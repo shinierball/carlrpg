@@ -1,0 +1,127 @@
+{{!-- PAGE 5: PETS, MOUNTS, PERSONAL SPACE & DEITY --}}
+<div class="dcc-page-container">
+  <div class="dcc-extras-grid">
+    {{!-- LEFT COLUMN: PET & MOUNT --}}
+    <div class="dcc-extras-col">
+      {{!-- PET BLOCK --}}
+      <div class="dcc-stat-block" style="margin-bottom: 12px;">
+        <div class="dcc-banner-header">PET</div>
+        <div class="dcc-block-content">
+          <div class="dcc-field-row" style="margin-bottom: 6px;">
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Special</span>
+              <input class="dcc-field-input" type="text" name="system.details.petSpecial" value="{{system.details.petSpecial}}" placeholder="Pet Special..." />
+            </div>
+            <div class="dcc-field-group small">
+              <span class="dcc-field-label">Level</span>
+              <input class="dcc-field-input" type="number" name="system.details.petLevel" value="{{system.details.petLevel}}" placeholder="1" />
+            </div>
+          </div>
+          <div class="dcc-field-row">
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Attack 1</span>
+              <input class="dcc-field-input" type="text" name="system.details.petAttack1" value="{{system.details.petAttack1}}" placeholder="Attack 1..." />
+            </div>
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Attack 2</span>
+              <input class="dcc-field-input" type="text" name="system.details.petAttack2" value="{{system.details.petAttack2}}" placeholder="Attack 2..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- MOUNT / VEHICLE BLOCK --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header">MOUNT / VEHICLE</div>
+        <div class="dcc-block-content">
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Size</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountSize" value="{{system.details.mountSize}}" placeholder="Large" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Move</span>
+              <input class="dcc-field-input" type="number" name="system.details.mountMove" value="{{system.details.mountMove}}" placeholder="40" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">DR</span>
+              <input class="dcc-field-input" type="number" name="system.details.mountDR" value="{{system.details.mountDR}}" placeholder="2" />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Occupants</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountOccupants" value="{{system.details.mountOccupants}}" placeholder="Occupants..." />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Accessories</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountAccessories" value="{{system.details.mountAccessories}}" placeholder="Accessories..." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- MIDDLE COLUMN: KILLS & CLUBS --}}
+    <div class="dcc-extras-col">
+      <div class="dcc-stat-block" style="margin-bottom: 12px;">
+        <div class="dcc-banner-header">IMPORTANT THINGS I'VE KILLED</div>
+        <textarea class="dcc-debuffs-input" name="system.details.importantKills" style="height: 180px;">{{system.details.importantKills}}</textarea>
+      </div>
+
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header">CLUBS, SOCIETIES, GUILDS, ETC</div>
+        <textarea class="dcc-debuffs-input" name="system.details.clubsSocieties" style="height: 140px;">{{system.details.clubsSocieties}}</textarea>
+      </div>
+    </div>
+
+    {{!-- RIGHT COLUMN: PERSONAL SPACE & DEITY --}}
+    <div class="dcc-extras-col">
+      {{!-- PERSONAL SPACE --}}
+      <div class="dcc-stat-block" style="margin-bottom: 12px;">
+        <div class="dcc-banner-header">PERSONAL SPACE</div>
+        <div class="dcc-block-content">
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Tier</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpace.tier" value="{{system.details.personalSpace.tier}}" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Size</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpace.size" value="{{system.details.personalSpace.size}}" />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group">
+              <span class="dcc-field-label">Amenities</span>
+              <textarea class="dcc-field-input" name="system.details.personalSpace.amenities" style="height: 90px;">{{system.details.personalSpace.amenities}}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- DEITY --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header">
+          <span>DEITY</span>
+          <a class="item-create" data-type="deity" data-tooltip="Add Deity Item" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        <div class="dcc-block-content">
+          <div class="dcc-field-group" style="margin-bottom: 6px;">
+            <span class="dcc-field-label">Deity Name</span>
+            <input class="dcc-field-input" type="text" name="system.details.deity" value="{{system.details.deity}}" placeholder="Deity..." />
+          </div>
+          {{#each deities as |deity|}}
+            <div class="dcc-item-entry" data-item-id="{{deity.id}}" style="border: 1px solid #000; padding: 4px; margin-top: 4px; background: #fff;">
+              <strong>{{deity.name}}</strong>
+              <p style="font-size: 11px; margin: 2px 0;">{{deity.system.description}}</p>
+              <a class="item-delete" data-tooltip="Remove Deity" style="float: right;"><i class="fa-solid fa-trash"></i></a>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

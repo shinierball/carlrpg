@@ -1,0 +1,62 @@
+{{!-- PAGE 3: SKILLS --}}
+<div class="dcc-page-container">
+  <div class="dcc-stat-block">
+    <div class="dcc-banner-header">
+      <span>SKILLS</span>
+      <a class="item-create" data-type="skill" data-tooltip="Add New Skill" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Skill</a>
+    </div>
+
+    <table class="dcc-attacks-table dcc-skills-table">
+      <thead>
+        <tr>
+          <th style="width: 25%;">Name</th>
+          <th style="width: 8%;">Rank</th>
+          <th style="width: 15%;">Stat & Mod</th>
+          <th style="width: 15%;">Check Type</th>
+          <th style="width: 25%;">Notes & Upgrades</th>
+          <th style="width: 12%;">Roll / Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each skills as |skill|}}
+          <tr data-item-id="{{skill.id}}">
+            <td>
+              <input class="dcc-field-input" type="text" name="name" value="{{skill.name}}" style="font-weight: bold;" />
+            </td>
+            <td>
+              <input class="dcc-stat-input" type="number" name="system.rank" value="{{skill.system.rank}}" style="width: 38px;" />
+            </td>
+            <td>
+              <select name="system.stat" style="font-family: 'Oswald', sans-serif; font-size: 11px;">
+                <option value="str" {{#if (eq skill.system.stat "str")}}selected{{/if}}>STR</option>
+                <option value="int" {{#if (eq skill.system.stat "int")}}selected{{/if}}>INT</option>
+                <option value="con" {{#if (eq skill.system.stat "con")}}selected{{/if}}>CON</option>
+                <option value="dex" {{#if (eq skill.system.stat "dex")}}selected{{/if}}>DEX</option>
+                <option value="cha" {{#if (eq skill.system.stat "cha")}}selected{{/if}}>CHA</option>
+              </select>
+            </td>
+            <td>
+              <input class="dcc-field-input" type="text" name="system.checkType" value="{{skill.system.checkType}}" placeholder="Stat Check" />
+            </td>
+            <td>
+              <input class="dcc-field-input" type="text" name="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
+            </td>
+            <td>
+              <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check">
+                <i class="fa-solid fa-dice-d20"></i> Roll
+              </button>
+              <a class="item-edit" data-tooltip="Edit Skill" style="margin-left: 4px;"><i class="fa-solid fa-edit"></i></a>
+              <a class="item-delete" data-tooltip="Delete Skill" style="margin-left: 4px;"><i class="fa-solid fa-trash"></i></a>
+            </td>
+          </tr>
+        {{else}}
+          <tr>
+            <td colspan="6" style="text-align: center; color: #777; padding: 14px;">
+              No skills added yet. Click <strong>Add Skill</strong> above or drag & drop skills from compendiums.
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

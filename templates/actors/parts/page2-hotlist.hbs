@@ -1,0 +1,84 @@
+{{!-- PAGE 2: HOTLIST & GEAR SLOTS --}}
+<div class="dcc-page-container">
+  {{!-- HOTLIST (10 BOXES) --}}
+  <div class="dcc-stat-block" style="margin-bottom: 12px;">
+    <div class="dcc-banner-header red">HOTLIST</div>
+    <div class="dcc-hotlist-grid">
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">1</span><input type="text" name="system.hotlist.slot1" value="{{system.hotlist.slot1}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">2</span><input type="text" name="system.hotlist.slot2" value="{{system.hotlist.slot2}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">3</span><input type="text" name="system.hotlist.slot3" value="{{system.hotlist.slot3}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">4</span><input type="text" name="system.hotlist.slot4" value="{{system.hotlist.slot4}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">5</span><input type="text" name="system.hotlist.slot5" value="{{system.hotlist.slot5}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">6</span><input type="text" name="system.hotlist.slot6" value="{{system.hotlist.slot6}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">7</span><input type="text" name="system.hotlist.slot7" value="{{system.hotlist.slot7}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">8</span><input type="text" name="system.hotlist.slot8" value="{{system.hotlist.slot8}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">9</span><input type="text" name="system.hotlist.slot9" value="{{system.hotlist.slot9}}" /></div>
+      <div class="dcc-hotlist-box"><span class="dcc-field-label">10</span><input type="text" name="system.hotlist.slot10" value="{{system.hotlist.slot10}}" /></div>
+    </div>
+  </div>
+
+  <div class="dcc-page2-grid">
+    {{!-- GEAR SLOTS / TATTOOS / PATCHES --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">GEAR SLOTS / TATTOOS / PATCHES</div>
+      <div class="dcc-gear-slots-list">
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Head</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.head" value="{{system.gearSlots.head}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Torso</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.torso" value="{{system.gearSlots.torso}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Arms</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.arms" value="{{system.gearSlots.arms}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Hands/Holding</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.hands" value="{{system.gearSlots.hands}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Legs</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.legs" value="{{system.gearSlots.legs}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Feet</span>
+          <input class="dcc-field-input" type="text" name="system.gearSlots.feet" value="{{system.gearSlots.feet}}" />
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Accessories (Max 10)</span>
+          <textarea class="dcc-field-input" name="system.gearSlots.accessories" style="height: 120px; resize: vertical;">{{system.gearSlots.accessories}}</textarea>
+        </div>
+      </div>
+    </div>
+
+    {{!-- RIGHT COLUMN: POPULARITY, TRAUMA, REGRETS --}}
+    <div class="dcc-story-column">
+      <div class="dcc-story-box">
+        <span class="dcc-field-label">Popularity</span>
+        <input class="dcc-field-input" type="text" name="system.details.popularity" value="{{system.details.popularity}}" />
+      </div>
+
+      <div class="dcc-story-box">
+        <span class="dcc-field-label">Past Trauma</span>
+        <textarea class="dcc-field-input" name="system.details.pastTrauma" style="height: 70px;">{{system.details.pastTrauma}}</textarea>
+      </div>
+
+      <div class="dcc-story-box">
+        <span class="dcc-field-label">Loose Ends</span>
+        <textarea class="dcc-field-input" name="system.details.looseEnds" style="height: 70px;">{{system.details.looseEnds}}</textarea>
+      </div>
+
+      <div class="dcc-story-box">
+        <span class="dcc-field-label">Regrets</span>
+        <textarea class="dcc-field-input" name="system.details.regrets" style="height: 70px;">{{system.details.regrets}}</textarea>
+      </div>
+
+      <div class="dcc-story-box">
+        <span class="dcc-field-label">Notes</span>
+        <textarea class="dcc-field-input" name="system.details.notes" style="height: 100px;">{{system.details.notes}}</textarea>
+      </div>
+    </div>
+  </div>
+</div>

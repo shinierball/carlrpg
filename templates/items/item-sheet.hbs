@@ -1,0 +1,167 @@
+<form class="{{cssClass}} dcc-item-sheet" autocomplete="off">
+  <header class="dcc-item-header">
+    <img src="{{item.img}}" data-edit="img" title="{{item.name}}" style="width: 56px; height: 56px; border: 2px solid #000; margin-right: 10px;" />
+    <div style="flex: 1;">
+      <h1 style="margin: 0; padding: 0; border: none;">
+        <input name="name" type="text" value="{{item.name}}" placeholder="Item Name" class="dcc-field-input" style="font-size: 18px; font-weight: bold;" />
+      </h1>
+      <div style="font-family: 'Oswald', sans-serif; font-size: 12px; text-transform: uppercase; color: #e74c3c; margin-top: 4px;">
+        Type: {{upper item.type}}
+      </div>
+    </div>
+  </header>
+
+  <div class="dcc-item-body" style="padding: 10px; background: #fff; border: 2px solid #000; margin-top: 10px;">
+    {{!-- SKILL TYPE --}}
+    {{#if (eq item.type "skill")}}
+      <div class="dcc-field-row" style="margin-bottom: 8px;">
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Rank</span>
+          <input class="dcc-field-input" type="number" name="system.rank" value="{{system.rank}}" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Stat</span>
+          <select name="system.stat" class="dcc-field-input">
+            <option value="str" {{#if (eq system.stat "str")}}selected{{/if}}>STR</option>
+            <option value="int" {{#if (eq system.stat "int")}}selected{{/if}}>INT</option>
+            <option value="con" {{#if (eq system.stat "con")}}selected{{/if}}>CON</option>
+            <option value="dex" {{#if (eq system.stat "dex")}}selected{{/if}}>DEX</option>
+            <option value="cha" {{#if (eq system.stat "cha")}}selected{{/if}}>CHA</option>
+          </select>
+        </div>
+        <div class="dcc-field-group">
+          <span class="dcc-field-label">Check Type</span>
+          <input class="dcc-field-input" type="text" name="system.checkType" value="{{system.checkType}}" placeholder="Stat Check" />
+        </div>
+      </div>
+      <div class="dcc-field-group" style="margin-bottom: 8px;">
+        <span class="dcc-field-label">Notes & Upgrades</span>
+        <textarea class="dcc-field-input" name="system.notes" style="height: 120px;">{{system.notes}}</textarea>
+      </div>
+    {{/if}}
+
+    {{!-- ATTACK TYPE --}}
+    {{#if (eq item.type "attack")}}
+      <div class="dcc-field-row" style="margin-bottom: 8px;">
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">To-Hit Rank</span>
+          <input class="dcc-field-input" type="number" name="system.toHitRank" value="{{system.toHitRank}}" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">To-Hit Stat</span>
+          <select name="system.toHitStat" class="dcc-field-input">
+            <option value="str" {{#if (eq system.toHitStat "str")}}selected{{/if}}>STR</option>
+            <option value="dex" {{#if (eq system.toHitStat "dex")}}selected{{/if}}>DEX</option>
+            <option value="con" {{#if (eq system.toHitStat "con")}}selected{{/if}}>CON</option>
+            <option value="int" {{#if (eq system.toHitStat "int")}}selected{{/if}}>INT</option>
+            <option value="cha" {{#if (eq system.toHitStat "cha")}}selected{{/if}}>CHA</option>
+          </select>
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Damage Dice</span>
+          <input class="dcc-field-input" type="text" name="system.damageDice" value="{{system.damageDice}}" placeholder="1d8" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Damage Stat</span>
+          <select name="system.damageStat" class="dcc-field-input">
+            <option value="str" {{#if (eq system.damageStat "str")}}selected{{/if}}>STR</option>
+            <option value="dex" {{#if (eq system.damageStat "dex")}}selected{{/if}}>DEX</option>
+            <option value="int" {{#if (eq system.damageStat "int")}}selected{{/if}}>INT</option>
+            <option value="con" {{#if (eq system.damageStat "con")}}selected{{/if}}>CON</option>
+            <option value="cha" {{#if (eq system.damageStat "cha")}}selected{{/if}}>CHA</option>
+          </select>
+        </div>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Effects</span>
+        <input class="dcc-field-input" type="text" name="system.effects" value="{{system.effects}}" placeholder="Knockdown, Fire, Piercing..." />
+      </div>
+    {{/if}}
+
+    {{!-- GEAR TYPE --}}
+    {{#if (eq item.type "gear")}}
+      <div class="dcc-field-row" style="margin-bottom: 8px;">
+        <div class="dcc-field-group">
+          <span class="dcc-field-label">Slot</span>
+          <select name="system.slot" class="dcc-field-input">
+            <option value="head" {{#if (eq system.slot "head")}}selected{{/if}}>Head</option>
+            <option value="torso" {{#if (eq system.slot "torso")}}selected{{/if}}>Torso</option>
+            <option value="arms" {{#if (eq system.slot "arms")}}selected{{/if}}>Arms</option>
+            <option value="hands" {{#if (eq system.slot "hands")}}selected{{/if}}>Hands/Holding</option>
+            <option value="legs" {{#if (eq system.slot "legs")}}selected{{/if}}>Legs</option>
+            <option value="feet" {{#if (eq system.slot "feet")}}selected{{/if}}>Feet</option>
+            <option value="accessory" {{#if (eq system.slot "accessory")}}selected{{/if}}>Accessory</option>
+            <option value="tattoo" {{#if (eq system.slot "tattoo")}}selected{{/if}}>Tattoo</option>
+            <option value="patch" {{#if (eq system.slot "patch")}}selected{{/if}}>Patch</option>
+          </select>
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Quantity</span>
+          <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Armor DR</span>
+          <input class="dcc-field-input" type="number" name="system.armorBonus" value="{{system.armorBonus}}" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Evade Bonus</span>
+          <input class="dcc-field-input" type="number" name="system.evadeBonus" value="{{system.evadeBonus}}" />
+        </div>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Notes & Description</span>
+        <textarea class="dcc-field-input" name="system.notes" style="height: 120px;">{{system.notes}}</textarea>
+      </div>
+    {{/if}}
+
+    {{!-- RACE & CLASS TYPE --}}
+    {{#if (or (eq item.type "race") (eq item.type "class"))}}
+      <div class="dcc-field-group" style="margin-bottom: 8px;">
+        <span class="dcc-field-label">Abilities</span>
+        <textarea class="dcc-field-input" name="system.abilities" style="height: 140px;">{{system.abilities}}</textarea>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Description & Lore</span>
+        <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+      </div>
+    {{/if}}
+
+    {{!-- DEITY TYPE --}}
+    {{#if (eq item.type "deity")}}
+      <div class="dcc-field-group" style="margin-bottom: 8px;">
+        <span class="dcc-field-label">Boons & Perks</span>
+        <textarea class="dcc-field-input" name="system.boons" style="height: 120px;">{{system.boons}}</textarea>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Description</span>
+        <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+      </div>
+    {{/if}}
+
+    {{!-- SPONSOR TYPE --}}
+    {{#if (eq item.type "sponsor")}}
+      <div class="dcc-field-group" style="margin-bottom: 8px;">
+        <span class="dcc-field-label">Gifts & Conditions</span>
+        <textarea class="dcc-field-input" name="system.gifts" style="height: 120px;">{{system.gifts}}</textarea>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Notes</span>
+        <textarea class="dcc-field-input" name="system.notes" style="height: 100px;">{{system.notes}}</textarea>
+      </div>
+    {{/if}}
+
+    {{!-- LOOT / GENERIC --}}
+    {{#if (eq item.type "loot")}}
+      <div class="dcc-field-row" style="margin-bottom: 8px;">
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Quantity</span>
+          <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
+        </div>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Notes</span>
+        <textarea class="dcc-field-input" name="system.notes" style="height: 140px;">{{system.notes}}</textarea>
+      </div>
+    {{/if}}
+  </div>
+</form>

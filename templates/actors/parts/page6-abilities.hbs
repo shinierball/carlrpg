@@ -1,0 +1,91 @@
+{{!-- PAGE 6: RACIAL ABILITIES, CLASS ABILITIES, SPONSORS --}}
+<div class="dcc-page-container">
+  <div class="dcc-abilities-page-grid">
+    {{!-- RACIAL ABILITIES --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">
+        <span>RACIAL ABILITIES</span>
+        <a class="item-create" data-type="race" data-tooltip="Add Race" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+      </div>
+      <div class="dcc-block-content">
+        {{#each races as |race|}}
+          <div class="dcc-item-card" data-item-id="{{race.id}}">
+            <div class="dcc-card-header">
+              <strong>{{race.name}}</strong>
+              <div class="dcc-card-actions">
+                <a class="item-edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+            <div class="dcc-card-body">
+              <p>{{race.system.abilities}}</p>
+            </div>
+          </div>
+        {{else}}
+          <textarea class="dcc-debuffs-input" name="system.details.racialAbilities" placeholder="Enter racial abilities or drag & drop a Race item here..." style="height: 380px;">{{system.details.racialAbilities}}</textarea>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- CLASS ABILITIES --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">
+        <span>CLASS ABILITIES</span>
+        <a class="item-create" data-type="class" data-tooltip="Add Class" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+      </div>
+      <div class="dcc-block-content">
+        {{#each classes as |cls|}}
+          <div class="dcc-item-card" data-item-id="{{cls.id}}">
+            <div class="dcc-card-header">
+              <strong>{{cls.name}}</strong>
+              <div class="dcc-card-actions">
+                <a class="item-edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+            <div class="dcc-card-body">
+              <p>{{cls.system.abilities}}</p>
+            </div>
+          </div>
+        {{else}}
+          <textarea class="dcc-debuffs-input" name="system.details.classAbilities" placeholder="Enter class abilities or drag & drop a Class item here..." style="height: 380px;">{{system.details.classAbilities}}</textarea>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- SPONSORS (3 BOXES) --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">
+        <span>SPONSORS</span>
+        <a class="item-create" data-type="sponsor" data-tooltip="Add Sponsor" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+      </div>
+      <div class="dcc-block-content dcc-sponsors-list">
+        {{#each sponsors as |sponsor|}}
+          <div class="dcc-sponsor-box" data-item-id="{{sponsor.id}}">
+            <div class="dcc-banner-header black" style="font-size: 11px;">
+              <span>{{sponsor.name}}</span>
+              <div>
+                <a class="item-edit" style="color: #fff; margin-right: 4px;"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" style="color: #fff;"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+            <textarea class="dcc-debuffs-input" style="height: 90px;" placeholder="Gifts & notes...">{{sponsor.system.gifts}}</textarea>
+          </div>
+        {{else}}
+          <div class="dcc-sponsor-box">
+            <div class="dcc-banner-header black" style="font-size: 11px;">SPONSOR 1</div>
+            <textarea class="dcc-debuffs-input" name="system.details.sponsor1" style="height: 90px;" placeholder="Sponsor 1 details...">{{system.details.sponsor1}}</textarea>
+          </div>
+          <div class="dcc-sponsor-box">
+            <div class="dcc-banner-header black" style="font-size: 11px;">SPONSOR 2</div>
+            <textarea class="dcc-debuffs-input" name="system.details.sponsor2" style="height: 90px;" placeholder="Sponsor 2 details...">{{system.details.sponsor2}}</textarea>
+          </div>
+          <div class="dcc-sponsor-box">
+            <div class="dcc-banner-header black" style="font-size: 11px;">SPONSOR 3</div>
+            <textarea class="dcc-debuffs-input" name="system.details.sponsor3" style="height: 90px;" placeholder="Sponsor 3 details...">{{system.details.sponsor3}}</textarea>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</div>

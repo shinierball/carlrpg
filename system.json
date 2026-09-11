@@ -1,0 +1,51 @@
+{
+  "id": "carl-rpg",
+  "title": "Dungeon Crawler Carl RPG",
+  "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12",
+    "maximum": "14"
+  },
+  "authors": [
+    {
+      "name": "DCC RPG Community"
+    }
+  ],
+  "esmodules": [
+    "src/dcc.mjs"
+  ],
+  "styles": [
+    "styles/dcc.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
+  "primaryTokenAttribute": "attributes.hp",
+  "flags": {
+    "hotReload": {
+      "extensions": [
+        "css",
+        "hbs",
+        "html",
+        "json",
+        "mjs"
+      ],
+      "paths": [
+        "styles",
+        "templates",
+        "lang",
+        "src"
+      ]
+    }
+  }
+}

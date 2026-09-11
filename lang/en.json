@@ -1,0 +1,41 @@
+{
+  "DCC": {
+    "Title": "Dungeon Crawler Carl RPG",
+    "Actor": {
+      "TypeCrawler": "Crawler",
+      "TypePet": "Pet",
+      "TypeMount": "Mount / Vehicle",
+      "TypeNPC": "NPC / Creature"
+    },
+    "Ability": {
+      "Str": "Strength",
+      "Int": "Intelligence",
+      "Con": "Constitution",
+      "Dex": "Dexterity",
+      "Cha": "Charisma",
+      "StrShort": "STR",
+      "IntShort": "INT",
+      "ConShort": "CON",
+      "DexShort": "DEX",
+      "ChaShort": "CHA"
+    },
+    "Item": {
+      "TypeSkill": "Skill",
+      "TypeAttack": "Attack",
+      "TypeGear": "Gear",
+      "TypeRace": "Race",
+      "TypeClass": "Class",
+      "TypeDeity": "Deity",
+      "TypeSponsor": "Sponsor",
+      "TypeLoot": "Loot"
+    },
+    "Tabs": {
+      "Core": "Page 1: Core",
+      "Hotlist": "Page 2: Hotlist & Gear",
+      "Skills": "Page 3: Skills",
+      "Inventory": "Page 4: Inventory",
+      "Extras": "Page 5: Pets & Space",
+      "Abilities": "Page 6: Abilities & Sponsors"
+    }
+  }
+}

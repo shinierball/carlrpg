@@ -1,0 +1,159 @@
+{
+  "Actor": {
+    "types": [
+      "crawler",
+      "pet",
+      "mount_vehicle",
+      "npc"
+    ],
+    "templates": {
+      "baseStats": {
+        "abilities": {
+          "str": { "value": 10, "unenhanced": 10, "mod": 0 },
+          "int": { "value": 10, "unenhanced": 10, "mod": 0 },
+          "con": { "value": 10, "unenhanced": 10, "mod": 0 },
+          "dex": { "value": 10, "unenhanced": 10, "mod": 0 },
+          "cha": { "value": 10, "unenhanced": 10, "mod": 0 }
+        },
+        "attributes": {
+          "hp": { "value": 20, "max": 20, "temp": 0, "pct": 100 },
+          "mana": { "value": 20, "max": 20 },
+          "evade": { "buffs": 0, "total": 10 },
+          "dr": { "armor": 0, "buffs": 0, "total": 0 },
+          "speed": { "move": 30, "step": 5 },
+          "aiFavor": 0,
+          "size": "Medium",
+          "debuffs": "",
+          "externalBuffs": { "buff1": "", "buff2": "", "buff3": "" }
+        }
+      }
+    },
+    "crawler": {
+      "templates": ["baseStats"],
+      "details": {
+        "crawlerNumber": "",
+        "floor": "1st Floor",
+        "race": "",
+        "class": "",
+        "gender": "",
+        "level": 1,
+        "deity": "",
+        "popularity": "",
+        "pastTrauma": "",
+        "looseEnds": "",
+        "regrets": "",
+        "notes": "",
+        "importantKills": "",
+        "clubsSocieties": "",
+        "personalSpace": {
+          "tier": "",
+          "size": "",
+          "amenities": ""
+        }
+      },
+      "gearSlots": {
+        "head": "",
+        "torso": "",
+        "arms": "",
+        "hands": "",
+        "legs": "",
+        "feet": "",
+        "accessories": ""
+      },
+      "hotlist": {
+        "slot1": "",
+        "slot2": "",
+        "slot3": "",
+        "slot4": "",
+        "slot5": "",
+        "slot6": "",
+        "slot7": "",
+        "slot8": "",
+        "slot9": "",
+        "slot10": ""
+      }
+    },
+    "pet": {
+      "templates": ["baseStats"],
+      "details": {
+        "level": 1,
+        "special": "",
+        "attack1": "",
+        "attack2": ""
+      }
+    },
+    "mount_vehicle": {
+      "attributes": {
+        "hp": { "value": 30, "max": 30, "pct": 100 },
+        "size": "Large",
+        "occupants": "",
+        "accessories": "",
+        "move": 40,
+        "dr": 2
+      }
+    },
+    "npc": {
+      "templates": ["baseStats"],
+      "details": {
+        "level": 1,
+        "notes": "",
+        "special": ""
+      }
+    }
+  },
+  "Item": {
+    "types": [
+      "skill",
+      "attack",
+      "gear",
+      "race",
+      "class",
+      "deity",
+      "sponsor",
+      "loot"
+    ],
+    "skill": {
+      "rank": 1,
+      "stat": "str",
+      "checkType": "Stat Check",
+      "notes": "",
+      "upgrades": "",
+      "checked": false
+    },
+    "attack": {
+      "toHitStat": "dex",
+      "toHitRank": 1,
+      "damageDice": "1d6",
+      "damageStat": "str",
+      "effects": ""
+    },
+    "gear": {
+      "slot": "torso",
+      "quantity": 1,
+      "armorBonus": 0,
+      "evadeBonus": 0,
+      "equipped": false,
+      "notes": ""
+    },
+    "race": {
+      "abilities": "",
+      "description": ""
+    },
+    "class": {
+      "abilities": "",
+      "description": ""
+    },
+    "deity": {
+      "boons": "",
+      "description": ""
+    },
+    "sponsor": {
+      "gifts": "",
+      "notes": ""
+    },
+    "loot": {
+      "quantity": 1,
+      "notes": ""
+    }
+  }
+}

@@ -2,9 +2,14 @@ import { DCCActor } from './documents/actor.mjs';
 import { DCCItem } from './documents/item.mjs';
 import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
+import { DCC_SKILLS } from './data/skills.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
+
+  CONFIG.DCC = {
+    skills: DCC_SKILLS
+  };
 
   // Register document classes
   CONFIG.Actor.documentClass = DCCActor;
@@ -76,3 +81,28 @@ Hooks.once('init', async function() {
     }
   };
 });
+
+Hooks.once('ready', async function() {
+  if (game.user.isGM) {
+    const pack = game.packs.get('carl-rpg.skills');
+    if (pack) {
+      try {
+        const index = await pack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty skills compendium...');
+          const docs = DCC_SKILLS.map(s => ({
+            name: s.name,
+            type: 'skill',
+            img: s.img,
+            system: s.system
+          }));
+          await Item.createDocuments(docs, { pack: 'carl-rpg.skills' });
+          console.log(`DCC RPG | Successfully imported ${docs.length} skills into carl-rpg.skills.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate skills compendium:', err);
+      }
+    }
+  }
+});
+

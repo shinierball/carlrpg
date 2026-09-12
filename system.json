@@ -31,6 +31,19 @@
     "units": "ft"
   },
   "primaryTokenAttribute": "attributes.hp",
+  "packs": [
+    {
+      "name": "skills",
+      "label": "DCC Skills",
+      "path": "packs/skills",
+      "type": "Item",
+      "system": "carl-rpg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
   "flags": {
     "hotReload": {
       "extensions": [

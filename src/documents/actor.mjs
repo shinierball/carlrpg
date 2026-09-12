@@ -146,19 +146,70 @@ export class DCCActor extends Actor {
 
   /**
    * Roll Skill Check
+   * Implements official DCC rules:
+   * - Untrained (Rank 0): Roll with Disadvantage (2d20kl + Stat Mod).
+   * - Trained (Rank > 0): Roll Standard (1d20 + Rank + Stat Mod).
+   * - Passive Skills: Informational message (no roll required).
+   * - Call a Play: Roll 2d6.
+   * - Intervene: Roll 1d6.
    * @param {Item} skillItem
    */
   async rollSkill(skillItem) {
     const sys = skillItem.system;
-    const statMod = this.system.abilities?.[sys.stat]?.mod ?? 0;
+    const statKey = sys.stat || 'str';
+    const statName = statKey.toUpperCase();
+    const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
     const rank = Number(sys.rank) || 0;
+    const checkType = (sys.checkType || '').toLowerCase();
+
+    // Passive skill handling
+    if (checkType.includes('passive') || checkType.includes('no roll')) {
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: `<div class="dcc-chat-card">
+          <h4><strong>${this.name}</strong>: ${skillItem.name}</h4>
+          <p><em>Passive Skill (No roll required)</em></p>
+          <p>${sys.notes || 'Static bonus active.'}</p>
+        </div>`
+      });
+    }
+
+    // Call a Play (2d6)
+    if (skillItem.name.toLowerCase() === 'call a play' || checkType.includes('2d6')) {
+      const roll = await new Roll('2d6').evaluate();
+      return roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name}</strong>: Call a Play (Roll 2d6 - ally adds higher d6 to upcoming check/damage)`
+      });
+    }
+
+    // Intervene (1d6)
+    if (skillItem.name.toLowerCase() === 'intervene' || checkType.includes('1d6')) {
+      const roll = await new Roll('1d6').evaluate();
+      return roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name}</strong>: Intervene (Roll 1d6 - added to ally's d20 after check)`
+      });
+    }
+
+    // Untrained Check (Rank 0): Disadvantage (2d20kl + mod)
+    if (rank <= 0) {
+      const formula = `2d20kl + ${statMod}`;
+      const roll = await new Roll(formula, { mod: statMod }).evaluate();
+      return roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flavor: `<strong>${this.name}</strong>: ${skillItem.name} (<strong>Untrained Check with Disadvantage</strong>: 2d20kl + ${statName} Mod ${statMod})`
+      });
+    }
+
+    // Trained Check (Rank > 0): 1d20 + rank + mod
     const total = rank + statMod;
     const formula = `1d20 + ${total}`;
-    const roll = await new Roll(formula).evaluate();
+    const roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${sys.stat.toUpperCase()} Check: 1d20 + Rank ${rank} + Stat Mod ${statMod})`
+      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + Rank ${rank} + Stat Mod ${statMod})`
     });
   }
 }

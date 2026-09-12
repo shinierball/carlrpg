@@ -3,14 +3,21 @@
   <div class="dcc-stat-block">
     <div class="dcc-banner-header">
       <span>SKILLS</span>
-      <a class="item-create" data-type="skill" data-tooltip="Add New Skill" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Skill</a>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a class="open-skill-picker" data-tooltip="Choose from official DCC Skill Library" style="color: #f1c40f; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-book-bookmark"></i> Select Skill
+        </a>
+        <a class="item-create" data-type="skill" data-tooltip="Create a custom skill" style="color: #fff; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-plus"></i> Custom Skill
+        </a>
+      </div>
     </div>
 
     <table class="dcc-attacks-table dcc-skills-table">
       <thead>
         <tr>
-          <th style="width: 25%;">Name</th>
-          <th style="width: 8%;">Rank</th>
+          <th style="width: 25%;">Skill Name</th>
+          <th style="width: 8%;" title="Rank 0 = Untrained (Disadvantage)">Rank</th>
           <th style="width: 15%;">Stat & Mod</th>
           <th style="width: 15%;">Check Type</th>
           <th style="width: 25%;">Notes & Upgrades</th>
@@ -21,19 +28,25 @@
         {{#each skills as |skill|}}
           <tr data-item-id="{{skill.id}}">
             <td>
-              <input class="dcc-field-input" type="text" name="name" value="{{skill.name}}" style="font-weight: bold;" />
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="{{skill.img}}" style="width: 20px; height: 20px; border: 1px solid #333; border-radius: 3px; object-fit: contain; background: #222;" />
+                <input class="dcc-field-input" type="text" name="name" value="{{skill.name}}" style="font-weight: bold; flex: 1;" />
+              </div>
             </td>
             <td>
-              <input class="dcc-stat-input" type="number" name="system.rank" value="{{skill.system.rank}}" style="width: 38px;" />
+              <input class="dcc-stat-input" type="number" name="system.rank" value="{{skill.system.rank}}" style="width: 38px;" title="Rank 0 = Untrained (Disadvantage)" />
             </td>
             <td>
-              <select name="system.stat" style="font-family: 'Oswald', sans-serif; font-size: 11px;">
-                <option value="str" {{#if (eq skill.system.stat "str")}}selected{{/if}}>STR</option>
-                <option value="int" {{#if (eq skill.system.stat "int")}}selected{{/if}}>INT</option>
-                <option value="con" {{#if (eq skill.system.stat "con")}}selected{{/if}}>CON</option>
-                <option value="dex" {{#if (eq skill.system.stat "dex")}}selected{{/if}}>DEX</option>
-                <option value="cha" {{#if (eq skill.system.stat "cha")}}selected{{/if}}>CHA</option>
-              </select>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <select name="system.stat" style="font-family: 'Oswald', sans-serif; font-size: 11px;">
+                  <option value="str" {{#if (eq skill.system.stat "str")}}selected{{/if}}>STR</option>
+                  <option value="int" {{#if (eq skill.system.stat "int")}}selected{{/if}}>INT</option>
+                  <option value="con" {{#if (eq skill.system.stat "con")}}selected{{/if}}>CON</option>
+                  <option value="dex" {{#if (eq skill.system.stat "dex")}}selected{{/if}}>DEX</option>
+                  <option value="cha" {{#if (eq skill.system.stat "cha")}}selected{{/if}}>CHA</option>
+                </select>
+                <span style="font-size: 11px; font-weight: bold; color: #c0392b;">{{skill.statModStr}}</span>
+              </div>
             </td>
             <td>
               <input class="dcc-field-input" type="text" name="system.checkType" value="{{skill.system.checkType}}" placeholder="Stat Check" />
@@ -51,8 +64,8 @@
           </tr>
         {{else}}
           <tr>
-            <td colspan="6" style="text-align: center; color: #777; padding: 14px;">
-              No skills added yet. Click <strong>Add Skill</strong> above or drag & drop skills from compendiums.
+            <td colspan="6" style="text-align: center; color: #777; padding: 18px;">
+              No skills added yet. Click <strong style="color: #f1c40f;">Select Skill</strong> above to pick from the official DCC Skill Library, or drag & drop from the Compendium.
             </td>
           </tr>
         {{/each}}

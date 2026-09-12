@@ -116,6 +116,7 @@
       "rank": 1,
       "stat": "str",
       "checkType": "Stat Check",
+      "category": "Utility",
       "notes": "",
       "upgrades": "",
       "checked": false

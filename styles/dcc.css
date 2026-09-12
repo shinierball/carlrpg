@@ -435,6 +435,16 @@
   padding: 6px;
 }
 
+.dcc-sub-combat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dcc-formula-row.dcc-centered-row {
+  justify-content: space-around;
+}
+
 .dcc-formula-item {
   display: flex;
   flex-direction: column;

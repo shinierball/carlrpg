@@ -208,14 +208,6 @@
             <input class="dcc-box-input medium" type="number" value="{{system.attributes.evade.total}}" readonly />
             <span class="dcc-stat-sublabel">Evade Total</span>
           </div>
-          <div class="dcc-formula-item">
-            <input class="dcc-box-input small" name="system.attributes.speed.move" type="number" value="{{system.attributes.speed.move}}" placeholder="20" />
-            <span class="dcc-stat-sublabel">Move</span>
-          </div>
-          <div class="dcc-formula-item">
-            <input class="dcc-box-input small" name="system.attributes.speed.step" type="number" value="{{system.attributes.speed.step}}" placeholder="10" />
-            <span class="dcc-stat-sublabel">Step</span>
-          </div>
         </div>
       </div>
 
@@ -229,6 +221,11 @@
           </div>
           <span class="dcc-formula-operator">+</span>
           <div class="dcc-formula-item">
+            <input class="dcc-box-input small" type="number" value="{{system.attributes.dr.items}}" readonly title="Items / Equipped Gear DR Bonus" />
+            <span class="dcc-stat-sublabel">Items</span>
+          </div>
+          <span class="dcc-formula-operator">+</span>
+          <div class="dcc-formula-item">
             <input class="dcc-box-input medium" name="system.attributes.dr.buffs" type="number" value="{{system.attributes.dr.buffs}}" placeholder="0" />
             <span class="dcc-stat-sublabel">Buffs</span>
           </div>
@@ -237,13 +234,36 @@
             <input class="dcc-box-input medium" type="number" value="{{system.attributes.dr.total}}" readonly />
             <span class="dcc-stat-sublabel">DR Total</span>
           </div>
-          <div class="dcc-formula-item">
-            <input class="dcc-box-input medium" name="system.attributes.aiFavor" type="number" value="{{system.attributes.aiFavor}}" placeholder="0" />
-            <span class="dcc-stat-sublabel">AI Favor</span>
+        </div>
+      </div>
+
+      {{!-- MOVEMENT & CHARACTER ATTRIBUTES --}}
+      <div class="dcc-sub-combat-grid">
+        <div class="dcc-stat-block">
+          <div class="dcc-banner-header">MOVEMENT</div>
+          <div class="dcc-formula-row dcc-centered-row">
+            <div class="dcc-formula-item">
+              <input class="dcc-box-input medium" name="system.attributes.speed.move" type="number" value="{{system.attributes.speed.move}}" placeholder="20" />
+              <span class="dcc-stat-sublabel">Move (ft)</span>
+            </div>
+            <div class="dcc-formula-item">
+              <input class="dcc-box-input medium" name="system.attributes.speed.step" type="number" value="{{system.attributes.speed.step}}" placeholder="10" />
+              <span class="dcc-stat-sublabel">Step (ft)</span>
+            </div>
           </div>
-          <div class="dcc-formula-item">
-            <input class="dcc-box-input small" name="system.attributes.size" type="text" value="{{system.attributes.size}}" placeholder="Med" />
-            <span class="dcc-stat-sublabel">Size</span>
+        </div>
+
+        <div class="dcc-stat-block">
+          <div class="dcc-banner-header">AI FAVOR &amp; SIZE</div>
+          <div class="dcc-formula-row dcc-centered-row">
+            <div class="dcc-formula-item">
+              <input class="dcc-box-input medium" name="system.attributes.aiFavor" type="number" value="{{system.attributes.aiFavor}}" placeholder="0" />
+              <span class="dcc-stat-sublabel">AI Favor</span>
+            </div>
+            <div class="dcc-formula-item">
+              <input class="dcc-box-input medium" name="system.attributes.size" type="text" value="{{system.attributes.size}}" placeholder="Med" />
+              <span class="dcc-stat-sublabel">Size</span>
+            </div>
           </div>
         </div>
       </div>

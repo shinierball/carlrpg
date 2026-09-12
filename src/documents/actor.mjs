@@ -146,6 +146,7 @@ export class DCCActor extends Actor {
       const drArmor = Number(system.attributes.dr?.armor) || 0;
       const drBuffs = Number(system.attributes.dr?.buffs) || 0;
       if (system.attributes.dr) {
+        system.attributes.dr.items = gearDR;
         system.attributes.dr.gear = gearDR;
         system.attributes.dr.total = drArmor + drBuffs + gearDR;
       }

@@ -16,7 +16,7 @@
           "cha": { "value": 10, "unenhanced": 10, "mod": 0 }
         },
         "attributes": {
-          "hp": { "value": 20, "max": 20, "temp": 0, "pct": 100 },
+          "hp": { "value": 40, "max": 40, "temp": 0, "pct": 100 },
           "mana": { "value": 20, "max": 20 },
           "evade": { "buffs": 0, "total": 10 },
           "dr": { "armor": 0, "buffs": 0, "total": 0 },

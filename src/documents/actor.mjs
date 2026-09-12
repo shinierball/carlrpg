@@ -61,7 +61,10 @@ export class DCCActor extends Actor {
       }
 
       if (system.attributes.hp) {
-        const hpVal = Number(system.attributes.hp.value) || 0;
+        const conMod = system.abilities?.con?.mod ?? 1;
+        system.attributes.hp.max = 10 * conMod;
+        const rawVal = Number(system.attributes.hp.value);
+        const hpVal = Number.isFinite(rawVal) ? rawVal : system.attributes.hp.max;
         const hpMax = Number(system.attributes.hp.max) || 1;
         system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
       }

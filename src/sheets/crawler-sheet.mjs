@@ -50,19 +50,6 @@ export class DCCCrawlerSheet extends ActorSheet {
       skill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
     }
 
-    // Sanitize actor name if it was previously corrupted with concatenated skill names
-    if (this.actor.name && this.actor.name.includes(',')) {
-      const parts = this.actor.name.split(',').map(s => s.trim());
-      const knownSkills = new Set((CONFIG.DCC?.skills || []).map(s => s.name.toLowerCase()));
-      if (parts.length > 1 && parts.slice(1).some(p => knownSkills.has(p.toLowerCase()))) {
-        const cleanName = parts[0];
-        console.log(`DCC RPG | Repairing concatenated actor name: "${this.actor.name}" -> "${cleanName}"`);
-        this.actor.update({ name: cleanName });
-        context.data.name = cleanName;
-        if (context.actor) context.actor.name = cleanName;
-      }
-    }
-
     // Sort skills alphabetically
     context.skills.sort((a, b) => a.name.localeCompare(b.name));
 

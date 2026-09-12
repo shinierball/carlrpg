@@ -135,11 +135,11 @@
       "drBonus": 0,
       "evadeBonus": 0,
       "abilityModifiers": {
-        "str": { "flat": 0, "pct": 0 },
-        "int": { "flat": 0, "pct": 0 },
-        "con": { "flat": 0, "pct": 0 },
-        "dex": { "flat": 0, "pct": 0 },
-        "cha": { "flat": 0, "pct": 0 }
+        "str": { "value": 0, "type": "flat" },
+        "int": { "value": 0, "type": "flat" },
+        "con": { "value": 0, "type": "flat" },
+        "dex": { "value": 0, "type": "flat" },
+        "cha": { "value": 0, "type": "flat" }
       },
       "skillModifiers": [],
       "notes": ""

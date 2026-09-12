@@ -32,15 +32,29 @@ export class DCCItemSheet extends ItemSheet {
       context.system.skillModifiers = [];
     }
 
-    // Ensure abilityModifiers structure exists
+    // Ensure abilityModifiers structure exists with { value, type: 'flat' | 'pct' }
     if (!context.system.abilityModifiers) {
-      context.system.abilityModifiers = {
-        str: { flat: 0, pct: 0 },
-        int: { flat: 0, pct: 0 },
-        con: { flat: 0, pct: 0 },
-        dex: { flat: 0, pct: 0 },
-        cha: { flat: 0, pct: 0 }
-      };
+      context.system.abilityModifiers = {};
+    }
+    for (const key of ['str', 'int', 'con', 'dex', 'cha']) {
+      if (!context.system.abilityModifiers[key]) {
+        context.system.abilityModifiers[key] = { value: 0, type: 'flat' };
+      } else {
+        const mod = context.system.abilityModifiers[key];
+        if (mod.value === undefined || mod.value === null || mod.value === '') {
+          if (mod.pct) {
+            mod.value = mod.pct;
+            mod.type = 'pct';
+          } else if (mod.flat) {
+            mod.value = mod.flat;
+            mod.type = 'flat';
+          } else {
+            mod.value = 0;
+            mod.type = 'flat';
+          }
+        }
+        if (!mod.type) mod.type = 'flat';
+      }
     }
 
     return context;

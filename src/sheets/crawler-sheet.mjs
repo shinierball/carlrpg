@@ -12,10 +12,22 @@ export function formatGearBonuses(gearItem) {
 
   if (sys.abilityModifiers) {
     for (const [stat, mods] of Object.entries(sys.abilityModifiers)) {
-      const flat = Number(mods.flat) || 0;
-      const pct = Number(mods.pct) || 0;
-      if (flat !== 0) parts.push(`${flat > 0 ? '+' : ''}${flat} ${stat.toUpperCase()}`);
-      if (pct !== 0) parts.push(`${pct > 0 ? '+' : ''}${pct}% ${stat.toUpperCase()}`);
+      if (!mods) continue;
+      const val = Number(mods.value);
+      const type = (mods.type || 'flat').toLowerCase();
+      if (Number.isFinite(val) && val !== 0) {
+        if (type === 'pct' || type === '%') {
+          parts.push(`${val > 0 ? '+' : ''}${val}% ${stat.toUpperCase()}`);
+        } else {
+          parts.push(`${val > 0 ? '+' : ''}${val} ${stat.toUpperCase()}`);
+        }
+      } else {
+        // Fallback for legacy format { flat, pct }
+        const flat = Number(mods.flat) || 0;
+        const pct = Number(mods.pct) || 0;
+        if (flat !== 0) parts.push(`${flat > 0 ? '+' : ''}${flat} ${stat.toUpperCase()}`);
+        if (pct !== 0) parts.push(`${pct > 0 ? '+' : ''}${pct}% ${stat.toUpperCase()}`);
+      }
     }
   }
 

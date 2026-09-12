@@ -54,6 +54,14 @@ export class DCCActor extends Actor {
         this.prototypeToken.actorLink = true;
       }
     }
+    // Ensure abilities have unenhanced initialized if missing
+    if (this.system.abilities) {
+      for (const ability of Object.values(this.system.abilities)) {
+        if (ability && (ability.unenhanced === undefined || ability.unenhanced === null || ability.unenhanced === '')) {
+          ability.unenhanced = ability.value || 10;
+        }
+      }
+    }
   }
 
   /** @override */
@@ -79,9 +87,23 @@ export class DCCActor extends Actor {
       const sys = item.system;
       if (sys.abilityModifiers) {
         for (const [key, mods] of Object.entries(sys.abilityModifiers)) {
-          if (gearStatBonuses[key]) {
-            gearStatBonuses[key].flat += Number(mods.flat) || 0;
-            gearStatBonuses[key].pct += Number(mods.pct) || 0;
+          if (!gearStatBonuses[key] || !mods) continue;
+
+          // Support { value, type: 'flat' | 'pct' } schema
+          const val = Number(mods.value);
+          const type = (mods.type || 'flat').toLowerCase();
+          if (Number.isFinite(val) && val !== 0) {
+            if (type === 'pct' || type === '%') {
+              gearStatBonuses[key].pct += val;
+            } else {
+              gearStatBonuses[key].flat += val;
+            }
+          }
+
+          // Legacy format fallback { flat, pct }
+          if (mods.value === undefined || mods.value === null || mods.value === '') {
+            if (mods.flat) gearStatBonuses[key].flat += Number(mods.flat) || 0;
+            if (mods.pct) gearStatBonuses[key].pct += Number(mods.pct) || 0;
           }
         }
       }
@@ -92,7 +114,11 @@ export class DCCActor extends Actor {
     // Calculate 5 Core Ability Scores and Modifiers using unenhanced base + gear bonuses
     if (system.abilities) {
       for (const [key, ability] of Object.entries(system.abilities)) {
-        const unenhanced = Number(ability.unenhanced) || 10;
+        let unenhanced = Number(ability.unenhanced);
+        if (!Number.isFinite(unenhanced) || unenhanced <= 0) {
+          unenhanced = Number(ability.value) || 10;
+          ability.unenhanced = unenhanced;
+        }
         const flatMod = gearStatBonuses[key]?.flat || 0;
         const pctMod = gearStatBonuses[key]?.pct || 0;
 

@@ -83,12 +83,12 @@
         <div class="dcc-attribute-title">Strength</div>
         <div class="dcc-attribute-values">
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.str.value" type="number" value="{{system.abilities.str.value}}" />
+            <input class="dcc-stat-input" name="system.abilities.str.value" type="number" value="{{system.abilities.str.value}}" readonly title="Enhanced: {{system.abilities.str.unenhanced}} base{{#if system.abilities.str.gearBonus}} ({{#if (gt system.abilities.str.gearBonus 0)}}+{{/if}}{{system.abilities.str.gearBonus}} gear){{/if}}" />
             <span class="dcc-stat-sublabel">Enhanced</span>
           </div>
           <span class="dcc-stat-slash">/</span>
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.str.unenhanced" type="number" value="{{system.abilities.str.unenhanced}}" placeholder="10" />
+            <input class="dcc-stat-input" name="system.abilities.str.unenhanced" type="number" value="{{system.abilities.str.unenhanced}}" placeholder="10" title="Base Unenhanced Score" />
             <span class="dcc-stat-sublabel">Unenhanced</span>
           </div>
         </div>
@@ -103,12 +103,12 @@
         <div class="dcc-attribute-title">Intelligence</div>
         <div class="dcc-attribute-values">
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.int.value" type="number" value="{{system.abilities.int.value}}" />
+            <input class="dcc-stat-input" name="system.abilities.int.value" type="number" value="{{system.abilities.int.value}}" readonly title="Enhanced: {{system.abilities.int.unenhanced}} base{{#if system.abilities.int.gearBonus}} ({{#if (gt system.abilities.int.gearBonus 0)}}+{{/if}}{{system.abilities.int.gearBonus}} gear){{/if}}" />
             <span class="dcc-stat-sublabel">Enhanced</span>
           </div>
           <span class="dcc-stat-slash">/</span>
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.int.unenhanced" type="number" value="{{system.abilities.int.unenhanced}}" placeholder="10" />
+            <input class="dcc-stat-input" name="system.abilities.int.unenhanced" type="number" value="{{system.abilities.int.unenhanced}}" placeholder="10" title="Base Unenhanced Score" />
             <span class="dcc-stat-sublabel">Unenhanced</span>
           </div>
         </div>
@@ -123,12 +123,12 @@
         <div class="dcc-attribute-title">Constitution</div>
         <div class="dcc-attribute-values">
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.con.value" type="number" value="{{system.abilities.con.value}}" />
+            <input class="dcc-stat-input" name="system.abilities.con.value" type="number" value="{{system.abilities.con.value}}" readonly title="Enhanced: {{system.abilities.con.unenhanced}} base{{#if system.abilities.con.gearBonus}} ({{#if (gt system.abilities.con.gearBonus 0)}}+{{/if}}{{system.abilities.con.gearBonus}} gear){{/if}}" />
             <span class="dcc-stat-sublabel">Enhanced</span>
           </div>
           <span class="dcc-stat-slash">/</span>
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.con.unenhanced" type="number" value="{{system.abilities.con.unenhanced}}" placeholder="10" />
+            <input class="dcc-stat-input" name="system.abilities.con.unenhanced" type="number" value="{{system.abilities.con.unenhanced}}" placeholder="10" title="Base Unenhanced Score" />
             <span class="dcc-stat-sublabel">Unenhanced</span>
           </div>
         </div>
@@ -143,12 +143,12 @@
         <div class="dcc-attribute-title">Dexterity</div>
         <div class="dcc-attribute-values">
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.dex.value" type="number" value="{{system.abilities.dex.value}}" />
+            <input class="dcc-stat-input" name="system.abilities.dex.value" type="number" value="{{system.abilities.dex.value}}" readonly title="Enhanced: {{system.abilities.dex.unenhanced}} base{{#if system.abilities.dex.gearBonus}} ({{#if (gt system.abilities.dex.gearBonus 0)}}+{{/if}}{{system.abilities.dex.gearBonus}} gear){{/if}}" />
             <span class="dcc-stat-sublabel">Enhanced</span>
           </div>
           <span class="dcc-stat-slash">/</span>
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.dex.unenhanced" type="number" value="{{system.abilities.dex.unenhanced}}" placeholder="10" />
+            <input class="dcc-stat-input" name="system.abilities.dex.unenhanced" type="number" value="{{system.abilities.dex.unenhanced}}" placeholder="10" title="Base Unenhanced Score" />
             <span class="dcc-stat-sublabel">Unenhanced</span>
           </div>
         </div>
@@ -163,12 +163,12 @@
         <div class="dcc-attribute-title">Charisma</div>
         <div class="dcc-attribute-values">
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.cha.value" type="number" value="{{system.abilities.cha.value}}" />
+            <input class="dcc-stat-input" name="system.abilities.cha.value" type="number" value="{{system.abilities.cha.value}}" readonly title="Enhanced: {{system.abilities.cha.unenhanced}} base{{#if system.abilities.cha.gearBonus}} ({{#if (gt system.abilities.cha.gearBonus 0)}}+{{/if}}{{system.abilities.cha.gearBonus}} gear){{/if}}" />
             <span class="dcc-stat-sublabel">Enhanced</span>
           </div>
           <span class="dcc-stat-slash">/</span>
           <div class="dcc-stat-box">
-            <input class="dcc-stat-input" name="system.abilities.cha.unenhanced" type="number" value="{{system.abilities.cha.unenhanced}}" placeholder="10" />
+            <input class="dcc-stat-input" name="system.abilities.cha.unenhanced" type="number" value="{{system.abilities.cha.unenhanced}}" placeholder="10" title="Base Unenhanced Score" />
             <span class="dcc-stat-sublabel">Unenhanced</span>
           </div>
         </div>

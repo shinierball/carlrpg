@@ -115,51 +115,80 @@
         </div>
       </div>
 
-      {{!-- STAT MODIFIERS (FLAT & PERCENTAGE) --}}
+      {{!-- STAT MODIFIERS (FLAT VS %) --}}
       <div class="dcc-stat-block" style="margin-bottom: 10px;">
         <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px;">ABILITY MODIFIERS (EQUIPPED ONLY)</div>
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px; background: #fafafa; border: 1px solid #ddd;">
-          <div style="text-align: center;">
-            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">STR</span>
-            <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.flat" value="{{system.abilityModifiers.str.flat}}" placeholder="Flat" title="Flat STR (+/-)" style="text-align: center; font-size: 11px;" />
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.pct" value="{{system.abilityModifiers.str.pct}}" placeholder="%" title="STR % (+/-)" style="text-align: center; font-size: 11px;" />
-            </div>
-            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
-          </div>
-          <div style="text-align: center;">
-            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">INT</span>
-            <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.flat" value="{{system.abilityModifiers.int.flat}}" placeholder="Flat" title="Flat INT (+/-)" style="text-align: center; font-size: 11px;" />
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.pct" value="{{system.abilityModifiers.int.pct}}" placeholder="%" title="INT % (+/-)" style="text-align: center; font-size: 11px;" />
-            </div>
-            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
-          </div>
-          <div style="text-align: center;">
-            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">CON</span>
-            <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.flat" value="{{system.abilityModifiers.con.flat}}" placeholder="Flat" title="Flat CON (+/-)" style="text-align: center; font-size: 11px;" />
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.pct" value="{{system.abilityModifiers.con.pct}}" placeholder="%" title="CON % (+/-)" style="text-align: center; font-size: 11px;" />
-            </div>
-            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
-          </div>
-          <div style="text-align: center;">
-            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">DEX</span>
-            <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.flat" value="{{system.abilityModifiers.dex.flat}}" placeholder="Flat" title="Flat DEX (+/-)" style="text-align: center; font-size: 11px;" />
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.pct" value="{{system.abilityModifiers.dex.pct}}" placeholder="%" title="DEX % (+/-)" style="text-align: center; font-size: 11px;" />
-            </div>
-            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
-          </div>
-          <div style="text-align: center;">
-            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">CHA</span>
-            <div style="display: flex; gap: 2px; margin-top: 2px;">
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.flat" value="{{system.abilityModifiers.cha.flat}}" placeholder="Flat" title="Flat CHA (+/-)" style="text-align: center; font-size: 11px;" />
-              <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.pct" value="{{system.abilityModifiers.cha.pct}}" placeholder="%" title="CHA % (+/-)" style="text-align: center; font-size: 11px;" />
-            </div>
-            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
-          </div>
-        </div>
+        <table class="dcc-table" style="margin: 0; font-size: 11px;">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Ability</th>
+              <th style="width: 35%;">Modifier Value (+/-)</th>
+              <th style="width: 40%;">Type (Flat vs %)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: bold; color: #c0392b;">STR (Strength)</td>
+              <td>
+                <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.value" value="{{system.abilityModifiers.str.value}}" placeholder="0" style="text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.abilityModifiers.str.type">
+                  <option value="flat" {{#if (or (eq system.abilityModifiers.str.type "flat") (not system.abilityModifiers.str.type))}}selected{{/if}}>Flat</option>
+                  <option value="pct" {{#if (eq system.abilityModifiers.str.type "pct")}}selected{{/if}}>%</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #c0392b;">INT (Intelligence)</td>
+              <td>
+                <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.value" value="{{system.abilityModifiers.int.value}}" placeholder="0" style="text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.abilityModifiers.int.type">
+                  <option value="flat" {{#if (or (eq system.abilityModifiers.int.type "flat") (not system.abilityModifiers.int.type))}}selected{{/if}}>Flat</option>
+                  <option value="pct" {{#if (eq system.abilityModifiers.int.type "pct")}}selected{{/if}}>%</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #c0392b;">CON (Constitution)</td>
+              <td>
+                <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.value" value="{{system.abilityModifiers.con.value}}" placeholder="0" style="text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.abilityModifiers.con.type">
+                  <option value="flat" {{#if (or (eq system.abilityModifiers.con.type "flat") (not system.abilityModifiers.con.type))}}selected{{/if}}>Flat</option>
+                  <option value="pct" {{#if (eq system.abilityModifiers.con.type "pct")}}selected{{/if}}>%</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #c0392b;">DEX (Dexterity)</td>
+              <td>
+                <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.value" value="{{system.abilityModifiers.dex.value}}" placeholder="0" style="text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.abilityModifiers.dex.type">
+                  <option value="flat" {{#if (or (eq system.abilityModifiers.dex.type "flat") (not system.abilityModifiers.dex.type))}}selected{{/if}}>Flat</option>
+                  <option value="pct" {{#if (eq system.abilityModifiers.dex.type "pct")}}selected{{/if}}>%</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; color: #c0392b;">CHA (Charisma)</td>
+              <td>
+                <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.value" value="{{system.abilityModifiers.cha.value}}" placeholder="0" style="text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.abilityModifiers.cha.type">
+                  <option value="flat" {{#if (or (eq system.abilityModifiers.cha.type "flat") (not system.abilityModifiers.cha.type))}}selected{{/if}}>Flat</option>
+                  <option value="pct" {{#if (eq system.abilityModifiers.cha.type "pct")}}selected{{/if}}>%</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {{!-- SKILL / SPELL MODIFIERS --}}

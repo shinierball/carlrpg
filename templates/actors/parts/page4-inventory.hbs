@@ -21,10 +21,29 @@
       <tbody>
         {{!-- Gear Items --}}
         {{#each gear as |item|}}
-          <tr data-item-id="{{item.id}}">
+          <tr data-item-id="{{item.id}}" style="{{#if item.system.equipped}}background: #fdf2f2;{{/if}}">
             <td>
-              <span style="font-weight: bold;">{{item.name}}</span>
-              <span class="dcc-stat-sublabel" style="display: inline-block; margin-left: 6px;">[{{item.system.slot}}]</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="gear-toggle-equipped" data-tooltip="{{#if item.system.equipped}}Equipped to {{upper item.system.slot}} (Click to unequip){{else}}Unequipped (Click to equip to {{upper item.system.slot}}){{/if}}" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 14px;">
+                  {{#if item.system.equipped}}
+                    <i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>
+                  {{else}}
+                    <i class="fa-regular fa-circle" style="color: #999;"></i>
+                  {{/if}}
+                </button>
+                <div>
+                  <span style="font-weight: bold;">{{item.name}}</span>
+                  <span class="dcc-stat-sublabel" style="display: inline-block; margin-left: 4px; text-transform: uppercase;">[{{item.system.slot}}]</span>
+                  {{#if item.system.equipped}}
+                    <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px; margin-left: 4px;">EQUIPPED</span>
+                  {{/if}}
+                  {{#if item.bonusesSummary}}
+                    <div style="font-size: 10px; color: #555; margin-top: 2px;">
+                      <i class="fa-solid fa-sparkles" style="color: #c0392b;"></i> {{item.bonusesSummary}}
+                    </div>
+                  {{/if}}
+                </div>
+              </div>
             </td>
             <td>
               <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />

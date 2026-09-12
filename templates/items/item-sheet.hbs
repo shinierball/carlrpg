@@ -80,7 +80,7 @@
 
     {{!-- GEAR TYPE --}}
     {{#if (eq item.type "gear")}}
-      <div class="dcc-field-row" style="margin-bottom: 8px;">
+      <div class="dcc-field-row" style="margin-bottom: 8px; align-items: center;">
         <div class="dcc-field-group">
           <span class="dcc-field-label">Slot</span>
           <select name="system.slot" class="dcc-field-input">
@@ -95,22 +95,116 @@
             <option value="patch" {{#if (eq system.slot "patch")}}selected{{/if}}>Patch</option>
           </select>
         </div>
+        <div class="dcc-field-group small" style="text-align: center;">
+          <span class="dcc-field-label">Equipped</span>
+          <label style="display: flex; align-items: center; justify-content: center; height: 28px; cursor: pointer;">
+            <input type="checkbox" name="system.equipped" {{#if system.equipped}}checked{{/if}} style="width: 18px; height: 18px; cursor: pointer;" />
+          </label>
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Damage Resist (DR)</span>
+          <input class="dcc-field-input" type="number" name="system.drBonus" value="{{system.drBonus}}" placeholder="0" title="DR bonus or penalty (+/-)" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Evade Bonus</span>
+          <input class="dcc-field-input" type="number" name="system.evadeBonus" value="{{system.evadeBonus}}" placeholder="0" />
+        </div>
         <div class="dcc-field-group small">
           <span class="dcc-field-label">Quantity</span>
           <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
         </div>
-        <div class="dcc-field-group small">
-          <span class="dcc-field-label">Armor DR</span>
-          <input class="dcc-field-input" type="number" name="system.armorBonus" value="{{system.armorBonus}}" />
-        </div>
-        <div class="dcc-field-group small">
-          <span class="dcc-field-label">Evade Bonus</span>
-          <input class="dcc-field-input" type="number" name="system.evadeBonus" value="{{system.evadeBonus}}" />
+      </div>
+
+      {{!-- STAT MODIFIERS (FLAT & PERCENTAGE) --}}
+      <div class="dcc-stat-block" style="margin-bottom: 10px;">
+        <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px;">ABILITY MODIFIERS (EQUIPPED ONLY)</div>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+          <div style="text-align: center;">
+            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">STR</span>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.flat" value="{{system.abilityModifiers.str.flat}}" placeholder="Flat" title="Flat STR (+/-)" style="text-align: center; font-size: 11px;" />
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.pct" value="{{system.abilityModifiers.str.pct}}" placeholder="%" title="STR % (+/-)" style="text-align: center; font-size: 11px;" />
+            </div>
+            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
+          </div>
+          <div style="text-align: center;">
+            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">INT</span>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.flat" value="{{system.abilityModifiers.int.flat}}" placeholder="Flat" title="Flat INT (+/-)" style="text-align: center; font-size: 11px;" />
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.pct" value="{{system.abilityModifiers.int.pct}}" placeholder="%" title="INT % (+/-)" style="text-align: center; font-size: 11px;" />
+            </div>
+            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
+          </div>
+          <div style="text-align: center;">
+            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">CON</span>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.flat" value="{{system.abilityModifiers.con.flat}}" placeholder="Flat" title="Flat CON (+/-)" style="text-align: center; font-size: 11px;" />
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.pct" value="{{system.abilityModifiers.con.pct}}" placeholder="%" title="CON % (+/-)" style="text-align: center; font-size: 11px;" />
+            </div>
+            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
+          </div>
+          <div style="text-align: center;">
+            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">DEX</span>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.flat" value="{{system.abilityModifiers.dex.flat}}" placeholder="Flat" title="Flat DEX (+/-)" style="text-align: center; font-size: 11px;" />
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.pct" value="{{system.abilityModifiers.dex.pct}}" placeholder="%" title="DEX % (+/-)" style="text-align: center; font-size: 11px;" />
+            </div>
+            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
+          </div>
+          <div style="text-align: center;">
+            <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">CHA</span>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.flat" value="{{system.abilityModifiers.cha.flat}}" placeholder="Flat" title="Flat CHA (+/-)" style="text-align: center; font-size: 11px;" />
+              <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.pct" value="{{system.abilityModifiers.cha.pct}}" placeholder="%" title="CHA % (+/-)" style="text-align: center; font-size: 11px;" />
+            </div>
+            <span class="dcc-stat-sublabel" style="font-size: 9px;">Flat / %</span>
+          </div>
         </div>
       </div>
+
+      {{!-- SKILL / SPELL MODIFIERS --}}
+      <div class="dcc-stat-block" style="margin-bottom: 10px;">
+        <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span>SKILL & SPELL MODIFIERS / GRANTED SKILLS</span>
+          <a class="add-skill-mod" style="color: #fff; font-size: 10px; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Skill</a>
+        </div>
+        <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+          {{#if system.skillModifiers.length}}
+            <table class="dcc-table" style="margin: 0; font-size: 11px;">
+              <thead>
+                <tr>
+                  <th style="width: 65%;">Skill / Spell Name</th>
+                  <th style="width: 25%;">Rank Bonus</th>
+                  <th style="width: 10%;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each system.skillModifiers as |mod idx|}}
+                  <tr>
+                    <td>
+                      <input class="dcc-field-input" type="text" name="system.skillModifiers.{{idx}}.name" value="{{mod.name}}" placeholder="e.g. Catcher" style="font-size: 11px;" />
+                    </td>
+                    <td>
+                      <input class="dcc-stat-input" type="number" name="system.skillModifiers.{{idx}}.bonus" value="{{mod.bonus}}" placeholder="1" style="width: 100%; font-size: 11px;" />
+                    </td>
+                    <td style="text-align: center;">
+                      <a class="delete-skill-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          {{else}}
+            <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+              No skill or spell modifiers. Click "+ Add Skill" above to grant or boost a skill.
+            </div>
+          {{/if}}
+        </div>
+      </div>
+
       <div class="dcc-field-group">
         <span class="dcc-field-label">Notes & Description</span>
-        <textarea class="dcc-field-input" name="system.notes" style="height: 120px;">{{system.notes}}</textarea>
+        <textarea class="dcc-field-input" name="system.notes" style="height: 80px;">{{system.notes}}</textarea>
       </div>
     {{/if}}
 

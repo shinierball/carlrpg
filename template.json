@@ -131,9 +131,17 @@
     "gear": {
       "slot": "torso",
       "quantity": 1,
-      "armorBonus": 0,
-      "evadeBonus": 0,
       "equipped": false,
+      "drBonus": 0,
+      "evadeBonus": 0,
+      "abilityModifiers": {
+        "str": { "flat": 0, "pct": 0 },
+        "int": { "flat": 0, "pct": 0 },
+        "con": { "flat": 0, "pct": 0 },
+        "dex": { "flat": 0, "pct": 0 },
+        "cha": { "flat": 0, "pct": 0 }
+      },
+      "skillModifiers": [],
       "notes": ""
     },
     "race": {

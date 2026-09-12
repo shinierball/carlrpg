@@ -24,31 +24,84 @@
       <div class="dcc-gear-slots-list">
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Head</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.head" value="{{system.gearSlots.head}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.head}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.head.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.head.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.head" value="{{system.gearSlots.head}}" placeholder="{{#if equippedBySlot.head}}{{equippedBySlot.head.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Torso</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.torso" value="{{system.gearSlots.torso}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.torso}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.torso.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.torso.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.torso" value="{{system.gearSlots.torso}}" placeholder="{{#if equippedBySlot.torso}}{{equippedBySlot.torso.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Arms</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.arms" value="{{system.gearSlots.arms}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.arms}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.arms.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.arms.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.arms" value="{{system.gearSlots.arms}}" placeholder="{{#if equippedBySlot.arms}}{{equippedBySlot.arms.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Hands/Holding</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.hands" value="{{system.gearSlots.hands}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.hands}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.hands.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.hands.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.hands" value="{{system.gearSlots.hands}}" placeholder="{{#if equippedBySlot.hands}}{{equippedBySlot.hands.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Legs</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.legs" value="{{system.gearSlots.legs}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.legs}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.legs.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.legs.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.legs" value="{{system.gearSlots.legs}}" placeholder="{{#if equippedBySlot.legs}}{{equippedBySlot.legs.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Feet</span>
-          <input class="dcc-field-input" type="text" name="system.gearSlots.feet" value="{{system.gearSlots.feet}}" />
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.feet}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.feet.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.feet.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.feet" value="{{system.gearSlots.feet}}" placeholder="{{#if equippedBySlot.feet}}{{equippedBySlot.feet.name}}{{else}}Notes...{{/if}}" />
+          </div>
         </div>
         <div class="dcc-gear-row">
           <span class="dcc-gear-label">Accessories (Max 10)</span>
-          <textarea class="dcc-field-input" name="system.gearSlots.accessories" style="height: 120px; resize: vertical;">{{system.gearSlots.accessories}}</textarea>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            {{#if equippedBySlot.accessory.length}}
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                {{#each equippedBySlot.accessory as |acc|}}
+                  <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 1px 5px; font-size: 9px; border-radius: 2px;" title="{{acc.bonusesSummary}}">
+                    {{acc.name}}
+                  </span>
+                {{/each}}
+              </div>
+            {{/if}}
+            <textarea class="dcc-field-input" name="system.gearSlots.accessories" style="height: 100px; resize: vertical;">{{system.gearSlots.accessories}}</textarea>
+          </div>
         </div>
       </div>
     </div>

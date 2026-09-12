@@ -61,26 +61,66 @@ export class DCCActor extends Actor {
     super.prepareDerivedData();
     const system = this.system;
 
-    // Calculate 5 Core Ability Modifiers using Enhanced values
+    // Gather equipped gear
+    const equippedGear = this.items ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : [];
+
+    // Tally gear bonuses to stats, DR, and evade
+    const gearStatBonuses = {
+      str: { flat: 0, pct: 0 },
+      int: { flat: 0, pct: 0 },
+      con: { flat: 0, pct: 0 },
+      dex: { flat: 0, pct: 0 },
+      cha: { flat: 0, pct: 0 }
+    };
+    let gearDR = 0;
+    let gearEvade = 0;
+
+    for (const item of equippedGear) {
+      const sys = item.system;
+      if (sys.abilityModifiers) {
+        for (const [key, mods] of Object.entries(sys.abilityModifiers)) {
+          if (gearStatBonuses[key]) {
+            gearStatBonuses[key].flat += Number(mods.flat) || 0;
+            gearStatBonuses[key].pct += Number(mods.pct) || 0;
+          }
+        }
+      }
+      gearDR += Number(sys.drBonus ?? sys.armorBonus) || 0;
+      gearEvade += Number(sys.evadeBonus) || 0;
+    }
+
+    // Calculate 5 Core Ability Scores and Modifiers using unenhanced base + gear bonuses
     if (system.abilities) {
       for (const [key, ability] of Object.entries(system.abilities)) {
-        const enhancedVal = Number(ability.value) || 0;
-        ability.mod = getDCCStatModifier(enhancedVal);
+        const unenhanced = Number(ability.unenhanced) || 10;
+        const flatMod = gearStatBonuses[key]?.flat || 0;
+        const pctMod = gearStatBonuses[key]?.pct || 0;
+
+        // Percentage bonus rounded up (e.g. +10% of 10 = +1)
+        const pctBonus = pctMod !== 0
+          ? (pctMod > 0 ? Math.ceil((unenhanced * pctMod) / 100) : Math.floor((unenhanced * pctMod) / 100))
+          : 0;
+
+        ability.gearBonus = flatMod + pctBonus;
+        ability.value = unenhanced + ability.gearBonus;
+        ability.mod = getDCCStatModifier(ability.value);
       }
     }
 
-    // Calculate Evade, DR, and HP percentage for Crawler/Creature
+    // Calculate Evade, DR, HP, and Mana for Crawler/Creature
     if (system.attributes) {
       const dexMod = system.abilities?.dex?.mod ?? 0;
       const evadeBuffs = Number(system.attributes.evade?.buffs) || 0;
       if (system.attributes.evade) {
-        system.attributes.evade.total = dexMod + evadeBuffs;
+        system.attributes.evade.gear = gearEvade;
+        system.attributes.evade.total = dexMod + evadeBuffs + gearEvade;
       }
 
       const drArmor = Number(system.attributes.dr?.armor) || 0;
       const drBuffs = Number(system.attributes.dr?.buffs) || 0;
       if (system.attributes.dr) {
-        system.attributes.dr.total = drArmor + drBuffs;
+        system.attributes.dr.gear = gearDR;
+        system.attributes.dr.total = drArmor + drBuffs + gearDR;
       }
 
       if (system.attributes.hp) {
@@ -191,7 +231,7 @@ export class DCCActor extends Actor {
     const statKey = sys.stat || 'str';
     const statName = statKey.toUpperCase();
     const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
-    const rank = Number(sys.rank) || 0;
+    const rank = Number(skillItem.effectiveRank ?? sys.rank) || 0;
     const checkType = (sys.checkType || '').toLowerCase();
 
     // Passive skill handling
@@ -236,12 +276,13 @@ export class DCCActor extends Actor {
 
     // Trained Check (Rank > 0): 1d20 + rank + mod
     const total = rank + statMod;
+    const bonusText = skillItem.itemBonus ? ` [incl. +${skillItem.itemBonus} gear]` : '';
     const formula = `1d20 + ${total}`;
     const roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + Rank ${rank} + Stat Mod ${statMod})`
+      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + Rank ${rank}${bonusText} + Stat Mod ${statMod})`
     });
   }
 }

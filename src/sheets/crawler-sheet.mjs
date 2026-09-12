@@ -1,4 +1,36 @@
 /**
+ * Helper to format active gear bonuses into a readable string summary
+ */
+export function formatGearBonuses(gearItem) {
+  const parts = [];
+  const sys = gearItem.system;
+  if (!sys) return '';
+  const dr = Number(sys.drBonus ?? sys.armorBonus) || 0;
+  if (dr !== 0) parts.push(`${dr > 0 ? '+' : ''}${dr} DR`);
+  const evade = Number(sys.evadeBonus) || 0;
+  if (evade !== 0) parts.push(`${evade > 0 ? '+' : ''}${evade} Evade`);
+
+  if (sys.abilityModifiers) {
+    for (const [stat, mods] of Object.entries(sys.abilityModifiers)) {
+      const flat = Number(mods.flat) || 0;
+      const pct = Number(mods.pct) || 0;
+      if (flat !== 0) parts.push(`${flat > 0 ? '+' : ''}${flat} ${stat.toUpperCase()}`);
+      if (pct !== 0) parts.push(`${pct > 0 ? '+' : ''}${pct}% ${stat.toUpperCase()}`);
+    }
+  }
+
+  if (Array.isArray(sys.skillModifiers)) {
+    for (const sm of sys.skillModifiers) {
+      if (sm && sm.name) {
+        const bonus = Number(sm.bonus) || 0;
+        parts.push(`${bonus >= 0 ? '+' : ''}${bonus} ${sm.name}`);
+      }
+    }
+  }
+  return parts.join(', ');
+}
+
+/**
  * Dungeon Crawler Carl Character Sheet Controller
  */
 export class DCCCrawlerSheet extends ActorSheet {
@@ -34,10 +66,35 @@ export class DCCCrawlerSheet extends ActorSheet {
     context.sponsors = [];
     context.loot = [];
 
+    // Track equipped items by slot
+    context.equippedBySlot = {
+      head: null,
+      torso: null,
+      arms: null,
+      hands: null,
+      legs: null,
+      feet: null,
+      accessory: [],
+      tattoo: [],
+      patch: []
+    };
+
     for (const item of this.actor.items) {
       if (item.type === 'attack') context.attacks.push(item);
       else if (item.type === 'skill') context.skills.push(item);
-      else if (item.type === 'gear') context.gear.push(item);
+      else if (item.type === 'gear') {
+        item.bonusesSummary = formatGearBonuses(item);
+        context.gear.push(item);
+
+        if (item.system?.equipped) {
+          const slot = (item.system.slot || 'torso').toLowerCase();
+          if (Array.isArray(context.equippedBySlot[slot])) {
+            context.equippedBySlot[slot].push(item);
+          } else {
+            context.equippedBySlot[slot] = item;
+          }
+        }
+      }
       else if (item.type === 'race') context.races.push(item);
       else if (item.type === 'class') context.classes.push(item);
       else if (item.type === 'deity') context.deities.push(item);
@@ -45,12 +102,80 @@ export class DCCCrawlerSheet extends ActorSheet {
       else if (item.type === 'loot') context.loot.push(item);
     }
 
-    // Calculate statModStr for each skill
+    // Tally gear skill bonuses from equipped gear
+    const gearSkillBonuses = new Map();
+    for (const item of context.gear) {
+      if (!item.system?.equipped) continue;
+      const skillMods = Array.isArray(item.system.skillModifiers) ? item.system.skillModifiers : [];
+      for (const sm of skillMods) {
+        if (!sm || !sm.name) continue;
+        const norm = sm.name.toLowerCase().trim();
+        const bonus = Number(sm.bonus) || 0;
+        if (!gearSkillBonuses.has(norm)) {
+          gearSkillBonuses.set(norm, { bonus: 0, sources: [], originalName: sm.name });
+        }
+        const entry = gearSkillBonuses.get(norm);
+        entry.bonus += bonus;
+        entry.sources.push(`${item.name} (+${bonus})`);
+      }
+    }
+
+    // Apply gear bonuses to actor's existing skills
+    const ownedSkillNames = new Set();
     for (const skill of context.skills) {
+      const norm = skill.name.toLowerCase().trim();
+      ownedSkillNames.add(norm);
+
+      if (gearSkillBonuses.has(norm)) {
+        const data = gearSkillBonuses.get(norm);
+        skill.itemBonus = data.bonus;
+        skill.effectiveRank = (Number(skill.system.rank) || 0) + data.bonus;
+        skill.itemSources = data.sources.join(', ');
+      } else {
+        skill.itemBonus = 0;
+        skill.effectiveRank = Number(skill.system.rank) || 0;
+      }
+
       const stat = skill.system?.stat || 'str';
       const mod = context.system.abilities?.[stat]?.mod ?? 0;
       skill.statMod = mod;
       skill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
+    }
+
+    // Add granted skills from equipped gear that the actor doesn't own
+    this._grantedSkills = new Map();
+    for (const [norm, data] of gearSkillBonuses.entries()) {
+      if (!ownedSkillNames.has(norm)) {
+        const official = (CONFIG.DCC?.skills || []).find(s => s.name.toLowerCase().trim() === norm);
+        const grantedId = `granted-${norm.replace(/\s+/g, '-')}`;
+        const grantedSkill = {
+          id: grantedId,
+          _id: grantedId,
+          name: official ? official.name : data.originalName,
+          type: 'skill',
+          img: official ? official.img : 'icons/magic/defensive/shield-barrier-blue.webp',
+          isGranted: true,
+          itemBonus: data.bonus,
+          effectiveRank: data.bonus,
+          itemSources: data.sources.join(', '),
+          system: {
+            rank: data.bonus,
+            stat: official ? official.system.stat : 'str',
+            checkType: official ? official.system.checkType : 'Stat Check',
+            category: official ? (official.system.category || 'Utility') : 'Combat',
+            notes: `Granted by ${data.sources.join(', ')}`,
+            upgrades: '',
+            checked: false
+          }
+        };
+        const stat = grantedSkill.system.stat;
+        const mod = context.system.abilities?.[stat]?.mod ?? 0;
+        grantedSkill.statMod = mod;
+        grantedSkill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
+
+        this._grantedSkills.set(grantedId, grantedSkill);
+        context.skills.push(grantedSkill);
+      }
     }
 
     // Sort skills alphabetically
@@ -95,11 +220,26 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (item) this.actor.rollAttack(item, 'damage');
     });
 
-    // Roll Skill
+    // Roll Skill (owned or gear-granted)
     html.find('.roll-skill').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
+      const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
       if (item) this.actor.rollSkill(item);
+    });
+
+    // Toggle Gear Equipped
+    html.find('.gear-toggle-equipped').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items.get(itemId);
+      if (item) {
+        const newEquipped = !item.system.equipped;
+        await item.update({ 'system.equipped': newEquipped });
+        if (this.isToken && this.token?.baseActor) {
+          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
+          if (baseItem) await baseItem.update({ 'system.equipped': newEquipped });
+        }
+      }
     });
 
     // Immediate form submission on input blur

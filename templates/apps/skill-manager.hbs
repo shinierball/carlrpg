@@ -1,0 +1,174 @@
+<div class="dcc-skill-manager-app">
+  {{!-- TOP BANNER --}}
+  <div class="dcc-banner-header" style="padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-book-bookmark" style="color: #f1c40f; font-size: 16px;"></i>
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: 0.5px;">DCC SKILL LIBRARY & MANAGER</span>
+    </div>
+
+    {{#if isActorPicker}}
+      <span style="font-size: 11px; background: #e67e22; color: #fff; padding: 2px 8px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+        SELECTING FOR CRAWLER: {{actor.name}}
+      </span>
+    {{else if isItemPicker}}
+      <span style="font-size: 11px; background: #27ae60; color: #fff; padding: 2px 8px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+        SELECTING MODIFIER FOR: {{item.name}}
+      </span>
+    {{else}}
+      <span style="font-size: 11px; color: #ccc; font-family: 'Oswald', sans-serif;">
+        CENTRALIZED SKILL REPOSITORY
+      </span>
+    {{/if}}
+  </div>
+
+  {{!-- CONTROLS BAR: SEARCH, STATS, ACTIONS --}}
+  <div class="dcc-sm-controls">
+    <div class="dcc-sm-search-row">
+      <div class="dcc-sm-search-wrapper">
+        <i class="fa-solid fa-magnifying-glass dcc-sm-search-icon"></i>
+        <input type="text" class="dcc-sm-search" placeholder="Search skills by name, stat, category, or mechanics..." value="{{searchQuery}}" autofocus />
+      </div>
+
+      {{#if isActorPicker}}
+        <button type="button" class="dcc-sm-action-btn dcc-sm-add-to-actor" style="background: #27ae60;">
+          <i class="fa-solid fa-user-plus"></i> Add Selected to {{actor.name}}
+        </button>
+      {{/if}}
+
+      {{#if isItemPicker}}
+        <div class="dcc-sm-gear-bonus-box">
+          <label>Rank Bonus:</label>
+          <input type="number" id="dcc-sm-gear-bonus" value="1" min="1" />
+        </div>
+      {{/if}}
+
+      {{#if canCreate}}
+        <button type="button" class="dcc-sm-action-btn dcc-sm-create-skill-btn">
+          <i class="fa-solid fa-plus"></i> New Custom Skill
+        </button>
+      {{/if}}
+    </div>
+
+    {{!-- CATEGORY FILTER TABS --}}
+    <div class="dcc-sm-categories">
+      <button type="button" class="dcc-sm-category-btn {{#if (eq activeCategory 'all')}}active{{/if}}" data-category="all">
+        All Skills <span class="dcc-sm-count-badge">{{counts.all}}</span>
+      </button>
+      <button type="button" class="dcc-sm-category-btn {{#if (eq activeCategory 'utility')}}active{{/if}}" data-category="utility">
+        Exploration & Survival <span class="dcc-sm-count-badge">{{counts.utility}}</span>
+      </button>
+      <button type="button" class="dcc-sm-category-btn {{#if (eq activeCategory 'combat')}}active{{/if}}" data-category="combat">
+        Combat Maneuvers <span class="dcc-sm-count-badge">{{counts.combat}}</span>
+      </button>
+      <button type="button" class="dcc-sm-category-btn {{#if (eq activeCategory 'passive')}}active{{/if}}" data-category="passive">
+        Passive Perks <span class="dcc-sm-count-badge">{{counts.passive}}</span>
+      </button>
+      <button type="button" class="dcc-sm-category-btn {{#if (eq activeCategory 'world')}}active{{/if}}" data-category="world">
+        World / Custom Skills <span class="dcc-sm-count-badge">{{counts.world}}</span>
+      </button>
+    </div>
+
+    {{!-- STAT FILTER PILLS --}}
+    <div class="dcc-sm-stat-pills">
+      <span class="dcc-sm-stat-label">Stat Filter:</span>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'all')}}active{{/if}}" data-stat="all">ALL</button>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'str')}}active{{/if}}" data-stat="str">STR</button>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'dex')}}active{{/if}}" data-stat="dex">DEX</button>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'con')}}active{{/if}}" data-stat="con">CON</button>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'int')}}active{{/if}}" data-stat="int">INT</button>
+      <button type="button" class="dcc-sm-stat-pill {{#if (eq activeStat 'cha')}}active{{/if}}" data-stat="cha">CHA</button>
+    </div>
+  </div>
+
+  {{!-- SKILLS LIST / TABLE --}}
+  <div class="dcc-sm-list-container">
+    {{#if skills.length}}
+      <table class="dcc-sm-table">
+        <thead>
+          <tr>
+            {{#if isActorPicker}}
+              <th style="width: 5%; text-align: center;">Select</th>
+            {{/if}}
+            <th style="width: 28%;">Skill Name</th>
+            <th style="width: 10%; text-align: center;">Stat</th>
+            <th style="width: 14%;">Category</th>
+            <th style="width: 13%;">Check Type</th>
+            <th style="width: 10%; text-align: center;">Source</th>
+            <th style="width: {{#if isItemPicker}}20%{{else}}25%{{/if}};">Description & Mechanics</th>
+            {{#if isItemPicker}}
+              <th style="width: 10%; text-align: center;">Action</th>
+            {{else}}
+              <th style="width: 5%; text-align: center;"></th>
+            {{/if}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each skills as |skill|}}
+            <tr class="dcc-sm-row {{#if skill.isAddedToActor}}is-added{{/if}} {{#if skill.isAddedToItem}}is-added{{/if}}">
+              {{#if ../isActorPicker}}
+                <td style="text-align: center;">
+                  <input type="checkbox" name="selectedSkill" value="{{skill.name}}" {{#if skill.isAddedToActor}}disabled{{/if}} />
+                </td>
+              {{/if}}
+              <td>
+                <div class="dcc-sm-name-cell">
+                  <img src="{{skill.img}}" class="dcc-sm-icon" />
+                  <div style="display: flex; flex-direction: column;">
+                    <span class="dcc-sm-name">{{skill.name}}</span>
+                    {{#if skill.isAddedToActor}}
+                      <span class="dcc-sm-on-sheet-badge"><i class="fa-solid fa-check"></i> On Actor Sheet</span>
+                    {{/if}}
+                    {{#if skill.isAddedToItem}}
+                      <span class="dcc-sm-on-gear-badge"><i class="fa-solid fa-shield-halved"></i> On This Gear</span>
+                    {{/if}}
+                  </div>
+                </div>
+              </td>
+              <td style="text-align: center;">
+                <span class="dcc-sm-stat-badge stat-{{skill.system.stat}}">{{skill.statUpper}}</span>
+              </td>
+              <td>
+                <span class="dcc-sm-category-tag">{{skill.system.category}}</span>
+              </td>
+              <td>
+                <span style="font-size: 11px;">{{skill.system.checkType}}</span>
+              </td>
+              <td style="text-align: center;">
+                {{#if skill.isCompendium}}
+                  <span class="dcc-sm-source-badge compendium" title="Official DCC Compendium Skill">COMPENDIUM</span>
+                {{else}}
+                  <span class="dcc-sm-source-badge world" title="Custom World Item Skill">WORLD</span>
+                {{/if}}
+              </td>
+              <td>
+                <span class="dcc-sm-notes" title="{{skill.system.notes}}">{{skill.system.notes}}</span>
+              </td>
+              <td style="text-align: center; white-space: nowrap;">
+                {{#if ../isItemPicker}}
+                  <button type="button" class="dcc-sm-select-for-item" data-name="{{skill.name}}">
+                    <i class="fa-solid fa-check"></i> Select
+                  </button>
+                {{else}}
+                  {{#if skill.isWorld}}
+                    <a class="dcc-sm-edit-skill" data-id="{{skill.id}}" data-tooltip="Edit Custom Skill" style="cursor: pointer; color: #2980b9; margin-right: 6px;">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a class="dcc-sm-delete-skill" data-id="{{skill.id}}" data-tooltip="Delete Custom Skill" style="cursor: pointer; color: #c0392b;">
+                      <i class="fa-solid fa-trash"></i>
+                    </a>
+                  {{/if}}
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div class="dcc-sm-empty-state">
+        <i class="fa-solid fa-magnifying-glass" style="font-size: 32px; color: #999; margin-bottom: 8px;"></i>
+        <p style="font-weight: bold; margin-bottom: 4px;">No skills matched your search or filter.</p>
+        <p style="font-size: 11px; color: #666;">Try adjusting the search query, category, or stat filters, or click "+ New Custom Skill" to add one.</p>
+      </div>
+    {{/if}}
+  </div>
+</div>

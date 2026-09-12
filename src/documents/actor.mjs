@@ -184,7 +184,11 @@ export class DCCActor extends Actor {
     // -------------------------------------------------------------------------
     const gearSkillBonuses = new Map();
     for (const item of equippedGear) {
-      const skillMods = Array.isArray(item.system?.skillModifiers) ? item.system.skillModifiers : [];
+      let rawMods = item.system?.skillModifiers;
+      if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+        rawMods = Object.values(rawMods);
+      }
+      const skillMods = Array.isArray(rawMods) ? rawMods : [];
       for (const sm of skillMods) {
         if (!sm || !sm.name) continue;
         const norm = sm.name.toLowerCase().trim();

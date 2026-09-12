@@ -1,3 +1,5 @@
+import { DCCSkillManager } from '../apps/skill-manager.mjs';
+
 /**
  * Helper to format active gear bonuses into a readable string summary
  */
@@ -31,8 +33,12 @@ export function formatGearBonuses(gearItem) {
     }
   }
 
-  if (Array.isArray(sys.skillModifiers)) {
-    for (const sm of sys.skillModifiers) {
+  let rawMods = sys.skillModifiers;
+  if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+    rawMods = Object.values(rawMods);
+  }
+  if (Array.isArray(rawMods)) {
+    for (const sm of rawMods) {
       if (sm && sm.name) {
         const bonus = Number(sm.bonus) || 0;
         parts.push(`${bonus >= 0 ? '+' : ''}${bonus} ${sm.name}`);
@@ -118,7 +124,11 @@ export class DCCCrawlerSheet extends ActorSheet {
     const gearSkillBonuses = new Map();
     for (const item of context.gear) {
       if (!item.system?.equipped) continue;
-      const skillMods = Array.isArray(item.system.skillModifiers) ? item.system.skillModifiers : [];
+      let rawMods = item.system.skillModifiers;
+      if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+        rawMods = Object.values(rawMods);
+      }
+      const skillMods = Array.isArray(rawMods) ? rawMods : [];
       for (const sm of skillMods) {
         if (!sm || !sm.name) continue;
         const norm = sm.name.toLowerCase().trim();
@@ -272,10 +282,6 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (item) {
         const newEquipped = !item.system.equipped;
         await item.update({ 'system.equipped': newEquipped });
-        if (this.isToken && this.token?.baseActor) {
-          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
-          if (baseItem) await baseItem.update({ 'system.equipped': newEquipped });
-        }
       }
     });
 
@@ -289,9 +295,9 @@ export class DCCCrawlerSheet extends ActorSheet {
       ev.preventDefault();
       const type = $(ev.currentTarget).data('type') || 'skill';
       const name = `New ${type.capitalize()}`;
-      await this.actor.createEmbeddedDocuments('Item', [{ name, type }]);
-      if (this.isToken && this.token?.baseActor) {
-        await this.token.baseActor.createEmbeddedDocuments('Item', [{ name, type }]);
+      const created = await this.actor.createEmbeddedDocuments('Item', [{ name, type }]);
+      if (created && created[0]) {
+        created[0].sheet?.render(true);
       }
     });
 
@@ -307,10 +313,6 @@ export class DCCCrawlerSheet extends ActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
       if (item) {
-        if (this.isToken && this.token?.baseActor) {
-          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
-          if (baseItem) await baseItem.delete();
-        }
         await item.delete();
       }
     });
@@ -325,165 +327,15 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (item && field) {
         const val = input.attr('type') === 'number' ? Number(input.val()) : input.val();
         await item.update({ [field]: val });
-        if (this.isToken && this.token?.baseActor) {
-          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
-          if (baseItem) await baseItem.update({ [field]: val });
-        }
       }
     });
   }
 
   /**
-   * Open interactive modal to choose skills from the official DCC Skill Library
+   * Open interactive modal to choose skills from the DCC Skill Library & Manager
    */
   _openSkillPicker() {
-    const existingSkillNames = new Set(
-      this.actor.items.filter(i => i.type === 'skill').map(i => i.name.toLowerCase().trim())
-    );
-
-    const skills = CONFIG.DCC?.skills || [];
-
-    // Group skills by category
-    const categories = {
-      Utility: { title: 'Exploration & Survival (Utility Skills)', skills: [] },
-      Combat: { title: 'Combat Skill Actions & Maneuvers', skills: [] },
-      Passive: { title: 'Passive Skills (Static Bonuses)', skills: [] }
-    };
-
-    for (const skill of skills) {
-      const cat = skill.system.category || 'Utility';
-      const isAdded = existingSkillNames.has(skill.name.toLowerCase().trim());
-      const itemData = {
-        ...skill,
-        isAdded
-      };
-      if (categories[cat]) categories[cat].skills.push(itemData);
-      else categories.Utility.skills.push(itemData);
-    }
-
-    // Build dialog HTML
-    let content = `
-      <div class="dcc-skill-picker-dialog">
-        <div class="dcc-picker-header">
-          <input type="text" class="dcc-picker-search" placeholder="Filter skills by name, stat, or mechanics..." autofocus />
-        </div>
-        <div class="dcc-picker-list">
-    `;
-
-    for (const [catKey, group] of Object.entries(categories)) {
-      content += `
-        <div class="dcc-picker-group" data-category="${catKey}">
-          <div class="dcc-picker-group-title">${group.title} (${group.skills.length})</div>
-          <div class="dcc-picker-items">
-      `;
-      for (const s of group.skills) {
-        const statName = (s.system.stat || 'str').toUpperCase();
-        const addedClass = s.isAdded ? 'is-added' : '';
-        const badge = s.isAdded ? `<span class="dcc-picker-badge added"><i class="fa-solid fa-check"></i> On Sheet</span>` : '';
-        content += `
-          <label class="dcc-picker-item ${addedClass}" data-skill-id="${s._id}" data-name="${s.name.toLowerCase()}" data-stat="${statName.toLowerCase()}" data-notes="${(s.system.notes || '').toLowerCase()}">
-            <input type="checkbox" name="selectedSkill" value="${s._id}" ${s.isAdded ? 'disabled' : ''} />
-            <img src="${s.img}" class="dcc-picker-item-icon" />
-            <div class="dcc-picker-item-info">
-              <div class="dcc-picker-item-name-row">
-                <span class="dcc-picker-item-name">${s.name}</span>
-                <span class="dcc-picker-item-stat">[${statName}]</span>
-                <span class="dcc-picker-item-type">${s.system.checkType}</span>
-                ${badge}
-              </div>
-              <div class="dcc-picker-item-desc">${s.system.notes || ''}</div>
-            </div>
-          </label>
-        `;
-      }
-      content += `
-          </div>
-        </div>
-      `;
-    }
-
-    content += `
-        </div>
-      </div>
-    `;
-
-    const dialog = new Dialog({
-      title: 'Dungeon Crawler Carl RPG - Skill Library',
-      content,
-      buttons: {
-        add: {
-          icon: '<i class="fa-solid fa-plus"></i>',
-          label: 'Add Selected Skills',
-          callback: async (html) => {
-            const checkedIds = html.find('input[name="selectedSkill"]:checked').map((_, el) => $(el).val()).get();
-            if (!checkedIds.length) {
-              ui.notifications?.info('No new skills selected.');
-              return;
-            }
-            const toCreate = [];
-            for (const id of checkedIds) {
-              const skillDef = skills.find(s => s._id === id);
-              if (skillDef) {
-                toCreate.push({
-                  name: skillDef.name,
-                  type: 'skill',
-                  img: skillDef.img,
-                  system: {
-                    rank: skillDef.system.rank ?? 0,
-                    stat: skillDef.system.stat,
-                    checkType: skillDef.system.checkType,
-                    category: skillDef.system.category || 'Utility',
-                    notes: skillDef.system.notes,
-                    upgrades: '',
-                    checked: false
-                  }
-                });
-              }
-            }
-            if (toCreate.length) {
-              await this.actor.createEmbeddedDocuments('Item', toCreate);
-              if (this.isToken && this.token?.baseActor) {
-                await this.token.baseActor.createEmbeddedDocuments('Item', toCreate);
-              }
-              ui.notifications?.info(`Added ${toCreate.length} skill(s) to ${this.actor.name}.`);
-            }
-          }
-        },
-        cancel: {
-          icon: '<i class="fa-solid fa-times"></i>',
-          label: 'Cancel'
-        }
-      },
-      default: 'add',
-      render: (html) => {
-        // Search filter listener
-        html.find('.dcc-picker-search').on('input', function() {
-          const query = $(this).val().toLowerCase().trim();
-          html.find('.dcc-picker-item').each(function() {
-            const name = $(this).data('name') || '';
-            const stat = $(this).data('stat') || '';
-            const notes = $(this).data('notes') || '';
-            if (!query || name.includes(query) || stat.includes(query) || notes.includes(query)) {
-              $(this).show();
-            } else {
-              $(this).hide();
-            }
-          });
-          // Hide empty groups
-          html.find('.dcc-picker-group').each(function() {
-            const visibleItems = $(this).find('.dcc-picker-item:visible').length;
-            if (visibleItems === 0) $(this).hide();
-            else $(this).show();
-          });
-        });
-      }
-    }, {
-      width: 720,
-      height: 720,
-      classes: ['dcc-sheet-window', 'dcc-skill-picker-window']
-    });
-
-    dialog.render(true);
+    new DCCSkillManager({ actor: this.actor }).render(true);
   }
 
   /** @override */
@@ -495,23 +347,10 @@ export class DCCCrawlerSheet extends ActorSheet {
     // If dropping a Race, Class, or Deity, automatically update actor detail string too
     if (item.type === 'race') {
       await this.actor.update({ 'system.details.race': item.name });
-      if (this.isToken && this.token?.baseActor) {
-        await this.token.baseActor.update({ 'system.details.race': item.name });
-      }
     } else if (item.type === 'class') {
       await this.actor.update({ 'system.details.class': item.name });
-      if (this.isToken && this.token?.baseActor) {
-        await this.token.baseActor.update({ 'system.details.class': item.name });
-      }
     } else if (item.type === 'deity') {
       await this.actor.update({ 'system.details.deity': item.name });
-      if (this.isToken && this.token?.baseActor) {
-        await this.token.baseActor.update({ 'system.details.deity': item.name });
-      }
-    }
-
-    if (this.isToken && this.token?.baseActor) {
-      await this.token.baseActor.createEmbeddedDocuments('Item', [item.toObject()]);
     }
 
     return super._onDropItem(event, data);
@@ -522,10 +361,6 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Ensure actor name is strictly a single string and never an array
     if (Array.isArray(formData.name)) {
       formData.name = formData.name[0];
-    }
-    // If this sheet was opened from an unlinked token on a scene, sync changes directly to the world base actor
-    if (this.isToken && this.token?.baseActor) {
-      await this.token.baseActor.update(formData);
     }
     return super._updateObject(event, formData);
   }

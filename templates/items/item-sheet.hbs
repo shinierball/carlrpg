@@ -206,7 +206,14 @@
       {{!-- SKILL / SPELL MODIFIERS --}}
       <div class="dcc-stat-block" style="margin-bottom: 10px;">
         <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
-          <span>SKILL & SPELL MODIFIERS / GRANTED SKILLS</span>
+          <span>
+            SKILL & SPELL MODIFIERS / GRANTED SKILLS
+            {{#if system.equipped}}
+              <span style="color: #2ecc71; font-weight: bold; font-size: 10px; margin-left: 6px;">[EQUIPPED: ACTIVE]</span>
+            {{else}}
+              <span style="color: #f39c12; font-weight: bold; font-size: 10px; margin-left: 6px;" title="Equip this gear on the actor to activate skill bonuses">[UNEQUIPPED: EQUIP TO ACTIVATE]</span>
+            {{/if}}
+          </span>
           <a class="add-skill-mod" data-tooltip="Select and add skills from DCC Compendium" style="color: #fff; font-size: 10px; cursor: pointer;">
             <i class="fa-solid fa-book-bookmark"></i> Add Skill from Compendium
           </a>

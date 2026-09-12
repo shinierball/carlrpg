@@ -16,12 +16,15 @@
     <table class="dcc-attacks-table dcc-skills-table">
       <thead>
         <tr>
-          <th style="width: 25%;">Skill Name</th>
-          <th style="width: 8%;" title="Rank 0 = Untrained (Disadvantage)">Rank</th>
-          <th style="width: 15%;">Stat & Mod</th>
-          <th style="width: 15%;">Check Type</th>
-          <th style="width: 25%;">Notes & Upgrades</th>
-          <th style="width: 12%;">Roll / Actions</th>
+          <th style="width: 22%;">Skill Name</th>
+          <th style="width: 7%; text-align: center;" title="Base Trained Rank">Base</th>
+          <th style="width: 12%; text-align: center;" title="Bonuses from equipped gear and boons">Item / Boon</th>
+          <th style="width: 9%; text-align: center;" title="Calculated rank after boons and items">Mod Rank</th>
+          <th style="width: 12%;">Stat & Mod</th>
+          <th style="width: 9%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
+          <th style="width: 11%;">Check Type</th>
+          <th style="width: 10%;">Notes & Upgrades</th>
+          <th style="width: 8%; text-align: center;">Roll</th>
         </tr>
       </thead>
       <tbody>
@@ -31,28 +34,41 @@
               <div style="display: flex; align-items: center; gap: 6px;">
                 <img src="{{skill.img}}" style="width: 20px; height: 20px; border: 1px solid #333; border-radius: 3px; object-fit: contain; background: #222;" />
                 {{#if skill.isGranted}}
-                  <span style="font-weight: bold; flex: 1;" title="Granted by: {{skill.itemSources}}">{{skill.name}}</span>
-                  <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px;" title="Granted by: {{skill.itemSources}}">GEAR</span>
+                  <span style="font-weight: bold; flex: 1;" title="Granted by equipped gear: {{skill.itemSources}}">{{skill.name}}</span>
+                  <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px;" title="Granted by equipped gear: {{skill.itemSources}}">GEAR</span>
                 {{else}}
                   <input class="dcc-field-input item-inline-edit" type="text" data-field="name" value="{{skill.name}}" style="font-weight: bold; flex: 1;" />
                 {{/if}}
               </div>
             </td>
-            <td>
+            <td style="text-align: center;">
               {{#if skill.isGranted}}
-                <span class="dcc-stat-input" style="display: inline-block; width: 38px; text-align: center; background: #fef0db; font-weight: bold; color: #c0392b;" title="Rank {{skill.effectiveRank}} (Granted by: {{skill.itemSources}})">
-                  {{skill.effectiveRank}}
-                </span>
+                <span style="font-size: 11px; color: #888;" title="Base Rank 0 (Granted by gear)">0</span>
               {{else}}
-                {{#if skill.itemBonus}}
-                  <div style="display: flex; align-items: center; gap: 2px;" title="Base Rank: {{skill.system.rank}}, Total Effective Rank: {{skill.effectiveRank}} (+{{skill.itemBonus}} gear)">
-                    <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.rank" value="{{skill.system.rank}}" style="width: 28px;" />
-                    <span style="font-size: 10px; color: #c0392b; font-weight: bold;" title="Active bonus from: {{skill.itemSources}}">+{{skill.itemBonus}}</span>
-                  </div>
-                {{else}}
-                  <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.rank" value="{{skill.system.rank}}" style="width: 38px;" title="Rank 0 = Untrained (Disadvantage)" />
-                {{/if}}
+                <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.rank" value="{{skill.baseRank}}" style="width: 32px; text-align: center;" title="Base Trained Rank (Rank 0 = Untrained)" />
               {{/if}}
+            </td>
+            <td style="text-align: center;">
+              <div style="display: inline-flex; align-items: center; gap: 3px; justify-content: center; flex-wrap: wrap;">
+                {{#if skill.itemBonus}}
+                  <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 2px; font-weight: bold;" title="Equipped Gear: +{{skill.itemBonus}} ({{skill.itemSources}})">
+                    <i class="fa-solid fa-shield-halved"></i> +{{skill.itemBonus}}
+                  </span>
+                {{/if}}
+                {{#if skill.boonBonus}}
+                  <span class="dcc-badge" style="background: #8e44ad; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 2px; font-weight: bold;" title="Boon / Deity Bonus: +{{skill.boonBonus}}">
+                    <i class="fa-solid fa-sparkles"></i> +{{skill.boonBonus}}
+                  </span>
+                {{/if}}
+                {{#unless (or skill.itemBonus skill.boonBonus)}}
+                  <span style="color: #bbb; font-size: 11px;">—</span>
+                {{/unless}}
+              </div>
+            </td>
+            <td style="text-align: center;">
+              <span class="dcc-stat-input" style="display: inline-block; width: 34px; text-align: center; font-weight: 800; font-size: 12px; background: #fff8e7; color: #c0392b; border: 1.5px solid #d32f2f; border-radius: 3px; line-height: 18px;" title="Modified Rank: {{skill.modifiedRank}} (Base {{skill.baseRank}} + Items {{skill.itemBonus}} + Boons {{skill.boonBonus}})">
+                {{skill.modifiedRank}}
+              </span>
             </td>
             <td>
               <div style="display: flex; align-items: center; gap: 4px;">
@@ -67,8 +83,13 @@
                     <option value="cha" {{#if (eq skill.system.stat "cha")}}selected{{/if}}>CHA</option>
                   </select>
                 {{/if}}
-                <span style="font-size: 11px; font-weight: bold; color: #c0392b;">{{skill.statModStr}}</span>
+                <span style="font-size: 11px; font-weight: bold; color: #c0392b;" title="{{upper skill.system.stat}} Stat Mod: {{skill.statModStr}}">{{skill.statModStr}}</span>
               </div>
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 800; color: #111; display: inline-block; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; border: 1px solid #ccc; text-align: center; min-width: 28px;" title="Total Skill: Modified Rank ({{skill.modifiedRank}}) + Stat Mod ({{skill.statModStr}}) = {{skill.totalSkillStr}}">
+                {{skill.totalSkillStr}}
+              </span>
             </td>
             <td>
               {{#if skill.isGranted}}
@@ -84,19 +105,19 @@
                 <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
               {{/if}}
             </td>
-            <td>
-              <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check (Rank {{skill.effectiveRank}})">
-                <i class="fa-solid fa-dice-d20"></i> Roll
+            <td style="text-align: center; white-space: nowrap;">
+              <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check: 1d20 + Total ({{skill.totalSkillStr}}) | Modified Rank: {{skill.modifiedRank}}" style="font-size: 10px; padding: 2px 6px;">
+                <i class="fa-solid fa-dice-d20"></i>
               </button>
               {{#unless skill.isGranted}}
-                <a class="item-edit" data-tooltip="Edit Skill" style="margin-left: 4px;"><i class="fa-solid fa-edit"></i></a>
-                <a class="item-delete" data-tooltip="Delete Skill" style="margin-left: 4px;"><i class="fa-solid fa-trash"></i></a>
+                <a class="item-edit" data-tooltip="Edit Skill" style="margin-left: 3px; font-size: 11px;"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" data-tooltip="Delete Skill" style="margin-left: 3px; font-size: 11px;"><i class="fa-solid fa-trash"></i></a>
               {{/unless}}
             </td>
           </tr>
         {{else}}
           <tr>
-            <td colspan="6" style="text-align: center; color: #777; padding: 18px;">
+            <td colspan="9" style="text-align: center; color: #777; padding: 18px;">
               No skills added yet. Click <strong style="color: #f1c40f;">Select Skill</strong> above to pick from the official DCC Skill Library, or drag & drop from the Compendium.
             </td>
           </tr>

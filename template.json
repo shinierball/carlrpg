@@ -114,6 +114,9 @@
     ],
     "skill": {
       "rank": 1,
+      "boonBonus": 0,
+      "itemBonus": 0,
+      "modifiedRank": 1,
       "stat": "str",
       "checkType": "Stat Check",
       "category": "Utility",

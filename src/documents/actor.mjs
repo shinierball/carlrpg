@@ -178,6 +178,60 @@ export class DCCActor extends Actor {
         }
       }
     }
+
+    // -------------------------------------------------------------------------
+    // SKILLS: Calculate Item Bonuses, Boon Bonuses, Modified Rank & Total Skill
+    // -------------------------------------------------------------------------
+    const gearSkillBonuses = new Map();
+    for (const item of equippedGear) {
+      const skillMods = Array.isArray(item.system?.skillModifiers) ? item.system.skillModifiers : [];
+      for (const sm of skillMods) {
+        if (!sm || !sm.name) continue;
+        const norm = sm.name.toLowerCase().trim();
+        const bonus = Number(sm.bonus) || 0;
+        if (!gearSkillBonuses.has(norm)) {
+          gearSkillBonuses.set(norm, { bonus: 0, sources: [], originalName: sm.name });
+        }
+        const entry = gearSkillBonuses.get(norm);
+        entry.bonus += bonus;
+        entry.sources.push(`${item.name} (+${bonus})`);
+      }
+    }
+
+    if (this.items) {
+      const skills = this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() ?? this.items).filter(i => i.type === 'skill');
+      for (const item of skills) {
+        const norm = item.name.toLowerCase().trim();
+        const baseRank = Number(item.system.rank) || 0;
+        const gearData = gearSkillBonuses.get(norm);
+        const itemBonus = gearData ? gearData.bonus : 0;
+        const boonBonus = Number(item.system.boonBonus) || 0;
+        const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus);
+
+        const stat = item.system.stat || 'str';
+        const statMod = system.abilities?.[stat]?.mod ?? 0;
+        const totalSkill = modifiedRank + statMod;
+
+        // Store on system
+        item.system.itemBonus = itemBonus;
+        item.system.boonBonus = boonBonus;
+        item.system.modifiedRank = modifiedRank;
+        item.system.totalSkill = totalSkill;
+        item.system.statMod = statMod;
+
+        // Direct accessors
+        item.baseRank = baseRank;
+        item.itemBonus = itemBonus;
+        item.boonBonus = boonBonus;
+        item.modifiedRank = modifiedRank;
+        item.effectiveRank = modifiedRank;
+        item.statMod = statMod;
+        item.statModStr = statMod >= 0 ? `+${statMod}` : `${statMod}`;
+        item.totalSkill = totalSkill;
+        item.totalSkillStr = totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`;
+        item.itemSources = gearData ? gearData.sources.join(', ') : '';
+      }
+    }
   }
 
   /**
@@ -252,19 +306,32 @@ export class DCCActor extends Actor {
   /**
    * Roll Skill Check
    * Implements official DCC rules:
-   * - Untrained (Rank 0): Roll with Disadvantage (2d20kl + Stat Mod).
-   * - Trained (Rank > 0): Roll Standard (1d20 + Rank + Stat Mod).
+   * - Uses Modified Rank (calculated rank after boons and items).
+   * - Untrained (Modified Rank <= 0): Roll with Disadvantage (2d20kl + Stat Mod).
+   * - Trained (Modified Rank > 0): Roll Standard (1d20 + Total Skill = 1d20 + Modified Rank + Stat Mod).
    * - Passive Skills: Informational message (no roll required).
    * - Call a Play: Roll 2d6.
    * - Intervene: Roll 1d6.
    * @param {Item} skillItem
    */
   async rollSkill(skillItem) {
-    const sys = skillItem.system;
+    const sys = skillItem.system || {};
     const statKey = sys.stat || 'str';
     const statName = statKey.toUpperCase();
     const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
-    const rank = Number(skillItem.effectiveRank ?? sys.rank) || 0;
+
+    // Use calculated modified rank after boons and items
+    const modifiedRank = Number(
+      skillItem.modifiedRank ??
+      sys.modifiedRank ??
+      skillItem.effectiveRank ??
+      sys.rank
+    ) || 0;
+
+    const baseRank = Number(sys.rank) || 0;
+    const itemBonus = Number(skillItem.itemBonus ?? sys.itemBonus) || 0;
+    const boonBonus = Number(skillItem.boonBonus ?? sys.boonBonus) || 0;
+    const totalSkill = modifiedRank + statMod;
     const checkType = (sys.checkType || '').toLowerCase();
 
     // Passive skill handling
@@ -274,6 +341,7 @@ export class DCCActor extends Actor {
         content: `<div class="dcc-chat-card">
           <h4><strong>${this.name}</strong>: ${skillItem.name}</h4>
           <p><em>Passive Skill (No roll required)</em></p>
+          <p><strong>Modified Rank:</strong> ${modifiedRank} (Base ${baseRank}${itemBonus ? `, Items +${itemBonus}` : ''}${boonBonus ? `, Boons +${boonBonus}` : ''})</p>
           <p>${sys.notes || 'Static bonus active.'}</p>
         </div>`
       });
@@ -297,25 +365,32 @@ export class DCCActor extends Actor {
       });
     }
 
-    // Untrained Check (Rank 0): Disadvantage (2d20kl + mod)
-    if (rank <= 0) {
+    // Untrained Check (Modified Rank <= 0): Disadvantage (2d20kl + mod)
+    if (modifiedRank <= 0) {
       const formula = `2d20kl + ${statMod}`;
       const roll = await new Roll(formula, { mod: statMod }).evaluate();
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `<strong>${this.name}</strong>: ${skillItem.name} (<strong>Untrained Check with Disadvantage</strong>: 2d20kl + ${statName} Mod ${statMod})`
+        flavor: `<strong>${this.name}</strong>: ${skillItem.name} (<strong>Untrained Check with Disadvantage</strong>: 2d20kl + ${statName} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`
       });
     }
 
-    // Trained Check (Rank > 0): 1d20 + rank + mod
-    const total = rank + statMod;
-    const bonusText = skillItem.itemBonus ? ` [incl. +${skillItem.itemBonus} gear]` : '';
-    const formula = `1d20 + ${total}`;
-    const roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+    // Trained Check (Modified Rank > 0): 1d20 + Total Skill (Modified Rank + Stat Mod)
+    const breakdown = [`Rank ${modifiedRank}`];
+    if (itemBonus > 0 || boonBonus > 0) {
+      const parts = [`Base ${baseRank}`];
+      if (itemBonus > 0) parts.push(`Items +${itemBonus}`);
+      if (boonBonus > 0) parts.push(`Boons +${boonBonus}`);
+      breakdown[0] += ` [${parts.join(', ')}]`;
+    }
+    breakdown.push(`${statName} Mod ${statMod >= 0 ? `+${statMod}` : statMod}`);
+
+    const formula = `1d20 + ${totalSkill}`;
+    const roll = await new Roll(formula, { rank: modifiedRank, mod: statMod }).evaluate();
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + Rank ${rank}${bonusText} + Stat Mod ${statMod})`
+      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`
     });
   }
 }

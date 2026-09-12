@@ -14,10 +14,22 @@
   <div class="dcc-item-body" style="padding: 10px; background: #fff; border: 2px solid #000; margin-top: 10px;">
     {{!-- SKILL TYPE --}}
     {{#if (eq item.type "skill")}}
-      <div class="dcc-field-row" style="margin-bottom: 8px;">
+      <div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
         <div class="dcc-field-group small">
-          <span class="dcc-field-label">Rank</span>
+          <span class="dcc-field-label">Base Rank</span>
           <input class="dcc-field-input" type="number" name="system.rank" value="{{system.rank}}" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Boon Bonus</span>
+          <input class="dcc-field-input" type="number" name="system.boonBonus" value="{{system.boonBonus}}" placeholder="0" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Item Bonus</span>
+          <input class="dcc-field-input" type="number" name="system.itemBonus" value="{{system.itemBonus}}" placeholder="0" readonly title="Calculated from equipped gear" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Modified Rank</span>
+          <input class="dcc-field-input" type="number" value="{{system.modifiedRank}}" readonly title="Base + Boon + Item Bonus" style="font-weight: bold; background: #fff8e7; color: #c0392b;" />
         </div>
         <div class="dcc-field-group small">
           <span class="dcc-field-label">Stat</span>

@@ -138,20 +138,34 @@ export class DCCCrawlerSheet extends ActorSheet {
       const norm = skill.name.toLowerCase().trim();
       ownedSkillNames.add(norm);
 
-      if (gearSkillBonuses.has(norm)) {
-        const data = gearSkillBonuses.get(norm);
-        skill.itemBonus = data.bonus;
-        skill.effectiveRank = (Number(skill.system.rank) || 0) + data.bonus;
-        skill.itemSources = data.sources.join(', ');
-      } else {
-        skill.itemBonus = 0;
-        skill.effectiveRank = Number(skill.system.rank) || 0;
-      }
+      const baseRank = Number(skill.system?.rank) || 0;
+      const gearData = gearSkillBonuses.get(norm);
+      const itemBonus = gearData ? gearData.bonus : 0;
+      const boonBonus = Number(skill.system?.boonBonus) || 0;
+      const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus);
 
       const stat = skill.system?.stat || 'str';
       const mod = context.system.abilities?.[stat]?.mod ?? 0;
+      const totalSkill = modifiedRank + mod;
+
+      skill.baseRank = baseRank;
+      skill.itemBonus = itemBonus;
+      skill.boonBonus = boonBonus;
+      skill.modifiedRank = modifiedRank;
+      skill.effectiveRank = modifiedRank;
       skill.statMod = mod;
       skill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
+      skill.totalSkill = totalSkill;
+      skill.totalSkillStr = totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`;
+      skill.itemSources = gearData ? gearData.sources.join(', ') : '';
+
+      if (skill.system) {
+        skill.system.itemBonus = itemBonus;
+        skill.system.boonBonus = boonBonus;
+        skill.system.modifiedRank = modifiedRank;
+        skill.system.totalSkill = totalSkill;
+        skill.system.statMod = mod;
+      }
     }
 
     // Add granted skills from equipped gear that the actor doesn't own
@@ -160,6 +174,10 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (!ownedSkillNames.has(norm)) {
         const official = (CONFIG.DCC?.skills || []).find(s => s.name.toLowerCase().trim() === norm);
         const grantedId = `granted-${norm.replace(/\s+/g, '-')}`;
+        const stat = official ? official.system.stat : 'str';
+        const mod = context.system.abilities?.[stat]?.mod ?? 0;
+        const totalSkill = data.bonus + mod;
+
         const grantedSkill = {
           id: grantedId,
           _id: grantedId,
@@ -167,12 +185,23 @@ export class DCCCrawlerSheet extends ActorSheet {
           type: 'skill',
           img: official ? official.img : 'icons/magic/defensive/shield-barrier-blue.webp',
           isGranted: true,
+          baseRank: 0,
           itemBonus: data.bonus,
+          boonBonus: 0,
+          modifiedRank: data.bonus,
           effectiveRank: data.bonus,
+          statMod: mod,
+          statModStr: mod >= 0 ? `+${mod}` : `${mod}`,
+          totalSkill: totalSkill,
+          totalSkillStr: totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`,
           itemSources: data.sources.join(', '),
           system: {
-            rank: data.bonus,
-            stat: official ? official.system.stat : 'str',
+            rank: 0,
+            itemBonus: data.bonus,
+            boonBonus: 0,
+            modifiedRank: data.bonus,
+            totalSkill: totalSkill,
+            stat: stat,
             checkType: official ? official.system.checkType : 'Stat Check',
             category: official ? (official.system.category || 'Utility') : 'Combat',
             notes: `Granted by ${data.sources.join(', ')}`,
@@ -180,10 +209,6 @@ export class DCCCrawlerSheet extends ActorSheet {
             checked: false
           }
         };
-        const stat = grantedSkill.system.stat;
-        const mod = context.system.abilities?.[stat]?.mod ?? 0;
-        grantedSkill.statMod = mod;
-        grantedSkill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
 
         this._grantedSkills.set(grantedId, grantedSkill);
         context.skills.push(grantedSkill);

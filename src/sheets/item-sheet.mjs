@@ -136,6 +136,13 @@ export class DCCItemSheet extends ItemSheet {
     // Retrieve available compendium skills for datalist & interactive picking
     context.availableSkills = await this.getCompendiumSkills();
 
+    if (context.item.type === 'skill') {
+      const base = Number(context.system.rank) || 0;
+      const boons = Number(context.system.boonBonus) || 0;
+      const items = Number(context.system.itemBonus) || 0;
+      context.system.modifiedRank = Math.max(0, base + boons + items);
+    }
+
     return context;
   }
 

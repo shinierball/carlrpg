@@ -50,6 +50,19 @@ export class DCCCrawlerSheet extends ActorSheet {
       skill.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
     }
 
+    // Sanitize actor name if it was previously corrupted with concatenated skill names
+    if (this.actor.name && this.actor.name.includes(',')) {
+      const parts = this.actor.name.split(',').map(s => s.trim());
+      const knownSkills = new Set((CONFIG.DCC?.skills || []).map(s => s.name.toLowerCase()));
+      if (parts.length > 1 && parts.slice(1).some(p => knownSkills.has(p.toLowerCase()))) {
+        const cleanName = parts[0];
+        console.log(`DCC RPG | Repairing concatenated actor name: "${this.actor.name}" -> "${cleanName}"`);
+        this.actor.update({ name: cleanName });
+        context.data.name = cleanName;
+        if (context.actor) context.actor.name = cleanName;
+      }
+    }
+
     // Sort skills alphabetically
     context.skills.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -119,6 +132,19 @@ export class DCCCrawlerSheet extends ActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
       if (item) await item.delete();
+    });
+
+    // Inline Item Edit on Actor Sheet (Skills, Gear, Loot)
+    html.find('.item-inline-edit').change(async ev => {
+      ev.preventDefault();
+      const input = $(ev.currentTarget);
+      const itemId = input.closest('[data-item-id]').data('itemId');
+      const field = input.data('field');
+      const item = this.actor.items.get(itemId);
+      if (item && field) {
+        const val = input.attr('type') === 'number' ? Number(input.val()) : input.val();
+        await item.update({ [field]: val });
+      }
     });
   }
 
@@ -288,5 +314,14 @@ export class DCCCrawlerSheet extends ActorSheet {
     }
 
     return super._onDropItem(event, data);
+  }
+
+  /** @override */
+  async _updateObject(event, formData) {
+    // Ensure actor name is strictly a single string and never an array
+    if (Array.isArray(formData.name)) {
+      formData.name = formData.name[0];
+    }
+    return super._updateObject(event, formData);
   }
 }

@@ -30,15 +30,15 @@
             <td>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <img src="{{skill.img}}" style="width: 20px; height: 20px; border: 1px solid #333; border-radius: 3px; object-fit: contain; background: #222;" />
-                <input class="dcc-field-input" type="text" name="name" value="{{skill.name}}" style="font-weight: bold; flex: 1;" />
+                <input class="dcc-field-input item-inline-edit" type="text" data-field="name" value="{{skill.name}}" style="font-weight: bold; flex: 1;" />
               </div>
             </td>
             <td>
-              <input class="dcc-stat-input" type="number" name="system.rank" value="{{skill.system.rank}}" style="width: 38px;" title="Rank 0 = Untrained (Disadvantage)" />
+              <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.rank" value="{{skill.system.rank}}" style="width: 38px;" title="Rank 0 = Untrained (Disadvantage)" />
             </td>
             <td>
               <div style="display: flex; align-items: center; gap: 4px;">
-                <select name="system.stat" style="font-family: 'Oswald', sans-serif; font-size: 11px;">
+                <select class="item-inline-edit" data-field="system.stat" style="font-family: 'Oswald', sans-serif; font-size: 11px;">
                   <option value="str" {{#if (eq skill.system.stat "str")}}selected{{/if}}>STR</option>
                   <option value="int" {{#if (eq skill.system.stat "int")}}selected{{/if}}>INT</option>
                   <option value="con" {{#if (eq skill.system.stat "con")}}selected{{/if}}>CON</option>
@@ -49,10 +49,10 @@
               </div>
             </td>
             <td>
-              <input class="dcc-field-input" type="text" name="system.checkType" value="{{skill.system.checkType}}" placeholder="Stat Check" />
+              <input class="dcc-field-input item-inline-edit" type="text" data-field="system.checkType" value="{{skill.system.checkType}}" placeholder="Stat Check" />
             </td>
             <td>
-              <input class="dcc-field-input" type="text" name="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
+              <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
             </td>
             <td>
               <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check">

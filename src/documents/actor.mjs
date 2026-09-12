@@ -65,6 +65,15 @@ export class DCCActor extends Actor {
         const hpMax = Number(system.attributes.hp.max) || 1;
         system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
       }
+
+      if (system.attributes.speed) {
+        if (system.attributes.speed.move === undefined || system.attributes.speed.move === null || system.attributes.speed.move === '') {
+          system.attributes.speed.move = 20;
+        }
+        if (system.attributes.speed.step === undefined || system.attributes.speed.step === null || system.attributes.speed.step === '') {
+          system.attributes.speed.step = 10;
+        }
+      }
     }
   }
 

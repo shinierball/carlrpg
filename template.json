@@ -18,7 +18,7 @@
         "attributes": {
           "hp": { "value": 40, "max": 40, "temp": 0, "pct": 100 },
           "mana": { "value": 10, "max": 10 },
-          "evade": { "buffs": 0, "total": 10 },
+          "evade": { "items": 0, "buffs": 0, "total": 10 },
           "dr": { "armor": 0, "buffs": 0, "total": 0 },
           "speed": { "move": 20, "step": 10 },
           "aiFavor": 0,

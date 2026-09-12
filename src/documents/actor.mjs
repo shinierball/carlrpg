@@ -138,6 +138,7 @@ export class DCCActor extends Actor {
       const dexMod = system.abilities?.dex?.mod ?? 0;
       const evadeBuffs = Number(system.attributes.evade?.buffs) || 0;
       if (system.attributes.evade) {
+        system.attributes.evade.items = gearEvade;
         system.attributes.evade.gear = gearEvade;
         system.attributes.evade.total = dexMod + evadeBuffs + gearEvade;
       }
@@ -202,14 +203,19 @@ export class DCCActor extends Actor {
    */
   async rollEvade() {
     const dexMod = this.system.abilities?.dex?.mod ?? 0;
+    const items = Number(this.system.attributes?.evade?.items ?? this.system.attributes?.evade?.gear) || 0;
     const buffs = Number(this.system.attributes?.evade?.buffs) || 0;
-    const total = dexMod + buffs;
+    const total = dexMod + items + buffs;
     const formula = `1d20 + ${total}`;
     const roll = await new Roll(formula).evaluate();
 
+    const parts = [`DEX Mod ${dexMod}`];
+    if (items) parts.push(`Items ${items >= 0 ? '+' : ''}${items}`);
+    if (buffs) parts.push(`Buffs ${buffs >= 0 ? '+' : ''}${buffs}`);
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: Evade Roll (1d20 + DEX Mod ${dexMod} + Buffs ${buffs})`
+      flavor: `<strong>${this.name}</strong>: Evade Roll (1d20 + ${parts.join(' + ')})`
     });
   }
 

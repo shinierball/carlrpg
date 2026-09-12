@@ -246,11 +246,11 @@
       {{!-- MANA & DEBUFFS --}}
       <div class="dcc-mana-debuffs">
         <div class="dcc-mana-box">
-          <span class="dcc-field-label">Max Mana / Current</span>
+          <span class="dcc-field-label">Current Mana / Max Mana</span>
           <div class="dcc-mana-values">
-            <input class="dcc-stat-input" name="system.attributes.mana.max" type="number" value="{{system.attributes.mana.max}}" title="Max Mana (Enhanced INT)" readonly />
-            <span class="dcc-stat-slash">/</span>
             <input class="dcc-stat-input" name="system.attributes.mana.value" type="number" value="{{system.attributes.mana.value}}" placeholder="10" title="Current Mana" />
+            <span class="dcc-stat-slash">/</span>
+            <input class="dcc-stat-input" name="system.attributes.mana.max" type="number" value="{{system.attributes.mana.max}}" title="Max Mana (Enhanced INT)" readonly />
           </div>
         </div>
         <div class="dcc-debuffs-box">

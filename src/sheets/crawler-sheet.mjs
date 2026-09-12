@@ -9,7 +9,10 @@ export class DCCCrawlerSheet extends ActorSheet {
       template: 'systems/carl-rpg/templates/actors/crawler-sheet.hbs',
       width: 860,
       height: 900,
-      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'page1' }]
+      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'page1' }],
+      submitOnChange: true,
+      submitOnClose: true,
+      closeOnSubmit: false
     });
   }
 
@@ -99,12 +102,20 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (item) this.actor.rollSkill(item);
     });
 
+    // Immediate form submission on input blur
+    html.find('input, select, textarea').on('blur', () => {
+      if (this.isEditable) this.submit();
+    });
+
     // Item Create
     html.find('.item-create').click(async ev => {
       ev.preventDefault();
       const type = $(ev.currentTarget).data('type') || 'skill';
       const name = `New ${type.capitalize()}`;
       await this.actor.createEmbeddedDocuments('Item', [{ name, type }]);
+      if (this.isToken && this.token?.baseActor) {
+        await this.token.baseActor.createEmbeddedDocuments('Item', [{ name, type }]);
+      }
     });
 
     // Item Edit
@@ -118,7 +129,13 @@ export class DCCCrawlerSheet extends ActorSheet {
     html.find('.item-delete').click(async ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
-      if (item) await item.delete();
+      if (item) {
+        if (this.isToken && this.token?.baseActor) {
+          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
+          if (baseItem) await baseItem.delete();
+        }
+        await item.delete();
+      }
     });
 
     // Inline Item Edit on Actor Sheet (Skills, Gear, Loot)
@@ -131,6 +148,10 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (item && field) {
         const val = input.attr('type') === 'number' ? Number(input.val()) : input.val();
         await item.update({ [field]: val });
+        if (this.isToken && this.token?.baseActor) {
+          const baseItem = this.token.baseActor.items.find(i => i.name === item.name && i.type === item.type);
+          if (baseItem) await baseItem.update({ [field]: val });
+        }
       }
     });
   }
@@ -244,6 +265,9 @@ export class DCCCrawlerSheet extends ActorSheet {
             }
             if (toCreate.length) {
               await this.actor.createEmbeddedDocuments('Item', toCreate);
+              if (this.isToken && this.token?.baseActor) {
+                await this.token.baseActor.createEmbeddedDocuments('Item', toCreate);
+              }
               ui.notifications?.info(`Added ${toCreate.length} skill(s) to ${this.actor.name}.`);
             }
           }
@@ -294,10 +318,23 @@ export class DCCCrawlerSheet extends ActorSheet {
     // If dropping a Race, Class, or Deity, automatically update actor detail string too
     if (item.type === 'race') {
       await this.actor.update({ 'system.details.race': item.name });
+      if (this.isToken && this.token?.baseActor) {
+        await this.token.baseActor.update({ 'system.details.race': item.name });
+      }
     } else if (item.type === 'class') {
       await this.actor.update({ 'system.details.class': item.name });
+      if (this.isToken && this.token?.baseActor) {
+        await this.token.baseActor.update({ 'system.details.class': item.name });
+      }
     } else if (item.type === 'deity') {
       await this.actor.update({ 'system.details.deity': item.name });
+      if (this.isToken && this.token?.baseActor) {
+        await this.token.baseActor.update({ 'system.details.deity': item.name });
+      }
+    }
+
+    if (this.isToken && this.token?.baseActor) {
+      await this.token.baseActor.createEmbeddedDocuments('Item', [item.toObject()]);
     }
 
     return super._onDropItem(event, data);
@@ -308,6 +345,10 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Ensure actor name is strictly a single string and never an array
     if (Array.isArray(formData.name)) {
       formData.name = formData.name[0];
+    }
+    // If this sheet was opened from an unlinked token on a scene, sync changes directly to the world base actor
+    if (this.isToken && this.token?.baseActor) {
+      await this.token.baseActor.update(formData);
     }
     return super._updateObject(event, formData);
   }

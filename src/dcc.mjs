@@ -84,6 +84,14 @@ Hooks.once('init', async function() {
 
 Hooks.once('ready', async function() {
   if (game.user.isGM) {
+    // Ensure existing world crawlers and pets have prototypeToken.actorLink = true
+    for (const actor of game.actors) {
+      if ((actor.type === 'crawler' || actor.type === 'pet') && !actor.prototypeToken?.actorLink) {
+        console.log(`DCC RPG | Ensuring prototypeToken.actorLink = true for world actor "${actor.name}"`);
+        await actor.update({ 'prototypeToken.actorLink': true });
+      }
+    }
+
     const pack = game.packs.get('carl-rpg.skills');
     if (pack) {
       try {

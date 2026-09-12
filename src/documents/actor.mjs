@@ -34,6 +34,29 @@ export function getDCCStatModifier(statValue) {
 
 export class DCCActor extends Actor {
   /** @override */
+  async _preCreate(data, options, user) {
+    await super._preCreate(data, options, user);
+    if (this.type === 'crawler' || this.type === 'pet') {
+      this.updateSource({
+        prototypeToken: {
+          actorLink: true,
+          disposition: 1
+        }
+      });
+    }
+  }
+
+  /** @override */
+  prepareBaseData() {
+    super.prepareBaseData();
+    if ((this.type === 'crawler' || this.type === 'pet') && !this.isToken) {
+      if (this.prototypeToken && !this.prototypeToken.actorLink) {
+        this.prototypeToken.actorLink = true;
+      }
+    }
+  }
+
+  /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();
     const system = this.system;

@@ -69,6 +69,15 @@ export class DCCActor extends Actor {
         system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
       }
 
+      if (system.attributes.mana) {
+        const enhancedInt = Number(system.abilities?.int?.value) || 0;
+        system.attributes.mana.max = enhancedInt;
+        const rawMana = Number(system.attributes.mana.value);
+        const manaVal = Number.isFinite(rawMana) ? rawMana : system.attributes.mana.max;
+        const manaMax = Number(system.attributes.mana.max) || 1;
+        system.attributes.mana.pct = Math.min(100, Math.max(0, Math.round((manaVal / manaMax) * 100)));
+      }
+
       if (system.attributes.speed) {
         if (system.attributes.speed.move === undefined || system.attributes.speed.move === null || system.attributes.speed.move === '') {
           system.attributes.speed.move = 20;

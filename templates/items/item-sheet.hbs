@@ -195,7 +195,9 @@
       <div class="dcc-stat-block" style="margin-bottom: 10px;">
         <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
           <span>SKILL & SPELL MODIFIERS / GRANTED SKILLS</span>
-          <a class="add-skill-mod" style="color: #fff; font-size: 10px; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Skill</a>
+          <a class="add-skill-mod" data-tooltip="Select and add skills from DCC Compendium" style="color: #fff; font-size: 10px; cursor: pointer;">
+            <i class="fa-solid fa-book-bookmark"></i> Add Skill from Compendium
+          </a>
         </div>
         <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
           {{#if system.skillModifiers.length}}
@@ -211,7 +213,10 @@
                 {{#each system.skillModifiers as |mod idx|}}
                   <tr>
                     <td>
-                      <input class="dcc-field-input" type="text" name="system.skillModifiers.{{idx}}.name" value="{{mod.name}}" placeholder="e.g. Catcher" style="font-size: 11px;" />
+                      <div style="display: flex; align-items: center; gap: 4px;">
+                        <input list="dcc-compendium-skills-datalist-{{../item.id}}" class="dcc-field-input" type="text" name="system.skillModifiers.{{idx}}.name" value="{{mod.name}}" placeholder="Select from compendium or type..." style="font-size: 11px; flex: 1;" />
+                        <a class="pick-skill-for-row" data-index="{{idx}}" data-tooltip="Pick from Compendium" style="color: #555; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-book-bookmark"></i></a>
+                      </div>
                     </td>
                     <td>
                       <input class="dcc-stat-input" type="number" name="system.skillModifiers.{{idx}}.bonus" value="{{mod.bonus}}" placeholder="1" style="width: 100%; font-size: 11px;" />
@@ -225,11 +230,17 @@
             </table>
           {{else}}
             <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
-              No skill or spell modifiers. Click "+ Add Skill" above to grant or boost a skill.
+              No skill or spell modifiers. Click "Add Skill from Compendium" above to grant or boost a skill.
             </div>
           {{/if}}
         </div>
       </div>
+
+      <datalist id="dcc-compendium-skills-datalist-{{item.id}}">
+        {{#each availableSkills as |skill|}}
+          <option value="{{skill.name}}">{{skill.system.category}} [{{upper skill.system.stat}}] - {{skill.system.checkType}}</option>
+        {{/each}}
+      </datalist>
 
       <div class="dcc-field-group">
         <span class="dcc-field-label">Notes & Description</span>

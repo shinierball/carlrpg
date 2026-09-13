@@ -1,20 +1,26 @@
 # Dungeon Crawler Carl RPG for Foundry VTT
 
-A community game system implementation for the **Dungeon Crawler Carl Roleplaying Game** on Foundry Virtual Tabletop.
+I'm just vibe coding my way to a placeholder until the real deal comes out.  This is in no way officially associated with the DCC brand, nor is it intended to be a replacement for the official game system once it is released.
+
+Questions or concerns contact me @ shinierball via gmail or maybe discord or whatever the cool kids use these days.  
 
 ---
 
 ## Features
 
-- **6-Page Character Sheet**: Recreates the official DCC RPG character sheet PDF across 6 tabs:
-  - **Page 1 (Core)**: Character details, 10-segment gradient Health Bar (10%–100%), 5 Core Stats (STR, INT, CON, DEX, CHA), EVADE ($d20 + \text{DEX Mod} + \text{Buffs}$), DAMAGE RESISTANCE ($\text{Armor} + \text{Buffs}$), Mana, Debuffs, Portrait, External Buffs, and ATTACKS table.
-  - **Page 2 (Hotlist & Gear)**: 10-slot Hotlist, dedicated Gear Slots (Head, Torso, Arms, Hands, Legs, Feet, 10 Accessories), and roleplay tracking (Popularity, Past Trauma, Loose Ends, Regrets, Notes).
-  - **Page 3 (Skills)**: Full skills table with rank, associated stat, check types, and clickable d20 roll buttons.
-  - **Page 4 (Inventory)**: Inventory management for Gear and Loot items.
+- Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
+
+- **7-Tab Character Sheet**: Recreates the official DCC RPG character sheet with expanded crawler features:
+  - **Page 1 (Core)**: Character details, 10-segment gradient Health Bar (10%–100%), 5 Core Stats (STR, INT, CON, DEX, CHA), EVADE ($d20 + \text{DEX Mod} + \text{Gear} + \text{Buffs}$), DAMAGE RESISTANCE ($\text{Armor} + \text{Gear} + \text{Buffs}$), Mana, Debuffs, Portrait, External Buffs, ATTACKS table with interactive damage application, and the 10-slot combat **Hotlist**.
+  - **Page 2 (Gear & Story)**: Equipped Gear Slots (Head, Torso, Arms, Hands/Holding, Legs, Feet, 10 Accessories, Tattoos, and Patches) with active bonus badges, plus roleplay tracking (Popularity, Past Trauma, Loose Ends, Regrets, Notes).
+  - **Page 3 (Skills)**: Full skills table tracking Base Rank, Gear Bonuses, Boon Bonuses, Modified Rank, and Total Skill. Automatic Untrained Disadvantage (`2d20kl`), Trained (`1d20 + Total`), *Call a Play* (`2d6`), and *Intervene* (`1d6`) rolls, backed by the **DCC Skill Library & Manager**.
+  - **Spells**: Dedicated spellbook with mana tracking, spell ranks, quotes, range, duration, damage, upgrades, and cast roll cards.
+  - **Page 4 (Inventory)**: Gear and Loot management with slot equipping that dynamically calculates ability, DR, Evade, and skill bonuses.
   - **Page 5 (Extras & Space)**: Pet and Mount/Vehicle blocks, Important Things I've Killed, Clubs/Societies, Personal Space, and Deity tracking.
   - **Page 6 (Abilities & Sponsors)**: Racial Abilities, Class Abilities, and 3 Sponsor blocks.
+- **Combat Performance & AI Awards**: Real-time tracking of net damage applied (factoring in target DR and Temp HP), kills, and tactical skills linked to Foundry's Combat Tracker, plus the **Dungeon AI Award Console** for dispensing Loot Boxes (Bronze through Celestial) and AI Favor.
 - **Pure DCC Mechanics**: Automated modifier calculations, Evade checks, DR totals, and dice rolls.
-- **Drag & Drop**: Drop Races, Classes, Deities, Skills, and Gear directly onto character sheets.
+- **Drag & Drop**: Drop Races, Classes, Deities, Skills, Spells, and Gear directly onto character sheets.
 - **Hot Reload Enabled**: Live updating of styles and templates without page reloads for instant developer feedback.
 
 ---
@@ -26,7 +32,7 @@ Link this repository directory directly into your Foundry VTT User Data systems 
 
 **On macOS / Linux:**
 ```bash
-ln -s "/Users/jeremy/Code/CarlRPG" "$HOME/Library/Application Support/FoundryVTT/Data/systems/carl-rpg"
+ln -s "~/Code/CarlRPG" "$HOME/Library/Application Support/FoundryVTT/Data/systems/carl-rpg"
 ```
 *(Or wherever your Foundry User Data folder is located, e.g., `~/FoundryVTT/Data/systems/carl-rpg`)*
 

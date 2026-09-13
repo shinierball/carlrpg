@@ -3,6 +3,7 @@ import { DCCItem } from './documents/item.mjs';
 import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
 import { DCCSkillManager } from './apps/skill-manager.mjs';
+import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 
@@ -54,7 +55,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/actors/parts/page4-inventory.hbs',
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
-    'systems/carl-rpg/templates/apps/skill-manager.hbs'
+    'systems/carl-rpg/templates/apps/skill-manager.hbs',
+    'systems/carl-rpg/templates/apps/combat-metrics.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -70,24 +72,30 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp) {
           app.render(false);
         }
       }
+      if (ui.combat) ui.combat.render(false);
     }
   });
 
   // Global Developer Helper
   window.carl = {
+    combatMetrics: DCCCombatMetrics,
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
     },
+    openCombatMetrics(options = {}) {
+      return new DCCCombatMetricsApp(options).render(true);
+    },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp) {
           app.render(false);
         }
       }
+      if (ui.combat) ui.combat.render(false);
       ui.notifications?.info('DCC RPG | Re-rendered all open sheets.');
     }
   };
@@ -114,6 +122,106 @@ Hooks.on('renderItemDirectory', (app, html) => {
   } else {
     html.find('.directory-footer').before(btn);
   }
+});
+
+// Hook into Combat Tracker sidebar to inject AI Awards button
+Hooks.on('renderCombatTracker', (app, html, data) => {
+  const $html = (html instanceof jQuery) ? html : $(html);
+  if ($html.find('.dcc-combat-awards-btn').length) return;
+
+  const btn = $(`
+    <button type="button" class="dcc-combat-awards-btn" style="width: calc(100% - 8px); margin: 4px 4px 6px 4px; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 6px 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 1;">
+      <i class="fa-solid fa-trophy" style="color: #f1c40f; font-size: 14px;"></i> AI Combat Awards & Performance
+    </button>
+  `);
+
+  btn.click(ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    new DCCCombatMetricsApp().render(true);
+  });
+
+  const header = $html.find('.combat-tracker-header');
+  if (header.length) {
+    header.after(btn);
+  } else {
+    const list = $html.find('#combat-tracker, .directory-list');
+    if (list.length) {
+      list.before(btn);
+    } else {
+      $html.prepend(btn);
+    }
+  }
+
+  // Also inject compact trophy icon into encounter navigation if active encounters exist
+  const encountersNav = $html.find('nav.encounters');
+  if (encountersNav.length && !$html.find('.dcc-combat-awards-header-btn').length) {
+    const iconBtn = $(`
+      <a class="combat-button dcc-combat-awards-header-btn" data-tooltip="DCC AI Combat Performance & Awards" title="DCC AI Combat Performance & Awards" style="color: #e74c3c; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+        <i class="fa-solid fa-trophy" style="font-size: 14px; color: #e74c3c;"></i>
+      </a>
+    `);
+    iconBtn.click(ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      new DCCCombatMetricsApp().render(true);
+    });
+    encountersNav.append(iconBtn);
+  }
+});
+
+// Hook into Chat Messages to handle "Apply Damage to Target(s)" button clicks
+Hooks.on('renderChatMessage', (message, html, data) => {
+  html.find('.dcc-apply-damage-btn').click(async ev => {
+    ev.preventDefault();
+    const btn = $(ev.currentTarget);
+    const card = btn.closest('.dcc-damage-card');
+    const attackerId = card.data('attacker-id');
+    const itemName = card.data('item-name') || 'Attack';
+    const attackType = card.data('attack-type') || 'attack';
+    const rawDamage = Number(card.data('damage-value')) || 0;
+    const multiplier = Number(btn.data('multiplier')) || 1;
+    const ignoreDR = Boolean(btn.data('ignore-dr'));
+
+    const attacker = game.actors?.get(attackerId) || null;
+
+    let targetTokens = Array.from(game.user?.targets || []);
+    if (!targetTokens.length && canvas?.tokens) {
+      targetTokens = canvas.tokens.controlled.filter(t => t.actor && t.actor.id !== attackerId);
+    }
+
+    if (!targetTokens.length) {
+      ui.notifications?.warn('DCC RPG | No targets selected! Please target or select at least one token on the canvas.');
+      return;
+    }
+
+    const results = [];
+    for (const token of targetTokens) {
+      const targetActor = token.actor;
+      if (!targetActor) continue;
+
+      const res = await DCCCombatMetrics.applyDamageToTarget({
+        targetActor,
+        rawDamage,
+        attackerActor: attacker,
+        attackName: itemName,
+        attackType,
+        ignoreDR,
+        multiplier
+      });
+      results.push(res);
+    }
+
+    const summary = results.map(r => `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.newHp} HP left)`).join(', ');
+    ui.notifications?.info(`DCC RPG | Damage applied: ${summary}`);
+
+    card.find('.dcc-damage-applied-feedback').remove();
+    card.append(`
+      <div class="dcc-damage-applied-feedback" style="margin-top: 6px; font-size: 11px; background: #e8f8f5; border: 1px solid #27ae60; color: #1e8449; padding: 4px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+        <i class="fa-solid fa-check"></i> Applied to ${results.length} target(s). Logged to combat!
+      </div>
+    `);
+  });
 });
 
 /**
@@ -195,6 +303,11 @@ Hooks.once('ready', async function() {
         console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
       }
     }
+  }
+
+  // Ensure Combat Tracker renders with DCC AI Awards button on load
+  if (ui.combat) {
+    ui.combat.render(false);
   }
 });
 

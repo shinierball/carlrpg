@@ -22,6 +22,24 @@ export class MockActor {
       this.prototypeToken = Object.assign(this.prototypeToken || {}, data.prototypeToken);
     }
   }
+  async update(data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('system.')) {
+        const path = k.replace('system.', '').split('.');
+        let curr = this.system;
+        for (let i = 0; i < path.length - 1; i++) {
+          if (!curr[path[i]]) curr[path[i]] = {};
+          curr = curr[path[i]];
+        }
+        curr[path[path.length - 1]] = v;
+      } else if (k === 'system') {
+        Object.assign(this.system, v);
+      } else {
+        this[k] = v;
+      }
+    }
+    return this;
+  }
   async createEmbeddedDocuments(embeddedType, dataArray) {
     if (embeddedType === 'Item') {
       const created = [];

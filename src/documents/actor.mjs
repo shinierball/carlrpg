@@ -1,6 +1,4 @@
-/**
- * Dungeon Crawler Carl RPG Actor Document
- */
+import { DCCCombatMetrics } from '../apps/combat-metrics.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -300,9 +298,44 @@ export class DCCActor extends Actor {
       const dice = sys.damageDice || '1d6';
       const formula = `${dice} + ${statMod}`;
       const roll = await new Roll(formula).evaluate();
+
+      const cardContent = `
+        <div class="dcc-chat-card dcc-damage-card" data-attacker-id="${this.id}" data-item-id="${attackItem.id}" data-item-name="${attackItem.name}" data-damage-value="${roll.total}" data-attack-type="${attackItem.type || 'attack'}">
+          <div class="dcc-damage-card-header">
+            <strong>${this.name}</strong>: ${attackItem.name} Damage
+          </div>
+          <div class="dcc-damage-card-result">
+            <span class="dcc-damage-value">${roll.total}</span>
+            <span class="dcc-damage-formula">(${formula})</span>
+          </div>
+          ${sys.effects ? `<div class="dcc-damage-effects"><em>${sys.effects}</em></div>` : ''}
+          <div class="dcc-damage-actions">
+            <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" title="Apply damage to targeted token(s), deducting their DR">
+              <i class="fa-solid fa-crosshairs"></i> Apply to Target(s)
+            </button>
+            <div class="dcc-damage-sub-actions">
+              <button type="button" class="dcc-apply-damage-btn" data-multiplier="0.5" title="Apply half damage">Half</button>
+              <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-ignore-dr="true" title="Apply ignoring DR">Ignore DR</button>
+              <button type="button" class="dcc-apply-damage-btn" data-multiplier="2" title="Apply double (critical) damage">Crit (2x)</button>
+            </div>
+          </div>
+        </div>
+      `;
+
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${dice} + ${sys.damageStat.toUpperCase()} Mod ${statMod}) ${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`
+        flavor: `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${dice} + ${sys.damageStat.toUpperCase()} Mod ${statMod}) ${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`,
+        content: cardContent,
+        flags: {
+          'carl-rpg': {
+            isDamageRoll: true,
+            attackerId: this.id,
+            itemId: attackItem.id,
+            itemName: attackItem.name,
+            attackType: attackItem.type || 'attack',
+            rawDamage: roll.total
+          }
+        }
       });
     }
   }
@@ -319,6 +352,11 @@ export class DCCActor extends Actor {
    * @param {Item} skillItem
    */
   async rollSkill(skillItem) {
+    // Record skill usage in active combat if applicable
+    if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.recordSkillUsage === 'function') {
+      DCCCombatMetrics.recordSkillUsage({ actor: this, skillName: skillItem.name }).catch(() => {});
+    }
+
     const sys = skillItem.system || {};
     const statKey = sys.stat || 'str';
     const statName = statKey.toUpperCase();

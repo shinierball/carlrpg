@@ -45,6 +45,17 @@
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
       }
+    },
+    {
+      "name": "spells",
+      "label": "DCC Spells",
+      "path": "packs/spells",
+      "type": "Item",
+      "system": "carl-rpg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
   "flags": {

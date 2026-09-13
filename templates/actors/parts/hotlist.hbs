@@ -1,0 +1,87 @@
+{{!-- HOTLIST COMPONENT (10 BOXES) --}}
+<div class="dcc-stat-block dcc-hotlist-section" style="margin-top: 14px;">
+  <div class="dcc-banner-header red">
+    <span><i class="fa-solid fa-bolt"></i> HOTLIST</span>
+    <span style="font-size: 11px; font-weight: normal; opacity: 0.9; text-transform: none;">
+      Quick Access • Drag &amp; drop spells or inventory items, or choose from dropdown
+    </span>
+  </div>
+  <div class="dcc-hotlist-grid">
+    {{#each hotlistSlots as |slot|}}
+      <div class="dcc-hotlist-box {{#if slot.isEmpty}}is-empty{{else}}is-populated{{/if}}" data-slot="{{slot.key}}" {{#if slot.itemId}}data-item-id="{{slot.itemId}}"{{/if}}>
+        <div class="dcc-hotlist-header">
+          <span class="dcc-hotlist-num">{{slot.index}}</span>
+          {{#if slot.badge}}
+            <span class="dcc-badge {{#if slot.isSpell}}dcc-badge-spell{{else if slot.isAttack}}dcc-badge-attack{{else if slot.isGear}}dcc-badge-gear{{else}}dcc-badge-item{{/if}}">
+              {{slot.badge}}
+            </span>
+          {{/if}}
+          {{#unless slot.isEmpty}}
+            <a class="hotlist-clear" data-slot="{{slot.key}}" data-tooltip="Clear Slot"><i class="fa-solid fa-xmark"></i></a>
+          {{/unless}}
+        </div>
+
+        {{#if slot.isEmpty}}
+          <div class="dcc-hotlist-empty">
+            <i class="fa-solid fa-plus"></i>
+            <span>Empty</span>
+          </div>
+        {{else}}
+          <div class="dcc-hotlist-content">
+            <div class="dcc-hotlist-item-info">
+              {{#if slot.img}}
+                <img class="dcc-hotlist-img" src="{{slot.img}}" alt="{{slot.name}}" />
+              {{/if}}
+              <div class="dcc-hotlist-text">
+                <span class="dcc-hotlist-name" title="{{slot.name}}">{{slot.name}}</span>
+                {{#if slot.detail}}
+                  <span class="dcc-hotlist-detail">{{slot.detail}}</span>
+                {{/if}}
+              </div>
+            </div>
+
+            {{#if slot.itemId}}
+              <div class="dcc-hotlist-action-wrapper">
+                {{#if slot.isAttack}}
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-attack" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Attack: {{slot.name}}">
+                    <i class="fa-solid fa-dice-d20"></i> Attack
+                  </button>
+                {{else if slot.isGear}}
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-gear toggle-hotlist-equip {{#if slot.isEquipped}}is-equipped{{/if}}" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="{{#if slot.isEquipped}}Unequip {{slot.name}}{{else}}Equip to {{upper slot.gearSlot}}{{/if}}">
+                    <i class="fa-solid {{#if slot.isEquipped}}fa-shield-halved{{else}}fa-shield{{/if}}"></i> {{#if slot.isEquipped}}Unequip{{else}}Equip{{/if}}
+                  </button>
+                {{else if slot.isSpell}}
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-spell roll-hotlist-spell" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Cast Spell: {{slot.name}}">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Cast
+                  </button>
+                {{else}}
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-use roll-hotlist-use" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Use Item: {{slot.name}}">
+                    <i class="fa-solid fa-flask"></i> Use
+                  </button>
+                {{/if}}
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
+
+        <div class="dcc-hotlist-select-wrapper">
+          <select class="hotlist-select" data-slot="{{slot.key}}">
+            <option value="">-- {{#if slot.isEmpty}}+ Assign Spell / Item{{else}}Change: {{slot.name}}{{/if}} --</option>
+            {{#each slot.groups as |group|}}
+              {{#if group.items.length}}
+                <optgroup label="{{group.label}}">
+                  {{#each group.items as |opt|}}
+                    <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+                  {{/each}}
+                </optgroup>
+              {{/if}}
+            {{/each}}
+            {{#if slot.isCustom}}
+              <option value="{{slot.value}}" selected>✏️ {{slot.name}}</option>
+            {{/if}}
+          </select>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>

@@ -4,6 +4,7 @@
     <a class="item" data-tab="page1"><i class="fa-solid fa-address-card"></i> 1: Core</a>
     <a class="item" data-tab="page2"><i class="fa-solid fa-vest-patches"></i> 2: Hotlist & Gear</a>
     <a class="item" data-tab="page3"><i class="fa-solid fa-bolt"></i> 3: Skills</a>
+    <a class="item" data-tab="spells"><i class="fa-solid fa-wand-magic-sparkles"></i> Spells</a>
     <a class="item" data-tab="page4"><i class="fa-solid fa-backpack"></i> 4: Inventory</a>
     <a class="item" data-tab="page5"><i class="fa-solid fa-paw"></i> 5: Extras & Space</a>
     <a class="item" data-tab="page6"><i class="fa-solid fa-handshake"></i> 6: Abilities & Sponsors</a>
@@ -24,6 +25,11 @@
     {{!-- Page 3: Skills --}}
     <div class="tab page3" data-group="primary" data-tab="page3">
       {{> "systems/carl-rpg/templates/actors/parts/page3-skills.hbs"}}
+    </div>
+
+    {{!-- Spells --}}
+    <div class="tab spells" data-group="primary" data-tab="spells">
+      {{> "systems/carl-rpg/templates/actors/parts/spells.hbs"}}
     </div>
 
     {{!-- Page 4: Inventory --}}

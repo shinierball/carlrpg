@@ -105,6 +105,7 @@
     "types": [
       "skill",
       "attack",
+      "spell",
       "gear",
       "race",
       "class",
@@ -130,6 +131,27 @@
       "damageDice": "1d6",
       "damageStat": "str",
       "effects": ""
+    },
+    "spell": {
+      "rank": 1,
+      "stat": "int",
+      "manaCost": 0,
+      "range": "30 feet",
+      "duration": "Instantaneous",
+      "cooldown": "None",
+      "spellType": "Attack",
+      "damageType": "",
+      "baseDamage": "",
+      "aiFavor": 0,
+      "favored": "",
+      "limitations": "",
+      "quote": "",
+      "description": "",
+      "upgrades": {
+        "rank5": "",
+        "rank10": "",
+        "rank15": ""
+      }
     },
     "gear": {
       "slot": "torso",

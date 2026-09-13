@@ -90,6 +90,99 @@
       </div>
     {{/if}}
 
+    {{!-- SPELL TYPE --}}
+    {{#if (eq item.type "spell")}}
+      {{#if system.quote}}
+        <div class="dcc-spell-quote-box" style="background: #1a1a2e; color: #f1c40f; font-style: italic; padding: 8px 12px; border-left: 4px solid #e74c3c; border-radius: 4px; margin-bottom: 10px; font-size: 13px; font-family: 'Gelasio', Georgia, serif;">
+          “{{system.quote}}”
+        </div>
+      {{/if}}
+
+      <div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Mana Cost</span>
+          <input class="dcc-field-input" type="number" name="system.manaCost" value="{{system.manaCost}}" style="font-weight: bold; color: #2980b9;" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Range</span>
+          <input class="dcc-field-input" type="text" name="system.range" value="{{system.range}}" placeholder="30 feet" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Duration</span>
+          <input class="dcc-field-input" type="text" name="system.duration" value="{{system.duration}}" placeholder="Instantaneous" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Cooldown</span>
+          <input class="dcc-field-input" type="text" name="system.cooldown" value="{{system.cooldown}}" placeholder="None" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">AI Favor</span>
+          <input class="dcc-field-input" type="number" name="system.aiFavor" value="{{system.aiFavor}}" placeholder="0" style="color: #e67e22;" />
+        </div>
+      </div>
+
+      <div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Spell Type</span>
+          <input class="dcc-field-input" type="text" name="system.spellType" value="{{system.spellType}}" placeholder="Attack, Passive, Heal" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Stat</span>
+          <select name="system.stat" class="dcc-field-input">
+            <option value="int" {{#if (eq system.stat "int")}}selected{{/if}}>INT</option>
+            <option value="cha" {{#if (eq system.stat "cha")}}selected{{/if}}>CHA</option>
+            <option value="con" {{#if (eq system.stat "con")}}selected{{/if}}>CON</option>
+            <option value="str" {{#if (eq system.stat "str")}}selected{{/if}}>STR</option>
+            <option value="dex" {{#if (eq system.stat "dex")}}selected{{/if}}>DEX</option>
+          </select>
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Damage Type</span>
+          <input class="dcc-field-input" type="text" name="system.damageType" value="{{system.damageType}}" placeholder="Fire, Ice, Necrotic..." />
+        </div>
+        <div class="dcc-field-group" style="flex: 2;">
+          <span class="dcc-field-label">Base Damage / Formula</span>
+          <input class="dcc-field-input" type="text" name="system.baseDamage" value="{{system.baseDamage}}" placeholder="1d12 + Int Fire" />
+        </div>
+      </div>
+
+      <div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Favored Class</span>
+          <input class="dcc-field-input" type="text" name="system.favored" value="{{system.favored}}" placeholder="Mage, Cleric, Druid, Bard..." />
+        </div>
+        <div class="dcc-field-group" style="flex: 2;">
+          <span class="dcc-field-label">Limitations</span>
+          <input class="dcc-field-input" type="text" name="system.limitations" value="{{system.limitations}}" placeholder="None" />
+        </div>
+      </div>
+
+      <div class="dcc-field-group" style="margin-bottom: 8px;">
+        <span class="dcc-field-label">Effect Description</span>
+        <textarea class="dcc-field-input" name="system.description" style="height: 90px;">{{system.description}}</textarea>
+      </div>
+
+      <div class="dcc-stat-block" style="background: #fdfbf7; border: 1px solid #d4af37; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
+        <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px;"><i class="fa-solid fa-arrow-up-right-dots"></i> SPELL UPGRADES</div>
+        <div class="dcc-field-group" style="margin-bottom: 6px;">
+          <span class="dcc-field-label" style="color: #27ae60; font-weight: bold;">Rank 5</span>
+          <input class="dcc-field-input" type="text" name="system.upgrades.rank5" value="{{system.upgrades.rank5}}" placeholder="Rank 5 upgrade..." />
+        </div>
+        <div class="dcc-field-group" style="margin-bottom: 6px;">
+          <span class="dcc-field-label" style="color: #2980b9; font-weight: bold;">Rank 10</span>
+          <input class="dcc-field-input" type="text" name="system.upgrades.rank10" value="{{system.upgrades.rank10}}" placeholder="Rank 10 upgrade..." />
+        </div>
+        <div class="dcc-field-group">
+          <span class="dcc-field-label" style="color: #8e44ad; font-weight: bold;">Rank 15</span>
+          <input class="dcc-field-input" type="text" name="system.upgrades.rank15" value="{{system.upgrades.rank15}}" placeholder="Rank 15 upgrade..." />
+        </div>
+      </div>
+
+      <button type="button" class="dcc-btn roll-spell" style="width: 100%; background: #2c3e50; color: #fff; border: 2px solid #000; padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Cast Spell / Post to Chat
+      </button>
+    {{/if}}
+
     {{!-- GEAR TYPE --}}
     {{#if (eq item.type "gear")}}
       <div class="dcc-field-row" style="margin-bottom: 8px; align-items: center;">

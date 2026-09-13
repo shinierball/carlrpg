@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { DCC_SKILLS } from '../src/data/skills.mjs';
+import { DCC_SPELLS } from '../src/data/spells.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,53 +22,125 @@ if (fs.existsSync(foundryModulePath)) {
   }
 }
 
-const packDir = path.resolve(__dirname, '../packs/skills');
-if (fs.existsSync(packDir)) {
-  fs.rmSync(packDir, { recursive: true, force: true });
+// 1. Build Skills Pack
+async function buildSkills() {
+  const packDir = path.resolve(__dirname, '../packs/skills');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building skills compendium with ${DCC_SKILLS.length} items...`);
+  const batch = db.batch();
+
+  for (const skill of DCC_SKILLS) {
+    const doc = {
+      _id: skill._id,
+      name: skill.name,
+      type: "skill",
+      img: skill.img,
+      system: {
+        rank: skill.system.rank ?? 0,
+        stat: skill.system.stat,
+        checkType: skill.system.checkType,
+        category: skill.system.category || "Utility",
+        notes: skill.system.notes,
+        upgrades: "",
+        checked: false
+      },
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion: "1.0.0",
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${skill._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built skills compendium at ${packDir}`);
 }
-fs.mkdirSync(packDir, { recursive: true });
 
-const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
-await db.open();
+// 2. Build Spells Pack
+async function buildSpells() {
+  const packDir = path.resolve(__dirname, '../packs/spells');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
 
-console.log(`Building skills compendium with ${DCC_SKILLS.length} items...`);
-const batch = db.batch();
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
 
-for (const skill of DCC_SKILLS) {
-  const doc = {
-    _id: skill._id,
-    name: skill.name,
-    type: "skill",
-    img: skill.img,
-    system: {
-      rank: skill.system.rank ?? 0,
-      stat: skill.system.stat,
-      checkType: skill.system.checkType,
-      category: skill.system.category || "Utility",
-      notes: skill.system.notes,
-      upgrades: "",
-      checked: false
-    },
-    effects: [],
-    folder: null,
-    sort: 0,
-    ownership: {
-      default: 0
-    },
-    flags: {},
-    _stats: {
-      systemId: "carl-rpg",
-      systemVersion: "1.0.0",
-      coreVersion: "12.331",
-      createdTime: Date.now(),
-      modifiedTime: Date.now(),
-      lastModifiedBy: "dccRPG0000000001"
-    }
-  };
+  console.log(`Building spells compendium with ${DCC_SPELLS.length} items...`);
+  const batch = db.batch();
 
-  batch.put(`!items!${skill._id}`, doc);
+  for (const spell of DCC_SPELLS) {
+    const doc = {
+      _id: spell._id,
+      name: spell.name,
+      type: "spell",
+      img: spell.img,
+      system: {
+        rank: spell.system.rank ?? 1,
+        stat: spell.system.stat || "int",
+        manaCost: spell.system.manaCost ?? 0,
+        range: spell.system.range || "Self",
+        duration: spell.system.duration || "Instantaneous",
+        cooldown: spell.system.cooldown || "None",
+        spellType: spell.system.spellType || "Attack",
+        damageType: spell.system.damageType || "",
+        baseDamage: spell.system.baseDamage || "",
+        aiFavor: spell.system.aiFavor ?? 0,
+        favored: spell.system.favored || "",
+        limitations: spell.system.limitations || "",
+        quote: spell.system.quote || "",
+        description: spell.system.description || "",
+        upgrades: {
+          rank5: spell.system.upgrades?.rank5 || "",
+          rank10: spell.system.upgrades?.rank10 || "",
+          rank15: spell.system.upgrades?.rank15 || ""
+        }
+      },
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion: "1.0.0",
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${spell._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built spells compendium at ${packDir}`);
 }
 
-await batch.write();
-await db.close();
-console.log(`Successfully built compendium at ${packDir}`);
+await buildSkills();
+await buildSpells();

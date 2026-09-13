@@ -4,12 +4,14 @@ import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
 import { DCCSkillManager } from './apps/skill-manager.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
+import { DCC_SPELLS } from './data/spells.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
 
   CONFIG.DCC = {
-    skills: DCC_SKILLS
+    skills: DCC_SKILLS,
+    spells: DCC_SPELLS
   };
 
   // Register document classes
@@ -46,7 +48,9 @@ Hooks.once('init', async function() {
   await loadTemplates([
     'systems/carl-rpg/templates/actors/parts/page1-core.hbs',
     'systems/carl-rpg/templates/actors/parts/page2-hotlist.hbs',
+    'systems/carl-rpg/templates/actors/parts/hotlist.hbs',
     'systems/carl-rpg/templates/actors/parts/page3-skills.hbs',
+    'systems/carl-rpg/templates/actors/parts/spells.hbs',
     'systems/carl-rpg/templates/actors/parts/page4-inventory.hbs',
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
@@ -169,6 +173,26 @@ Hooks.once('ready', async function() {
         }
       } catch (err) {
         console.warn('DCC RPG | Could not inspect/populate skills compendium:', err);
+      }
+    }
+
+    const spellsPack = game.packs.get('carl-rpg.spells');
+    if (spellsPack) {
+      try {
+        const index = await spellsPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty spells compendium...');
+          const docs = DCC_SPELLS.map(s => ({
+            name: s.name,
+            type: 'spell',
+            img: s.img,
+            system: s.system
+          }));
+          await Item.createDocuments(docs, { pack: 'carl-rpg.spells' });
+          console.log(`DCC RPG | Successfully imported ${docs.length} spells into carl-rpg.spells.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
       }
     }
   }

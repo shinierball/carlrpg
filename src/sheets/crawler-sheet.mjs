@@ -77,6 +77,7 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Categorize embedded items
     context.attacks = [];
     context.skills = [];
+    context.spells = [];
     context.gear = [];
     context.races = [];
     context.classes = [];
@@ -100,6 +101,7 @@ export class DCCCrawlerSheet extends ActorSheet {
     for (const item of this.actor.items) {
       if (item.type === 'attack') context.attacks.push(item);
       else if (item.type === 'skill') context.skills.push(item);
+      else if (item.type === 'spell') context.spells.push(item);
       else if (item.type === 'gear') {
         item.bonusesSummary = formatGearBonuses(item);
         context.gear.push(item);
@@ -228,6 +230,196 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Sort skills alphabetically
     context.skills.sort((a, b) => a.name.localeCompare(b.name));
 
+    // Prepare spells (stat modifiers, sorting)
+    for (const spell of context.spells) {
+      const stat = spell.system?.stat || 'int';
+      const mod = context.system.abilities?.[stat]?.mod ?? 0;
+      spell.statMod = mod;
+      spell.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
+    }
+    context.spells.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Prepare Hotlist Slots (1-10)
+    const hotlistData = context.system.hotlist || {};
+    context.hotlistSlots = [];
+
+    for (let i = 1; i <= 10; i++) {
+      const slotKey = `slot${i}`;
+      let rawVal = hotlistData[slotKey] || '';
+
+      // Safely sanitize array or comma-separated concatenation
+      if (Array.isArray(rawVal)) {
+        rawVal = rawVal[0] || '';
+      }
+      let valStr = String(rawVal).trim();
+      if (valStr.includes(',')) {
+        const parts = valStr.split(',').map(s => s.trim()).filter(Boolean);
+        const match = parts.find(p => this.actor.items.get?.(p) ||
+          (Array.isArray(this.actor.items)
+            ? this.actor.items.find(it => it.id === p || it.name.toLowerCase() === p.toLowerCase())
+            : this.actor.items.find?.(it => it.id === p || it.name.toLowerCase() === p.toLowerCase())));
+        valStr = match || parts[0] || '';
+      }
+
+      let resolvedItem = null;
+      if (valStr) {
+        // 1. Look up by ID on actor items
+        resolvedItem = this.actor.items.get?.(valStr);
+        // 2. Look up by ID or name in actor items array/collection
+        if (!resolvedItem) {
+          const norm = valStr.toLowerCase().trim();
+          resolvedItem = Array.isArray(this.actor.items)
+            ? this.actor.items.find(it => it.id === valStr || it._id === valStr || it.name.toLowerCase().trim() === norm)
+            : this.actor.items.find?.(it => it.id === valStr || it._id === valStr || it.name.toLowerCase().trim() === norm);
+        }
+        // 3. Look up official spells if ID is a compendium spell ID or name
+        if (!resolvedItem && CONFIG.DCC?.spells) {
+          const compSpell = CONFIG.DCC.spells.find(s => s._id === valStr || s.name.toLowerCase().trim() === valStr.toLowerCase().trim());
+          if (compSpell) {
+            const owned = context.spells.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim());
+            resolvedItem = owned || {
+              id: compSpell._id,
+              name: compSpell.name,
+              type: 'spell',
+              img: compSpell.img,
+              system: compSpell.system,
+              isCompendium: true
+            };
+          }
+        }
+        // 4. Look up in world items
+        if (!resolvedItem && globalThis.game?.items) {
+          const worldItem = game.items.find(it => it.id === valStr || it.name.toLowerCase().trim() === valStr.toLowerCase().trim());
+          if (worldItem) resolvedItem = worldItem;
+        }
+      }
+
+      let slotType = '';
+      let badge = '';
+      let detail = '';
+      let gearSlot = '';
+      let isEquipped = false;
+      let isSpell = false;
+      let isGear = false;
+      let isLoot = false;
+      let isAttack = false;
+
+      let displayName = valStr;
+      if (resolvedItem) {
+        displayName = resolvedItem.name;
+        slotType = resolvedItem.type;
+        if (slotType === 'spell') {
+          isSpell = true;
+          badge = 'SPELL';
+          detail = `${resolvedItem.system?.manaCost ?? 0} MP`;
+          if (resolvedItem.system?.spellType) {
+            detail += ` • ${resolvedItem.system.spellType}`;
+          }
+        } else if (slotType === 'gear') {
+          isGear = true;
+          gearSlot = resolvedItem.system?.slot || 'gear';
+          isEquipped = Boolean(resolvedItem.system?.equipped);
+          badge = gearSlot.toUpperCase();
+          detail = isEquipped ? 'Equipped' : 'Unequipped';
+        } else if (slotType === 'loot') {
+          isLoot = true;
+          badge = 'ITEM';
+          detail = `x${resolvedItem.system?.quantity ?? 1}`;
+          if (resolvedItem.system?.notes) {
+            detail += ` • ${resolvedItem.system.notes}`;
+          }
+        } else if (slotType === 'attack') {
+          isAttack = true;
+          badge = 'ATTACK';
+          detail = resolvedItem.system?.damageDice || '';
+          if (resolvedItem.system?.damageStat) {
+            detail += ` + ${resolvedItem.system.damageStat.toUpperCase()}`;
+          }
+        } else {
+          badge = slotType.toUpperCase();
+        }
+      } else if (valStr) {
+        // If unresolvable ID string, do not show raw hash/ID if we can avoid it
+        if (/^dccspl\d+/.test(valStr) && CONFIG.DCC?.spells) {
+          const found = CONFIG.DCC.spells.find(s => s._id === valStr);
+          if (found) displayName = found.name;
+        }
+      }
+
+      // Build grouped selectable options for this slot
+      const groups = [];
+
+      // Spells group
+      if (context.spells.length) {
+        groups.push({
+          label: 'Spells',
+          items: context.spells.map(s => ({
+            id: s.id,
+            label: `⚡ ${s.name} (${s.system?.manaCost ?? 0} MP)`,
+            selected: s.id === valStr || s.name.toLowerCase() === valStr.toLowerCase() || s.id === resolvedItem?.id
+          }))
+        });
+      }
+
+      // Attacks group
+      if (context.attacks.length) {
+        groups.push({
+          label: 'Attacks',
+          items: context.attacks.map(a => ({
+            id: a.id,
+            label: `⚔️ ${a.name}${a.system?.damageDice ? ` (${a.system.damageDice})` : ''}`,
+            selected: a.id === valStr || a.name.toLowerCase() === valStr.toLowerCase() || a.id === resolvedItem?.id
+          }))
+        });
+      }
+
+      // Gear group
+      if (context.gear.length) {
+        groups.push({
+          label: 'Gear (Equipment)',
+          items: context.gear.map(g => ({
+            id: g.id,
+            label: `🛡️ ${g.name} [${(g.system?.slot || 'gear').toUpperCase()}]${g.system?.equipped ? ' (Equipped)' : ''}`,
+            selected: g.id === valStr || g.name.toLowerCase() === valStr.toLowerCase() || g.id === resolvedItem?.id
+          }))
+        });
+      }
+
+      // Inventory / Loot group
+      if (context.loot.length) {
+        groups.push({
+          label: 'Inventory Items',
+          items: context.loot.map(l => ({
+            id: l.id,
+            label: `📦 ${l.name} (x${l.system?.quantity ?? 1})`,
+            selected: l.id === valStr || l.name.toLowerCase() === valStr.toLowerCase() || l.id === resolvedItem?.id
+          }))
+        });
+      }
+
+      context.hotlistSlots.push({
+        index: i,
+        key: slotKey,
+        value: valStr,
+        isEmpty: !valStr,
+        item: resolvedItem,
+        itemId: resolvedItem?.id || '',
+        name: displayName,
+        img: resolvedItem ? (resolvedItem.img || 'icons/svg/item-bag.svg') : '',
+        type: slotType,
+        isSpell,
+        isGear,
+        isLoot,
+        isAttack,
+        isEquipped,
+        gearSlot,
+        badge,
+        detail,
+        groups,
+        isCustom: Boolean(valStr && !resolvedItem)
+      });
+    }
+
     return context;
   }
 
@@ -241,6 +433,17 @@ export class DCCCrawlerSheet extends ActorSheet {
     html.find('.open-skill-picker').click(ev => {
       ev.preventDefault();
       this._openSkillPicker();
+    });
+
+    // Open Spells Compendium
+    html.find('.open-spell-picker').click(ev => {
+      ev.preventDefault();
+      const pack = game.packs.get('carl-rpg.spells');
+      if (pack) {
+        pack.render(true);
+      } else {
+        ui.notifications?.info('Spells compendium not found.');
+      }
     });
 
     // Roll Stat Check
@@ -272,6 +475,13 @@ export class DCCCrawlerSheet extends ActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
       if (item) this.actor.rollSkill(item);
+    });
+
+    // Roll / Cast Spell
+    html.find('.roll-spell').click(ev => {
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items.get(itemId);
+      if (item) this.actor.rollSpell(item);
     });
 
     // Toggle Gear Equipped
@@ -329,6 +539,107 @@ export class DCCCrawlerSheet extends ActorSheet {
         await item.update({ [field]: val });
       }
     });
+
+    // Hotlist Slot Selection
+    html.find('.hotlist-select').change(async ev => {
+      ev.preventDefault();
+      const select = $(ev.currentTarget);
+      const slot = select.data('slot');
+      const val = select.val();
+      if (slot) {
+        await this.actor.update({ [`system.hotlist.${slot}`]: val });
+      }
+    });
+
+    // Hotlist Slot Clear
+    html.find('.hotlist-clear').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const slot = $(ev.currentTarget).data('slot');
+      if (slot) {
+        await this.actor.update({ [`system.hotlist.${slot}`]: '' });
+      }
+    });
+
+    // Hotlist Action: Roll Attack
+    html.find('.roll-hotlist-attack').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+      if (item && typeof this.actor.rollAttack === 'function') {
+        await this.actor.rollAttack(item, 'hit');
+      } else if (item && typeof item.roll === 'function') {
+        await item.roll();
+      }
+    });
+
+    // Hotlist Action: Cast Spell
+    html.find('.roll-hotlist-spell').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      let item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+
+      // Fallback: check if it matches a compendium spell
+      if (!item && CONFIG.DCC?.spells) {
+        const compSpell = CONFIG.DCC.spells.find(s => s._id === itemId || s.name === itemId);
+        if (compSpell) {
+          const owned = this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim());
+          item = owned;
+        }
+      }
+
+      if (item && typeof this.actor.rollSpell === 'function') {
+        await this.actor.rollSpell(item);
+      } else if (item && typeof item.roll === 'function') {
+        await item.roll();
+      }
+    });
+
+    // Hotlist Action: Toggle Gear Equip
+    html.find('.toggle-hotlist-equip').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+      if (item) {
+        const newEquipped = !item.system?.equipped;
+        await item.update({ 'system.equipped': newEquipped });
+      }
+    });
+
+    // Hotlist Action: Use Item (Loot / Consumables)
+    html.find('.roll-hotlist-use').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+      if (!item) return;
+
+      if (typeof item.roll === 'function') {
+        await item.roll();
+      } else {
+        const sys = item.system || {};
+        ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+          content: `
+            <div class="dcc-chat-card" style="font-family: var(--font-primary, sans-serif);">
+              <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 4px; margin-bottom: 6px;">
+                <img src="${item.img || 'icons/svg/item-bag.svg'}" style="width: 32px; height: 32px; border: 1px solid #000; border-radius: 4px;" />
+                <div>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: bold; color: #111;">${item.name}</h3>
+                  <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">Used Item</span>
+                </div>
+              </div>
+              ${sys.quantity !== undefined ? `<p style="margin: 2px 0; font-size: 12px;"><strong>Quantity:</strong> ${sys.quantity}</p>` : ''}
+              ${sys.notes ? `<p style="margin: 4px 0; font-size: 12px;">${sys.notes}</p>` : ''}
+              ${sys.description ? `<div style="font-size: 12px; margin-top: 4px;">${sys.description}</div>` : ''}
+            </div>
+          `
+        });
+      }
+    });
   }
 
   /**
@@ -353,6 +664,29 @@ export class DCCCrawlerSheet extends ActorSheet {
       await this.actor.update({ 'system.details.deity': item.name });
     }
 
+    // Check if dropped directly onto a Hotlist box
+    const hotlistBox = event.target?.closest?.('.dcc-hotlist-box');
+    const hotlistSlot = hotlistBox?.dataset?.slot;
+
+    if (hotlistSlot) {
+      // If item is already on this actor, assign directly without creating duplicate
+      const isOwned = item.actor?.id === this.actor.id ||
+        (this.actor.items.get ? this.actor.items.get(item.id) : this.actor.items.some(i => i.id === item.id));
+
+      if (isOwned) {
+        await this.actor.update({ [`system.hotlist.${hotlistSlot}`]: item.id });
+        return item;
+      }
+
+      // If from compendium or world, create item on actor first and assign to slot
+      const createdItems = await super._onDropItem(event, data);
+      const createdItem = Array.isArray(createdItems) ? createdItems[0] : createdItems;
+      if (createdItem?.id) {
+        await this.actor.update({ [`system.hotlist.${hotlistSlot}`]: createdItem.id });
+      }
+      return createdItems;
+    }
+
     return super._onDropItem(event, data);
   }
 
@@ -361,6 +695,13 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Ensure actor name is strictly a single string and never an array
     if (Array.isArray(formData.name)) {
       formData.name = formData.name[0];
+    }
+    // Sanitize any hotlist slot entries in form data
+    for (let i = 1; i <= 10; i++) {
+      const k = `system.hotlist.slot${i}`;
+      if (Array.isArray(formData[k])) {
+        formData[k] = formData[k][0] || '';
+      }
     }
     return super._updateObject(event, formData);
   }

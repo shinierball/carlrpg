@@ -397,4 +397,62 @@ export class DCCActor extends Actor {
       flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`
     });
   }
+
+  /**
+   * Cast/Roll a DCC Spell, posting a formatted chat card to chat
+   * @param {DCCItem} spellItem
+   */
+  async rollSpell(spellItem) {
+    const sys = spellItem.system || {};
+    const manaCost = sys.manaCost ?? 0;
+
+    let content = `
+      <div class="dcc-chat-card dcc-spell-card" style="font-family: var(--font-primary, sans-serif);">
+        <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 4px; margin-bottom: 6px;">
+          <img src="${spellItem.img || 'icons/svg/wand.svg'}" style="width: 36px; height: 36px; border: 1px solid #000; border-radius: 4px;" />
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${spellItem.name}</h3>
+            <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">${sys.spellType || 'Spell'}${sys.damageType ? ` • ${sys.damageType}` : ''}</span>
+          </div>
+        </div>
+    `;
+
+    if (sys.quote) {
+      content += `<div style="font-style: italic; color: #555; font-size: 12px; margin-bottom: 8px; border-left: 3px solid #d4af37; padding-left: 6px;">“${sys.quote}”</div>`;
+    }
+
+    content += `
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 6px; border-radius: 3px;">
+        <div><strong>Mana:</strong> <span style="color: #2980b9; font-weight: bold;">${manaCost ? manaCost : 'None'}</span></div>
+        <div><strong>Range:</strong> ${sys.range || 'Self'}</div>
+        <div><strong>Duration:</strong> ${sys.duration || 'Instantaneous'}</div>
+        ${sys.cooldown && sys.cooldown !== 'None' ? `<div><strong>Cooldown:</strong> ${sys.cooldown}</div>` : ''}
+        ${sys.favored ? `<div><strong>Favored:</strong> ${sys.favored}</div>` : ''}
+        ${sys.aiFavor ? `<div><strong>AI Favor:</strong> +${sys.aiFavor}</div>` : ''}
+      </div>
+    `;
+
+    if (sys.baseDamage) {
+      content += `<div style="margin-bottom: 6px; font-weight: bold; color: #c0392b; font-size: 13px;">Base Damage: ${sys.baseDamage}</div>`;
+    }
+
+    if (sys.description) {
+      content += `<div style="font-size: 12px; line-height: 1.4; margin-bottom: 8px;">${sys.description}</div>`;
+    }
+
+    if (sys.upgrades?.rank5 || sys.upgrades?.rank10 || sys.upgrades?.rank15) {
+      content += `<div style="border-top: 1px dashed #ccc; padding-top: 4px; font-size: 11px; color: #444;">`;
+      if (sys.upgrades.rank5 && sys.upgrades.rank5 !== 'None') content += `<div><strong style="color: #27ae60;">Rank 5:</strong> ${sys.upgrades.rank5}</div>`;
+      if (sys.upgrades.rank10 && sys.upgrades.rank10 !== 'None') content += `<div><strong style="color: #2980b9;">Rank 10:</strong> ${sys.upgrades.rank10}</div>`;
+      if (sys.upgrades.rank15 && sys.upgrades.rank15 !== 'None') content += `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${sys.upgrades.rank15}</div>`;
+      content += `</div>`;
+    }
+
+    content += `</div>`;
+
+    return ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      content
+    });
+  }
 }

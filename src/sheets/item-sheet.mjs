@@ -268,6 +268,12 @@ export class DCCItemSheet extends ItemSheet {
         }
       }
     });
+
+    // Cast / Roll Spell
+    html.find('.roll-spell').click(async ev => {
+      ev.preventDefault();
+      await this.item.roll();
+    });
   }
 }
 

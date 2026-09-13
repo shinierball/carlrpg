@@ -613,28 +613,243 @@
   background: #d32f2f;
 }
 
-/* ---------------- PAGE 2: HOTLIST & GEAR SLOTS ---------------- */
+/* ---------------- HOTLIST ---------------- */
+.dcc-hotlist-section {
+  margin-top: 14px;
+}
+
 .dcc-hotlist-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  gap: 8px;
   padding: 8px;
+  background: #f8f8f8;
 }
 
 .dcc-hotlist-box {
-  border: 2px solid #000;
-  padding: 4px;
+  border: 2px solid #2c3e50;
+  border-radius: 4px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
+  background: #ffffff;
+  min-height: 105px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dcc-hotlist-box:hover {
+  border-color: #c0392b;
+  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.15);
+}
+
+.dcc-hotlist-box.is-empty {
+  border-style: dashed;
   background: #fafafa;
 }
 
-.dcc-hotlist-box input {
-  border: none;
-  border-bottom: 1px solid #000;
-  background: transparent;
+.dcc-hotlist-box.drag-over {
+  border-color: #e74c3c;
+  background: #fdf2f2;
+}
+
+.dcc-hotlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 4px;
+}
+
+.dcc-hotlist-num {
+  font-family: 'Oswald', sans-serif;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 11px;
+  background: #2c3e50;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.2;
+}
+
+.dcc-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dcc-badge-spell {
+  background: #2980b9;
+  color: #ffffff;
+}
+
+.dcc-badge-attack {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.dcc-badge-gear {
+  background: #27ae60;
+  color: #ffffff;
+}
+
+.dcc-badge-item {
+  background: #d35400;
+  color: #ffffff;
+}
+
+.hotlist-clear {
+  color: #999999;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 1px 4px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.hotlist-clear:hover {
+  color: #c0392b;
+}
+
+.dcc-hotlist-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #95a5a6;
+  font-size: 11px;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.dcc-hotlist-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.dcc-hotlist-item-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcc-hotlist-img {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #333;
+  border-radius: 3px;
+  object-fit: contain;
+  background: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.dcc-hotlist-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  line-height: 1.15;
+}
+
+.dcc-hotlist-name {
+  font-weight: bold;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #111;
+}
+
+.dcc-hotlist-detail {
+  font-size: 10px;
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
+.dcc-hotlist-btn {
+  background: #2c3e50;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  margin-top: 2px;
+  width: 100%;
+}
+
+.dcc-hotlist-btn:hover {
+  opacity: 0.9;
+}
+
+.dcc-hotlist-btn-attack {
+  background: #c0392b;
+}
+.dcc-hotlist-btn-attack:hover {
+  background: #962d22;
+}
+
+.dcc-hotlist-btn-spell {
+  background: #2980b9;
+}
+.dcc-hotlist-btn-spell:hover {
+  background: #1f618d;
+}
+
+.dcc-hotlist-btn-gear {
+  background: #34495e;
+}
+.dcc-hotlist-btn-gear.is-equipped {
+  background: #27ae60;
+}
+.dcc-hotlist-btn-gear:hover {
+  background: #2c3e50;
+}
+.dcc-hotlist-btn-gear.is-equipped:hover {
+  background: #1e8449;
+}
+
+.dcc-hotlist-btn-use {
+  background: #d35400;
+}
+.dcc-hotlist-btn-use:hover {
+  background: #a04000;
+}
+
+.dcc-hotlist-select-wrapper {
+  margin-top: 4px;
+  border-top: 1px dotted #ccc;
+  padding-top: 3px;
+}
+
+.dcc-hotlist-select-wrapper select.hotlist-select {
+  width: 100%;
+  font-size: 10px;
+  font-family: 'Oswald', sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  background: #fff;
+  padding: 1px 2px;
+  height: 20px;
+  color: #444;
+}
+
+.dcc-hotlist-select-wrapper select.hotlist-select:focus {
+  border-color: #c0392b;
   outline: none;
 }
 

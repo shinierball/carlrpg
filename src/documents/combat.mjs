@@ -21,25 +21,25 @@ const deepClone = (obj) => {
 
 export const DCC_ACTION_TYPES = {
   // Standard Actions
-  attack: { id: 'attack', label: 'Attack', icon: 'fa-solid fa-burst', isAttack: true, desc: 'Perform Attack Skill Check against target; roll damage on Success.' },
-  move: { id: 'move', label: 'Move', icon: 'fa-solid fa-person-walking', isAttack: false, desc: 'Move up to full Move distance (default 20ft + 10ft Step).' },
-  cast: { id: 'cast', label: 'Cast Spell', icon: 'fa-solid fa-wand-magic-sparkles', isAttack: false, desc: 'Cast a Spell or scroll from Hotlist.' },
-  check: { id: 'check', label: 'Make Check', icon: 'fa-solid fa-dice-d20', isAttack: false, desc: 'Perform a Skill Check or Stat Check.' },
-  item: { id: 'item', label: 'Use Item', icon: 'fa-solid fa-flask', isAttack: false, desc: 'Use a prepared consumable or ready another Hotlist Item.' },
-  retrieve: { id: 'retrieve', label: 'Retrieve', icon: 'fa-solid fa-box-open', isAttack: false, desc: 'Move an item from Inventory into Hotlist or hand.' },
-  help: { id: 'help', label: 'Help', icon: 'fa-solid fa-handshake-angle', isAttack: false, desc: 'Aid another crawler on a non-combat Skill Check.' },
-  play: { id: 'play', label: 'Call a Play', icon: 'fa-solid fa-clipboard-list', isAttack: false, desc: 'Plan an Action, granting an ally a bonus when executed.' },
-  clues: { id: 'clues', label: 'Look for Clues', icon: 'fa-solid fa-magnifying-glass', isAttack: false, desc: 'Gain tactical info on a Boss or environment.' },
+  attack: { id: 'attack', label: 'Attack', category: 'damage', icon: 'fa-solid fa-burst', isAttack: true, desc: 'Perform Attack Skill Check against target; roll damage on Success.' },
+  move: { id: 'move', label: 'Move', category: 'utility', icon: 'fa-solid fa-person-walking', isAttack: false, desc: 'Move up to full Move distance (default 20ft + 10ft Step).' },
+  cast: { id: 'cast', label: 'Cast Spell', category: 'tactical', icon: 'fa-solid fa-wand-magic-sparkles', isAttack: false, desc: 'Cast a Spell or scroll from Hotlist.' },
+  check: { id: 'check', label: 'Make Check', category: 'utility', icon: 'fa-solid fa-dice-d20', isAttack: false, desc: 'Perform a Skill Check or Stat Check.' },
+  item: { id: 'item', label: 'Use Item', category: 'utility', icon: 'fa-solid fa-flask', isAttack: false, desc: 'Use a prepared consumable or ready another Hotlist Item.' },
+  retrieve: { id: 'retrieve', label: 'Retrieve', category: 'utility', icon: 'fa-solid fa-box-open', isAttack: false, desc: 'Move an item from Inventory into Hotlist or hand.' },
+  help: { id: 'help', label: 'Help', category: 'buff', icon: 'fa-solid fa-handshake-angle', isAttack: false, desc: 'Aid another crawler on a non-combat Skill Check.' },
+  play: { id: 'play', label: 'Call a Play', category: 'tactical', icon: 'fa-solid fa-clipboard-list', isAttack: false, desc: 'Plan an Action, granting an ally a bonus when executed.' },
+  clues: { id: 'clues', label: 'Look for Clues', category: 'tactical', icon: 'fa-solid fa-magnifying-glass', isAttack: false, desc: 'Gain tactical info on a Boss or environment.' },
   
   // Interrupts
-  evade: { id: 'evade', label: 'Evade', icon: 'fa-solid fa-shield-halved', isAttack: false, isInterrupt: true, desc: 'Attempt to avoid incoming attacks for the rest of the round.' },
-  heal: { id: 'heal', label: 'Heal', icon: 'fa-solid fa-heart-pulse', isAttack: false, isInterrupt: true, desc: 'Use a Spell or item to restore Health.' },
-  taunt: { id: 'taunt', label: 'Taunt', icon: 'fa-solid fa-bullhorn', isAttack: false, isInterrupt: true, desc: "Redirect a Mob's attack from an ally to yourself." },
-  catcher: { id: 'catcher', label: 'Catcher', icon: 'fa-solid fa-person-falling-burst', isAttack: false, isInterrupt: true, desc: 'Take a hit meant for an ally.' },
-  intervene: { id: 'intervene', label: 'Intervene', icon: 'fa-solid fa-user-shield', isAttack: false, isInterrupt: true, desc: "Aid an ally's Skill Check (+1d6 added after they roll)." },
+  evade: { id: 'evade', label: 'Evade', category: 'defensive', icon: 'fa-solid fa-shield-halved', isAttack: false, isInterrupt: true, desc: 'Attempt to avoid incoming attacks for the rest of the round.' },
+  heal: { id: 'heal', label: 'Heal', category: 'buff', icon: 'fa-solid fa-heart-pulse', isAttack: false, isInterrupt: true, desc: 'Use a Spell or item to restore Health.' },
+  taunt: { id: 'taunt', label: 'Taunt', category: 'defensive', icon: 'fa-solid fa-bullhorn', isAttack: false, isInterrupt: true, desc: "Redirect a Mob's attack from an ally to yourself." },
+  catcher: { id: 'catcher', label: 'Catcher', category: 'defensive', icon: 'fa-solid fa-person-falling-burst', isAttack: false, isInterrupt: true, desc: 'Take a hit meant for an ally.' },
+  intervene: { id: 'intervene', label: 'Intervene', category: 'tactical', icon: 'fa-solid fa-user-shield', isAttack: false, isInterrupt: true, desc: "Aid an ally's Skill Check (+1d6 added after they roll)." },
   
   // Other
-  other: { id: 'other', label: 'Other Action', icon: 'fa-solid fa-ellipsis', isAttack: false, desc: 'Custom or non-standard action.' }
+  other: { id: 'other', label: 'Other Action', category: 'utility', icon: 'fa-solid fa-ellipsis', isAttack: false, desc: 'Custom or non-standard action.' }
 };
 
 export class DCCCombat extends BaseCombat {
@@ -354,8 +354,10 @@ export class DCCCombat extends BaseCombat {
       return { success: false, error: errorMsg, actions };
     }
 
+    const category = actionData.category || typeDef.category || 'utility';
     const slot = {
       type,
+      category,
       label: actionData.label || typeDef.label,
       icon: typeDef.icon,
       isAttack,
@@ -568,6 +570,25 @@ export class DCCCombat extends BaseCombat {
     const combatantsData = Array.from(this.combatants || []).map(c => {
       const actor = c.actor || (globalThis.game?.actors?.get ? globalThis.game.actors.get(c.actorId) : null);
       const isMob = DCCCombat.isMobCombatant(c);
+      const actorMetrics = metrics[c.actorId] || {};
+      
+      // Tally action counts across all rounds in roundHistory
+      const actionCategories = { damage: 0, tactical: 0, defensive: 0, buff: 0, utility: 0 };
+      for (const roundData of Object.values(roundHistory)) {
+        const rAct = roundData?.[c.id];
+        if (rAct?.slots && Array.isArray(rAct.slots)) {
+          for (const s of rAct.slots) {
+            if (!s) continue;
+            const cat = s.category || DCC_ACTION_TYPES[s.type]?.category || (s.isAttack ? 'damage' : 'utility');
+            if (actionCategories[cat] !== undefined) {
+              actionCategories[cat]++;
+            } else {
+              actionCategories.utility++;
+            }
+          }
+        }
+      }
+
       return {
         id: c.id,
         name: c.name,
@@ -575,9 +596,16 @@ export class DCCCombat extends BaseCombat {
         img: c.img || actor?.img || 'icons/svg/mystery-man.svg',
         type: actor?.type || (isMob ? 'npc' : 'crawler'),
         isMob,
+        level: Number(actor?.system?.details?.level) || 1,
+        xpValue: Number(actor?.system?.details?.xpValue) || 0,
         hp: actor?.system?.attributes?.hp?.value ?? null,
         maxHp: actor?.system?.attributes?.hp?.max ?? null,
-        actions: this.getCombatantActions(c)
+        actions: this.getCombatantActions(c),
+        damageDealt: actorMetrics.totalDamage || 0,
+        damageTaken: actorMetrics.damageTaken || 0,
+        actionCategories,
+        highestHit: actorMetrics.highestHit || 0,
+        kills: actorMetrics.kills || 0
       };
     });
 
@@ -593,6 +621,7 @@ export class DCCCombat extends BaseCombat {
       combatants: combatantsData,
       roundHistory,
       metrics: {
+        ...metrics,
         totalDamageDealt: metrics.totalDamageDealt || 0,
         mvp: metrics.mvp || null,
         awards: metrics.awards || [],

@@ -1587,6 +1587,189 @@
   background: #b91c1c;
 }
 
+.dcc-badge-archived {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #34495e;
+  color: #ecf0f1;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid #7f8c8d;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.dcc-open-archive-btn {
+  background: #2c3e50;
+  color: #ecf0f1;
+  border: 1px solid #455a64;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s ease;
+}
+
+.dcc-open-archive-btn:hover {
+  background: #34495e;
+  color: #fff;
+}
+
+/* Post-Battle XP & Level Progression Banner in Metrics Window */
+.dcc-metrics-xp-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #1c1c1c 0%, #2a1515 100%);
+  border: 1.5px solid #c0392b;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.dcc-xp-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dcc-xp-cap-icon {
+  font-size: 24px;
+  color: #f1c40f;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.4);
+}
+
+.dcc-xp-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dcc-xp-banner-desc {
+  display: block;
+  font-size: 11px;
+  color: #bdc3c7;
+  margin-top: 2px;
+}
+
+.dcc-xp-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-xp-awarded-pill {
+  background: #27ae60;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dcc-award-encounter-xp-btn {
+  background: #c0392b;
+  color: #fff;
+  border: 1px solid #e74c3c;
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.dcc-award-encounter-xp-btn:hover {
+  background: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+}
+
+.dcc-undo-encounter-xp-btn {
+  background: #4a1515;
+  color: #e0e0e0;
+  border: 1px solid #7a2222;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+
+.dcc-undo-encounter-xp-btn:hover {
+  background: #6a1e1e;
+  color: #fff;
+}
+
+/* Previously Dispatched Awards */
+.dcc-previous-awards-section {
+  background: #141414;
+  border: 1px solid #2d3748;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.dcc-previous-awards-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.dcc-previous-award-pill {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: #e2e8f0;
+}
+
+/* Dual stat box in crawler card header */
+.dcc-crawler-stat-banner {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dcc-stat-damage-taken {
+  background: #0f2438;
+  border: 1.5px solid #3498db;
+  border-radius: 4px;
+  padding: 4px 10px;
+  text-align: center;
+  min-width: 70px;
+}
+
+.dcc-stat-damage-taken .dcc-stat-label {
+  color: #aed6f1;
+}
+
 /* Metrics Body */
 .dcc-metrics-body {
   flex: 1;
@@ -2862,25 +3045,45 @@
   color: #2c3e50;
 }
 
+.dcc-archive-app * {
+  box-sizing: border-box;
+}
+
+.dcc-archive-app .window-content {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #fdfbf7;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  position: relative !important;
+}
+
 .dcc-archive-window {
-  height: 100%;
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .dcc-archive-header {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: #1a1a1a;
   color: #fff;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-bottom: 2px solid #c0392b;
 }
 
 .dcc-archive-header h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.5px;
   display: flex;
@@ -2892,10 +3095,92 @@
 
 .dcc-archive-header-actions {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 }
 
-.dcc-archive-chat-btn, .dcc-archive-delete-btn, .dcc-archive-clear-all-btn {
+/* Quick Combat Selector Bar */
+.dcc-archive-nav-bar {
+  flex: 0 0 auto;
+  background: #2c3e50;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #1a252f;
+  color: #ecf0f1;
+}
+
+.dcc-archive-encounter-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 600px;
+}
+
+.dcc-picker-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #bdc3c7;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.dcc-archive-nav-btn {
+  background: #1a252f;
+  color: #fff;
+  border: 1px solid #34495e;
+  border-radius: 3px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 10px;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dcc-archive-nav-btn:hover:not(:disabled) {
+  background: #c0392b;
+  border-color: #962d22;
+}
+
+.dcc-archive-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.dcc-archive-combat-select {
+  flex: 1;
+  background: #1c2833;
+  color: #fff;
+  border: 1px solid #34495e;
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dcc-archive-combat-select:focus {
+  outline: none;
+  border-color: #c0392b;
+}
+
+.dcc-archive-count-badge {
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #bdc3c7;
+  white-space: nowrap;
+}
+
+.dcc-archive-chat-btn, .dcc-archive-delete-btn, .dcc-archive-clear-all-btn, .dcc-archive-save-live-btn {
   font-family: 'Oswald', sans-serif;
   font-size: 11px;
   font-weight: 600;
@@ -2909,12 +3194,20 @@
   transition: all 0.15s ease;
 }
 
-.dcc-archive-chat-btn {
+.dcc-archive-save-live-btn {
   background: #27ae60;
   color: #fff;
 }
-.dcc-archive-chat-btn:hover {
+.dcc-archive-save-live-btn:hover {
   background: #2ecc71;
+}
+
+.dcc-archive-chat-btn {
+  background: #2980b9;
+  color: #fff;
+}
+.dcc-archive-chat-btn:hover {
+  background: #3498db;
 }
 
 .dcc-archive-delete-btn {
@@ -2937,41 +3230,82 @@
 
 .dcc-archive-body {
   display: flex;
-  flex: 1;
+  flex-direction: row;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
   overflow: hidden;
 }
 
 /* Sidebar */
 .dcc-archive-sidebar {
-  width: 230px;
+  width: 250px;
+  min-width: 230px;
+  max-width: 270px;
+  flex: 0 0 250px;
   background: #f4f6f7;
   border-right: 1.5px solid #d5dbdb;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dcc-archive-sidebar-header {
+  flex: 0 0 auto;
+  border-bottom: 1px solid #d5dbdb;
+  background: #eaeded;
 }
 
 .dcc-archive-sidebar-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
-  background: #eaeded;
-  border-bottom: 1px solid #d5dbdb;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #566573;
+}
+
+.dcc-archive-search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 6px 8px;
+  background: #eaeded;
+}
+
+.dcc-archive-search-box i {
+  color: #7f8c8d;
+  font-size: 11px;
+}
+
+.dcc-archive-search {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #bdc3c7;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  color: #2c3e50;
 }
 
 .dcc-archive-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow-y: auto;
-  flex: 1;
+  overflow-y: auto !important;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .dcc-archive-item {
-  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
   border-bottom: 1px solid #e5e8e8;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -2987,6 +3321,16 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.dcc-archive-item-radio {
+  flex: 0 0 auto;
+  font-size: 11px;
+}
+
+.dcc-archive-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .dcc-archive-item-header {
   display: flex;
   justify-content: space-between;
@@ -3000,7 +3344,25 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  max-width: 140px;
+}
+
+.dcc-live-badge {
+  font-size: 9px;
+  background: #27ae60;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+.dcc-archived-tag {
+  font-size: 10px;
+  background: #7f8c8d;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
 }
 
 .dcc-archive-item-rounds {
@@ -3021,7 +3383,7 @@
   justify-content: space-between;
   font-size: 10px;
   color: #7f8c8d;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .dcc-archive-empty {
@@ -3032,21 +3394,47 @@
   text-align: center;
 }
 
-/* Right Content Area */
+/* Right Content Area - SCROLLABLE CONTAINER */
 .dcc-archive-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  padding: 10px 14px 24px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* Make custom scrollbars prominent, visible, and styled */
+.dcc-archive-content::-webkit-scrollbar,
+.dcc-archive-list::-webkit-scrollbar {
+  width: 10px;
+}
+.dcc-archive-content::-webkit-scrollbar-track,
+.dcc-archive-list::-webkit-scrollbar-track {
+  background: #eaeded;
+  border-radius: 4px;
+}
+.dcc-archive-content::-webkit-scrollbar-thumb,
+.dcc-archive-list::-webkit-scrollbar-thumb {
+  background: #c0392b;
+  border-radius: 4px;
+  border: 2px solid #eaeded;
+}
+.dcc-archive-content::-webkit-scrollbar-thumb:hover,
+.dcc-archive-list::-webkit-scrollbar-thumb:hover {
+  background: #962d22;
+}
+
+/* Compact Encounter Hero */
 .dcc-archive-encounter-hero {
+  flex: 0 0 auto;
   background: #fff;
   border: 1.5px solid #d5dbdb;
   border-radius: 4px;
-  padding: 10px 12px;
+  padding: 6px 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -3054,27 +3442,55 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dcc-hero-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dcc-hero-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: #c0392b;
   border: none;
 }
 
+.dcc-live-tag {
+  font-size: 10px;
+  background: #27ae60;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.dcc-surprise-badge {
+  font-size: 10px;
+  background: #f39c12;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
 .dcc-hero-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 6px;
-  font-size: 12px;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
   color: #566573;
 }
 
 .dcc-hero-stat {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
 }
@@ -3091,11 +3507,12 @@
 
 /* Round Inspector Tabs */
 .dcc-archive-round-selector {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 10px;
   background: #eaeded;
-  padding: 6px 10px;
+  padding: 5px 8px;
   border-radius: 4px;
 }
 
@@ -3123,6 +3540,7 @@
   cursor: pointer;
   color: #2c3e50;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .dcc-archive-round-btn:hover {
@@ -3140,14 +3558,16 @@
 .dcc-archive-round-detail {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
 .dcc-archive-phase {
   background: #fff;
   border-radius: 4px;
   border: 1.5px solid #d5dbdb;
-  overflow: hidden;
+  flex: 0 0 auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .dcc-archive-phase.mob-phase {
@@ -3166,6 +3586,9 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  flex: 0 0 auto;
 }
 
 .mob-phase .dcc-archive-phase-header {
@@ -3188,27 +3611,37 @@
 .dcc-archive-combatants-list {
   display: flex;
   flex-direction: column;
-  divide-y: 1px solid #eaeded;
+  flex: 0 0 auto;
 }
 
 .dcc-archive-combatant-card {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-bottom: 1px solid #f2f4f4;
+  flex: 0 0 auto;
+}
+
+.dcc-archive-combatant-card:last-child {
+  border-bottom: none;
 }
 
 .dcc-archive-combatant-img {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
   border: 1px solid #bdc3c7;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .dcc-archive-combatant-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .dcc-archive-combatant-name {
@@ -3217,6 +3650,10 @@
   align-items: center;
   font-size: 13px;
   color: #2c3e50;
+}
+
+.dcc-combatant-title {
+  font-weight: 700;
 }
 
 .dcc-archive-actions-spent {
@@ -3229,38 +3666,39 @@
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: 4px;
+  align-items: center;
 }
 
 .dcc-archive-slot {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  padding: 2px 6px;
+  gap: 5px;
+  font-size: 11px;
+  padding: 3px 8px;
   border-radius: 3px;
-  background: #eaeded;
-  color: #566573;
-  border: 1px solid #d5dbdb;
+  background: #f4f6f7;
+  color: #7f8c8d;
+  border: 1px dashed #bdc3c7;
+  white-space: nowrap;
 }
 
 .dcc-archive-slot.filled {
   background: #d4efdf;
   color: #1e8449;
-  border-color: #a9dfbf;
+  border: 1px solid #a9dfbf;
   font-weight: 600;
 }
 
-.dcc-archive-slot.is-attack {
+.dcc-archive-slot.filled.is-attack {
   background: #fadbd8;
   color: #c0392b;
-  border-color: #f5b7b1;
+  border: 1px solid #f5b7b1;
 }
 
-.dcc-archive-slot.is-bonus {
-  border-color: #f9e79f;
+.dcc-archive-slot.filled.is-bonus {
   background: #fef9e7;
   color: #b7950b;
+  border: 1px solid #f9e79f;
 }
 
 .dcc-archive-no-combatants {
@@ -3284,3 +3722,541 @@
   font-size: 48px;
   color: #bdc3c7;
 }
+
+/* Crawler Sheet XP Bar */
+.dcc-xp-field-group {
+  flex: 1.5 !important;
+  min-width: 140px;
+}
+
+.dcc-xp-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dcc-xp-pct-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.dcc-xp-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dcc-xp-input {
+  text-align: right;
+  font-weight: 700;
+}
+
+.dcc-xp-max-sep {
+  color: #7f8c8d;
+  font-weight: 700;
+}
+
+.dcc-xp-max-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+}
+
+.dcc-xp-bar-track {
+  height: 5px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+  border: 1px solid #ccc;
+}
+
+.dcc-xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c0392b, #f39c12);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Combat Archive Mode Tabs */
+.dcc-archive-tab-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #d5dbdb;
+  padding-bottom: 6px;
+  flex: 0 0 auto;
+}
+
+.dcc-archive-tab-btn {
+  background: #f4f6f7;
+  border: 1.5px solid #bdc3c7;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #566573;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.dcc-archive-tab-btn:hover {
+  background: #eaeded;
+  color: #2c3e50;
+  border-color: #95a5a6;
+}
+
+.dcc-archive-tab-btn.active {
+  background: #2c3e50;
+  color: #ffffff;
+  border-color: #1a252f;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.dcc-xp-awarded-pill {
+  background: #27ae60;
+  color: #ffffff;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+
+/* Experience Panel */
+.dcc-archive-xp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.dcc-xp-pool-card {
+  background: #ffffff;
+  border: 1.5px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dcc-xp-pool-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-xp-pool-badge-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-xp-pool-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 0.5px;
+}
+
+.dcc-xp-pool-input {
+  width: 90px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #c0392b;
+  text-align: center;
+  border: 1.5px solid #bdc3c7;
+  border-radius: 3px;
+  padding: 2px 4px;
+  background: #fff;
+}
+
+.dcc-xp-pool-unit {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.dcc-xp-pool-val {
+  font-size: 16px;
+  color: #c0392b;
+}
+
+.dcc-xp-pool-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #7f8c8d;
+}
+
+.dcc-xp-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-archive-award-xp-btn {
+  background: linear-gradient(135deg, #c0392b, #962d22);
+  color: #ffffff;
+  border: 1.5px solid #d4af37;
+  border-radius: 3px;
+  padding: 6px 14px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.dcc-archive-award-xp-btn:hover {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+}
+
+.dcc-xp-awarded-banner {
+  background: #d4efdf;
+  color: #1e8449;
+  border: 1px solid #a9dfbf;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dcc-archive-undo-xp-btn {
+  background: #7f8c8d;
+  color: #ffffff;
+  border: 1px solid #636e72;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+
+.dcc-archive-undo-xp-btn:hover {
+  background: #c0392b;
+}
+
+/* Weights Card */
+.dcc-xp-weights-card {
+  background: #f8f9fa;
+  border: 1px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.dcc-xp-weights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e8e8;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.dcc-weights-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #566573;
+  letter-spacing: 0.5px;
+}
+
+.dcc-weights-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dcc-xp-reset-weights-btn, .dcc-xp-save-defaults-btn {
+  background: #fff;
+  border: 1px solid #bdc3c7;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: 'Oswald', sans-serif;
+  color: #555;
+  cursor: pointer;
+}
+
+.dcc-xp-reset-weights-btn:hover, .dcc-xp-save-defaults-btn:hover {
+  background: #eaeded;
+  color: #000;
+}
+
+.dcc-xp-weights-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.dcc-xp-weight-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dcc-weight-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+}
+
+.dcc-weight-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #7f8c8d;
+}
+
+.dcc-xp-weight-input {
+  width: 44px;
+  text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #bdc3c7;
+  border-radius: 3px;
+  padding: 2px;
+}
+
+.dcc-weight-hint {
+  font-size: 9px;
+  color: #95a5a6;
+  text-align: center;
+}
+
+/* XP Table */
+.dcc-xp-table-wrapper {
+  background: #ffffff;
+  border: 1.5px solid #d5dbdb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dcc-xp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.dcc-xp-table thead {
+  background: #2c3e50;
+  color: #ecf0f1;
+}
+
+.dcc-xp-table th {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-right: 1px solid #34495e;
+}
+
+.dcc-xp-table th:last-child {
+  border-right: none;
+}
+
+.dcc-xp-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eaeded;
+  vertical-align: middle;
+}
+
+.dcc-xp-table tr:hover {
+  background: #fdfaf2;
+}
+
+.dcc-xp-table tr.is-level-up {
+  background: #fefde8;
+}
+
+.dcc-xp-crawler-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-xp-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid #bdc3c7;
+  object-fit: cover;
+}
+
+.dcc-xp-crawler-name-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.dcc-xp-current-level {
+  font-size: 10px;
+  color: #7f8c8d;
+}
+
+.dcc-stat-val {
+  color: #2c3e50;
+}
+
+.dcc-stat-sub {
+  font-size: 10px;
+  color: #7f8c8d;
+  margin-left: 2px;
+}
+
+.dcc-action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.dcc-action-badge.defensive {
+  background: #fadbd8;
+  color: #922b21;
+  border: 1px solid #f5b7b1;
+}
+
+.dcc-action-badge.tactical {
+  background: #d6eaf8;
+  color: #1b4f72;
+  border: 1px solid #aed6f1;
+}
+
+.dcc-action-badge.buff {
+  background: #d4efdf;
+  color: #1e8449;
+  border: 1px solid #a9dfbf;
+}
+
+.dcc-action-badge-group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dcc-share-pct {
+  color: #2980b9;
+  font-size: 13px;
+}
+
+.dcc-xp-award-val {
+  color: #27ae60;
+  font-size: 14px;
+}
+
+.dcc-xp-progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dcc-xp-level-preview {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.dcc-level-up-tag {
+  color: #f39c12;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dcc-xp-to-next {
+  font-size: 10px;
+  color: #7f8c8d;
+}
+
+.dcc-xp-dual-bar {
+  height: 5px;
+  background: #eaeded;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #d5dbdb;
+}
+
+.dcc-xp-fill-current {
+  height: 100%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+}
+
+/* Mobs breakdown */
+.dcc-xp-mobs-card {
+  background: #fff;
+  border: 1.5px solid #d5dbdb;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.dcc-xp-mobs-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7f8c8d;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.dcc-xp-mobs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dcc-mob-xp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f4f6f7;
+  border: 1px solid #d5dbdb;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+.dcc-mob-xp-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.dcc-mob-xp-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.dcc-mob-xp-info span {
+  font-size: 9px;
+  color: #7f8c8d;
+}
+
+

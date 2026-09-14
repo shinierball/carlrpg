@@ -28,6 +28,20 @@
           <span class="dcc-field-label">Level</span>
           <input class="dcc-field-input" name="system.details.level" type="number" value="{{system.details.level}}" placeholder="1" />
         </div>
+        <div class="dcc-field-group dcc-xp-field-group">
+          <div class="dcc-xp-label-row">
+            <span class="dcc-field-label">Experience</span>
+            <span class="dcc-xp-pct-label">{{system.details.xp.pct}}%</span>
+          </div>
+          <div class="dcc-xp-input-wrapper">
+            <input class="dcc-field-input dcc-xp-input" name="system.details.xp.value" type="number" value="{{system.details.xp.value}}" placeholder="0" />
+            <span class="dcc-xp-max-sep">/</span>
+            <span class="dcc-xp-max-val" title="Next Level at {{system.details.xp.max}} XP">{{system.details.xp.max}}</span>
+          </div>
+          <div class="dcc-xp-bar-track" title="{{system.details.xp.toNext}} XP to Next Level">
+            <div class="dcc-xp-bar-fill" style="width: {{system.details.xp.pct}}%;"></div>
+          </div>
+        </div>
         <div class="dcc-field-group">
           <span class="dcc-field-label">Crawler Number</span>
           <input class="dcc-field-input" name="system.details.crawlerNumber" type="text" value="{{system.details.crawlerNumber}}" placeholder="#12345" />

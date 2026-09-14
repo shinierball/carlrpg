@@ -5,6 +5,10 @@
  * scoped cleanly to Foundry VTT's Combat documents.
  */
 
+import { DCCCombat } from '../documents/combat.mjs';
+import { DCCExperienceTracker } from './xp-tracker.mjs';
+import { DCCCombatArchiveApp } from './combat-archive.mjs';
+
 const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
 
 /**
@@ -68,7 +72,7 @@ export class DCCCombatMetrics {
   static getMetrics(combat = null) {
     const c = combat || this.getCombat();
     if (!c) return {};
-    return c.getFlag?.('carl-rpg', 'metrics') || c.flags?.['carl-rpg']?.metrics || {};
+    return c.getFlag?.('carl-rpg', 'metrics') || c.flags?.['carl-rpg']?.metrics || c.metrics || {};
   }
 
   /**
@@ -87,6 +91,7 @@ export class DCCCombatMetrics {
         actorName: actor?.name || 'Unknown Combatant',
         actorImg: actor?.img || actor?.prototypeToken?.texture?.src || 'icons/svg/mystery-man.svg',
         totalDamage: 0,
+        damageTaken: 0,
         highestHit: 0,
         kills: 0,
         attacks: {},
@@ -128,8 +133,12 @@ export class DCCCombatMetrics {
     entry.totalDamage = (entry.totalDamage || 0) + netDamage;
     entry.highestHit = Math.max(entry.highestHit || 0, netDamage);
 
-    // Track kills if target HP reduced to 0
+    // Track damage taken and kills on targetActor
     if (targetActor) {
+      const targetEntry = this._getOrCreateActorEntry(metrics, targetActor);
+      if (targetEntry) {
+        targetEntry.damageTaken = (targetEntry.damageTaken || 0) + netDamage;
+      }
       const targetHp = Number(targetActor.system?.attributes?.hp?.value);
       if (Number.isFinite(targetHp) && targetHp <= 0) {
         entry.kills = (entry.kills || 0) + 1;
@@ -154,6 +163,43 @@ export class DCCCombatMetrics {
       actualDamage: netDamage,
       totalDamage: entry.totalDamage,
       attackerName: attackerActor.name
+    };
+  }
+
+  /**
+   * Record net damage taken by a target actor in combat
+   * @param {object} params
+   * @param {Combat} [params.combat]
+   * @param {Actor} params.targetActor
+   * @param {Actor} [params.attackerActor=null]
+   * @param {number} params.actualDamage
+   * @returns {Promise<object>}
+   */
+  static async recordDamageTaken({ combat = null, targetActor, attackerActor = null, actualDamage = 0 } = {}) {
+    if (!targetActor) return { logged: false, reason: 'no-target' };
+
+    let c = combat || this.getCombat();
+    if (!c && game.combats) {
+      c = game.combats.find(cb => cb.combatants?.some(con => con.actorId === targetActor.id));
+    }
+    if (!c) return { logged: false, reason: 'no-combat' };
+
+    const metrics = structuredClone(this.getMetrics(c));
+    const targetEntry = this._getOrCreateActorEntry(metrics, targetActor);
+    if (!targetEntry) return { logged: false, reason: 'invalid-target' };
+
+    const netDamage = Math.max(0, Number(actualDamage) || 0);
+    targetEntry.damageTaken = (targetEntry.damageTaken || 0) + netDamage;
+
+    await c.setFlag('carl-rpg', 'metrics', metrics);
+    this._refreshOpenWindows();
+
+    return {
+      logged: true,
+      combatId: c.id,
+      damageTaken: netDamage,
+      totalDamageTaken: targetEntry.damageTaken,
+      targetName: targetActor.name
     };
   }
 
@@ -236,6 +282,13 @@ export class DCCCombatMetrics {
         attackName,
         attackType
       });
+    } else if (targetActor && actualDamage > 0) {
+      loggedMetrics = await this.recordDamageTaken({
+        combat,
+        targetActor,
+        attackerActor: null,
+        actualDamage
+      });
     }
 
     return {
@@ -301,7 +354,7 @@ export class DCCCombatMetrics {
     if (!c) return null;
 
     const metrics = structuredClone(this.getMetrics(c));
-    let actor = game.actors?.get?.(actorId) || c.combatants?.find?.(con => con.actorId === actorId)?.actor || null;
+    let actor = game.actors?.get?.(actorId) || c.combatants?.find?.(con => (con.actorId || con.actor?.id) === actorId)?.actor || null;
     if (!metrics[actorId]) {
       this._getOrCreateActorEntry(metrics, actor, actorId);
     }
@@ -309,7 +362,17 @@ export class DCCCombatMetrics {
     const entry = metrics[actorId];
     if (!entry) return null;
     entry.totalDamage = Math.max(0, (entry.totalDamage || 0) + Number(delta));
-    await c.setFlag('carl-rpg', 'metrics', metrics);
+
+    if (typeof c.setFlag === 'function') {
+      await c.setFlag('carl-rpg', 'metrics', metrics);
+    } else if (typeof DCCCombat !== 'undefined') {
+      c.metrics = metrics;
+      const combatant = (c.combatants || []).find(con => (con.actorId || con.actor?.id) === actorId);
+      if (combatant) {
+        combatant.damageDealt = entry.totalDamage;
+      }
+      await DCCCombat.saveArchivedCombat(c);
+    }
     this._refreshOpenWindows();
     return entry;
   }
@@ -321,7 +384,23 @@ export class DCCCombatMetrics {
   static async resetMetrics(combat = null) {
     const c = combat || this.getCombat();
     if (!c) return;
-    await c.unsetFlag('carl-rpg', 'metrics');
+    if (typeof c.unsetFlag === 'function') {
+      await c.unsetFlag('carl-rpg', 'metrics');
+    } else if (typeof DCCCombat !== 'undefined') {
+      c.metrics = {
+        totalDamageDealt: 0,
+        mvp: null,
+        awards: [],
+        events: []
+      };
+      for (const combatant of (c.combatants || [])) {
+        combatant.damageDealt = 0;
+        combatant.damageTaken = 0;
+        combatant.highestHit = 0;
+        combatant.kills = 0;
+      }
+      await DCCCombat.saveArchivedCombat(c);
+    }
     this._refreshOpenWindows();
   }
 
@@ -437,6 +516,31 @@ export class DCCCombatMetrics {
       </div>
     `;
 
+    // Persist award in combat metrics (active or archived)
+    if (combat) {
+      const awardRecord = {
+        recipientId: recipientActor.id,
+        recipientName: recipientActor.name,
+        awardType,
+        title,
+        rewardText,
+        quote,
+        timestamp: Date.now()
+      };
+      if (typeof combat.setFlag === 'function') {
+        const metrics = structuredClone(this.getMetrics(combat));
+        metrics.awards = metrics.awards || [];
+        metrics.awards.push(awardRecord);
+        await combat.setFlag('carl-rpg', 'metrics', metrics);
+      } else if (typeof DCCCombat !== 'undefined') {
+        combat.metrics = combat.metrics || {};
+        combat.metrics.awards = combat.metrics.awards || [];
+        combat.metrics.awards.push(awardRecord);
+        await DCCCombat.saveArchivedCombat(combat);
+      }
+      this._refreshOpenWindows();
+    }
+
     return ChatMessage.create({
       speaker: { alias: 'THE DUNGEON AI' },
       content: chatContent
@@ -478,35 +582,82 @@ export class DCCCombatMetricsApp extends BaseApplication {
     });
   }
 
+  /**
+   * Helper to retrieve active combat document or archived encounter record.
+   * @returns {Combat|object|null}
+   */
+  getTargetCombat() {
+    if (this.selectedCombatId) {
+      const active = (Array.isArray(game.combats) ? game.combats : (game.combats?.contents || []))
+        .find(c => c.id === this.selectedCombatId) || (game.combats?.get ? game.combats.get(this.selectedCombatId) : null);
+      if (active) return active;
+      if (typeof DCCCombat !== 'undefined') {
+        const archived = DCCCombat.getArchivedCombats().find(a => a.id === this.selectedCombatId);
+        if (archived) return archived;
+      }
+    }
+    const current = DCCCombatMetrics.getCombat();
+    if (current) return current;
+    if (typeof DCCCombat !== 'undefined') {
+      const archives = DCCCombat.getArchivedCombats();
+      if (archives.length > 0) return archives[0];
+    }
+    return null;
+  }
+
   /** @override */
   async getData(options = {}) {
     const data = await super.getData(options);
 
-    const allCombats = (game.combats?.contents || []).map(c => ({
+    const activeCombats = (Array.isArray(game.combats) ? game.combats : (game.combats?.contents || [])).map(c => ({
       id: c.id,
-      name: c.scene?.name ? `${c.scene.name} (Round ${c.round})` : `Combat ${c.id} (Round ${c.round})`,
+      name: c.name || (c.scene?.name ? `${c.scene.name} (Round ${c.round})` : `Combat ${c.id} (Round ${c.round})`),
       isActive: c.isActive,
-      round: c.round
+      round: c.round,
+      isArchived: false
     }));
 
-    const activeCombat = this.selectedCombatId
-      ? game.combats?.get(this.selectedCombatId)
-      : DCCCombatMetrics.getCombat();
+    const archivedCombatsList = (typeof DCCCombat !== 'undefined' ? DCCCombat.getArchivedCombats() : []).map(a => ({
+      id: a.id,
+      name: a.name || 'Archived Encounter',
+      dateString: a.dateString || '',
+      totalRounds: a.totalRounds || 1,
+      isActive: false,
+      isArchived: true,
+      round: a.totalRounds || 1
+    }));
 
-    const selectedCombatId = activeCombat?.id || null;
-    const rawMetrics = activeCombat ? DCCCombatMetrics.getMetrics(activeCombat) : {};
+    const allCombats = [...activeCombats, ...archivedCombatsList];
+    const targetCombat = this.getTargetCombat();
+    const isArchived = Boolean(targetCombat && typeof targetCombat.setFlag !== 'function');
+
+    const selectedCombatId = targetCombat?.id || null;
+    const rawMetrics = targetCombat ? DCCCombatMetrics.getMetrics(targetCombat) : {};
 
     // Gather combatants in this combat
     const crawlers = [];
-    if (activeCombat && activeCombat.combatants) {
-      for (const cb of activeCombat.combatants) {
-        const actor = cb.actor;
-        if (!actor) continue;
+    if (targetCombat) {
+      const combatantsList = isArchived
+        ? (targetCombat.combatants || [])
+        : Array.from(targetCombat.combatants || []);
 
-        const m = rawMetrics[actor.id] || {
-          totalDamage: 0,
-          highestHit: 0,
-          kills: 0,
+      for (const cb of combatantsList) {
+        const isMob = typeof cb.isMob === 'boolean'
+          ? cb.isMob
+          : (typeof DCCCombat !== 'undefined' && typeof DCCCombat.isMobCombatant === 'function'
+              ? DCCCombat.isMobCombatant(cb)
+              : (cb.actor?.type === 'npc' || cb.type === 'npc'));
+
+        if (isMob) continue;
+
+        const actorId = cb.actorId || cb.actor?.id;
+        const liveActor = (actorId && game.actors?.get) ? game.actors.get(actorId) : null;
+        const actor = cb.actor || liveActor;
+        const m = rawMetrics[actorId] || {
+          totalDamage: cb.damageDealt || 0,
+          damageTaken: cb.damageTaken || 0,
+          highestHit: cb.highestHit || 0,
+          kills: cb.kills || 0,
           attacks: {},
           skills: {}
         };
@@ -524,16 +675,27 @@ export class DCCCombatMetricsApp extends BaseApplication {
           count
         }));
 
+        const name = cb.name || actor?.name || 'Crawler';
+        const img = cb.img || actor?.img || 'icons/svg/mystery-man.svg';
+        const level = actor?.system?.details?.level || cb.level || 1;
+        const aiFavor = actor?.system?.attributes?.aiFavor || cb.aiFavor || 0;
+        const totalDamage = Math.max(0, Number(cb.damageDealt ?? m.totalDamage) || 0);
+        const damageTaken = Math.max(0, Number(cb.damageTaken ?? m.damageTaken) || 0);
+        const highestHit = Math.max(0, Number(cb.highestHit ?? m.highestHit) || 0);
+        const kills = Math.max(0, Number(cb.kills ?? m.kills) || 0);
+
         crawlers.push({
-          actorId: actor.id,
-          name: actor.name,
-          type: actor.type,
-          img: actor.img || 'icons/svg/mystery-man.svg',
-          level: actor.system?.details?.level || 1,
-          aiFavor: actor.system?.attributes?.aiFavor || 0,
-          totalDamage: m.totalDamage || 0,
-          highestHit: m.highestHit || 0,
-          kills: m.kills || 0,
+          actorId,
+          combatantId: cb.id,
+          name,
+          type: cb.type || liveActor?.type || 'crawler',
+          img,
+          level,
+          aiFavor,
+          totalDamage,
+          damageTaken,
+          highestHit,
+          kills,
           attacks: attacksList,
           skills: skillsList,
           hasAttacks: attacksList.length > 0,
@@ -545,14 +707,35 @@ export class DCCCombatMetricsApp extends BaseApplication {
     // Sort crawlers by total damage descending
     crawlers.sort((a, b) => b.totalDamage - a.totalDamage);
 
+    // XP calculation for post-battle awarding
+    let xpInfo = null;
+    if (targetCombat && typeof DCCExperienceTracker !== 'undefined') {
+      try {
+        xpInfo = DCCExperienceTracker.calculateEncounterXP(targetCombat);
+      } catch (err) {
+        console.warn('DCC RPG | Could not calculate encounter XP:', err);
+      }
+    }
+
+    const previousAwards = rawMetrics.awards || targetCombat?.metrics?.awards || [];
+
     return {
       ...data,
+      activeCombats,
+      archivedCombats: archivedCombatsList,
       allCombats,
       selectedCombatId,
-      hasCombat: Boolean(activeCombat),
-      round: activeCombat?.round || 0,
+      hasCombat: Boolean(targetCombat),
+      isArchived,
+      combatName: targetCombat?.name || (isArchived ? 'Archived Encounter' : 'Active Encounter'),
+      dateString: targetCombat?.dateString || null,
+      round: isArchived ? (targetCombat.totalRounds || 1) : (targetCombat?.round || 0),
+      totalRounds: targetCombat?.totalRounds || targetCombat?.round || 1,
       crawlers,
-      hasCrawlers: crawlers.length > 0
+      hasCrawlers: crawlers.length > 0,
+      xpInfo,
+      previousAwards,
+      hasPreviousAwards: previousAwards.length > 0
     };
   }
 
@@ -569,18 +752,17 @@ export class DCCCombatMetricsApp extends BaseApplication {
     // Reset combat stats
     html.find('.dcc-reset-metrics-btn').click(async ev => {
       ev.preventDefault();
-      const activeCombat = this.selectedCombatId
-        ? game.combats?.get(this.selectedCombatId)
-        : DCCCombatMetrics.getCombat();
-      if (!activeCombat) return;
+      const targetCombat = this.getTargetCombat();
+      if (!targetCombat) return;
 
       const confirm = await Dialog.confirm({
         title: 'Reset Combat Metrics?',
         content: '<p>Are you sure you want to reset all tracked damage and skill stats for this combat encounter?</p>'
       });
       if (confirm) {
-        await DCCCombatMetrics.resetMetrics(activeCombat);
+        await DCCCombatMetrics.resetMetrics(targetCombat);
         ui.notifications?.info('DCC RPG | Combat metrics reset.');
+        this.render(false);
       }
     });
 
@@ -588,10 +770,8 @@ export class DCCCombatMetricsApp extends BaseApplication {
     html.find('.dcc-adjust-damage-btn').click(async ev => {
       ev.preventDefault();
       const actorId = $(ev.currentTarget).data('actor-id');
-      const activeCombat = this.selectedCombatId
-        ? game.combats?.get(this.selectedCombatId)
-        : DCCCombatMetrics.getCombat();
-      if (!activeCombat || !actorId) return;
+      const targetCombat = this.getTargetCombat();
+      if (!targetCombat || !actorId) return;
 
       new Dialog({
         title: 'Manual Damage Adjustment',
@@ -607,7 +787,8 @@ export class DCCCombatMetricsApp extends BaseApplication {
             label: 'Adjust',
             callback: async (dlgHtml) => {
               const val = Number(dlgHtml.find('#dcc-manual-damage-input').val()) || 0;
-              await DCCCombatMetrics.adjustDamage(activeCombat, actorId, val);
+              await DCCCombatMetrics.adjustDamage(targetCombat, actorId, val);
+              this.render(false);
             }
           },
           cancel: {
@@ -627,19 +808,17 @@ export class DCCCombatMetricsApp extends BaseApplication {
       const customQuote = html.find('.dcc-award-quote-input').val() || '';
       const favorAmount = Number(html.find('.dcc-award-favor-input').val()) || 0;
 
-      const actor = game.actors?.get(recipientId);
+      const actor = game.actors?.get ? game.actors.get(recipientId) : null;
       if (!actor) {
         ui.notifications?.warn('DCC RPG | Please select a recipient crawler.');
         return;
       }
 
-      const activeCombat = this.selectedCombatId
-        ? game.combats?.get(this.selectedCombatId)
-        : DCCCombatMetrics.getCombat();
+      const targetCombat = this.getTargetCombat();
 
       try {
         await DCCCombatMetrics.dispatchAIAward({
-          combat: activeCombat,
+          combat: targetCombat,
           recipientActor: actor,
           awardType,
           customQuote,
@@ -647,9 +826,49 @@ export class DCCCombatMetricsApp extends BaseApplication {
         });
         ui.notifications?.info(`DCC RPG | Dispatched ${awardType} award to ${actor.name}!`);
         html.find('.dcc-award-quote-input').val('');
+        this.render(false);
       } catch (err) {
         console.error('DCC RPG | Failed to dispatch award:', err);
         ui.notifications?.error(`Failed to dispatch award: ${err.message}`);
+      }
+    });
+
+    // Award Encounter Experience
+    html.find('.dcc-award-encounter-xp-btn').click(async ev => {
+      ev.preventDefault();
+      const targetCombat = this.getTargetCombat();
+      if (!targetCombat) return;
+
+      try {
+        await DCCExperienceTracker.awardEncounterXP(targetCombat.id);
+        this.render(false);
+      } catch (err) {
+        console.error('DCC RPG | Failed to award encounter XP:', err);
+        ui.notifications?.error(err.message);
+      }
+    });
+
+    // Undo Encounter Experience
+    html.find('.dcc-undo-encounter-xp-btn').click(async ev => {
+      ev.preventDefault();
+      const targetCombat = this.getTargetCombat();
+      if (!targetCombat) return;
+
+      try {
+        await DCCExperienceTracker.undoAwardEncounterXP(targetCombat.id);
+        this.render(false);
+      } catch (err) {
+        console.error('DCC RPG | Failed to undo encounter XP:', err);
+        ui.notifications?.error(err.message);
+      }
+    });
+
+    // Open Combat Archive Timeline
+    html.find('.dcc-open-archive-btn').click(ev => {
+      ev.preventDefault();
+      const targetCombat = this.getTargetCombat();
+      if (typeof DCCCombatArchiveApp !== 'undefined') {
+        new DCCCombatArchiveApp({ combatId: targetCombat?.id }).render(true);
       }
     });
 

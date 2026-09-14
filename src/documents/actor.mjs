@@ -30,6 +30,21 @@ export function getDCCStatModifier(statValue) {
   return 0;
 }
 
+/**
+ * Calculate required cumulative XP to reach the next level.
+ * Level 1 -> 1,000 XP (reaches Level 2)
+ * Level 2 -> 2,500 XP (reaches Level 3)
+ * Level 3 -> 4,500 XP (reaches Level 4)
+ * Level 4 -> 7,000 XP (reaches Level 5)
+ * Formula: 250 * L^2 + 750 * L
+ * @param {number} level
+ * @returns {number}
+ */
+export function getRequiredXPForLevel(level) {
+  const lvl = Math.max(1, Number(level) || 1);
+  return 250 * lvl * lvl + 750 * lvl;
+}
+
 export class DCCActor extends Actor {
   /** @override */
   async _preCreate(data, options, user) {
@@ -232,6 +247,78 @@ export class DCCActor extends Actor {
         item.itemSources = gearData ? gearData.sources.join(', ') : '';
       }
     }
+
+    // -------------------------------------------------------------------------
+    // EXPERIENCE & LEVEL PROGRESSION (Crawlers)
+    // -------------------------------------------------------------------------
+    if (this.type === 'crawler' && system.details) {
+      system.details.xp = system.details.xp || {};
+      const lvl = Math.max(1, Number(system.details.level) || 1);
+      const levelMinXP = (lvl > 1) ? (250 * (lvl - 1) * (lvl - 1) + 750 * (lvl - 1)) : 0;
+      const levelMaxXP = 250 * lvl * lvl + 750 * lvl;
+      const levelSpan = Math.max(1, levelMaxXP - levelMinXP);
+      
+      const currentXP = Number(system.details.xp.value) || 0;
+      system.details.xp.value = currentXP;
+      system.details.xp.min = levelMinXP;
+      system.details.xp.max = levelMaxXP;
+      system.details.xp.toNext = Math.max(0, levelMaxXP - currentXP);
+      system.details.xp.levelSpan = levelSpan;
+      const progressInLevel = Math.max(0, currentXP - levelMinXP);
+      system.details.xp.pct = Math.min(100, Math.max(0, Math.round((progressInLevel / levelSpan) * 100)));
+    }
+  }
+
+  /**
+   * Award experience points to a crawler, automatically checking for level advancements.
+   * @param {number} amount - XP amount to add
+   * @param {object} [options={}]
+   * @param {boolean} [options.notify=true] - Whether to post a ChatMessage on level up
+   * @returns {Promise<object|null>}
+   */
+  async awardExperience(amount, { notify = true } = {}) {
+    if (this.type !== 'crawler') return null;
+    const add = Math.max(0, Number(amount) || 0);
+    const currentXP = Number(this.system.details?.xp?.value) || 0;
+    const newXP = currentXP + add;
+    const currentLevel = Math.max(1, Number(this.system.details?.level) || 1);
+    
+    // Check if newXP crosses any level thresholds
+    let newLevel = currentLevel;
+    while (newXP >= getRequiredXPForLevel(newLevel)) {
+      newLevel++;
+    }
+
+    const leveledUp = newLevel > currentLevel;
+    await this.update({
+      'system.details.xp.value': newXP,
+      'system.details.level': newLevel
+    });
+
+    if (leveledUp && notify && globalThis.ChatMessage?.create) {
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: `
+          <div class="dcc-chat-card dcc-level-up-card" style="border: 2px solid #f39c12; background: #1a1a1a; color: #fff; padding: 10px; border-radius: 4px; font-family: 'Oswald', sans-serif;">
+            <h3 style="color: #f1c40f; margin: 0 0 6px 0; font-size: 16px;">
+              <i class="fa-solid fa-angles-up"></i> LEVEL UP!
+            </h3>
+            <p style="margin: 0 0 4px 0; font-size: 13px;"><strong>${this.name}</strong> advanced from Level <strong>${currentLevel}</strong> to Level <strong>${newLevel}</strong>!</p>
+            <p style="margin: 0; font-size: 11px; color: #bdc3c7;">Total Experience: <strong>${newXP} XP</strong></p>
+          </div>
+        `
+      });
+    }
+
+    return {
+      actor: this,
+      oldXP: currentXP,
+      newXP,
+      oldLevel: currentLevel,
+      newLevel,
+      leveledUp,
+      added: add
+    };
   }
 
   /**

@@ -248,4 +248,53 @@ test('DCC RPG Combat History & Encounter Archive Suite', async (t) => {
     assert.equal(trackerData.canStepPrev, false, 'canStepPrev is false at Round 1');
     assert.equal(trackerData.canStepNext, true, 'canStepNext is true at Round 1');
   });
+
+  await t.test('7. Selecting Older Combats, Dropdown Navigation & Search Filter', async () => {
+    // Add multiple archived battles across different times
+    const now = Date.now();
+    const battleOlder = {
+      id: 'archive-older-1',
+      name: 'Goblin Ambush Early',
+      timestamp: now - 100000,
+      dateString: '9/10/2026, 1:00 PM',
+      totalRounds: 2,
+      combatants: [{ id: 'c1', name: 'Goblin' }]
+    };
+    const battleNewer = {
+      id: 'archive-newer-2',
+      name: 'Dragon Lair Boss',
+      timestamp: now + 100000,
+      dateString: '9/14/2026, 5:00 PM',
+      totalRounds: 5,
+      combatants: [{ id: 'c2', name: 'Dragon' }]
+    };
+
+    await DCCCombat.saveArchivedCombat(battleOlder);
+    await DCCCombat.saveArchivedCombat(battleNewer);
+
+    const app = new DCCCombatArchiveApp();
+    let data = await app.getData();
+
+    // Verify all combats are available and sorted newest first
+    assert.ok(data.combats.length >= 2, 'Multiple combats available');
+    assert.equal(data.combats[0].id, 'archive-newer-2', 'Newest combat first by default');
+
+    // Select older combat
+    app.selectedCombatId = 'archive-older-1';
+    data = await app.getData();
+    assert.equal(data.selectedCombat.id, 'archive-older-1', 'Successfully selected older combat');
+    assert.equal(data.selectedCombat.name, 'Goblin Ambush Early');
+    assert.ok(data.prevCombat, 'Has prevCombat in list');
+
+    // Test search filter
+    app.searchQuery = 'Dragon';
+    data = await app.getData();
+    assert.equal(data.combats.length, 1, 'Search filters to matching battle');
+    assert.equal(data.combats[0].name, 'Dragon Lair Boss');
+
+    // Clear search filter
+    app.searchQuery = '';
+    data = await app.getData();
+    assert.ok(data.combats.length >= 2, 'Clearing search restores all battles');
+  });
 });

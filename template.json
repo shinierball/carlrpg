@@ -37,6 +37,11 @@
         "class": "",
         "gender": "",
         "level": 1,
+        "xp": {
+          "value": 0,
+          "max": 1000,
+          "pct": 0
+        },
         "deity": "",
         "popularity": "",
         "pastTrauma": "",
@@ -96,6 +101,7 @@
       "templates": ["baseStats"],
       "details": {
         "level": 1,
+        "xpValue": 0,
         "notes": "",
         "special": ""
       }

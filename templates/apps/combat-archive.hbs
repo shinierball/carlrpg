@@ -1,171 +1,439 @@
-<div class="dcc-archive-window flexcol">
-  <header class="dcc-archive-header flexrow">
+<div class="dcc-archive-window">
+  <!-- Top App Header -->
+  <header class="dcc-archive-header">
     <h2><i class="fa-solid fa-book-skull"></i> ARCHIVED BATTLES & ENCOUNTER HISTORY</h2>
-    {{#if hasCombats}}
-      <div class="dcc-archive-header-actions flexrow">
+    {{#if selectedCombat}}
+      <div class="dcc-archive-header-actions">
+        {{#if selectedCombat.isLive}}
+          <button type="button" class="dcc-archive-save-live-btn" data-tooltip="Save this active encounter snapshot to permanent archive">
+            <i class="fa-solid fa-floppy-disk"></i> Save to Archive
+          </button>
+        {{/if}}
         <button type="button" class="dcc-archive-chat-btn" data-tooltip="Post Encounter Summary to Chat">
           <i class="fa-solid fa-comment-dots"></i> Post to Chat
         </button>
         {{#if isGM}}
-          <button type="button" class="dcc-archive-delete-btn" data-tooltip="Delete this archived encounter">
-            <i class="fa-solid fa-trash"></i> Delete Battle
-          </button>
+          {{#if selectedCombat.isArchived}}
+            <button type="button" class="dcc-archive-delete-btn" data-tooltip="Delete this archived encounter">
+              <i class="fa-solid fa-trash"></i> Delete Battle
+            </button>
+          {{/if}}
         {{/if}}
       </div>
     {{/if}}
   </header>
 
-  <div class="dcc-archive-body flexrow">
-    <!-- Left Sidebar: List of Archived Encounters -->
-    <aside class="dcc-archive-sidebar flexcol">
-      <div class="dcc-archive-sidebar-title flexrow">
-        <span>ENCOUNTERS ({{combats.length}})</span>
-        {{#if isGM}}
-          {{#if hasCombats}}
-            <button type="button" class="dcc-archive-clear-all-btn" data-tooltip="Clear All Archived Encounters">
-              <i class="fa-solid fa-dumpster-fire"></i> Clear All
-            </button>
-          {{/if}}
+  <!-- Quick Combat Selector Bar -->
+  <nav class="dcc-archive-nav-bar">
+    <div class="dcc-archive-encounter-picker">
+      <span class="dcc-picker-label"><i class="fa-solid fa-swords"></i> SELECT ENCOUNTER:</span>
+      <button type="button" class="dcc-archive-nav-btn prev-combat" data-tooltip="Previous Encounter" data-combat-id="{{prevCombat.id}}" {{#unless prevCombat}}disabled{{/unless}}>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <select class="dcc-archive-combat-select" aria-label="Select Combat Encounter">
+        {{#if hasCombats}}
+          {{#each combats as |combat|}}
+            <option value="{{combat.id}}" {{#if (eq combat.id ../selectedCombat.id)}}selected{{/if}}>
+              {{combat.name}} — {{combat.dateString}} ({{combat.totalRounds}} Rds){{#if combat.isLive}} [ACTIVE]{{/if}}
+            </option>
+          {{/each}}
+        {{else}}
+          <option value="">No combat encounters found</option>
         {{/if}}
+      </select>
+      <button type="button" class="dcc-archive-nav-btn next-combat" data-tooltip="Next Encounter" data-combat-id="{{nextCombat.id}}" {{#unless nextCombat}}disabled{{/unless}}>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    <span class="dcc-archive-count-badge">{{combats.length}} Battle{{#unless (eq combats.length 1)}}s{{/unless}}</span>
+  </nav>
+
+  <!-- Main Body: Sidebar + Scrollable Content -->
+  <div class="dcc-archive-body">
+    <!-- Left Sidebar: List of Archived Encounters -->
+    <aside class="dcc-archive-sidebar">
+      <div class="dcc-archive-sidebar-header">
+        <div class="dcc-archive-sidebar-title">
+          <span>ALL ENCOUNTERS ({{combats.length}})</span>
+          {{#if isGM}}
+            {{#if hasCombats}}
+              <button type="button" class="dcc-archive-clear-all-btn" data-tooltip="Clear All Archived Encounters">
+                <i class="fa-solid fa-dumpster-fire"></i> Clear All
+              </button>
+            {{/if}}
+          {{/if}}
+        </div>
+        <div class="dcc-archive-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="dcc-archive-search" placeholder="Filter battles..." value="{{searchQuery}}" />
+        </div>
       </div>
 
       <ul class="dcc-archive-list">
         {{#if hasCombats}}
           {{#each combats as |combat|}}
             <li class="dcc-archive-item {{#if (eq combat.id ../selectedCombat.id)}}active{{/if}}" data-combat-id="{{combat.id}}">
-              <div class="dcc-archive-item-header flexrow">
-                <span class="dcc-archive-item-name" title="{{combat.name}}">{{combat.name}}</span>
-                <span class="dcc-archive-item-rounds">{{combat.totalRounds}} Rds</span>
+              <div class="dcc-archive-item-radio">
+                {{#if (eq combat.id ../selectedCombat.id)}}
+                  <i class="fa-solid fa-circle-dot" style="color: #c0392b;"></i>
+                {{else}}
+                  <i class="fa-regular fa-circle" style="color: #95a5a6;"></i>
+                {{/if}}
               </div>
-              <div class="dcc-archive-item-meta flexrow">
-                <span class="dcc-archive-item-date">{{combat.dateString}}</span>
-                <span class="dcc-archive-item-count">{{combat.combatants.length}} Combatants</span>
+              <div class="dcc-archive-item-content">
+                <div class="dcc-archive-item-header">
+                  <span class="dcc-archive-item-name" title="{{combat.name}}">{{combat.name}}</span>
+                  {{#if combat.isLive}}
+                    <span class="dcc-live-badge">LIVE</span>
+                  {{else}}
+                    <span class="dcc-archive-item-rounds">{{combat.totalRounds}} Rds</span>
+                  {{/if}}
+                </div>
+                <div class="dcc-archive-item-meta">
+                  <span class="dcc-archive-item-date">{{combat.dateString}}</span>
+                  <span class="dcc-archive-item-count">{{combat.combatants.length}} Combatants</span>
+                </div>
               </div>
             </li>
           {{/each}}
         {{else}}
-          <li class="dcc-archive-empty">No archived encounters yet. Complete a combat encounter to see it archived here!</li>
+          <li class="dcc-archive-empty">No combat encounters match your search.</li>
         {{/if}}
       </ul>
     </aside>
 
-    <!-- Right Content: Selected Encounter Details & Round Inspector -->
-    <main class="dcc-archive-content flexcol">
+    <!-- Right Content: Selected Encounter Details & Inspector Views -->
+    <main class="dcc-archive-content">
       {{#if selectedCombat}}
-        <!-- Encounter Meta Banner -->
-        <div class="dcc-archive-encounter-hero flexcol">
-          <div class="dcc-hero-title-row flexrow">
-            <h3 class="dcc-hero-title">{{selectedCombat.name}}</h3>
-            {{#if selectedCombat.isSurpriseRound}}
-              <span class="dcc-surprise-badge"><i class="fa-solid fa-bolt"></i> SURPRISE ROUND INITIATION</span>
-            {{/if}}
-          </div>
-          
-          <div class="dcc-hero-stats flexrow">
-            <div class="dcc-hero-stat">
-              <i class="fa-regular fa-calendar"></i> {{selectedCombat.dateString}}
-            </div>
-            <div class="dcc-hero-stat">
-              <i class="fa-solid fa-hourglass-half"></i> {{selectedCombat.totalRounds}} Total Rounds
-            </div>
-            {{#if selectedCombat.metrics.totalDamageDealt}}
-              <div class="dcc-hero-stat stat-highlight">
-                <i class="fa-solid fa-burst"></i> {{selectedCombat.metrics.totalDamageDealt}} Damage Dealt
-              </div>
-            {{/if}}
-            {{#if selectedCombat.metrics.mvp}}
-              <div class="dcc-hero-stat stat-mvp">
-                <i class="fa-solid fa-trophy"></i> MVP: {{selectedCombat.metrics.mvp.name}}
-              </div>
-            {{/if}}
-          </div>
-        </div>
-
-        <!-- Round Inspector Selector -->
-        <div class="dcc-archive-round-selector flexrow">
-          <span class="dcc-round-selector-label"><i class="fa-solid fa-clock-rotate-left"></i> ROUND INSPECTOR:</span>
-          <div class="dcc-round-nav flexrow">
-            {{#each roundsList as |r|}}
-              <button type="button" class="dcc-archive-round-btn {{#if r.active}}active{{/if}}" data-round="{{r.round}}">
-                ROUND {{r.round}}
-              </button>
-            {{/each}}
-          </div>
-        </div>
-
-        <!-- Round Timeline & Combatant Actions for Selected Round -->
-        <div class="dcc-archive-round-detail flexcol">
-          <!-- Mob Phase -->
-          <div class="dcc-archive-phase mob-phase flexcol">
-            <div class="dcc-archive-phase-header flexrow">
-              <span><i class="fa-solid fa-skull"></i> HOSTILE MOBS — ROUND {{selectedRound}}</span>
-              <span class="dcc-archive-phase-badge">{{mobCombatants.length}} MOBS</span>
-            </div>
-
-            <div class="dcc-archive-combatants-list">
-              {{#if mobCombatants.length}}
-                {{#each mobCombatants as |c|}}
-                  <div class="dcc-archive-combatant-card flexrow">
-                    <img class="dcc-archive-combatant-img" src="{{c.img}}" alt="{{c.name}}" />
-                    <div class="dcc-archive-combatant-info flexcol">
-                      <div class="dcc-archive-combatant-name flexrow">
-                        <strong>{{c.name}}</strong>
-                        <span class="dcc-archive-actions-spent">{{c.roundActions.spent}}/{{c.roundActions.max}} Actions</span>
-                      </div>
-                      <div class="dcc-archive-slots flexrow">
-                        {{#each c.slotList as |s|}}
-                          <span class="dcc-archive-slot {{#if s.filled}}filled{{else}}empty{{/if}} {{#if s.isAttack}}is-attack{{/if}}" title="{{s.label}}">
-                            <i class="{{s.icon}}"></i> {{s.label}}
-                          </span>
-                        {{/each}}
-                      </div>
-                    </div>
-                  </div>
-                {{/each}}
+        <!-- Encounter Meta Banner (Compact) -->
+        <div class="dcc-archive-encounter-hero">
+          <div class="dcc-hero-title-row">
+            <div class="dcc-hero-title-group">
+              <h3 class="dcc-hero-title">{{selectedCombat.name}}</h3>
+              {{#if selectedCombat.isLive}}
+                <span class="dcc-live-tag">ACTIVE COMBAT</span>
               {{else}}
-                <div class="dcc-archive-no-combatants">No hostiles recorded for this round.</div>
+                <span class="dcc-archived-tag">ARCHIVED</span>
+              {{/if}}
+              {{#if selectedCombat.isSurpriseRound}}
+                <span class="dcc-surprise-badge"><i class="fa-solid fa-bolt"></i> SURPRISE ROUND</span>
               {{/if}}
             </div>
-          </div>
-
-          <!-- Crawler Phase -->
-          <div class="dcc-archive-phase crawler-phase flexcol">
-            <div class="dcc-archive-phase-header flexrow">
-              <span><i class="fa-solid fa-shield-halved"></i> CRAWLERS & ALLIES — ROUND {{selectedRound}}</span>
-              <span class="dcc-archive-phase-badge">{{crawlerCombatants.length}} CRAWLERS</span>
-            </div>
-
-            <div class="dcc-archive-combatants-list">
-              {{#if crawlerCombatants.length}}
-                {{#each crawlerCombatants as |c|}}
-                  <div class="dcc-archive-combatant-card flexrow">
-                    <img class="dcc-archive-combatant-img" src="{{c.img}}" alt="{{c.name}}" />
-                    <div class="dcc-archive-combatant-info flexcol">
-                      <div class="dcc-archive-combatant-name flexrow">
-                        <strong>{{c.name}}</strong>
-                        <span class="dcc-archive-actions-spent">{{c.roundActions.spent}}/{{c.roundActions.max}} Actions</span>
-                      </div>
-                      <div class="dcc-archive-slots flexrow">
-                        {{#each c.slotList as |s|}}
-                          <span class="dcc-archive-slot {{#if s.filled}}filled{{else}}empty{{/if}} {{#if s.isAttack}}is-attack{{/if}} {{#if s.isBonus}}is-bonus{{/if}}" title="{{s.label}}">
-                            <i class="{{s.icon}}"></i> {{s.label}}
-                          </span>
-                        {{/each}}
-                      </div>
-                    </div>
-                  </div>
-                {{/each}}
-              {{else}}
-                <div class="dcc-archive-no-combatants">No crawlers recorded for this round.</div>
+            <div class="dcc-hero-stats">
+              <span class="dcc-hero-stat"><i class="fa-regular fa-calendar"></i> {{selectedCombat.dateString}}</span>
+              <span class="dcc-hero-stat"><i class="fa-solid fa-hourglass-half"></i> {{selectedCombat.totalRounds}} Rds</span>
+              {{#if selectedCombat.metrics.totalDamageDealt}}
+                <span class="dcc-hero-stat stat-highlight"><i class="fa-solid fa-burst"></i> {{selectedCombat.metrics.totalDamageDealt}} Dmg</span>
+              {{/if}}
+              {{#if selectedCombat.metrics.mvp}}
+                <span class="dcc-hero-stat stat-mvp"><i class="fa-solid fa-trophy"></i> MVP: {{selectedCombat.metrics.mvp.name}}</span>
               {{/if}}
             </div>
           </div>
         </div>
+
+        <!-- Mode Navigation Tabs: Timeline vs Experience & Level Tracker -->
+        <div class="dcc-archive-tab-bar">
+          <button type="button" class="dcc-archive-tab-btn {{#if (eq activeView 'timeline')}}active{{/if}}" data-view="timeline">
+            <i class="fa-solid fa-clock-rotate-left"></i> ROUND ACTIONS TIMELINE
+          </button>
+          <button type="button" class="dcc-archive-tab-btn {{#if (eq activeView 'experience')}}active{{/if}}" data-view="experience">
+            <i class="fa-solid fa-trophy"></i> EXPERIENCE & LEVEL TRACKER
+            {{#if xpSummary.isAwarded}}
+              <span class="dcc-xp-awarded-pill"><i class="fa-solid fa-circle-check"></i> AWARDED</span>
+            {{/if}}
+          </button>
+        </div>
+
+        {{#if (eq activeView 'timeline')}}
+          <!-- Round Inspector Selector -->
+          <div class="dcc-archive-round-selector">
+            <span class="dcc-round-selector-label"><i class="fa-solid fa-clock-rotate-left"></i> ROUND INSPECTOR:</span>
+            <div class="dcc-round-nav">
+              {{#each roundsList as |r|}}
+                <button type="button" class="dcc-archive-round-btn {{#if r.active}}active{{/if}}" data-round="{{r.round}}">
+                  ROUND {{r.round}}
+                </button>
+              {{/each}}
+            </div>
+          </div>
+
+          <!-- Round Timeline & Combatant Actions for Selected Round -->
+          <div class="dcc-archive-round-detail">
+            <!-- Mob Phase -->
+            <div class="dcc-archive-phase mob-phase">
+              <div class="dcc-archive-phase-header">
+                <span><i class="fa-solid fa-skull"></i> HOSTILE MOBS — ROUND {{selectedRound}}</span>
+                <span class="dcc-archive-phase-badge">{{mobCombatants.length}} MOBS</span>
+              </div>
+
+              <div class="dcc-archive-combatants-list">
+                {{#if mobCombatants.length}}
+                  {{#each mobCombatants as |c|}}
+                    <div class="dcc-archive-combatant-card">
+                      <img class="dcc-archive-combatant-img" src="{{c.img}}" alt="{{c.name}}" />
+                      <div class="dcc-archive-combatant-info">
+                        <div class="dcc-archive-combatant-name">
+                          <strong class="dcc-combatant-title">{{c.name}}</strong>
+                          <span class="dcc-archive-actions-spent">{{c.roundActions.spent}} / {{c.roundActions.max}} Actions Used</span>
+                        </div>
+                        <div class="dcc-archive-slots">
+                          {{#each c.slotList as |s|}}
+                            <span class="dcc-archive-slot {{#if s.filled}}filled{{else}}empty{{/if}} {{#if s.isAttack}}is-attack{{/if}} {{#if s.isBonus}}is-bonus{{/if}}" title="{{s.label}}">
+                              <i class="{{s.icon}}"></i> {{s.label}}
+                            </span>
+                          {{/each}}
+                        </div>
+                      </div>
+                    </div>
+                  {{/each}}
+                {{else}}
+                  <div class="dcc-archive-no-combatants">No hostiles recorded for this round.</div>
+                {{/if}}
+              </div>
+            </div>
+
+            <!-- Crawler Phase -->
+            <div class="dcc-archive-phase crawler-phase">
+              <div class="dcc-archive-phase-header">
+                <span><i class="fa-solid fa-shield-halved"></i> CRAWLERS & ALLIES — ROUND {{selectedRound}}</span>
+                <span class="dcc-archive-phase-badge">{{crawlerCombatants.length}} CRAWLERS</span>
+              </div>
+
+              <div class="dcc-archive-combatants-list">
+                {{#if crawlerCombatants.length}}
+                  {{#each crawlerCombatants as |c|}}
+                    <div class="dcc-archive-combatant-card">
+                      <img class="dcc-archive-combatant-img" src="{{c.img}}" alt="{{c.name}}" />
+                      <div class="dcc-archive-combatant-info">
+                        <div class="dcc-archive-combatant-name">
+                          <strong class="dcc-combatant-title">{{c.name}}</strong>
+                          <span class="dcc-archive-actions-spent">{{c.roundActions.spent}} / {{c.roundActions.max}} Actions Used</span>
+                        </div>
+                        <div class="dcc-archive-slots">
+                          {{#each c.slotList as |s|}}
+                            <span class="dcc-archive-slot {{#if s.filled}}filled{{else}}empty{{/if}} {{#if s.isAttack}}is-attack{{/if}} {{#if s.isBonus}}is-bonus{{/if}}" title="{{s.label}}">
+                              <i class="{{s.icon}}"></i> {{s.label}}
+                            </span>
+                          {{/each}}
+                        </div>
+                      </div>
+                    </div>
+                  {{/each}}
+                {{else}}
+                  <div class="dcc-archive-no-combatants">No crawlers recorded for this round.</div>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+        {{else}}
+          <!-- EXPERIENCE & LEVEL PROGRESSION PANEL -->
+          <div class="dcc-archive-xp-panel">
+            <!-- Pool & Action Header -->
+            <div class="dcc-xp-pool-card">
+              <div class="dcc-xp-pool-info">
+                <div class="dcc-xp-pool-badge-wrapper">
+                  <span class="dcc-xp-pool-label"><i class="fa-solid fa-coins"></i> ENCOUNTER XP POOL:</span>
+                  {{#if isGM}}
+                    <input type="number" class="dcc-xp-pool-input" value="{{customXPPool}}" placeholder="{{xpSummary.calculatedMobPool}}" title="Override Total Encounter XP Pool" />
+                    <span class="dcc-xp-pool-unit">XP</span>
+                  {{else}}
+                    <strong class="dcc-xp-pool-val">{{xpSummary.totalPool}} XP</strong>
+                  {{/if}}
+                </div>
+                <div class="dcc-xp-pool-meta">
+                  <span>Based on <strong>{{xpSummary.mobs.length}}</strong> Defeated Mob{{#unless (eq xpSummary.mobs.length 1)}}s{{/unless}}</span>
+                  <span>Total Crawler Damage Dealt: <strong>{{xpSummary.totals.damageDealt}} HP</strong></span>
+                  <span>Total Crawler Damage Taken: <strong>{{xpSummary.totals.damageTaken}} HP</strong></span>
+                </div>
+              </div>
+
+              {{#if isGM}}
+                <div class="dcc-xp-actions-group">
+                  {{#if xpSummary.isAwarded}}
+                    <div class="dcc-xp-awarded-banner">
+                      <i class="fa-solid fa-circle-check"></i> XP AWARDED
+                    </div>
+                    <button type="button" class="dcc-archive-undo-xp-btn" title="Undo experience distribution for this battle">
+                      <i class="fa-solid fa-rotate-left"></i> Undo Award
+                    </button>
+                  {{else}}
+                    <button type="button" class="dcc-archive-award-xp-btn" title="Distribute calculated XP to all crawlers">
+                      <i class="fa-solid fa-award"></i> Award Experience to Crawlers
+                    </button>
+                  {{/if}}
+                </div>
+              {{/if}}
+            </div>
+
+            <!-- Configurable XP Allocation Weights Bar (GM Controls) -->
+            {{#if isGM}}
+              <div class="dcc-xp-weights-card">
+                <div class="dcc-xp-weights-header">
+                  <span class="dcc-weights-title"><i class="fa-solid fa-sliders"></i> XP ALLOCATION WEIGHTS</span>
+                  <div class="dcc-weights-actions">
+                    <button type="button" class="dcc-xp-reset-weights-btn" title="Reset Weights to Defaults">
+                      <i class="fa-solid fa-arrow-rotate-left"></i> Reset Defaults
+                    </button>
+                    <button type="button" class="dcc-xp-save-defaults-btn" title="Save current weights as system defaults">
+                      <i class="fa-solid fa-floppy-disk"></i> Save Defaults
+                    </button>
+                  </div>
+                </div>
+                <div class="dcc-xp-weights-grid">
+                  <div class="dcc-xp-weight-col">
+                    <span class="dcc-weight-label">Damage Dealt</span>
+                    <div class="dcc-weight-input-wrapper">
+                      <input type="number" class="dcc-xp-weight-input" data-weight-key="damageDealt" value="{{customXPWeights.damageDealt}}" min="0" max="100" />
+                      <span>%</span>
+                    </div>
+                  </div>
+                  <div class="dcc-xp-weight-col">
+                    <span class="dcc-weight-label">Damage Taken</span>
+                    <div class="dcc-weight-input-wrapper">
+                      <input type="number" class="dcc-xp-weight-input" data-weight-key="damageTaken" value="{{customXPWeights.damageTaken}}" min="0" max="100" />
+                      <span>%</span>
+                    </div>
+                  </div>
+                  <div class="dcc-xp-weight-col">
+                    <span class="dcc-weight-label">Defensive Skills</span>
+                    <div class="dcc-weight-input-wrapper">
+                      <input type="number" class="dcc-xp-weight-input" data-weight-key="defensive" value="{{customXPWeights.defensive}}" min="0" max="100" />
+                      <span>%</span>
+                    </div>
+                    <span class="dcc-weight-hint">Taunt, Catcher, Evade</span>
+                  </div>
+                  <div class="dcc-xp-weight-col">
+                    <span class="dcc-weight-label">Tactical Skills</span>
+                    <div class="dcc-weight-input-wrapper">
+                      <input type="number" class="dcc-xp-weight-input" data-weight-key="tactical" value="{{customXPWeights.tactical}}" min="0" max="100" />
+                      <span>%</span>
+                    </div>
+                    <span class="dcc-weight-hint">Call a Play, Intervene, Clues</span>
+                  </div>
+                  <div class="dcc-xp-weight-col">
+                    <span class="dcc-weight-label">Buffing / Support</span>
+                    <div class="dcc-weight-input-wrapper">
+                      <input type="number" class="dcc-xp-weight-input" data-weight-key="buff" value="{{customXPWeights.buff}}" min="0" max="100" />
+                      <span>%</span>
+                    </div>
+                    <span class="dcc-weight-hint">Heal, Help, Buff Spells</span>
+                  </div>
+                </div>
+              </div>
+            {{/if}}
+
+            <!-- Crawler Experience Distribution Table -->
+            <div class="dcc-xp-table-wrapper">
+              <table class="dcc-xp-table">
+                <thead>
+                  <tr>
+                    <th style="width: 170px;">Crawler</th>
+                    <th style="text-align: center;">Damage Done</th>
+                    <th style="text-align: center;">Damage Taken</th>
+                    <th style="text-align: center;">Defensive</th>
+                    <th style="text-align: center;">Tactical / Buff</th>
+                    <th style="text-align: center;">Share %</th>
+                    <th style="text-align: center;">XP Award</th>
+                    <th style="width: 190px;">Level Progression</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#if xpSummary.crawlers.length}}
+                    {{#each xpSummary.crawlers as |c|}}
+                      <tr class="{{#if c.willLevelUp}}is-level-up{{/if}}">
+                        <td>
+                          <div class="dcc-xp-crawler-cell">
+                            <img class="dcc-xp-avatar" src="{{c.img}}" alt="{{c.name}}" />
+                            <div class="dcc-xp-crawler-name-group">
+                              <strong>{{c.name}}</strong>
+                              <span class="dcc-xp-current-level">Level {{c.currentLevel}}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td style="text-align: center;">
+                          <strong class="dcc-stat-val">{{c.damageDealt}} HP</strong>
+                          <span class="dcc-stat-sub">({{c.pctDamageDealt}}%)</span>
+                        </td>
+                        <td style="text-align: center;">
+                          <strong class="dcc-stat-val">{{c.damageTaken}} HP</strong>
+                          <span class="dcc-stat-sub">({{c.pctDamageTaken}}%)</span>
+                        </td>
+                        <td style="text-align: center;">
+                          <span class="dcc-action-badge defensive" title="Defensive skill uses (Taunt, Catcher, Evade)">
+                            <i class="fa-solid fa-shield-halved"></i> {{c.defensiveCount}}
+                          </span>
+                        </td>
+                        <td style="text-align: center;">
+                          <div class="dcc-action-badge-group">
+                            <span class="dcc-action-badge tactical" title="Tactical skill uses (Call a Play, Intervene, Clues)">
+                              <i class="fa-solid fa-clipboard-list"></i> {{c.tacticalCount}}
+                            </span>
+                            <span class="dcc-action-badge buff" title="Buffing skill uses (Heal, Help)">
+                              <i class="fa-solid fa-hand-holding-medical"></i> {{c.buffCount}}
+                            </span>
+                          </div>
+                        </td>
+                        <td style="text-align: center;">
+                          <strong class="dcc-share-pct">{{c.pct}}%</strong>
+                        </td>
+                        <td style="text-align: center;">
+                          <strong class="dcc-xp-award-val">+{{c.xpAward}} XP</strong>
+                        </td>
+                        <td>
+                          <div class="dcc-xp-progress-cell">
+                            <div class="dcc-xp-level-preview">
+                              <span>Lv. {{c.currentLevel}}</span>
+                              {{#if c.willLevelUp}}
+                                <i class="fa-solid fa-arrow-right"></i>
+                                <strong class="dcc-level-up-tag"><i class="fa-solid fa-angles-up"></i> LV. {{c.projectedLevel}}!</strong>
+                              {{else}}
+                                <span class="dcc-xp-to-next">({{c.projectedXP}} XP)</span>
+                              {{/if}}
+                            </div>
+                            <div class="dcc-xp-dual-bar">
+                              <div class="dcc-xp-fill-current" style="width: 100%;"></div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    {{/each}}
+                  {{else}}
+                    <tr>
+                      <td colspan="8" class="dcc-archive-empty">No crawlers participated in this battle.</td>
+                    </tr>
+                  {{/if}}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobs Fought Breakdown Section -->
+            {{#if xpSummary.mobs.length}}
+              <div class="dcc-xp-mobs-card">
+                <div class="dcc-xp-mobs-title">
+                  <i class="fa-solid fa-skull"></i> DEFEATED MOBS & BASE XP BREAKDOWN
+                </div>
+                <div class="dcc-xp-mobs-list">
+                  {{#each xpSummary.mobs as |m|}}
+                    <div class="dcc-mob-xp-pill">
+                      <img class="dcc-mob-xp-img" src="{{m.img}}" alt="{{m.name}}" />
+                      <div class="dcc-mob-xp-info">
+                        <strong>{{m.name}}</strong>
+                        <span>Lv. {{m.level}} • {{m.maxHp}} HP</span>
+                      </div>
+                    </div>
+                  {{/each}}
+                </div>
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
 
       {{else}}
-        <div class="dcc-archive-empty-placeholder flexcol">
+        <div class="dcc-archive-empty-placeholder">
           <i class="fa-solid fa-book-open-reader"></i>
-          <p>Select an archived encounter on the left to view its round timeline and action history.</p>
+          <p>No encounters found. Run and end a combat encounter to view its action history here.</p>
         </div>
       {{/if}}
     </main>

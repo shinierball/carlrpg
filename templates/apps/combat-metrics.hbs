@@ -4,8 +4,21 @@
     <div class="dcc-metrics-title-group">
       <i class="fa-solid fa-trophy dcc-trophy-icon"></i>
       <div>
-        <h2 class="dcc-metrics-main-title">COMBAT PERFORMANCE & AI AWARDS</h2>
-        <span class="dcc-metrics-subtitle">Dungeon Crawler Performance Analysis • Real Damage Tracking</span>
+        <h2 class="dcc-metrics-main-title">
+          COMBAT PERFORMANCE & AI AWARDS
+          {{#if isArchived}}
+            <span class="dcc-badge-archived" title="Viewing Permanently Archived Encounter">
+              <i class="fa-solid fa-box-archive"></i> ARCHIVED
+            </span>
+          {{/if}}
+        </h2>
+        <span class="dcc-metrics-subtitle">
+          {{#if isArchived}}
+            Post-Battle Analysis & Awarding • {{combatName}} ({{totalRounds}} Rounds • {{dateString}})
+          {{else}}
+            Dungeon Crawler Performance Analysis • Real Damage Tracking
+          {{/if}}
+        </span>
       </div>
     </div>
 
@@ -14,16 +27,32 @@
         <div class="dcc-metrics-combat-select-wrapper">
           <label><i class="fa-solid fa-swords"></i> Encounter:</label>
           <select class="dcc-combat-select">
-            {{#each allCombats}}
-              <option value="{{this.id}}" {{#if (eq this.id ../selectedCombatId)}}selected{{/if}}>
-                {{this.name}}{{#if this.isActive}} ★{{/if}}
-              </option>
-            {{/each}}
+            {{#if activeCombats.length}}
+              <optgroup label="Active Encounters">
+                {{#each activeCombats}}
+                  <option value="{{this.id}}" {{#if (eq this.id ../selectedCombatId)}}selected{{/if}}>
+                    ★ {{this.name}} (Round {{this.round}})
+                  </option>
+                {{/each}}
+              </optgroup>
+            {{/if}}
+            {{#if archivedCombats.length}}
+              <optgroup label="Archived Battles (History)">
+                {{#each archivedCombats}}
+                  <option value="{{this.id}}" {{#if (eq this.id ../selectedCombatId)}}selected{{/if}}>
+                    📜 {{this.name}} ({{this.dateString}} • {{this.totalRounds}} Rds)
+                  </option>
+                {{/each}}
+              </optgroup>
+            {{/if}}
           </select>
         </div>
       {{/if}}
 
       {{#if hasCombat}}
+        <button type="button" class="dcc-open-archive-btn" title="Open in Combat Archive Dialog with round-by-round timeline">
+          <i class="fa-solid fa-clock-rotate-left"></i> Timeline
+        </button>
         <button type="button" class="dcc-reset-metrics-btn" title="Reset all tracked metrics for this encounter">
           <i class="fa-solid fa-rotate-left"></i> Reset
         </button>
@@ -34,6 +63,55 @@
   {{!-- MAIN CONTENT AREA --}}
   <div class="dcc-metrics-body">
     {{#if hasCombat}}
+      {{!-- Post-Battle XP & Level Progression Banner --}}
+      {{#if xpInfo}}
+        <div class="dcc-metrics-xp-banner">
+          <div class="dcc-xp-banner-info">
+            <i class="fa-solid fa-graduation-cap dcc-xp-cap-icon"></i>
+            <div>
+              <div class="dcc-xp-banner-title">
+                Encounter Experience Pool: <strong>{{xpInfo.totalPool}} XP</strong>
+                {{#if isArchived}}
+                  <span class="dcc-xp-status-tag" style="font-size: 10px; background: #2c3e50; color: #fff; padding: 1px 6px; border-radius: 2px; margin-left: 6px;">
+                    <i class="fa-solid fa-calendar-days"></i> {{dateString}}
+                  </span>
+                {{/if}}
+              </div>
+              <span class="dcc-xp-banner-desc">
+                {{xpInfo.mobs.length}} Defeated Mobs • {{xpInfo.crawlers.length}} Participating Crawlers
+              </span>
+            </div>
+          </div>
+          <div class="dcc-xp-banner-actions">
+            {{#if xpInfo.isAwarded}}
+              <span class="dcc-xp-awarded-pill"><i class="fa-solid fa-check"></i> XP AWARDED</span>
+              <button type="button" class="dcc-undo-encounter-xp-btn" title="Undo this encounter's XP award">
+                <i class="fa-solid fa-rotate-left"></i> Undo XP
+              </button>
+            {{else}}
+              <button type="button" class="dcc-award-encounter-xp-btn" title="Calculate and allocate experience to all participating crawlers">
+                <i class="fa-solid fa-award"></i> Award Encounter XP (+{{xpInfo.totalPool}} XP)
+              </button>
+            {{/if}}
+          </div>
+        </div>
+      {{/if}}
+
+      {{!-- Previously Dispatched AI Awards --}}
+      {{#if hasPreviousAwards}}
+        <div class="dcc-previous-awards-section">
+          <h4 class="dcc-section-label"><i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> AI Awards Dispatched In This Battle</h4>
+          <div class="dcc-previous-awards-list">
+            {{#each previousAwards}}
+              <div class="dcc-previous-award-pill" title="{{this.quote}}">
+                <strong>{{this.recipientName}}</strong>: <span style="color: #2ecc71;">{{this.rewardText}}</span>
+                {{#if this.title}}<span style="color: #aaa; font-size: 10px;">({{this.title}})</span>{{/if}}
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      {{/if}}
+
       {{#if hasCrawlers}}
         <div class="dcc-crawler-metrics-grid">
           {{#each crawlers}}
@@ -53,6 +131,10 @@
                     <span class="dcc-stat-number">{{this.totalDamage}}</span>
                     <span class="dcc-stat-label">Net Damage</span>
                   </div>
+                  <div class="dcc-stat-box dcc-stat-damage-taken">
+                    <span class="dcc-stat-number" style="color: #3498db;">{{this.damageTaken}}</span>
+                    <span class="dcc-stat-label">Damage Taken</span>
+                  </div>
                 </div>
               </div>
 
@@ -65,6 +147,10 @@
                 <div class="dcc-kpi-pill" title="Enemies finished off (HP reduced to 0)">
                   <i class="fa-solid fa-skull" style="color: #c0392b;"></i>
                   <span>Kills: <strong>{{this.kills}}</strong></span>
+                </div>
+                <div class="dcc-kpi-pill" title="Total damage sustained / tanked">
+                  <i class="fa-solid fa-shield-halved" style="color: #3498db;"></i>
+                  <span>Tanked: <strong>{{this.damageTaken}}</strong></span>
                 </div>
                 <button type="button" class="dcc-adjust-damage-btn" data-actor-id="{{this.actorId}}" title="Manually adjust damage total">
                   <i class="fa-solid fa-pen-to-square"></i> Adjust
@@ -98,7 +184,7 @@
                     </tbody>
                   </table>
                 {{else}}
-                  <div class="dcc-empty-hint">No attack damage applied yet in this combat.</div>
+                  <div class="dcc-empty-hint">No attack damage recorded in this combat.</div>
                 {{/if}}
               </div>
 
@@ -114,7 +200,7 @@
                     {{/each}}
                   </div>
                 {{else}}
-                  <div class="dcc-empty-hint">No tactical skills rolled in this combat yet.</div>
+                  <div class="dcc-empty-hint">No tactical skills recorded in this combat yet.</div>
                 {{/if}}
               </div>
             </div>
@@ -123,14 +209,14 @@
       {{else}}
         <div class="dcc-empty-state">
           <i class="fa-solid fa-users-slash"></i>
-          <p>No combatants found in this encounter.</p>
+          <p>No crawlers found in this encounter.</p>
         </div>
       {{/if}}
     {{else}}
       <div class="dcc-empty-state">
         <i class="fa-solid fa-swords"></i>
-        <h3>NO ACTIVE COMBAT ENCOUNTER</h3>
-        <p>Start an encounter in Foundry's Combat Tracker to track crawler damage and skill performance!</p>
+        <h3>NO COMBAT ENCOUNTER SELECTED</h3>
+        <p>Select an active encounter or an archived battle from the dropdown above, or start a new encounter in Foundry's Combat Tracker!</p>
       </div>
     {{/if}}
   </div>

@@ -6,6 +6,7 @@
  */
 
 import { DCCCombat, DCC_ACTION_TYPES } from '../documents/combat.mjs';
+import { DCCExperienceTracker } from './xp-tracker.mjs';
 
 const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
 
@@ -14,6 +15,10 @@ export class DCCCombatArchiveApp extends BaseApplication {
     super(options);
     this.selectedCombatId = options.combatId || null;
     this.selectedRound = options.round || 1;
+    this.searchQuery = '';
+    this.activeView = options.view || 'timeline';
+    this.customXPWeights = null;
+    this.customXPPool = null;
   }
 
   static get defaultOptions() {
@@ -26,10 +31,11 @@ export class DCCCombatArchiveApp extends BaseApplication {
       id: 'dcc-combat-archive',
       template: 'systems/carl-rpg/templates/apps/combat-archive.hbs',
       title: 'Archived Battles & Encounter History',
-      width: 740,
-      height: 620,
+      width: 860,
+      height: 720,
       resizable: true,
-      classes: ['dcc-sheet', 'dcc-archive-app']
+      scrollY: ['.dcc-archive-content', '.dcc-archive-list'],
+      classes: ['dcc-archive-app']
     });
   }
 
@@ -40,13 +46,87 @@ export class DCCCombatArchiveApp extends BaseApplication {
    */
   async getData(options = {}) {
     const data = (typeof super.getData === 'function') ? await super.getData(options) : {};
-    const combats = DCCCombat.getArchivedCombats() || [];
 
-    if (!this.selectedCombatId && combats.length > 0) {
-      this.selectedCombatId = combats[0].id;
+    // 1. Gather permanently archived combats
+    const archivedCombats = (DCCCombat.getArchivedCombats() || []).map(c => ({
+      ...c,
+      isArchived: true,
+      isLive: false
+    }));
+
+    // 2. Gather active or world encounters from game.combats that have not yet been archived
+    const liveCombats = [];
+    if (globalThis.game?.combats) {
+      for (const c of globalThis.game.combats) {
+        if (!archivedCombats.some(a => a.id === c.id)) {
+          const scene = c.scene || (globalThis.game?.scenes?.get ? globalThis.game.scenes.get(c.sceneId) : null);
+          const metrics = c.getFlag?.('carl-rpg', 'metrics') || c.flags?.['carl-rpg']?.metrics || {};
+          const roundHistory = c.getFlag?.('carl-rpg', 'roundHistory') || c.flags?.['carl-rpg']?.roundHistory || {};
+
+          const combatantsData = Array.from(c.combatants || []).map(con => {
+            const actor = con.actor || (globalThis.game?.actors?.get ? globalThis.game.actors.get(con.actorId) : null);
+            const isMob = DCCCombat.isMobCombatant(con);
+            return {
+              id: con.id,
+              name: con.name,
+              actorId: con.actorId,
+              img: con.img || actor?.img || 'icons/svg/mystery-man.svg',
+              type: actor?.type || (isMob ? 'npc' : 'crawler'),
+              isMob,
+              hp: actor?.system?.attributes?.hp?.value ?? null,
+              maxHp: actor?.system?.attributes?.hp?.max ?? null,
+              actions: c.getCombatantActions ? c.getCombatantActions(con) : DCCCombat.getCombatantActions(con, c)
+            };
+          });
+
+          liveCombats.push({
+            id: c.id,
+            name: c.name || (scene ? `${scene.name} Encounter` : 'Active Encounter'),
+            timestamp: c.timestamp || Date.now(),
+            dateString: new Date().toLocaleString(),
+            sceneId: c.sceneId || null,
+            sceneName: scene?.name || 'Unknown Scene',
+            totalRounds: Math.max(1, c.round || 1),
+            isSurpriseRound: Boolean(c.isSurpriseRound),
+            combatants: combatantsData,
+            roundHistory,
+            metrics: {
+              totalDamageDealt: metrics.totalDamageDealt || 0,
+              mvp: metrics.mvp || null,
+              awards: metrics.awards || [],
+              events: metrics.events || []
+            },
+            isArchived: false,
+            isLive: true
+          });
+        }
+      }
     }
 
-    const selectedCombat = combats.find(c => c.id === this.selectedCombatId) || combats[0] || null;
+    // Combined combats list sorted by most recent
+    const allCombats = [...archivedCombats, ...liveCombats].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    // Filter by search query if any
+    let combats = allCombats;
+    if (this.searchQuery && this.searchQuery.trim()) {
+      const q = this.searchQuery.trim().toLowerCase();
+      combats = allCombats.filter(c => 
+        (c.name && c.name.toLowerCase().includes(q)) || 
+        (c.dateString && c.dateString.toLowerCase().includes(q))
+      );
+    }
+
+    // Default to first combat if none selected or selected doesn't exist
+    if (!this.selectedCombatId && combats.length > 0) {
+      this.selectedCombatId = combats[0].id;
+    } else if (this.selectedCombatId && !combats.some(c => c.id === this.selectedCombatId)) {
+      this.selectedCombatId = combats[0]?.id || null;
+    }
+
+    const selectedCombat = allCombats.find(c => c.id === this.selectedCombatId) || combats[0] || null;
+    const selectedIndex = combats.findIndex(c => c.id === (selectedCombat?.id));
+    const prevCombat = selectedIndex > 0 ? combats[selectedIndex - 1] : null;
+    const nextCombat = (selectedIndex >= 0 && selectedIndex < combats.length - 1) ? combats[selectedIndex + 1] : null;
 
     let roundsList = [];
     let mobCombatants = [];
@@ -67,19 +147,24 @@ export class DCCCombatArchiveApp extends BaseApplication {
       const combatants = selectedCombat.combatants || [];
 
       for (const c of combatants) {
-        const roundActions = currentRoundData[c.id] || c.actions || { max: 2, spent: 0, bonusActionGranted: false, hasAttacked: false, slots: [] };
+        let roundActions = currentRoundData[c.id];
+        if (!roundActions && this.selectedRound === selectedCombat.totalRounds) {
+          roundActions = c.actions;
+        }
+        roundActions = roundActions || { max: 2, spent: 0, bonusActionGranted: false, hasAttacked: false, slots: [] };
         
         const slotList = [];
         for (let i = 0; i < (roundActions.max || 2); i++) {
           const slot = roundActions.slots?.[i] || null;
+          const typeDef = slot?.type ? DCC_ACTION_TYPES[slot.type] : null;
           slotList.push({
             index: i,
             isBonus: i >= 2,
             filled: Boolean(slot),
-            label: slot ? slot.label : (i >= 2 ? 'Bonus Action' : `Action ${i + 1}`),
-            icon: slot ? (slot.icon || 'fa-solid fa-circle-check') : 'fa-regular fa-circle',
-            isAttack: Boolean(slot?.isAttack),
-            isInterrupt: Boolean(slot?.isInterrupt)
+            label: slot ? (slot.label || slot.name || typeDef?.label || 'Action') : (i >= 2 ? 'Bonus Action (Unused)' : `Action ${i + 1} (Unused)`),
+            icon: slot ? (slot.icon || typeDef?.icon || 'fa-solid fa-circle-check') : 'fa-regular fa-circle',
+            isAttack: Boolean(slot?.isAttack || typeDef?.isAttack),
+            isInterrupt: Boolean(slot?.isInterrupt || typeDef?.isInterrupt)
           });
         }
 
@@ -98,15 +183,31 @@ export class DCCCombatArchiveApp extends BaseApplication {
       }
     }
 
+    const xpSummary = selectedCombat
+      ? DCCExperienceTracker.calculateEncounterXP(selectedCombat, {
+          customWeights: this.customXPWeights,
+          customPool: this.customXPPool
+        })
+      : null;
+
     return {
       ...data,
       combats,
+      allCombats,
       hasCombats: combats.length > 0,
       selectedCombat,
+      selectedIndex,
+      prevCombat,
+      nextCombat,
       selectedRound: this.selectedRound,
       roundsList,
       mobCombatants,
       crawlerCombatants,
+      searchQuery: this.searchQuery,
+      activeView: this.activeView,
+      xpSummary,
+      customXPWeights: this.customXPWeights || xpSummary?.weights,
+      customXPPool: this.customXPPool ?? xpSummary?.totalPool,
       isGM: Boolean(globalThis.game?.user?.isGM)
     };
   }
@@ -119,7 +220,38 @@ export class DCCCombatArchiveApp extends BaseApplication {
     super.activateListeners(html);
     const $html = (html instanceof jQuery) ? html : $(html);
 
-    // 1. Select encounter from sidebar list
+    // 1. Dropdown Combat Selector
+    $html.find('.dcc-archive-combat-select').change(ev => {
+      const id = ev.target.value;
+      if (id && id !== this.selectedCombatId) {
+        this.selectedCombatId = id;
+        this.selectedRound = 1;
+        this.render();
+      }
+    });
+
+    // 2. Previous / Next Combat Navigation Buttons
+    $html.find('.dcc-archive-nav-btn.prev-combat').click(ev => {
+      ev.preventDefault();
+      const prevId = $(ev.currentTarget).data('combat-id');
+      if (prevId) {
+        this.selectedCombatId = prevId;
+        this.selectedRound = 1;
+        this.render();
+      }
+    });
+
+    $html.find('.dcc-archive-nav-btn.next-combat').click(ev => {
+      ev.preventDefault();
+      const nextId = $(ev.currentTarget).data('combat-id');
+      if (nextId) {
+        this.selectedCombatId = nextId;
+        this.selectedRound = 1;
+        this.render();
+      }
+    });
+
+    // 3. Select encounter from sidebar list
     $html.find('.dcc-archive-item').click(ev => {
       ev.preventDefault();
       const id = $(ev.currentTarget).data('combat-id');
@@ -130,7 +262,20 @@ export class DCCCombatArchiveApp extends BaseApplication {
       }
     });
 
-    // 2. Select round tab
+    // 4. Search Filter Input
+    $html.find('.dcc-archive-search').on('input', ev => {
+      this.searchQuery = ev.target.value || '';
+      const query = this.searchQuery.trim().toLowerCase();
+      $html.find('.dcc-archive-item').each((i, el) => {
+        const $el = $(el);
+        const name = ($el.find('.dcc-archive-item-name').text() || '').toLowerCase();
+        const date = ($el.find('.dcc-archive-item-date').text() || '').toLowerCase();
+        const matches = !query || name.includes(query) || date.includes(query);
+        $el.toggle(matches);
+      });
+    });
+
+    // 5. Select round tab
     $html.find('.dcc-archive-round-btn').click(ev => {
       ev.preventDefault();
       const r = Number($(ev.currentTarget).data('round'));
@@ -140,7 +285,18 @@ export class DCCCombatArchiveApp extends BaseApplication {
       }
     });
 
-    // 3. Post Encounter to Chat
+    // 6. Save Active Combat to Permanent Archive
+    $html.find('.dcc-archive-save-live-btn').click(async ev => {
+      ev.preventDefault();
+      const liveCombat = (globalThis.game?.combats || []).find(c => c.id === this.selectedCombatId);
+      if (liveCombat && typeof liveCombat.archiveCombat === 'function') {
+        await liveCombat.archiveCombat();
+        ui.notifications?.info(`DCC RPG | Saved ${liveCombat.name || 'Encounter'} to permanent archive.`);
+        this.render();
+      }
+    });
+
+    // 7. Post Encounter to Chat
     $html.find('.dcc-archive-chat-btn').click(async ev => {
       ev.preventDefault();
       const combats = DCCCombat.getArchivedCombats();
@@ -177,7 +333,7 @@ export class DCCCombatArchiveApp extends BaseApplication {
       }
     });
 
-    // 4. Delete archived encounter (GM only)
+    // 8. Delete archived encounter (GM only)
     $html.find('.dcc-archive-delete-btn').click(async ev => {
       ev.preventDefault();
       const id = $(ev.currentTarget).data('combat-id') || this.selectedCombatId;
@@ -200,7 +356,7 @@ export class DCCCombatArchiveApp extends BaseApplication {
       }
     });
 
-    // 5. Clear all archived encounters (GM only)
+    // 9. Clear all archived encounters (GM only)
     $html.find('.dcc-archive-clear-all-btn').click(async ev => {
       ev.preventDefault();
       const confirmed = globalThis.Dialog?.confirm
@@ -216,6 +372,85 @@ export class DCCCombatArchiveApp extends BaseApplication {
         this.selectedRound = 1;
         this.render();
         ui.notifications?.info('DCC RPG | Cleared all archived battles.');
+      }
+    });
+
+    // 10. View Mode Tab Switching (Timeline vs Experience)
+    $html.find('.dcc-archive-tab-btn').click(ev => {
+      ev.preventDefault();
+      const view = $(ev.currentTarget).data('view');
+      if (view && view !== this.activeView) {
+        this.activeView = view;
+        this.render();
+      }
+    });
+
+    // 11. Custom XP Pool Input Change
+    $html.find('.dcc-xp-pool-input').change(ev => {
+      const val = Number(ev.target.value);
+      this.customXPPool = Number.isFinite(val) && val >= 0 ? val : null;
+      this.render();
+    });
+
+    // 12. Weight Input Changes
+    $html.find('.dcc-xp-weight-input').change(ev => {
+      const key = $(ev.currentTarget).data('weight-key');
+      const val = Math.max(0, Number(ev.target.value) || 0);
+      this.customXPWeights = this.customXPWeights || { ...DCCExperienceTracker.getXPConfig() };
+      this.customXPWeights[key] = val;
+      this.render();
+    });
+
+    // 13. Reset XP Weights to Default
+    $html.find('.dcc-xp-reset-weights-btn').click(async ev => {
+      ev.preventDefault();
+      this.customXPWeights = null;
+      this.customXPPool = null;
+      this.render();
+    });
+
+    // 14. Save Current XP Weights as Global Defaults
+    $html.find('.dcc-xp-save-defaults-btn').click(async ev => {
+      ev.preventDefault();
+      if (this.customXPWeights) {
+        await DCCExperienceTracker.saveXPConfig(this.customXPWeights);
+        if (globalThis.ui?.notifications?.info) {
+          globalThis.ui.notifications.info('DCC RPG | Saved custom XP weights as system defaults.');
+        }
+      }
+    });
+
+    // 15. Award Experience to Crawlers
+    $html.find('.dcc-archive-award-xp-btn').click(async ev => {
+      ev.preventDefault();
+      if (!this.selectedCombatId) return;
+      try {
+        await DCCExperienceTracker.awardEncounterXP(this.selectedCombatId, {
+          customWeights: this.customXPWeights,
+          customPool: this.customXPPool
+        });
+        if (globalThis.ui?.notifications?.info) {
+          globalThis.ui.notifications.info('DCC RPG | Experience awarded to crawlers.');
+        }
+        this.render();
+      } catch (err) {
+        if (globalThis.ui?.notifications?.warn) {
+          globalThis.ui.notifications.warn(err.message);
+        }
+      }
+    });
+
+    // 16. Undo Experience Award
+    $html.find('.dcc-archive-undo-xp-btn').click(async ev => {
+      ev.preventDefault();
+      if (!this.selectedCombatId) return;
+      try {
+        await DCCExperienceTracker.undoAwardEncounterXP(this.selectedCombatId);
+        this.render();
+      } catch (err) {
+        if (globalThis.ui?.notifications?.warn) {
+          globalThis.ui.notifications.warn(err.message);
+        }
       }
     });
   }

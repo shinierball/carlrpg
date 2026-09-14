@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import './setup.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp } from '../src/apps/combat-metrics.mjs';
 import { DCCActor } from '../src/documents/actor.mjs';
+import { DCCCombat } from '../src/documents/combat.mjs';
 
 class MockCombatant {
   constructor(data = {}) {
@@ -442,7 +443,6 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
     assert.equal(data.round, 3);
     assert.equal(data.crawlers.length, 2);
 
-    // Sorted descending by total damage: Beta (40) should be first, Alpha (10) second
     assert.equal(data.crawlers[0].name, 'Beta');
     assert.equal(data.crawlers[0].totalDamage, 40);
     assert.equal(data.crawlers[0].attacks[0].avg, 20); // 40 / 2
@@ -450,5 +450,161 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
 
     assert.equal(data.crawlers[1].name, 'Alpha');
     assert.equal(data.crawlers[1].totalDamage, 10);
+  });
+
+  await t.test('8. Loading Archived Combats into DCCCombatMetricsApp for Post-Battle Analysis and Awarding', async (sub) => {
+    await DCCCombat.clearArchivedCombats();
+
+    const crawlerCarl = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: { details: { level: 2, xp: { value: 1200 } }, attributes: { aiFavor: 10 } }
+    });
+    crawlerCarl.id = 'actor-carl';
+
+    const crawlerDonut = new DCCActor({
+      name: 'Princess Donut',
+      type: 'crawler',
+      system: { details: { level: 2, xp: { value: 1200 } }, attributes: { aiFavor: 15 } }
+    });
+    crawlerDonut.id = 'actor-donut';
+
+    globalThis.game.actors = {
+      get: (id) => {
+        if (id === crawlerCarl.id) return crawlerCarl;
+        if (id === crawlerDonut.id) return crawlerDonut;
+        return null;
+      }
+    };
+
+    // Construct an archived combat record
+    const archivedRecord = {
+      id: 'archived-boss-battle',
+      name: 'Floor 3 Boss Fight',
+      timestamp: Date.now() - 3600000,
+      dateString: '9/14/2026, 4:00:00 PM',
+      totalRounds: 4,
+      isSurpriseRound: false,
+      combatants: [
+        {
+          id: 'c-carl',
+          name: 'Carl',
+          actorId: crawlerCarl.id,
+          isMob: false,
+          level: 2,
+          damageDealt: 65,
+          damageTaken: 25,
+          highestHit: 30,
+          kills: 1
+        },
+        {
+          id: 'c-donut',
+          name: 'Princess Donut',
+          actorId: crawlerDonut.id,
+          isMob: false,
+          level: 2,
+          damageDealt: 45,
+          damageTaken: 5,
+          highestHit: 25,
+          kills: 0
+        },
+        {
+          id: 'c-boss',
+          name: 'Llamataur Boss',
+          actorId: 'mob-boss-id',
+          isMob: true,
+          level: 3,
+          maxHp: 100,
+          damageDealt: 30,
+          damageTaken: 110,
+          highestHit: 15,
+          kills: 0
+        }
+      ],
+      metrics: {
+        totalDamageDealt: 110,
+        mvp: null,
+        awards: [],
+        [crawlerCarl.id]: {
+          totalDamage: 65,
+          damageTaken: 25,
+          highestHit: 30,
+          kills: 1,
+          attacks: { 'Spiked Bat': { count: 3, damage: 65, type: 'Melee' } },
+          skills: { 'Catcher': 2 }
+        },
+        [crawlerDonut.id]: {
+          totalDamage: 45,
+          damageTaken: 5,
+          highestHit: 25,
+          kills: 0,
+          attacks: { 'Magic Missile': { count: 2, damage: 45, type: 'Spell' } },
+          skills: { 'Call a Play': 1 }
+        }
+      }
+    };
+
+    await DCCCombat.saveArchivedCombat(archivedRecord);
+
+    // No active combats in world
+    globalThis.game.combat = null;
+    globalThis.game.combats = [];
+
+    // Instantiate app targeting the archived combat
+    const app = new DCCCombatMetricsApp({ combatId: 'archived-boss-battle' });
+    const data = await app.getData();
+
+    assert.equal(data.hasCombat, true, 'Loads archived combat when no active combat exists');
+    assert.equal(data.isArchived, true, 'Flags encounter as archived');
+    assert.equal(data.combatName, 'Floor 3 Boss Fight');
+    assert.equal(data.round, 4);
+    assert.equal(data.totalRounds, 4);
+
+    // Mobs filtered out; only 2 crawlers displayed
+    assert.equal(data.crawlers.length, 2, 'Only crawlers in cards grid');
+    assert.equal(data.crawlers[0].name, 'Carl', 'Carl is sorted first with 65 damage');
+    assert.equal(data.crawlers[0].totalDamage, 65);
+    assert.equal(data.crawlers[0].damageTaken, 25);
+    assert.equal(data.crawlers[0].highestHit, 30);
+    assert.equal(data.crawlers[0].kills, 1);
+    assert.equal(data.crawlers[0].attacks[0].name, 'Spiked Bat');
+    assert.equal(data.crawlers[0].skills[0].name, 'Catcher');
+
+    assert.equal(data.crawlers[1].name, 'Princess Donut');
+    assert.equal(data.crawlers[1].totalDamage, 45);
+    assert.equal(data.crawlers[1].damageTaken, 5);
+
+    // Experience pool calculated for the archived encounter
+    assert.ok(data.xpInfo, 'Encounter XP computed for archived encounter');
+    assert.equal(data.xpInfo.totalPool, 500, 'Boss Level 3 (100*3 + 100*2 = 500 XP)');
+
+    // Post-battle Awarding: Dispatch AI Award for the archived encounter
+    const targetCombat = app.getTargetCombat();
+    await DCCCombatMetrics.dispatchAIAward({
+      combat: targetCombat,
+      recipientActor: crawlerCarl,
+      awardType: 'mvp',
+      customQuote: 'Unstoppable blunt force trauma.'
+    });
+
+    // Award persisted into archived record
+    const updatedArchives = DCCCombat.getArchivedCombats();
+    const updatedEncounter = updatedArchives.find(a => a.id === 'archived-boss-battle');
+    assert.equal(updatedEncounter.metrics.awards.length, 1, 'Award saved to archived encounter');
+    assert.equal(updatedEncounter.metrics.awards[0].recipientName, 'Carl');
+    assert.equal(updatedEncounter.metrics.awards[0].awardType, 'mvp');
+
+    // Post-battle adjustment: adjust damage on archived combat
+    await DCCCombatMetrics.adjustDamage(targetCombat, crawlerCarl.id, 10);
+    const afterAdjustArchives = DCCCombat.getArchivedCombats();
+    const afterAdjustEncounter = afterAdjustArchives.find(a => a.id === 'archived-boss-battle');
+    assert.equal(afterAdjustEncounter.metrics[crawlerCarl.id].totalDamage, 75, 'Adjusted damage persisted in archive');
+    assert.equal(afterAdjustEncounter.combatants.find(c => c.actorId === crawlerCarl.id).damageDealt, 75);
+
+    // Reset metrics on archived combat
+    await DCCCombatMetrics.resetMetrics(targetCombat);
+    const afterResetArchives = DCCCombat.getArchivedCombats();
+    const afterResetEncounter = afterResetArchives.find(a => a.id === 'archived-boss-battle');
+    assert.equal(afterResetEncounter.combatants.find(c => c.actorId === crawlerCarl.id).damageDealt, 0, 'Archived combatant metrics reset');
   });
 });

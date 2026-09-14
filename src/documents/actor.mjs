@@ -714,7 +714,52 @@ export class DCCActor extends Actor {
     }
 
     const sys = spellItem.system || {};
-    const manaCost = sys.manaCost ?? 0;
+    const manaCost = Math.max(0, Number(sys.manaCost) || 0);
+    const rawMana = this.system?.attributes?.mana?.value !== undefined
+      ? Number(this.system.attributes.mana.value)
+      : (Number(this.system?.attributes?.mana?.max) || 0);
+    const currentMana = Number.isFinite(rawMana) ? rawMana : 0;
+
+    // Check existing mana: if insufficient, the spell fails
+    if (manaCost > 0 && currentMana < manaCost) {
+      globalThis.ui?.notifications?.warn?.(`DCC RPG | ${this.name} has insufficient Mana to cast ${spellItem.name}! (Needs ${manaCost} MP, has ${currentMana} MP)`);
+
+      const failContent = `
+        <div class="dcc-chat-card dcc-spell-card dcc-spell-failed" style="font-family: var(--font-primary, sans-serif); border: 2px solid #e74c3c;">
+          <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 4px; margin-bottom: 6px;">
+            <img src="${spellItem.img || 'icons/svg/wand.svg'}" style="width: 36px; height: 36px; border: 1px solid #000; border-radius: 4px; filter: grayscale(100%);" />
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #c0392b;">${spellItem.name} — FAILED</h3>
+              <span style="font-size: 11px; text-transform: uppercase; color: #7f8c8d; font-weight: bold;">Insufficient Mana (${currentMana} / ${manaCost} MP)</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #c0392b; background: #fdf2f2; border: 1px solid #f5c6cb; padding: 6px 8px; border-radius: 3px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>${this.name}</strong> attempted to cast <strong>${spellItem.name}</strong>, but lacks sufficient Mana! (Required: <strong>${manaCost} MP</strong>, Available: <strong>${currentMana} MP</strong>)
+          </div>
+        </div>
+      `;
+
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: failContent,
+        flags: {
+          'carl-rpg': {
+            isSpellCast: true,
+            spellFailed: true,
+            reason: 'insufficient_mana',
+            manaCost,
+            currentMana
+          }
+        }
+      });
+    }
+
+    // Subtract mana on successful cast
+    const newMana = Math.max(0, currentMana - manaCost);
+    if (this.system?.attributes?.mana && manaCost > 0) {
+      await this.update({ 'system.attributes.mana.value': newMana });
+    }
+
     const dmgData = this.getSpellDamageData(spellItem);
 
     let content = `
@@ -734,7 +779,7 @@ export class DCCActor extends Actor {
 
     content += `
       <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 6px; border-radius: 3px;">
-        <div><strong>Mana:</strong> <span style="color: #2980b9; font-weight: bold;">${manaCost ? manaCost : 'None'}</span></div>
+        <div><strong>Mana:</strong> <span style="color: #2980b9; font-weight: bold;">${manaCost ? `${manaCost} MP` : 'None'}</span>${manaCost > 0 ? ` <small style="color: #7f8c8d;">(${newMana} MP left)</small>` : ''}</div>
         <div><strong>Range:</strong> ${sys.range || 'Self'}</div>
         <div><strong>Duration:</strong> ${sys.duration || 'Instantaneous'}</div>
         ${sys.cooldown && sys.cooldown !== 'None' ? `<div><strong>Cooldown:</strong> ${sys.cooldown}</div>` : ''}
@@ -774,7 +819,15 @@ export class DCCActor extends Actor {
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      content
+      content,
+      flags: {
+        'carl-rpg': {
+          isSpellCast: true,
+          spellSuccess: true,
+          manaCost,
+          remainingMana: newMana
+        }
+      }
     });
   }
 }

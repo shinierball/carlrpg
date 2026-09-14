@@ -233,7 +233,8 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 3 } }
+        abilities: { int: { mod: 3 } },
+        attributes: { mana: { value: 20, max: 20 } }
       }
     });
 
@@ -346,5 +347,127 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(result.damageAfterDR, 8);
     assert.equal(result.damageToHp, 6);
     assert.equal(target.system.attributes.hp.value, 24);
+  });
+
+  test('casting spell checks mana, subtracts mana on success, and records remaining mana', async () => {
+    const crawler = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        attributes: {
+          mana: { value: 15, max: 20 }
+        }
+      }
+    });
+
+    const spell = new DCCItem({
+      name: 'Magic Missile',
+      type: 'spell',
+      system: {
+        rank: 1,
+        manaCost: 5,
+        baseDamage: '1d4 + Int Force'
+      }
+    }, crawler);
+
+    assert.equal(crawler.system.attributes.mana.value, 15);
+
+    const msg = await crawler.rollSpell(spell);
+    assert.ok(msg, 'Message must be created');
+    assert.equal(crawler.system.attributes.mana.value, 10, 'Mana must be reduced from 15 to 10');
+    assert.equal(msg.flags['carl-rpg'].spellSuccess, true);
+    assert.equal(msg.flags['carl-rpg'].manaCost, 5);
+    assert.equal(msg.flags['carl-rpg'].remainingMana, 10);
+    assert.ok(msg.content.includes('10 MP left'));
+  });
+
+  test('casting spell fails when mana is insufficient, does not subtract mana, and posts failure card', async () => {
+    const crawler = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        attributes: {
+          mana: { value: 3, max: 20 }
+        }
+      }
+    });
+
+    const spell = new DCCItem({
+      name: 'Fireball',
+      type: 'spell',
+      system: {
+        rank: 1,
+        manaCost: 10,
+        baseDamage: '1d12 + Int Fire'
+      }
+    }, crawler);
+
+    assert.equal(crawler.system.attributes.mana.value, 3);
+
+    const msg = await crawler.rollSpell(spell);
+    assert.ok(msg, 'Failure message must be created');
+    assert.equal(crawler.system.attributes.mana.value, 3, 'Mana must NOT be deducted on failure');
+    assert.equal(msg.flags['carl-rpg'].spellFailed, true);
+    assert.equal(msg.flags['carl-rpg'].reason, 'insufficient_mana');
+    assert.equal(msg.flags['carl-rpg'].manaCost, 10);
+    assert.equal(msg.flags['carl-rpg'].currentMana, 3);
+    assert.ok(msg.content.includes('FAILED'));
+    assert.ok(msg.content.includes('Insufficient Mana'));
+    assert.ok(msg.content.includes('3 / 10 MP'));
+  });
+
+  test('casting 0-cost spell succeeds even with 0 mana', async () => {
+    const crawler = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        attributes: {
+          mana: { value: 0, max: 10 }
+        }
+      }
+    });
+
+    const cantrip = new DCCItem({
+      name: 'Dirt Clod',
+      type: 'spell',
+      system: {
+        rank: 1,
+        manaCost: 0,
+        baseDamage: '1d2 + Int Bludgeoning'
+      }
+    }, crawler);
+
+    const msg = await crawler.rollSpell(cantrip);
+    assert.ok(msg);
+    assert.equal(crawler.system.attributes.mana.value, 0);
+    assert.equal(msg.flags['carl-rpg'].spellSuccess, true);
+    assert.equal(msg.flags['carl-rpg'].remainingMana, 0);
+  });
+
+  test('casting with exact mana reduces mana to 0', async () => {
+    const crawler = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        attributes: {
+          mana: { value: 6, max: 10 }
+        }
+      }
+    });
+
+    const spell = new DCCItem({
+      name: 'Earworm',
+      type: 'spell',
+      system: {
+        rank: 1,
+        manaCost: 6,
+        baseDamage: '1d6 + Cha Sonic'
+      }
+    }, crawler);
+
+    const msg = await crawler.rollSpell(spell);
+    assert.ok(msg);
+    assert.equal(crawler.system.attributes.mana.value, 0, 'Mana must be exactly 0 after spending all remaining mana');
+    assert.equal(msg.flags['carl-rpg'].spellSuccess, true);
   });
 });

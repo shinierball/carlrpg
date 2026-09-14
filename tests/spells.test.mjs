@@ -118,6 +118,11 @@ describe('DCC RPG Spells Dataset & Compendium', () => {
     const crawler = new DCCActor({
       name: 'Carl',
       type: 'crawler',
+      system: {
+        attributes: {
+          mana: { value: 20, max: 20 }
+        }
+      },
       items: [spell]
     });
 

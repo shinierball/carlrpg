@@ -17,9 +17,26 @@ export class MockActor {
   prepareBaseData() {}
   prepareDerivedData() {}
   updateSource(data) {
-    Object.assign(this.system, data.system || data);
-    if (data.prototypeToken) {
-      this.prototypeToken = Object.assign(this.prototypeToken || {}, data.prototypeToken);
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('prototypeToken.')) {
+        const prop = k.replace('prototypeToken.', '');
+        this.prototypeToken = this.prototypeToken || {};
+        this.prototypeToken[prop] = v;
+      } else if (k === 'prototypeToken') {
+        this.prototypeToken = Object.assign(this.prototypeToken || {}, v);
+      } else if (k.startsWith('system.')) {
+        const path = k.replace('system.', '').split('.');
+        let curr = this.system;
+        for (let i = 0; i < path.length - 1; i++) {
+          if (!curr[path[i]]) curr[path[i]] = {};
+          curr = curr[path[i]];
+        }
+        curr[path[path.length - 1]] = v;
+      } else if (k === 'system') {
+        Object.assign(this.system, v);
+      } else {
+        this[k] = v;
+      }
     }
   }
   async update(data) {
@@ -118,15 +135,43 @@ if (!globalThis.Item) {
   globalThis.Item = MockItem;
 }
 
+const _settingsStore = new Map();
+
 if (!globalThis.game) {
   globalThis.game = {
     user: { id: 'test-user', isGM: true, can: () => true },
     items: [],
     folders: [],
-    packs: new Map()
+    packs: new Map(),
+    settings: {
+      register: (module, key, options) => {
+        if (!_settingsStore.has(`${module}.${key}`)) {
+          _settingsStore.set(`${module}.${key}`, options.default);
+        }
+      },
+      get: (module, key) => _settingsStore.get(`${module}.${key}`),
+      set: async (module, key, value) => {
+        _settingsStore.set(`${module}.${key}`, value);
+        return value;
+      }
+    }
   };
-} else if (!globalThis.game.folders) {
-  globalThis.game.folders = [];
+} else {
+  if (!globalThis.game.folders) globalThis.game.folders = [];
+  if (!globalThis.game.settings) {
+    globalThis.game.settings = {
+      register: (module, key, options) => {
+        if (!_settingsStore.has(`${module}.${key}`)) {
+          _settingsStore.set(`${module}.${key}`, options.default);
+        }
+      },
+      get: (module, key) => _settingsStore.get(`${module}.${key}`),
+      set: async (module, key, value) => {
+        _settingsStore.set(`${module}.${key}`, value);
+        return value;
+      }
+    };
+  }
 }
 
 if (!globalThis.Folder) {
@@ -241,16 +286,180 @@ if (!globalThis.foundry) {
   };
 }
 
+export class MockCombatant {
+  constructor(data = {}, combat = null) {
+    this.id = data.id || data._id || ('combatant-' + Math.random().toString(36).substring(2, 7));
+    this._id = this.id;
+    this.name = data.name || data.actor?.name || 'Combatant';
+    this.actorId = data.actorId || data.actor?.id;
+    this.actor = data.actor || (globalThis.game?.actors?.get ? globalThis.game.actors.get(this.actorId) : null);
+    this.initiative = data.initiative ?? null;
+    this.defeated = data.defeated ?? false;
+    this.hidden = data.hidden ?? false;
+    this.flags = structuredClone(data.flags || {});
+    this.combat = combat;
+  }
+
+  getFlag(scope, key) {
+    return this.flags?.[scope]?.[key];
+  }
+
+  async setFlag(scope, key, value) {
+    if (!this.flags) this.flags = {};
+    if (!this.flags[scope]) this.flags[scope] = {};
+    this.flags[scope][key] = structuredClone(value);
+    return this;
+  }
+
+  async unsetFlag(scope, key) {
+    if (this.flags?.[scope]) {
+      delete this.flags[scope][key];
+    }
+    return this;
+  }
+
+  async update(data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('flags.')) {
+        const parts = k.split('.');
+        let curr = this;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!curr[parts[i]]) curr[parts[i]] = {};
+          curr = curr[parts[i]];
+        }
+        curr[parts[parts.length - 1]] = v;
+      } else {
+        this[k] = v;
+      }
+    }
+    return this;
+  }
+}
+
+export class MockCombat {
+  constructor(data = {}) {
+    this.id = data.id || data._id || ('combat-' + Math.random().toString(36).substring(2, 7));
+    this._id = this.id;
+    this.round = data.round ?? 0;
+    this.turn = data.turn ?? 0;
+    this.isActive = data.isActive ?? true;
+    this.flags = structuredClone(data.flags || { 'carl-rpg': {} });
+    this.combatants = (data.combatants || []).map(c => c instanceof MockCombatant ? c : new MockCombatant(c, this));
+  }
+
+  getFlag(scope, key) {
+    return this.flags?.[scope]?.[key];
+  }
+
+  async setFlag(scope, key, value) {
+    if (!this.flags) this.flags = {};
+    if (!this.flags[scope]) this.flags[scope] = {};
+    this.flags[scope][key] = structuredClone(value);
+    return this;
+  }
+
+  async unsetFlag(scope, key) {
+    if (this.flags?.[scope]) {
+      delete this.flags[scope][key];
+    }
+    return this;
+  }
+
+  async update(data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('flags.')) {
+        const parts = k.split('.');
+        let curr = this;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!curr[parts[i]]) curr[parts[i]] = {};
+          curr = curr[parts[i]];
+        }
+        curr[parts[parts.length - 1]] = v;
+      } else {
+        this[k] = v;
+      }
+    }
+    return this;
+  }
+
+  getCombatantByActor(actorOrId) {
+    const id = typeof actorOrId === 'string' ? actorOrId : actorOrId?.id;
+    return this.combatants.find(c => c.actorId === id || c.actor?.id === id) || null;
+  }
+
+  async startCombat() {
+    this.round = 1;
+    this.turn = 0;
+    return this;
+  }
+
+  async nextRound() {
+    this.round += 1;
+    this.turn = 0;
+    return this;
+  }
+
+  async nextTurn() {
+    this.turn += 1;
+    return this;
+  }
+
+  async endCombat() {
+    this.round = 0;
+    this.turn = 0;
+    return this;
+  }
+
+  _sortCombatants(a, b) {
+    return (b.initiative || 0) - (a.initiative || 0);
+  }
+}
+
+export class MockCombatTracker extends (globalThis.Application || class {}) {
+  constructor(options = {}) {
+    super(options);
+    this.viewed = null;
+  }
+  static get defaultOptions() {
+    return {
+      id: 'combat',
+      title: 'Combat Tracker',
+      template: 'templates/sidebar/combat-tracker.html'
+    };
+  }
+  async getData() {
+    return {
+      combat: this.viewed || globalThis.game?.combat || null,
+      combats: globalThis.game?.combats || [],
+      turns: []
+    };
+  }
+}
+
+if (!globalThis.Combat) {
+  globalThis.Combat = MockCombat;
+}
+if (!globalThis.Combatant) {
+  globalThis.Combatant = MockCombatant;
+}
+if (!globalThis.CombatTracker) {
+  globalThis.CombatTracker = MockCombatTracker;
+}
 
 if (!globalThis.CONFIG) {
   globalThis.CONFIG = {
     DCC: {
       skills: DCC_SKILLS
-    }
+    },
+    Combat: { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } },
+    ui: { combat: MockCombatTracker }
   };
 } else {
   globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
   globalThis.CONFIG.DCC.skills = DCC_SKILLS;
+  globalThis.CONFIG.Combat = globalThis.CONFIG.Combat || { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } };
+  globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
+  globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };
 }
 
 if (!globalThis.ChatMessage) {
@@ -280,3 +489,16 @@ if (!globalThis.Roll) {
   };
 }
 
+if (!globalThis.foundry) {
+  globalThis.foundry = {
+    utils: {
+      deepClone: (obj) => structuredClone(obj),
+      duplicate: (obj) => structuredClone(obj)
+    }
+  };
+} else if (!globalThis.foundry.utils) {
+  globalThis.foundry.utils = {
+    deepClone: (obj) => structuredClone(obj),
+    duplicate: (obj) => structuredClone(obj)
+  };
+}

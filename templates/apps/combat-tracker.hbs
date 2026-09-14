@@ -1,0 +1,275 @@
+<section class="tab sidebar-tab directory flexcol dcc-combat-tracker" id="combat" data-tab="combat">
+  <header class="combat-tracker-header">
+    {{#if combat}}
+      <nav class="encounters flexrow" aria-label="Combat Navigation">
+        <a class="combat-button combat-control" aria-label="Previous Combat" data-tooltip="Previous Encounter" data-control="previousCombat" {{#unless previousId}}disabled{{/unless}}>
+          <i class="fas fa-caret-left"></i>
+        </a>
+        <div class="dcc-round-stepper flexrow">
+          <button type="button" class="dcc-step-round-btn prev-round" data-tooltip="View Previous Round History" {{#unless canStepPrev}}disabled{{/unless}}>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h4 class="encounter-title noborder dcc-encounter-title {{#if isViewingHistory}}is-history{{/if}}">
+            {{#if isSurpriseRound}}
+              <span class="dcc-surprise-badge"><i class="fa-solid fa-bolt"></i> SURPRISE RD {{viewedRound}}</span>
+            {{else}}
+              <span>ROUND {{viewedRound}}</span>
+            {{/if}}
+            {{#if isViewingHistory}}
+              <span class="dcc-history-tag">(PAST)</span>
+            {{else}}
+              <span class="dcc-live-tag">(LIVE)</span>
+            {{/if}}
+          </h4>
+          <button type="button" class="dcc-step-round-btn next-round" data-tooltip="View Next Round" {{#unless canStepNext}}disabled{{/unless}}>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <a class="combat-button combat-control" aria-label="Next Combat" data-tooltip="Next Encounter" data-control="nextCombat" {{#unless nextId}}disabled{{/unless}}>
+          <i class="fas fa-caret-right"></i>
+        </a>
+      </nav>
+
+      {{#if isViewingHistory}}
+        <!-- Past Round History Alert Banner -->
+        <div class="dcc-history-banner flexrow">
+          <span class="dcc-history-banner-text">
+            <i class="fa-solid fa-clock-rotate-left"></i> Viewing Past Round {{viewedRound}} History
+          </span>
+          <button type="button" class="dcc-return-live-btn" data-tooltip="Jump back to live active round {{round}}">
+            <i class="fa-solid fa-play"></i> LIVE RD {{round}}
+          </button>
+        </div>
+      {{/if}}
+
+      <!-- DCC Encounter Action Bar -->
+      <div class="dcc-combat-action-bar flexrow">
+        <!-- Surprise Round Toggle Button -->
+        <button type="button" class="dcc-surprise-toggle {{#if isSurpriseRound}}active{{/if}}" data-tooltip="Toggle Surprise Round (Crawlers Act First)">
+          <i class="fa-solid {{#if isSurpriseRound}}fa-bolt{{else}}fa-triangle-exclamation{{/if}}"></i>
+          {{#if isSurpriseRound}}
+            SURPRISE: CRAWLERS FIRST!
+          {{else}}
+            NORMAL (MOBS FIRST)
+          {{/if}}
+        </button>
+
+        <!-- Reset Actions Button -->
+        <button type="button" class="dcc-reset-round-actions-btn" data-tooltip="Reset Action Budgets for Current Round">
+          <i class="fa-solid fa-rotate-left"></i> RESET ACTIONS
+        </button>
+      </div>
+
+      <!-- AI Awards & Performance + Archived Battles Buttons -->
+      <div class="dcc-combat-nav-buttons flexrow">
+        <button type="button" class="dcc-combat-awards-btn" data-tooltip="Open AI Performance & Awards Dashboard">
+          <i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> AI AWARDS
+        </button>
+        <button type="button" class="dcc-combat-archive-btn" data-tooltip="Open Archived Battles History">
+          <i class="fa-solid fa-book-skull" style="color: #e74c3c;"></i> ARCHIVED BATTLES
+        </button>
+      </div>
+
+    {{else}}
+      <nav class="encounters flexrow" aria-label="Combat Navigation">
+        <h4 class="encounter-title noborder">NO ACTIVE COMBAT</h4>
+      </nav>
+      <button type="button" class="dcc-combat-archive-btn" style="margin: 6px 0; width: 100%;">
+        <i class="fa-solid fa-book-skull" style="color: #e74c3c;"></i> ARCHIVED BATTLES
+      </button>
+    {{/if}}
+  </header>
+
+  <!-- Combat Tracker Phases and Combatant Lists -->
+  <ol id="combat-tracker" class="directory-list dcc-combat-list">
+    {{#if combat}}
+      {{#each phases as |phase|}}
+        <li class="dcc-phase-section {{#if phase.isMob}}phase-mob{{else}}phase-crawler{{/if}} {{#if phase.isSurprise}}phase-surprise{{/if}}">
+          <!-- Phase Header Banner -->
+          <div class="dcc-phase-header flexrow">
+            <span class="dcc-phase-title">
+              <i class="{{phase.icon}}"></i> {{phase.name}}
+            </span>
+            <span class="dcc-phase-badge">{{phase.badge}}</span>
+          </div>
+          <div class="dcc-phase-subtitle">{{phase.subtitle}}</div>
+
+          <!-- Combatants in this Phase -->
+          <ul class="dcc-combatant-group">
+            {{#if phase.turns.length}}
+              {{#each phase.turns as |turn|}}
+                <li class="combatant dcc-combatant-row {{#if turn.isComplete}}turn-complete{{/if}} {{#if turn.defeated}}defeated{{/if}}" data-combatant-id="{{turn.id}}">
+                  
+                  <div class="dcc-combatant-main flexrow">
+                    <!-- Token Image -->
+                    <img class="token-image dcc-combatant-img" src="{{turn.img}}" alt="{{turn.name}}" />
+
+                    <!-- Combatant Info -->
+                    <div class="dcc-combatant-details flexcol">
+                      <div class="dcc-combatant-name-row flexrow">
+                        <span class="token-name dcc-combatant-name" title="{{turn.name}}">{{turn.name}}</span>
+                        <span class="dcc-type-badge {{#if turn.isMob}}badge-mob{{else}}badge-crawler{{/if}}">
+                          {{turn.actorTypeLabel}}
+                        </span>
+                      </div>
+
+                      <!-- Health Threshold Indicator (Cheat Sheet: Green / Yellow / Red) -->
+                      <div class="dcc-combatant-hp-row flexrow">
+                        <span class="dcc-hp-threshold-badge health-{{turn.healthThreshold.status}}" data-tooltip="Health Threshold: {{turn.healthThreshold.label}}">
+                          HP: {{turn.actor.system.attributes.hp.value}}/{{turn.actor.system.attributes.hp.max}}
+                          <span class="dcc-hp-badge-pill">({{turn.healthThreshold.pct}}%)</span>
+                        </span>
+
+                        <!-- Action Budget Counter -->
+                        <span class="dcc-action-budget-counter {{#if turn.isComplete}}budget-empty{{else}}budget-active{{/if}}">
+                          <i class="fa-solid fa-clock"></i> {{turn.actions.spent}}/{{turn.actions.max}} ACTIONS
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Slots Row -->
+                  <div class="dcc-actions-row flexrow">
+                    <span class="dcc-actions-label">ACTIONS:</span>
+                    <div class="dcc-action-pips flexrow">
+                      {{#each turn.slotList as |slot|}}
+                        <button type="button" class="dcc-action-pip {{#if slot.filled}}pip-filled {{#if slot.isAttack}}pip-attack{{else}}pip-utility{{/if}}{{else}}pip-empty{{/if}} {{#if slot.isBonus}}pip-bonus{{/if}}"
+                                data-combatant-id="{{turn.id}}"
+                                data-slot-index="{{slot.index}}"
+                                data-tooltip="{{#if slot.filled}}{{slot.label}} (Click to change/clear){{else}}{{slot.label}} (Click to select action){{/if}}">
+                          <i class="{{slot.icon}}"></i>
+                          <span class="dcc-pip-text">{{slot.label}}</span>
+                        </button>
+                      {{/each}}
+                    </div>
+
+                    <!-- AI Favor Bonus Action Button for Crawlers -->
+                    {{#if turn.canSpendAIFavor}}
+                      <button type="button" class="dcc-spend-favor-btn" data-combatant-id="{{turn.id}}" data-tooltip="Spend 1 AI Favor ({{turn.currentFavor}} available) for +1 Non-Attack Action this round">
+                        <i class="fa-solid fa-hand-holding-heart"></i> +1 ACTION (1 FAVOR)
+                      </button>
+                    {{/if}}
+                  </div>
+
+                  <!-- Quick Action Popover Menu (Toggled on pip click) -->
+                  <div class="dcc-action-picker-popover" data-combatant-id="{{turn.id}}" style="display: none;">
+                    <div class="dcc-popover-header flexrow">
+                      <span>SELECT ACTION FOR {{upper turn.name}}</span>
+                      <button type="button" class="dcc-action-clear-opt" data-tooltip="Clear this action slot">
+                        <i class="fa-solid fa-trash-can"></i> CLEAR
+                      </button>
+                    </div>
+
+                    <!-- Mob 1-Attack Notice -->
+                    {{#if turn.isMob}}
+                      {{#if turn.actions.hasAttacked}}
+                        <div class="dcc-rule-warning">
+                          <i class="fa-solid fa-triangle-exclamation"></i> Mob Attack Used! Next action must be Move or Skill.
+                        </div>
+                      {{/if}}
+                    {{/if}}
+
+                    <div class="dcc-action-options-grid">
+                      <!-- Standard Actions -->
+                      <div class="dcc-action-group-label">Standard Actions</div>
+                      
+                      <!-- Attack Button with Mob check -->
+                      <button type="button" class="dcc-action-option opt-attack {{#if turn.isMob}}{{#if turn.actions.hasAttacked}}disabled{{/if}}{{/if}}"
+                              data-action-type="attack"
+                              {{#if turn.isMob}}{{#if turn.actions.hasAttacked}}disabled title="Mobs may only make 1 Attack per round!"{{/if}}{{/if}}>
+                        <i class="fa-solid fa-burst"></i> Attack {{#if turn.isMob}}{{#if turn.actions.hasAttacked}}(USED){{/if}}{{/if}}
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-move" data-action-type="move">
+                        <i class="fa-solid fa-person-walking"></i> Move (20ft + 10ft Step)
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-cast" data-action-type="cast">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Cast Spell
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-check" data-action-type="check">
+                        <i class="fa-solid fa-dice-d20"></i> Make a Check
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-item" data-action-type="item">
+                        <i class="fa-solid fa-flask"></i> Use Hotlist Item
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-retrieve" data-action-type="retrieve">
+                        <i class="fa-solid fa-box-open"></i> Retrieve
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-help" data-action-type="help">
+                        <i class="fa-solid fa-handshake-angle"></i> Help
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-play" data-action-type="play">
+                        <i class="fa-solid fa-clipboard-list"></i> Call a Play
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-clues" data-action-type="clues">
+                        <i class="fa-solid fa-magnifying-glass"></i> Look for Clues
+                      </button>
+
+                      <!-- Interrupts -->
+                      <div class="dcc-action-group-label" style="margin-top: 4px;">Interrupts / Defenses</div>
+
+                      <button type="button" class="dcc-action-option opt-evade" data-action-type="evade">
+                        <i class="fa-solid fa-shield-halved"></i> Evade
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-heal" data-action-type="heal">
+                        <i class="fa-solid fa-heart-pulse"></i> Heal
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-taunt" data-action-type="taunt">
+                        <i class="fa-solid fa-bullhorn"></i> Taunt
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-catcher" data-action-type="catcher">
+                        <i class="fa-solid fa-person-falling-burst"></i> Catcher
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-intervene" data-action-type="intervene">
+                        <i class="fa-solid fa-user-shield"></i> Intervene
+                      </button>
+
+                      <button type="button" class="dcc-action-option opt-other" data-action-type="other">
+                        <i class="fa-solid fa-ellipsis"></i> Other Action
+                      </button>
+                    </div>
+                  </div>
+
+                </li>
+              {{/each}}
+            {{else}}
+              <li class="dcc-empty-phase">No combatants in this phase.</li>
+            {{/if}}
+          </ul>
+        </li>
+      {{/each}}
+    {{else}}
+      <li class="dcc-no-combat-msg">
+        <p>No active combat encounter.</p>
+      </li>
+    {{/if}}
+  </ol>
+
+  <!-- Bottom Combat Controls Footer -->
+  <footer class="directory-footer combat-tracker-footer">
+    {{#if combat}}
+      <nav class="combat-controls flexrow">
+        {{#if user.isGM}}
+          {{#if round}}
+            <a class="combat-control" aria-label="End Turn" data-tooltip="End Turn" data-control="nextTurn"><i class="fas fa-step-forward"></i></a>
+            <a class="combat-control" aria-label="End Round" data-tooltip="End Round" data-control="nextRound"><i class="fas fa-redo"></i></a>
+            <a class="combat-control" aria-label="End Combat" data-tooltip="End Combat" data-control="endCombat"><i class="fas fa-stop"></i></a>
+          {{else}}
+            <a class="combat-control center" aria-label="Start Combat" data-control="startCombat">START COMBAT</a>
+          {{/if}}
+        {{/if}}
+      </nav>
+    {{/if}}
+  </footer>
+</section>

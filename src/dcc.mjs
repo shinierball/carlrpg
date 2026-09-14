@@ -1,9 +1,12 @@
 import { DCCActor } from './documents/actor.mjs';
 import { DCCItem } from './documents/item.mjs';
+import { DCCCombat } from './documents/combat.mjs';
 import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
 import { DCCSkillManager } from './apps/skill-manager.mjs';
+import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
+import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 
@@ -18,8 +21,15 @@ Hooks.once('init', async function() {
   // Register document classes
   CONFIG.Actor.documentClass = DCCActor;
   CONFIG.Item.documentClass = DCCItem;
+  CONFIG.Combat.documentClass = DCCCombat;
+  CONFIG.Combat.initiative = {
+    formula: null,
+    decimals: 0
+  };
 
-  // Register sheet classes
+  // Register sheet & UI classes
+  CONFIG.ui.combat = DCCCombatTracker;
+
   Actors.unregisterSheet('core', ActorSheet);
   Actors.registerSheet('carl-rpg', DCCCrawlerSheet, {
     types: ['crawler', 'pet', 'mount_vehicle', 'npc'],
@@ -31,6 +41,16 @@ Hooks.once('init', async function() {
   Items.registerSheet('carl-rpg', DCCItemSheet, {
     makeDefault: true,
     label: 'DCC.ItemSheet'
+  });
+
+  // Register System Settings
+  game.settings.register('carl-rpg', 'archivedCombats', {
+    name: 'Archived Combats',
+    hint: 'Stores permanently archived combat encounters and round-by-round action history.',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
   });
 
   // Register Handlebars Helpers
@@ -56,7 +76,9 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
     'systems/carl-rpg/templates/apps/skill-manager.hbs',
-    'systems/carl-rpg/templates/apps/combat-metrics.hbs'
+    'systems/carl-rpg/templates/apps/combat-metrics.hbs',
+    'systems/carl-rpg/templates/apps/combat-tracker.hbs',
+    'systems/carl-rpg/templates/apps/combat-archive.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -72,7 +94,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp) {
           app.render(false);
         }
       }
@@ -89,9 +111,12 @@ Hooks.once('init', async function() {
     openCombatMetrics(options = {}) {
       return new DCCCombatMetricsApp(options).render(true);
     },
+    openCombatArchive(options = {}) {
+      return new DCCCombatArchiveApp(options).render(true);
+    },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp) {
           app.render(false);
         }
       }
@@ -124,49 +149,190 @@ Hooks.on('renderItemDirectory', (app, html) => {
   }
 });
 
-// Hook into Combat Tracker sidebar to inject AI Awards button
+// Hook into Combat Tracker sidebar to inject CarlRPG Action Tracker & AI Awards, and remove initiative rolling
 Hooks.on('renderCombatTracker', (app, html, data) => {
   const $html = (html instanceof jQuery) ? html : $(html);
-  if ($html.find('.dcc-combat-awards-btn').length) return;
 
-  const btn = $(`
-    <button type="button" class="dcc-combat-awards-btn" style="width: calc(100% - 8px); margin: 4px 4px 6px 4px; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 6px 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 1;">
-      <i class="fa-solid fa-trophy" style="color: #f1c40f; font-size: 14px;"></i> AI Combat Awards & Performance
-    </button>
-  `);
+  // 1. Remove all initiative roll buttons and inputs to prevent confusion
+  $html.find('[data-action="rollAll"], [data-action="rollNPC"], [data-control="rollAll"], [data-control="rollNPC"]').remove();
+  $html.find('.combatant-control.roll, [data-action="rollInitiative"], [data-control="rollInitiative"]').remove();
 
-  btn.click(ev => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    new DCCCombatMetricsApp().render(true);
-  });
-
-  const header = $html.find('.combat-tracker-header');
-  if (header.length) {
-    header.after(btn);
-  } else {
-    const list = $html.find('#combat-tracker, .directory-list');
-    if (list.length) {
-      list.before(btn);
-    } else {
-      $html.prepend(btn);
-    }
-  }
-
-  // Also inject compact trophy icon into encounter navigation if active encounters exist
-  const encountersNav = $html.find('nav.encounters');
-  if (encountersNav.length && !$html.find('.dcc-combat-awards-header-btn').length) {
-    const iconBtn = $(`
-      <a class="combat-button dcc-combat-awards-header-btn" data-tooltip="DCC AI Combat Performance & Awards" title="DCC AI Combat Performance & Awards" style="color: #e74c3c; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
-        <i class="fa-solid fa-trophy" style="font-size: 14px; color: #e74c3c;"></i>
-      </a>
+  // 2. Inject AI Awards button if not already present
+  if (!$html.find('.dcc-combat-awards-btn').length) {
+    const btn = $(`
+      <button type="button" class="dcc-combat-awards-btn" style="width: calc(100% - 8px); margin: 4px 4px 6px 4px; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 6px 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 1;">
+        <i class="fa-solid fa-trophy" style="color: #f1c40f; font-size: 14px;"></i> AI Combat Awards & Performance
+      </button>
     `);
-    iconBtn.click(ev => {
+
+    btn.click(ev => {
       ev.preventDefault();
       ev.stopPropagation();
       new DCCCombatMetricsApp().render(true);
     });
-    encountersNav.append(iconBtn);
+
+    const header = $html.find('.combat-tracker-header');
+    if (header.length) {
+      header.after(btn);
+    } else {
+      const list = $html.find('#combat-tracker, .directory-list');
+      if (list.length) {
+        list.before(btn);
+      } else {
+        $html.prepend(btn);
+      }
+    }
+  }
+
+  // 3. Inject compact trophy icon and archived battles icon into encounter navigation if active encounters exist
+  const encountersNav = $html.find('nav.encounters');
+  if (encountersNav.length) {
+    if (!$html.find('.dcc-combat-awards-header-btn').length) {
+      const iconBtn = $(`
+        <a class="combat-button dcc-combat-awards-header-btn" data-tooltip="DCC AI Combat Performance & Awards" title="DCC AI Combat Performance & Awards" style="color: #e74c3c; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+          <i class="fa-solid fa-trophy" style="font-size: 14px; color: #e74c3c;"></i>
+        </a>
+      `);
+      iconBtn.click(ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        new DCCCombatMetricsApp().render(true);
+      });
+      encountersNav.append(iconBtn);
+    }
+
+    if (!$html.find('.dcc-combat-archive-header-btn').length) {
+      const archiveBtn = $(`
+        <a class="combat-button dcc-combat-archive-header-btn" data-tooltip="Archived Battles & Encounter History" title="Archived Battles & Encounter History" style="color: #c0392b; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+          <i class="fa-solid fa-book-skull" style="font-size: 14px; color: #c0392b;"></i>
+        </a>
+      `);
+      archiveBtn.click(ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        new DCCCombatArchiveApp().render(true);
+      });
+      encountersNav.append(archiveBtn);
+    }
+  }
+
+  // 4. Handle any archived battles buttons in tracker
+  $html.find('.dcc-combat-archive-btn').off('click.dccArchive').on('click.dccArchive', ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    new DCCCombatArchiveApp().render(true);
+  });
+
+  // 5. Inject CarlRPG Action Economy Dock for each combatant (showing remaining actions & clickable used/unused pips)
+  const combat = app.viewed || globalThis.game?.combat;
+  if (combat) {
+    const targetRound = app.viewedRound || combat.round || 1;
+
+    $html.find('.combatant, li[data-combatant-id]').each((i, el) => {
+      const $li = $(el);
+      const combatantId = $li.data('combatant-id') || $li.attr('data-combatant-id');
+      if (!combatantId) return;
+
+      const combatant = combat.combatants?.get ? combat.combatants.get(combatantId) : (combat.combatants?.find ? combat.combatants.find(c => c.id === combatantId) : null);
+      if (!combatant) return;
+
+      const actions = combat.getCombatantActions ? combat.getCombatantActions(combatant, targetRound) : DCCCombat.getCombatantActions(combatant, combat, targetRound);
+      const isMob = DCCCombat.isMobCombatant(combatant);
+      const remaining = Math.max(0, actions.max - actions.spent);
+      const isComplete = remaining <= 0;
+
+      let pipsHtml = '';
+      for (let s = 0; s < actions.max; s++) {
+        const isUsed = Boolean(actions.slots[s]);
+        const isBonus = s >= 2;
+        pipsHtml += `
+          <button type="button" class="dcc-action-dock-pip ${isUsed ? 'pip-used' : ''} ${isBonus ? 'pip-bonus' : ''}" 
+                  data-slot-index="${s}" 
+                  data-combatant-id="${combatantId}"
+                  title="Action ${s + 1}${isBonus ? ' (Bonus)' : ''}: ${isUsed ? 'Used (Click to mark Unused)' : 'Unused (Click to mark Used)'}">
+          </button>
+        `;
+      }
+
+      const dockHtml = `
+        <div class="dcc-action-dock ${isMob ? 'dock-mob' : 'dock-crawler'} ${isComplete ? 'dock-complete' : ''}" data-combatant-id="${combatantId}">
+          <button type="button" class="dcc-action-dock-btn" data-combatant-id="${combatantId}" title="${remaining} of ${actions.max} actions remaining. Click to use next action. Right-click to restore.">
+            <i class="fa-solid fa-clock" style="font-size: 9px;"></i>
+            <span>${remaining}/${actions.max} ACT</span>
+          </button>
+          <div class="dcc-action-dock-pips">
+            ${pipsHtml}
+          </div>
+        </div>
+      `;
+
+      const tokenInit = $li.find('.token-initiative');
+      if (tokenInit.length) {
+        tokenInit.empty().append(dockHtml).show();
+      } else if (!$li.find('.dcc-action-dock').length) {
+        const nameCol = $li.find('.dcc-combatant-details, .token-name').first();
+        if (nameCol.length) {
+          nameCol.after(dockHtml);
+        } else {
+          $li.append(dockHtml);
+        }
+      }
+    });
+
+    // Pips: click toggles Used <-> Unused for that slot
+    $html.find('.dcc-action-dock-pip').off('click').on('click', async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const btn = $(ev.currentTarget);
+      const combatantId = btn.data('combatant-id');
+      const slotIndex = Number(btn.data('slot-index')) || 0;
+      const isUsed = btn.hasClass('pip-used');
+
+      if (isUsed) {
+        await combat.clearCombatantAction(combatantId, slotIndex, { round: targetRound });
+      } else {
+        const c = combat.combatants?.get ? combat.combatants.get(combatantId) : null;
+        const isMob = DCCCombat.isMobCombatant(c);
+        await combat.recordCombatantAction(combatantId, {
+          type: isMob ? 'move' : 'check',
+          slotIndex,
+          label: isMob ? 'Mob Action' : 'Crawler Action'
+        }, { round: targetRound });
+      }
+      app.render(false);
+    });
+
+    // Action button: click uses next action (or resets if 0 left); right-click restores action
+    $html.find('.dcc-action-dock-btn').off('click contextmenu').on('click', async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const combatantId = $(ev.currentTarget).data('combatant-id');
+      const c = combat.combatants?.get ? combat.combatants.get(combatantId) : null;
+      const actions = combat.getCombatantActions(c, targetRound);
+      const isMob = DCCCombat.isMobCombatant(c);
+
+      if (actions.spent < actions.max) {
+        await combat.recordCombatantAction(combatantId, {
+          type: isMob ? 'move' : 'check',
+          label: isMob ? 'Mob Action' : 'Crawler Action'
+        }, { round: targetRound });
+      } else {
+        for (let s = 0; s < actions.max; s++) {
+          await combat.clearCombatantAction(combatantId, s, { round: targetRound });
+        }
+      }
+      app.render(false);
+    }).on('contextmenu', async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const combatantId = $(ev.currentTarget).data('combatant-id');
+      const c = combat.combatants?.get ? combat.combatants.get(combatantId) : null;
+      const actions = combat.getCombatantActions(c, targetRound);
+      if (actions.spent > 0) {
+        await combat.clearCombatantAction(combatantId, actions.spent - 1, { round: targetRound });
+        app.render(false);
+      }
+    });
   }
 });
 
@@ -212,7 +378,14 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       results.push(res);
     }
 
-    const summary = results.map(r => `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.newHp} HP left)`).join(', ');
+    const summary = results.map(r => {
+      let text = `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.barsRemoved ?? 0} bar${r.barsRemoved === 1 ? '' : 's'}, ${r.newHp} HP left`;
+      if (r.excessDamage > 0) {
+        text += `, ${r.excessDamage} excess ignored`;
+      }
+      text += ')';
+      return text;
+    }).join(', ');
     ui.notifications?.info(`DCC RPG | Damage applied: ${summary}`);
 
     card.find('.dcc-damage-applied-feedback').remove();
@@ -276,7 +449,16 @@ Hooks.once('ready', async function() {
             img: s.img,
             system: s.system
           }));
-          await Item.createDocuments(docs, { pack: 'carl-rpg.skills' });
+          const wasLocked = Boolean(pack.locked);
+          if (wasLocked) {
+            if (typeof pack.configure === 'function') await pack.configure({ locked: false });
+            else pack.locked = false;
+          }
+          await Item.createDocuments(docs, { pack: pack.collection || 'carl-rpg.skills' });
+          if (wasLocked) {
+            if (typeof pack.configure === 'function') await pack.configure({ locked: true });
+            else pack.locked = true;
+          }
           console.log(`DCC RPG | Successfully imported ${docs.length} skills into carl-rpg.skills.`);
         }
       } catch (err) {
@@ -296,7 +478,16 @@ Hooks.once('ready', async function() {
             img: s.img,
             system: s.system
           }));
-          await Item.createDocuments(docs, { pack: 'carl-rpg.spells' });
+          const wasLocked = Boolean(spellsPack.locked);
+          if (wasLocked) {
+            if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: false });
+            else spellsPack.locked = false;
+          }
+          await Item.createDocuments(docs, { pack: spellsPack.collection || 'carl-rpg.spells' });
+          if (wasLocked) {
+            if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: true });
+            else spellsPack.locked = true;
+          }
           console.log(`DCC RPG | Successfully imported ${docs.length} spells into carl-rpg.spells.`);
         }
       } catch (err) {

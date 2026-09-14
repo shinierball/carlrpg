@@ -105,3 +105,4 @@ This document defines the core directives, workflow rules, architecture standard
 4. **Verify**: Execute `node --test tests/*.test.mjs`. Fix any failures.
 5. **Inspect Diff**: Verify `git diff` to ensure no stray files or accidental edits.
 6. **Report**: Summarize changes clearly and point out verified test results.
+7. **Release**: Increment the patch version in `system.json` and `template.json` to all foundry to detect system changes for updates.

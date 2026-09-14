@@ -36,10 +36,8 @@ export class DCCActor extends Actor {
     await super._preCreate(data, options, user);
     if (this.type === 'crawler' || this.type === 'pet') {
       this.updateSource({
-        prototypeToken: {
-          actorLink: true,
-          disposition: 1
-        }
+        'prototypeToken.actorLink': true,
+        'prototypeToken.disposition': 1
       });
     }
   }
@@ -338,6 +336,20 @@ export class DCCActor extends Actor {
         }
       });
     }
+  }
+
+  /**
+   * Apply incoming damage to this actor using DCC RPG rules (DR, Temp HP, full damage bars).
+   * @param {number} rawDamage
+   * @param {object} [options={}]
+   * @returns {Promise<object>}
+   */
+  async applyDamage(rawDamage, options = {}) {
+    return DCCCombatMetrics.applyDamageToTarget({
+      targetActor: this,
+      rawDamage,
+      ...options
+    });
   }
 
   /**

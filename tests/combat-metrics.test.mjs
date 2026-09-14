@@ -44,7 +44,7 @@ class MockCombat {
 test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
 
   await t.test('1. Target Damage Application and DR Calculation', async (sub) => {
-    await sub.test('deducts target DR from raw damage before updating HP', async () => {
+    await sub.test('deducts target DR from raw damage and applies full damage bars rounded down', async () => {
       const target = new DCCActor({
         name: 'Goblin Grunt',
         type: 'npc',
@@ -62,14 +62,20 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
         ignoreDR: false
       });
 
-      // 14 raw - 4 DR = 10 actual damage
+      // 14 raw - 4 DR = 10 damage after DR
+      // With max HP 30, each bar has 3 HP (30 / 10 = 3)
+      // 10 / 3 = 3 full bars removed (9 HP damage), 1 excess damage ignored
       assert.equal(res.rawDamage, 14);
       assert.equal(res.dr, 4);
-      assert.equal(res.actualDamage, 10);
-      assert.equal(target.system.attributes.hp.value, 20);
+      assert.equal(res.damageAfterDR, 10);
+      assert.equal(res.hpPerBar, 3);
+      assert.equal(res.barsRemoved, 3);
+      assert.equal(res.excessDamage, 1);
+      assert.equal(res.actualDamage, 9);
+      assert.equal(target.system.attributes.hp.value, 21);
     });
 
-    await sub.test('absorbs damage using Temp HP first then deducts remainder from regular HP', async () => {
+    await sub.test('absorbs damage using Temp HP first then deducts remainder from regular HP in full bars', async () => {
       const target = new DCCActor({
         name: 'Shielded Crawler',
         type: 'crawler',
@@ -81,18 +87,23 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
         }
       });
 
-      // 15 damage: 10 absorbed by temp HP, 5 penetrates to regular HP (40 -> 35)
+      // 15 damage: 10 absorbed by temp HP, 5 penetrates to regular HP
+      // With max HP 40 (4 HP per bar): 5 / 4 = 1 bar removed (4 HP), 1 excess ignored
       const res = await DCCCombatMetrics.applyDamageToTarget({
         targetActor: target,
         rawDamage: 15
       });
 
-      assert.equal(res.actualDamage, 15);
+      assert.equal(res.tempDamage, 10);
+      assert.equal(res.barsRemoved, 1);
+      assert.equal(res.damageToHp, 4);
+      assert.equal(res.excessDamage, 1);
+      assert.equal(res.actualDamage, 14); // 10 temp + 4 hp
       assert.equal(target.system.attributes.hp.temp, 0);
-      assert.equal(target.system.attributes.hp.value, 35);
+      assert.equal(target.system.attributes.hp.value, 36);
     });
 
-    await sub.test('respects ignoreDR flag and applies full raw damage', async () => {
+    await sub.test('respects ignoreDR flag and applies full raw damage in full bars', async () => {
       const target = new DCCActor({
         name: 'Armored Boss',
         type: 'npc',
@@ -110,12 +121,18 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
         ignoreDR: true
       });
 
+      // 12 raw, DR ignored -> 12 damage after DR
+      // With max HP 50 (5 HP per bar): 12 / 5 = 2 bars removed (10 HP), 2 excess ignored
       assert.equal(res.dr, 0);
-      assert.equal(res.actualDamage, 12);
-      assert.equal(target.system.attributes.hp.value, 38);
+      assert.equal(res.damageAfterDR, 12);
+      assert.equal(res.hpPerBar, 5);
+      assert.equal(res.barsRemoved, 2);
+      assert.equal(res.excessDamage, 2);
+      assert.equal(res.actualDamage, 10);
+      assert.equal(target.system.attributes.hp.value, 40);
     });
 
-    await sub.test('respects multipliers (0.5 for half, 2 for crit)', async () => {
+    await sub.test('respects multipliers (0.5 for half, 2 for crit) with bar rounding', async () => {
       const target = new DCCActor({
         name: 'Training Dummy',
         type: 'npc',
@@ -128,20 +145,26 @@ test('DCC RPG Combat Metrics & AI Awards System', async (t) => {
       });
 
       // Half: 15 * 0.5 = 7 raw - 2 DR = 5 net damage
-      await DCCCombatMetrics.applyDamageToTarget({
+      // Max 60 -> 6 HP per bar. 5 < 6 -> 0 bars removed, 5 excess ignored!
+      const halfRes = await DCCCombatMetrics.applyDamageToTarget({
         targetActor: target,
         rawDamage: 15,
         multiplier: 0.5
       });
-      assert.equal(target.system.attributes.hp.value, 55);
+      assert.equal(halfRes.barsRemoved, 0);
+      assert.equal(halfRes.excessDamage, 5);
+      assert.equal(target.system.attributes.hp.value, 60);
 
       // Crit: 10 * 2 = 20 raw - 2 DR = 18 net damage
-      await DCCCombatMetrics.applyDamageToTarget({
+      // 18 / 6 = 3 bars removed (18 HP damage), 0 excess ignored
+      const critRes = await DCCCombatMetrics.applyDamageToTarget({
         targetActor: target,
         rawDamage: 10,
         multiplier: 2
       });
-      assert.equal(target.system.attributes.hp.value, 37);
+      assert.equal(critRes.barsRemoved, 3);
+      assert.equal(critRes.actualDamage, 18);
+      assert.equal(target.system.attributes.hp.value, 42);
     });
   });
 

@@ -7,6 +7,47 @@
 
 const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
 
+/**
+ * Calculate HP per damage bar for an actor.
+ * In CarlRPG, health is measured in 10 bars, where each bar represents CON modifier HP.
+ * When applying damage, only full damage bars (rounded down) are deducted; excess damage is ignored.
+ * @param {Actor} targetActor
+ * @returns {number}
+ */
+export function getHpPerBar(targetActor) {
+  if (!targetActor) return 1;
+
+  // 1. Direct CON modifier if already prepared
+  const conMod = Number(targetActor.system?.abilities?.con?.mod);
+  if (Number.isFinite(conMod) && conMod > 0) {
+    return conMod;
+  }
+
+  // 2. Score lookup if modifier not computed yet
+  const conScore = targetActor.system?.abilities?.con?.value ?? targetActor.system?.abilities?.con?.unenhanced;
+  if (conScore !== undefined && conScore !== null && conScore !== '') {
+    const val = Number(conScore) || 0;
+    if (val >= 300) return 10;
+    if (val >= 200) return 9;
+    if (val >= 150) return 8;
+    if (val >= 100) return 7;
+    if (val >= 50) return 6;
+    if (val >= 20) return 5;
+    if (val >= 10) return 4;
+    if (val >= 6) return 3;
+    if (val >= 3) return 2;
+    if (val >= 1) return 1;
+  }
+
+  // 3. Max HP fallback (in CarlRPG max HP = 10 * CON mod, so 10 bars)
+  const maxHp = Number(targetActor.system?.attributes?.hp?.max);
+  if (Number.isFinite(maxHp) && maxHp > 0) {
+    return Math.max(1, Math.floor(maxHp / 10));
+  }
+
+  return 1;
+}
+
 export class DCCCombatMetrics {
   /**
    * Get target combat document
@@ -117,8 +158,26 @@ export class DCCCombatMetrics {
   }
 
   /**
-   * Apply damage to a target actor, accounting for DR and Temp HP, and log to combat
+   * Calculate HP per damage bar for an actor (each bar represents CON mod HP)
+   * @param {Actor} targetActor
+   * @returns {number}
+   */
+  static getHpPerBar(targetActor) {
+    return getHpPerBar(targetActor);
+  }
+
+  /**
+   * Apply damage to a target actor, accounting for DR, Temp HP, and full damage bars.
+   * Only full damage bars (rounded down) are removed from regular HP; excess damage is ignored.
    * @param {object} params
+   * @param {Actor} params.targetActor
+   * @param {number} params.rawDamage
+   * @param {Actor} [params.attackerActor=null]
+   * @param {string} [params.attackName='Attack']
+   * @param {string} [params.attackType='Melee']
+   * @param {boolean} [params.ignoreDR=false]
+   * @param {number} [params.multiplier=1]
+   * @param {Combat} [params.combat=null]
    * @returns {Promise<object>}
    */
   static async applyDamageToTarget({ targetActor, rawDamage, attackerActor = null, attackName = 'Attack', attackType = 'Melee', ignoreDR = false, multiplier = 1, combat = null }) {
@@ -127,23 +186,35 @@ export class DCCCombatMetrics {
     const mult = Number(multiplier) || 1;
     const adjustedRaw = Math.max(0, Math.floor((Number(rawDamage) || 0) * mult));
     const dr = ignoreDR ? 0 : (Number(targetActor.system?.attributes?.dr?.total) || 0);
-    const actualDamage = Math.max(0, adjustedRaw - dr);
+    const damageAfterDR = Math.max(0, adjustedRaw - dr);
 
-    // Deduct from Temp HP first, then regular HP
+    // HP per damage bar (determined by CON modifier: 1 bar = CON mod HP)
+    const hpPerBar = this.getHpPerBar(targetActor);
+
+    // Deduct from Temp HP first point-for-point
     const currentTemp = Number(targetActor.system?.attributes?.hp?.temp) || 0;
     const currentHp = Number(targetActor.system?.attributes?.hp?.value) || 0;
     let tempRemaining = currentTemp;
-    let damageToHp = actualDamage;
+    let tempDamage = 0;
+    let damagePenetrating = damageAfterDR;
 
     if (currentTemp > 0) {
-      if (actualDamage <= currentTemp) {
-        tempRemaining = currentTemp - actualDamage;
-        damageToHp = 0;
+      if (damageAfterDR <= currentTemp) {
+        tempDamage = damageAfterDR;
+        tempRemaining = currentTemp - damageAfterDR;
+        damagePenetrating = 0;
       } else {
-        damageToHp = actualDamage - currentTemp;
+        tempDamage = currentTemp;
         tempRemaining = 0;
+        damagePenetrating = damageAfterDR - currentTemp;
       }
     }
+
+    // Only remove full damage bars rounded down from regular HP. Excess damage is ignored.
+    const barsRemoved = Math.floor(damagePenetrating / hpPerBar);
+    const damageToHp = barsRemoved * hpPerBar;
+    const excessDamage = damagePenetrating - damageToHp;
+    const actualDamage = tempDamage + damageToHp;
 
     const newHp = Math.max(0, currentHp - damageToHp);
 
@@ -172,6 +243,12 @@ export class DCCCombatMetrics {
       targetName: targetActor.name,
       rawDamage: adjustedRaw,
       dr,
+      damageAfterDR,
+      hpPerBar,
+      barsRemoved,
+      excessDamage,
+      damageToHp,
+      tempDamage,
       actualDamage,
       newHp,
       tempRemaining,

@@ -367,6 +367,13 @@ export class DCCActor extends Actor {
    * @param {'hit'|'damage'} type
    */
   async rollAttack(attackItem, type = 'hit') {
+    if (attackItem.type === 'spell') {
+      if (type === 'damage') {
+        return this.rollSpellDamage(attackItem);
+      }
+      return this.rollSpellAttack(attackItem);
+    }
+
     const sys = attackItem.system;
     if (type === 'hit') {
       const statMod = this.system.abilities?.[sys.toHitStat]?.mod ?? 0;
@@ -536,12 +543,179 @@ export class DCCActor extends Actor {
   }
 
   /**
-   * Cast/Roll a DCC Spell, posting a formatted chat card to chat
+   * Parse and calculate spell damage formula and metadata based on spell description, stat, and rank upgrades
+   * @param {DCCItem} spellItem
+   * @returns {object}
+   */
+  getSpellDamageData(spellItem) {
+    const sys = spellItem?.system || {};
+    const baseDmg = (sys.baseDamage || '').trim();
+    if (!baseDmg || sys.spellType === 'Heal' || /health bar|resistance/i.test(baseDmg)) {
+      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '' };
+    }
+
+    const diceMatch = baseDmg.match(/(\d+)d(\d+)/i);
+    const flatMatch = !diceMatch ? baseDmg.match(/^[+]?(\d+)/) : null;
+
+    if (!diceMatch && !flatMatch) {
+      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '' };
+    }
+
+    let diceStr = '';
+    let sides = 0;
+    let count = 0;
+
+    if (diceMatch) {
+      count = parseInt(diceMatch[1], 10);
+      sides = parseInt(diceMatch[2], 10);
+
+      // Check rank upgrades for bonus damage dice
+      const rank = Number(sys.rank) || 1;
+      const upgrades = sys.upgrades || {};
+      if (rank >= 5 && upgrades.rank5) {
+        const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)/i);
+        if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
+      }
+      if (rank >= 10 && upgrades.rank10) {
+        const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)/i);
+        if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
+      }
+      if (rank >= 15 && upgrades.rank15) {
+        const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)/i);
+        if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
+      }
+      diceStr = `${count}d${sides}`;
+    }
+
+    // Determine governing stat
+    let statKey = null;
+    const statMatch = baseDmg.match(/\+\s*(int|cha|con|dex|str)\b/i);
+    if (statMatch) {
+      statKey = statMatch[1].toLowerCase();
+    } else if (diceMatch && sys.stat && !/per|ft|\//i.test(baseDmg.split(diceMatch[0])[1] || '')) {
+      if (sys.spellType === 'Attack') statKey = (sys.stat || 'int').toLowerCase();
+    }
+
+    const statMod = statKey && this.system.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+
+    let formula = diceStr;
+    if (flatMatch) {
+      formula = flatMatch[1];
+    } else if (statKey) {
+      formula += statMod >= 0 ? ` + ${statMod}` : ` - ${Math.abs(statMod)}`;
+    }
+
+    // Extract rider effects (e.g. blast radius, splash)
+    let effects = '';
+    if (baseDmg.includes(',')) {
+      effects = baseDmg.split(',').slice(1).join(',').trim();
+    }
+
+    const damageType = sys.damageType || '';
+
+    return {
+      hasDamage: true,
+      dice: diceStr,
+      count,
+      sides,
+      stat: statKey,
+      statMod,
+      formula,
+      damageType,
+      effects,
+      rawBase: baseDmg
+    };
+  }
+
+  /**
+   * Roll Spell Damage, producing an interactive CarlRPG damage card
    * @param {DCCItem} spellItem
    */
-  async rollSpell(spellItem) {
+  async rollSpellDamage(spellItem) {
+    const sys = spellItem.system || {};
+    const dmgData = this.getSpellDamageData(spellItem);
+    const formula = dmgData.hasDamage && dmgData.formula ? dmgData.formula : (sys.baseDamage || '1d6');
+    const roll = await new Roll(formula).evaluate();
+
+    const damageTypeStr = dmgData.damageType ? ` (${dmgData.damageType})` : '';
+    const effectsStr = dmgData.effects || sys.limitations || '';
+
+    const cardContent = `
+      <div class="dcc-chat-card dcc-damage-card" data-attacker-id="${this.id}" data-item-id="${spellItem.id}" data-item-name="${spellItem.name}" data-damage-value="${roll.total}" data-attack-type="spell">
+        <div class="dcc-damage-card-header">
+          <strong>${this.name}</strong>: ${spellItem.name} Damage${damageTypeStr}
+        </div>
+        <div class="dcc-damage-card-result">
+          <span class="dcc-damage-value">${roll.total}</span>
+          <span class="dcc-damage-formula">(${formula})</span>
+        </div>
+        ${effectsStr ? `<div class="dcc-damage-effects"><em>${effectsStr}</em></div>` : ''}
+        <div class="dcc-damage-actions">
+          <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" title="Apply damage to targeted token(s), deducting their DR">
+            <i class="fa-solid fa-crosshairs"></i> Apply to Target(s)
+          </button>
+          <div class="dcc-damage-sub-actions">
+            <button type="button" class="dcc-apply-damage-btn" data-multiplier="0.5" title="Apply half damage">Half</button>
+            <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-ignore-dr="true" title="Apply ignoring DR">Ignore DR</button>
+            <button type="button" class="dcc-apply-damage-btn" data-multiplier="2" title="Apply double (critical) damage">Crit (2x)</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}</strong>: ${spellItem.name} (Spell Damage: ${formula})${damageTypeStr ? ` [${dmgData.damageType}]` : ''}${effectsStr ? ` - <em>${effectsStr}</em>` : ''}`,
+      content: cardContent,
+      flags: {
+        'carl-rpg': {
+          isDamageRoll: true,
+          attackerId: this.id,
+          itemId: spellItem.id,
+          itemName: spellItem.name,
+          attackType: 'spell',
+          damageType: dmgData.damageType || '',
+          rawDamage: roll.total
+        }
+      }
+    });
+  }
+
+  /**
+   * Roll Spell Attack / To-Hit
+   * @param {DCCItem} spellItem
+   */
+  async rollSpellAttack(spellItem) {
+    const sys = spellItem.system || {};
+    const statKey = (sys.stat || 'int').toLowerCase();
+    const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
+    const rank = Number(sys.rank) || 1;
+    const total = rank + statMod;
+    const formula = `1d20 + ${total}`;
+    const roll = await new Roll(formula).evaluate();
+
+    return roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<strong>${this.name}</strong>: ${spellItem.name} (Spell Attack / To Hit: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`
+    });
+  }
+
+  /**
+   * Cast/Roll a DCC Spell, posting a formatted chat card to chat
+   * @param {DCCItem} spellItem
+   * @param {'cast'|'damage'|'hit'} [action='cast']
+   */
+  async rollSpell(spellItem, action = 'cast') {
+    if (action === 'damage') {
+      return this.rollSpellDamage(spellItem);
+    }
+    if (action === 'hit') {
+      return this.rollSpellAttack(spellItem);
+    }
+
     const sys = spellItem.system || {};
     const manaCost = sys.manaCost ?? 0;
+    const dmgData = this.getSpellDamageData(spellItem);
 
     let content = `
       <div class="dcc-chat-card dcc-spell-card" style="font-family: var(--font-primary, sans-serif);">
@@ -583,6 +757,17 @@ export class DCCActor extends Actor {
       if (sys.upgrades.rank10 && sys.upgrades.rank10 !== 'None') content += `<div><strong style="color: #2980b9;">Rank 10:</strong> ${sys.upgrades.rank10}</div>`;
       if (sys.upgrades.rank15 && sys.upgrades.rank15 !== 'None') content += `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${sys.upgrades.rank15}</div>`;
       content += `</div>`;
+    }
+
+    // Embed Roll Spell Damage action button if the spell discusses damage
+    if (dmgData.hasDamage) {
+      content += `
+        <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #c0392b;">
+          <button type="button" class="dcc-btn roll-spell-dmg-from-card" data-spell-id="${spellItem.id}" data-actor-id="${this.id}" style="width: 100%; background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-primary, sans-serif); font-size: 12px;">
+            <i class="fa-solid fa-burst"></i> Roll Spell Damage (${dmgData.formula})
+          </button>
+        </div>
+      `;
     }
 
     content += `</div>`;

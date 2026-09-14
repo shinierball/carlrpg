@@ -141,6 +141,8 @@ describe('DCC RPG Spells Dataset & Compendium', () => {
     assert.ok(spellsHbs.includes('open-spell-picker'), 'spells.hbs must have open-spell-picker button');
     assert.ok(spellsHbs.includes('data-type="spell"'), 'spells.hbs must have item-create data-type="spell"');
     assert.ok(spellsHbs.includes('roll-spell'), 'spells.hbs must have roll-spell action button');
+    assert.ok(spellsHbs.includes('roll-spell-dmg'), 'spells.hbs must have roll-spell-dmg action button');
+    assert.ok(spellsHbs.includes('roll-spell-hit'), 'spells.hbs must have roll-spell-hit action button');
     assert.ok(spellsHbs.includes('dcc-spells-table'), 'spells.hbs must contain dcc-spells-table');
 
     const hotlistHbs = fs.readFileSync('templates/actors/parts/page2-hotlist.hbs', 'utf8');

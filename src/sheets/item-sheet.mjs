@@ -163,6 +163,22 @@ export class DCCItemSheet extends ItemSheet {
       context.system.modifiedRank = Math.max(0, base + boons + items);
     }
 
+    if (context.item.type === 'spell') {
+      const actor = this.item.actor || null;
+      const dmgData = actor && typeof actor.getSpellDamageData === 'function'
+        ? actor.getSpellDamageData(this.item)
+        : null;
+      if (dmgData) {
+        context.hasDamage = dmgData.hasDamage;
+        context.damageFormula = dmgData.formula;
+      } else {
+        const sys = context.item.system || {};
+        const baseDmg = (sys.baseDamage || '').trim();
+        context.hasDamage = Boolean(baseDmg && sys.spellType !== 'Heal' && !/health bar|resistance/i.test(baseDmg));
+        context.damageFormula = sys.baseDamage || '';
+      }
+    }
+
     return context;
   }
 
@@ -273,6 +289,12 @@ export class DCCItemSheet extends ItemSheet {
     html.find('.roll-spell').click(async ev => {
       ev.preventDefault();
       await this.item.roll();
+    });
+
+    // Roll Spell Damage
+    html.find('.roll-spell-dmg').click(async ev => {
+      ev.preventDefault();
+      await this.item.roll('damage');
     });
   }
 }

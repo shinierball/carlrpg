@@ -100,14 +100,14 @@ export class DCCItem extends Item {
     }
   }
 
-  async roll() {
+  async roll(action = 'cast') {
     if (this.type === 'spell') {
-      if (this.actor) return this.actor.rollSpell(this);
+      if (this.actor) return this.actor.rollSpell(this, action);
       return DCCItem.rollSpellCard(this);
     }
     if (!this.actor) return;
     if (this.type === 'attack') {
-      return this.actor.rollAttack(this, 'hit');
+      return this.actor.rollAttack(this, action === 'damage' ? 'damage' : 'hit');
     }
     if (this.type === 'skill') {
       return this.actor.rollSkill(this);

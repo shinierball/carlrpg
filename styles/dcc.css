@@ -2234,6 +2234,31 @@
   color: #fff !important;
 }
 
+.roll-spell-dmg-from-card {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  background: #c0392b;
+  color: #ffffff;
+  border: 1px solid #962d22;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.roll-spell-dmg-from-card:hover {
+  background: #e74c3c;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+}
+
 .dcc-combat-awards-header-btn {
   color: #e74c3c !important;
 }

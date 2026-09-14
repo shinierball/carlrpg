@@ -54,6 +54,11 @@
                   <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-spell roll-hotlist-spell" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Cast Spell: {{slot.name}}">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Cast
                   </button>
+                  {{#if slot.hasDamage}}
+                    <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-spell-dmg" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Damage: {{slot.name}}" style="margin-left: 4px; background: #c0392b; color: #fff;">
+                      <i class="fa-solid fa-burst"></i> Dmg
+                    </button>
+                  {{/if}}
                 {{else}}
                   <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-use roll-hotlist-use" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Use Item: {{slot.name}}">
                     <i class="fa-solid fa-flask"></i> Use

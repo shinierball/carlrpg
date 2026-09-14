@@ -16,15 +16,15 @@
     <table class="dcc-attacks-table dcc-spells-table">
       <thead>
         <tr>
-          <th style="width: 22%;">Spell Name</th>
-          <th style="width: 6%; text-align: center;" title="Spell Rank">Rank</th>
-          <th style="width: 8%; text-align: center;" title="Mana Cost">Mana</th>
-          <th style="width: 11%;">Stat & Mod</th>
-          <th style="width: 11%;">Range</th>
-          <th style="width: 11%;">Duration</th>
+          <th style="width: 20%;">Spell Name</th>
+          <th style="width: 5%; text-align: center;" title="Spell Rank">Rank</th>
+          <th style="width: 7%; text-align: center;" title="Mana Cost">Mana</th>
+          <th style="width: 10%;">Stat & Mod</th>
+          <th style="width: 10%;">Range</th>
+          <th style="width: 10%;">Duration</th>
           <th style="width: 13%;">Damage / Effect</th>
-          <th style="width: 11%;">Notes / Upgrades</th>
-          <th style="width: 7%; text-align: center;">Cast</th>
+          <th style="width: 12%;">Notes / Upgrades</th>
+          <th style="width: 13%; text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -76,6 +76,16 @@
               <button type="button" class="dcc-attack-roll-btn roll-spell" data-tooltip="Cast Spell: {{spell.name}}" style="font-size: 10px; padding: 2px 6px;">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
               </button>
+              {{#if spell.hasDamage}}
+                <button type="button" class="dcc-attack-roll-btn roll-spell-dmg" data-tooltip="Roll Damage ({{spell.damageFormula}})" style="font-size: 10px; padding: 2px 6px; margin-left: 2px; background: #c0392b; color: #fff;">
+                  <i class="fa-solid fa-burst"></i>
+                </button>
+              {{/if}}
+              {{#if spell.isAttack}}
+                <button type="button" class="dcc-attack-roll-btn roll-spell-hit" data-tooltip="Roll Spell Attack (1d20 + Rank {{spell.system.rank}} + {{upper spell.system.stat}} Mod)" style="font-size: 10px; padding: 2px 6px; margin-left: 2px; background: #2980b9; color: #fff;">
+                  <i class="fa-solid fa-crosshairs"></i>
+                </button>
+              {{/if}}
               <a class="item-edit" data-tooltip="Edit Spell Details & Upgrades" style="margin-left: 3px; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-edit"></i></a>
               <a class="item-delete" data-tooltip="Delete Spell" style="margin-left: 3px; font-size: 11px; cursor: pointer; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
             </td>

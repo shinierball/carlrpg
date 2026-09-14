@@ -230,12 +230,18 @@ export class DCCCrawlerSheet extends ActorSheet {
     // Sort skills alphabetically
     context.skills.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Prepare spells (stat modifiers, sorting)
+    // Prepare spells (stat modifiers, damage data, sorting)
     for (const spell of context.spells) {
       const stat = spell.system?.stat || 'int';
       const mod = context.system.abilities?.[stat]?.mod ?? 0;
       spell.statMod = mod;
       spell.statModStr = mod >= 0 ? `+${mod}` : `${mod}`;
+      const dmgData = typeof this.actor.getSpellDamageData === 'function' ? this.actor.getSpellDamageData(spell) : null;
+      spell.hasDamage = dmgData?.hasDamage ?? false;
+      spell.damageFormula = dmgData?.formula ?? '';
+      spell.damageDice = dmgData?.dice ?? '';
+      spell.damageType = dmgData?.damageType || spell.system?.damageType || '';
+      spell.isAttack = spell.system?.spellType === 'Attack';
     }
     context.spells.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -303,6 +309,7 @@ export class DCCCrawlerSheet extends ActorSheet {
       let isGear = false;
       let isLoot = false;
       let isAttack = false;
+      let slotHasDamage = false;
 
       let displayName = valStr;
       if (resolvedItem) {
@@ -315,6 +322,8 @@ export class DCCCrawlerSheet extends ActorSheet {
           if (resolvedItem.system?.spellType) {
             detail += ` • ${resolvedItem.system.spellType}`;
           }
+          const dmgData = typeof this.actor.getSpellDamageData === 'function' ? this.actor.getSpellDamageData(resolvedItem) : null;
+          slotHasDamage = dmgData?.hasDamage ?? false;
         } else if (slotType === 'gear') {
           isGear = true;
           gearSlot = resolvedItem.system?.slot || 'gear';
@@ -411,6 +420,7 @@ export class DCCCrawlerSheet extends ActorSheet {
         isGear,
         isLoot,
         isAttack,
+        hasDamage: slotHasDamage,
         isEquipped,
         gearSlot,
         badge,
@@ -482,6 +492,20 @@ export class DCCCrawlerSheet extends ActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
       if (item) this.actor.rollSpell(item);
+    });
+
+    // Roll Spell Damage
+    html.find('.roll-spell-dmg, .roll-spell-damage').click(ev => {
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items.get(itemId);
+      if (item) this.actor.rollSpellDamage(item);
+    });
+
+    // Roll Spell Attack / To Hit
+    html.find('.roll-spell-hit').click(ev => {
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items.get(itemId);
+      if (item) this.actor.rollSpellAttack(item);
     });
 
     // Toggle Gear Equipped
@@ -594,6 +618,28 @@ export class DCCCrawlerSheet extends ActorSheet {
         await this.actor.rollSpell(item);
       } else if (item && typeof item.roll === 'function') {
         await item.roll();
+      }
+    });
+
+    // Hotlist Action: Roll Spell Damage
+    html.find('.roll-hotlist-spell-dmg').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      let item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+
+      if (!item && CONFIG.DCC?.spells) {
+        const compSpell = CONFIG.DCC.spells.find(s => s._id === itemId || s.name === itemId);
+        if (compSpell) {
+          const owned = this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim());
+          item = owned;
+        }
+      }
+
+      if (item && typeof this.actor.rollSpellDamage === 'function') {
+        await this.actor.rollSpellDamage(item);
+      } else if (item && typeof item.roll === 'function') {
+        await item.roll('damage');
       }
     });
 

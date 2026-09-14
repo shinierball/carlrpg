@@ -395,6 +395,21 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       </div>
     `);
   });
+
+  // Handle click on "Roll Spell Damage" from a cast spell card in chat
+  html.find('.roll-spell-dmg-from-card').click(async ev => {
+    ev.preventDefault();
+    const btn = $(ev.currentTarget);
+    const actorId = btn.data('actor-id');
+    const spellId = btn.data('spell-id');
+    const actor = game.actors?.get(actorId) || null;
+    if (!actor) return;
+    const spell = actor.items?.get(spellId) ||
+      (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId) : actor.items.find?.(it => it.id === spellId));
+    if (spell && typeof actor.rollSpellDamage === 'function') {
+      await actor.rollSpellDamage(spell);
+    }
+  });
 });
 
 /**

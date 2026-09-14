@@ -32,6 +32,7 @@ test('DCC RPG Hotlist on Main Character Sheet & Inventory/Spell Population', asy
     assert.ok(hotlistHbs.includes('hotlist-select'), 'hotlist.hbs must define hotlist-select');
     assert.ok(hotlistHbs.includes('hotlist-clear'), 'hotlist.hbs must define hotlist-clear button');
     assert.ok(hotlistHbs.includes('roll-hotlist-attack'), 'hotlist.hbs must define roll-hotlist-attack button');
+    assert.ok(hotlistHbs.includes('roll-hotlist-attack-dmg'), 'hotlist.hbs must define roll-hotlist-attack-dmg button');
     assert.ok(hotlistHbs.includes('toggle-hotlist-equip'), 'hotlist.hbs must define toggle-hotlist-equip button');
     assert.ok(hotlistHbs.includes('roll-hotlist-spell'), 'hotlist.hbs must define roll-hotlist-spell button');
     assert.ok(hotlistHbs.includes('roll-hotlist-use'), 'hotlist.hbs must define roll-hotlist-use button');
@@ -223,8 +224,11 @@ test('DCC RPG Hotlist on Main Character Sheet & Inventory/Spell Population', asy
       }
     });
 
+    let attackDamageRolled = false;
+
     crawler.rollAttack = async (item, type) => {
-      attackRolled = true;
+      if (type === 'damage') attackDamageRolled = true;
+      else attackRolled = true;
       return { item, type };
     };
 
@@ -256,9 +260,11 @@ test('DCC RPG Hotlist on Main Character Sheet & Inventory/Spell Population', asy
 
     crawler.items.push(sword, shield, spell);
 
-    // 1. Roll Attack action
+    // 1. Roll Attack action (Hit and Damage)
     await crawler.rollAttack(sword, 'hit');
-    assert.equal(attackRolled, true, 'Attack action must call rollAttack');
+    assert.equal(attackRolled, true, 'Attack action must call rollAttack with hit');
+    await crawler.rollAttack(sword, 'damage');
+    assert.equal(attackDamageRolled, true, 'Attack damage action must call rollAttack with damage');
 
     // 2. Equip / Unequip gear action
     assert.equal(shield.system.equipped, false);
@@ -270,5 +276,41 @@ test('DCC RPG Hotlist on Main Character Sheet & Inventory/Spell Population', asy
     // 3. Cast Spell action
     await crawler.rollSpell(spell);
     assert.equal(spellCast, true, 'Spell action must call rollSpell');
+
+    // 4. Test sheet click listeners for roll-hotlist-attack and roll-hotlist-attack-dmg
+    const sheet = new DCCCrawlerSheet(crawler);
+    const clickHandlers = {};
+    const mockHtml = {
+      find: (sel) => ({
+        click: (fn) => { clickHandlers[sel] = fn; },
+        change: () => {},
+        contextmenu: () => {},
+        on: () => {}
+      })
+    };
+    sheet.activateListeners(mockHtml);
+
+    assert.ok(clickHandlers['.roll-hotlist-attack'], 'Sheet must register .roll-hotlist-attack click listener');
+    assert.ok(clickHandlers['.roll-hotlist-attack-dmg'], 'Sheet must register .roll-hotlist-attack-dmg click listener');
+
+    let hitCalledFromEvent = false;
+    let dmgCalledFromEvent = false;
+    crawler.rollAttack = async (item, type) => {
+      if (type === 'damage') dmgCalledFromEvent = true;
+      if (type === 'hit') hitCalledFromEvent = true;
+      return { item, type };
+    };
+
+    const mockAttackEv = {
+      preventDefault: () => {},
+      currentTarget: { dataset: { itemId: sword.id } }
+    };
+
+    await clickHandlers['.roll-hotlist-attack'](mockAttackEv);
+    assert.equal(hitCalledFromEvent, true, 'Clicking attack button must trigger rollAttack(item, "hit")');
+
+    await clickHandlers['.roll-hotlist-attack-dmg'](mockAttackEv);
+    assert.equal(dmgCalledFromEvent, true, 'Clicking attack damage button must trigger rollAttack(item, "damage")');
   });
 });
+

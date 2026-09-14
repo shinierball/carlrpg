@@ -598,6 +598,19 @@ export class DCCCrawlerSheet extends ActorSheet {
       }
     });
 
+    // Hotlist Action: Roll Attack Damage
+    html.find('.roll-hotlist-attack-dmg').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId');
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+      if (item && typeof this.actor.rollAttack === 'function') {
+        await this.actor.rollAttack(item, 'damage');
+      } else if (item && typeof item.roll === 'function') {
+        await item.roll('damage');
+      }
+    });
+
     // Hotlist Action: Cast Spell
     html.find('.roll-hotlist-spell').click(async ev => {
       ev.preventDefault();

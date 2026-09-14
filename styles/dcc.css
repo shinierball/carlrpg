@@ -822,6 +822,16 @@
   width: 100%;
 }
 
+.dcc-hotlist-action-wrapper {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.dcc-hotlist-action-wrapper .dcc-hotlist-btn {
+  flex: 1;
+}
+
 .dcc-hotlist-btn:hover {
   opacity: 0.9;
 }

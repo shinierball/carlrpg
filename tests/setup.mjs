@@ -211,6 +211,10 @@ if (!globalThis.ActorSheet) {
       this.actor = actor;
       this.options = options;
     }
+    get isEditable() {
+      return true;
+    }
+    activateListeners(html) {}
     async getData() {
       return {
         actor: this.actor,
@@ -501,4 +505,14 @@ if (!globalThis.foundry) {
     deepClone: (obj) => structuredClone(obj),
     duplicate: (obj) => structuredClone(obj)
   };
+}
+
+if (!globalThis.$) {
+  globalThis.$ = (target) => ({
+    data: (key) => target?.dataset?.[key],
+    val: () => target?.value,
+    attr: (attr) => target?.getAttribute?.(attr) || target?.[attr],
+    find: () => ({ length: 0 }),
+    closest: (sel) => target?.closest?.(sel)
+  });
 }

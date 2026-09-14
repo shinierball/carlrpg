@@ -43,8 +43,11 @@
             {{#if slot.itemId}}
               <div class="dcc-hotlist-action-wrapper">
                 {{#if slot.isAttack}}
-                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-attack" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Attack: {{slot.name}}">
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-attack" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Attack (To Hit): {{slot.name}}">
                     <i class="fa-solid fa-dice-d20"></i> Attack
+                  </button>
+                  <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-attack-dmg" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Damage: {{slot.name}}">
+                    <i class="fa-solid fa-burst"></i> Dmg
                   </button>
                 {{else if slot.isGear}}
                   <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-gear toggle-hotlist-equip {{#if slot.isEquipped}}is-equipped{{/if}}" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="{{#if slot.isEquipped}}Unequip {{slot.name}}{{else}}Equip to {{upper slot.gearSlot}}{{/if}}">
@@ -55,7 +58,7 @@
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Cast
                   </button>
                   {{#if slot.hasDamage}}
-                    <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-spell-dmg" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Damage: {{slot.name}}" style="margin-left: 4px; background: #c0392b; color: #fff;">
+                    <button type="button" class="dcc-hotlist-btn dcc-hotlist-btn-attack roll-hotlist-spell-dmg" data-item-id="{{slot.itemId}}" data-slot="{{slot.key}}" title="Roll Damage: {{slot.name}}">
                       <i class="fa-solid fa-burst"></i> Dmg
                     </button>
                   {{/if}}

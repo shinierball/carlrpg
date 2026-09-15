@@ -1,0 +1,35 @@
+{{!-- RACE & CLASS TYPE --}}
+{{#if (or (eq item.type "race") (eq item.type "class"))}}
+  <div class="dcc-field-group" style="margin-bottom: 8px;">
+    <span class="dcc-field-label">Abilities</span>
+    <textarea class="dcc-field-input" name="system.abilities" style="height: 140px;">{{system.abilities}}</textarea>
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Description & Lore</span>
+    <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+  </div>
+{{/if}}
+
+{{!-- DEITY TYPE --}}
+{{#if (eq item.type "deity")}}
+  <div class="dcc-field-group" style="margin-bottom: 8px;">
+    <span class="dcc-field-label">Boons & Perks</span>
+    <textarea class="dcc-field-input" name="system.boons" style="height: 120px;">{{system.boons}}</textarea>
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Description</span>
+    <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+  </div>
+{{/if}}
+
+{{!-- SPONSOR TYPE --}}
+{{#if (eq item.type "sponsor")}}
+  <div class="dcc-field-group" style="margin-bottom: 8px;">
+    <span class="dcc-field-label">Gifts & Conditions</span>
+    <textarea class="dcc-field-input" name="system.gifts" style="height: 120px;">{{system.gifts}}</textarea>
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Notes</span>
+    <textarea class="dcc-field-input" name="system.notes" style="height: 100px;">{{system.notes}}</textarea>
+  </div>
+{{/if}}

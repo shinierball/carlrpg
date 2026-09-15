@@ -483,20 +483,318 @@ export const DCC_BUFFS = [
 ];
 
 /**
- * Common Canonical Debuffs for quick lookup and reference
+ * Common Canonical DCC RPG Debuffs and Status Conditions
  */
 export const DCC_DEBUFFS = [
-  { name: "Burned", severity: "Minor", description: "Takes periodic fire damage." },
-  { name: "Shocked", severity: "Minor", description: "Disadvantage on Dex-based checks." },
-  { name: "Poisoned", severity: "Minor", description: "Disadvantage on physical checks." },
-  { name: "Held", severity: "Major", description: "Incapacitated and cannot move or act." },
-  { name: "Stunned", severity: "Major", description: "Cannot take actions or reactions." },
-  { name: "Woozy", severity: "Minor", description: "-2 penalty to attack and perception rolls." },
-  { name: "Queasy", severity: "Minor", description: "-2 penalty to physical rolls." },
-  { name: "Stiff Legs", severity: "Minor", description: "Movement speed reduced by 50%." },
-  { name: "The Taint", severity: "Major", description: "Permanent corruption or necrosis." },
-  { name: "Sore as Shit", severity: "Minor", description: "-1 to all physical stat checks." },
-  { name: "Muted", severity: "Minor", description: "Unable to speak or cast vocal spells." },
-  { name: "Minor Injury", severity: "Minor", description: "Impairment to a limb or organ." },
-  { name: "Major Injury", severity: "Major", description: "Severe impairment or broken bone." }
+  {
+    _id: "dccdeb0000000001",
+    name: "Burned",
+    type: "debuff",
+    img: "icons/svg/fire.svg",
+    severity: "Minor",
+    description: "Takes periodic fire damage and suffers lingering burning pain.",
+    system: {
+      severity: "Minor",
+      damageType: "Fire",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Takes periodic fire damage and suffers lingering burning pain."
+    }
+  },
+  {
+    _id: "dccdeb0000000002",
+    name: "Shocked",
+    type: "debuff",
+    img: "icons/svg/lightning.svg",
+    severity: "Minor",
+    description: "Muscles twitch violently from electric currents. Disadvantage on Dex-based checks.",
+    system: {
+      severity: "Minor",
+      damageType: "Electric",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "dex", value: -2 }],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Muscles twitch violently from electric currents. Disadvantage on Dex-based checks."
+    }
+  },
+  {
+    _id: "dccdeb0000000003",
+    name: "Poisoned",
+    type: "debuff",
+    img: "icons/svg/poison.svg",
+    severity: "Minor",
+    description: "Toxic venom coursing through the bloodstream. -2 to physical stats.",
+    system: {
+      severity: "Minor",
+      damageType: "Poison",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "con", value: -2 },
+        { stat: "str", value: -2 }
+      ],
+      damageModifiers: [],
+      duration: "1 Hour",
+      description: "Toxic venom coursing through the bloodstream. -2 to physical stats."
+    }
+  },
+  {
+    _id: "dccdeb0000000004",
+    name: "Held",
+    type: "debuff",
+    img: "icons/svg/net.svg",
+    severity: "Major",
+    description: "Physically or magically restrained. Incapacitated and cannot move or take actions.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "dex", value: -5 }],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Physically or magically restrained. Incapacitated and cannot move or take actions."
+    }
+  },
+  {
+    _id: "dccdeb0000000005",
+    name: "Stunned",
+    type: "debuff",
+    img: "icons/svg/daze.svg",
+    severity: "Major",
+    description: "Completely dazed and concussed. Cannot take actions or reactions.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "dex", value: -4 },
+        { stat: "int", value: -4 }
+      ],
+      damageModifiers: [],
+      duration: "1 Round",
+      description: "Completely dazed and concussed. Cannot take actions or reactions."
+    }
+  },
+  {
+    _id: "dccdeb0000000006",
+    name: "Woozy",
+    type: "debuff",
+    img: "icons/svg/sleep.svg",
+    severity: "Minor",
+    description: "Dizzy and lightheaded. -2 penalty to attack, intelligence, and perception rolls.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "int", value: -2 }],
+      damageModifiers: [],
+      duration: "10 Minutes",
+      description: "Dizzy and lightheaded. -2 penalty to attack, intelligence, and perception rolls."
+    }
+  },
+  {
+    _id: "dccdeb0000000007",
+    name: "Queasy",
+    type: "debuff",
+    img: "icons/svg/acid.svg",
+    severity: "Minor",
+    description: "Violent stomach cramps and nausea. -2 penalty to physical rolls.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "con", value: -2 },
+        { stat: "str", value: -1 }
+      ],
+      damageModifiers: [],
+      duration: "30 Minutes",
+      description: "Violent stomach cramps and nausea. -2 penalty to physical rolls."
+    }
+  },
+  {
+    _id: "dccdeb0000000008",
+    name: "Stiff Legs",
+    type: "debuff",
+    img: "icons/svg/hazard.svg",
+    severity: "Minor",
+    description: "Muscles or joints frozen. Movement speed reduced by 50% and -2 Dexterity.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "dex", value: -2 }],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Muscles or joints frozen. Movement speed reduced by 50% and -2 Dexterity."
+    }
+  },
+  {
+    _id: "dccdeb0000000009",
+    name: "The Taint",
+    type: "debuff",
+    img: "icons/svg/skull.svg",
+    severity: "Major",
+    description: "Permanent dungeon corruption or creeping necrotic rot eating away at vitality.",
+    system: {
+      severity: "Major",
+      damageType: "Necrotic",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "con", value: -3 },
+        { stat: "cha", value: -3 }
+      ],
+      damageModifiers: [],
+      duration: "Permanent",
+      description: "Permanent dungeon corruption or creeping necrotic rot eating away at vitality."
+    }
+  },
+  {
+    _id: "dccdeb0000000010",
+    name: "Sore as Shit",
+    type: "debuff",
+    img: "icons/svg/falling.svg",
+    severity: "Minor",
+    description: "Every muscle aches after a brutal encounter. -1 to all physical stat checks.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "str", value: -1 },
+        { stat: "dex", value: -1 },
+        { stat: "con", value: -1 }
+      ],
+      damageModifiers: [],
+      duration: "Rest",
+      description: "Every muscle aches after a brutal encounter. -1 to all physical stat checks."
+    }
+  },
+  {
+    _id: "dccdeb0000000011",
+    name: "Muted",
+    type: "debuff",
+    img: "icons/svg/silenced.svg",
+    severity: "Minor",
+    description: "Vocal cords silenced or magically sealed. Unable to speak or cast verbal spells.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "cha", value: -2 }],
+      damageModifiers: [],
+      duration: "10 Minutes",
+      description: "Vocal cords silenced or magically sealed. Unable to speak or cast verbal spells."
+    }
+  },
+  {
+    _id: "dccdeb0000000012",
+    name: "Bleeding",
+    type: "debuff",
+    img: "icons/svg/blood.svg",
+    severity: "Minor",
+    description: "Active open wound leaking blood each turn.",
+    system: {
+      severity: "Minor",
+      damageType: "Slashing",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "con", value: -1 }],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Active open wound leaking blood each turn."
+    }
+  },
+  {
+    _id: "dccdeb0000000013",
+    name: "Frozen",
+    type: "debuff",
+    img: "icons/svg/ice-cube.svg",
+    severity: "Minor",
+    description: "Deep chill numbing limbs and slowing reactions. -2 Dexterity.",
+    system: {
+      severity: "Minor",
+      damageType: "Ice",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "dex", value: -2 }],
+      damageModifiers: [],
+      duration: "Combat",
+      description: "Deep chill numbing limbs and slowing reactions. -2 Dexterity."
+    }
+  },
+  {
+    _id: "dccdeb0000000014",
+    name: "Crippled",
+    type: "debuff",
+    img: "icons/svg/broken-bone.svg",
+    severity: "Major",
+    description: "Severely broken limb or torn tendon. -4 Dexterity and -2 Strength.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "dex", value: -4 },
+        { stat: "str", value: -2 }
+      ],
+      damageModifiers: [],
+      duration: "Until Treated",
+      description: "Severely broken limb or torn tendon. -4 Dexterity and -2 Strength."
+    }
+  },
+  {
+    _id: "dccdeb0000000015",
+    name: "Minor Injury",
+    type: "debuff",
+    img: "icons/svg/wound.svg",
+    severity: "Minor",
+    description: "Laceration, sprain, or surface burn impairing physical actions.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [{ stat: "con", value: -1 }],
+      damageModifiers: [],
+      duration: "Rest",
+      description: "Laceration, sprain, or surface burn impairing physical actions."
+    }
+  },
+  {
+    _id: "dccdeb0000000016",
+    name: "Major Injury",
+    type: "debuff",
+    img: "icons/svg/trauma.svg",
+    severity: "Major",
+    description: "Severe compound fracture, punctured organ, or massive trauma. -3 to all stats.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [
+        { stat: "str", value: -3 },
+        { stat: "dex", value: -3 },
+        { stat: "con", value: -3 }
+      ],
+      damageModifiers: [],
+      duration: "Until Med-Bay",
+      description: "Severe compound fracture, punctured organ, or massive trauma. -3 to all stats."
+    }
+  }
 ];

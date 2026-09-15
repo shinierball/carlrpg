@@ -1,4 +1,6 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
+import { DCCSpellManager } from '../apps/spell-manager.mjs';
+import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -85,6 +87,7 @@ export class DCCCrawlerSheet extends ActorSheet {
     context.sponsors = [];
     context.loot = [];
     context.buffs = [];
+    context.debuffs = [];
 
     // Track equipped items by slot
     context.equippedBySlot = {
@@ -122,6 +125,22 @@ export class DCCCrawlerSheet extends ActorSheet {
       else if (item.type === 'sponsor') context.sponsors.push(item);
       else if (item.type === 'loot') context.loot.push(item);
       else if (item.type === 'buff') context.buffs.push(item);
+      else if (item.type === 'debuff') {
+        const sys = item.system || {};
+        const sev = (sys.severity || 'Minor').toLowerCase();
+        item.severityClass = sev === 'major' ? 'is-major' : 'is-minor';
+        const parts = [];
+        if (Array.isArray(sys.statModifiers) && sys.statModifiers.length > 0) {
+          parts.push(sys.statModifiers.map(m => `${m.value > 0 ? '+' : ''}${m.value} ${(m.stat || '').toUpperCase()}`).join(', '));
+        } else if (sys.stat) {
+          parts.push(`${Number(sys.value) > 0 ? '+' : ''}${sys.value} ${(sys.stat || '').toUpperCase()}`);
+        }
+        if (sys.reductionPercent && sys.damageType) {
+          parts.push(`-${sys.reductionPercent}% ${sys.damageType}`);
+        }
+        item.summary = parts.join(' • ') || sys.description || '';
+        context.debuffs.push(item);
+      }
     }
 
     // Tally gear skill bonuses from equipped gear
@@ -645,15 +664,23 @@ export class DCCCrawlerSheet extends ActorSheet {
       this._openSkillPicker();
     });
 
-    // Open Spells Compendium
+    // Open Spells Compendium / Manager
     html.find('.open-spell-picker').click(ev => {
       ev.preventDefault();
-      const pack = game.packs.get('carl-rpg.spells');
-      if (pack) {
-        pack.render(true);
-      } else {
-        ui.notifications?.info('Spells compendium not found.');
-      }
+      this._openSpellPicker();
+    });
+
+    // Open Buffs Compendium / Manager
+    html.find('.open-buff-picker').click(ev => {
+      ev.preventDefault();
+      const targetSlot = $(ev.currentTarget).data('slot') || null;
+      this._openBuffPicker(targetSlot, 'buffs');
+    });
+
+    // Open Debuffs Compendium / Manager
+    html.find('.open-debuff-picker').click(ev => {
+      ev.preventDefault();
+      this._openBuffPicker(null, 'debuffs');
     });
 
     // Roll Stat Check
@@ -927,6 +954,22 @@ export class DCCCrawlerSheet extends ActorSheet {
    */
   _openSkillPicker() {
     new DCCSkillManager({ actor: this.actor }).render(true);
+  }
+
+  /**
+   * Open interactive modal to choose spells from the DCC Spell Library & Manager
+   */
+  _openSpellPicker() {
+    new DCCSpellManager({ actor: this.actor }).render(true);
+  }
+
+  /**
+   * Open interactive modal to choose buffs or debuffs from the Condition Library
+   * @param {string|null} targetSlot
+   * @param {string} initialTab
+   */
+  _openBuffPicker(targetSlot = null, initialTab = 'all') {
+    new DCCBuffDebuffManager({ actor: this.actor, targetSlot, activeTab: initialTab }).render(true);
   }
 
   /** @override */

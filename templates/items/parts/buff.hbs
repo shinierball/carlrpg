@@ -1,0 +1,144 @@
+<div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Primary Buff Type</span>
+    <select name="system.buffType" class="dcc-field-input">
+      <option value="stat" {{#if (eq system.buffType "stat")}}selected{{/if}}>Stat Bonus</option>
+      <option value="tempHp" {{#if (eq system.buffType "tempHp")}}selected{{/if}}>Temp Health</option>
+      <option value="damageMultiplier" {{#if (eq system.buffType "damageMultiplier")}}selected{{/if}}>Damage Multiplier</option>
+      <option value="resistance" {{#if (eq system.buffType "resistance")}}selected{{/if}}>Damage Resistance</option>
+      <option value="immunity" {{#if (eq system.buffType "immunity")}}selected{{/if}}>Damage Immunity</option>
+      <option value="custom" {{#if (eq system.buffType "custom")}}selected{{/if}}>Custom</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Value / Multiplier</span>
+    <input class="dcc-field-input" type="number" step="0.1" name="system.value" value="{{system.value}}" placeholder="2" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Damage Type</span>
+    <select name="system.damageType" class="dcc-field-input">
+      <option value="">All / None</option>
+      {{#each damageTypes as |dt|}}
+        <option value="{{dt}}" {{#if (eq ../system.damageType dt)}}selected{{/if}}>{{dt}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Duration</span>
+    <input class="dcc-field-input" type="text" name="system.duration" value="{{system.duration}}" placeholder="1 Hour" />
+  </div>
+</div>
+
+{{!-- MULTIPLE STAT MODIFIERS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>STAT MODIFIERS</span>
+    <a class="add-stat-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Stat Modifier
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.statModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 55%;">Ability / Stat</th>
+            <th style="width: 35%;">Bonus Value (+/-)</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.statModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.statModifiers.{{idx}}.stat" style="font-size: 11px;">
+                  <option value="str" {{#if (eq mod.stat "str")}}selected{{/if}}>STR (Strength)</option>
+                  <option value="int" {{#if (eq mod.stat "int")}}selected{{/if}}>INT (Intelligence)</option>
+                  <option value="con" {{#if (eq mod.stat "con")}}selected{{/if}}>CON (Constitution)</option>
+                  <option value="dex" {{#if (eq mod.stat "dex")}}selected{{/if}}>DEX (Dexterity)</option>
+                  <option value="cha" {{#if (eq mod.stat "cha")}}selected{{/if}}>CHA (Charisma)</option>
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.statModifiers.{{idx}}.value" value="{{mod.value}}" placeholder="2" style="width: 100%; font-size: 11px; text-align: center;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-stat-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No additional stat modifiers. Click "Add Stat Modifier" above to grant stat bonuses (e.g. +2 STR, +2 DEX).
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+{{!-- MULTIPLE DAMAGE & DEFENSE MODIFIERS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>DAMAGE & DEFENSE MODIFIERS</span>
+    <a class="add-buff-damage-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Damage Modifier
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Effect Type</th>
+            <th style="width: 25%;">Damage Type</th>
+            <th style="width: 20%;">Value / Mult</th>
+            <th style="width: 20%;">Dice</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.type" style="font-size: 11px;">
+                  <option value="damageBonus" {{#if (eq mod.type "damageBonus")}}selected{{/if}}>Damage Bonus</option>
+                  <option value="damageMultiplier" {{#if (eq mod.type "damageMultiplier")}}selected{{/if}}>Damage Multiplier</option>
+                  <option value="resistance" {{#if (eq mod.type "resistance")}}selected{{/if}}>Resistance</option>
+                  <option value="immunity" {{#if (eq mod.type "immunity")}}selected{{/if}}>Immunity</option>
+                  <option value="tempHp" {{#if (eq mod.type "tempHp")}}selected{{/if}}>Temp HP</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.damageType" style="font-size: 11px;">
+                  <option value="">All / None</option>
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq mod.damageType dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" step="0.1" name="system.damageModifiers.{{idx}}.value" value="{{mod.value}}" placeholder="2" style="width: 100%; font-size: 11px; text-align: center;" />
+              </td>
+              <td>
+                <input class="dcc-field-input" type="text" name="system.damageModifiers.{{idx}}.dice" value="{{mod.dice}}" placeholder="1d6" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-buff-damage-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No additional damage modifiers. Click "Add Damage Modifier" above to add multipliers, resistances, or bonus damage.
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<div class="dcc-field-group">
+  <span class="dcc-field-label">Description</span>
+  <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+</div>

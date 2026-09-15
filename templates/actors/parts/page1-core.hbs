@@ -293,8 +293,29 @@
           </div>
         </div>
         <div class="dcc-debuffs-box">
-          <div class="dcc-banner-header">Debuffs</div>
-          <textarea class="dcc-debuffs-input" name="system.attributes.debuffs" placeholder="Debuffs, conditions...">{{system.attributes.debuffs}}</textarea>
+          <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>DEBUFFS & CONDITIONS</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <a class="open-debuff-picker" data-tooltip="Browse Conditions Compendium" style="color: #f1c40f; cursor: pointer; font-size: 10px; font-weight: normal; text-transform: none;">
+                <i class="fa-solid fa-book-skull"></i> Browse
+              </a>
+              <a class="item-create" data-type="debuff" data-tooltip="Add Custom Debuff" style="color: #fff; cursor: pointer; font-size: 10px; font-weight: normal; text-transform: none;">
+                <i class="fa-solid fa-plus"></i> Add
+              </a>
+            </div>
+          </div>
+          {{#if debuffs.length}}
+            <div class="dcc-debuff-chips-container" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 6px; background: #fff5f5; border: 1px solid #e74c3c; border-radius: 3px; margin-bottom: 4px;">
+              {{#each debuffs as |deb|}}
+                <div class="dcc-debuff-chip {{deb.severityClass}}" data-item-id="{{deb.id}}" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 3px; font-size: 10px; background: {{#if (eq deb.severityClass 'is-major')}}#c0392b{{else}}#d35400{{/if}}; color: #fff;" title="{{deb.name}}{{#if deb.summary}} ({{deb.summary}}){{/if}}{{#if deb.system.duration}} • {{deb.system.duration}}{{/if}}">
+                  <span class="item-edit" style="cursor: pointer; font-weight: bold;">{{deb.name}}</span>
+                  {{#if deb.summary}}<span style="opacity: 0.85; font-size: 9px;">({{deb.summary}})</span>{{/if}}
+                  <a class="item-delete" data-tooltip="Remove {{deb.name}}" style="color: #fff; cursor: pointer; margin-left: 2px;"><i class="fa-solid fa-xmark"></i></a>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+          <textarea class="dcc-debuffs-input" name="system.attributes.debuffs" placeholder="Debuffs, conditions, notes...">{{system.attributes.debuffs}}</textarea>
         </div>
       </div>
     </div>
@@ -309,6 +330,7 @@
         <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
           <span>EXTERNAL BUFFS (MAX 3)</span>
           <div style="display: flex; align-items: center; gap: 8px;">
+            <a class="open-buff-picker" data-tooltip="Browse Buffs Compendium" style="color: #f1c40f; font-size: 10px; cursor: pointer;"><i class="fa-solid fa-sparkles"></i> Browse</a>
             <a class="item-create" data-type="buff" data-tooltip="Create New Buff" style="color: #fff; font-size: 10px; cursor: pointer;"><i class="fa-solid fa-plus"></i> New Buff</a>
             <span style="font-size: 9px; font-weight: normal; opacity: 0.85;">Active Effects</span>
           </div>

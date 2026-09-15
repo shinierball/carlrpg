@@ -1,0 +1,105 @@
+<div class="dcc-field-row" style="margin-bottom: 8px;">
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">To-Hit Rank</span>
+    <input class="dcc-field-input" type="number" name="system.toHitRank" value="{{system.toHitRank}}" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">To-Hit Stat</span>
+    <select name="system.toHitStat" class="dcc-field-input">
+      <option value="str" {{#if (eq system.toHitStat "str")}}selected{{/if}}>STR</option>
+      <option value="dex" {{#if (eq system.toHitStat "dex")}}selected{{/if}}>DEX</option>
+      <option value="con" {{#if (eq system.toHitStat "con")}}selected{{/if}}>CON</option>
+      <option value="int" {{#if (eq system.toHitStat "int")}}selected{{/if}}>INT</option>
+      <option value="cha" {{#if (eq system.toHitStat "cha")}}selected{{/if}}>CHA</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Primary Dice</span>
+    <input class="dcc-field-input" type="text" name="system.damageDice" value="{{system.damageDice}}" placeholder="1d8" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Primary Stat</span>
+    <select name="system.damageStat" class="dcc-field-input">
+      <option value="str" {{#if (eq system.damageStat "str")}}selected{{/if}}>STR</option>
+      <option value="dex" {{#if (eq system.damageStat "dex")}}selected{{/if}}>DEX</option>
+      <option value="int" {{#if (eq system.damageStat "int")}}selected{{/if}}>INT</option>
+      <option value="con" {{#if (eq system.damageStat "con")}}selected{{/if}}>CON</option>
+      <option value="cha" {{#if (eq system.damageStat "cha")}}selected{{/if}}>CHA</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Primary Type</span>
+    <select name="system.damageType" class="dcc-field-input">
+      <option value="">Physical</option>
+      {{#each damageTypes as |dt|}}
+        <option value="{{dt}}" {{#if (eq ../system.damageType dt)}}selected{{/if}}>{{dt}}</option>
+      {{/each}}
+    </select>
+  </div>
+</div>
+
+{{!-- MULTI-TYPED DAMAGE PARTS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>DAMAGE PARTS & TYPED DAMAGE</span>
+    <a class="add-damage-part" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Damage Part
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageParts.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Dice</th>
+            <th style="width: 20%;">Stat</th>
+            <th style="width: 30%;">Damage Type</th>
+            <th style="width: 20%;">Flat Value</th>
+            <th style="width: 5%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageParts as |part idx|}}
+            <tr>
+              <td>
+                <input class="dcc-field-input" type="text" name="system.damageParts.{{idx}}.dice" value="{{part.dice}}" placeholder="1d6" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageParts.{{idx}}.stat" style="font-size: 11px;">
+                  <option value="" {{#if (not part.stat)}}selected{{/if}}>None</option>
+                  <option value="str" {{#if (eq part.stat "str")}}selected{{/if}}>STR</option>
+                  <option value="dex" {{#if (eq part.stat "dex")}}selected{{/if}}>DEX</option>
+                  <option value="con" {{#if (eq part.stat "con")}}selected{{/if}}>CON</option>
+                  <option value="int" {{#if (eq part.stat "int")}}selected{{/if}}>INT</option>
+                  <option value="cha" {{#if (eq part.stat "cha")}}selected{{/if}}>CHA</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageParts.{{idx}}.type" style="font-size: 11px;">
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq part.type dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageParts.{{idx}}.value" value="{{part.value}}" placeholder="0" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-damage-part" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        Single primary damage roll active. Click "Add Damage Part" above to add composite typed damages (e.g. +2 Necrotic, +4 Sonic).
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<div class="dcc-field-group">
+  <span class="dcc-field-label">Effects</span>
+  <input class="dcc-field-input" type="text" name="system.effects" value="{{system.effects}}" placeholder="Knockdown, Fire, Piercing..." />
+</div>

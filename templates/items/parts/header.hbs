@@ -1,0 +1,11 @@
+<header class="dcc-item-header">
+  <img src="{{item.img}}" data-edit="img" title="{{item.name}}" style="width: 56px; height: 56px; border: 2px solid #000; margin-right: 10px;" />
+  <div style="flex: 1;">
+    <h1 style="margin: 0; padding: 0; border: none;">
+      <input name="name" type="text" value="{{item.name}}" placeholder="Item Name" class="dcc-field-input" style="font-size: 18px; font-weight: bold;" />
+    </h1>
+    <div style="font-family: 'Oswald', sans-serif; font-size: 12px; text-transform: uppercase; color: #e74c3c; margin-top: 4px;">
+      Type: {{upper item.type}}
+    </div>
+  </div>
+</header>

@@ -1,4 +1,5 @@
 import { DCC_SKILLS } from '../src/data/skills.mjs';
+import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 
 /**
@@ -18,6 +19,10 @@ export class MockActor {
   async _preCreate(data, options, user) {}
   prepareBaseData() {}
   prepareDerivedData() {}
+  prepareData() {
+    this.prepareBaseData();
+    this.prepareDerivedData();
+  }
   updateSource(data) {
     for (const [k, v] of Object.entries(data)) {
       if (k.startsWith('prototypeToken.')) {
@@ -456,6 +461,7 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG = {
     DCC: {
       skills: DCC_SKILLS,
+      spells: DCC_SPELLS,
       buffs: DCC_BUFFS,
       damageTypes: DCC_DAMAGE_TYPES,
       debuffs: DCC_DEBUFFS
@@ -466,12 +472,24 @@ if (!globalThis.CONFIG) {
 } else {
   globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
   globalThis.CONFIG.DCC.skills = DCC_SKILLS;
+  globalThis.CONFIG.DCC.spells = DCC_SPELLS;
   globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
   globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
   globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
   globalThis.CONFIG.Combat = globalThis.CONFIG.Combat || { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } };
   globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
   globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };
+}
+
+if (!globalThis.ui) {
+  globalThis.ui = {
+    notifications: {
+      info: () => {},
+      warn: () => {},
+      error: () => {}
+    },
+    windows: {}
+  };
 }
 
 if (!globalThis.ChatMessage) {

@@ -1,0 +1,130 @@
+<div class="dcc-manager-container dcc-spell-manager" style="display: flex; flex-direction: column; height: 100%; font-family: 'Oswald', sans-serif;">
+  {{!-- Top Header & Controls --}}
+  <div class="dcc-manager-header" style="background: #111; color: #fff; padding: 10px 14px; border-bottom: 2px solid #c0392b;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-wand-magic-sparkles" style="color: #e74c3c; font-size: 18px;"></i>
+        <span style="font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">DCC SPELL LIBRARY &amp; COMPENDIUM</span>
+      </div>
+      {{#if actor}}
+        <div style="font-size: 12px; color: #f1c40f;">
+          Browsing for: <strong>{{actor.name}}</strong>
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- Search and Filters Row --}}
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <div style="flex: 2; position: relative; min-width: 200px;">
+        <input type="text" class="spell-search-input dcc-field-input" placeholder="Search spells, damage types, quotes..." value="{{searchQuery}}" style="width: 100%; height: 30px; font-size: 12px; padding-right: 24px;" />
+        {{#if searchQuery}}
+          <a class="spell-search-clear" style="position: absolute; right: 8px; top: 6px; color: #999; cursor: pointer;"><i class="fa-solid fa-xmark"></i></a>
+        {{/if}}
+      </div>
+
+      <div style="flex: 1; min-width: 130px;">
+        <select class="spell-stat-filter dcc-field-input" style="height: 30px; font-size: 12px; width: 100%;">
+          <option value="all" {{#if (eq activeStat 'all')}}selected{{/if}}>Stat: All</option>
+          <option value="int" {{#if (eq activeStat 'int')}}selected{{/if}}>INT (Intelligence)</option>
+          <option value="cha" {{#if (eq activeStat 'cha')}}selected{{/if}}>CHA (Charisma)</option>
+          <option value="str" {{#if (eq activeStat 'str')}}selected{{/if}}>STR (Strength)</option>
+          <option value="dex" {{#if (eq activeStat 'dex')}}selected{{/if}}>DEX (Dexterity)</option>
+          <option value="con" {{#if (eq activeStat 'con')}}selected{{/if}}>CON (Constitution)</option>
+        </select>
+      </div>
+
+      <div style="flex: 1; min-width: 130px;">
+        <select class="spell-damage-filter dcc-field-input" style="height: 30px; font-size: 12px; width: 100%;">
+          <option value="all" {{#if (eq activeDamageType 'all')}}selected{{/if}}>Damage: All</option>
+          {{#each damageTypes as |dt|}}
+            <option value="{{dt}}" {{#if (eq ../activeDamageType dt)}}selected{{/if}}>{{dt}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    {{!-- Category Pills --}}
+    <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+      <a class="spell-type-pill {{#if (eq activeSpellType 'all')}}is-active{{/if}}" data-type="all" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeSpellType 'all')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        All ({{counts.all}})
+      </a>
+      <a class="spell-type-pill {{#if (eq activeSpellType 'attack')}}is-active{{/if}}" data-type="attack" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeSpellType 'attack')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Attack ({{counts.attack}})
+      </a>
+      <a class="spell-type-pill {{#if (eq activeSpellType 'heal')}}is-active{{/if}}" data-type="heal" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeSpellType 'heal')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Heal ({{counts.heal}})
+      </a>
+      <a class="spell-type-pill {{#if (eq activeSpellType 'buff')}}is-active{{/if}}" data-type="buff" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeSpellType 'buff')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Buff &amp; Utility ({{counts.buff}})
+      </a>
+      <a class="spell-type-pill {{#if (eq activeSpellType 'passive')}}is-active{{/if}}" data-type="passive" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeSpellType 'passive')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Passive ({{counts.passive}})
+      </a>
+    </div>
+  </div>
+
+  {{!-- Spell Cards Body --}}
+  <div class="dcc-manager-body" style="flex: 1; overflow-y: auto; padding: 10px; background: #222; display: flex; flex-direction: column; gap: 8px;">
+    {{#each spells as |spell|}}
+      <div class="dcc-spell-card-row dcc-spell-card-draggable" data-spell-name="{{spell.name}}" draggable="true" style="background: #2a2a2a; border: 1px solid #444; border-left: 4px solid {{#if (eq spell.system.spellType 'Heal')}}#27ae60{{else if (eq spell.system.spellType 'Attack')}}#c0392b{{else}}#2980b9{{/if}}; border-radius: 4px; padding: 8px 10px; color: #eee; display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="{{spell.img}}" style="width: 32px; height: 32px; border: 1px solid #000; border-radius: 3px; object-fit: contain; background: #111;" />
+            <div>
+              <span style="font-size: 14px; font-weight: bold; color: #fff;">{{spell.name}}</span>
+              <div style="display: flex; gap: 4px; align-items: center; margin-top: 2px;">
+                <span class="dcc-badge" style="background: #34495e; font-size: 9px; padding: 1px 4px; color: #fff;">{{spell.system.spellType}}</span>
+                <span class="dcc-badge" style="background: #2980b9; font-size: 9px; padding: 1px 4px; color: #fff;">{{spell.system.manaCost}} MP</span>
+                <span class="dcc-badge" style="background: #8e44ad; font-size: 9px; padding: 1px 4px; color: #fff;">{{spell.statUpper}}</span>
+                {{#if spell.system.damageType}}
+                  <span class="dcc-badge" style="background: #d35400; font-size: 9px; padding: 1px 4px; color: #fff;">{{spell.system.damageType}}</span>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" class="btn-cast-spell dcc-btn" data-spell-name="{{spell.name}}" title="Cast / Preview Spell" style="background: #34495e; color: #fff; font-size: 11px; padding: 4px 8px; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+              <i class="fa-solid fa-comment-dots"></i> Preview
+            </button>
+            {{#if ../actor}}
+              {{#if spell.isKnown}}
+                <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 11px; padding: 4px 8px;">
+                  <i class="fa-solid fa-check"></i> Known
+                </span>
+              {{else}}
+                <button type="button" class="btn-learn-spell dcc-btn" data-spell-name="{{spell.name}}" style="background: #c0392b; color: #fff; font-size: 11px; padding: 4px 8px; border: 1px solid #111; border-radius: 3px; font-weight: bold; cursor: pointer;">
+                  <i class="fa-solid fa-plus"></i> Learn
+                </button>
+              {{/if}}
+            {{/if}}
+          </div>
+        </div>
+
+        {{#if spell.system.quote}}
+          <div style="font-style: italic; color: #f1c40f; font-size: 11px; opacity: 0.9; margin-top: 2px;">
+            “{{spell.system.quote}}”
+          </div>
+        {{/if}}
+
+        <div style="font-size: 11px; color: #bbb; line-height: 1.3;">
+          {{#if spell.system.baseDamage}}
+            <span style="color: #e74c3c; font-weight: bold;">Damage/Effect:</span> {{spell.system.baseDamage}} •
+          {{/if}}
+          <span><strong>Range:</strong> {{spell.system.range}}</span> •
+          <span><strong>Duration:</strong> {{spell.system.duration}}</span>
+        </div>
+
+        {{#if spell.system.description}}
+          <div style="font-size: 11px; color: #ccc; line-height: 1.3; background: #1f1f1f; padding: 4px 6px; border-radius: 2px; margin-top: 2px;">
+            {{spell.system.description}}
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <div style="text-align: center; color: #777; padding: 40px; font-size: 14px;">
+        No spells found matching the search criteria.
+      </div>
+    {{/each}}
+  </div>
+</div>

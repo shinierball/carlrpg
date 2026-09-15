@@ -1,3 +1,22 @@
+## 1.0.16
+
+### Item Sheet Decomposition, Debuff Management & Dedicated Spell/Condition Browsers
+
+- **Modular Item Sheet Partials**: Decomposed the monolithic item sheet into modular, purpose-built partial templates (`header.hbs`, `attack.hbs`, `spell.hbs`, `gear.hbs`, `buff.hbs`, `debuff.hbs`, `skill.hbs`, `loot.hbs`, `traits.hbs`) under `templates/items/parts/`, registered dynamically in `loadTemplates`.
+- **First-Class Debuff Visibility & Management**:
+  - Expanded `DCC_DEBUFFS` canonical dataset with 16 complete Item schemas including severity tags, duration, stat penalties, and damage modifiers.
+  - Interactive condition badge strip on character sheet Page 1 (Core) displaying active debuffs with severity styling (`is-major`/`is-minor`), penalty badges, and one-click removal.
+  - Dedicated "Character Debuffs & Conditions" table on Page 4 (Inventory) showing severity badges, effect summaries, remaining duration, inline edit/delete actions, and quick-add shortcuts.
+- **Dedicated Spell Manager (`DCCSpellManager`)**:
+  - Interactive popup catalog (`src/apps/spell-manager.mjs`) for browsing, searching, and filtering all canonical and world spells by type and governing stat.
+  - Displays mana cost, spell type, cast range, duration, damage, and iconic crawler quotes.
+  - 1-click spell learning/assignment to crawler spellbook with known-spell state detection.
+- **Dedicated Buff & Debuff Manager (`DCCBuffDebuffManager`)**:
+  - Tabbed browser for searching and inspecting canonical buffs and debuffs.
+  - Real-time search query filtering and category/severity filtering.
+  - 1-click condition application directly onto character sheets (assigning to external buff slots or adding embedded debuffs).
+  - Accessible via "Browse" buttons in the character sheet Core debuffs box, External Buffs header, and Inventory tables.
+
 ## 1.0.15
 
 ### Multi-Modifier Buffs & Debuffs

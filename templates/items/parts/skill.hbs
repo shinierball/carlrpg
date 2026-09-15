@@ -1,0 +1,91 @@
+<div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Base Rank</span>
+    <input class="dcc-field-input" type="number" name="system.rank" value="{{system.rank}}" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Boon Bonus</span>
+    <input class="dcc-field-input" type="number" name="system.boonBonus" value="{{system.boonBonus}}" placeholder="0" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Item Bonus</span>
+    <input class="dcc-field-input" type="number" name="system.itemBonus" value="{{system.itemBonus}}" placeholder="0" readonly title="Calculated from equipped gear" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Modified Rank</span>
+    <input class="dcc-field-input" type="number" value="{{system.modifiedRank}}" readonly title="Base + Boon + Item Bonus" style="font-weight: bold; background: #fff8e7; color: #c0392b;" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Stat</span>
+    <select name="system.stat" class="dcc-field-input">
+      <option value="str" {{#if (eq system.stat "str")}}selected{{/if}}>STR</option>
+      <option value="int" {{#if (eq system.stat "int")}}selected{{/if}}>INT</option>
+      <option value="con" {{#if (eq system.stat "con")}}selected{{/if}}>CON</option>
+      <option value="dex" {{#if (eq system.stat "dex")}}selected{{/if}}>DEX</option>
+      <option value="cha" {{#if (eq system.stat "cha")}}selected{{/if}}>CHA</option>
+    </select>
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Check Type</span>
+    <input class="dcc-field-input" type="text" name="system.checkType" value="{{system.checkType}}" placeholder="Stat Check" />
+  </div>
+</div>
+
+{{!-- SKILL DAMAGE MODIFIERS (RANK GATED) --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>ATTACK DAMAGE MODIFIERS (SCALING / PASSIVE)</span>
+    <a class="add-damage-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Damage Bonus
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Damage Type</th>
+            <th style="width: 20%;">Fixed Bonus</th>
+            <th style="width: 25%;">Dice (Optional)</th>
+            <th style="width: 20%;">Min Rank</th>
+            <th style="width: 5%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.type" style="font-size: 11px;">
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq mod.type dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageModifiers.{{idx}}.value" value="{{mod.value}}" placeholder="2" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <input class="dcc-field-input" type="text" name="system.damageModifiers.{{idx}}.dice" value="{{mod.dice}}" placeholder="1d4" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageModifiers.{{idx}}.minRank" value="{{mod.minRank}}" placeholder="0" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-damage-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No attack damage bonuses. Click "Add Damage Bonus" above to add scaling or typed damage to attacks.
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<div class="dcc-field-group" style="margin-bottom: 8px;">
+  <span class="dcc-field-label">Notes & Upgrades</span>
+  <textarea class="dcc-field-input" name="system.notes" style="height: 120px;">{{system.notes}}</textarea>
+</div>

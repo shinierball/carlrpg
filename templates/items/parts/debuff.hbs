@@ -1,0 +1,148 @@
+<div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap;">
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Severity</span>
+    <select name="system.severity" class="dcc-field-input">
+      <option value="Minor" {{#if (eq system.severity "Minor")}}selected{{/if}}>Minor</option>
+      <option value="Major" {{#if (eq system.severity "Major")}}selected{{/if}}>Major</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Primary Damage Reduced</span>
+    <select name="system.damageType" class="dcc-field-input">
+      <option value="">None / Specific</option>
+      {{#each damageTypes as |dt|}}
+        <option value="{{dt}}" {{#if (eq ../system.damageType dt)}}selected{{/if}}>{{dt}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Reduction %</span>
+    <input class="dcc-field-input" type="number" name="system.reductionPercent" value="{{system.reductionPercent}}" placeholder="50" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Rounding</span>
+    <select name="system.rounding" class="dcc-field-input">
+      <option value="up" {{#if (eq system.rounding "up")}}selected{{/if}}>Rounded Up</option>
+      <option value="down" {{#if (eq system.rounding "down")}}selected{{/if}}>Rounded Down</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Duration</span>
+    <input class="dcc-field-input" type="text" name="system.duration" value="{{system.duration}}" placeholder="Combat" />
+  </div>
+</div>
+
+{{!-- MULTIPLE STAT PENALTIES --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>STAT PENALTIES</span>
+    <a class="add-stat-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Stat Penalty
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.statModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 55%;">Ability / Stat</th>
+            <th style="width: 35%;">Penalty Value (+/-)</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.statModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.statModifiers.{{idx}}.stat" style="font-size: 11px;">
+                  <option value="str" {{#if (eq mod.stat "str")}}selected{{/if}}>STR (Strength)</option>
+                  <option value="int" {{#if (eq mod.stat "int")}}selected{{/if}}>INT (Intelligence)</option>
+                  <option value="con" {{#if (eq mod.stat "con")}}selected{{/if}}>CON (Constitution)</option>
+                  <option value="dex" {{#if (eq mod.stat "dex")}}selected{{/if}}>DEX (Dexterity)</option>
+                  <option value="cha" {{#if (eq mod.stat "cha")}}selected{{/if}}>CHA (Charisma)</option>
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.statModifiers.{{idx}}.value" value="{{mod.value}}" placeholder="-2" style="width: 100%; font-size: 11px; text-align: center;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-stat-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No additional stat penalties. Click "Add Stat Penalty" above to inflict penalties (e.g. -2 STR, -2 DEX).
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+{{!-- MULTIPLE DAMAGE REDUCTION MODIFIERS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>DAMAGE REDUCTION MODIFIERS</span>
+    <a class="add-buff-damage-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Reduction Modifier
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Effect Type</th>
+            <th style="width: 25%;">Damage Type</th>
+            <th style="width: 25%;">Reduction %</th>
+            <th style="width: 15%;">Rounding</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.type" style="font-size: 11px;">
+                  <option value="reduction" {{#if (eq mod.type "reduction")}}selected{{/if}}>Reduction %</option>
+                  <option value="resistance" {{#if (eq mod.type "resistance")}}selected{{/if}}>Resistance</option>
+                  <option value="immunity" {{#if (eq mod.type "immunity")}}selected{{/if}}>Immunity</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.damageType" style="font-size: 11px;">
+                  <option value="">All / Any</option>
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq mod.damageType dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageModifiers.{{idx}}.reductionPercent" value="{{mod.reductionPercent}}" placeholder="50" style="width: 100%; font-size: 11px; text-align: center;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.rounding" style="font-size: 11px;">
+                  <option value="up" {{#if (eq mod.rounding "up")}}selected{{/if}}>Up</option>
+                  <option value="down" {{#if (eq mod.rounding "down")}}selected{{/if}}>Down</option>
+                </select>
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-buff-damage-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No additional damage reduction modifiers. Click "Add Reduction Modifier" above to configure multi-type reductions.
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<div class="dcc-field-group">
+  <span class="dcc-field-label">Description</span>
+  <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>
+</div>

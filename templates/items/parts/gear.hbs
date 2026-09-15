@@ -1,0 +1,236 @@
+<div class="dcc-field-row" style="margin-bottom: 8px; align-items: center;">
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Slot</span>
+    <select name="system.slot" class="dcc-field-input">
+      <option value="head" {{#if (eq system.slot "head")}}selected{{/if}}>Head</option>
+      <option value="torso" {{#if (eq system.slot "torso")}}selected{{/if}}>Torso</option>
+      <option value="arms" {{#if (eq system.slot "arms")}}selected{{/if}}>Arms</option>
+      <option value="hands" {{#if (eq system.slot "hands")}}selected{{/if}}>Hands/Holding</option>
+      <option value="legs" {{#if (eq system.slot "legs")}}selected{{/if}}>Legs</option>
+      <option value="feet" {{#if (eq system.slot "feet")}}selected{{/if}}>Feet</option>
+      <option value="accessory" {{#if (eq system.slot "accessory")}}selected{{/if}}>Accessory</option>
+      <option value="tattoo" {{#if (eq system.slot "tattoo")}}selected{{/if}}>Tattoo</option>
+      <option value="patch" {{#if (eq system.slot "patch")}}selected{{/if}}>Patch</option>
+    </select>
+  </div>
+  <div class="dcc-field-group small" style="text-align: center;">
+    <span class="dcc-field-label">Equipped</span>
+    <label style="display: flex; align-items: center; justify-content: center; height: 28px; cursor: pointer;">
+      <input type="checkbox" name="system.equipped" {{#if system.equipped}}checked{{/if}} style="width: 18px; height: 18px; cursor: pointer;" />
+    </label>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Damage Resist (DR)</span>
+    <input class="dcc-field-input" type="number" name="system.drBonus" value="{{system.drBonus}}" placeholder="0" title="DR bonus or penalty (+/-)" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Evade Bonus</span>
+    <input class="dcc-field-input" type="number" name="system.evadeBonus" value="{{system.evadeBonus}}" placeholder="0" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Quantity</span>
+    <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
+  </div>
+</div>
+
+{{!-- STAT MODIFIERS (FLAT VS %) --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px;">ABILITY MODIFIERS (EQUIPPED ONLY)</div>
+  <table class="dcc-table" style="margin: 0; font-size: 11px;">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Ability</th>
+        <th style="width: 35%;">Modifier Value (+/-)</th>
+        <th style="width: 40%;">Type (Flat vs %)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight: bold; color: #c0392b;">STR (Strength)</td>
+        <td>
+          <input class="dcc-field-input" type="number" name="system.abilityModifiers.str.value" value="{{system.abilityModifiers.str.value}}" placeholder="0" style="text-align: center;" />
+        </td>
+        <td>
+          <select class="dcc-field-input" name="system.abilityModifiers.str.type">
+            <option value="flat" {{#if (or (eq system.abilityModifiers.str.type "flat") (not system.abilityModifiers.str.type))}}selected{{/if}}>Flat</option>
+            <option value="pct" {{#if (eq system.abilityModifiers.str.type "pct")}}selected{{/if}}>%</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; color: #c0392b;">INT (Intelligence)</td>
+        <td>
+          <input class="dcc-field-input" type="number" name="system.abilityModifiers.int.value" value="{{system.abilityModifiers.int.value}}" placeholder="0" style="text-align: center;" />
+        </td>
+        <td>
+          <select class="dcc-field-input" name="system.abilityModifiers.int.type">
+            <option value="flat" {{#if (or (eq system.abilityModifiers.int.type "flat") (not system.abilityModifiers.int.type))}}selected{{/if}}>Flat</option>
+            <option value="pct" {{#if (eq system.abilityModifiers.int.type "pct")}}selected{{/if}}>%</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; color: #c0392b;">CON (Constitution)</td>
+        <td>
+          <input class="dcc-field-input" type="number" name="system.abilityModifiers.con.value" value="{{system.abilityModifiers.con.value}}" placeholder="0" style="text-align: center;" />
+        </td>
+        <td>
+          <select class="dcc-field-input" name="system.abilityModifiers.con.type">
+            <option value="flat" {{#if (or (eq system.abilityModifiers.con.type "flat") (not system.abilityModifiers.con.type))}}selected{{/if}}>Flat</option>
+            <option value="pct" {{#if (eq system.abilityModifiers.con.type "pct")}}selected{{/if}}>%</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; color: #c0392b;">DEX (Dexterity)</td>
+        <td>
+          <input class="dcc-field-input" type="number" name="system.abilityModifiers.dex.value" value="{{system.abilityModifiers.dex.value}}" placeholder="0" style="text-align: center;" />
+        </td>
+        <td>
+          <select class="dcc-field-input" name="system.abilityModifiers.dex.type">
+            <option value="flat" {{#if (or (eq system.abilityModifiers.dex.type "flat") (not system.abilityModifiers.dex.type))}}selected{{/if}}>Flat</option>
+            <option value="pct" {{#if (eq system.abilityModifiers.dex.type "pct")}}selected{{/if}}>%</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; color: #c0392b;">CHA (Charisma)</td>
+        <td>
+          <input class="dcc-field-input" type="number" name="system.abilityModifiers.cha.value" value="{{system.abilityModifiers.cha.value}}" placeholder="0" style="text-align: center;" />
+        </td>
+        <td>
+          <select class="dcc-field-input" name="system.abilityModifiers.cha.type">
+            <option value="flat" {{#if (or (eq system.abilityModifiers.cha.type "flat") (not system.abilityModifiers.cha.type))}}selected{{/if}}>Flat</option>
+            <option value="pct" {{#if (eq system.abilityModifiers.cha.type "pct")}}selected{{/if}}>%</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{{!-- SKILL / SPELL MODIFIERS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>
+      SKILL & SPELL MODIFIERS / GRANTED SKILLS
+      {{#if system.equipped}}
+        <span style="color: #2ecc71; font-weight: bold; font-size: 10px; margin-left: 6px;">[EQUIPPED: ACTIVE]</span>
+      {{else}}
+        <span style="color: #f39c12; font-weight: bold; font-size: 10px; margin-left: 6px;" title="Equip this gear on the actor to activate skill bonuses">[UNEQUIPPED: EQUIP TO ACTIVATE]</span>
+      {{/if}}
+    </span>
+    <a class="add-skill-mod" data-tooltip="Select and add skills from DCC Compendium" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-book-bookmark"></i> Add Skill from Compendium
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.skillModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 65%;">Skill / Spell Name</th>
+            <th style="width: 25%;">Rank Bonus</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.skillModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <input list="dcc-compendium-skills-datalist-{{../item.id}}" class="dcc-field-input" type="text" name="system.skillModifiers.{{idx}}.name" value="{{mod.name}}" placeholder="Select from compendium or type..." style="font-size: 11px; flex: 1;" />
+                  <a class="pick-skill-for-row" data-index="{{idx}}" data-tooltip="Pick from Compendium" style="color: #555; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-book-bookmark"></i></a>
+                </div>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.skillModifiers.{{idx}}.bonus" value="{{mod.bonus}}" placeholder="1" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-skill-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No skill or spell modifiers. Click "Add Skill from Compendium" above to grant or boost a skill.
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+{{!-- WEAPON / GEAR DAMAGE PARTS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>WEAPON DAMAGE PARTS (WHEN USED/EQUIPPED)</span>
+    <a class="add-damage-part" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Damage Part
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageParts.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Dice</th>
+            <th style="width: 20%;">Stat</th>
+            <th style="width: 30%;">Damage Type</th>
+            <th style="width: 20%;">Flat Value</th>
+            <th style="width: 5%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageParts as |part idx|}}
+            <tr>
+              <td>
+                <input class="dcc-field-input" type="text" name="system.damageParts.{{idx}}.dice" value="{{part.dice}}" placeholder="1d6" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageParts.{{idx}}.stat" style="font-size: 11px;">
+                  <option value="" {{#if (not part.stat)}}selected{{/if}}>None</option>
+                  <option value="str" {{#if (eq part.stat "str")}}selected{{/if}}>STR</option>
+                  <option value="dex" {{#if (eq part.stat "dex")}}selected{{/if}}>DEX</option>
+                  <option value="con" {{#if (eq part.stat "con")}}selected{{/if}}>CON</option>
+                  <option value="int" {{#if (eq part.stat "int")}}selected{{/if}}>INT</option>
+                  <option value="cha" {{#if (eq part.stat "cha")}}selected{{/if}}>CHA</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.damageParts.{{idx}}.type" style="font-size: 11px;">
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq part.type dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageParts.{{idx}}.value" value="{{part.value}}" placeholder="0" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-damage-part" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+        No bonus weapon damage parts. Click "Add Damage Part" above to add weapon damage (e.g. +2 Necrotic, +4 Sonic).
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<div class="dcc-field-group">
+  <span class="dcc-field-label">Notes & Description</span>
+  <textarea class="dcc-field-input" name="system.notes" style="height: 80px;">{{system.notes}}</textarea>
+</div>
+
+{{#if availableSkills.length}}
+  <datalist id="dcc-compendium-skills-datalist-{{item.id}}">
+    {{#each availableSkills as |s|}}
+      <option value="{{s.name}}">{{s.name}} ({{upper s.system.stat}} • {{s.system.category}})</option>
+    {{/each}}
+  </datalist>
+{{/if}}

@@ -4,6 +4,8 @@ import { DCCCombat } from './documents/combat.mjs';
 import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
 import { DCCSkillManager } from './apps/skill-manager.mjs';
+import { DCCSpellManager } from './apps/spell-manager.mjs';
+import { DCCBuffDebuffManager } from './apps/buff-manager.mjs';
 import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
@@ -13,6 +15,20 @@ import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
+
+  game.dcc = {
+    DCCActor,
+    DCCItem,
+    DCCCombat,
+    DCCCrawlerSheet,
+    DCCItemSheet,
+    DCCSkillManager,
+    DCCSpellManager,
+    DCCBuffDebuffManager,
+    DCCCombatMetrics,
+    DCCCombatTracker,
+    DCCCombatArchiveApp
+  };
 
   CONFIG.DCC = {
     skills: DCC_SKILLS,
@@ -79,7 +95,18 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/actors/parts/page4-inventory.hbs',
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
+    'systems/carl-rpg/templates/items/parts/header.hbs',
+    'systems/carl-rpg/templates/items/parts/attack.hbs',
+    'systems/carl-rpg/templates/items/parts/spell.hbs',
+    'systems/carl-rpg/templates/items/parts/gear.hbs',
+    'systems/carl-rpg/templates/items/parts/buff.hbs',
+    'systems/carl-rpg/templates/items/parts/debuff.hbs',
+    'systems/carl-rpg/templates/items/parts/skill.hbs',
+    'systems/carl-rpg/templates/items/parts/loot.hbs',
+    'systems/carl-rpg/templates/items/parts/traits.hbs',
     'systems/carl-rpg/templates/apps/skill-manager.hbs',
+    'systems/carl-rpg/templates/apps/spell-manager.hbs',
+    'systems/carl-rpg/templates/apps/buff-manager.hbs',
     'systems/carl-rpg/templates/apps/combat-metrics.hbs',
     'systems/carl-rpg/templates/apps/combat-tracker.hbs',
     'systems/carl-rpg/templates/apps/combat-archive.hbs'

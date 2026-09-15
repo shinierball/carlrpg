@@ -308,7 +308,10 @@
       <div class="dcc-external-buffs-box">
         <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
           <span>EXTERNAL BUFFS (MAX 3)</span>
-          <span style="font-size: 9px; font-weight: normal; opacity: 0.85;">Active Effects</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <a class="item-create" data-type="buff" data-tooltip="Create New Buff" style="color: #fff; font-size: 10px; cursor: pointer;"><i class="fa-solid fa-plus"></i> New Buff</a>
+            <span style="font-size: 9px; font-weight: normal; opacity: 0.85;">Active Effects</span>
+          </div>
         </div>
         <div class="dcc-buff-slots-container">
           {{#each externalBuffSlots as |slot|}}

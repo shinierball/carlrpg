@@ -12,6 +12,7 @@ export class MockActor {
     this.name = data.name || 'Test Crawler';
     this.type = data.type || 'crawler';
     this.system = structuredClone(data.system || {});
+    this.isOwner = data.isOwner ?? true;
     this.items = (data.items || []).map(i => i instanceof MockItem ? i : new MockItem(i, this));
   }
   async _preCreate(data, options, user) {}

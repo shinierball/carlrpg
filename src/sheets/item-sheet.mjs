@@ -128,6 +128,21 @@ export class DCCItemSheet extends ItemSheet {
     }
     context.system.skillModifiers = Array.isArray(skillMods) ? skillMods : [];
 
+    // Ensure statModifiers and damageModifiers arrays exist for buff and debuff
+    if (context.item.type === 'buff' || context.item.type === 'debuff') {
+      let statMods = context.system.statModifiers;
+      if (statMods && !Array.isArray(statMods) && typeof statMods === 'object') {
+        statMods = Object.values(statMods);
+      }
+      context.system.statModifiers = Array.isArray(statMods) ? statMods : [];
+
+      let dmgMods = context.system.damageModifiers;
+      if (dmgMods && !Array.isArray(dmgMods) && typeof dmgMods === 'object') {
+        dmgMods = Object.values(dmgMods);
+      }
+      context.system.damageModifiers = Array.isArray(dmgMods) ? dmgMods : [];
+    }
+
     // Ensure abilityModifiers structure exists with { value, type: 'flat' | 'pct' }
     if (!context.system.abilityModifiers) {
       context.system.abilityModifiers = {};
@@ -275,6 +290,36 @@ export class DCCItemSheet extends ItemSheet {
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
     }
 
+    if (this.item.type === 'buff' || this.item.type === 'debuff') {
+      let statMods = expanded.system?.statModifiers;
+      if (statMods !== undefined) {
+        expanded.system.statModifiers = Array.isArray(statMods) ? statMods : Object.values(statMods);
+      } else {
+        expanded.system = expanded.system || {};
+        expanded.system.statModifiers = [];
+      }
+      for (const key of Object.keys(formData)) {
+        if (key.startsWith('system.statModifiers')) {
+          delete formData[key];
+        }
+      }
+      formData['system.statModifiers'] = expanded.system.statModifiers;
+
+      let dmgMods = expanded.system?.damageModifiers;
+      if (dmgMods !== undefined) {
+        expanded.system.damageModifiers = Array.isArray(dmgMods) ? dmgMods : Object.values(dmgMods);
+      } else {
+        expanded.system = expanded.system || {};
+        expanded.system.damageModifiers = [];
+      }
+      for (const key of Object.keys(formData)) {
+        if (key.startsWith('system.damageModifiers')) {
+          delete formData[key];
+        }
+      }
+      formData['system.damageModifiers'] = expanded.system.damageModifiers;
+    }
+
     const result = await super._updateObject(event, formData);
 
     // Re-render parent actor sheet if open so skills tab reflects changes immediately
@@ -368,6 +413,69 @@ export class DCCItemSheet extends ItemSheet {
 
     // Delete Skill Damage Modifier
     html.find('.delete-damage-mod').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.damageModifiers)
+        ? [...this.item.system.damageModifiers]
+        : Object.values(this.item.system?.damageModifiers || {});
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
+        await this.item.update({ 'system.damageModifiers': current });
+      }
+    });
+
+    // Add Stat Modifier (for buff or debuff)
+    html.find('.add-stat-mod').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.statModifiers)
+        ? [...this.item.system.statModifiers]
+        : Object.values(this.item.system?.statModifiers || {});
+      current.push({
+        stat: 'str',
+        value: this.item.type === 'debuff' ? -2 : 2
+      });
+      await this.item.update({ 'system.statModifiers': current });
+    });
+
+    // Delete Stat Modifier (for buff or debuff)
+    html.find('.delete-stat-mod').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.statModifiers)
+        ? [...this.item.system.statModifiers]
+        : Object.values(this.item.system?.statModifiers || {});
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
+        await this.item.update({ 'system.statModifiers': current });
+      }
+    });
+
+    // Add Buff/Debuff Damage Modifier
+    html.find('.add-buff-damage-mod').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.damageModifiers)
+        ? [...this.item.system.damageModifiers]
+        : Object.values(this.item.system?.damageModifiers || {});
+      if (this.item.type === 'debuff') {
+        current.push({
+          type: 'reduction',
+          damageType: 'Fire',
+          reductionPercent: 50,
+          rounding: 'up'
+        });
+      } else {
+        current.push({
+          type: 'damageBonus',
+          damageType: 'Fire',
+          value: 2,
+          dice: ''
+        });
+      }
+      await this.item.update({ 'system.damageModifiers': current });
+    });
+
+    // Delete Buff/Debuff Damage Modifier
+    html.find('.delete-buff-damage-mod').click(async ev => {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
       const current = Array.isArray(this.item.system?.damageModifiers)

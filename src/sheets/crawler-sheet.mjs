@@ -438,27 +438,102 @@ export class DCCCrawlerSheet extends ActorSheet {
     const rawExternalBuffs = context.system.attributes?.externalBuffs || {};
     context.externalBuffSlots = [];
 
-    const compBuffs = CONFIG.DCC?.buffs || [];
-    const statBuffOptions = compBuffs.filter(b => b.system?.buffType === 'stat').map(b => ({
-      id: b._id,
+    // Helper to format descriptive labels for any buff item
+    const formatBuffOptionLabel = (b, defaultIcon = '✨') => {
+      const sys = b.system || {};
+      const bType = (sys.buffType || '').toLowerCase();
+      let details = '';
+
+      if (Array.isArray(sys.statModifiers) && sys.statModifiers.length > 0) {
+        details = sys.statModifiers.map(m => `+${m.value} ${(m.stat || '').toUpperCase()}`).join(', ');
+      } else if (bType === 'stat' && sys.stat) {
+        details = `+${sys.value || 2} ${(sys.stat || '').toUpperCase()}`;
+      } else if (bType === 'temphp' || bType === 'temp_hp') {
+        details = `+${sys.value || 10} Temp HP`;
+      } else if (bType === 'resistance' && sys.damageType) {
+        details = `Resist ${sys.damageType}`;
+      } else if (bType === 'immunity' && sys.damageType) {
+        details = `Immune ${sys.damageType}`;
+      } else if (bType === 'damagemultiplier' || sys.damageMultiplier > 1) {
+        details = `*${sys.damageMultiplier || sys.value || 2} ${sys.damageType || 'Total'} Dmg`;
+      } else if (Array.isArray(sys.damageModifiers) && sys.damageModifiers.length > 0) {
+        details = sys.damageModifiers.map(m => m.type || m.damageType || 'Mod').join(', ');
+      }
+
+      return details ? `${defaultIcon} ${b.name} (${details})` : `${defaultIcon} ${b.name}`;
+    };
+
+    // 1. Owned Buffs on Actor
+    const ownedBuffs = context.buffs || (this.actor.items ? Array.from(this.actor.items).filter(it => it.type === 'buff') : []);
+    const ownedBuffOptions = ownedBuffs.map(b => ({
+      id: b.id || b._id,
       name: b.name,
-      label: `⚡ ${b.name} (+${b.system?.value || 2} ${(b.system?.stat || '').toUpperCase()})`
+      label: formatBuffOptionLabel(b, '✨')
     }));
-    const tempHpBuffOptions = compBuffs.filter(b => b.system?.buffType === 'tempHp').map(b => ({
-      id: b._id,
+
+    // 2. World Buff Items (items created in the world directory of type buff)
+    const worldBuffs = globalThis.game?.items
+      ? Array.from(game.items).filter(it => it.type === 'buff' && !ownedBuffs.some(ob => (ob.id && ob.id === it.id) || ob.name.toLowerCase() === it.name.toLowerCase()))
+      : [];
+    const worldBuffOptions = worldBuffs.map(b => ({
+      id: b.id || b._id,
       name: b.name,
-      label: `❤️ ${b.name} (+${b.system?.value || 10} Temp HP)`
+      label: formatBuffOptionLabel(b, '🔮')
     }));
-    const resistBuffOptions = compBuffs.filter(b => b.system?.buffType === 'resistance').map(b => ({
-      id: b._id,
-      name: b.name,
-      label: `🛡️ ${b.name} (Resist ${b.system?.damageType || ''})`
-    }));
-    const immuneBuffOptions = compBuffs.filter(b => b.system?.buffType === 'immunity').map(b => ({
-      id: b._id,
-      name: b.name,
-      label: `🌟 ${b.name} (Immune ${b.system?.damageType || ''})`
-    }));
+
+    // 3. Compendium & Preloaded System Buffs
+    const compBuffsMap = new Map();
+    if (CONFIG.DCC?.buffs) {
+      for (const b of CONFIG.DCC.buffs) {
+        compBuffsMap.set(b._id || b.name.toLowerCase().trim(), {
+          id: b._id,
+          name: b.name,
+          system: b.system || {}
+        });
+      }
+    }
+    if (globalThis.game?.packs) {
+      const buffPack = game.packs.get('carl-rpg.buffs');
+      if (buffPack) {
+        const index = buffPack.index || [];
+        for (const entry of index) {
+          const key = entry._id || entry.name.toLowerCase().trim();
+          if (!compBuffsMap.has(key)) {
+            compBuffsMap.set(key, {
+              id: entry._id,
+              name: entry.name,
+              system: entry.system || {}
+            });
+          }
+        }
+      }
+    }
+
+    const allCompBuffs = Array.from(compBuffsMap.values());
+    const statBuffOptions = allCompBuffs
+      .filter(b => b.system?.buffType === 'stat' || (Array.isArray(b.system?.statModifiers) && b.system.statModifiers.length > 0))
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '⚡') }));
+    const tempHpBuffOptions = allCompBuffs
+      .filter(b => b.system?.buffType === 'tempHp' || b.system?.buffType === 'temp_hp')
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '❤️') }));
+    const resistBuffOptions = allCompBuffs
+      .filter(b => b.system?.buffType === 'resistance')
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '🛡️') }));
+    const immuneBuffOptions = allCompBuffs
+      .filter(b => b.system?.buffType === 'immunity')
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '🌟') }));
+    const combatBuffOptions = allCompBuffs
+      .filter(b => (b.system?.buffType === 'damageMultiplier' || Number(b.system?.damageMultiplier) > 1 || (Array.isArray(b.system?.damageModifiers) && b.system.damageModifiers.length > 0)) && b.system?.buffType !== 'stat')
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '⚔️') }));
+    const otherBuffOptions = allCompBuffs
+      .filter(b => {
+        const t = (b.system?.buffType || '').toLowerCase();
+        return !['stat', 'temphp', 'temp_hp', 'resistance', 'immunity'].includes(t) &&
+          !Number(b.system?.damageMultiplier > 1) &&
+          (!Array.isArray(b.system?.statModifiers) || !b.system.statModifiers.length) &&
+          (!Array.isArray(b.system?.damageModifiers) || !b.system.damageModifiers.length);
+      })
+      .map(b => ({ id: b.id, name: b.name, label: formatBuffOptionLabel(b, '✨') }));
 
     for (let i = 1; i <= 3; i++) {
       const slotKey = `buff${i}`;
@@ -477,22 +552,32 @@ export class DCCCrawlerSheet extends ActorSheet {
 
       if (resolvedBuff) {
         displayName = resolvedBuff.name;
-        const bType = (resolvedBuff.system?.buffType || '').toLowerCase();
-        if (bType === 'stat') {
+        const bSys = resolvedBuff.system || {};
+        const bType = (bSys.buffType || '').toLowerCase();
+        if (Array.isArray(bSys.statModifiers) && bSys.statModifiers.length > 0) {
           badge = 'STAT';
-          detail = `+${resolvedBuff.system?.value || 2} ${(resolvedBuff.system?.stat || '').toUpperCase()}`;
+          detail = bSys.statModifiers.map(m => `+${m.value} ${(m.stat || '').toUpperCase()}`).join(', ');
+        } else if (bType === 'stat') {
+          badge = 'STAT';
+          detail = `+${bSys.value || 2} ${(bSys.stat || '').toUpperCase()}`;
         } else if (bType === 'temphp' || bType === 'temp_hp') {
           badge = 'TEMP HP';
-          detail = `+${resolvedBuff.system?.value || 10} Temp HP`;
+          detail = `+${bSys.value || 10} Temp HP`;
         } else if (bType === 'resistance') {
           badge = 'RESIST';
-          detail = `50% ${resolvedBuff.system?.damageType || ''} Dmg`;
+          detail = `50% ${bSys.damageType || ''} Dmg`;
         } else if (bType === 'immunity') {
           badge = 'IMMUNE';
-          detail = `Negate ${resolvedBuff.system?.damageType || ''} Dmg`;
+          detail = `Negate ${bSys.damageType || ''} Dmg`;
+        } else if (bType === 'damagemultiplier' || Number(bSys.damageMultiplier) > 1) {
+          badge = 'MULT';
+          detail = `*${bSys.damageMultiplier || bSys.value || 2} ${bSys.damageType || 'Total'} Dmg`;
+        } else if (Array.isArray(bSys.damageModifiers) && bSys.damageModifiers.length > 0) {
+          badge = 'COMBAT';
+          detail = bSys.damageModifiers.map(m => m.type || m.damageType || 'Mod').join(', ');
         } else {
           badge = 'BUFF';
-          detail = resolvedBuff.system?.description || '';
+          detail = bSys.description || '';
         }
       }
 
@@ -503,6 +588,15 @@ export class DCCCrawlerSheet extends ActorSheet {
         return { ...o, selected: isSel };
       });
 
+      // 1. Character's owned buffs
+      if (ownedBuffOptions.length) {
+        groups.push({ label: '📦 Character Buffs', items: mapOpts(ownedBuffOptions) });
+      }
+      // 2. World buff items
+      if (worldBuffOptions.length) {
+        groups.push({ label: '🌍 World Buffs', items: mapOpts(worldBuffOptions) });
+      }
+      // 3. Predefined / Compendium Buffs
       if (statBuffOptions.length) {
         groups.push({ label: '⚡ Ability Score Buffs', items: mapOpts(statBuffOptions) });
       }
@@ -515,23 +609,11 @@ export class DCCCrawlerSheet extends ActorSheet {
       if (immuneBuffOptions.length) {
         groups.push({ label: '🌟 Damage Immunity Buffs', items: mapOpts(immuneBuffOptions) });
       }
-
-      // Owned buffs on actor
-      const ownedBuffs = this.actor.items ? Array.from(this.actor.items).filter(it => it.type === 'buff') : [];
-      if (ownedBuffs.length) {
-        groups.push({
-          label: '📦 Owned Buffs',
-          items: ownedBuffs.map(b => {
-            const isSel = Boolean(valStr && (valStr === b.id || valStr.toLowerCase() === b.name.toLowerCase()));
-            if (isSel) isKnownOption = true;
-            return {
-              id: b.id,
-              name: b.name,
-              label: `✨ ${b.name}`,
-              selected: isSel
-            };
-          })
-        });
+      if (combatBuffOptions.length) {
+        groups.push({ label: '⚔️ Damage Multiplier & Combat Buffs', items: mapOpts(combatBuffOptions) });
+      }
+      if (otherBuffOptions.length) {
+        groups.push({ label: '✨ Other Compendium Buffs', items: mapOpts(otherBuffOptions) });
       }
 
       context.externalBuffSlots.push({
@@ -849,7 +931,7 @@ export class DCCCrawlerSheet extends ActorSheet {
 
   /** @override */
   async _onDropItem(event, data) {
-    if (!this.actor.isOwner) return false;
+    if (this.actor.isOwner === false) return false;
     const item = await Item.fromDropData(data);
     if (!item) return false;
 
@@ -860,6 +942,29 @@ export class DCCCrawlerSheet extends ActorSheet {
       await this.actor.update({ 'system.details.class': item.name });
     } else if (item.type === 'deity') {
       await this.actor.update({ 'system.details.deity': item.name });
+    }
+
+    // Check if dropped directly onto an External Buff slot
+    const buffSlotBox = event.target?.closest?.('.dcc-buff-slot-entry, .dcc-buff-slot');
+    const buffSlotKey = buffSlotBox?.dataset?.slot;
+
+    if (buffSlotKey && item.type === 'buff') {
+      const isOwned = item.actor?.id === this.actor.id ||
+        (this.actor.items.get ? this.actor.items.get(item.id) : (Array.isArray(this.actor.items) && this.actor.items.some(i => i.id === item.id)));
+
+      if (isOwned) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${buffSlotKey}`]: item.id });
+        return item;
+      }
+
+      const createdItems = await super._onDropItem(event, data);
+      const createdItem = Array.isArray(createdItems) ? createdItems[0] : createdItems;
+      if (createdItem?.id) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${buffSlotKey}`]: createdItem.id });
+      } else {
+        await this.actor.update({ [`system.attributes.externalBuffs.${buffSlotKey}`]: item.id || item.name });
+      }
+      return createdItems;
     }
 
     // Check if dropped directly onto a Hotlist box

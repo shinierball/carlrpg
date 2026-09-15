@@ -26,6 +26,19 @@ export class DCCItem extends Item {
       }
       this.system.damageModifiers = Array.isArray(mods) ? mods : [];
     }
+    if ((this.type === 'buff' || this.type === 'debuff') && this.system) {
+      let stats = this.system.statModifiers;
+      if (stats && !Array.isArray(stats) && typeof stats === 'object') {
+        stats = Object.values(stats);
+      }
+      this.system.statModifiers = Array.isArray(stats) ? stats : [];
+
+      let dmgs = this.system.damageModifiers;
+      if (dmgs && !Array.isArray(dmgs) && typeof dmgs === 'object') {
+        dmgs = Object.values(dmgs);
+      }
+      this.system.damageModifiers = Array.isArray(dmgs) ? dmgs : [];
+    }
   }
 
   /** @override */
@@ -59,6 +72,19 @@ export class DCCItem extends Item {
         mods = Object.values(mods);
       }
       this.system.damageModifiers = Array.isArray(mods) ? mods : [];
+    }
+    if ((this.type === 'buff' || this.type === 'debuff') && this.system) {
+      let stats = this.system.statModifiers;
+      if (stats && !Array.isArray(stats) && typeof stats === 'object') {
+        stats = Object.values(stats);
+      }
+      this.system.statModifiers = Array.isArray(stats) ? stats : [];
+
+      let dmgs = this.system.damageModifiers;
+      if (dmgs && !Array.isArray(dmgs) && typeof dmgs === 'object') {
+        dmgs = Object.values(dmgs);
+      }
+      this.system.damageModifiers = Array.isArray(dmgs) ? dmgs : [];
     }
   }
 

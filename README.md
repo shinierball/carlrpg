@@ -27,7 +27,12 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - Damage multiplier buffs (e.g. `*2 Total Damage`) doubling all rolled damage components.
   - Type-specific target debuffs and resistance reductions (e.g. 50% Fire reduction rounded up) applied before DR and CON damage bars.
   - Interactive chat cards displaying color-coded typed damage breakdowns and one-click damage application to targeted tokens.
-- **Drag & Drop**: Drop Races, Classes, Deities, Skills, Spells, and Gear directly onto character sheets.
+- **Multi-Modifier Buffs & Debuffs**:
+  - Create buffs with multiple stat bonuses (e.g. +2 STR, +2 DEX) and multiple damage/defense modifiers (damage multipliers, bonus typed damage, resistances, immunities, and Temp HP).
+  - Create debuffs with multiple stat penalties (-2 STR, -4 CON) and multi-typed incoming damage reductions.
+  - Interactive repeater tables in item sheets for real-time adding, removing, and tuning of modifiers.
+  - **Universal External Buff Slots**: Any Buff item (actor-owned, world items in `game.items`, or compendium packs) can be selected in any of the 3 External Buff slots or dragged directly onto a slot.
+- **Drag & Drop**: Drop Races, Classes, Deities, Skills, Spells, Buffs, and Gear directly onto character sheets.
 - **Hot Reload Enabled**: Live updating of styles and templates without page reloads for instant developer feedback.
 
 ---

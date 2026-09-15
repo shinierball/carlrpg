@@ -600,6 +600,18 @@
   background: #8e44ad;
 }
 
+.dcc-buff-badge-mult {
+  background: #c0392b;
+}
+
+.dcc-buff-badge-combat {
+  background: #d35400;
+}
+
+.dcc-buff-badge-buff {
+  background: #16a085;
+}
+
 .dcc-buff-name {
   font-weight: bold;
   color: #111;

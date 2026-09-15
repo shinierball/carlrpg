@@ -207,6 +207,8 @@
       "value": 2,
       "damageMultiplier": 1,
       "damageType": "",
+      "statModifiers": [],
+      "damageModifiers": [],
       "duration": "1 Hour",
       "description": ""
     },
@@ -215,6 +217,8 @@
       "damageType": "",
       "reductionPercent": 0,
       "rounding": "up",
+      "statModifiers": [],
+      "damageModifiers": [],
       "duration": "Combat",
       "description": ""
     }

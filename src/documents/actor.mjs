@@ -146,20 +146,75 @@ export class DCCActor extends Actor {
       const bDmg = bSys.damageType || '';
       const bMult = Number(bSys.damageMultiplier) || (bType === 'damagemultiplier' ? bVal : 1);
 
-      if (bType === 'stat' && bStat && buffStatBonuses[bStat] !== undefined) {
-        buffStatBonuses[bStat] += bVal;
-      } else if (bType === 'temphp' || bType === 'temp_hp') {
-        buffTempHp += bVal;
-      } else if (bType === 'resistance' && bDmg) {
-        resistances.add(bDmg);
-      } else if (bType === 'immunity' && bDmg) {
-        immunities.add(bDmg);
-      } else if (bType === 'damagemultiplier' || bMult > 1) {
-        if (bDmg && damageMultipliers[bDmg] !== undefined) {
-          damageMultipliers[bDmg] *= bMult;
-        } else {
-          damageMultipliers.all *= bMult;
+      // Support multiple statModifiers on buff
+      if (Array.isArray(bSys.statModifiers) && bSys.statModifiers.length > 0) {
+        for (const sm of bSys.statModifiers) {
+          const sKey = (sm?.stat || '').toLowerCase();
+          const sVal = Number(sm?.value) || 0;
+          if (sKey && buffStatBonuses[sKey] !== undefined) {
+            buffStatBonuses[sKey] += sVal;
+          }
         }
+      } else if (bType === 'stat' && bStat && buffStatBonuses[bStat] !== undefined) {
+        buffStatBonuses[bStat] += bVal;
+      }
+
+      // Support multiple damageModifiers on buff
+      if (Array.isArray(bSys.damageModifiers) && bSys.damageModifiers.length > 0) {
+        for (const dm of bSys.damageModifiers) {
+          if (!dm) continue;
+          const kind = (dm.kind || dm.type || '').toLowerCase();
+          const dt = dm.damageType || '';
+          const val = Number(dm.value) || 0;
+          const mult = Number(dm.multiplier ?? dm.value) || 1;
+
+          if (kind === 'temphp' || kind === 'temp_hp') {
+            buffTempHp += val;
+          } else if (kind === 'resistance' && dt) {
+            resistances.add(dt);
+          } else if (kind === 'immunity' && dt) {
+            immunities.add(dt);
+          } else if (kind === 'damagemultiplier' || kind === 'multiplier' || mult > 1) {
+            if (dt && damageMultipliers[dt] !== undefined) {
+              damageMultipliers[dt] *= mult;
+            } else {
+              damageMultipliers.all *= mult;
+            }
+          }
+        }
+      } else {
+        if (bType === 'temphp' || bType === 'temp_hp') {
+          buffTempHp += bVal;
+        } else if (bType === 'resistance' && bDmg) {
+          resistances.add(bDmg);
+        } else if (bType === 'immunity' && bDmg) {
+          immunities.add(bDmg);
+        } else if (bType === 'damagemultiplier' || bMult > 1) {
+          if (bDmg && damageMultipliers[bDmg] !== undefined) {
+            damageMultipliers[bDmg] *= bMult;
+          } else {
+            damageMultipliers.all *= bMult;
+          }
+        }
+      }
+    }
+
+    // Process debuff stat penalties from embedded debuff items
+    const debuffItems = this.items
+      ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff'))
+      : [];
+    for (const debuff of debuffItems) {
+      const dSys = debuff.system || {};
+      if (Array.isArray(dSys.statModifiers) && dSys.statModifiers.length > 0) {
+        for (const sm of dSys.statModifiers) {
+          const sKey = (sm?.stat || '').toLowerCase();
+          const sVal = Number(sm?.value) || 0;
+          if (sKey && buffStatBonuses[sKey] !== undefined) {
+            buffStatBonuses[sKey] += sVal;
+          }
+        }
+      } else if (dSys.stat && buffStatBonuses[dSys.stat.toLowerCase()] !== undefined) {
+        buffStatBonuses[dSys.stat.toLowerCase()] += Number(dSys.value) || 0;
       }
     }
 
@@ -192,6 +247,7 @@ export class DCCActor extends Actor {
       system.attributes.resistances = Array.from(resistances);
       system.attributes.immunities = Array.from(immunities);
       system.attributes.damageMultipliers = damageMultipliers;
+      system.attributes.damageMultiplier = damageMultipliers.all;
       system.attributes.activeBuffs = activeBuffs;
 
       const dexMod = system.abilities?.dex?.mod ?? 0;
@@ -525,6 +581,31 @@ export class DCCActor extends Actor {
       }
     }
 
+    // 4. Buffs: Active Damage Bonuses
+    const activeBuffs = this.getActiveBuffs();
+    for (const buff of activeBuffs) {
+      if (!buff) continue;
+      const bSys = buff.system || buff;
+      const mods = Array.isArray(bSys.damageModifiers) ? bSys.damageModifiers : Object.values(bSys.damageModifiers || {});
+      for (const dm of mods) {
+        if (!dm) continue;
+        const kind = (dm.kind || dm.type || '').toLowerCase();
+        if (kind === 'damagebonus' || kind === 'bonus') {
+          const statKey = (dm.stat || '').toLowerCase();
+          const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+          parts.push({
+            id: dm.id || `buff-${buff.id || 'buff'}-${parts.length}`,
+            type: dm.damageType || dm.type || 'Physical',
+            dice: (dm.dice || '').trim(),
+            stat: statKey,
+            statMod,
+            value: Number(dm.value) || 0,
+            source: buff.name
+          });
+        }
+      }
+    }
+
     return parts;
   }
 
@@ -753,15 +834,34 @@ export class DCCActor extends Actor {
 
     // 3. Check world items
     if (globalThis.game?.items) {
-      const worldItem = game.items.find(i => (i.id === str || i.name.toLowerCase() === str.toLowerCase()) && i.type === 'buff');
+      const worldItem = Array.from(game.items).find(i => (i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()) && i.type === 'buff');
       if (worldItem) {
         return {
-          id: worldItem.id,
+          id: worldItem.id || worldItem._id,
           name: worldItem.name,
           type: 'buff',
           img: worldItem.img || 'icons/svg/aura.svg',
           system: structuredClone(worldItem.system || {})
         };
+      }
+    }
+
+    // 4. Check compendium packs (e.g. carl-rpg.buffs or any Item pack)
+    if (globalThis.game?.packs) {
+      for (const pack of game.packs) {
+        if (pack.documentName === 'Item' || pack.type === 'Item' || pack.metadata?.type === 'Item') {
+          const entry = pack.index?.get?.(str) ||
+            (pack.index ? Array.from(pack.index.values ? pack.index.values() : pack.index).find(e => (e.id === str || e._id === str || e.name?.toLowerCase() === str.toLowerCase()) && (e.type === 'buff' || !e.type)) : null);
+          if (entry) {
+            return {
+              id: entry._id || entry.id,
+              name: entry.name,
+              type: 'buff',
+              img: entry.img || 'icons/svg/aura.svg',
+              system: structuredClone(entry.system || {})
+            };
+          }
+        }
       }
     }
 
@@ -898,32 +998,59 @@ export class DCCActor extends Actor {
 
     for (const item of debuffItems) {
       const sys = item.system || {};
-      const itemDmg = (sys.damageType || '').toLowerCase().trim();
       const desc = (sys.description || item.name || '').toLowerCase();
 
-      const appliesToType = !itemDmg || itemDmg === targetType || itemDmg === 'all' || desc.includes(targetType) || desc.includes('all damage') || desc.includes('all attacks');
-      if (appliesToType) {
-        if (sys.reductionPercent) {
-          const rawPct = Number(sys.reductionPercent) || 0;
-          percent += rawPct > 1 ? rawPct / 100 : rawPct;
-        } else {
-          // Parse e.g. "reduces all fire damage by 50% rounded up"
-          const pctMatch = desc.match(/(\d+)%\s*(?:reduction|damage)?/i);
-          if (pctMatch) {
-            percent += Number(pctMatch[1]) / 100;
+      // Check multi damageModifiers if present
+      if (Array.isArray(sys.damageModifiers) && sys.damageModifiers.length > 0) {
+        for (const dm of sys.damageModifiers) {
+          if (!dm) continue;
+          const kind = (dm.kind || dm.type || '').toLowerCase();
+          const dt = (dm.damageType || '').toLowerCase().trim();
+          const applies = !dt || dt === 'all' || dt === targetType;
+
+          if (applies) {
+            if (kind === 'immunity') {
+              return { percent: 1, flat: 0, rounding: 'up', isResistant: false, isImmune: true };
+            }
+            if (kind === 'resistance') {
+              isResistant = true;
+              percent += 0.5;
+            }
+            if (kind === 'reduction' || kind === 'damagereduction' || dm.reductionPercent !== undefined) {
+              const rawPct = Number(dm.reductionPercent ?? dm.value) || 0;
+              percent += rawPct > 1 ? rawPct / 100 : rawPct;
+              if (dm.rounding) rounding = dm.rounding;
+              if (dm.flat) flat += Number(dm.flat) || 0;
+            }
           }
         }
+      } else {
+        // Legacy single modifier fallback
+        const itemDmg = (sys.damageType || '').toLowerCase().trim();
+        const appliesToType = !itemDmg || itemDmg === targetType || itemDmg === 'all' || desc.includes(targetType) || desc.includes('all damage') || desc.includes('all attacks');
+        if (appliesToType) {
+          if (sys.reductionPercent) {
+            const rawPct = Number(sys.reductionPercent) || 0;
+            percent += rawPct > 1 ? rawPct / 100 : rawPct;
+          } else {
+            // Parse e.g. "reduces all fire damage by 50% rounded up"
+            const pctMatch = desc.match(/(\d+)%\s*(?:reduction|damage)?/i);
+            if (pctMatch) {
+              percent += Number(pctMatch[1]) / 100;
+            }
+          }
 
-        if (sys.rounding) {
-          rounding = sys.rounding;
-        } else if (desc.includes('rounded up') || desc.includes('round up')) {
-          rounding = 'up';
-        } else if (desc.includes('rounded down') || desc.includes('round down')) {
-          rounding = 'down';
-        }
+          if (sys.rounding) {
+            rounding = sys.rounding;
+          } else if (desc.includes('rounded up') || desc.includes('round up')) {
+            rounding = 'up';
+          } else if (desc.includes('rounded down') || desc.includes('round down')) {
+            rounding = 'down';
+          }
 
-        if (sys.flatReduction) {
-          flat += Number(sys.flatReduction) || 0;
+          if (sys.flatReduction) {
+            flat += Number(sys.flatReduction) || 0;
+          }
         }
       }
     }

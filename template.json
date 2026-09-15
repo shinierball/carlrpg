@@ -117,7 +117,9 @@
       "class",
       "deity",
       "sponsor",
-      "loot"
+      "loot",
+      "buff",
+      "debuff"
     ],
     "skill": {
       "rank": 1,
@@ -129,6 +131,7 @@
       "category": "Utility",
       "notes": "",
       "upgrades": "",
+      "damageModifiers": [],
       "checked": false
     },
     "attack": {
@@ -136,6 +139,8 @@
       "toHitRank": 1,
       "damageDice": "1d6",
       "damageStat": "str",
+      "damageType": "",
+      "damageParts": [],
       "effects": ""
     },
     "spell": {
@@ -173,6 +178,7 @@
         "cha": { "value": 0, "type": "flat" }
       },
       "skillModifiers": [],
+      "damageParts": [],
       "notes": ""
     },
     "race": {
@@ -194,6 +200,23 @@
     "loot": {
       "quantity": 1,
       "notes": ""
+    },
+    "buff": {
+      "buffType": "stat",
+      "stat": "str",
+      "value": 2,
+      "damageMultiplier": 1,
+      "damageType": "",
+      "duration": "1 Hour",
+      "description": ""
+    },
+    "debuff": {
+      "severity": "Minor",
+      "damageType": "",
+      "reductionPercent": 0,
+      "rounding": "up",
+      "duration": "Combat",
+      "description": ""
     }
   }
 }

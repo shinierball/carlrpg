@@ -179,6 +179,12 @@ export class DCCItemSheet extends ItemSheet {
       }
     }
 
+    context.damageTypes = CONFIG.DCC?.damageTypes || [
+      'Acid', 'Bludgeoning', 'Electric', 'Fire', 'Force',
+      'Holy', 'Ice', 'Necrotic', 'Piercing', 'Poison',
+      'Psychic', 'Slashing', 'Sonic'
+    ];
+
     return context;
   }
 
@@ -237,6 +243,38 @@ export class DCCItemSheet extends ItemSheet {
       formData['system.skillModifiers'] = expanded.system.skillModifiers;
     }
 
+    if (this.item.type === 'attack' || this.item.type === 'gear') {
+      let parts = expanded.system?.damageParts;
+      if (parts !== undefined) {
+        expanded.system.damageParts = Array.isArray(parts) ? parts : Object.values(parts);
+      } else {
+        expanded.system = expanded.system || {};
+        expanded.system.damageParts = [];
+      }
+      for (const key of Object.keys(formData)) {
+        if (key.startsWith('system.damageParts')) {
+          delete formData[key];
+        }
+      }
+      formData['system.damageParts'] = expanded.system.damageParts;
+    }
+
+    if (this.item.type === 'skill') {
+      let mods = expanded.system?.damageModifiers;
+      if (mods !== undefined) {
+        expanded.system.damageModifiers = Array.isArray(mods) ? mods : Object.values(mods);
+      } else {
+        expanded.system = expanded.system || {};
+        expanded.system.damageModifiers = [];
+      }
+      for (const key of Object.keys(formData)) {
+        if (key.startsWith('system.damageModifiers')) {
+          delete formData[key];
+        }
+      }
+      formData['system.damageModifiers'] = expanded.system.damageModifiers;
+    }
+
     const result = await super._updateObject(event, formData);
 
     // Re-render parent actor sheet if open so skills tab reflects changes immediately
@@ -282,6 +320,62 @@ export class DCCItemSheet extends ItemSheet {
         if (this.item.actor?.sheet?.rendered) {
           this.item.actor.render(false);
         }
+      }
+    });
+
+    // Add Damage Part (for attack or gear)
+    html.find('.add-damage-part').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.damageParts)
+        ? [...this.item.system.damageParts]
+        : Object.values(this.item.system?.damageParts || {});
+      current.push({
+        dice: '1d6',
+        stat: 'str',
+        type: 'Slashing',
+        value: 0
+      });
+      await this.item.update({ 'system.damageParts': current });
+    });
+
+    // Delete Damage Part
+    html.find('.delete-damage-part').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.damageParts)
+        ? [...this.item.system.damageParts]
+        : Object.values(this.item.system?.damageParts || {});
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
+        await this.item.update({ 'system.damageParts': current });
+      }
+    });
+
+    // Add Skill Damage Modifier (for skills)
+    html.find('.add-damage-mod').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.damageModifiers)
+        ? [...this.item.system.damageModifiers]
+        : Object.values(this.item.system?.damageModifiers || {});
+      current.push({
+        type: 'Fire',
+        value: 2,
+        dice: '',
+        minRank: 0
+      });
+      await this.item.update({ 'system.damageModifiers': current });
+    });
+
+    // Delete Skill Damage Modifier
+    html.find('.delete-damage-mod').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.damageModifiers)
+        ? [...this.item.system.damageModifiers]
+        : Object.values(this.item.system?.damageModifiers || {});
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
+        await this.item.update({ 'system.damageModifiers': current });
       }
     });
 

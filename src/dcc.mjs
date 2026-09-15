@@ -9,13 +9,17 @@ import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
+import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
 
   CONFIG.DCC = {
     skills: DCC_SKILLS,
-    spells: DCC_SPELLS
+    spells: DCC_SPELLS,
+    buffs: DCC_BUFFS,
+    damageTypes: DCC_DAMAGE_TYPES,
+    debuffs: DCC_DEBUFFS
   };
 
   // Register document classes
@@ -361,6 +365,15 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
+    const rawTyped = card.attr('data-typed-damage') || card.data('typed-damage');
+    let typedDamage = null;
+    if (rawTyped) {
+      try {
+        typedDamage = typeof rawTyped === 'string' ? JSON.parse(rawTyped) : rawTyped;
+      } catch (_) {}
+    }
+    const damageType = card.data('damage-type') || '';
+
     const results = [];
     for (const token of targetTokens) {
       const targetActor = token.actor;
@@ -369,6 +382,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       const res = await DCCCombatMetrics.applyDamageToTarget({
         targetActor,
         rawDamage,
+        typedDamage,
+        damageType,
         attackerActor: attacker,
         attackName: itemName,
         attackType,

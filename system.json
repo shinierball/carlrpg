@@ -2,7 +2,7 @@
   "id": "carl-rpg",
   "title": "Dungeon Crawler Carl RPG",
   "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
-  "version": "1.0.12",
+  "version": "1.0.14",
   "url": "https://github.com/shinierball/carlrpg",
   "manifest": "https://raw.githubusercontent.com/shinierball/carlrpg/main/system.json",
   "download": "https://github.com/shinierball/carlrpg/archive/refs/heads/main.zip",
@@ -50,6 +50,17 @@
       "name": "spells",
       "label": "DCC Spells",
       "path": "packs/spells",
+      "type": "Item",
+      "system": "carl-rpg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "buffs",
+      "label": "DCC Buffs & Debuffs",
+      "path": "packs/buffs",
       "type": "Item",
       "system": "carl-rpg",
       "ownership": {

@@ -306,18 +306,45 @@
       </div>
 
       <div class="dcc-external-buffs-box">
-        <div class="dcc-field-label" style="margin-bottom: 6px;">External Buffs (Max 3)</div>
-        <div class="dcc-buff-line">
-          <span class="dcc-buff-num">1.</span>
-          <input class="dcc-field-input" name="system.attributes.externalBuffs.buff1" type="text" value="{{system.attributes.externalBuffs.buff1}}" placeholder="Buff 1..." />
+        <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+          <span>EXTERNAL BUFFS (MAX 3)</span>
+          <span style="font-size: 9px; font-weight: normal; opacity: 0.85;">Active Effects</span>
         </div>
-        <div class="dcc-buff-line">
-          <span class="dcc-buff-num">2.</span>
-          <input class="dcc-field-input" name="system.attributes.externalBuffs.buff2" type="text" value="{{system.attributes.externalBuffs.buff2}}" placeholder="Buff 2..." />
-        </div>
-        <div class="dcc-buff-line">
-          <span class="dcc-buff-num">3.</span>
-          <input class="dcc-field-input" name="system.attributes.externalBuffs.buff3" type="text" value="{{system.attributes.externalBuffs.buff3}}" placeholder="Buff 3..." />
+        <div class="dcc-buff-slots-container">
+          {{#each externalBuffSlots as |slot|}}
+            <div class="dcc-buff-slot-entry {{#if slot.isEmpty}}is-empty{{else}}is-active{{/if}}" data-slot="{{slot.key}}">
+              <div class="dcc-buff-slot-header">
+                <span class="dcc-buff-num">{{slot.index}}.</span>
+                {{#if slot.badge}}
+                  <span class="dcc-buff-badge {{slot.badgeClass}}">{{slot.badge}}</span>
+                {{/if}}
+                {{#unless slot.isEmpty}}
+                  <span class="dcc-buff-name" title="{{slot.name}}">{{slot.name}}</span>
+                  {{#if slot.detail}}
+                    <span class="dcc-buff-detail">{{slot.detail}}</span>
+                  {{/if}}
+                  <a class="external-buff-clear" data-slot="{{slot.key}}" data-tooltip="Clear Buff"><i class="fa-solid fa-xmark"></i></a>
+                {{/unless}}
+              </div>
+              <div class="dcc-buff-select-wrapper">
+                <select class="external-buff-select" data-slot="{{slot.key}}">
+                  <option value="">-- {{#if slot.isEmpty}}Select Buff {{slot.index}}...{{else}}Change Buff...{{/if}} --</option>
+                  {{#each slot.groups as |group|}}
+                    {{#if group.items.length}}
+                      <optgroup label="{{group.label}}">
+                        {{#each group.items as |opt|}}
+                          <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+                        {{/each}}
+                      </optgroup>
+                    {{/if}}
+                  {{/each}}
+                  {{#if slot.isCustom}}
+                    <option value="{{slot.value}}" selected>✏️ {{slot.name}}</option>
+                  {{/if}}
+                </select>
+              </div>
+            </div>
+          {{/each}}
         </div>
       </div>
     </div>

@@ -226,11 +226,74 @@ export class DCCCombatMetrics {
    * @param {Combat} [params.combat=null]
    * @returns {Promise<object>}
    */
-  static async applyDamageToTarget({ targetActor, rawDamage, attackerActor = null, attackName = 'Attack', attackType = 'Melee', ignoreDR = false, multiplier = 1, combat = null }) {
+  static async applyDamageToTarget({ targetActor, rawDamage, attackerActor = null, attackName = 'Attack', attackType = 'Melee', ignoreDR = false, multiplier = 1, combat = null, damageType = '', typedDamage = null }) {
     if (!targetActor) return { error: 'No target actor' };
 
     const mult = Number(multiplier) || 1;
-    const adjustedRaw = Math.max(0, Math.floor((Number(rawDamage) || 0) * mult));
+
+    // Process either typedDamage dictionary or legacy rawDamage + damageType
+    let totalAdjustedRaw = 0;
+    let anyImmune = false;
+    let anyResistant = false;
+    const typeBreakdown = {};
+
+    const damageBuckets = typedDamage && typeof typedDamage === 'object'
+      ? { ...typedDamage }
+      : (damageType ? { [damageType]: Number(rawDamage) || 0 } : { 'Physical': Number(rawDamage) || 0 });
+
+    for (const [dt, rawAmt] of Object.entries(damageBuckets)) {
+      const initialAmt = Math.max(0, Math.floor((Number(rawAmt) || 0) * mult));
+      let currentAmt = initialAmt;
+      let isImmune = false;
+      let isResistant = false;
+
+      // 1. Check if targetActor has getDamageReduction (handles immunity, resistance, debuffs with rounding)
+      if (typeof targetActor.getDamageReduction === 'function') {
+        const red = targetActor.getDamageReduction(dt);
+        if (red.isImmune) {
+          isImmune = true;
+          anyImmune = true;
+          currentAmt = 0;
+        } else {
+          if (red.isResistant) {
+            isResistant = true;
+            anyResistant = true;
+          }
+          if (red.percent > 0) {
+            const reduction = red.rounding === 'up'
+              ? Math.ceil(currentAmt * red.percent)
+              : Math.floor(currentAmt * red.percent);
+            currentAmt = Math.max(0, currentAmt - reduction);
+          }
+          if (red.flat > 0) {
+            currentAmt = Math.max(0, currentAmt - red.flat);
+          }
+        }
+      } else {
+        // Fallback to legacy hasImmunity / hasResistance
+        if (typeof targetActor.hasImmunity === 'function' && targetActor.hasImmunity(dt)) {
+          isImmune = true;
+          anyImmune = true;
+          currentAmt = 0;
+        } else if (typeof targetActor.hasResistance === 'function' && targetActor.hasResistance(dt)) {
+          isResistant = true;
+          anyResistant = true;
+          currentAmt = Math.floor(currentAmt / 2);
+        }
+      }
+
+      typeBreakdown[dt] = {
+        initial: initialAmt,
+        final: currentAmt,
+        isImmune,
+        isResistant
+      };
+      totalAdjustedRaw += currentAmt;
+    }
+
+    const adjustedRaw = totalAdjustedRaw;
+    const isImmune = anyImmune && totalAdjustedRaw === 0;
+    const isResistant = anyResistant;
     const dr = ignoreDR ? 0 : (Number(targetActor.system?.attributes?.dr?.total) || 0);
     const damageAfterDR = Math.max(0, adjustedRaw - dr);
 
@@ -305,6 +368,11 @@ export class DCCCombatMetrics {
       actualDamage,
       newHp,
       tempRemaining,
+      damageType,
+      typedDamage: damageBuckets,
+      typeBreakdown,
+      isImmune,
+      isResistant,
       loggedMetrics
     };
   }

@@ -1,4 +1,5 @@
 import { DCC_SKILLS } from '../src/data/skills.mjs';
+import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -453,7 +454,10 @@ if (!globalThis.CombatTracker) {
 if (!globalThis.CONFIG) {
   globalThis.CONFIG = {
     DCC: {
-      skills: DCC_SKILLS
+      skills: DCC_SKILLS,
+      buffs: DCC_BUFFS,
+      damageTypes: DCC_DAMAGE_TYPES,
+      debuffs: DCC_DEBUFFS
     },
     Combat: { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } },
     ui: { combat: MockCombatTracker }
@@ -461,6 +465,9 @@ if (!globalThis.CONFIG) {
 } else {
   globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
   globalThis.CONFIG.DCC.skills = DCC_SKILLS;
+  globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
+  globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
+  globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
   globalThis.CONFIG.Combat = globalThis.CONFIG.Combat || { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } };
   globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
   globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };
@@ -476,16 +483,28 @@ if (!globalThis.ChatMessage) {
 if (!globalThis.Roll) {
   globalThis.Roll = class MockRoll {
     constructor(formula, data) {
-      this.formula = formula;
+      this.formula = String(formula || '10');
       this.data = data;
     }
     async evaluate() {
+      let total = 10;
+      try {
+        const clean = this.formula.replace(/(\d+)d(\d+)/gi, (m, count, sides) => {
+          return String(parseInt(count, 10) * Math.ceil(parseInt(sides, 10) / 2));
+        });
+        const evalTotal = Function(`"use strict"; return (${clean});`)();
+        if (Number.isFinite(evalTotal)) {
+          total = evalTotal;
+        }
+      } catch (_) {
+        total = 10;
+      }
       return {
         formula: this.formula,
-        total: 10,
+        total,
         toMessage: async (opts = {}) => ({
           formula: this.formula,
-          total: 10,
+          total,
           ...opts
         })
       };

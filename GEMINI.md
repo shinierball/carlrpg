@@ -84,16 +84,18 @@ This document defines the core directives, workflow rules, architecture standard
 
 ### 5. Specialized Item & Hotlist Actions
 - Differentiate behavior cleanly based on item types:
-  - **Attacks**: Roll to hit (`actor.rollAttack(item, 'hit')`) and damage.
-  - **Spells**: Cast spell with chat card (`actor.rollSpell(item)`).
-  - **Gear**: Toggle equipment slot (`item.update({ 'system.equipped': !item.system.equipped })`).
+  - **Attacks**: Roll to hit (`actor.rollAttack(item, 'hit')`) and damage. Allow for both 1d20 + modifiers to hit and roll under. If a roll to hit is performed, generate a chat card with the results.
+    Allow application of damage to targeted actors or groups of actors. Allow undue of damage, including negative HP.
+  - **Spells**: Cast spell with chat card (`actor.rollSpell(item)`). Include damage and effects in chat cards and calculations.  Allow application of damage to targeted actors or groups of actors. Allow undue of damage, including negative HP. Allow casting of spells with no MP cost.
+  - **Gear**: Toggle equipment slot (`item.update({ 'system.equipped': !item.system.equipped })`). 
   - **Loot / Consumables**: Use item and output chat message (`ChatMessage.create(...)`).
+  - **Buff / Debuff**: Apply or remove the buff/debuff to the actor. Include Buff/Debuff calculation and affects in chat cards and calculations.  Allow application of buffs or debuffs to targeted actors or groups of actors. 
 
 ### 6. Design & Styling (DCC Theme)
 - Follow the established Dungeon Crawler Carl visual theme:
   - Primary font: `'Oswald', sans-serif`
   - Accent / DCC Red: `#c0392b` / `#962d22`
-  - Clean borders, high contrast, readable inputs, and crisp state badges (`[EQUIPPED]`, `[SPELL]`, `[ATTACK]`, `[ITEM]`).
+  - Clean borders, high contrast, readable inputs, and crisp state badges (`[EQUIPPED]`, `[SPELL]`, `[ATTACK]`, `[ITEM]`, `[BUFF]`, `[DEBUFF]`).
 
 ---
 
@@ -105,4 +107,5 @@ This document defines the core directives, workflow rules, architecture standard
 4. **Verify**: Execute `node --test tests/*.test.mjs`. Fix any failures.
 5. **Inspect Diff**: Verify `git diff` to ensure no stray files or accidental edits.
 6. **Report**: Summarize changes clearly and point out verified test results.
-7. **Release**: Increment the patch version in `system.json` and `template.json` to all foundry to detect system changes for updates.
+7. **Documentation**: Create or update documentation in the `docs/` directory to reflect the changes. Update the README.md to reflect the changes. Update the CHANGELOG.md to reflect the changes.
+8. **Release**: Increment the patch version in `system.json` and `template.json` to all foundry to detect system changes for updates.

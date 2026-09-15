@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
+import { DCC_BUFFS } from '../src/data/buffs.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -142,5 +143,59 @@ async function buildSpells() {
   console.log(`Successfully built spells compendium at ${packDir}`);
 }
 
+// 3. Build Buffs Pack
+async function buildBuffs() {
+  const packDir = path.resolve(__dirname, '../packs/buffs');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building buffs compendium with ${DCC_BUFFS.length} items...`);
+  const batch = db.batch();
+
+  for (const buff of DCC_BUFFS) {
+    const doc = {
+      _id: buff._id,
+      name: buff.name,
+      type: "buff",
+      img: buff.img,
+      system: {
+        buffType: buff.system.buffType || "stat",
+        stat: buff.system.stat || "",
+        value: buff.system.value ?? 0,
+        damageType: buff.system.damageType || "",
+        duration: buff.system.duration || "1 Hour",
+        description: buff.system.description || ""
+      },
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion: "1.0.0",
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${buff._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built buffs compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
+await buildBuffs();

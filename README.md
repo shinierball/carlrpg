@@ -20,6 +20,13 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - **Page 6 (Abilities & Sponsors)**: Racial Abilities, Class Abilities, and 3 Sponsor blocks.
 - **Combat Performance & AI Awards**: Real-time tracking of net damage applied (factoring in target DR and Temp HP), kills, and tactical skills linked to Foundry's Combat Tracker, plus the **Dungeon AI Award Console** for dispensing Loot Boxes (Bronze through Celestial) and AI Favor.
 - **Pure DCC Mechanics**: Automated modifier calculations, Evade checks, DR totals, and dice rolls.
+- **Damage Type Integration & Multi-Typed Attacks**:
+  - Full support for 13 canonical CarlRPG damage types across weapons, attacks, spells, skills, buffs, and debuffs.
+  - Multi-part weapon damage (e.g. Slashing base + Necrotic + Sonic).
+  - Rank-gated skill damage bonuses scaling with skill rank (e.g. +2 Bludgeoning at Rank 0, +16 Fire at Rank 15).
+  - Damage multiplier buffs (e.g. `*2 Total Damage`) doubling all rolled damage components.
+  - Type-specific target debuffs and resistance reductions (e.g. 50% Fire reduction rounded up) applied before DR and CON damage bars.
+  - Interactive chat cards displaying color-coded typed damage breakdowns and one-click damage application to targeted tokens.
 - **Drag & Drop**: Drop Races, Classes, Deities, Skills, Spells, and Gear directly onto character sheets.
 - **Hot Reload Enabled**: Live updating of styles and templates without page reloads for instant developer feedback.
 

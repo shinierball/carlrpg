@@ -84,6 +84,7 @@ export class DCCCrawlerSheet extends ActorSheet {
     context.deities = [];
     context.sponsors = [];
     context.loot = [];
+    context.buffs = [];
 
     // Track equipped items by slot
     context.equippedBySlot = {
@@ -120,6 +121,7 @@ export class DCCCrawlerSheet extends ActorSheet {
       else if (item.type === 'deity') context.deities.push(item);
       else if (item.type === 'sponsor') context.sponsors.push(item);
       else if (item.type === 'loot') context.loot.push(item);
+      else if (item.type === 'buff') context.buffs.push(item);
     }
 
     // Tally gear skill bonuses from equipped gear
@@ -430,6 +432,122 @@ export class DCCCrawlerSheet extends ActorSheet {
       });
     }
 
+    // -------------------------------------------------------------------------
+    // EXTERNAL BUFF SLOTS (Max 3)
+    // -------------------------------------------------------------------------
+    const rawExternalBuffs = context.system.attributes?.externalBuffs || {};
+    context.externalBuffSlots = [];
+
+    const compBuffs = CONFIG.DCC?.buffs || [];
+    const statBuffOptions = compBuffs.filter(b => b.system?.buffType === 'stat').map(b => ({
+      id: b._id,
+      name: b.name,
+      label: `⚡ ${b.name} (+${b.system?.value || 2} ${(b.system?.stat || '').toUpperCase()})`
+    }));
+    const tempHpBuffOptions = compBuffs.filter(b => b.system?.buffType === 'tempHp').map(b => ({
+      id: b._id,
+      name: b.name,
+      label: `❤️ ${b.name} (+${b.system?.value || 10} Temp HP)`
+    }));
+    const resistBuffOptions = compBuffs.filter(b => b.system?.buffType === 'resistance').map(b => ({
+      id: b._id,
+      name: b.name,
+      label: `🛡️ ${b.name} (Resist ${b.system?.damageType || ''})`
+    }));
+    const immuneBuffOptions = compBuffs.filter(b => b.system?.buffType === 'immunity').map(b => ({
+      id: b._id,
+      name: b.name,
+      label: `🌟 ${b.name} (Immune ${b.system?.damageType || ''})`
+    }));
+
+    for (let i = 1; i <= 3; i++) {
+      const slotKey = `buff${i}`;
+      let rawVal = rawExternalBuffs[slotKey] || '';
+      if (Array.isArray(rawVal)) rawVal = rawVal[0] || '';
+      let valStr = String(rawVal).trim();
+      if (valStr.includes(',')) {
+        valStr = valStr.split(',')[0].trim();
+      }
+
+      const resolvedBuff = typeof this.actor.resolveBuff === 'function' ? this.actor.resolveBuff(valStr) : null;
+      let displayName = valStr;
+      let badge = '';
+      let detail = '';
+      let isKnownOption = false;
+
+      if (resolvedBuff) {
+        displayName = resolvedBuff.name;
+        const bType = (resolvedBuff.system?.buffType || '').toLowerCase();
+        if (bType === 'stat') {
+          badge = 'STAT';
+          detail = `+${resolvedBuff.system?.value || 2} ${(resolvedBuff.system?.stat || '').toUpperCase()}`;
+        } else if (bType === 'temphp' || bType === 'temp_hp') {
+          badge = 'TEMP HP';
+          detail = `+${resolvedBuff.system?.value || 10} Temp HP`;
+        } else if (bType === 'resistance') {
+          badge = 'RESIST';
+          detail = `50% ${resolvedBuff.system?.damageType || ''} Dmg`;
+        } else if (bType === 'immunity') {
+          badge = 'IMMUNE';
+          detail = `Negate ${resolvedBuff.system?.damageType || ''} Dmg`;
+        } else {
+          badge = 'BUFF';
+          detail = resolvedBuff.system?.description || '';
+        }
+      }
+
+      const groups = [];
+      const mapOpts = (opts) => opts.map(o => {
+        const isSel = Boolean(valStr && (valStr === o.id || valStr.toLowerCase() === o.name.toLowerCase() || resolvedBuff?.id === o.id || resolvedBuff?.name.toLowerCase() === o.name.toLowerCase()));
+        if (isSel) isKnownOption = true;
+        return { ...o, selected: isSel };
+      });
+
+      if (statBuffOptions.length) {
+        groups.push({ label: '⚡ Ability Score Buffs', items: mapOpts(statBuffOptions) });
+      }
+      if (tempHpBuffOptions.length) {
+        groups.push({ label: '❤️ Temporary Health Buffs', items: mapOpts(tempHpBuffOptions) });
+      }
+      if (resistBuffOptions.length) {
+        groups.push({ label: '🛡️ Damage Resistance Buffs', items: mapOpts(resistBuffOptions) });
+      }
+      if (immuneBuffOptions.length) {
+        groups.push({ label: '🌟 Damage Immunity Buffs', items: mapOpts(immuneBuffOptions) });
+      }
+
+      // Owned buffs on actor
+      const ownedBuffs = this.actor.items ? Array.from(this.actor.items).filter(it => it.type === 'buff') : [];
+      if (ownedBuffs.length) {
+        groups.push({
+          label: '📦 Owned Buffs',
+          items: ownedBuffs.map(b => {
+            const isSel = Boolean(valStr && (valStr === b.id || valStr.toLowerCase() === b.name.toLowerCase()));
+            if (isSel) isKnownOption = true;
+            return {
+              id: b.id,
+              name: b.name,
+              label: `✨ ${b.name}`,
+              selected: isSel
+            };
+          })
+        });
+      }
+
+      context.externalBuffSlots.push({
+        index: i,
+        key: slotKey,
+        value: valStr,
+        isEmpty: !valStr,
+        name: displayName,
+        badge,
+        badgeClass: badge ? ('dcc-buff-badge-' + badge.toLowerCase().replace(/\s+/g, '-')) : '',
+        detail,
+        groups,
+        isCustom: Boolean(valStr && !isKnownOption)
+      });
+    }
+
     return context;
   }
 
@@ -572,6 +690,27 @@ export class DCCCrawlerSheet extends ActorSheet {
       const val = select.val();
       if (slot) {
         await this.actor.update({ [`system.hotlist.${slot}`]: val });
+      }
+    });
+
+    // External Buff Slot Selection
+    html.find('.external-buff-select').change(async ev => {
+      ev.preventDefault();
+      const select = $(ev.currentTarget);
+      const slot = select.data('slot');
+      const val = select.val();
+      if (slot) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: val });
+      }
+    });
+
+    // External Buff Slot Clear
+    html.find('.external-buff-clear').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const slot = $(ev.currentTarget).data('slot');
+      if (slot) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: '' });
       }
     });
 

@@ -122,7 +122,48 @@ export class DCCActor extends Actor {
       gearEvade += Number(sys.evadeBonus) || 0;
     }
 
-    // Calculate 5 Core Ability Scores and Modifiers using unenhanced base + gear bonuses
+    // -------------------------------------------------------------------------
+    // EXTERNAL BUFFS (Max 3)
+    // -------------------------------------------------------------------------
+    const activeBuffs = this.getActiveBuffs();
+    const buffStatBonuses = { str: 0, int: 0, con: 0, dex: 0, cha: 0 };
+    const resistances = new Set();
+    const immunities = new Set();
+    let buffTempHp = 0;
+    const damageMultipliers = { all: 1 };
+    if (CONFIG.DCC?.damageTypes) {
+      for (const dt of CONFIG.DCC.damageTypes) {
+        damageMultipliers[dt] = 1;
+      }
+    }
+
+    for (const buff of activeBuffs) {
+      if (!buff) continue;
+      const bSys = buff.system || buff;
+      const bType = (bSys.buffType || '').toLowerCase();
+      const bStat = (bSys.stat || '').toLowerCase();
+      const bVal = Number(bSys.value) || 0;
+      const bDmg = bSys.damageType || '';
+      const bMult = Number(bSys.damageMultiplier) || (bType === 'damagemultiplier' ? bVal : 1);
+
+      if (bType === 'stat' && bStat && buffStatBonuses[bStat] !== undefined) {
+        buffStatBonuses[bStat] += bVal;
+      } else if (bType === 'temphp' || bType === 'temp_hp') {
+        buffTempHp += bVal;
+      } else if (bType === 'resistance' && bDmg) {
+        resistances.add(bDmg);
+      } else if (bType === 'immunity' && bDmg) {
+        immunities.add(bDmg);
+      } else if (bType === 'damagemultiplier' || bMult > 1) {
+        if (bDmg && damageMultipliers[bDmg] !== undefined) {
+          damageMultipliers[bDmg] *= bMult;
+        } else {
+          damageMultipliers.all *= bMult;
+        }
+      }
+    }
+
+    // Calculate 5 Core Ability Scores and Modifiers using unenhanced base + gear bonuses + external buff bonuses
     if (system.abilities) {
       for (const [key, ability] of Object.entries(system.abilities)) {
         let unenhanced = Number(ability.unenhanced);
@@ -132,6 +173,7 @@ export class DCCActor extends Actor {
         }
         const flatMod = gearStatBonuses[key]?.flat || 0;
         const pctMod = gearStatBonuses[key]?.pct || 0;
+        const buffMod = buffStatBonuses[key] || 0;
 
         // Percentage bonus rounded up (e.g. +10% of 10 = +1)
         const pctBonus = pctMod !== 0
@@ -139,13 +181,19 @@ export class DCCActor extends Actor {
           : 0;
 
         ability.gearBonus = flatMod + pctBonus;
-        ability.value = unenhanced + ability.gearBonus;
+        ability.buffBonus = buffMod;
+        ability.value = unenhanced + ability.gearBonus + ability.buffBonus;
         ability.mod = getDCCStatModifier(ability.value);
       }
     }
 
     // Calculate Evade, DR, HP, and Mana for Crawler/Creature
     if (system.attributes) {
+      system.attributes.resistances = Array.from(resistances);
+      system.attributes.immunities = Array.from(immunities);
+      system.attributes.damageMultipliers = damageMultipliers;
+      system.attributes.activeBuffs = activeBuffs;
+
       const dexMod = system.abilities?.dex?.mod ?? 0;
       const evadeBuffs = Number(system.attributes.evade?.buffs) || 0;
       if (system.attributes.evade) {
@@ -169,6 +217,13 @@ export class DCCActor extends Actor {
         const hpVal = Number.isFinite(rawVal) ? rawVal : system.attributes.hp.max;
         const hpMax = Number(system.attributes.hp.max) || 1;
         system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
+
+        if (buffTempHp > 0) {
+          system.attributes.hp.buffTemp = buffTempHp;
+          if (system.attributes.hp.temp === undefined || system.attributes.hp.temp === null || Number(system.attributes.hp.temp) <= 0) {
+            system.attributes.hp.temp = buffTempHp;
+          }
+        }
       }
 
       if (system.attributes.mana) {
@@ -362,7 +417,119 @@ export class DCCActor extends Actor {
   }
 
   /**
-   * Roll Attack: To-Hit and Damage
+   * Retrieve active damage multiplier for this actor (global or type-specific)
+   * @param {string} [damageType='']
+   * @returns {number}
+   */
+  getDamageMultiplier(damageType = '') {
+    const mults = this.system?.attributes?.damageMultipliers || { all: 1 };
+    const globalMult = Number(mults.all) || 1;
+    if (!damageType) return globalMult;
+    const typeMult = Number(mults[damageType]) || 1;
+    return globalMult * typeMult;
+  }
+
+  /**
+   * Resolve all damage parts for an attack from the weapon/attack item itself,
+   * equipped gear bonuses, and active skill modifiers (with rank gating).
+   * @param {Item} attackItem
+   * @returns {Array<object>}
+   */
+  getAttackDamageParts(attackItem) {
+    const parts = [];
+    const sys = attackItem?.system || {};
+
+    // 1. Primary parts on attackItem
+    const rawParts = sys.damageParts || [];
+    const itemParts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts);
+
+    if (itemParts.length > 0) {
+      for (const p of itemParts) {
+        if (!p) continue;
+        const statKey = (p.stat || '').toLowerCase();
+        const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+        const type = p.type || sys.damageType || 'Physical';
+        const dice = (p.dice || '').trim();
+        const value = Number(p.value) || 0;
+        parts.push({
+          id: p.id || `item-part-${parts.length}`,
+          type,
+          dice,
+          stat: statKey,
+          statMod,
+          value,
+          source: attackItem.name || 'Weapon'
+        });
+      }
+    } else {
+      // Legacy fallback: damageDice + damageStat + effects/damageType
+      const statKey = (sys.damageStat || 'str').toLowerCase();
+      const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+      const dice = (sys.damageDice || '1d6').trim();
+      const type = sys.damageType || 'Physical';
+      parts.push({
+        id: 'legacy-base',
+        type,
+        dice,
+        stat: statKey,
+        statMod,
+        value: 0,
+        source: attackItem.name || 'Weapon'
+      });
+    }
+
+    // 2. Equipped Gear damage parts
+    const equippedGear = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' && i.system?.equipped)) : [];
+    for (const gear of equippedGear) {
+      if (gear.id === attackItem.id) continue;
+      const gearParts = Array.isArray(gear.system?.damageParts) ? gear.system.damageParts : Object.values(gear.system?.damageParts || {});
+      for (const gp of gearParts) {
+        if (!gp) continue;
+        const statKey = (gp.stat || '').toLowerCase();
+        const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+        parts.push({
+          id: gp.id || `gear-${gear.id}-${parts.length}`,
+          type: gp.type || 'Physical',
+          dice: (gp.dice || '').trim(),
+          stat: statKey,
+          statMod,
+          value: Number(gp.value) || 0,
+          source: gear.name
+        });
+      }
+    }
+
+    // 3. Skills: Rank-gated damage bonuses
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    for (const skill of skills) {
+      const rank = Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
+      const rawMods = skill.system?.damageModifiers;
+      const mods = Array.isArray(rawMods) ? rawMods : Object.values(rawMods || {});
+
+      for (const m of mods) {
+        if (!m) continue;
+        const minRank = Number(m.minRank) || 0;
+        if (rank >= minRank) {
+          const statKey = (m.stat || '').toLowerCase();
+          const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+          parts.push({
+            id: m.id || `skill-${skill.id}-${parts.length}`,
+            type: m.type || 'Physical',
+            dice: (m.dice || '').trim(),
+            stat: statKey,
+            statMod,
+            value: Number(m.value) || 0,
+            source: `${skill.name} (Rank ${rank})`
+          });
+        }
+      }
+    }
+
+    return parts;
+  }
+
+  /**
+   * Roll Attack: To-Hit and Multi-Typed Damage
    * @param {Item} attackItem
    * @param {'hit'|'damage'} type
    */
@@ -374,7 +541,7 @@ export class DCCActor extends Actor {
       return this.rollSpellAttack(attackItem);
     }
 
-    const sys = attackItem.system;
+    const sys = attackItem.system || {};
     if (type === 'hit') {
       const statMod = this.system.abilities?.[sys.toHitStat]?.mod ?? 0;
       const rank = Number(sys.toHitRank) || 0;
@@ -386,21 +553,90 @@ export class DCCActor extends Actor {
         flavor: `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + Rank ${rank} + ${sys.toHitStat.toUpperCase()} Mod ${statMod})`
       });
     } else {
-      const statMod = this.system.abilities?.[sys.damageStat]?.mod ?? 0;
-      const dice = sys.damageDice || '1d6';
-      const formula = `${dice} + ${statMod}`;
-      const roll = await new Roll(formula).evaluate();
+      const parts = this.getAttackDamageParts(attackItem);
+      const evaluatedParts = [];
+      const typedDamage = {};
 
+      for (const part of parts) {
+        let formulaParts = [];
+        if (part.dice) formulaParts.push(part.dice);
+        if (part.stat && part.statMod) {
+          formulaParts.push(part.statMod >= 0 ? `+ ${part.statMod}` : `- ${Math.abs(part.statMod)}`);
+        }
+        if (part.value) {
+          if (!part.dice && !part.stat) {
+            formulaParts.push(String(part.value));
+          } else {
+            formulaParts.push(part.value >= 0 ? `+ ${part.value}` : `- ${Math.abs(part.value)}`);
+          }
+        }
+
+        const formula = formulaParts.join(' ').trim() || '0';
+        let baseRollTotal = 0;
+        if (!part.dice) {
+          baseRollTotal = (Number(part.value) || 0) + (part.stat ? Number(part.statMod) || 0 : 0);
+        } else {
+          const roll = await new Roll(formula).evaluate();
+          baseRollTotal = roll.total;
+        }
+
+        // Apply attacker damage multiplier (Scenario 3)
+        const mult = this.getDamageMultiplier(part.type);
+        const finalPartDamage = Math.max(0, Math.floor(baseRollTotal * mult));
+
+        typedDamage[part.type] = (typedDamage[part.type] || 0) + finalPartDamage;
+
+        evaluatedParts.push({
+          ...part,
+          formula,
+          baseTotal: baseRollTotal,
+          finalDamage: finalPartDamage,
+          multiplier: mult
+        });
+      }
+
+      const totalRawDamage = Object.values(typedDamage).reduce((acc, v) => acc + v, 0);
+      const globalMult = this.getDamageMultiplier();
+      const hasMult = globalMult !== 1 || evaluatedParts.some(p => p.multiplier !== 1);
+
+      // Construct rich breakdown HTML for chat card
+      const partPills = evaluatedParts.map(p => {
+        const multTag = p.multiplier !== 1 ? ` <span class="dcc-mult-tag">(x${p.multiplier})</span>` : '';
+        const sourceTag = p.source ? ` <span class="dcc-source-tag">[${p.source}]</span>` : '';
+        return `
+          <div class="dcc-damage-part-row" style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; font-size: 11px; border-bottom: 1px dashed #ddd;">
+            <div>
+              <strong style="color: #c0392b;">${p.finalDamage}</strong>
+              <span style="font-weight: bold; text-transform: uppercase; margin-left: 4px;">${p.type}</span>
+              ${sourceTag}
+            </div>
+            <div style="color: #666; font-size: 10px;">
+              <span>(${p.formula})</span>${multTag}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const typedDamageJson = JSON.stringify(typedDamage);
       const cardContent = `
-        <div class="dcc-chat-card dcc-damage-card" data-attacker-id="${this.id}" data-item-id="${attackItem.id}" data-item-name="${attackItem.name}" data-damage-value="${roll.total}" data-attack-type="${attackItem.type || 'attack'}">
+        <div class="dcc-chat-card dcc-damage-card"
+          data-attacker-id="${this.id}"
+          data-item-id="${attackItem.id}"
+          data-item-name="${attackItem.name}"
+          data-damage-value="${totalRawDamage}"
+          data-typed-damage='${typedDamageJson}'
+          data-attack-type="${attackItem.type || 'attack'}">
           <div class="dcc-damage-card-header">
             <strong>${this.name}</strong>: ${attackItem.name} Damage
           </div>
-          <div class="dcc-damage-card-result">
-            <span class="dcc-damage-value">${roll.total}</span>
-            <span class="dcc-damage-formula">(${formula})</span>
+          <div class="dcc-damage-card-result" style="margin: 6px 0;">
+            <span class="dcc-damage-value" style="font-size: 20px; font-weight: bold; color: #c0392b;">${totalRawDamage}</span>
+            <span class="dcc-damage-formula">${hasMult ? `(Buff Multiplied Total)` : `Total Damage`}</span>
           </div>
-          ${sys.effects ? `<div class="dcc-damage-effects"><em>${sys.effects}</em></div>` : ''}
+          <div class="dcc-typed-breakdown" style="background: #faf8f5; border: 1px solid #e0dacf; border-radius: 4px; padding: 4px 6px; margin-bottom: 8px;">
+            ${partPills}
+          </div>
+          ${sys.effects ? `<div class="dcc-damage-effects" style="font-size: 11px; margin-bottom: 6px;"><em>${sys.effects}</em></div>` : ''}
           <div class="dcc-damage-actions">
             <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" title="Apply damage to targeted token(s), deducting their DR">
               <i class="fa-solid fa-crosshairs"></i> Apply to Target(s)
@@ -414,9 +650,14 @@ export class DCCActor extends Actor {
         </div>
       `;
 
-      return roll.toMessage({
+      const flavorBreakdown = Object.entries(typedDamage).map(([t, val]) => `${val} ${t}`).join(', ');
+      const flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${flavorBreakdown}${hasMult ? ` [x${globalMult}]` : ''})${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`;
+
+      const mainRoll = await new Roll(`${totalRawDamage}`).evaluate();
+
+      return mainRoll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${dice} + ${sys.damageStat.toUpperCase()} Mod ${statMod}) ${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`,
+        flavor: flavorText,
         content: cardContent,
         flags: {
           'carl-rpg': {
@@ -425,7 +666,9 @@ export class DCCActor extends Actor {
             itemId: attackItem.id,
             itemName: attackItem.name,
             attackType: attackItem.type || 'attack',
-            rawDamage: roll.total
+            rawDamage: totalRawDamage,
+            typedDamage,
+            parts: evaluatedParts
           }
         }
       });
@@ -439,11 +682,274 @@ export class DCCActor extends Actor {
    * @returns {Promise<object>}
    */
   async applyDamage(rawDamage, options = {}) {
-    return DCCCombatMetrics.applyDamageToTarget({
-      targetActor: this,
-      rawDamage,
-      ...options
+    let payload = { targetActor: this, ...options };
+    if (typeof rawDamage === 'object' && rawDamage !== null) {
+      payload.typedDamage = rawDamage;
+      payload.rawDamage = Object.values(rawDamage).reduce((a, b) => a + (Number(b) || 0), 0);
+    } else {
+      payload.rawDamage = Number(rawDamage) || 0;
+    }
+    return DCCCombatMetrics.applyDamageToTarget(payload);
+  }
+
+  /**
+   * Resolve and return details for the up to 3 active external buffs
+   * @returns {Array<object>}
+   */
+  getActiveBuffs() {
+    const rawBuffs = this.system?.attributes?.externalBuffs;
+    if (!rawBuffs) return [];
+
+    let buffKeys = [];
+    if (Array.isArray(rawBuffs)) {
+      buffKeys = rawBuffs.slice(0, 3);
+    } else if (typeof rawBuffs === 'object') {
+      buffKeys = [rawBuffs.buff1, rawBuffs.buff2, rawBuffs.buff3];
+    }
+
+    const resolved = [];
+    for (const key of buffKeys) {
+      if (!key) continue;
+      const buffObj = this.resolveBuff(key);
+      if (buffObj) resolved.push(buffObj);
+    }
+    return resolved;
+  }
+
+  /**
+   * Resolve a buff by ID, compendium ID, or name
+   * @param {string} rawVal
+   * @returns {object|null}
+   */
+  resolveBuff(rawVal) {
+    if (!rawVal) return null;
+    const str = String(rawVal).trim();
+    if (!str) return null;
+
+    // 1. Check embedded item on actor
+    const owned = this.items?.get?.(str) ||
+      (Array.isArray(this.items) ? this.items.find(i => i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()) : this.items?.find?.(i => i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()));
+    if (owned && (owned.type === 'buff' || owned.system?.buffType)) {
+      return {
+        id: owned.id || owned._id,
+        name: owned.name,
+        type: 'buff',
+        img: owned.img || 'icons/svg/aura.svg',
+        system: structuredClone(owned.system || {})
+      };
+    }
+
+    // 2. Check compendium dataset in CONFIG.DCC.buffs
+    const compBuff = CONFIG.DCC?.buffs?.find(b => b._id === str || b.name.toLowerCase() === str.toLowerCase());
+    if (compBuff) {
+      return {
+        id: compBuff._id,
+        name: compBuff.name,
+        type: 'buff',
+        img: compBuff.img || 'icons/svg/aura.svg',
+        system: structuredClone(compBuff.system || {})
+      };
+    }
+
+    // 3. Check world items
+    if (globalThis.game?.items) {
+      const worldItem = game.items.find(i => (i.id === str || i.name.toLowerCase() === str.toLowerCase()) && i.type === 'buff');
+      if (worldItem) {
+        return {
+          id: worldItem.id,
+          name: worldItem.name,
+          type: 'buff',
+          img: worldItem.img || 'icons/svg/aura.svg',
+          system: structuredClone(worldItem.system || {})
+        };
+      }
+    }
+
+    // 4. Fallback for custom buff string (e.g. "+2 STR", "Fire Resistance", "*2 Damage", "10 Temp HP")
+    const lower = str.toLowerCase();
+
+    // Damage Multiplier buff string (e.g. "*2", "2x damage", "double damage", "*2 fire damage")
+    const multMatch = lower.match(/(?:\*|x)\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:x|\*)/i);
+    if (multMatch || lower.includes('double damage') || lower.includes('triple damage')) {
+      const mult = multMatch ? Number(multMatch[1] || multMatch[2]) : (lower.includes('double') ? 2 : 3);
+      const dmgType = CONFIG.DCC?.damageTypes?.find(dt => lower.includes(dt.toLowerCase())) || '';
+      return {
+        id: 'custom-' + str,
+        name: str,
+        type: 'buff',
+        img: 'icons/svg/sword.svg',
+        system: { buffType: 'damageMultiplier', stat: '', value: mult, damageMultiplier: mult, damageType: dmgType, duration: '', description: str }
+      };
+    }
+
+    const statMatch = lower.match(/\+?(\d+)?\s*(str|int|con|dex|cha|strength|intelligence|constitution|dexterity|charisma)/i);
+    if (statMatch) {
+      const statMap = { str: 'str', strength: 'str', int: 'int', intelligence: 'int', con: 'con', constitution: 'con', dex: 'dex', dexterity: 'dex', cha: 'cha', charisma: 'cha' };
+      const stat = statMap[statMatch[2].toLowerCase()];
+      const val = Number(statMatch[1]) || 2;
+      return {
+        id: 'custom-' + str,
+        name: str,
+        type: 'buff',
+        img: 'icons/svg/sword.svg',
+        system: { buffType: 'stat', stat, value: val, damageType: '', duration: '', description: str }
+      };
+    }
+
+    if (lower.includes('resist')) {
+      const dmgType = CONFIG.DCC?.damageTypes?.find(dt => lower.includes(dt.toLowerCase())) || '';
+      return {
+        id: 'custom-' + str,
+        name: str,
+        type: 'buff',
+        img: 'icons/svg/shield.svg',
+        system: { buffType: 'resistance', stat: '', value: 0, damageType: dmgType, duration: '', description: str }
+      };
+    }
+
+    if (lower.includes('immun')) {
+      const dmgType = CONFIG.DCC?.damageTypes?.find(dt => lower.includes(dt.toLowerCase())) || '';
+      return {
+        id: 'custom-' + str,
+        name: str,
+        type: 'buff',
+        img: 'icons/svg/shield.svg',
+        system: { buffType: 'immunity', stat: '', value: 0, damageType: dmgType, duration: '', description: str }
+      };
+    }
+
+    if (lower.includes('temp') || lower.includes('health') || lower.includes('hp')) {
+      const hpMatch = lower.match(/\+?(\d+)/);
+      const val = hpMatch ? Number(hpMatch[1]) : 10;
+      return {
+        id: 'custom-' + str,
+        name: str,
+        type: 'buff',
+        img: 'icons/svg/regen.svg',
+        system: { buffType: 'temphp', stat: '', value: val, damageType: '', duration: '', description: str }
+      };
+    }
+
+    return {
+      id: 'custom-' + str,
+      name: str,
+      type: 'buff',
+      img: 'icons/svg/aura.svg',
+      system: { buffType: 'custom', stat: '', value: 0, damageType: '', duration: '', description: str }
+    };
+  }
+
+  /**
+   * Check if actor has resistance to a specific damage type
+   * @param {string} damageType
+   * @returns {boolean}
+   */
+  hasResistance(damageType) {
+    if (!damageType) return false;
+    const list = this.system?.attributes?.resistances || [];
+    const target = damageType.toLowerCase().trim();
+    return list.some(r => {
+      const rLower = r.toLowerCase().trim();
+      return target === rLower || target.includes(rLower) || rLower.includes(target);
     });
+  }
+
+  /**
+   * Check if actor has immunity to a specific damage type
+   * @param {string} damageType
+   * @returns {boolean}
+   */
+  hasImmunity(damageType) {
+    if (!damageType) return false;
+    const list = this.system?.attributes?.immunities || [];
+    const target = damageType.toLowerCase().trim();
+    return list.some(i => {
+      const iLower = i.toLowerCase().trim();
+      return target === iLower || target.includes(iLower) || iLower.includes(target);
+    });
+  }
+
+  /**
+   * Get damage reduction for an incoming damage type from debuffs, resistances, or active effects.
+   * Returns { percent: number, flat: number, rounding: 'up'|'down', isResistant: boolean, isImmune: boolean }
+   * @param {string} damageType
+   * @returns {object}
+   */
+  getDamageReduction(damageType) {
+    if (!damageType) return { percent: 0, flat: 0, rounding: 'up', isResistant: false, isImmune: false };
+    const targetType = damageType.toLowerCase().trim();
+
+    if (this.hasImmunity(damageType)) {
+      return { percent: 1, flat: 0, rounding: 'up', isResistant: false, isImmune: true };
+    }
+
+    let percent = 0;
+    let flat = 0;
+    let rounding = 'up';
+    let isResistant = this.hasResistance(damageType);
+    if (isResistant) {
+      percent += 0.5;
+    }
+
+    // Check embedded debuff items
+    const debuffItems = this.items
+      ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff'))
+      : [];
+
+    for (const item of debuffItems) {
+      const sys = item.system || {};
+      const itemDmg = (sys.damageType || '').toLowerCase().trim();
+      const desc = (sys.description || item.name || '').toLowerCase();
+
+      const appliesToType = !itemDmg || itemDmg === targetType || itemDmg === 'all' || desc.includes(targetType) || desc.includes('all damage') || desc.includes('all attacks');
+      if (appliesToType) {
+        if (sys.reductionPercent) {
+          const rawPct = Number(sys.reductionPercent) || 0;
+          percent += rawPct > 1 ? rawPct / 100 : rawPct;
+        } else {
+          // Parse e.g. "reduces all fire damage by 50% rounded up"
+          const pctMatch = desc.match(/(\d+)%\s*(?:reduction|damage)?/i);
+          if (pctMatch) {
+            percent += Number(pctMatch[1]) / 100;
+          }
+        }
+
+        if (sys.rounding) {
+          rounding = sys.rounding;
+        } else if (desc.includes('rounded up') || desc.includes('round up')) {
+          rounding = 'up';
+        } else if (desc.includes('rounded down') || desc.includes('round down')) {
+          rounding = 'down';
+        }
+
+        if (sys.flatReduction) {
+          flat += Number(sys.flatReduction) || 0;
+        }
+      }
+    }
+
+    // Also check text in system.attributes.debuffs
+    const debuffStr = typeof this.system?.attributes?.debuffs === 'string' ? this.system.attributes.debuffs.toLowerCase() : '';
+    if (debuffStr && (debuffStr.includes(targetType) || debuffStr.includes('all damage') || debuffStr.includes('all fire'))) {
+      const pctMatch = debuffStr.match(new RegExp(`(\\d+)%\\s*(?:reduction|damage)?.*?${targetType}|${targetType}.*?(\\d+)%`, 'i'));
+      if (pctMatch) {
+        const p = Number(pctMatch[1] || pctMatch[2]) || 0;
+        percent += p > 1 ? p / 100 : p;
+      }
+      if (debuffStr.includes('rounded up') || debuffStr.includes('round up')) {
+        rounding = 'up';
+      } else if (debuffStr.includes('rounded down') || debuffStr.includes('round down')) {
+        rounding = 'down';
+      }
+    }
+
+    return {
+      percent: Math.min(1, Math.max(0, percent)),
+      flat,
+      rounding,
+      isResistant,
+      isImmune: false
+    };
   }
 
   /**

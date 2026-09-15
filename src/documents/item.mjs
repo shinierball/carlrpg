@@ -12,6 +12,20 @@ export class DCCItem extends Item {
       }
       this.system.skillModifiers = Array.isArray(mods) ? mods : [];
     }
+    if ((this.type === 'attack' || this.type === 'gear') && this.system) {
+      let parts = this.system.damageParts;
+      if (parts && !Array.isArray(parts) && typeof parts === 'object') {
+        parts = Object.values(parts);
+      }
+      this.system.damageParts = Array.isArray(parts) ? parts : [];
+    }
+    if (this.type === 'skill' && this.system) {
+      let mods = this.system.damageModifiers;
+      if (mods && !Array.isArray(mods) && typeof mods === 'object') {
+        mods = Object.values(mods);
+      }
+      this.system.damageModifiers = Array.isArray(mods) ? mods : [];
+    }
   }
 
   /** @override */
@@ -24,7 +38,14 @@ export class DCCItem extends Item {
       }
       this.system.skillModifiers = Array.isArray(mods) ? mods : [];
     }
-    if (this.type === 'skill') {
+    if ((this.type === 'attack' || this.type === 'gear') && this.system) {
+      let parts = this.system.damageParts;
+      if (parts && !Array.isArray(parts) && typeof parts === 'object') {
+        parts = Object.values(parts);
+      }
+      this.system.damageParts = Array.isArray(parts) ? parts : [];
+    }
+    if (this.type === 'skill' && this.system) {
       const baseRank = Number(this.system.rank) || 0;
       const itemBonus = Number(this.system.itemBonus) || 0;
       const boonBonus = Number(this.system.boonBonus) || 0;
@@ -32,6 +53,12 @@ export class DCCItem extends Item {
       this.system.modifiedRank = modifiedRank;
       this.modifiedRank = modifiedRank;
       this.effectiveRank = modifiedRank;
+
+      let mods = this.system.damageModifiers;
+      if (mods && !Array.isArray(mods) && typeof mods === 'object') {
+        mods = Object.values(mods);
+      }
+      this.system.damageModifiers = Array.isArray(mods) ? mods : [];
     }
   }
 

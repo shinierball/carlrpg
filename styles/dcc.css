@@ -539,16 +539,114 @@
   padding: 6px;
 }
 
-.dcc-buff-line {
+.dcc-buff-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dcc-buff-slot-entry {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 4px 6px;
+  background: #fdfdfd;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.dcc-buff-slot-entry.is-active {
+  border-color: #c0392b;
+  background: #fffafa;
+}
+
+.dcc-buff-slot-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 5px;
+  margin-bottom: 3px;
+  font-size: 11px;
 }
 
 .dcc-buff-num {
   font-weight: bold;
   font-size: 12px;
+  color: #333;
+}
+
+.dcc-buff-badge {
+  display: inline-block;
+  padding: 1px 4px;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  color: #fff;
+  background: #7f8c8d;
+}
+
+.dcc-buff-badge-stat {
+  background: #2980b9;
+}
+
+.dcc-buff-badge-temp-hp {
+  background: #27ae60;
+}
+
+.dcc-buff-badge-resist {
+  background: #d35400;
+}
+
+.dcc-buff-badge-immune {
+  background: #8e44ad;
+}
+
+.dcc-buff-name {
+  font-weight: bold;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+.dcc-buff-detail {
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.external-buff-clear {
+  margin-left: auto;
+  color: #999;
+  cursor: pointer;
+  padding: 1px 3px;
+  font-size: 11px;
+}
+
+.external-buff-clear:hover {
+  color: #c0392b;
+}
+
+.dcc-buff-select-wrapper {
+  width: 100%;
+}
+
+.external-buff-select {
+  width: 100%;
+  height: 22px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  border: 1px solid #bbb;
+  border-radius: 2px;
+  background: #fff;
+  color: #222;
+  padding: 1px 4px;
+  cursor: pointer;
+}
+
+.external-buff-select:focus {
+  border-color: #c0392b;
+  outline: none;
 }
 
 /* ---------------- TABLES (ATTACKS & SKILLS & INVENTORY) ---------------- */
@@ -2182,6 +2280,39 @@
 .dcc-damage-formula {
   font-size: 12px;
   color: #7f8c8d;
+}
+
+.dcc-typed-breakdown {
+  background: #faf8f5;
+  border: 1px solid #e0dacf;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin-bottom: 8px;
+}
+
+.dcc-damage-part-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 4px;
+  font-size: 11px;
+  border-bottom: 1px dashed #e2ded5;
+}
+
+.dcc-damage-part-row:last-child {
+  border-bottom: none;
+}
+
+.dcc-mult-tag {
+  color: #e67e22;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.dcc-source-tag {
+  color: #7f8c8d;
+  font-size: 10px;
+  font-style: italic;
 }
 
 .dcc-damage-effects {

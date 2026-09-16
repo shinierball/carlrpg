@@ -111,9 +111,11 @@ The CarlRPG system provides official standardized creature size categories:
 
 When creating a Level 1 Crawler, players choose their combat starter loadout from three distinct archetypes:
 
-### 1. Basic Weapon (Rank 3)
+### 1. Basic Weapon (Rank 3), Equipped Gear & Attack
 - Choose any existing weapon skill in the CarlRPG system (e.g. *Axe*, *Bow*, *Club*, *Crossbow*, *Dagger*, *Handgun*, *Herding Weapons*, *Improvised Weapons*, *Javelin*, *Lance*, *Longsword*, *Polearm*, *Quarterstaff*, *Rapier*, *Shotgun*, *Shuriken*, *Slingshot*, *Warhammer*).
 - Receive that weapon skill at **Rank 3** (non-additive with background skills).
+- **Equipped Gear in Inventory**: Automatically adds the physical weapon item to the crawler's inventory as a `gear` item equipped to the `hands` slot (`system.equipped = true`).
+- **Configured Attack**: Automatically creates an `attack` item configured with the weapon's damage dice, damage stat, to-hit stat, to-hit rank (Rank 3), damage type, and combat notes, ready to roll to-hit and damage from Page 1 (Core) and Hotlist Slot 2.
 
 ### 2. Starter Spell (Rank 3) + 5 Normal Mana Potions
 - Choose one of the 7 initial starter spells at **Rank 3**:
@@ -138,5 +140,23 @@ When creating a Level 1 Crawler, players choose their combat starter loadout fro
 
 ### 4. Universal Baseline: `Heal` (Rank 1)
 - **All Crawlers** start with the **Heal** spell at **Rank 1** inscribed and assigned to Hotlist Slot 1 (or Slot 2 if a starter attack spell was chosen).
+- **Active Healing Mechanics**: Casting `Heal` spends 2 MP and heals **up to 2 bars of health** (`2 × CON Mod` HP, or 20% of max HP). Target is **self only** (the caster). Healing is capped at maximum health, preventing overhealing, and displays full health recovery feedback on the chat card.
 
+---
 
+## 10. Health & Mana Initialization on Creation
+
+When a crawler is created through the Induction Terminal or generated directly, their starting health and mana are dynamically bound to their core stats:
+
+### Starting Health:
+$$\text{Max HP} = 10 \times \text{getDCCStatModifier}(\text{CON})$$
+- Current health (`hp.value`) and maximum health (`hp.max`) are initialized to the exact same value ($100\%$ full health).
+- **Stat Modifier Scaling**:
+  - CON 2: Modifier $+1 \implies \mathbf{10\text{ HP}}$
+  - CON 3–5: Modifier $+2 \implies \mathbf{20\text{ HP}}$
+  - CON 6–9: Modifier $+3 \implies \mathbf{30\text{ HP}}$
+
+### Starting Mana:
+$$\text{Max Mana} = \text{Intelligence Score (INT)}$$
+- Current mana (`mana.value`) and maximum mana (`mana.max`) are initialized to the exact same value ($100\%$ full mana).
+- E.g., INT 2 starts with $2\text{ MP}$, INT 5 starts with $5\text{ MP}$, INT 6 starts with $6\text{ MP}$.

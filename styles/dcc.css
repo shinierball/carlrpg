@@ -5661,6 +5661,20 @@ select.dcc-box-input.dcc-size-select,
   font-weight: bold;
 }
 
+.resolved-pill.hp-pill {
+  background: #2d1414;
+  border-color: #c0392b;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.resolved-pill.mana-pill {
+  background: #14213d;
+  border-color: #2980b9;
+  color: #5dade2;
+  font-weight: bold;
+}
+
 .resolved-pill.spell-pill {
   background: #1a2936;
   border-color: #2980b9;

@@ -16,6 +16,7 @@ import { DCC_SPELLS } from './data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
 import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from './data/crawler-creation.mjs';
 import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
+import { DCC_MACROS } from './data/macros.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
@@ -41,6 +42,7 @@ Hooks.once('init', async function() {
     skills: DCC_SKILLS,
     spells: DCC_SPELLS,
     buffs: DCC_BUFFS,
+    macros: DCC_MACROS,
     damageTypes: DCC_DAMAGE_TYPES,
     debuffs: DCC_DEBUFFS,
     outcomes: DCC_ROLL_OUTCOMES,
@@ -173,6 +175,7 @@ Hooks.once('init', async function() {
   window.carl = {
     combatMetrics: DCCCombatMetrics,
     sessionEngine: DCCSessionEngine,
+    setupInitialHotbar,
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
     },
@@ -199,6 +202,62 @@ Hooks.once('init', async function() {
     }
   };
 });
+
+/**
+ * Setup canonical DCC macro bar shortcuts (slots 1-3) for a given user.
+ * Slot 1: Character Creator
+ * Slot 2: Open Combat Metrics
+ * Slot 3: Party Progression and Session Hub
+ * @param {User} [user=game.user] - The target Foundry user
+ * @param {object} [options={}] - Configuration options
+ * @param {boolean} [options.force=false] - Force assignment even if already configured
+ */
+export async function setupInitialHotbar(user = globalThis.game?.user, { force = false } = {}) {
+  if (!user) return;
+  if (!force && typeof user.getFlag === 'function' && user.getFlag('carl-rpg', 'initialHotbarConfigured')) {
+    return;
+  }
+
+  const findMacro = (key, altNames) => {
+    if (globalThis.game?.macros?.find) {
+      const found = globalThis.game.macros.find(m => m.flags?.['carl-rpg']?.macroKey === key || altNames.includes(m.name));
+      if (found) return found;
+    }
+    if (Array.isArray(globalThis.game?.macros)) {
+      const found = globalThis.game.macros.find(m => m.flags?.['carl-rpg']?.macroKey === key || altNames.includes(m.name));
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const macroCreator = findMacro('crawler-creator', ['Character Creator', 'Open Character Creator']);
+  const macroMetrics = findMacro('combat-metrics', ['Open Combat Metrics', 'Combat Metrics']);
+  const macroSession = findMacro('session-manager', ['Party Progression and Session Hub', 'Party Progression & Session Hub']);
+
+  const assignments = [
+    { slot: 1, macro: macroCreator },
+    { slot: 2, macro: macroMetrics },
+    { slot: 3, macro: macroSession }
+  ];
+
+  for (const { slot, macro } of assignments) {
+    if (!macro) continue;
+    const currentSlotVal = user.hotbar ? user.hotbar[slot] : null;
+    if (force || !currentSlotVal) {
+      if (typeof user.assignHotbarMacro === 'function') {
+        await user.assignHotbarMacro(macro, slot);
+      } else if (typeof user.update === 'function') {
+        await user.update({ [`hotbar.${slot}`]: macro.id || macro._id });
+      } else if (user.hotbar) {
+        user.hotbar[slot] = macro.id || macro._id;
+      }
+    }
+  }
+
+  if (typeof user.setFlag === 'function') {
+    await user.setFlag('carl-rpg', 'initialHotbarConfigured', true);
+  }
+}
 
 // Hook into the Foundry Items Directory sidebar to add a top-level Skill Library & Manager button
 Hooks.on('renderItemDirectory', (app, html) => {
@@ -693,7 +752,70 @@ Hooks.once('ready', async function() {
         console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
       }
     }
+
+    // 3. Ensure macros compendium pack is populated if empty
+    const macrosPack = game.packs.get('carl-rpg.macros');
+    if (macrosPack && typeof Macro !== 'undefined') {
+      try {
+        const index = await macrosPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty macros compendium...');
+          const docs = DCC_MACROS.map(m => ({
+            _id: m._id,
+            name: m.name,
+            type: m.type,
+            img: m.img,
+            command: m.command,
+            scope: m.scope || 'global',
+            ownership: m.ownership || { default: 2 },
+            flags: m.flags || {}
+          }));
+          const wasLocked = Boolean(macrosPack.locked);
+          if (wasLocked) {
+            if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: false });
+            else macrosPack.locked = false;
+          }
+          await Macro.createDocuments(docs, { pack: macrosPack.collection || 'carl-rpg.macros' });
+          if (wasLocked) {
+            if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: true });
+            else macrosPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} macros into carl-rpg.macros.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate macros compendium:', err);
+      }
+    }
+
+    // 4. Ensure canonical DCC macros exist in world with Observer ownership (default: 2) so all users can execute them
+    if (game.macros && typeof Macro !== 'undefined') {
+      for (const mData of DCC_MACROS) {
+        const existing = game.macros.find ? game.macros.find(m => m.flags?.['carl-rpg']?.macroKey === mData.flags?.['carl-rpg']?.macroKey || m.name === mData.name) : null;
+        if (!existing) {
+          try {
+            await Macro.create({
+              name: mData.name,
+              type: mData.type,
+              img: mData.img,
+              command: mData.command,
+              scope: mData.scope || 'global',
+              ownership: { default: 2 },
+              flags: mData.flags || {}
+            });
+          } catch (err) {
+            console.warn(`DCC RPG | Could not create world macro "${mData.name}":`, err);
+          }
+        } else if (existing.ownership && existing.ownership.default < 2) {
+          try {
+            await existing.update({ 'ownership.default': 2 });
+          } catch (_) {}
+        }
+      }
+    }
   }
+
+  // Ensure initial macro bar has Character Creator, Combat Metrics, and Session Hub in slots 1, 2, 3
+  await setupInitialHotbar(game.user);
 
   // Ensure Actor Directory has New Crawler & Session buttons on startup
   if (ui.actors?.element?.length) {

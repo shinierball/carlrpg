@@ -1,3 +1,79 @@
+## 1.0.25
+
+### System Macros Compendium & Initial Hotbar Quick-Access
+
+- **Universal Macros Compendium (`carl-rpg.macros`)**:
+  - Registered official `macros` compendium pack in `system.json` under `packs/macros` configured with `PLAYER: "OBSERVER"` permissions, ensuring macros are accessible and executable by all players and non-administrators.
+  - Added prebuilt LevelDB compendium database with three canonical system macros:
+    1. **Character Creator**: Launches the Fast Matrix character creation terminal (`window.carl.openCrawlerCreator()`).
+    2. **Open Combat Metrics**: Opens the real-time combat performance tracker and AI Award console (`window.carl.openCombatMetrics()`).
+    3. **Party Progression and Session Hub**: Opens the party dashboard, activity ledger, and end-of-session management hub (`window.carl.openSessionManager()`).
+- **Player-Executable Ownership**:
+  - Defined explicit default ownership (`ownership: { default: 2 }`, OBSERVER) on all system macro records in `src/data/macros.mjs`, granting non-admin players permission to view and execute the macros from the compendium, directory, or macro bar.
+- **Initial Macro Bar Auto-Configuration (`setupInitialHotbar`)**:
+  - Automatically maps the three system macros into Hotbar slots **1**, **2**, and **3** upon user login:
+    - **Slot 1**: Character Creator
+    - **Slot 2**: Open Combat Metrics
+    - **Slot 3**: Party Progression and Session Hub
+  - Intelligently respects existing user keybindings without overwriting custom macro assignments, while providing a force option (`window.carl.setupInitialHotbar(game.user, { force: true })`) to restore system defaults.
+  - Automatically ensures all three macros exist in the world `game.macros` collection with proper player observer permissions on world startup.
+- **Automated Test Suite**:
+  - Added comprehensive test suite in `tests/macros.test.mjs` verifying manifest compendium configuration, ownership permissions, LevelDB pack integrity, execution callbacks, non-admin access, and initial hotbar slot assignment.
+
+## 1.0.24
+
+### Character Creation Health & Mana Initialization
+
+- **Dynamic Starting Health**:
+  - Automatically calculates maximum health on character creation based on the assigned Constitution score:
+    $$\text{Max HP} = 10 \times \text{getDCCStatModifier}(\text{CON})$$
+  - Current health (`system.attributes.hp.value`) and maximum health (`system.attributes.hp.max`) are now initialized to the exact same value upon crawler creation, with `system.attributes.hp.pct` set to 100%.
+  - Eliminates the previous static hardcoded default of 40 HP from `template.json`.
+- **Dynamic Starting Mana**:
+  - Automatically calculates maximum mana on character creation based on the assigned Intelligence score:
+    $$\text{Max Mana} = \text{INT}$$
+  - Current mana (`system.attributes.mana.value`) and maximum mana (`system.attributes.mana.max`) are now initialized to the exact same value upon crawler creation, with `system.attributes.mana.pct` set to 100%.
+  - Eliminates the previous static hardcoded default of 10 Mana from `template.json`.
+- **Induction Terminal Live Preview**:
+  - Exposed live `startingHp` and `startingMana` metrics in `DCCCrawlerCreatorApp.getData()`.
+  - Added visual `[HP: X / X]` and `[Mana: Y / Y]` summary pills in the Induction Terminal loadout box so players see their exact starting vitals as they allocate stats.
+- **Actor Creation Lifecycle Fallback**:
+  - Enhanced `DCCActor._preCreate` to automatically evaluate and set `hp.value = hp.max = 10 * conMod` and `mana.value = mana.max = intVal` for newly created crawlers and pets if attributes are omitted or match template defaults.
+- **Automated Test Suite**:
+  - Added unit tests in `tests/crawler-creator.test.mjs` and `tests/starter-loadouts.test.mjs` verifying that diverse stat arrays (e.g., standard array, high INT/low CON, CON 4/INT 5) produce equal current and max health/mana values at creation time.
+
+## 1.0.23
+
+### Starter Weapon Inventory Equipping & Attack Item Generation
+
+- **Starter Weapon Inventory Equipping**:
+  - When choosing a starter weapon on character creation (`starterMode === 'weapon'`), the selected weapon is now automatically added to the crawler's inventory as a `gear` item.
+  - Automatically equipped to the `hands` slot (`system.slot = 'hands'`, `system.equipped = true`).
+  - Appears in Inventory under Gear with the red `EQUIPPED` badge, and is displayed under Hands/Holding in the equipped gear overview on Page 2.
+- **Configured Attack Item**:
+  - Automatically creates a matching `attack` item configured with the weapon's canonical parameters: to-hit stat (`str` or `dex`), to-hit rank (Rank 3), damage dice, damage stat, damage type, and combat notes.
+  - Displayed on Page 1 (Core) in the ATTACKS table with one-click to-hit and damage rolling buttons.
+  - Automatically mapped into Hotlist Slot 2 for quick combat access (with Heal on Slot 1).
+- **Weapon Definitions Library (`DCC_STARTER_WEAPON_DEFINITIONS`)**:
+  - Defined full combat profiles for all 18 starter weapons in `src/data/crawler-creation.mjs` including `toHitStat`, `damageDice`, `damageStat`, `damageType`, and weapon properties.
+- **Automated Test Suite**:
+  - Updated test 2 and added test 12 in `tests/starter-loadouts.test.mjs` validating inventory gear creation, equipped status, attack item schema, and to-hit/damage roll execution.
+
+## 1.0.22
+
+### Heal Spell Active Mechanics & Self-Targeting
+
+- **Active Self Healing**:
+  - Casting the `Heal` spell (`actor.rollSpell(healItem)`) dynamically evaluates the caster's Constitution modifier to determine health per bar (`CON Mod` HP per bar, 10 bars total).
+  - Actively heals **up to 2 bars of health** (`2 × CON Mod` HP).
+  - Target is strictly **self only** (the caster), ignoring any external canvas/token selections.
+  - Automatically caps at the actor's maximum health (`system.attributes.hp.max`), preventing overhealing.
+  - Updates actor `system.attributes.hp.value` and `system.attributes.hp.pct` in a clean atomic state change.
+  - Displays rich healing feedback in the chat card (HP healed, Health Bar slots, HP/bar, current/max HP, and self target badge).
+  - Logs heal action and recovered HP to the session manager activity ledger.
+- **Automated Test Suite**:
+  - Added unit tests 8 through 11 in `tests/starter-loadouts.test.mjs` verifying healing calculations, 2-bar recovery, max HP capping, full health casting, and mana requirement checks.
+
 ## 1.0.21
 
 ### Level 1 Starter Combat Loadouts & Universal Baseline Heal Spell

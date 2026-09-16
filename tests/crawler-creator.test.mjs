@@ -11,6 +11,9 @@ import {
   generateRandomCrawler
 } from '../src/data/crawler-creation.mjs';
 import { DCCCrawlerCreatorApp } from '../src/apps/crawler-creator.mjs';
+import { DCCActor } from '../src/documents/actor.mjs';
+
+CONFIG.Actor = { documentClass: DCCActor };
 
 test('DCC RPG Crawler Character Creator Subsystem', async (t) => {
 
@@ -274,6 +277,16 @@ test('DCC RPG Crawler Character Creator Subsystem', async (t) => {
     assert.strictEqual(actor.system.abilities.int.value, 5);
     assert.strictEqual(actor.system.abilities.cha.value, 3);
 
+    // HP and Mana: Current must equal Max on character creation (not default 40 / 10)
+    // CON 4 -> getDCCStatModifier(4) = 2 -> maxHp = 20
+    assert.strictEqual(actor.system.attributes.hp.value, 20, 'Current HP must equal max HP (20) on creation');
+    assert.strictEqual(actor.system.attributes.hp.max, 20, 'Max HP must be 20 for CON 4');
+    assert.strictEqual(actor.system.attributes.hp.pct, 100, 'HP percentage must be 100% on creation');
+    // INT 5 -> maxMana = 5
+    assert.strictEqual(actor.system.attributes.mana.value, 5, 'Current Mana must equal max Mana (5) on creation');
+    assert.strictEqual(actor.system.attributes.mana.max, 5, 'Max Mana must be 5 for INT 5');
+    assert.strictEqual(actor.system.attributes.mana.pct, 100, 'Mana percentage must be 100% on creation');
+
     // Items check (inherent + 8 background skills + 1 starter weapon skill)
     const skills = actor.items.filter(i => i.type === 'skill');
     assert.strictEqual(skills.length, 10, 'Actor should have 1 inherent + 8 background skills + 1 starter weapon skill');
@@ -298,5 +311,65 @@ test('DCC RPG Crawler Character Creator Subsystem', async (t) => {
     const healSpell = actor.items.find(i => i.type === 'spell' && i.name === 'Heal');
     assert.ok(healSpell, 'Should start with universal Heal spell');
     assert.strictEqual(healSpell.system.rank, 1, 'Heal spell should be Rank 1');
+  });
+
+  await t.test('6. Crawler creator sets current health and mana equal to max health and mana across diverse stat arrays', async () => {
+    // Case 1: Default standard array assignment (CON 6 -> 30 HP, INT 2 -> 2 Mana)
+    const defaultCreator = new DCCCrawlerCreatorApp({
+      name: 'Carl Standard'
+    });
+    const defaultData = await defaultCreator.getData();
+    assert.strictEqual(defaultData.startingHp, 30, 'getData exposes preview startingHp 30 for CON 6');
+    assert.strictEqual(defaultData.startingMana, 2, 'getData exposes preview startingMana 2 for INT 2');
+
+    const defaultActor = await defaultCreator.createCrawler();
+    assert.ok(defaultActor);
+    assert.strictEqual(defaultActor.system.attributes.hp.value, 30, 'Current HP must be 30, not default 40');
+    assert.strictEqual(defaultActor.system.attributes.hp.max, 30, 'Max HP must be 30');
+    assert.strictEqual(defaultActor.system.attributes.hp.pct, 100);
+    assert.strictEqual(defaultActor.system.attributes.mana.value, 2, 'Current Mana must be 2, not default 10');
+    assert.strictEqual(defaultActor.system.attributes.mana.max, 2, 'Max Mana must be 2');
+    assert.strictEqual(defaultActor.system.attributes.mana.pct, 100);
+
+    // Case 2: Low CON 2 -> mod 1 -> 10 HP; High INT 6 -> 6 Mana
+    const lowConCreator = new DCCCrawlerCreatorApp({
+      name: 'Scholar Crawler',
+      stats: { str: 4, dex: 3, con: 2, int: 6, cha: 5 }
+    });
+    const lowConData = await lowConCreator.getData();
+    assert.strictEqual(lowConData.startingHp, 10, 'Preview HP must be 10 for CON 2');
+    assert.strictEqual(lowConData.startingMana, 6, 'Preview Mana must be 6 for INT 6');
+
+    const scholarActor = await lowConCreator.createCrawler();
+    assert.ok(scholarActor);
+    assert.strictEqual(scholarActor.system.attributes.hp.value, 10, 'Current HP must equal max HP 10');
+    assert.strictEqual(scholarActor.system.attributes.hp.max, 10);
+    assert.strictEqual(scholarActor.system.attributes.hp.pct, 100);
+    assert.strictEqual(scholarActor.system.attributes.mana.value, 6, 'Current Mana must equal max Mana 6');
+    assert.strictEqual(scholarActor.system.attributes.mana.max, 6);
+    assert.strictEqual(scholarActor.system.attributes.mana.pct, 100);
+  });
+
+  await t.test('7. Direct Actor.create sets current HP and Mana to max values if unspecified', async () => {
+    // Creating actor directly with CON 3 (mod 2 -> 20 HP) and INT 4 (4 Mana)
+    const directActor = await CONFIG.Actor.documentClass.create({
+      name: 'Direct Crawler',
+      type: 'crawler',
+      system: {
+        abilities: {
+          str: { value: 5 },
+          dex: { value: 6 },
+          con: { value: 3 },
+          int: { value: 4 },
+          cha: { value: 2 }
+        }
+      }
+    });
+
+    assert.ok(directActor);
+    assert.strictEqual(directActor.system.attributes.hp.value, 20, 'Direct creation sets current HP to max HP (20)');
+    assert.strictEqual(directActor.system.attributes.hp.max, 20, 'Direct creation sets max HP to 20');
+    assert.strictEqual(directActor.system.attributes.mana.value, 4, 'Direct creation sets current Mana to max Mana (4)');
+    assert.strictEqual(directActor.system.attributes.mana.max, 4, 'Direct creation sets max Mana to 4');
   });
 });

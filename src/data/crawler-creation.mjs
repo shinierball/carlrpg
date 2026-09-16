@@ -812,6 +812,192 @@ export const DCC_STARTER_WEAPONS = [
   'Warhammer'
 ];
 
+export const DCC_STARTER_WEAPON_DEFINITIONS = {
+  axe: {
+    name: 'Axe',
+    toHitStat: 'str',
+    damageDice: '1d6',
+    damageStat: 'str',
+    damageType: 'Slashing',
+    effects: 'Base Damage: 1d6 + Str Slashing.',
+    img: 'icons/svg/sword.svg'
+  },
+  bow: {
+    name: 'Bow',
+    toHitStat: 'dex',
+    damageDice: '1d6',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'Range: 100 feet. Requires two hands and ammunition. Base Damage: 1d6 + Str Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  club: {
+    name: 'Club',
+    toHitStat: 'str',
+    damageDice: '1d6',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'Base Damage: 1d6 + Str Bludgeoning.',
+    img: 'icons/svg/shield.svg'
+  },
+  crossbow: {
+    name: 'Crossbow',
+    toHitStat: 'dex',
+    damageDice: '1d8',
+    damageStat: 'dex',
+    damageType: 'Piercing',
+    effects: 'Range: 50 feet. Requires two hands and ammunition. Cooldown: Once per round. Base Damage: 1d8 Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  dagger: {
+    name: 'Dagger',
+    toHitStat: 'dex',
+    damageDice: '1d4',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'AI Favor: 1. Base Damage: 1d4 + Str Piercing.',
+    img: 'icons/svg/sword.svg'
+  },
+  handgun: {
+    name: 'Handgun',
+    toHitStat: 'dex',
+    damageDice: '1d8',
+    damageStat: 'dex',
+    damageType: 'Piercing',
+    effects: 'Range: 150 feet. Requires ammunition. Spend one Action to reload after Major Fail or worse. Base Damage: 1d8 Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  'herding weapons': {
+    name: 'Herding Weapons',
+    toHitStat: 'str',
+    damageDice: '1d4',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'Range: 10 feet. AI Favor: 1. Requires two hands. Base Damage: 1d4 + Str Bludgeoning.',
+    img: 'icons/svg/sword.svg'
+  },
+  'improvised weapons': {
+    name: 'Improvised Weapons',
+    toHitStat: 'str',
+    damageDice: '1d4',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'AI Favor: 1. Object must weigh at least 1 lb and no more than your Str in lbs. Base Damage: 1d4 + Str Bludgeoning.',
+    img: 'icons/svg/chest.svg'
+  },
+  javelin: {
+    name: 'Javelin',
+    toHitStat: 'dex',
+    damageDice: '1d8',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'Range: 40 feet. Base Damage: 1d8 + Str Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  lance: {
+    name: 'Lance',
+    toHitStat: 'str',
+    damageDice: '1d12',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'Range: 10 feet. Must be mounted. Base Damage: 1d12 + Str Piercing.',
+    img: 'icons/svg/sword.svg'
+  },
+  longsword: {
+    name: 'Longsword',
+    toHitStat: 'str',
+    damageDice: '1d8',
+    damageStat: 'str',
+    damageType: 'Slashing',
+    effects: 'Base Damage: 1d8 + Str Slashing.',
+    img: 'icons/svg/sword.svg'
+  },
+  polearm: {
+    name: 'Polearm',
+    toHitStat: 'str',
+    damageDice: '1d10',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'Range: 10 feet. Requires two hands. Base Damage: 1d8 + Str Piercing.',
+    img: 'icons/svg/sword.svg'
+  },
+  quarterstaff: {
+    name: 'Quarterstaff',
+    toHitStat: 'str',
+    damageDice: '1d6',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'Range: 10 feet. Requires two hands. Base Damage: 1d6 + Str Bludgeoning.',
+    img: 'icons/svg/shield.svg'
+  },
+  rapier: {
+    name: 'Rapier',
+    toHitStat: 'dex',
+    damageDice: '1d6',
+    damageStat: 'dex',
+    damageType: 'Piercing',
+    effects: 'Base Damage: 1d6 + Dex Piercing.',
+    img: 'icons/svg/sword.svg'
+  },
+  shotgun: {
+    name: 'Shotgun',
+    toHitStat: 'dex',
+    damageDice: '1d10',
+    damageStat: 'dex',
+    damageType: 'Piercing',
+    effects: 'Range: 30 feet. Requires two hands and ammunition. Reload after Major Fail or worse. Base Damage: 1d10 Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  shuriken: {
+    name: 'Shuriken',
+    toHitStat: 'dex',
+    damageDice: '1d4',
+    damageStat: 'str',
+    damageType: 'Piercing',
+    effects: 'Range: 30 feet. AI Favor: 1. Base Damage: 1d4 + Str Piercing.',
+    img: 'icons/svg/target.svg'
+  },
+  slingshot: {
+    name: 'Slingshot',
+    toHitStat: 'dex',
+    damageDice: '1d2',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'Range: 30 feet. AI Favor: 2. Requires two hands. Base Damage: 1d2 + Str Bludgeoning.',
+    img: 'icons/svg/target.svg'
+  },
+  warhammer: {
+    name: 'Warhammer',
+    toHitStat: 'str',
+    damageDice: '1d10',
+    damageStat: 'str',
+    damageType: 'Bludgeoning',
+    effects: 'Limitations: Requires two hands to wield. Base Damage: 1d10 + Str Bludgeoning.',
+    img: 'icons/svg/shield.svg'
+  }
+};
+
+/**
+ * Resolve weapon attack and gear parameters for a starter weapon.
+ * @param {string} weaponName 
+ * @returns {object} Weapon definition
+ */
+export function getStarterWeaponDefinition(weaponName) {
+  const norm = (weaponName || '').toLowerCase().trim();
+  if (DCC_STARTER_WEAPON_DEFINITIONS[norm]) {
+    return DCC_STARTER_WEAPON_DEFINITIONS[norm];
+  }
+  return {
+    name: weaponName || 'Weapon',
+    toHitStat: 'str',
+    damageDice: '1d6',
+    damageStat: 'str',
+    damageType: 'Slashing',
+    effects: 'Standard weapon',
+    img: 'icons/svg/sword.svg'
+  };
+}
+
 export const DCC_STARTER_SPELLS = [
   'Dirt Clod',
   'Fire Fingers',

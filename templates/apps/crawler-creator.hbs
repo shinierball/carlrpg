@@ -186,7 +186,7 @@
               </select>
             </div>
             <div class="dcc-choice-perk-badge">
-              <i class="fa-solid fa-check"></i> Grants <strong>{{starterWeapon}}</strong> weapon skill at <strong>Rank 3</strong>.
+              <i class="fa-solid fa-check"></i> Grants <strong>{{starterWeapon}}</strong> skill at <strong>Rank 3</strong>, equips weapon in inventory, and adds attack.
             </div>
           </div>
         {{/if}}
@@ -252,6 +252,12 @@
       <div class="dcc-resolved-pills-wrap flexrow">
         <span class="resolved-pill inherent">
           <i class="fa-solid fa-star"></i> {{speciesData.inherentSkill.name}} [Rank {{speciesData.inherentSkill.rank}}]
+        </span>
+        <span class="resolved-pill hp-pill" title="Starting Health: {{startingHp}} / {{startingHp}} (Current and Max Health equal)">
+          <i class="fa-solid fa-heart"></i> HP: {{startingHp}} / {{startingHp}}
+        </span>
+        <span class="resolved-pill mana-pill" title="Starting Mana: {{startingMana}} / {{startingMana}} (Current and Max Mana equal)">
+          <i class="fa-solid fa-bolt"></i> Mana: {{startingMana}} / {{startingMana}}
         </span>
         <span class="resolved-pill spell-pill">
           <i class="fa-solid fa-hand-holding-heart"></i> Heal [Rank 1]

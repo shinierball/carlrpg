@@ -1,8 +1,3 @@
-2026/09/16-16:15:42.204979 17474f000 Recovering log #84
-2026/09/16-16:15:42.205419 17474f000 Delete type=3 #82
-2026/09/16-16:15:42.205461 17474f000 Delete type=0 #84
-2026/09/16-16:15:45.167014 16d637000 Level-0 table #89: started
-2026/09/16-16:15:45.167057 16d637000 Level-0 table #89: 0 bytes OK
-2026/09/16-16:15:45.167242 16d637000 Delete type=0 #87
-2026/09/16-16:15:45.167347 16d637000 Manual compaction at level-0 from '!items!0f4njdKDnHiEm4ym' @ 72057594037927935 : 1 .. '!items!zaetsgNCqShqHPVa' @ 0 : 0; will stop at (end)
-2026/09/16-16:15:45.167371 16d637000 Manual compaction at level-1 from '!items!0f4njdKDnHiEm4ym' @ 72057594037927935 : 1 .. '!items!zaetsgNCqShqHPVa' @ 0 : 0; will stop at (end)
+2026/09/16-18:27:43.467330 175767000 Log #96: 0 ops saved to Table #97 OK
+2026/09/16-18:27:43.467478 175767000 Archiving /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/spells/000096.log: OK
+2026/09/16-18:27:43.467879 175767000 **** Repaired leveldb /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/spells; recovered 0 files; 0 bytes. Some data may have been lost. ****

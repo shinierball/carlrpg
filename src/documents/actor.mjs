@@ -1,4 +1,4 @@
-import { DCCCombatMetrics } from '../apps/combat-metrics.mjs';
+import { DCCCombatMetrics, getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCCSessionEngine } from '../apps/session-manager.mjs';
 import { getSizeInfo } from '../data/sizes.mjs';
 
@@ -76,10 +76,35 @@ export class DCCActor extends Actor {
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
     if (this.type === 'crawler' || this.type === 'pet') {
-      this.updateSource({
+      const updates = {
         'prototypeToken.actorLink': true,
         'prototypeToken.disposition': 1
-      });
+      };
+
+      const conVal = data?.system?.abilities?.con?.value ?? this.system?.abilities?.con?.value;
+      if (conVal !== undefined) {
+        const conMod = getDCCStatModifier(conVal);
+        const computedMaxHp = 10 * conMod;
+        const rawHp = data?.system?.attributes?.hp?.value;
+        if (rawHp === undefined || (rawHp === 40 && computedMaxHp !== 40)) {
+          updates['system.attributes.hp.value'] = computedMaxHp;
+          updates['system.attributes.hp.max'] = computedMaxHp;
+          updates['system.attributes.hp.pct'] = 100;
+        }
+      }
+
+      const intVal = data?.system?.abilities?.int?.value ?? this.system?.abilities?.int?.value;
+      if (intVal !== undefined) {
+        const computedMaxMana = Number(intVal) || 0;
+        const rawMana = data?.system?.attributes?.mana?.value;
+        if (rawMana === undefined || (rawMana === 10 && computedMaxMana !== 10)) {
+          updates['system.attributes.mana.value'] = computedMaxMana;
+          updates['system.attributes.mana.max'] = computedMaxMana;
+          updates['system.attributes.mana.pct'] = 100;
+        }
+      }
+
+      this.updateSource(updates);
     }
   }
 
@@ -305,6 +330,7 @@ export class DCCActor extends Actor {
         system.attributes.hp.max = 10 * conMod;
         const rawVal = Number(system.attributes.hp.value);
         const hpVal = Number.isFinite(rawVal) ? rawVal : system.attributes.hp.max;
+        system.attributes.hp.value = hpVal;
         const hpMax = Number(system.attributes.hp.max) || 1;
         system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
 
@@ -321,6 +347,7 @@ export class DCCActor extends Actor {
         system.attributes.mana.max = enhancedInt;
         const rawMana = Number(system.attributes.mana.value);
         const manaVal = Number.isFinite(rawMana) ? rawMana : system.attributes.mana.max;
+        system.attributes.mana.value = manaVal;
         const manaMax = Number(system.attributes.mana.max) || 1;
         system.attributes.mana.pct = Math.min(100, Math.max(0, Math.round((manaVal / manaMax) * 100)));
       }
@@ -1515,9 +1542,47 @@ export class DCCActor extends Actor {
     }
 
     // Subtract mana on successful cast
+    const updates = {};
     const newMana = Math.max(0, currentMana - manaCost);
     if (this.system?.attributes?.mana && manaCost > 0) {
-      await this.update({ 'system.attributes.mana.value': newMana });
+      updates['system.attributes.mana.value'] = newMana;
+    }
+
+    // Check if casting Heal (target: self only, heals up to 2 bars of health, capped at max HP)
+    const isHealSpell = spellItem.name?.trim().toLowerCase() === 'heal' ||
+      (sys.spellType === 'Heal' && /2\s*(?:health\s*bar)?\s*slots?/i.test(sys.baseDamage || ''));
+
+    let healInfo = null;
+    if (isHealSpell) {
+      const hpPerBar = getHpPerBar(this);
+      const barsToHeal = 2;
+      const maxHealAmount = barsToHeal * hpPerBar;
+      const currentHp = Number(this.system?.attributes?.hp?.value ?? this.system?.attributes?.hp?.max ?? 0);
+      const maxHp = Number(this.system?.attributes?.hp?.max) || (10 * hpPerBar);
+      const newHp = Math.min(maxHp, currentHp + maxHealAmount);
+      const actualHealed = Math.max(0, newHp - currentHp);
+      const newPct = maxHp > 0 ? Math.min(100, Math.max(0, Math.round((newHp / maxHp) * 100))) : 100;
+
+      if (this.system?.attributes?.hp) {
+        updates['system.attributes.hp.value'] = newHp;
+        updates['system.attributes.hp.pct'] = newPct;
+      }
+
+      healInfo = {
+        hpPerBar,
+        barsToHeal,
+        maxHealAmount,
+        actualHealed,
+        currentHp,
+        newHp,
+        maxHp,
+        newPct,
+        target: 'self'
+      };
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await this.update(updates);
     }
 
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -1526,7 +1591,9 @@ export class DCCActor extends Actor {
         roll: { total: 0, formula: manaCost > 0 ? `${manaCost} MP` : '0 MP' },
         type: 'spell',
         name: spellItem.name,
-        notes: `Cast ${spellItem.name} (${manaCost} MP)`
+        notes: healInfo
+          ? `Cast Heal (+${healInfo.actualHealed} HP to self, ${healInfo.newHp}/${healInfo.maxHp} HP)`
+          : `Cast ${spellItem.name} (${manaCost} MP)`
       }).catch(() => {});
     }
 
@@ -1557,6 +1624,23 @@ export class DCCActor extends Actor {
         ${sys.aiFavor ? `<div><strong>AI Favor:</strong> +${sys.aiFavor}</div>` : ''}
       </div>
     `;
+
+    if (healInfo) {
+      content += `
+        <div class="dcc-heal-effect" style="margin: 8px 0; padding: 8px 10px; background: #eafaf1; border: 1px solid #2ecc71; border-radius: 4px; color: #1e8449; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-heart-pulse" style="font-size: 18px; color: #27ae60;"></i>
+          <div style="flex: 1;">
+            <div style="font-weight: bold; font-size: 13px;">
+              ${healInfo.actualHealed > 0 ? `Healed +${healInfo.actualHealed} HP` : 'Already at Full Health'}
+              <span style="font-weight: normal; font-size: 11px; color: #27ae60;">(up to ${healInfo.barsToHeal} Health Bar slots)</span>
+            </div>
+            <div style="font-size: 11px; color: #444; margin-top: 2px;">
+              Target: <strong>Self only</strong> • Health: <strong>${healInfo.newHp} / ${healInfo.maxHp} HP</strong> (${healInfo.newPct}%)
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
     if (sys.baseDamage) {
       content += `<div style="margin-bottom: 6px; font-weight: bold; color: #c0392b; font-size: 13px;">Base Damage: ${sys.baseDamage}</div>`;
@@ -1595,7 +1679,9 @@ export class DCCActor extends Actor {
           isSpellCast: true,
           spellSuccess: true,
           manaCost,
-          remainingMana: newMana
+          remainingMana: newMana,
+          isHeal: Boolean(healInfo),
+          healInfo: healInfo || null
         }
       }
     });

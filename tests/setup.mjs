@@ -2,6 +2,7 @@ import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 import { DCC_SIZES, getSizeInfo } from '../src/data/sizes.mjs';
+import { DCC_MACROS } from '../src/data/macros.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -34,6 +35,9 @@ export class MockActor {
     }
     if (actor._preCreate) {
       await actor._preCreate(data, {}, globalThis.game?.user || { id: 'test-user' });
+    }
+    if (typeof actor.prepareData === 'function') {
+      actor.prepareData();
     }
     return actor;
   }
@@ -173,13 +177,97 @@ if (!globalThis.Item) {
   globalThis.Item = MockItem;
 }
 
+export class MockMacro {
+  constructor(data = {}) {
+    this.id = data.id || data._id || ('mock-macro-' + Math.random().toString(36).substring(2, 9));
+    this._id = this.id;
+    this.name = data.name || 'Test Macro';
+    this.type = data.type || 'script';
+    this.img = data.img || 'icons/svg/dice-target.svg';
+    this.command = data.command || '';
+    this.scope = data.scope || 'global';
+    this.ownership = structuredClone(data.ownership || { default: 2 });
+    this.flags = structuredClone(data.flags || {});
+  }
+  async update(data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('ownership.')) {
+        this.ownership[k.replace('ownership.', '')] = v;
+      } else {
+        this[k] = v;
+      }
+    }
+    return this;
+  }
+  async execute(scope = {}) {
+    const fn = new Function('window', 'game', 'ui', this.command);
+    return fn(globalThis.window, globalThis.game, globalThis.ui);
+  }
+  static async create(data) {
+    const macro = new MockMacro(data);
+    if (globalThis.game?.macros) {
+      if (Array.isArray(globalThis.game.macros)) {
+        globalThis.game.macros.push(macro);
+      } else if (typeof globalThis.game.macros.set === 'function') {
+        globalThis.game.macros.set(macro.id, macro);
+      }
+    }
+    return macro;
+  }
+}
+
+if (!globalThis.Macro) {
+  globalThis.Macro = MockMacro;
+}
+
+if (!globalThis.CONST) {
+  globalThis.CONST = {};
+}
+globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS = globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS || {
+  NONE: 0,
+  LIMITED: 1,
+  OBSERVER: 2,
+  OWNER: 3
+};
+
 const _settingsStore = new Map();
 
 if (!globalThis.game) {
   globalThis.game = {
-    user: { id: 'test-user', isGM: true, can: () => true },
+    user: {
+      id: 'test-user',
+      isGM: true,
+      can: () => true,
+      hotbar: {},
+      flags: {},
+      getFlag(scope, key) {
+        return this.flags?.[scope]?.[key];
+      },
+      async setFlag(scope, key, val) {
+        this.flags = this.flags || {};
+        this.flags[scope] = this.flags[scope] || {};
+        this.flags[scope][key] = val;
+      },
+      async assignHotbarMacro(macro, slot) {
+        this.hotbar = this.hotbar || {};
+        this.hotbar[slot] = macro ? (macro.id || macro._id) : null;
+      },
+      async update(data) {
+        for (const [k, v] of Object.entries(data)) {
+          if (k.startsWith('hotbar.')) {
+            const slot = k.replace('hotbar.', '');
+            this.hotbar = this.hotbar || {};
+            this.hotbar[slot] = v;
+          } else {
+            this[k] = v;
+          }
+        }
+        return this;
+      }
+    },
     actors: [],
     items: [],
+    macros: [],
     folders: [],
     packs: new Map(),
     settings: {
@@ -197,6 +285,31 @@ if (!globalThis.game) {
   };
 } else {
   if (!globalThis.game.folders) globalThis.game.folders = [];
+  if (!globalThis.game.macros) globalThis.game.macros = [];
+  if (!globalThis.game.user.hotbar) globalThis.game.user.hotbar = {};
+  if (!globalThis.game.user.flags) globalThis.game.user.flags = {};
+  if (!globalThis.game.user.getFlag) globalThis.game.user.getFlag = function(s, k) { return this.flags?.[s]?.[k]; };
+  if (!globalThis.game.user.setFlag) globalThis.game.user.setFlag = async function(s, k, v) {
+    this.flags = this.flags || {};
+    this.flags[s] = this.flags[s] || {};
+    this.flags[s][k] = v;
+  };
+  if (!globalThis.game.user.assignHotbarMacro) globalThis.game.user.assignHotbarMacro = async function(m, s) {
+    this.hotbar = this.hotbar || {};
+    this.hotbar[s] = m ? (m.id || m._id) : null;
+  };
+  if (!globalThis.game.user.update) globalThis.game.user.update = async function(data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('hotbar.')) {
+        const slot = k.replace('hotbar.', '');
+        this.hotbar = this.hotbar || {};
+        this.hotbar[slot] = v;
+      } else {
+        this[k] = v;
+      }
+    }
+    return this;
+  };
   if (!globalThis.game.settings) {
     globalThis.game.settings = {
       register: (module, key, options) => {
@@ -492,10 +605,13 @@ if (!globalThis.CombatTracker) {
 
 if (!globalThis.CONFIG) {
   globalThis.CONFIG = {
+    Actor: { documentClass: MockActor },
+    Item: { documentClass: MockItem },
     DCC: {
       skills: DCC_SKILLS,
       spells: DCC_SPELLS,
       buffs: DCC_BUFFS,
+      macros: DCC_MACROS,
       damageTypes: DCC_DAMAGE_TYPES,
       debuffs: DCC_DEBUFFS,
       sizes: DCC_SIZES,
@@ -505,10 +621,13 @@ if (!globalThis.CONFIG) {
     ui: { combat: MockCombatTracker }
   };
 } else {
+  globalThis.CONFIG.Actor = globalThis.CONFIG.Actor || { documentClass: MockActor };
+  globalThis.CONFIG.Item = globalThis.CONFIG.Item || { documentClass: MockItem };
   globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
   globalThis.CONFIG.DCC.skills = DCC_SKILLS;
   globalThis.CONFIG.DCC.spells = DCC_SPELLS;
   globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
+  globalThis.CONFIG.DCC.macros = DCC_MACROS;
   globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
   globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
   globalThis.CONFIG.DCC.sizes = DCC_SIZES;
@@ -516,6 +635,63 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG.Combat = globalThis.CONFIG.Combat || { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } };
   globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
   globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };
+}
+
+if (!globalThis.window) {
+  globalThis.window = globalThis;
+}
+
+if (!globalThis.Hooks) {
+  const _hooks = {};
+  globalThis.Hooks = {
+    once: (event, fn) => {
+      _hooks[event] = _hooks[event] || [];
+      _hooks[event].push({ fn, once: true });
+    },
+    on: (event, fn) => {
+      _hooks[event] = _hooks[event] || [];
+      _hooks[event].push({ fn, once: false });
+    },
+    callAll: (event, ...args) => {
+      const cbs = _hooks[event] || [];
+      for (const entry of [...cbs]) {
+        entry.fn(...args);
+        if (entry.once) {
+          const idx = _hooks[event].indexOf(entry);
+          if (idx !== -1) _hooks[event].splice(idx, 1);
+        }
+      }
+    },
+    call: (event, ...args) => {
+      globalThis.Hooks.callAll(event, ...args);
+      return true;
+    }
+  };
+}
+
+if (!globalThis.Handlebars) {
+  globalThis.Handlebars = {
+    registerHelper: () => {},
+    partials: {}
+  };
+}
+
+if (!globalThis.loadTemplates) {
+  globalThis.loadTemplates = async () => [];
+}
+
+if (!globalThis.Actors) {
+  globalThis.Actors = {
+    registerSheet: () => {},
+    unregisterSheet: () => {}
+  };
+}
+
+if (!globalThis.Items) {
+  globalThis.Items = {
+    registerSheet: () => {},
+    unregisterSheet: () => {}
+  };
 }
 
 if (!globalThis.ui) {

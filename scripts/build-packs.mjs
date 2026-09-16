@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS } from '../src/data/buffs.mjs';
+import { DCC_MACROS } from '../src/data/macros.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -199,6 +200,53 @@ async function buildBuffs() {
   console.log(`Successfully built buffs compendium at ${packDir}`);
 }
 
+// 4. Build Macros Pack
+async function buildMacros() {
+  const packDir = path.resolve(__dirname, '../packs/macros');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building macros compendium with ${DCC_MACROS.length} items...`);
+  const batch = db.batch();
+
+  for (const macro of DCC_MACROS) {
+    const doc = {
+      _id: macro._id,
+      name: macro.name,
+      type: macro.type,
+      img: macro.img,
+      command: macro.command,
+      scope: macro.scope || "global",
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 2
+      },
+      flags: macro.flags || {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion: "1.0.25",
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!macros!${macro._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built macros compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
 await buildBuffs();
+await buildMacros();

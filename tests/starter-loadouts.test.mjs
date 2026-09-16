@@ -11,6 +11,9 @@ import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
 import { DCCCrawlerCreatorApp } from '../src/apps/crawler-creator.mjs';
 
+CONFIG.Actor = { documentClass: DCCActor };
+CONFIG.Item = { documentClass: DCCItem };
+
 test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (t) => {
   await t.test('1. Starter Datasets contain required weapons, spells, and unarmed packages', () => {
     // Spells: Dirt Clod, Fire Fingers, Frost Scar, Mind Tickle, Shock Treatment, Soul Collector, Vine Porn
@@ -69,13 +72,36 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
     assert.ok(warhammerSkill, 'Warhammer skill must be embedded');
     assert.equal(warhammerSkill.system.rank, 3, 'Weapon skill must be Rank 3');
 
+    // Check weapon added to inventory and equipped
+    const warhammerGear = actor.items.find(i => i.type === 'gear' && i.name === 'Warhammer');
+    assert.ok(warhammerGear, 'Warhammer must be added to inventory as gear');
+    assert.equal(warhammerGear.system.slot, 'hands', 'Weapon slot must be hands');
+    assert.equal(warhammerGear.system.equipped, true, 'Weapon must be equipped');
+    assert.equal(warhammerGear.system.quantity, 1, 'Quantity must be 1');
+
+    // Check attack item created using equipped item
+    const warhammerAttack = actor.items.find(i => i.type === 'attack' && i.name === 'Warhammer');
+    assert.ok(warhammerAttack, 'Attack item must be created for Warhammer');
+    assert.equal(warhammerAttack.system.toHitStat, 'str');
+    assert.equal(warhammerAttack.system.toHitRank, 3);
+    assert.equal(warhammerAttack.system.damageDice, '1d10');
+    assert.equal(warhammerAttack.system.damageStat, 'str');
+    assert.equal(warhammerAttack.system.damageType, 'Bludgeoning');
+
     // Check universal Heal spell at Rank 1
     const healSpell = actor.items.find(i => i.type === 'spell' && i.name === 'Heal');
     assert.ok(healSpell, 'Heal spell must be embedded');
     assert.equal(healSpell.system.rank, 1, 'Heal spell must be Rank 1');
 
-    // Hotlist maps Heal
+    // Hotlist maps Heal and equipped Attack
     assert.equal(actor.system.hotlist?.slot1, healSpell.id, 'Slot 1 must contain Heal spell');
+    assert.equal(actor.system.hotlist?.slot2, warhammerAttack.id, 'Slot 2 must contain Warhammer attack');
+
+    // Health and Mana initialization checks
+    assert.equal(actor.system.attributes.hp.value, actor.system.attributes.hp.max, 'Current HP must equal max HP');
+    assert.equal(actor.system.attributes.hp.value, 30, 'Current HP must be 30 for CON 6');
+    assert.equal(actor.system.attributes.mana.value, actor.system.attributes.mana.max, 'Current Mana must equal max Mana');
+    assert.equal(actor.system.attributes.mana.value, 2, 'Current Mana must be 2 for INT 2');
   });
 
   await t.test('3. Starter Spell choice grants spell Rank 3, 5 Normal Mana Potions, and hotlist mapping', async () => {
@@ -107,6 +133,12 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
     assert.equal(actor.system.hotlist?.slot1, frostScar.id, 'Hotlist Slot 1 must be Frost Scar');
     assert.equal(actor.system.hotlist?.slot2, healSpell.id, 'Hotlist Slot 2 must be Heal');
     assert.equal(actor.system.hotlist?.slot3, manaPotion.id, 'Hotlist Slot 3 must be Normal Mana Potion');
+
+    // Health and Mana initialization checks
+    assert.equal(actor.system.attributes.hp.value, actor.system.attributes.hp.max, 'Current HP must equal max HP');
+    assert.equal(actor.system.attributes.hp.value, 30, 'Current HP must be 30 for CON 6');
+    assert.equal(actor.system.attributes.mana.value, actor.system.attributes.mana.max, 'Current Mana must equal max Mana');
+    assert.equal(actor.system.attributes.mana.value, 2, 'Current Mana must be 2 for INT 2');
   });
 
   await t.test('4. Starter Unarmed choice grants both H2H skill and Damage Effect at Rank 3', async () => {
@@ -223,4 +255,203 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
     assert.equal(bowSkills.length, 1, 'Should have exactly 1 Bow skill entry, not duplicate entries');
     assert.equal(bowSkills[0].system.rank, 3, 'Bow skill rank must resolve to Math.max(2, 3) = 3');
   });
+
+  await t.test('8. Casting Heal restores up to 2 bars of health to self only and spends 2 MP', async () => {
+    const crawler = new DCCActor({
+      name: 'Wounded Carl',
+      type: 'crawler',
+      system: {
+        abilities: {
+          con: { value: 10, mod: 4 }, // 4 HP per bar, 10 bars = 40 max HP
+          int: { value: 10, mod: 4 }
+        },
+        attributes: {
+          hp: { value: 20, max: 40, temp: 0, pct: 50 },
+          mana: { value: 10, max: 10, pct: 100 }
+        }
+      }
+    });
+
+    const healSpell = new DCCItem({
+      name: 'Heal',
+      type: 'spell',
+      system: {
+        rank: 1,
+        spellType: 'Heal',
+        manaCost: 2,
+        range: 'Self only',
+        baseDamage: '2 Health Bar slots',
+        description: 'Heal 2 Health Bar slots.'
+      }
+    }, crawler);
+
+    crawler.items = [healSpell];
+
+    // Cast Heal (should heal 2 bars * 4 HP/bar = 8 HP)
+    const chatMsg = await crawler.rollSpell(healSpell);
+
+    assert.equal(crawler.system.attributes.mana.value, 8, 'Mana should reduce by 2 from 10 to 8');
+    assert.equal(crawler.system.attributes.hp.value, 28, 'HP should increase by 8 from 20 to 28 (2 bars of 4 HP)');
+    assert.equal(crawler.system.attributes.hp.pct, 70, 'HP percentage should update to 70%');
+
+    const flags = chatMsg.flags?.['carl-rpg'];
+    assert.equal(flags?.isSpellCast, true);
+    assert.equal(flags?.spellSuccess, true);
+    assert.equal(flags?.isHeal, true);
+    assert.equal(flags?.healInfo?.target, 'self', 'Target must be self only');
+    assert.equal(flags?.healInfo?.barsToHeal, 2);
+    assert.equal(flags?.healInfo?.actualHealed, 8);
+    assert.equal(flags?.healInfo?.newHp, 28);
+
+    assert.ok(chatMsg.content.includes('Healed +8 HP'), 'Chat card should display actual HP healed');
+    assert.ok(chatMsg.content.includes('up to 2 Health Bar slots'), 'Chat card should state 2 Health Bar slots');
+    assert.ok(chatMsg.content.includes('Self only'), 'Chat card should indicate Self only target');
+  });
+
+  await t.test('9. Casting Heal caps at maximum HP when less than 2 bars are needed', async () => {
+    const crawler = new DCCActor({
+      name: 'Slightly Injured Carl',
+      type: 'crawler',
+      system: {
+        abilities: {
+          con: { value: 10, mod: 4 }, // 4 HP per bar, 40 max HP
+          int: { value: 10, mod: 4 }
+        },
+        attributes: {
+          hp: { value: 37, max: 40, temp: 0, pct: 93 },
+          mana: { value: 6, max: 10, pct: 60 }
+        }
+      }
+    });
+
+    const healSpell = new DCCItem({
+      name: 'Heal',
+      type: 'spell',
+      system: {
+        rank: 1,
+        spellType: 'Heal',
+        manaCost: 2,
+        range: 'Self only',
+        baseDamage: '2 Health Bar slots',
+        description: 'Heal 2 Health Bar slots.'
+      }
+    }, crawler);
+
+    // 2 bars would be 8 HP, but only 3 HP needed to reach max 40 HP
+    const chatMsg = await crawler.rollSpell(healSpell);
+
+    assert.equal(crawler.system.attributes.hp.value, 40, 'HP must cap at max HP 40');
+    assert.equal(crawler.system.attributes.hp.pct, 100, 'HP percentage should be 100%');
+    assert.equal(crawler.system.attributes.mana.value, 4, 'Mana reduced from 6 to 4');
+
+    const flags = chatMsg.flags?.['carl-rpg'];
+    assert.equal(flags?.healInfo?.actualHealed, 3, 'Actual healed must be 3 HP');
+    assert.equal(flags?.healInfo?.newHp, 40);
+  });
+
+  await t.test('10. Casting Heal at full health heals 0 HP and does not exceed max HP', async () => {
+    const crawler = new DCCActor({
+      name: 'Full Health Carl',
+      type: 'crawler',
+      system: {
+        abilities: {
+          con: { value: 6, mod: 3 }, // 3 HP per bar, 30 max HP
+          int: { value: 10, mod: 4 }
+        },
+        attributes: {
+          hp: { value: 30, max: 30, temp: 0, pct: 100 },
+          mana: { value: 5, max: 10, pct: 50 }
+        }
+      }
+    });
+
+    const healSpell = new DCCItem({
+      name: 'Heal',
+      type: 'spell',
+      system: {
+        rank: 1,
+        spellType: 'Heal',
+        manaCost: 2,
+        range: 'Self only',
+        baseDamage: '2 Health Bar slots'
+      }
+    }, crawler);
+
+    const chatMsg = await crawler.rollSpell(healSpell);
+
+    assert.equal(crawler.system.attributes.hp.value, 30, 'HP remains at 30');
+    assert.equal(crawler.system.attributes.mana.value, 3, 'Mana reduced from 5 to 3');
+
+    const flags = chatMsg.flags?.['carl-rpg'];
+    assert.equal(flags?.healInfo?.actualHealed, 0, 'Actual healed is 0');
+    assert.ok(chatMsg.content.includes('Already at Full Health'), 'Card notes already at full health');
+  });
+
+  await t.test('11. Casting Heal fails with insufficient mana and does not apply healing', async () => {
+    const crawler = new DCCActor({
+      name: 'OutOfMana Carl',
+      type: 'crawler',
+      system: {
+        abilities: { con: { value: 10, mod: 4 } },
+        attributes: {
+          hp: { value: 10, max: 40, temp: 0 },
+          mana: { value: 1, max: 10 } // needs 2 MP
+        }
+      }
+    });
+
+    const healSpell = new DCCItem({
+      name: 'Heal',
+      type: 'spell',
+      system: {
+        rank: 1,
+        spellType: 'Heal',
+        manaCost: 2,
+        range: 'Self only',
+        baseDamage: '2 Health Bar slots'
+      }
+    }, crawler);
+
+    const chatMsg = await crawler.rollSpell(healSpell);
+
+    assert.equal(crawler.system.attributes.hp.value, 10, 'HP should remain 10 on cast failure');
+    assert.equal(crawler.system.attributes.mana.value, 1, 'Mana should remain 1');
+    assert.equal(chatMsg.flags?.['carl-rpg']?.spellFailed, true);
+  });
+
+  await t.test('12. Choosing Bow equips it to hands in inventory, adds attack, and executes attack rolls', async () => {
+    const creator = new DCCCrawlerCreatorApp({
+      name: 'Robin Carl',
+      starterMode: 'weapon',
+      starterWeapon: 'Bow'
+    });
+
+    const actor = await creator.createCrawler();
+    assert.ok(actor, 'Actor should be created');
+
+    // Verify Bow gear in inventory
+    const bowGear = actor.items.find(i => i.type === 'gear' && i.name === 'Bow');
+    assert.ok(bowGear, 'Bow must exist in inventory as gear');
+    assert.equal(bowGear.system.slot, 'hands', 'Bow slot must be hands');
+    assert.equal(bowGear.system.equipped, true, 'Bow must be equipped');
+
+    // Verify Bow attack item
+    const bowAttack = actor.items.find(i => i.type === 'attack' && i.name === 'Bow');
+    assert.ok(bowAttack, 'Bow attack item must exist');
+    assert.equal(bowAttack.system.toHitStat, 'dex', 'Bow to-hit stat must be dex');
+    assert.equal(bowAttack.system.toHitRank, 3, 'Bow to-hit rank must be 3');
+    assert.equal(bowAttack.system.damageDice, '1d6', 'Bow damage dice must be 1d6');
+    assert.equal(bowAttack.system.damageType, 'Piercing', 'Bow damage type must be Piercing');
+
+    // Verify rolling the attack
+    const hitMessage = await actor.rollAttack(bowAttack, 'hit');
+    assert.ok(hitMessage, 'Attack to-hit message must be generated');
+    assert.ok(hitMessage.flavor.includes('Bow (To Hit: 1d20 + Rank 3'), 'Hit flavor should include Rank 3');
+
+    const dmgMessage = await actor.rollAttack(bowAttack, 'damage');
+    assert.ok(dmgMessage, 'Attack damage message must be generated');
+    assert.ok(dmgMessage.content.includes('Bow Damage'), 'Damage card should indicate Bow Damage');
+  });
 });
+
+

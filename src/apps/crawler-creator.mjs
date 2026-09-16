@@ -9,6 +9,8 @@ import {
   DCC_SPECIES_DATA,
   DCC_BACKGROUND_MATRICES,
   DCC_STARTER_WEAPONS,
+  DCC_STARTER_WEAPON_DEFINITIONS,
+  getStarterWeaponDefinition,
   DCC_STARTER_SPELLS,
   DCC_STARTER_UNARMED_PACKAGES,
   validateStatArray,
@@ -18,6 +20,7 @@ import {
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { DCC_SKILLS } from '../data/skills.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
+import { getDCCStatModifier } from '../documents/actor.mjs';
 
 const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
 
@@ -240,6 +243,10 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
     const allTiersValid = tiers.every(t => t.isValid);
     const canCreate = statValidation.valid && allTiersValid && Boolean(this.name?.trim());
 
+    const conMod = getDCCStatModifier(this.stats.con);
+    const startingHp = 10 * conMod;
+    const startingMana = Number(this.stats.int) || 0;
+
     return {
       name: this.name,
       crawlerNumber: this.crawlerNumber,
@@ -256,6 +263,8 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       standardArray: DCC_STANDARD_ARRAY,
       statValidation,
       availableNumbers,
+      startingHp,
+      startingMana,
       tiers,
       starterMode: this.starterMode,
       isStarterWeapon: this.starterMode === 'weapon',
@@ -545,6 +554,65 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       });
     }
 
+    // If starterMode === 'weapon': add the weapon to inventory (gear), equip it, and add an attack using it
+    if (this.starterMode === 'weapon') {
+      const wDef = getStarterWeaponDefinition(this.starterWeapon);
+
+      // 1. Add weapon to inventory and equip it
+      itemPayloads.push({
+        name: this.starterWeapon,
+        type: 'gear',
+        img: wDef.img || 'icons/svg/sword.svg',
+        system: {
+          slot: 'hands',
+          quantity: 1,
+          equipped: true,
+          drBonus: 0,
+          evadeBonus: 0,
+          abilityModifiers: {
+            str: { value: 0, type: 'flat' },
+            int: { value: 0, type: 'flat' },
+            con: { value: 0, type: 'flat' },
+            dex: { value: 0, type: 'flat' },
+            cha: { value: 0, type: 'flat' }
+          },
+          skillModifiers: [],
+          damageParts: [
+            {
+              type: wDef.damageType,
+              dice: wDef.damageDice,
+              stat: wDef.damageStat,
+              effects: wDef.effects || ''
+            }
+          ],
+          notes: wDef.effects || `Equipped weapon: ${this.starterWeapon}`
+        }
+      });
+
+      // 2. Add an attack using the equipped item
+      itemPayloads.push({
+        name: this.starterWeapon,
+        type: 'attack',
+        img: wDef.img || 'icons/svg/sword.svg',
+        system: {
+          toHitStat: wDef.toHitStat,
+          toHitRank: 3,
+          damageDice: wDef.damageDice,
+          damageStat: wDef.damageStat,
+          damageType: wDef.damageType,
+          damageParts: [
+            {
+              type: wDef.damageType,
+              dice: wDef.damageDice,
+              stat: wDef.damageStat,
+              effects: wDef.effects || ''
+            }
+          ],
+          effects: wDef.effects || ''
+        }
+      });
+    }
+
     // If starterMode === 'spell': grant starter spell at Rank 3 and 5 Normal Mana Potions
     if (this.starterMode === 'spell') {
       const spellCanonical = officialSpells.find(sp => sp.name.toLowerCase().trim() === this.starterSpell.toLowerCase().trim());
@@ -581,6 +649,10 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       });
     }
 
+    const conMod = getDCCStatModifier(this.stats.con);
+    const maxHp = 10 * conMod;
+    const maxMana = Number(this.stats.int) || 0;
+
     const actorPayload = {
       name: this.name.trim() || 'New Crawler',
       type: 'crawler',
@@ -598,7 +670,19 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
         },
         attributes: {
           aiFavor: speciesData.aiFavor,
-          size: this.size || 'Medium'
+          size: this.size || 'Medium',
+          hp: {
+            value: maxHp,
+            max: maxHp,
+            temp: 0,
+            buffTemp: 0,
+            pct: 100
+          },
+          mana: {
+            value: maxMana,
+            max: maxMana,
+            pct: 100
+          }
         },
         details: {
           race: speciesData.label,
@@ -623,6 +707,10 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
           if (spellItem) hotlistUpdates['system.hotlist.slot1'] = spellItem.id;
           if (healItem) hotlistUpdates['system.hotlist.slot2'] = healItem.id;
           if (potionItem) hotlistUpdates['system.hotlist.slot3'] = potionItem.id;
+        } else if (this.starterMode === 'weapon') {
+          const attackItem = actor.items.find(i => i.type === 'attack' && i.name.toLowerCase().trim() === this.starterWeapon.toLowerCase().trim());
+          if (healItem) hotlistUpdates['system.hotlist.slot1'] = healItem.id;
+          if (attackItem) hotlistUpdates['system.hotlist.slot2'] = attackItem.id;
         } else {
           if (healItem) hotlistUpdates['system.hotlist.slot1'] = healItem.id;
         }

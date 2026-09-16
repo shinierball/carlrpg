@@ -62,7 +62,8 @@ export class DCCItem extends Item {
       const baseRank = Number(this.system.rank) || 0;
       const itemBonus = Number(this.system.itemBonus) || 0;
       const boonBonus = Number(this.system.boonBonus) || 0;
-      const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus);
+      const typeBonus = Number(this.system.typeBonus) || 0;
+      const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus + typeBonus);
       this.system.modifiedRank = modifiedRank;
       this.modifiedRank = modifiedRank;
       this.effectiveRank = modifiedRank;
@@ -204,5 +205,10 @@ export class DCCItem extends Item {
     return ChatMessage.create({
       content
     });
+  }
+
+  get skillType() {
+    if (this.type !== 'skill') return '';
+    return this.system?.skillType || this.system?.type || 'Utility';
   }
 }

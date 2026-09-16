@@ -46,10 +46,13 @@ async function buildSkills() {
       system: {
         rank: skill.system.rank ?? 0,
         stat: skill.system.stat,
+        skillType: skill.system.skillType || skill.system.type || "Utility",
+        type: skill.system.type || skill.system.skillType || "Utility",
+        typeBonus: 0,
         checkType: skill.system.checkType,
         category: skill.system.category || "Utility",
         notes: skill.system.notes,
-        upgrades: "",
+        upgrades: skill.system.upgrades || "",
         checked: false
       },
       effects: [],

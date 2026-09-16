@@ -129,6 +129,11 @@
               </td>
               <td>
                 <span class="dcc-sm-category-tag">{{skill.system.category}}</span>
+                {{#if (or skill.system.skillType skill.system.type)}}
+                  <span class="dcc-badge" style="background: #34495e; color: #fff; font-size: 8px; padding: 1px 3px; border-radius: 2px; margin-top: 2px; display: inline-block;" title="Skill Type: {{or skill.system.skillType skill.system.type}}">
+                    {{upper (or skill.system.skillType skill.system.type)}}
+                  </span>
+                {{/if}}
               </td>
               <td>
                 <span style="font-size: 11px;">{{skill.system.checkType}}</span>

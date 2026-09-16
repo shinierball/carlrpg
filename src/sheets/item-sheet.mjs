@@ -29,7 +29,7 @@ export class DCCItemSheet extends ItemSheet {
     const pack = game.packs?.get('carl-rpg.skills');
     if (pack) {
       try {
-        const index = await pack.getIndex({ fields: ['system.stat', 'system.checkType', 'system.category', 'system.notes', 'img'] });
+        const index = await pack.getIndex({ fields: ['system.stat', 'system.checkType', 'system.category', 'system.skillType', 'system.type', 'system.notes', 'img'] });
         for (const entry of index) {
           skillsMap.set(entry.name.toLowerCase().trim(), {
             id: entry._id,
@@ -37,6 +37,8 @@ export class DCCItemSheet extends ItemSheet {
             img: entry.img || 'icons/svg/book.svg',
             system: {
               stat: entry.system?.stat || 'str',
+              skillType: entry.system?.skillType || entry.system?.type || 'Utility',
+              type: entry.system?.type || entry.system?.skillType || 'Utility',
               checkType: entry.system?.checkType || 'Stat Check',
               category: entry.system?.category || 'Utility',
               notes: entry.system?.notes || ''
@@ -59,6 +61,8 @@ export class DCCItemSheet extends ItemSheet {
             img: s.img || 'icons/svg/book.svg',
             system: {
               stat: s.system?.stat || 'str',
+              skillType: s.system?.skillType || s.system?.type || 'Utility',
+              type: s.system?.type || s.system?.skillType || 'Utility',
               checkType: s.system?.checkType || 'Stat Check',
               category: s.system?.category || 'Utility',
               notes: s.system?.notes || ''
@@ -80,6 +84,8 @@ export class DCCItemSheet extends ItemSheet {
               img: item.img || 'icons/svg/book.svg',
               system: {
                 stat: item.system?.stat || 'str',
+                skillType: item.system?.skillType || item.system?.type || 'Utility',
+                type: item.system?.type || item.system?.skillType || 'Utility',
                 checkType: item.system?.checkType || 'Stat Check',
                 category: item.system?.category || 'General',
                 notes: item.system?.notes || ''

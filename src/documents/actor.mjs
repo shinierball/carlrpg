@@ -31,6 +31,30 @@ export function getDCCStatModifier(statValue) {
 }
 
 /**
+ * Mapping of generic weapon group skill names (lowercase) to the skill type they buff.
+ */
+export const DCC_WEAPON_GROUP_MAP = {
+  'edge': 'Edge',
+  'edged': 'Edge',
+  'edged weapons': 'Edge',
+  'edge weapons': 'Edge',
+  'bashing': 'Bashing',
+  'blunt': 'Bashing',
+  'blunt weapons': 'Bashing',
+  'bashing weapons': 'Bashing',
+  'reach': 'Reach',
+  'reach weapons': 'Reach',
+  'ranged': 'Ranged',
+  'ranged weapons': 'Ranged',
+  'strike': 'Strike',
+  'strike weapons': 'Strike',
+  'hand to hand': 'Hand to Hand',
+  'hand-to-hand': 'Hand to Hand',
+  'hand to hand combat': 'Hand to Hand',
+  'hand-to-hand combat': 'Hand to Hand'
+};
+
+/**
  * Calculate required cumulative XP to reach the next level.
  * Level 1 -> 1,000 XP (reaches Level 2)
  * Level 2 -> 2,500 XP (reaches Level 3)
@@ -326,21 +350,74 @@ export class DCCActor extends Actor {
 
     if (this.items) {
       const skills = this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() ?? this.items).filter(i => i.type === 'skill');
+
+      // First Pass: Calculate base, item, and boon ranks for all skills,
+      // and collect generic weapon group bonuses from trained group skills.
+      const genericTypeBonuses = new Map(); // e.g. 'Edge' -> { bonus: 0, sources: [] }
+
       for (const item of skills) {
         const norm = item.name.toLowerCase().trim();
-        const baseRank = Number(item.system.rank) || 0;
+        const baseRank = Number(item.system?.rank) || 0;
         const gearData = gearSkillBonuses.get(norm);
         const itemBonus = gearData ? gearData.bonus : 0;
-        const boonBonus = Number(item.system.boonBonus) || 0;
-        const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus);
+        const boonBonus = Number(item.system?.boonBonus) || 0;
+        const selfRank = Math.max(0, baseRank + itemBonus + boonBonus);
 
-        const stat = item.system.stat || 'str';
+        const groupType = DCC_WEAPON_GROUP_MAP[norm];
+        if (groupType && selfRank > 0) {
+          if (!genericTypeBonuses.has(groupType)) {
+            genericTypeBonuses.set(groupType, { bonus: 0, sources: [] });
+          }
+          const entry = genericTypeBonuses.get(groupType);
+          entry.bonus += selfRank;
+          entry.sources.push(`${item.name} (+${selfRank})`);
+        }
+      }
+
+      // Also incorporate gear modifiers that reference a weapon group or type directly
+      // when the actor does not own that skill document
+      const ownedSkillNorms = new Set(skills.map(s => s.name.toLowerCase().trim()));
+      for (const [norm, data] of gearSkillBonuses.entries()) {
+        const groupType = DCC_WEAPON_GROUP_MAP[norm];
+        if (groupType && !ownedSkillNorms.has(norm) && data.bonus > 0) {
+          if (!genericTypeBonuses.has(groupType)) {
+            genericTypeBonuses.set(groupType, { bonus: 0, sources: [] });
+          }
+          const entry = genericTypeBonuses.get(groupType);
+          entry.bonus += data.bonus;
+          entry.sources.push(...data.sources);
+        }
+      }
+
+      // Second Pass: Apply type bonuses to member skills
+      for (const item of skills) {
+        const norm = item.name.toLowerCase().trim();
+        const isGroupSkill = Boolean(DCC_WEAPON_GROUP_MAP[norm]);
+        const skillType = item.system?.skillType || item.system?.type || '';
+
+        let typeBonus = 0;
+        let typeSources = '';
+
+        if (!isGroupSkill && skillType && genericTypeBonuses.has(skillType)) {
+          const tData = genericTypeBonuses.get(skillType);
+          typeBonus = tData.bonus;
+          typeSources = tData.sources.join(', ');
+        }
+
+        const baseRank = Number(item.system?.rank) || 0;
+        const gearData = gearSkillBonuses.get(norm);
+        const itemBonus = gearData ? gearData.bonus : 0;
+        const boonBonus = Number(item.system?.boonBonus) || 0;
+        const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus + typeBonus);
+
+        const stat = item.system?.stat || 'str';
         const statMod = system.abilities?.[stat]?.mod ?? 0;
         const totalSkill = modifiedRank + statMod;
 
         // Store on system
         item.system.itemBonus = itemBonus;
         item.system.boonBonus = boonBonus;
+        item.system.typeBonus = typeBonus;
         item.system.modifiedRank = modifiedRank;
         item.system.totalSkill = totalSkill;
         item.system.statMod = statMod;
@@ -349,6 +426,7 @@ export class DCCActor extends Actor {
         item.baseRank = baseRank;
         item.itemBonus = itemBonus;
         item.boonBonus = boonBonus;
+        item.typeBonus = typeBonus;
         item.modifiedRank = modifiedRank;
         item.effectiveRank = modifiedRank;
         item.statMod = statMod;
@@ -356,6 +434,7 @@ export class DCCActor extends Actor {
         item.totalSkill = totalSkill;
         item.totalSkillStr = totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`;
         item.itemSources = gearData ? gearData.sources.join(', ') : '';
+        item.typeSources = typeSources;
       }
     }
 
@@ -1112,6 +1191,7 @@ export class DCCActor extends Actor {
     const baseRank = Number(sys.rank) || 0;
     const itemBonus = Number(skillItem.itemBonus ?? sys.itemBonus) || 0;
     const boonBonus = Number(skillItem.boonBonus ?? sys.boonBonus) || 0;
+    const typeBonus = Number(skillItem.typeBonus ?? sys.typeBonus) || 0;
     const totalSkill = modifiedRank + statMod;
     const checkType = (sys.checkType || '').toLowerCase();
 
@@ -1122,7 +1202,7 @@ export class DCCActor extends Actor {
         content: `<div class="dcc-chat-card">
           <h4><strong>${this.name}</strong>: ${skillItem.name}</h4>
           <p><em>Passive Skill (No roll required)</em></p>
-          <p><strong>Modified Rank:</strong> ${modifiedRank} (Base ${baseRank}${itemBonus ? `, Items +${itemBonus}` : ''}${boonBonus ? `, Boons +${boonBonus}` : ''})</p>
+          <p><strong>Modified Rank:</strong> ${modifiedRank} (Base ${baseRank}${itemBonus ? `, Items +${itemBonus}` : ''}${typeBonus ? `, Type +${typeBonus}` : ''}${boonBonus ? `, Boons +${boonBonus}` : ''})</p>
           <p>${sys.notes || 'Static bonus active.'}</p>
         </div>`
       });
@@ -1158,9 +1238,10 @@ export class DCCActor extends Actor {
 
     // Trained Check (Modified Rank > 0): 1d20 + Total Skill (Modified Rank + Stat Mod)
     const breakdown = [`Rank ${modifiedRank}`];
-    if (itemBonus > 0 || boonBonus > 0) {
+    if (itemBonus > 0 || boonBonus > 0 || typeBonus > 0) {
       const parts = [`Base ${baseRank}`];
       if (itemBonus > 0) parts.push(`Items +${itemBonus}`);
+      if (typeBonus > 0) parts.push(`Type +${typeBonus}`);
       if (boonBonus > 0) parts.push(`Boons +${boonBonus}`);
       breakdown[0] += ` [${parts.join(', ')}]`;
     }

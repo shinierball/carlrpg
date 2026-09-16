@@ -1,6 +1,7 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
+import { DCC_WEAPON_GROUP_MAP } from '../documents/actor.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -165,17 +166,63 @@ export class DCCCrawlerSheet extends ActorSheet {
       }
     }
 
-    // Apply gear bonuses to actor's existing skills
-    const ownedSkillNames = new Set();
+    // Calculate generic weapon group bonuses and apply to actor skills
+    const ownedSkillNames = new Set(context.skills.map(s => s.name.toLowerCase().trim()));
+    const genericTypeBonuses = new Map(); // e.g. 'Edge' -> { bonus: 0, sources: [] }
+
+    // First pass: collect bonuses from owned generic weapon group skills
     for (const skill of context.skills) {
       const norm = skill.name.toLowerCase().trim();
-      ownedSkillNames.add(norm);
+      const baseRank = Number(skill.system?.rank) || 0;
+      const gearData = gearSkillBonuses.get(norm);
+      const itemBonus = gearData ? gearData.bonus : 0;
+      const boonBonus = Number(skill.system?.boonBonus) || 0;
+      const selfRank = Math.max(0, baseRank + itemBonus + boonBonus);
+
+      const groupType = DCC_WEAPON_GROUP_MAP[norm];
+      if (groupType && selfRank > 0) {
+        if (!genericTypeBonuses.has(groupType)) {
+          genericTypeBonuses.set(groupType, { bonus: 0, sources: [] });
+        }
+        const entry = genericTypeBonuses.get(groupType);
+        entry.bonus += selfRank;
+        entry.sources.push(`${skill.name} (+${selfRank})`);
+      }
+    }
+
+    // Incorporate gear modifiers referencing a weapon group/type directly when not owned
+    for (const [norm, data] of gearSkillBonuses.entries()) {
+      const groupType = DCC_WEAPON_GROUP_MAP[norm];
+      if (groupType && !ownedSkillNames.has(norm) && data.bonus > 0) {
+        if (!genericTypeBonuses.has(groupType)) {
+          genericTypeBonuses.set(groupType, { bonus: 0, sources: [] });
+        }
+        const entry = genericTypeBonuses.get(groupType);
+        entry.bonus += data.bonus;
+        entry.sources.push(...data.sources);
+      }
+    }
+
+    // Second pass: apply item, boon, and type bonuses to existing skills
+    for (const skill of context.skills) {
+      const norm = skill.name.toLowerCase().trim();
+      const isGroupSkill = Boolean(DCC_WEAPON_GROUP_MAP[norm]);
+      const skillType = skill.system?.skillType || skill.system?.type || '';
+
+      let typeBonus = 0;
+      let typeSources = '';
+
+      if (!isGroupSkill && skillType && genericTypeBonuses.has(skillType)) {
+        const tData = genericTypeBonuses.get(skillType);
+        typeBonus = tData.bonus;
+        typeSources = tData.sources.join(', ');
+      }
 
       const baseRank = Number(skill.system?.rank) || 0;
       const gearData = gearSkillBonuses.get(norm);
       const itemBonus = gearData ? gearData.bonus : 0;
       const boonBonus = Number(skill.system?.boonBonus) || 0;
-      const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus);
+      const modifiedRank = Math.max(0, baseRank + itemBonus + boonBonus + typeBonus);
 
       const stat = skill.system?.stat || 'str';
       const mod = context.system.abilities?.[stat]?.mod ?? 0;
@@ -184,6 +231,7 @@ export class DCCCrawlerSheet extends ActorSheet {
       skill.baseRank = baseRank;
       skill.itemBonus = itemBonus;
       skill.boonBonus = boonBonus;
+      skill.typeBonus = typeBonus;
       skill.modifiedRank = modifiedRank;
       skill.effectiveRank = modifiedRank;
       skill.statMod = mod;
@@ -191,10 +239,12 @@ export class DCCCrawlerSheet extends ActorSheet {
       skill.totalSkill = totalSkill;
       skill.totalSkillStr = totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`;
       skill.itemSources = gearData ? gearData.sources.join(', ') : '';
+      skill.typeSources = typeSources;
 
       if (skill.system) {
         skill.system.itemBonus = itemBonus;
         skill.system.boonBonus = boonBonus;
+        skill.system.typeBonus = typeBonus;
         skill.system.modifiedRank = modifiedRank;
         skill.system.totalSkill = totalSkill;
         skill.system.statMod = mod;
@@ -209,7 +259,19 @@ export class DCCCrawlerSheet extends ActorSheet {
         const grantedId = `granted-${norm.replace(/\s+/g, '-')}`;
         const stat = official ? official.system.stat : 'str';
         const mod = context.system.abilities?.[stat]?.mod ?? 0;
-        const totalSkill = data.bonus + mod;
+        const skillType = official ? (official.system?.skillType || official.system?.type || 'Utility') : 'Combat';
+        const isGroupSkill = Boolean(DCC_WEAPON_GROUP_MAP[norm]);
+
+        let typeBonus = 0;
+        let typeSources = '';
+        if (!isGroupSkill && skillType && genericTypeBonuses.has(skillType)) {
+          const tData = genericTypeBonuses.get(skillType);
+          typeBonus = tData.bonus;
+          typeSources = tData.sources.join(', ');
+        }
+
+        const modifiedRank = data.bonus + typeBonus;
+        const totalSkill = modifiedRank + mod;
 
         const grantedSkill = {
           id: grantedId,
@@ -221,20 +283,25 @@ export class DCCCrawlerSheet extends ActorSheet {
           baseRank: 0,
           itemBonus: data.bonus,
           boonBonus: 0,
-          modifiedRank: data.bonus,
-          effectiveRank: data.bonus,
+          typeBonus: typeBonus,
+          modifiedRank: modifiedRank,
+          effectiveRank: modifiedRank,
           statMod: mod,
           statModStr: mod >= 0 ? `+${mod}` : `${mod}`,
           totalSkill: totalSkill,
           totalSkillStr: totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`,
           itemSources: data.sources.join(', '),
+          typeSources: typeSources,
           system: {
             rank: 0,
             itemBonus: data.bonus,
             boonBonus: 0,
-            modifiedRank: data.bonus,
+            typeBonus: typeBonus,
+            modifiedRank: modifiedRank,
             totalSkill: totalSkill,
             stat: stat,
+            skillType: skillType,
+            type: skillType,
             checkType: official ? official.system.checkType : 'Stat Check',
             category: official ? (official.system.category || 'Utility') : 'Combat',
             notes: `Granted by ${data.sources.join(', ')}`,

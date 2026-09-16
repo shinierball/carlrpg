@@ -18,9 +18,9 @@
         <tr>
           <th style="width: 22%;">Skill Name</th>
           <th style="width: 7%; text-align: center;" title="Base Trained Rank">Base</th>
-          <th style="width: 12%; text-align: center;" title="Bonuses from equipped gear and boons">Item / Boon</th>
-          <th style="width: 9%; text-align: center;" title="Calculated rank after boons and items">Mod Rank</th>
-          <th style="width: 12%;">Stat & Mod</th>
+          <th style="width: 14%; text-align: center;" title="Bonuses from equipped gear, generic weapon groups, and boons">Item / Group / Boon</th>
+          <th style="width: 8%; text-align: center;" title="Calculated rank after boons, items, and weapon group bonuses">Mod Rank</th>
+          <th style="width: 11%;">Stat & Mod</th>
           <th style="width: 9%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
           <th style="width: 11%;">Check Type</th>
           <th style="width: 10%;">Notes & Upgrades</th>
@@ -39,6 +39,11 @@
                 {{else}}
                   <input class="dcc-field-input item-inline-edit" type="text" data-field="name" value="{{skill.name}}" style="font-weight: bold; flex: 1;" />
                 {{/if}}
+                {{#if (or skill.system.skillType skill.system.type)}}
+                  <span class="dcc-badge" style="background: #34495e; color: #ecf0f1; font-size: 8px; padding: 1px 3px; border-radius: 2px;" title="Skill Type: {{or skill.system.skillType skill.system.type}}">
+                    {{upper (or skill.system.skillType skill.system.type)}}
+                  </span>
+                {{/if}}
               </div>
             </td>
             <td style="text-align: center;">
@@ -55,18 +60,23 @@
                     <i class="fa-solid fa-shield-halved"></i> +{{skill.itemBonus}}
                   </span>
                 {{/if}}
+                {{#if skill.typeBonus}}
+                  <span class="dcc-badge" style="background: #2980b9; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 2px; font-weight: bold;" title="Weapon Group / Type: +{{skill.typeBonus}} ({{skill.typeSources}})">
+                    <i class="fa-solid fa-layer-group"></i> +{{skill.typeBonus}}
+                  </span>
+                {{/if}}
                 {{#if skill.boonBonus}}
                   <span class="dcc-badge" style="background: #8e44ad; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 2px; font-weight: bold;" title="Boon / Deity Bonus: +{{skill.boonBonus}}">
                     <i class="fa-solid fa-sparkles"></i> +{{skill.boonBonus}}
                   </span>
                 {{/if}}
-                {{#unless (or skill.itemBonus skill.boonBonus)}}
+                {{#unless (or skill.itemBonus skill.typeBonus skill.boonBonus)}}
                   <span style="color: #bbb; font-size: 11px;">—</span>
                 {{/unless}}
               </div>
             </td>
             <td style="text-align: center;">
-              <span class="dcc-stat-input" style="display: inline-block; width: 34px; text-align: center; font-weight: 800; font-size: 12px; background: #fff8e7; color: #c0392b; border: 1.5px solid #d32f2f; border-radius: 3px; line-height: 18px;" title="Modified Rank: {{skill.modifiedRank}} (Base {{skill.baseRank}} + Items {{skill.itemBonus}} + Boons {{skill.boonBonus}})">
+              <span class="dcc-stat-input" style="display: inline-block; width: 34px; text-align: center; font-weight: 800; font-size: 12px; background: #fff8e7; color: #c0392b; border: 1.5px solid #d32f2f; border-radius: 3px; line-height: 18px;" title="Modified Rank: {{skill.modifiedRank}} (Base {{skill.baseRank}} + Items {{skill.itemBonus}} + Group {{skill.typeBonus}} + Boons {{skill.boonBonus}})">
                 {{skill.modifiedRank}}
               </span>
             </td>

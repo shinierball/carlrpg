@@ -12,8 +12,24 @@
     <input class="dcc-field-input" type="number" name="system.itemBonus" value="{{system.itemBonus}}" placeholder="0" readonly title="Calculated from equipped gear" />
   </div>
   <div class="dcc-field-group small">
+    <span class="dcc-field-label">Type Bonus</span>
+    <input class="dcc-field-input" type="number" name="system.typeBonus" value="{{system.typeBonus}}" placeholder="0" readonly title="Calculated from generic weapon group skills or group gear modifiers" />
+  </div>
+  <div class="dcc-field-group small">
     <span class="dcc-field-label">Modified Rank</span>
-    <input class="dcc-field-input" type="number" value="{{system.modifiedRank}}" readonly title="Base + Boon + Item Bonus" style="font-weight: bold; background: #fff8e7; color: #c0392b;" />
+    <input class="dcc-field-input" type="number" value="{{system.modifiedRank}}" readonly title="Base + Boon + Item + Type Bonus" style="font-weight: bold; background: #fff8e7; color: #c0392b;" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Skill Type</span>
+    <select name="system.skillType" class="dcc-field-input">
+      <option value="Edge" {{#if (eq (or system.skillType system.type) "Edge")}}selected{{/if}}>Edge</option>
+      <option value="Bashing" {{#if (eq (or system.skillType system.type) "Bashing")}}selected{{/if}}>Bashing</option>
+      <option value="Reach" {{#if (eq (or system.skillType system.type) "Reach")}}selected{{/if}}>Reach</option>
+      <option value="Ranged" {{#if (eq (or system.skillType system.type) "Ranged")}}selected{{/if}}>Ranged</option>
+      <option value="Strike" {{#if (eq (or system.skillType system.type) "Strike")}}selected{{/if}}>Strike</option>
+      <option value="Hand to Hand" {{#if (eq (or system.skillType system.type) "Hand to Hand")}}selected{{/if}}>Hand to Hand</option>
+      <option value="Utility" {{#if (eq (or system.skillType system.type) "Utility")}}selected{{/if}}>Utility</option>
+    </select>
   </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label">Stat</span>

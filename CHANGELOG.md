@@ -1,3 +1,24 @@
+## 1.0.17
+
+### Skill Compendium Overhaul & Generic Weapon Group Mastery
+
+- **Official Skills Compendium Overhaul**:
+  - Completely updated `DCC_SKILLS` compendium dataset with the full canonical ruleset from `skills.txt` (121 skills across Strike, Bashing, Edge, Hand to Hand, Hand-to-Hand Damage Effects, Ranged, Reach, and Utility skills).
+  - Prebuilt LevelDB compendium pack in `packs/skills`.
+- **Skill Types & Weapon Groups**:
+  - Every skill item now includes an explicit `skillType` / `type` (`Edge`, `Bashing`, `Reach`, `Ranged`, `Strike`, `Hand to Hand`, `Utility`).
+  - Added generic weapon mastery skills: **Edged Weapons**, **Blunt Weapons**, **Reach Weapons**, **Ranged Weapons**, and **Strike Weapons**.
+- **Automated Cascading Weapon Group Bonuses**:
+  - Trained generic group skills automatically grant their rank bonus to all member weapon skills of that type (e.g. *Edged Weapons* Rank 2 gives +2 to *Axe*, *Dagger*, *Longsword*, and *Rapier*).
+  - Equipped gear modifiers referencing weapon types or generic group skills (e.g. `+2 Edged Weapons` or `+2 Edge`) automatically apply to all member skills of that type.
+  - Stacking calculation: $\text{Modified Rank} = \max(0, \text{Base} + \text{Item} + \text{Boon} + \text{Type Bonus})$.
+  - Group bonuses prevent recursive self-buffing on the generic mastery skill itself.
+- **UI & Character Sheet Enhancements**:
+  - Skills table on Page 3 displays color-coded skill type badges (`[EDGE]`, `[BASHING]`, `[REACH]`, `[RANGED]`, `[STRIKE]`, `[HAND TO HAND]`, `[UTILITY]`).
+  - Expanded Item / Group / Boon column displaying active `typeBonus` badges with source tooltips.
+  - Skill item sheet partial (`templates/items/parts/skill.hbs`) supports selecting and editing `Skill Type` and viewing `Type Bonus`.
+  - Skill Manager (`DCCSkillManager`) displays type badges and searches across skill types.
+
 ## 1.0.16
 
 ### Item Sheet Decomposition, Debuff Management & Dedicated Spell/Condition Browsers

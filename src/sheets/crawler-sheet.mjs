@@ -2,6 +2,7 @@ import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCC_WEAPON_GROUP_MAP } from '../documents/actor.mjs';
+import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -76,6 +77,17 @@ export class DCCCrawlerSheet extends ActorSheet {
 
     context.system = actorData.system;
     context.flags = actorData.flags;
+
+    // Prepare creature size options
+    const currentSize = context.system.attributes?.size ?? 'Medium';
+    const currentSizeInfo = getSizeInfo(currentSize);
+    context.currentSizeInfo = currentSizeInfo;
+    context.sizeOptions = (CONFIG.DCC?.sizes || DCC_SIZES).map(s => ({
+      size: s.size,
+      name: s.name,
+      label: s.label,
+      selected: s.size === currentSizeInfo.size
+    }));
 
     // Categorize embedded items
     context.attacks = [];
@@ -991,7 +1003,9 @@ export class DCCCrawlerSheet extends ActorSheet {
         (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
       if (!item) return;
 
-      if (typeof item.roll === 'function') {
+      if (typeof item.useLoot === 'function') {
+        await item.useLoot();
+      } else if (typeof item.roll === 'function') {
         await item.roll();
       } else {
         const sys = item.system || {};
@@ -1012,6 +1026,22 @@ export class DCCCrawlerSheet extends ActorSheet {
             </div>
           `
         });
+      }
+    });
+
+    // Inventory Table Action: Use Consumable Item
+    html.find('.item-use').click(async ev => {
+      ev.preventDefault();
+      const tr = $(ev.currentTarget).closest('[data-item-id]');
+      const itemId = tr.data('itemId');
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+      if (!item) return;
+
+      if (typeof item.useLoot === 'function') {
+        await item.useLoot();
+      } else if (typeof item.roll === 'function') {
+        await item.roll();
       }
     });
   }

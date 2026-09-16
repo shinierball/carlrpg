@@ -10,9 +10,12 @@ import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
+import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
+import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from './data/crawler-creation.mjs';
+import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
@@ -30,7 +33,8 @@ Hooks.once('init', async function() {
     DCCCombatTracker,
     DCCCombatArchiveApp,
     DCCSessionEngine,
-    DCCSessionManagerApp
+    DCCSessionManagerApp,
+    DCCCrawlerCreatorApp
   };
 
   CONFIG.DCC = {
@@ -40,7 +44,14 @@ Hooks.once('init', async function() {
     damageTypes: DCC_DAMAGE_TYPES,
     debuffs: DCC_DEBUFFS,
     outcomes: DCC_ROLL_OUTCOMES,
-    outcomeConfig: DCC_OUTCOME_CONFIG
+    outcomeConfig: DCC_OUTCOME_CONFIG,
+    sizes: DCC_SIZES,
+    getSizeInfo,
+    crawlerCreation: {
+      standardArray: DCC_STANDARD_ARRAY,
+      species: DCC_SPECIES_DATA,
+      matrices: DCC_BACKGROUND_MATRICES
+    }
   };
 
   // Register document classes
@@ -133,7 +144,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/combat-metrics.hbs',
     'systems/carl-rpg/templates/apps/combat-tracker.hbs',
     'systems/carl-rpg/templates/apps/combat-archive.hbs',
-    'systems/carl-rpg/templates/apps/session-manager.hbs'
+    'systems/carl-rpg/templates/apps/session-manager.hbs',
+    'systems/carl-rpg/templates/apps/crawler-creator.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -149,7 +161,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp) {
           app.render(false);
         }
       }
@@ -173,9 +185,12 @@ Hooks.once('init', async function() {
     openSessionManager(options = {}) {
       return new DCCSessionManagerApp(options).render(true);
     },
+    openCrawlerCreator(options = {}) {
+      return new DCCCrawlerCreatorApp(options).render(true);
+    },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp) {
           app.render(false);
         }
       }
@@ -208,26 +223,88 @@ Hooks.on('renderItemDirectory', (app, html) => {
   }
 });
 
-// Hook into the Foundry Actors Directory sidebar to add a top-level Party Progression & Session Manager button
+// Helper function to inject New Crawler and Session Manager buttons into the Actors Directory
+function injectActorDirectoryButtons(app, html) {
+  const $html = (html instanceof jQuery) ? html : $(html ?? app?.element);
+  if (!$html || !$html.length) return;
+
+  // 1. New Crawler Button next to default Create Actor button inside .header-actions
+  if (!$html.find('.dcc-create-crawler-btn-sidebar').length) {
+    const crawlerBtn = $(`
+      <button type="button" class="create-entry dcc-create-crawler-btn-sidebar" title="Open Crawler Induction Terminal">
+        <i class="fa-solid fa-skull-crossbones"></i> New Crawler
+      </button>
+    `);
+
+    crawlerBtn.on('click', ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      new DCCCrawlerCreatorApp().render(true);
+    });
+
+    const headerActions = $html.find('.header-actions, .action-buttons, header.directory-header .action-buttons');
+    if (headerActions.length) {
+      const createActorBtn = headerActions.find('.create-document, .create-entry, [data-action="createEntry"], [data-action="createDocument"], button:first-child');
+      if (createActorBtn.length) {
+        createActorBtn.after(crawlerBtn);
+      } else {
+        headerActions.prepend(crawlerBtn);
+      }
+    } else {
+      const dirHeader = $html.find('.directory-header');
+      if (dirHeader.length) {
+        const actionsRow = $('<div class="header-actions action-buttons flexrow" style="display: flex; gap: 4px; margin-bottom: 4px;"></div>');
+        actionsRow.append(crawlerBtn);
+        dirHeader.prepend(actionsRow);
+      } else {
+        $html.find('.directory-list').before(crawlerBtn);
+      }
+    }
+  }
+
+  // 2. Party Progression & Session Hub button
+  if (!$html.find('.dcc-open-session-manager-btn').length) {
+    const btn = $(`
+      <button type="button" class="dcc-open-session-manager-btn" style="width: 100%; margin: 4px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+        <i class="fa-solid fa-users-gear" style="color: #f1c40f;"></i> Party Progression & Session Hub
+      </button>
+    `);
+
+    btn.on('click', ev => {
+      ev.preventDefault();
+      new DCCSessionManagerApp().render(true);
+    });
+
+    const headerActions = $html.find('.header-actions, .action-buttons, header.directory-header .action-buttons');
+    if (headerActions.length) {
+      headerActions.after(btn);
+    } else {
+      $html.find('.directory-footer').before(btn);
+    }
+  }
+}
+
+// Hook into the Foundry Actors Directory sidebar
 Hooks.on('renderActorDirectory', (app, html) => {
-  if (html.find('.dcc-open-session-manager-btn').length) return;
+  injectActorDirectoryButtons(app, html);
+});
 
-  const btn = $(`
-    <button type="button" class="dcc-open-session-manager-btn" style="width: 100%; margin: 4px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
-      <i class="fa-solid fa-users-gear" style="color: #f1c40f;"></i> Party Progression & Session Hub
-    </button>
-  `);
+// Hook into generic sidebar tab render in case of tab switching
+Hooks.on('renderSidebarTab', (app, html) => {
+  if (app?.tabName === 'actors' || app?.id === 'actors' || app?.options?.id === 'actors') {
+    injectActorDirectoryButtons(app, html);
+  }
+});
 
-  btn.click(ev => {
-    ev.preventDefault();
-    new DCCSessionManagerApp().render(true);
-  });
-
-  const headerActions = html.find('.header-actions');
-  if (headerActions.length) {
-    headerActions.after(btn);
-  } else {
-    html.find('.directory-footer').before(btn);
+// Add header button if ActorDirectory is popped out into a floating window
+Hooks.on('getApplicationHeaderButtons', (app, buttons) => {
+  if (app?.constructor?.name === 'ActorDirectory' || (typeof ActorDirectory !== 'undefined' && app instanceof ActorDirectory)) {
+    buttons.unshift({
+      label: 'New Crawler',
+      class: 'dcc-header-crawler-btn',
+      icon: 'fa-solid fa-skull-crossbones',
+      onclick: () => new DCCCrawlerCreatorApp().render(true)
+    });
   }
 });
 
@@ -616,6 +693,11 @@ Hooks.once('ready', async function() {
         console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
       }
     }
+  }
+
+  // Ensure Actor Directory has New Crawler & Session buttons on startup
+  if (ui.actors?.element?.length) {
+    injectActorDirectoryButtons(ui.actors, ui.actors.element);
   }
 
   // Ensure Combat Tracker renders with DCC AI Awards button on load

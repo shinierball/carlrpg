@@ -1,3 +1,81 @@
+## 1.0.21
+
+### Level 1 Starter Combat Loadouts & Universal Baseline Heal Spell
+
+- **Level 1 Starter Combat Loadout Options**:
+  - **Basic Weapon Option**: Choose any existing weapon skill (Axe, Bow, Club, Crossbow, Dagger, Handgun, Herding Weapons, Improvised Weapons, Javelin, Lance, Longsword, Polearm, Quarterstaff, Rapier, Shotgun, Shuriken, Slingshot, Warhammer) and receive that weapon skill at **Rank 3**.
+  - **Starter Spell Option**: Choose one of the 7 initial starter spells at **Rank 3**:
+    - *Dirt Clod*, *Fire Fingers*, *Frost Scar*, *Mind Tickle*, *Shock Treatment*, *Soul Collector*, *Vine Porn*.
+    - Grants **5 Normal Mana Potions** in inventory and hotlist.
+  - **Unarmed Combat Option**: Choose a Hand-to-Hand skill and Damage Effect package, receiving both at **Rank 3**:
+    - *Pugilism* with the *Iron Punch* Damage Effect (+1d2 base dmg)
+    - *Foot Soldier* with the *Smush* Damage Effect (×2 dmg on ≤20% HP)
+    - *Noggin Nocker* with the *Skullcracker* Damage Effect (+1d4 base dmg vs same size)
+    - *Wrasslin* with the *Toss* Damage Effect (+1d8 base dmg + throw)
+- **Universal Baseline Spell (`Heal` Rank 1)**:
+  - Every created crawler enters the dungeon with the **Heal** spell at **Rank 1** automatically inscribed and slotted into their hotlist.
+- **Normal Mana Potion Consumable Mechanics**:
+  - `Normal Mana Potion` items completely refill current mana to maximum (`system.attributes.mana.value = system.attributes.mana.max`) when used from the hotlist (`.roll-hotlist-use`) or inventory (`.item-use`).
+  - Automatically decrements quantity and removes the item upon consuming the final potion.
+  - Generates rich chat card with mana restoration feedback.
+- **Crawler Induction Terminal (`DCCCrawlerCreatorApp`) UI**:
+  - Dedicated interactive starter combat loadout deck with mode toggle cards, live dropdown selectors, dynamic perk badges, and summary tray integration.
+  - Full support in the 1-click procedural randomizer.
+- **Automated Test Suite**:
+  - Added `tests/starter-loadouts.test.mjs` validating all starter options, hotlist mappings, mana refill mechanics, and non-additive skill rank resolutions.
+
+## 1.0.20
+
+### Creature Size Categories & Sheet Integration
+
+- **Standardized Creature Size System**:
+  - Implemented the 8 official DCC creature size categories:
+    - **1 Tiny**
+    - **2 Small**
+    - **3 Petite**
+    - **4 Medium**
+    - **5 Large**
+    - **6 Huge**
+    - **7 Colossal**
+    - **8 Gargantuan**
+- **Crawler Sheet Integration**:
+  - Replaced the plain text input on Page 1 (Core) with a styled select dropdown displaying all 8 sizes (`1 Tiny` to `8 Gargantuan`).
+  - Precomputes `sizeOptions` in `DCCCrawlerSheet.getData()` with automatic `selected` resolution matching current actor size.
+  - Automatically derives `system.attributes.sizeInfo`, `system.attributes.sizeNumber`, and `system.attributes.sizeLabel` in `DCCActor.prepareDerivedData()`.
+- **Crawler Character Creator Integration**:
+  - Added creature size selection dropdown to the Crawler Induction Terminal (`DCCCrawlerCreatorApp`).
+  - Integrates with randomizer and resets, persisting creature size to newly spawned Crawler actors.
+- **Robust Normalization Engine (`getSizeInfo`)**:
+  - Robustly maps numbers (1–8), numeric strings, names (e.g. "Petite", "petite"), and full labels ("3 Petite") safely defaulting to `4 Medium`.
+- **Automated Unit Test Suite**:
+  - Added comprehensive unit tests in `tests/sizes.test.mjs` verifying size definitions, normalization, sheet option generation, and document derived stats.
+
+## 1.0.19
+
+### Fast Matrix Crawler Character Creator
+
+- **Crawler Induction Terminal (`DCCCrawlerCreatorApp`)**:
+  - Dedicated fast matrix character creation application accessible from the Actors Directory header actions (`[ ⚔️ New Crawler ]`) and global `window.carl.openCrawlerCreator()`.
+  - **Species Selection & Perks**:
+    - **Human**: Starts with Inherent `Unarmed Combat` (Rank 3) and `1 AI Favor`.
+    - **Animal**: Surrenders AI Favor (`0 AI Favor`) to become an animal crawler, gaining Inherent `Slice Attack` (Rank 3).
+  - **Standard Stat Array Engine**:
+    - Assigns `[2, 3, 4, 5, 6]` across the 5 core abilities (`STR`, `DEX`, `CON`, `INT`, `CHA`).
+    - Dynamic pool tracker showing Available, Used, and Duplicate indicators with real-time validation.
+  - **Four-Tier Life Stage Background Matrices**:
+    - Full official background matrices for Humans (Childhood, Adolescence, Career/Profession, Hobby) and Animals (Youth, Training, Adult, Quirk).
+    - 1 background select and exactly 2 of 3 skill choices per stage.
+    - Tier-specific rank assignments: Tier 1 (Rank 1), Tier 2 (Rank 1), Tier 3 (Rank 3), Tier 4 (Rank 2).
+  - **Non-Additive Skill Duplicate Detection**:
+    - Duplicate skill picks across backgrounds resolve to the highest selected rank (`Math.max(...ranks)`), preserving the official non-additive rules.
+    - Real-time warning alert banner detailing each duplicated skill, source stages, and resolved rank.
+  - **Procedural 1-Click Randomizer**:
+    - `[ 🎲 Randomize All ]` button generates complete, legal character builds with randomized valid standard array distribution, background paths, distinct skills, and DCC-themed names.
+  - **Starting Floors 1 through 5**:
+    - Configurable floor entrance setting `system.details.floor` and `system.details.level`.
+  - **Direct Foundry Actor Creation**:
+    - `[ ⚔️ Enter the Dungeon ]` validates all choices, creates a linked `crawler` Actor document, embeds all resolved skill items, and renders the newly minted character sheet.
+
 ## 1.0.18
 
 ### Party Progression, Session Management Hub & 7-Tier Roll Outcome Engine

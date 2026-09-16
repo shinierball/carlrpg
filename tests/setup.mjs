@@ -1,6 +1,7 @@
 import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs';
+import { DCC_SIZES, getSizeInfo } from '../src/data/sizes.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -17,6 +18,24 @@ export class MockActor {
     this.system = structuredClone(data.system || {});
     this.isOwner = data.isOwner ?? true;
     this.items = (data.items || []).map(i => i instanceof MockItem ? i : new MockItem(i, this));
+    this.sheet = {
+      render: () => this
+    };
+  }
+  static async create(data = {}) {
+    const ActorClass = CONFIG.Actor?.documentClass || MockActor;
+    const actor = new ActorClass(data);
+    if (globalThis.game?.actors) {
+      if (Array.isArray(globalThis.game.actors)) {
+        globalThis.game.actors.push(actor);
+      } else if (typeof globalThis.game.actors.set === 'function') {
+        globalThis.game.actors.set(actor.id, actor);
+      }
+    }
+    if (actor._preCreate) {
+      await actor._preCreate(data, {}, globalThis.game?.user || { id: 'test-user' });
+    }
+    return actor;
   }
   async _preCreate(data, options, user) {}
   prepareBaseData() {}
@@ -126,6 +145,16 @@ export class MockItem {
     return this;
   }
 
+  async delete() {
+    if (this.actor && Array.isArray(this.actor.items)) {
+      const idx = this.actor.items.findIndex(i => (i.id === this.id || i._id === this.id));
+      if (idx !== -1) {
+        this.actor.items.splice(idx, 1);
+      }
+    }
+    return this;
+  }
+
   static async create(data) {
     const ItemClass = CONFIG.Item?.documentClass || MockItem;
     const item = new ItemClass(data);
@@ -149,6 +178,7 @@ const _settingsStore = new Map();
 if (!globalThis.game) {
   globalThis.game = {
     user: { id: 'test-user', isGM: true, can: () => true },
+    actors: [],
     items: [],
     folders: [],
     packs: new Map(),
@@ -281,6 +311,7 @@ if (!globalThis.foundry) {
     utils: {
       mergeObject: (target, source) => Object.assign(target, source),
       duplicate: (obj) => structuredClone(obj),
+      deepClone: (obj) => structuredClone(obj),
       expandObject: (obj) => {
         const result = {};
         for (const [key, val] of Object.entries(obj)) {
@@ -466,7 +497,9 @@ if (!globalThis.CONFIG) {
       spells: DCC_SPELLS,
       buffs: DCC_BUFFS,
       damageTypes: DCC_DAMAGE_TYPES,
-      debuffs: DCC_DEBUFFS
+      debuffs: DCC_DEBUFFS,
+      sizes: DCC_SIZES,
+      getSizeInfo
     },
     Combat: { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } },
     ui: { combat: MockCombatTracker }
@@ -478,6 +511,8 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
   globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
   globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
+  globalThis.CONFIG.DCC.sizes = DCC_SIZES;
+  globalThis.CONFIG.DCC.getSizeInfo = getSizeInfo;
   globalThis.CONFIG.Combat = globalThis.CONFIG.Combat || { documentClass: MockCombat, initiative: { formula: null, decimals: 0 } };
   globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
   globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };

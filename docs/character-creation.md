@@ -1,0 +1,142 @@
+# Dungeon Crawler Carl RPG — Crawler Character Creator
+
+## Overview
+
+The **Crawler Character Creator** (`DCCCrawlerCreatorApp`), also known as the **Crawler Induction Terminal**, provides a fast matrix character generation dashboard built according to the official Dungeon Crawler Carl RPG rulebooks.
+
+The application allows players and Game Masters to rapidly build, validate, and spawn fully legal Crawlers for starting Floor 1 through Floor 5, with standard stat arrays, species-specific combat perks, 4-tier life-stage background matrices, and automatic duplicate skill rank resolution.
+
+---
+
+## 1. Quick Access in Foundry VTT
+
+- **Actors Directory Sidebar**: A prominent `[ ⚔️ New Crawler ]` button is located directly next to the default Foundry "Create Actor" button in the Actors directory.
+- **Developer Helper**: Run `window.carl.openCrawlerCreator()` from the developer console or macro editor.
+
+---
+
+## 2. Species Rules & Inherent Perks
+
+| Species | Inherent Combat Skill | Inherent Rank | Starting AI Favor | Rationale |
+| :--- | :--- | :--- | :--- | :--- |
+| **Human** | `Unarmed Combat` | **Rank 3** | **1** | Standard crawler entrance protocol with baseline brawling training and 1 AI favor. |
+| **Animal** | `Slice Attack` | **Rank 3** | **0** | Animals surrender their AI favor to enter as animal crawlers, gaining innate natural claws/slice attacks. |
+
+---
+
+## 3. Standard Stat Array: `[2, 3, 4, 5, 6]`
+
+Every crawler assigns the standard array values `[2, 3, 4, 5, 6]` across their five core abilities:
+- **Strength (STR)**
+- **Dexterity (DEX)**
+- **Constitution (CON)**
+- **Intelligence (INT)**
+- **Charisma (CHA)**
+
+### Rules:
+- Each number must be assigned to exactly one ability score.
+- No ability score may be skipped or duplicated.
+- The interface displays the live status of the standard array pool (`Available`, `Used`, or `Duplicate`).
+
+---
+
+## 4. Four-Tier Life Stage Background Matrices
+
+Crawlers select **1 Background** and **exactly 2 of 3 Skills** from each of the four life stages.
+
+### Human Life Stages
+1. **Childhood (Rank 1)**: 12 background choices (`Latchkey Kid`, `Crafty Kid`, `Excitable Kid`, `Gymnast`, `Military Brat`, `MMO Kid`, `Only Child`, `Outdoor Kid`, `Problem Child`, `Scamp`, `Teacher’s Pet`, `Wild Child`).
+2. **Adolescence (Rank 1)**: 12 background choices (`Family Farm`, `Drama Nerd`, `Drop-Out`, `Greek Life`, `Influencer`, `Jock`, `McJob`, `Popular`, `Religious`, `Student Government`, `Nerd`, `Weirdo`).
+3. **Career / Profession (Rank 3)**: 12 background choices (`Criminal`, `Service Industry`, `Small Business Owner`, `Medical`, `Law Enforcement`, `Gig Worker`, `Teacher`, `Office Drone`, `Entertainer`, `Unhoused`, `Middle Manager`, `Military`).
+4. **Hobby (Rank 2)**: 12 background choices (`Collector`, `Cosplay`, `Drinker`, `Gamer`, `Gym Rat`, `Hunting`, `Music`, `Motorsports`, `Climber`, `Pop Culture`, `Tinkering`, `Travel`).
+
+### Animal Life Stages
+1. **Youth (Rank 1)**: 6 background choices (`Abandoned`, `Farmed`, `Litter-Raised`, `Pampered`, `Runt`, `Stray`).
+2. **Training (Rank 1)**: 6 background choices (`Clever`, `Free Range`, `Pack Mentality`, `Mischievous`, `Watcher`, `Well-Trained`).
+3. **Adult (Rank 3)**: 6 background choices (`Guard`, `Pile of Floof`, `Scrapper`, `Show Animal`, `Support Animal`, `Working`).
+4. **Quirk (Rank 2)**: 6 background choices (`Chow Hound`, `Cuddly`, `Curious`, `Hunter`, `Playful`, `Social`).
+
+---
+
+## 5. Non-Additive Duplicate Skill Handling
+
+In the DCC RPG system:
+- **Skill ranks chosen across multiple backgrounds do NOT stack additively.**
+- If a skill is selected more than once (e.g. `Perception` in Childhood at Rank 1 and in Hobby at Rank 2), the final rank is calculated as the **highest rank selected** (`Math.max(1, 2) = Rank 2`).
+- The application displays an explicit visual alert banner informing the player whenever duplicate selections occur.
+
+---
+
+## 6. Procedural 1-Click Randomizer
+
+Clicking `[ 🎲 Randomize All ]` instantly generates a fully legal Crawler:
+- Selects species and randomized standard array `[2, 3, 4, 5, 6]`.
+- Picks 1 random background and 2 distinct skills for all 4 life stages.
+- Resolves all duplicate ranks and flags warnings.
+- Generates a thematic crawler name (e.g. *Carl the Unbroken*, *Princess Donut III*) and crawler number.
+
+---
+
+## 7. Starting Floors (1 through 5)
+
+Players can designate the crawler's starting floor:
+- Sets `system.details.floor` (e.g., `1st Floor`, `2nd Floor`, `3rd Floor`, `4th Floor`, `5th Floor`).
+- Sets `system.details.level` (1 to 5).
+- Future updates will layer automated roll tables for starting loot, additional skill ranks, and spell allocations for higher floor spawns.
+
+---
+
+## 8. Creature Size Categories
+
+The CarlRPG system provides official standardized creature size categories:
+
+| Size Number | Size Name | Full Label |
+| :---: | :--- | :--- |
+| **1** | `Tiny` | `1 Tiny` |
+| **2** | `Small` | `2 Small` |
+| **3** | `Petite` | `3 Petite` |
+| **4** | `Medium` | `4 Medium` |
+| **5** | `Large` | `5 Large` |
+| **6** | `Huge` | `6 Huge` |
+| **7** | `Colossal` | `7 Colossal` |
+| **8** | `Gargantuan` | `8 Gargantuan` |
+
+- **Character Sheet Selection**: Crawlers can select their creature size category from the dedicated dropdown on Page 1 (Core) in the AI Favor & Size stat block.
+- **Creator Induction Terminal**: The induction terminal includes a Size dropdown pre-populated with all 8 sizes, defaulting to `Medium` for humans and customizable for animals.
+- **Data Model**: Normalizes `system.attributes.size` with derived `sizeNumber`, `sizeLabel`, and `sizeInfo` object under `system.attributes`.
+
+---
+
+## 9. Level 1 Starter Combat Loadout & Universal Heal Spell
+
+When creating a Level 1 Crawler, players choose their combat starter loadout from three distinct archetypes:
+
+### 1. Basic Weapon (Rank 3)
+- Choose any existing weapon skill in the CarlRPG system (e.g. *Axe*, *Bow*, *Club*, *Crossbow*, *Dagger*, *Handgun*, *Herding Weapons*, *Improvised Weapons*, *Javelin*, *Lance*, *Longsword*, *Polearm*, *Quarterstaff*, *Rapier*, *Shotgun*, *Shuriken*, *Slingshot*, *Warhammer*).
+- Receive that weapon skill at **Rank 3** (non-additive with background skills).
+
+### 2. Starter Spell (Rank 3) + 5 Normal Mana Potions
+- Choose one of the 7 initial starter spells at **Rank 3**:
+  - `Dirt Clod`
+  - `Fire Fingers`
+  - `Frost Scar`
+  - `Mind Tickle`
+  - `Shock Treatment`
+  - `Soul Collector`
+  - `Vine Porn`
+- **5 Normal Mana Potions**:
+  - Automatically added to the crawler's inventory.
+  - Placed into Hotlist **Slot 3** (with the chosen spell on **Slot 1** and Heal on **Slot 2**).
+  - When consumed via hotlist or inventory, completely refills current mana to maximum (`100% MP`) and decrements quantity.
+
+### 3. Unarmed Combat & Damage Effect (Both Rank 3)
+- Come in unarmed without a spell, choosing one of the 4 synergistic Hand-to-Hand and Damage Effect combo packages (both granted at **Rank 3**):
+  - **Pugilism** + **Iron Punch** (+1d2 base bludgeoning damage)
+  - **Foot Soldier** + **Smush** (deal ×2 total damage against targets at ≤20% Health Bar)
+  - **Noggin Nocker** + **Skullcracker** (+1d4 base bludgeoning damage against foes of the same size)
+  - **Wrasslin** + **Toss** (+1d8 base damage and throws the target 5 ft per 5 Ranks)
+
+### 4. Universal Baseline: `Heal` (Rank 1)
+- **All Crawlers** start with the **Heal** spell at **Rank 1** inscribed and assigned to Hotlist Slot 1 (or Slot 2 if a starter attack spell was chosen).
+
+

@@ -159,6 +159,9 @@ export class DCCItem extends Item {
       if (this.actor) return this.actor.rollSpell(this, action);
       return DCCItem.rollSpellCard(this);
     }
+    if (this.type === 'loot') {
+      return this.useLoot();
+    }
     if (!this.actor) return;
     if (this.type === 'attack') {
       return this.actor.rollAttack(this, action === 'damage' ? 'damage' : 'hit');
@@ -166,6 +169,64 @@ export class DCCItem extends Item {
     if (this.type === 'skill') {
       return this.actor.rollSkill(this);
     }
+  }
+
+  /**
+   * Use a loot / consumable item (e.g. Normal Mana Potion, healing items).
+   * Refills resources, decrements quantity, and outputs a rich chat card.
+   * @returns {Promise<ChatMessage>}
+   */
+  async useLoot() {
+    const actor = this.actor;
+    const sys = this.system || {};
+    const itemName = this.name || 'Item';
+    const isManaPotion = itemName.toLowerCase().includes('mana potion') ||
+      (sys.notes && sys.notes.toLowerCase().includes('mana') && sys.notes.toLowerCase().includes('refill'));
+
+    let extraEffectHtml = '';
+    if (isManaPotion && actor && actor.system?.attributes?.mana) {
+      const currentMana = actor.system.attributes.mana.value ?? 0;
+      const maxMana = actor.system.attributes.mana.max ?? 10;
+      await actor.update({ 'system.attributes.mana.value': maxMana });
+      extraEffectHtml = `
+        <div style="margin-top: 6px; padding: 6px 8px; background: rgba(41, 128, 185, 0.15); border-left: 3px solid #2980b9; color: #2980b9; font-weight: bold; font-size: 12px; border-radius: 2px;">
+          <i class="fa-solid fa-bolt"></i> Mana refilled completely to <strong>${maxMana} MP</strong>! (Was ${currentMana} MP)
+        </div>
+      `;
+    }
+
+    const currentQty = Number(sys.quantity) || 1;
+    if (currentQty > 1) {
+      await this.update({ 'system.quantity': currentQty - 1 });
+    } else {
+      if (typeof this.delete === 'function') {
+        await this.delete();
+      } else if (actor && typeof actor.deleteEmbeddedDocuments === 'function') {
+        await actor.deleteEmbeddedDocuments('Item', [this.id]);
+      } else if (actor && Array.isArray(actor.items)) {
+        const idx = actor.items.findIndex(i => (i.id === this.id || i._id === this.id));
+        if (idx !== -1) actor.items.splice(idx, 1);
+      }
+    }
+
+    return ChatMessage.create({
+      speaker: actor ? ChatMessage.getSpeaker({ actor }) : undefined,
+      content: `
+        <div class="dcc-chat-card dcc-item-card" style="font-family: var(--font-primary, sans-serif);">
+          <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #2980b9; padding-bottom: 4px; margin-bottom: 6px;">
+            <img src="${this.img || 'icons/svg/item-bag.svg'}" style="width: 32px; height: 32px; border: 1px solid #000; border-radius: 4px;" />
+            <div>
+              <h3 style="margin: 0; font-size: 15px; font-weight: bold; color: #111;">${itemName}</h3>
+              <span style="font-size: 11px; text-transform: uppercase; color: #2980b9; font-weight: bold;">Used Consumable</span>
+            </div>
+          </div>
+          ${currentQty > 1 ? `<p style="margin: 2px 0; font-size: 12px;"><strong>Remaining Quantity:</strong> ${currentQty - 1}</p>` : '<p style="margin: 2px 0; font-size: 12px; color: #888;"><em>Last consumable used.</em></p>'}
+          ${sys.notes ? `<p style="margin: 4px 0; font-size: 12px;">${sys.notes}</p>` : ''}
+          ${sys.description ? `<div style="font-size: 12px; margin-top: 4px;">${sys.description}</div>` : ''}
+          ${extraEffectHtml}
+        </div>
+      `
+    });
   }
 
   static async rollSpellCard(spellItem) {

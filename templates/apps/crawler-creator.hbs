@@ -1,0 +1,292 @@
+<form class="dcc-crawler-creator-form flexcol" autocomplete="off">
+  <!-- TOP BANNER & IDENTITY -->
+  <header class="dcc-creator-header">
+    <div class="dcc-creator-title-row flexrow">
+      <div class="dcc-creator-title">
+        <h2><i class="fa-solid fa-skull-crossbones"></i> CRAWLER INDUCTION TERMINAL</h2>
+        <span class="dcc-creator-subtitle">BORG TELEPORTATION & BIOMETRIC REGISTRATION — FLOOR ENTRANCE</span>
+      </div>
+      <div class="dcc-creator-quick-actions">
+        <button type="button" class="dcc-randomize-btn" title="Generate a legal randomized Crawler">
+          <i class="fa-solid fa-dice-d20"></i> Randomize All
+        </button>
+        <button type="button" class="dcc-reset-btn" title="Reset selections to default">
+          <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="dcc-creator-meta-grid">
+      <div class="dcc-form-group">
+        <label><i class="fa-solid fa-user"></i> Crawler Name</label>
+        <input type="text" name="creator-name" value="{{name}}" placeholder="Enter Crawler Name..." required />
+      </div>
+
+      <div class="dcc-form-group">
+        <label><i class="fa-solid fa-hashtag"></i> Crawler #</label>
+        <input type="text" name="creator-number" value="{{crawlerNumber}}" placeholder="#1001" />
+      </div>
+
+      <div class="dcc-form-group">
+        <label><i class="fa-solid fa-dna"></i> Species</label>
+        <div class="dcc-species-toggles flexrow">
+          <label class="dcc-species-radio {{#if isHuman}}active{{/if}}">
+            <input type="radio" name="creator-species" value="human" {{#if isHuman}}checked{{/if}} />
+            <i class="fa-solid fa-person-walking"></i> Human
+          </label>
+          <label class="dcc-species-radio {{#if isAnimal}}active{{/if}}">
+            <input type="radio" name="creator-species" value="animal" {{#if isAnimal}}checked{{/if}} />
+            <i class="fa-solid fa-paw"></i> Animal
+          </label>
+        </div>
+      </div>
+
+      <div class="dcc-form-group">
+        <label><i class="fa-solid fa-arrows-up-down-left-right"></i> Size</label>
+        <select name="creator-size">
+          {{#each sizeOptions}}
+            <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="dcc-form-group">
+        <label><i class="fa-solid fa-dungeon"></i> Starting Floor</label>
+        <select name="creator-floor">
+          {{#each floorOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="dcc-species-perks flexrow">
+        <div class="dcc-perk-badge favor-badge" title="AI Favor awarded based on species choice">
+          <i class="fa-solid fa-heart-pulse"></i> AI Favor: <strong>{{speciesData.aiFavor}}</strong>
+        </div>
+        <div class="dcc-perk-badge skill-badge" title="Inherent species combat skill">
+          <i class="fa-solid fa-hand-fist"></i> Inherent: <strong>{{speciesData.inherentSkill.name}} (Rank {{speciesData.inherentSkill.rank}})</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABILITY SCORES (STANDARD ARRAY) -->
+  <section class="dcc-creator-section dcc-stats-section">
+    <div class="dcc-section-header flexrow">
+      <h3><i class="fa-solid fa-gauge-high"></i> ABILITY SCORES (STANDARD ARRAY: 2, 3, 4, 5, 6)</h3>
+      <div class="dcc-array-pool flexrow">
+        <span class="pool-label">Standard Array Pool:</span>
+        {{#each availableNumbers}}
+          <span class="pool-num {{#if (eq this.used 'duplicate')}}duplicate{{else if this.used}}used{{else}}available{{/if}}">
+            {{this.value}}
+          </span>
+        {{/each}}
+      </div>
+    </div>
+
+    {{#unless statValidation.valid}}
+      <div class="dcc-validation-banner warning">
+        <i class="fa-solid fa-triangle-exclamation"></i> {{statValidation.error}}
+      </div>
+    {{/unless}}
+
+    <div class="dcc-stats-grid">
+      {{#each statList}}
+        <div class="dcc-stat-box flexcol">
+          <span class="stat-short">{{this.short}}</span>
+          <span class="stat-full">{{this.label}}</span>
+          <select class="dcc-stat-select" data-stat="{{this.key}}">
+            <option value="" {{#unless this.value}}selected{{/unless}}>—</option>
+            {{#each ../standardArray}}
+              <option value="{{this}}" {{#if (eq ../value this)}}selected{{/if}}>{{this}}</option>
+            {{/each}}
+          </select>
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <!-- 4-TIER BACKGROUND MATRIX -->
+  <section class="dcc-creator-section dcc-matrix-section">
+    <div class="dcc-section-header flexrow">
+      <h3><i class="fa-solid fa-network-wired"></i> LIFE STAGE BACKGROUND MATRIX</h3>
+      <span class="dcc-rule-hint"><i class="fa-solid fa-circle-info"></i> Choose 1 Background and exactly 2 Skills per stage</span>
+    </div>
+
+    <div class="dcc-matrix-grid">
+      {{#each tiers}}
+        <div class="dcc-tier-card flexcol {{#if this.isValid}}valid{{else}}invalid{{/if}}">
+          <div class="dcc-tier-header flexrow">
+            <span class="tier-name">{{this.label}}</span>
+            <span class="tier-rank-pill">Rank {{this.rank}}</span>
+          </div>
+
+          <div class="dcc-tier-select-wrapper">
+            <label class="tier-label">Background:</label>
+            <select class="dcc-tier-bg-select" data-tier="{{this.key}}">
+              {{#each this.backgrounds}}
+                <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="dcc-tier-skills-wrapper flexcol">
+            <div class="skills-header flexrow">
+              <span class="skills-label">Skills (Pick 2):</span>
+              <span class="skills-counter {{#if this.isValid}}complete{{else}}incomplete{{/if}}">
+                {{this.selectedCount}} / 2 Selected
+              </span>
+            </div>
+
+            <div class="skills-checkbox-list flexcol">
+              {{#each this.skills}}
+                <label class="dcc-skill-pill flexrow {{#if this.checked}}checked{{/if}}">
+                  <input type="checkbox" class="dcc-skill-checkbox" data-tier="{{../key}}" data-skill="{{this.name}}" {{#if this.checked}}checked{{/if}} />
+                  <span class="skill-name">{{this.name}}</span>
+                  <span class="stat-tag stat-{{this.stat}}">{{this.stat}}</span>
+                </label>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <!-- LEVEL 1 STARTER COMBAT LOADOUT -->
+  <section class="dcc-creator-section dcc-starter-section">
+    <div class="dcc-section-header flexrow">
+      <h3><i class="fa-solid fa-shield-halved"></i> LEVEL 1 STARTER COMBAT LOADOUT</h3>
+      <span class="dcc-rule-hint"><i class="fa-solid fa-circle-info"></i> Choose a Weapon, Starter Spell (+5 Mana Potions), or Unarmed Combat package</span>
+    </div>
+
+    <div class="dcc-starter-deck flexcol">
+      <div class="dcc-starter-mode-pills flexrow">
+        {{#each starterModeOptions}}
+          <label class="dcc-starter-mode-label {{#if this.selected}}active{{/if}}">
+            <input type="radio" name="creator-starter-mode" value="{{this.key}}" {{#if this.selected}}checked{{/if}} />
+            <i class="{{this.icon}}"></i>
+            <div class="mode-text">
+              <strong>{{this.label}}</strong>
+              <small>{{this.desc}}</small>
+            </div>
+          </label>
+        {{/each}}
+      </div>
+
+      <div class="dcc-starter-choice-body">
+        {{#if isStarterWeapon}}
+          <div class="dcc-starter-choice-row flexrow">
+            <div class="dcc-choice-field flexcol">
+              <label><i class="fa-solid fa-sword"></i> Select Starting Weapon Skill (Rank 3):</label>
+              <select name="creator-starter-weapon" class="dcc-creator-select">
+                {{#each starterWeaponOptions}}
+                  <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="dcc-choice-perk-badge">
+              <i class="fa-solid fa-check"></i> Grants <strong>{{starterWeapon}}</strong> weapon skill at <strong>Rank 3</strong>.
+            </div>
+          </div>
+        {{/if}}
+
+        {{#if isStarterSpell}}
+          <div class="dcc-starter-choice-row flexrow">
+            <div class="dcc-choice-field flexcol">
+              <label><i class="fa-solid fa-wand-magic-sparkles"></i> Select Starting Spell (Rank 3):</label>
+              <select name="creator-starter-spell" class="dcc-creator-select">
+                {{#each starterSpellOptions}}
+                  <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="dcc-choice-perk-badge mana-potion-badge">
+              <i class="fa-solid fa-flask"></i> Includes <strong>5 Normal Mana Potions</strong> in inventory &amp; Hotlist (refills mana to 100%).
+            </div>
+          </div>
+        {{/if}}
+
+        {{#if isStarterUnarmed}}
+          <div class="dcc-starter-choice-row flexrow">
+            <div class="dcc-choice-field flexcol">
+              <label><i class="fa-solid fa-hand-fist"></i> Select Hand-to-Hand &amp; Damage Effect Package (Both Rank 3):</label>
+              <select name="creator-starter-unarmed" class="dcc-creator-select">
+                {{#each starterUnarmedOptions}}
+                  <option value="{{this.key}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="dcc-choice-perk-badge unarmed-badge">
+              <i class="fa-solid fa-burst"></i> Both H2H skill &amp; Damage Effect granted at <strong>Rank 3</strong>.
+            </div>
+          </div>
+        {{/if}}
+
+        <div class="dcc-baseline-spell-badge flexrow">
+          <i class="fa-solid fa-hand-holding-heart"></i>
+          <span>Universal Crawler Baseline: All crawlers enter the dungeon with <strong>Heal (Rank 1)</strong> inscribed and hotlisted!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DUPLICATE WARNINGS & RESOLVED SKILLS TRAY -->
+  <section class="dcc-creator-section dcc-summary-tray">
+    {{#if warnings.length}}
+      <div class="dcc-duplicate-warnings-box flexcol">
+        <div class="warnings-header flexrow">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <strong>NON-ADDITIVE SKILL DUPLICATION WARNING</strong>
+        </div>
+        <ul class="warnings-list">
+          {{#each warnings}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+    <div class="dcc-resolved-skills-box">
+      <span class="resolved-header"><i class="fa-solid fa-list-check"></i> Final Crawler Skills &amp; Loadout:</span>
+      <div class="dcc-resolved-pills-wrap flexrow">
+        <span class="resolved-pill inherent">
+          <i class="fa-solid fa-star"></i> {{speciesData.inherentSkill.name}} [Rank {{speciesData.inherentSkill.rank}}]
+        </span>
+        <span class="resolved-pill spell-pill">
+          <i class="fa-solid fa-hand-holding-heart"></i> Heal [Rank 1]
+        </span>
+        {{#if isStarterSpell}}
+          <span class="resolved-pill spell-pill">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> {{starterSpell}} [Rank 3]
+          </span>
+          <span class="resolved-pill potion-pill">
+            <i class="fa-solid fa-flask"></i> 5x Normal Mana Potions
+          </span>
+        {{/if}}
+        {{#each resolvedSkills}}
+          {{#unless (eq this.name ../speciesData.inherentSkill.name)}}
+            <span class="resolved-pill {{#if this.isStarter}}starter-skill{{/if}}">
+              {{this.name}} [Rank {{this.rank}}] <small>({{upper this.stat}})</small>
+            </span>
+          {{/unless}}
+        {{/each}}
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER ACTIONS -->
+  <footer class="dcc-creator-footer flexrow">
+    <div class="footer-status">
+      {{#if canCreate}}
+        <span class="status-ready"><i class="fa-solid fa-circle-check"></i> Crawler is fully configured and ready to enter the dungeon.</span>
+      {{else}}
+        <span class="status-not-ready"><i class="fa-solid fa-circle-xmark"></i> Complete all standard array stats and 2 skills per stage to spawn.</span>
+      {{/if}}
+    </div>
+
+    <button type="button" class="dcc-create-crawler-btn {{#unless canCreate}}disabled{{/unless}}" {{#unless canCreate}}disabled{{/unless}}>
+      <i class="fa-solid fa-door-open"></i> ENTER THE DUNGEON (CREATE CRAWLER)
+    </button>
+  </footer>
+</form>

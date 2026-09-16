@@ -1,5 +1,6 @@
 import { DCCCombatMetrics } from '../apps/combat-metrics.mjs';
 import { DCCSessionEngine } from '../apps/session-manager.mjs';
+import { getSizeInfo } from '../data/sizes.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -104,6 +105,14 @@ export class DCCActor extends Actor {
   prepareDerivedData() {
     super.prepareDerivedData();
     const system = this.system;
+
+    // Derive size normalization
+    if (system.attributes) {
+      const sizeInfo = getSizeInfo(system.attributes.size);
+      system.attributes.sizeInfo = sizeInfo;
+      system.attributes.sizeNumber = sizeInfo.size;
+      system.attributes.sizeLabel = sizeInfo.label;
+    }
 
     // Gather equipped gear
     const equippedGear = this.items ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : [];

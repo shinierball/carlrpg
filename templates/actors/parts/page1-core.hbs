@@ -275,7 +275,11 @@
               <span class="dcc-stat-sublabel">AI Favor</span>
             </div>
             <div class="dcc-formula-item">
-              <input class="dcc-box-input medium" name="system.attributes.size" type="text" value="{{system.attributes.size}}" placeholder="Med" />
+              <select class="dcc-box-input dcc-size-select" name="system.attributes.size" title="Creature Size Category">
+                {{#each sizeOptions}}
+                  <option value="{{this.name}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+              </select>
               <span class="dcc-stat-sublabel">Size</span>
             </div>
           </div>

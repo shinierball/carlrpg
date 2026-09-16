@@ -469,6 +469,20 @@
 
 .dcc-box-input.small { width: 44px; }
 .dcc-box-input.medium { width: 62px; }
+select.dcc-box-input.dcc-size-select,
+.dcc-box-input.dcc-size-select {
+  width: 95px;
+  height: 28px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 4px;
+  text-align: center;
+  text-align-last: center;
+  cursor: pointer;
+  background: #fff;
+  border: 2px solid #000;
+}
 
 /* Mana & Debuffs */
 .dcc-mana-debuffs {
@@ -5124,5 +5138,821 @@
   color: #fff;
 }
 
+/* =======================================================
+   CRAWLER CHARACTER CREATOR (FAST MATRIX APPLICATION)
+   ======================================================= */
 
+.dcc-crawler-creator-window .window-content {
+  background: #121318;
+  color: #ecf0f1;
+  padding: 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  overflow-y: auto;
+}
 
+.dcc-crawler-creator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+/* Header & Meta */
+.dcc-creator-header {
+  background: #1b1c24;
+  border: 1.5px solid #2e3040;
+  border-left: 5px solid #c0392b;
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+
+.dcc-creator-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2e3040;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.dcc-creator-title h2 {
+  margin: 0;
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  color: #e74c3c;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dcc-creator-subtitle {
+  font-size: 10px;
+  color: #95a5a6;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.dcc-creator-quick-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dcc-randomize-btn, .dcc-reset-btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-radius: 3px;
+  padding: 4px 10px;
+  cursor: pointer;
+  border: 1px solid #3e4054;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.dcc-randomize-btn {
+  background: #8e44ad;
+  color: #fff;
+  border-color: #9b59b6;
+}
+.dcc-randomize-btn:hover {
+  background: #9b59b6;
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+}
+
+.dcc-reset-btn {
+  background: #2c3e50;
+  color: #bdc3c7;
+}
+.dcc-reset-btn:hover {
+  background: #34495e;
+  color: #fff;
+}
+
+.dcc-creator-meta-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 0.9fr 1.6fr 1.3fr 1.4fr 2.1fr;
+  gap: 8px;
+  align-items: end;
+}
+
+.dcc-creator-meta-grid .dcc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dcc-creator-meta-grid label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+}
+
+.dcc-creator-meta-grid input,
+.dcc-creator-meta-grid select {
+  background: #0d0e12;
+  color: #fff;
+  border: 1px solid #3a3c4f;
+  border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+
+.dcc-species-toggles {
+  display: flex;
+  gap: 6px;
+}
+
+.dcc-species-radio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: #0d0e12;
+  border: 1px solid #3a3c4f;
+  border-radius: 3px;
+  padding: 5px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #bdc3c7;
+  cursor: pointer;
+}
+
+.dcc-species-radio input {
+  display: none;
+}
+
+.dcc-species-radio.active {
+  background: #c0392b;
+  border-color: #e74c3c;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.4);
+}
+
+.dcc-species-perks {
+  display: flex;
+  gap: 6px;
+}
+
+.dcc-perk-badge {
+  flex: 1;
+  background: #0f1015;
+  border: 1px solid #2b2d3c;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: #bdc3c7;
+  text-align: center;
+}
+
+.dcc-perk-badge strong {
+  color: #f1c40f;
+}
+
+/* Sections */
+.dcc-creator-section {
+  background: #181922;
+  border: 1px solid #282a3a;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.dcc-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #262838;
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+}
+
+.dcc-section-header h3 {
+  margin: 0;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  color: #ecf0f1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dcc-rule-hint {
+  font-size: 11px;
+  color: #7f8c8d;
+}
+
+/* Ability Scores */
+.dcc-array-pool {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dcc-array-pool .pool-label {
+  font-size: 11px;
+  color: #95a5a6;
+  margin-right: 4px;
+}
+
+.dcc-array-pool .pool-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 1px 7px;
+  border-radius: 3px;
+  border: 1px solid #3a3c4f;
+}
+
+.dcc-array-pool .pool-num.available {
+  background: #1e824c;
+  color: #fff;
+  border-color: #27ae60;
+}
+
+.dcc-array-pool .pool-num.used {
+  background: #2c3e50;
+  color: #7f8c8d;
+  opacity: 0.6;
+}
+
+.dcc-array-pool .pool-num.duplicate {
+  background: #c0392b;
+  color: #fff;
+  border-color: #e74c3c;
+  animation: pulse 1s infinite alternate;
+}
+
+.dcc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.dcc-stat-box {
+  background: #0f1016;
+  border: 1px solid #2a2c3d;
+  border-radius: 4px;
+  padding: 6px;
+  text-align: center;
+  align-items: center;
+}
+
+.dcc-stat-box .stat-short {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.dcc-stat-box .stat-full {
+  font-size: 10px;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.dcc-stat-box select {
+  width: 80%;
+  background: #181922;
+  color: #fff;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1.5px solid #3e4054;
+  border-radius: 3px;
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.dcc-validation-banner {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 4-Tier Matrix Grid */
+.dcc-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.dcc-tier-card {
+  background: #111218;
+  border: 1.5px solid #2d2f40;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dcc-tier-card.valid {
+  border-color: #27ae60;
+}
+
+.dcc-tier-card.invalid {
+  border-color: #c0392b;
+}
+
+.dcc-tier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #232533;
+  padding-bottom: 4px;
+}
+
+.dcc-tier-header .tier-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.dcc-tier-header .tier-rank-pill {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  background: #c0392b;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.dcc-tier-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dcc-tier-select-wrapper .tier-label {
+  font-size: 10px;
+  color: #95a5a6;
+  text-transform: uppercase;
+}
+
+.dcc-tier-bg-select {
+  background: #1a1b24;
+  color: #fff;
+  border: 1px solid #393b4d;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
+.dcc-tier-skills-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skills-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skills-label {
+  font-size: 10px;
+  color: #95a5a6;
+  text-transform: uppercase;
+}
+
+.skills-counter {
+  font-size: 10px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.skills-counter.complete {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.skills-counter.incomplete {
+  color: #e67e22;
+  background: rgba(230, 126, 34, 0.15);
+}
+
+.skills-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-skill-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #181922;
+  border: 1px solid #2e3042;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.dcc-skill-pill:hover {
+  background: #20222e;
+}
+
+.dcc-skill-pill.checked {
+  background: #1f2735;
+  border-color: #3498db;
+  color: #fff;
+}
+
+.dcc-skill-pill input[type="checkbox"] {
+  margin: 0 6px 0 0;
+  cursor: pointer;
+}
+
+.dcc-skill-pill .skill-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dcc-skill-pill .stat-tag {
+  font-size: 9px;
+  font-family: 'Oswald', sans-serif;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: #2c3e50;
+  color: #bdc3c7;
+}
+
+/* Warnings & Summary Tray */
+.dcc-duplicate-warnings-box {
+  background: rgba(230, 126, 34, 0.12);
+  border: 1px solid #d35400;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+}
+
+.warnings-header {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  color: #e67e22;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.warnings-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 11px;
+  color: #f39c12;
+}
+
+.warnings-list li {
+  margin-bottom: 2px;
+}
+
+.dcc-resolved-skills-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resolved-header {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+}
+
+.dcc-resolved-pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.resolved-pill {
+  background: #1c1e28;
+  border: 1px solid #333649;
+  border-radius: 3px;
+  padding: 2px 7px;
+  font-size: 11px;
+  color: #ecf0f1;
+}
+
+.resolved-pill.inherent {
+  background: #391c1c;
+  border-color: #c0392b;
+  color: #ff9999;
+  font-weight: bold;
+}
+
+.resolved-pill.spell-pill {
+  background: #1a2936;
+  border-color: #2980b9;
+  color: #5dade2;
+  font-weight: bold;
+}
+
+.resolved-pill.potion-pill {
+  background: #251c36;
+  border-color: #8e44ad;
+  color: #bb8fce;
+  font-weight: bold;
+}
+
+.resolved-pill.starter-skill {
+  border-color: #e67e22;
+  color: #f39c12;
+}
+
+.resolved-pill small {
+  color: #7f8c8d;
+}
+
+/* Level 1 Starter Combat Loadout Section */
+.dcc-starter-section {
+  border-left-color: #e67e22;
+}
+
+.dcc-starter-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dcc-starter-mode-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.dcc-starter-mode-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #181922;
+  border: 1.5px solid #2e3040;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dcc-starter-mode-label:hover {
+  background: #20222f;
+  border-color: #e67e22;
+}
+
+.dcc-starter-mode-label.active {
+  background: rgba(230, 126, 34, 0.15);
+  border-color: #e67e22;
+  box-shadow: 0 0 6px rgba(230, 126, 34, 0.3);
+}
+
+.dcc-starter-mode-label input[type="radio"] {
+  accent-color: #e67e22;
+  cursor: pointer;
+}
+
+.dcc-starter-mode-label i {
+  font-size: 16px;
+  color: #e67e22;
+}
+
+.dcc-starter-mode-label .mode-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dcc-starter-mode-label .mode-text strong {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.dcc-starter-mode-label .mode-text small {
+  font-size: 11px;
+  color: #bdc3c7;
+}
+
+.dcc-starter-choice-body {
+  background: #14151d;
+  border: 1px solid #262837;
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dcc-starter-choice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.dcc-choice-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-choice-field label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcc-creator-select {
+  background: #0d0e12;
+  color: #fff;
+  border: 1px solid #3a3c4f;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.dcc-choice-perk-badge {
+  background: #1f2330;
+  border: 1px solid #34495e;
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #ecf0f1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcc-choice-perk-badge strong {
+  color: #f1c40f;
+}
+
+.dcc-choice-perk-badge.mana-potion-badge {
+  background: rgba(41, 128, 185, 0.15);
+  border-color: #2980b9;
+  color: #3498db;
+}
+
+.dcc-choice-perk-badge.mana-potion-badge strong {
+  color: #5dade2;
+}
+
+.dcc-choice-perk-badge.unarmed-badge {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: #c0392b;
+  color: #e74c3c;
+}
+
+.dcc-baseline-spell-badge {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px dashed #27ae60;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  color: #2ecc71;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Footer Actions */
+.dcc-creator-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #161720;
+  border: 1px solid #282a3a;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.footer-status {
+  font-size: 12px;
+}
+
+.status-ready {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.status-not-ready {
+  color: #e74c3c;
+}
+
+.dcc-create-crawler-btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  background: #c0392b;
+  color: #fff;
+  border: 1.5px solid #000;
+  border-radius: 4px;
+  padding: 8px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: all 0.15s ease;
+}
+
+.dcc-create-crawler-btn:hover:not(.disabled) {
+  background: #e74c3c;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+}
+
+.dcc-create-crawler-btn.disabled,
+.dcc-create-crawler-btn:disabled {
+  background: #3a3b47;
+  color: #7f8c8d;
+  border-color: #2b2c36;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Sidebar "New Crawler" Button */
+.directory-header .action-buttons .dcc-create-crawler-btn-sidebar,
+.header-actions .dcc-create-crawler-btn-sidebar {
+  flex: 1;
+  width: auto;
+  margin: 0;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  font-size: 11px;
+  background: #c0392b;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 3px;
+  padding: 4px 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  line-height: normal;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.directory-header .action-buttons .dcc-create-crawler-btn-sidebar:hover,
+.header-actions .dcc-create-crawler-btn-sidebar:hover {
+  background: #e74c3c;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
+}
+
+.dcc-create-crawler-btn-sidebar {
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+  background: #c0392b;
+  color: #fff;
+  border: 1.5px solid #000;
+  border-radius: 3px;
+  padding: 5px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  margin: 4px 0 6px 0;
+  width: 100%;
+  transition: background 0.15s ease;
+}
+
+.dcc-create-crawler-btn-sidebar:hover {
+  background: #e74c3c;
+  color: #fff;
+}

@@ -9,6 +9,7 @@ import { DCCBuffDebuffManager } from './apps/buff-manager.mjs';
 import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
+import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
@@ -27,7 +28,9 @@ Hooks.once('init', async function() {
     DCCBuffDebuffManager,
     DCCCombatMetrics,
     DCCCombatTracker,
-    DCCCombatArchiveApp
+    DCCCombatArchiveApp,
+    DCCSessionEngine,
+    DCCSessionManagerApp
   };
 
   CONFIG.DCC = {
@@ -35,7 +38,9 @@ Hooks.once('init', async function() {
     spells: DCC_SPELLS,
     buffs: DCC_BUFFS,
     damageTypes: DCC_DAMAGE_TYPES,
-    debuffs: DCC_DEBUFFS
+    debuffs: DCC_DEBUFFS,
+    outcomes: DCC_ROLL_OUTCOMES,
+    outcomeConfig: DCC_OUTCOME_CONFIG
   };
 
   // Register document classes
@@ -71,6 +76,24 @@ Hooks.once('init', async function() {
     config: false,
     type: Array,
     default: []
+  });
+
+  game.settings.register('carl-rpg', 'sessions', {
+    name: 'Party Sessions',
+    hint: 'Stores active and historical crawler party session records.',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
+  game.settings.register('carl-rpg', 'activeSessionId', {
+    name: 'Active Session ID',
+    hint: 'Current active session ID for live party progression.',
+    scope: 'world',
+    config: false,
+    type: String,
+    default: ''
   });
 
   // Register Handlebars Helpers
@@ -109,7 +132,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/buff-manager.hbs',
     'systems/carl-rpg/templates/apps/combat-metrics.hbs',
     'systems/carl-rpg/templates/apps/combat-tracker.hbs',
-    'systems/carl-rpg/templates/apps/combat-archive.hbs'
+    'systems/carl-rpg/templates/apps/combat-archive.hbs',
+    'systems/carl-rpg/templates/apps/session-manager.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -125,7 +149,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp) {
           app.render(false);
         }
       }
@@ -136,6 +160,7 @@ Hooks.once('init', async function() {
   // Global Developer Helper
   window.carl = {
     combatMetrics: DCCCombatMetrics,
+    sessionEngine: DCCSessionEngine,
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
     },
@@ -145,9 +170,12 @@ Hooks.once('init', async function() {
     openCombatArchive(options = {}) {
       return new DCCCombatArchiveApp(options).render(true);
     },
+    openSessionManager(options = {}) {
+      return new DCCSessionManagerApp(options).render(true);
+    },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp) {
           app.render(false);
         }
       }
@@ -170,6 +198,29 @@ Hooks.on('renderItemDirectory', (app, html) => {
   btn.click(ev => {
     ev.preventDefault();
     new DCCSkillManager().render(true);
+  });
+
+  const headerActions = html.find('.header-actions');
+  if (headerActions.length) {
+    headerActions.after(btn);
+  } else {
+    html.find('.directory-footer').before(btn);
+  }
+});
+
+// Hook into the Foundry Actors Directory sidebar to add a top-level Party Progression & Session Manager button
+Hooks.on('renderActorDirectory', (app, html) => {
+  if (html.find('.dcc-open-session-manager-btn').length) return;
+
+  const btn = $(`
+    <button type="button" class="dcc-open-session-manager-btn" style="width: 100%; margin: 4px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-users-gear" style="color: #f1c40f;"></i> Party Progression & Session Hub
+    </button>
+  `);
+
+  btn.click(ev => {
+    ev.preventDefault();
+    new DCCSessionManagerApp().render(true);
   });
 
   const headerActions = html.find('.header-actions');
@@ -244,6 +295,20 @@ Hooks.on('renderCombatTracker', (app, html, data) => {
         new DCCCombatArchiveApp().render(true);
       });
       encountersNav.append(archiveBtn);
+    }
+
+    if (!$html.find('.dcc-session-manager-header-btn').length) {
+      const sessionBtn = $(`
+        <a class="combat-button dcc-session-manager-header-btn" data-tooltip="Party Progression & Session Manager" title="Party Progression & Session Manager" style="color: #f1c40f; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+          <i class="fa-solid fa-users-gear" style="font-size: 14px; color: #f1c40f;"></i>
+        </a>
+      `);
+      sessionBtn.click(ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        new DCCSessionManagerApp().render(true);
+      });
+      encountersNav.append(sessionBtn);
     }
   }
 

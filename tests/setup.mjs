@@ -10,6 +10,8 @@ import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs'
 
 export class MockActor {
   constructor(data = {}) {
+    this.id = data.id || data._id || ('mock-actor-' + Math.random().toString(36).substring(2, 9));
+    this._id = this.id;
     this.name = data.name || 'Test Crawler';
     this.type = data.type || 'crawler';
     this.system = structuredClone(data.system || {});

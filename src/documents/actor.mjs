@@ -1,4 +1,5 @@
 import { DCCCombatMetrics } from '../apps/combat-metrics.mjs';
+import { DCCSessionEngine } from '../apps/session-manager.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -708,6 +709,15 @@ export class DCCActor extends Actor {
       const total = rank + statMod;
       const formula = `1d20 + ${total}`;
       const roll = await new Roll(formula).evaluate();
+      if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+        DCCSessionEngine.recordRoll({
+          actor: this,
+          roll,
+          type: 'attack',
+          name: attackItem.name,
+          isUntrained: false
+        }).catch(() => {});
+      }
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + Rank ${rank} + ${sys.toHitStat.toUpperCase()} Mod ${statMod})`
@@ -1230,6 +1240,15 @@ export class DCCActor extends Actor {
     if (modifiedRank <= 0) {
       const formula = `2d20kl + ${statMod}`;
       const roll = await new Roll(formula, { mod: statMod }).evaluate();
+      if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+        DCCSessionEngine.recordRoll({
+          actor: this,
+          roll,
+          type: 'untrained_skill',
+          name: skillItem.name,
+          isUntrained: true
+        }).catch(() => {});
+      }
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: `<strong>${this.name}</strong>: ${skillItem.name} (<strong>Untrained Check with Disadvantage</strong>: 2d20kl + ${statName} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`
@@ -1249,6 +1268,15 @@ export class DCCActor extends Actor {
 
     const formula = `1d20 + ${totalSkill}`;
     const roll = await new Roll(formula, { rank: modifiedRank, mod: statMod }).evaluate();
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll,
+        type: 'skill',
+        name: skillItem.name,
+        isUntrained: false
+      }).catch(() => {});
+    }
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -1407,6 +1435,15 @@ export class DCCActor extends Actor {
     const total = rank + statMod;
     const formula = `1d20 + ${total}`;
     const roll = await new Roll(formula).evaluate();
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll,
+        type: 'spell',
+        name: `${spellItem.name} (Attack)`,
+        isUntrained: false
+      }).catch(() => {});
+    }
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -1472,6 +1509,16 @@ export class DCCActor extends Actor {
     const newMana = Math.max(0, currentMana - manaCost);
     if (this.system?.attributes?.mana && manaCost > 0) {
       await this.update({ 'system.attributes.mana.value': newMana });
+    }
+
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll: { total: 0, formula: manaCost > 0 ? `${manaCost} MP` : '0 MP' },
+        type: 'spell',
+        name: spellItem.name,
+        notes: `Cast ${spellItem.name} (${manaCost} MP)`
+      }).catch(() => {});
     }
 
     const dmgData = this.getSpellDamageData(spellItem);

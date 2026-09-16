@@ -8,6 +8,7 @@
 import { DCCCombat } from '../documents/combat.mjs';
 import { DCCExperienceTracker } from './xp-tracker.mjs';
 import { DCCCombatArchiveApp } from './combat-archive.mjs';
+import { DCCSessionEngine } from './session-manager.mjs';
 
 const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
 
@@ -156,6 +157,17 @@ export class DCCCombatMetrics {
 
     await c.setFlag('carl-rpg', 'metrics', metrics);
     this._refreshOpenWindows();
+
+    // Sync to active session progression
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordDamage === 'function') {
+      DCCSessionEngine.recordDamage({
+        attackerActor,
+        targetActor,
+        actualDamage: netDamage,
+        attackName,
+        type: attackType
+      }).catch(() => {});
+    }
 
     return {
       logged: true,
@@ -556,6 +568,14 @@ export class DCCCombatMetrics {
       const currentFavor = Number(recipientActor.system?.attributes?.aiFavor) || 0;
       const newFavor = currentFavor + favorDelta;
       await recipientActor.update({ 'system.attributes.aiFavor': newFavor });
+
+      if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.adjustAIFavor === 'function') {
+        DCCSessionEngine.adjustAIFavor({ actorId: recipientActor.id, delta: favorDelta, reason: title || 'AI Award' }).catch(() => {});
+      }
+    } else if (['bronze', 'silver', 'gold', 'platinum', 'legendary', 'celestial'].includes(awardType)) {
+      if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordLootBox === 'function') {
+        DCCSessionEngine.recordLootBox({ actorId: recipientActor.id, tier: awardType, title, defaultQuote }).catch(() => {});
+      }
     }
 
     const quote = customQuote.trim() || defaultQuote;

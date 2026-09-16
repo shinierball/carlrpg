@@ -1,3 +1,31 @@
+## 1.0.18
+
+### Party Progression, Session Management Hub & 7-Tier Roll Outcome Engine
+
+- **Party Progression & Session Hub (`DCCSessionManagerApp`)**:
+  - Dedicated multi-tab application (`DCCSessionManagerApp`) accessible from the Actor Directory, Combat Tracker, and global `window.carl.openSessionManager()`.
+  - **Party Live Overview**: Real-time cards for all active crawlers displaying portraits, Level, HP bars, Mana, Net Damage Dealt/Taken, AI Favor, Popularity, and counts for Untrained attempts and Crits.
+  - Quick inline +/- adjustments on crawler cards for immediate DM balancing corrections.
+- **7-Tier Roll Outcome Engine**:
+  - Automated classification of all rolls against Target DC / AC:
+    - **Critical Failure**: Natural 1 on d20.
+    - **Major Failure**: Miss by 10 or more ($\text{Total} \le \text{DC} - 10$).
+    - **Failure**: Miss by 4 to 9 ($\text{DC} - 9 \le \text{Total} \le \text{DC} - 4$).
+    - **Near Miss**: Miss by 1 to 3 ($\text{DC} - 3 \le \text{Total} \le \text{DC} - 1$).
+    - **Success**: Meet or exceed by less than 10 ($\text{DC} \le \text{Total} \le \text{DC} + 9$).
+    - **Major Success**: Exceed by 10 or more ($\text{Total} \ge \text{DC} + 10$).
+    - **Critical Success**: Natural 20 on d20.
+  - High-contrast color-coded badges (`.outcome-crit-fail`, `.outcome-major-fail`, `.outcome-fail`, `.outcome-near-miss`, `.outcome-success`, `.outcome-major-success`, `.outcome-crit-success`, `.outcome-pending`).
+- **Activity & Roll Ledger**:
+  - Automatic interception and logging of trained skills, untrained checks (rolled with disadvantage `2d20kl`), attacks, spells, combat damage, AI Favor deltas, Popularity deltas, and Loot Boxes.
+  - Interactive filters by Crawler, Action Type, Outcome Tier, and text search.
+  - Inline editing of Target DC with instant outcome re-evaluation, outcome dropdown override, notes editing, and manual event creation.
+- **End-of-Session Progression**:
+  - **Field Training Checklist**: Inspects all untrained skills attempted during the session and provides a 1-click `[Train to Rank 1]` promotion directly updating the crawler's actor document.
+  - **Session XP Distribution**: Computes proportional experience distribution based on deeds, damage, and kills, with custom bonus/milestone XP support.
+  - **Dungeon AI Review Card**: Posts an authentic recap chat message celebrating Session MVP, Target of the Night, and audience statistics.
+  - **Session Archiving**: Seals the session record and increments to the next session while maintaining full historical archive access.
+
 ## 1.0.17
 
 ### Skill Compendium Overhaul & Generic Weapon Group Mastery

@@ -1,0 +1,391 @@
+<div class="dcc-session-manager-root">
+  {{!-- HEADER BAR --}}
+  <header class="dcc-session-header">
+    <div class="dcc-session-title-group">
+      <i class="fa-solid fa-users-gear dcc-header-icon"></i>
+      <div>
+        <h2 class="dcc-app-title">PARTY PROGRESSION & SESSION MANAGER</h2>
+        <div class="dcc-session-subheading">
+          Dungeon Crawler Carl RPG &bull; Live Party Matrix & DM Balancing Console
+        </div>
+      </div>
+    </div>
+
+    <div class="dcc-session-controls">
+      <div class="dcc-session-selector-wrap">
+        <label for="dcc-session-select"><i class="fa-solid fa-calendar-days"></i> Session:</label>
+        <select id="dcc-session-select" class="dcc-select-session">
+          {{#each sessions}}
+            <option value="{{this.id}}" {{#if (eq this.id ../currentSessionId)}}selected{{/if}}>
+              {{this.title}} {{#if (eq this.status 'active')}}🟢 [ACTIVE]{{else}}🔒 [ARCHIVED]{{/if}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+
+      <button type="button" class="dcc-btn dcc-btn-primary dcc-new-session-btn" title="Start a New Session">
+        <i class="fa-solid fa-plus"></i> New Session
+      </button>
+
+      {{#if session}}
+        {{#if isActiveSession}}
+          <button type="button" class="dcc-btn dcc-btn-danger dcc-end-session-btn" data-session-id="{{session.id}}" title="Conclude and Archive this Session">
+            <i class="fa-solid fa-flag-checkered"></i> End Session
+          </button>
+        {{else}}
+          <button type="button" class="dcc-btn dcc-btn-secondary dcc-set-active-session-btn" data-session-id="{{session.id}}" title="Make this session the active session">
+            <i class="fa-solid fa-bolt"></i> Set Active
+          </button>
+          <button type="button" class="dcc-btn dcc-btn-secondary dcc-reopen-session-btn" data-session-id="{{session.id}}" title="Reopen this archived session for editing">
+            <i class="fa-solid fa-lock-open"></i> Reopen
+          </button>
+        {{/if}}
+      {{/if}}
+    </div>
+  </header>
+
+  {{!-- TAB NAVIGATION --}}
+  <nav class="dcc-session-tabs">
+    <button type="button" class="dcc-tab-nav-btn {{#if (eq activeTab 'party')}}active{{/if}}" data-tab="party">
+      <i class="fa-solid fa-id-card-clip"></i> Party Overview
+    </button>
+    <button type="button" class="dcc-tab-nav-btn {{#if (eq activeTab 'ledger')}}active{{/if}}" data-tab="ledger">
+      <i class="fa-solid fa-dice-d20"></i> Activity & Roll Ledger ({{ledger.length}})
+    </button>
+    <button type="button" class="dcc-tab-nav-btn {{#if (eq activeTab 'wrapup')}}active{{/if}}" data-tab="wrapup">
+      <i class="fa-solid fa-graduation-cap"></i> End-of-Session Progression
+    </button>
+    <button type="button" class="dcc-tab-nav-btn {{#if (eq activeTab 'archive')}}active{{/if}}" data-tab="archive">
+      <i class="fa-solid fa-box-archive"></i> Session History ({{sessions.length}})
+    </button>
+  </nav>
+
+  {{!-- BODY CONTENT --}}
+  <div class="dcc-session-body">
+    {{!-- TAB 1: PARTY OVERVIEW --}}
+    {{#if (eq activeTab 'party')}}
+      <div class="dcc-party-tab-content">
+        <div class="dcc-tab-banner">
+          <div class="dcc-banner-stats">
+            <span><strong style="color: #fff;">{{session.title}}</strong> ({{#if isActiveSession}}<span style="color: #2ecc71;">Active</span>{{else}}<span style="color: #95a5a6;">Archived</span>{{/if}})</span>
+            <span>Total Dmg Dealt: <strong style="color: #e74c3c;">{{session.summary.totalDamageDealt}}</strong></span>
+            <span>Total Dmg Taken: <strong style="color: #f39c12;">{{session.summary.totalDamageTaken}}</strong></span>
+            <span>Kills: <strong style="color: #fff;">{{session.summary.totalKills}}</strong></span>
+            <span>Untrained Checks: <strong style="color: #f1c40f;">{{session.summary.totalUntrainedAttempts}}</strong></span>
+          </div>
+        </div>
+
+        <div class="dcc-party-grid">
+          {{#each crawlersList}}
+            <div class="dcc-crawler-card {{#if this.isSelected}}selected{{/if}}" data-actor-id="{{this.actorId}}">
+              <div class="dcc-crawler-card-header">
+                <img class="dcc-crawler-avatar" src="{{this.img}}" alt="{{this.name}}" />
+                <div class="dcc-crawler-identity">
+                  <h3 class="dcc-crawler-name">{{this.name}}</h3>
+                  <div class="dcc-crawler-meta">
+                    <span class="dcc-badge-level">LVL {{this.level}}</span>
+                    <span class="dcc-crawler-bars">{{this.hpBars}} Bars ({{this.hpValue}}/{{this.hpMax}} HP)</span>
+                    <span class="dcc-crawler-mana">{{this.manaValue}}/{{this.manaMax}} MP</span>
+                  </div>
+                </div>
+              </div>
+
+              {{!-- Combat stats row --}}
+              <div class="dcc-card-metric-row">
+                <div class="dcc-card-metric">
+                  <span class="dcc-metric-lbl">Dealt</span>
+                  <span class="dcc-metric-val dmg-dealt">{{this.damageDealt}}</span>
+                  <div class="dcc-quick-adjusts">
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="damageDealt" data-delta="-5">-5</button>
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="damageDealt" data-delta="5">+5</button>
+                  </div>
+                </div>
+                <div class="dcc-card-metric">
+                  <span class="dcc-metric-lbl">Taken</span>
+                  <span class="dcc-metric-val dmg-taken">{{this.damageTaken}}</span>
+                  <div class="dcc-quick-adjusts">
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="damageTaken" data-delta="-5">-5</button>
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="damageTaken" data-delta="5">+5</button>
+                  </div>
+                </div>
+                <div class="dcc-card-metric">
+                  <span class="dcc-metric-lbl">Kills</span>
+                  <span class="dcc-metric-val">{{this.kills}}</span>
+                  <div class="dcc-quick-adjusts">
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="kills" data-delta="-1">-1</button>
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="kills" data-delta="1">+1</button>
+                  </div>
+                </div>
+              </div>
+
+              {{!-- Favor & Popularity row --}}
+              <div class="dcc-card-metric-row secondary">
+                <div class="dcc-card-metric">
+                  <span class="dcc-metric-lbl"><i class="fa-solid fa-hand-holding-heart"></i> AI Favor</span>
+                  <span class="dcc-metric-val favor {{#if (gte this.aiFavorDelta 0)}}pos{{else}}neg{{/if}}">
+                    {{#if (gte this.aiFavorDelta 0)}}+{{/if}}{{this.aiFavorDelta}}
+                  </span>
+                  <div class="dcc-quick-adjusts">
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="aiFavorDelta" data-delta="-1">-1</button>
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="aiFavorDelta" data-delta="1">+1</button>
+                  </div>
+                </div>
+                <div class="dcc-card-metric">
+                  <span class="dcc-metric-lbl"><i class="fa-solid fa-star"></i> Popularity</span>
+                  <span class="dcc-metric-val pop {{#if (gte this.popularityDelta 0)}}pos{{else}}neg{{/if}}">
+                    {{#if (gte this.popularityDelta 0)}}+{{/if}}{{this.popularityDelta}}
+                  </span>
+                  <div class="dcc-quick-adjusts">
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="popularityDelta" data-delta="-1">-1</button>
+                    <button type="button" class="dcc-stat-adjust-btn" data-actor-id="{{this.actorId}}" data-stat="popularityDelta" data-delta="1">+1</button>
+                  </div>
+                </div>
+              </div>
+
+              {{!-- Deeds & Untrained attempts badges --}}
+              <div class="dcc-card-activity-summary">
+                <span class="dcc-pill pill-skill" title="Trained Skills Used">
+                  <i class="fa-solid fa-bolt"></i> {{this.totalSkillsCount}} Skills
+                </span>
+                <span class="dcc-pill pill-untrained {{#if this.totalUntrainedCount}}highlight{{/if}}" title="Untrained Skills Attempted">
+                  <i class="fa-solid fa-triangle-exclamation"></i> {{this.totalUntrainedCount}} Untrained
+                </span>
+                <span class="dcc-pill pill-spell" title="Spells Cast">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> {{this.totalSpellsCount}} Spells
+                </span>
+                {{#if this.lootBoxesAwarded.length}}
+                  <span class="dcc-pill pill-loot" title="Loot Boxes">
+                    <i class="fa-solid fa-gift"></i> {{this.lootBoxesAwarded.length}} Boxes
+                  </span>
+                {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+
+    {{!-- TAB 2: ACTIVITY & ROLL LEDGER --}}
+    {{#if (eq activeTab 'ledger')}}
+      <div class="dcc-ledger-tab-content">
+        {{!-- Filters bar --}}
+        <div class="dcc-ledger-filter-bar">
+          <div class="dcc-filter-item">
+            <label for="dcc-filter-crawler">Crawler:</label>
+            <select id="dcc-filter-crawler">
+              <option value="all">All Crawlers</option>
+              {{#each crawlersList}}
+                <option value="{{this.actorId}}" {{#if (eq ../filterCrawlerId this.actorId)}}selected{{/if}}>{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="dcc-filter-item">
+            <label for="dcc-filter-type">Action Type:</label>
+            <select id="dcc-filter-type">
+              <option value="all">All Types</option>
+              <option value="skill" {{#if (eq filterType 'skill')}}selected{{/if}}>Trained Skill</option>
+              <option value="untrained_skill" {{#if (eq filterType 'untrained_skill')}}selected{{/if}}>Untrained Skill</option>
+              <option value="attack" {{#if (eq filterType 'attack')}}selected{{/if}}>Attack</option>
+              <option value="spell" {{#if (eq filterType 'spell')}}selected{{/if}}>Spell</option>
+              <option value="favor" {{#if (eq filterType 'favor')}}selected{{/if}}>AI Favor</option>
+              <option value="popularity" {{#if (eq filterType 'popularity')}}selected{{/if}}>Popularity</option>
+              <option value="manual" {{#if (eq filterType 'manual')}}selected{{/if}}>Manual</option>
+            </select>
+          </div>
+
+          <div class="dcc-filter-item">
+            <label for="dcc-filter-outcome">Outcome:</label>
+            <select id="dcc-filter-outcome">
+              <option value="all">All Outcomes</option>
+              {{#each outcomeOptions}}
+                <option value="{{this.key}}" {{#if (eq ../filterOutcome this.key)}}selected{{/if}}>{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="dcc-filter-item search">
+            <input type="text" id="dcc-filter-search" placeholder="Search rolls or notes..." value="{{searchQuery}}" />
+          </div>
+
+          <button type="button" class="dcc-btn dcc-btn-secondary dcc-add-manual-event-btn">
+            <i class="fa-solid fa-pen-to-square"></i> + Add Event
+          </button>
+        </div>
+
+        {{!-- Table --}}
+        <div class="dcc-ledger-table-wrap">
+          <table class="dcc-ledger-table">
+            <thead>
+              <tr>
+                <th style="width: 70px;">Time</th>
+                <th style="width: 140px;">Crawler</th>
+                <th>Action & Details</th>
+                <th style="width: 90px;">Roll</th>
+                <th style="width: 70px;">DC / AC</th>
+                <th style="width: 150px;">7-Tier Outcome</th>
+                <th>Notes</th>
+                <th style="width: 40px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#if ledger.length}}
+                {{#each ledger}}
+                  <tr class="dcc-ledger-row" data-entry-id="{{this.id}}">
+                    <td class="dcc-cell-time">{{this.dateFormatted}}</td>
+                    <td class="dcc-cell-actor">
+                      <div class="dcc-actor-pill">
+                        <img src="{{this.actorImg}}" alt="" />
+                        <span>{{this.actorName}}</span>
+                      </div>
+                    </td>
+                    <td class="dcc-cell-action">
+                      <strong>{{this.name}}</strong>
+                      {{#if this.isUntrained}}
+                        <span class="dcc-badge-untrained">[UNTRAINED]</span>
+                      {{/if}}
+                      <span class="dcc-action-type-tag">[{{this.type}}]</span>
+                    </td>
+                    <td class="dcc-cell-roll">
+                      <span class="dcc-roll-total">{{this.total}}</span>
+                      <small class="dcc-roll-formula">{{this.rollFormula}}</small>
+                    </td>
+                    <td class="dcc-cell-dc">
+                      <input type="number" class="dcc-ledger-dc-input" data-entry-id="{{this.id}}" value="{{this.targetDC}}" placeholder="DC" />
+                    </td>
+                    <td class="dcc-cell-outcome">
+                      <select class="dcc-ledger-outcome-select {{this.outcomeClass}}" data-entry-id="{{this.id}}">
+                        {{#each ../outcomeOptions}}
+                          <option value="{{this.key}}" {{#if (eq this.key ../outcome)}}selected{{/if}}>{{this.label}}</option>
+                        {{/each}}
+                      </select>
+                    </td>
+                    <td class="dcc-cell-notes">{{this.notes}}</td>
+                    <td class="dcc-cell-actions">
+                      <button type="button" class="dcc-ledger-delete-btn" data-entry-id="{{this.id}}" title="Delete entry">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                {{/each}}
+              {{else}}
+                <tr>
+                  <td colspan="8" class="dcc-empty-state">
+                    No activity recorded in this session yet. Rolls from character sheets, attacks, and spells will automatically appear here!
+                  </td>
+                </tr>
+              {{/if}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {{/if}}
+
+    {{!-- TAB 3: END-OF-SESSION PROGRESSION --}}
+    {{#if (eq activeTab 'wrapup')}}
+      <div class="dcc-wrapup-tab-content">
+        {{!-- SECTION A: UNTRAINED SKILL PROMOTIONS --}}
+        <section class="dcc-wrapup-section">
+          <div class="dcc-section-header">
+            <i class="fa-solid fa-book-sparkles"></i>
+            <h3>Untrained Skills Attempted — Field Training Opportunities</h3>
+          </div>
+          <p class="dcc-section-desc">
+            In CarlRPG, crawlers learn through survival. Below are all untrained skills attempted during this session.
+            The DM can award field mastery, promoting an untrained skill to Rank 1 directly on the crawler's character sheet.
+          </p>
+
+          <div class="dcc-untrained-grid">
+            {{#if untrainedSkillsReview.length}}
+              {{#each untrainedSkillsReview}}
+                <div class="dcc-untrained-card">
+                  <div class="dcc-untrained-card-body">
+                    <span class="dcc-untrained-actor"><strong>{{this.actorName}}</strong></span>
+                    <span class="dcc-untrained-skill">{{this.skillName}}</span>
+                    <span class="dcc-untrained-count">{{this.count}} attempt{{#if (not (eq this.count 1))}}s{{/if}}</span>
+                  </div>
+                  <button type="button" class="dcc-btn dcc-btn-success dcc-train-skill-btn" data-actor-id="{{this.actorId}}" data-skill-name="{{this.skillName}}">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Train to Rank 1
+                  </button>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="dcc-empty-box">
+                <i class="fa-solid fa-circle-check" style="color: #27ae60;"></i> No untrained skill attempts recorded in this session.
+              </div>
+            {{/if}}
+          </div>
+        </section>
+
+        {{!-- SECTION B: SESSION XP DISTRIBUTION --}}
+        <section class="dcc-wrapup-section">
+          <div class="dcc-section-header">
+            <i class="fa-solid fa-trophy"></i>
+            <h3>Session Experience & Progression Pool</h3>
+          </div>
+          <p class="dcc-section-desc">
+            Experience is pooled from total damage dealt, damage taken, tactical skills used, completed quests, and mob kills, then distributed proportionally.
+          </p>
+
+          <div class="dcc-xp-wrapup-box">
+            <div class="dcc-xp-input-group">
+              <label for="dcc-bonus-xp-input">Milestone / Bonus XP:</label>
+              <input type="number" id="dcc-bonus-xp-input" value="0" step="50" min="0" />
+            </div>
+            <button type="button" class="dcc-btn dcc-btn-primary dcc-distribute-session-xp-btn">
+              <i class="fa-solid fa-coins"></i> Calculate & Award Session XP to Party
+            </button>
+          </div>
+        </section>
+
+        {{!-- SECTION C: BROADCAST & ARCHIVE --}}
+        <section class="dcc-wrapup-section">
+          <div class="dcc-section-header">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <h3>Dungeon AI Broadcast & Session Finalization</h3>
+          </div>
+          <p class="dcc-section-desc">
+            Post an official Dungeon AI Performance Review card to chat highlighting MVP, crowd metrics, and loot dispatches, then seal the session into history.
+          </p>
+
+          <div class="dcc-broadcast-actions">
+            <button type="button" class="dcc-btn dcc-btn-gold dcc-broadcast-review-btn">
+              <i class="fa-solid fa-bullhorn"></i> Broadcast Dungeon AI Review to Chat
+            </button>
+
+            {{#if isActiveSession}}
+              <button type="button" class="dcc-btn dcc-btn-danger dcc-end-session-btn" data-session-id="{{session.id}}">
+                <i class="fa-solid fa-lock"></i> Conclude & Archive Session
+              </button>
+            {{/if}}
+          </div>
+        </section>
+      </div>
+    {{/if}}
+
+    {{!-- TAB 4: SESSION ARCHIVES --}}
+    {{#if (eq activeTab 'archive')}}
+      <div class="dcc-archive-tab-content">
+        <div class="dcc-archive-list">
+          {{#each sessions}}
+            <div class="dcc-archive-card {{#if (eq this.id ../currentSessionId)}}selected{{/if}}">
+              <div class="dcc-archive-card-header">
+                <div>
+                  <h4>{{this.title}}</h4>
+                  <small>{{#if (eq this.status 'active')}}<span style="color: #2ecc71;">Active Session</span>{{else}}<span style="color: #95a5a6;">Archived</span>{{/if}}</small>
+                </div>
+                <span class="dcc-archive-deeds">{{this.ledger.length}} Recorded Deeds</span>
+              </div>
+              <div class="dcc-archive-card-stats">
+                <span>Dmg Dealt: <strong>{{this.summary.totalDamageDealt}}</strong></span>
+                <span>Dmg Taken: <strong>{{this.summary.totalDamageTaken}}</strong></span>
+                <span>Kills: <strong>{{this.summary.totalKills}}</strong></span>
+                <span>Untrained: <strong>{{this.summary.totalUntrainedAttempts}}</strong></span>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

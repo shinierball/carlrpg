@@ -54,6 +54,18 @@ Hooks.once('init', async function() {
     DCCSessionEngine,
     DCCSessionManagerApp,
     DCCCrawlerCreatorApp,
+    applications: {
+      DCCCrawlerSheet,
+      DCCItemSheet,
+      DCCSkillManager,
+      DCCSpellManager,
+      DCCBuffDebuffManager,
+      DCCCombatMetrics,
+      DCCCombatArchiveApp,
+      DCCSessionEngine,
+      DCCSessionManagerApp,
+      DCCCrawlerCreatorApp
+    },
     models: {
       // Items
       SkillDataModel,

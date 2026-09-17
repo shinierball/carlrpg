@@ -469,9 +469,116 @@ if (!globalThis.ItemSheet) {
   };
 }
 
+class MockApplicationV2 {
+  constructor(options = {}) {
+    this.options = options;
+    this.element = {
+      querySelectorAll: () => [],
+      querySelector: () => null,
+      addEventListener: () => {},
+      classList: { add: () => {}, remove: () => {}, contains: () => false },
+      dataset: {}
+    };
+  }
+  static DEFAULT_OPTIONS = {
+    tag: 'div',
+    classes: ['application'],
+    position: { width: 'auto', height: 'auto' }
+  };
+  static PARTS = {};
+  async render(force = false, options = {}) {
+    return this;
+  }
+  async close(options = {}) {
+    return Promise.resolve();
+  }
+}
+
+function MockHandlebarsApplicationMixin(Base) {
+  return class extends Base {
+    async _prepareContext(options = {}) {
+      if (typeof super._prepareContext === 'function') {
+        return super._prepareContext(options);
+      }
+      return {};
+    }
+    async _preparePartContext(partId, context, options) {
+      return context;
+    }
+    async _onRender(context, options) {}
+  };
+}
+
+class MockActorSheetV2 extends MockApplicationV2 {
+  constructor(options = {}) {
+    const opts = (options instanceof MockActor || (globalThis.Actor && options instanceof globalThis.Actor))
+      ? { document: options }
+      : options;
+    super(opts);
+    this.document = opts.document || null;
+    this.actor = this.document;
+  }
+  static mixin(...mixins) {
+    let cls = this;
+    for (const mixin of mixins) {
+      cls = mixin(cls);
+    }
+    return cls;
+  }
+  get isEditable() {
+    return true;
+  }
+  async _prepareContext(options = {}) {
+    return {
+      actor: this.actor,
+      document: this.actor,
+      data: this.actor,
+      items: this.actor?.items || []
+    };
+  }
+}
+
+class MockItemSheetV2 extends MockApplicationV2 {
+  constructor(options = {}) {
+    const opts = (options instanceof MockItem || (globalThis.Item && options instanceof globalThis.Item))
+      ? { document: options }
+      : options;
+    super(opts);
+    this.document = opts.document || null;
+    this.item = this.document;
+  }
+  static mixin(...mixins) {
+    let cls = this;
+    for (const mixin of mixins) {
+      cls = mixin(cls);
+    }
+    return cls;
+  }
+  get isEditable() {
+    return true;
+  }
+  async _prepareContext(options = {}) {
+    return {
+      item: this.item,
+      document: this.item,
+      data: this.item
+    };
+  }
+}
+
 if (!globalThis.foundry) {
   globalThis.foundry = {};
 }
+
+globalThis.foundry.applications = globalThis.foundry.applications || {};
+globalThis.foundry.applications.api = globalThis.foundry.applications.api || {
+  ApplicationV2: MockApplicationV2,
+  HandlebarsApplicationMixin: MockHandlebarsApplicationMixin
+};
+globalThis.foundry.applications.sheets = globalThis.foundry.applications.sheets || {
+  ActorSheetV2: MockActorSheetV2,
+  ItemSheetV2: MockItemSheetV2
+};
 
 if (!globalThis.foundry.utils) {
   globalThis.foundry.utils = {
@@ -1036,11 +1143,17 @@ if (!globalThis.foundry) {
 }
 
 if (!globalThis.$) {
-  globalThis.$ = (target) => ({
+  const createMockJQuery = (target) => ({
     data: (key) => target?.dataset?.[key],
     val: () => target?.value,
     attr: (attr) => target?.getAttribute?.(attr) || target?.[attr],
-    find: () => ({ length: 0 }),
-    closest: (sel) => target?.closest?.(sel)
+    find: () => createMockJQuery(null),
+    closest: (sel) => target?.closest?.(sel),
+    on: () => createMockJQuery(null),
+    click: () => createMockJQuery(null),
+    change: () => createMockJQuery(null),
+    length: 0,
+    [Symbol.iterator]: function* () {}
   });
+  globalThis.$ = createMockJQuery;
 }

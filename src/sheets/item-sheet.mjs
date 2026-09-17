@@ -1,12 +1,56 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 
+const BaseItemSheet = (globalThis.foundry?.applications?.sheets?.ItemSheetV2 && globalThis.foundry?.applications?.api?.HandlebarsApplicationMixin)
+  ? foundry.applications.sheets.ItemSheetV2.mixin(foundry.applications.api.HandlebarsApplicationMixin)
+  : (globalThis.ItemSheet || class {});
+
 /**
- * Dungeon Crawler Carl Item Sheet Controller
+ * Dungeon Crawler Carl Item Sheet Controller (Application V2 with V1 Compatibility)
  */
-export class DCCItemSheet extends ItemSheet {
-  /** @override */
+export class DCCItemSheet extends BaseItemSheet {
+  constructor(itemOrOptions, options = {}) {
+    let opts = options;
+    let itemDoc = null;
+    if (itemOrOptions && typeof itemOrOptions === 'object' && itemOrOptions.document) {
+      opts = itemOrOptions;
+      itemDoc = itemOrOptions.document;
+    } else {
+      itemDoc = itemOrOptions;
+      opts = { document: itemOrOptions, ...options };
+    }
+    super(opts);
+    this.item = itemDoc || this.document || this.item;
+    this.document = this.item;
+  }
+
+  /**
+   * Application V2 Options
+   */
+  static DEFAULT_OPTIONS = {
+    tag: 'form',
+    classes: ['dcc-sheet-window', 'item'],
+    position: {
+      width: 580,
+      height: 640
+    },
+    form: {
+      submitOnChange: true,
+      closeOnSubmit: false
+    }
+  };
+
+  /**
+   * Application V2 Parts definition
+   */
+  static PARTS = {
+    sheet: {
+      template: 'systems/carl-rpg/templates/items/item-sheet.hbs'
+    }
+  };
+
+  /** @override (V1 compatibility) */
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions || {}, {
       classes: ['dcc-sheet-window', 'item'],
       template: 'systems/carl-rpg/templates/items/item-sheet.hbs',
       width: 580,
@@ -115,10 +159,20 @@ export class DCCItemSheet extends ItemSheet {
       }));
   }
 
-  /** @override */
-  async getData(options) {
-    const context = await super.getData(options);
-    context.system = context.item.system;
+  /**
+   * Application V2 context preparation
+   * @override
+   */
+  async _prepareContext(options = {}) {
+    const context = (typeof super._prepareContext === 'function')
+      ? await super._prepareContext(options)
+      : (typeof super.getData === 'function' ? await super.getData(options) : {});
+
+    const item = this.document || this.item;
+    context.item = item;
+    context.document = item;
+    context.data = item;
+    context.system = item?.system || context.system || {};
     context.abilities = {
       str: 'Strength',
       int: 'Intelligence',
@@ -207,6 +261,28 @@ export class DCCItemSheet extends ItemSheet {
     ];
 
     return context;
+  }
+
+  /**
+   * Compatibility method for FormApplication V1 callers
+   * @override
+   */
+  async getData(options) {
+    return this._prepareContext(options);
+  }
+
+  /**
+   * Application V2 render hook
+   * @override
+   */
+  _onRender(context, options) {
+    if (typeof super._onRender === 'function') {
+      super._onRender(context, options);
+    }
+    if (this.element) {
+      const $el = globalThis.$ ? globalThis.$(this.element) : this.element;
+      this.activateListeners($el);
+    }
   }
 
   /**
@@ -326,7 +402,9 @@ export class DCCItemSheet extends ItemSheet {
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
     }
 
-    const result = await super._updateObject(event, formData);
+    const result = (typeof super._updateObject === 'function')
+      ? await super._updateObject(event, formData)
+      : await this.item.update(formData);
 
     // Re-render parent actor sheet if open so skills tab reflects changes immediately
     if (this.item.actor?.sheet?.rendered) {
@@ -338,7 +416,9 @@ export class DCCItemSheet extends ItemSheet {
 
   /** @override */
   activateListeners(html) {
-    super.activateListeners(html);
+    if (typeof super.activateListeners === 'function') {
+      super.activateListeners(html);
+    }
 
     if (!this.isEditable) return;
 

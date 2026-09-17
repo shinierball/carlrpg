@@ -52,13 +52,74 @@ export function formatGearBonuses(gearItem) {
   return parts.join(', ');
 }
 
+const BaseCrawlerSheet = (globalThis.foundry?.applications?.sheets?.ActorSheetV2 && globalThis.foundry?.applications?.api?.HandlebarsApplicationMixin)
+  ? foundry.applications.sheets.ActorSheetV2.mixin(foundry.applications.api.HandlebarsApplicationMixin)
+  : (globalThis.ActorSheet || class {});
+
 /**
- * Dungeon Crawler Carl Character Sheet Controller
+ * Dungeon Crawler Carl Character Sheet Controller (Application V2 with V1 Compatibility)
  */
-export class DCCCrawlerSheet extends ActorSheet {
-  /** @override */
+export class DCCCrawlerSheet extends BaseCrawlerSheet {
+  constructor(actorOrOptions, options = {}) {
+    let opts = options;
+    let actorDoc = null;
+    if (actorOrOptions && typeof actorOrOptions === 'object' && actorOrOptions.document) {
+      opts = actorOrOptions;
+      actorDoc = actorOrOptions.document;
+    } else {
+      actorDoc = actorOrOptions;
+      opts = { document: actorOrOptions, ...options };
+    }
+    super(opts);
+    this.actor = actorDoc || this.document || this.actor;
+    this.document = this.actor;
+  }
+
+  /**
+   * Application V2 Options
+   */
+  static DEFAULT_OPTIONS = {
+    tag: 'form',
+    classes: ['dcc-sheet-window', 'actor', 'crawler'],
+    position: {
+      width: 860,
+      height: 900
+    },
+    form: {
+      submitOnChange: true,
+      closeOnSubmit: false
+    },
+    window: {
+      resizable: true,
+      controls: [
+        {
+          icon: 'fa-solid fa-file-pdf',
+          label: 'Save to PDF',
+          action: 'exportPdf'
+        }
+      ]
+    },
+    actions: {
+      exportPdf: DCCCrawlerSheet.#onExportPdfAction
+    }
+  };
+
+  /**
+   * Application V2 Parts definition
+   */
+  static PARTS = {
+    sheet: {
+      template: 'systems/carl-rpg/templates/actors/crawler-sheet.hbs'
+    }
+  };
+
+  static async #onExportPdfAction(event, target) {
+    return this._onExportPdf();
+  }
+
+  /** @override (V1 compatibility) */
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions || {}, {
       classes: ['dcc-sheet-window', 'actor', 'crawler'],
       template: 'systems/carl-rpg/templates/actors/crawler-sheet.hbs',
       width: 860,
@@ -70,9 +131,9 @@ export class DCCCrawlerSheet extends ActorSheet {
     });
   }
 
-  /** @override */
+  /** @override (V1 compatibility) */
   _getHeaderButtons() {
-    const buttons = super._getHeaderButtons();
+    const buttons = super._getHeaderButtons ? super._getHeaderButtons() : [];
     buttons.unshift({
       label: 'Save to PDF',
       class: 'save-pdf-btn',
@@ -82,13 +143,23 @@ export class DCCCrawlerSheet extends ActorSheet {
     return buttons;
   }
 
-  /** @override */
-  async getData(options) {
-    const context = await super.getData(options);
-    const actorData = context.data;
+  /**
+   * Application V2 context preparation
+   * @override
+   */
+  async _prepareContext(options = {}) {
+    const context = (typeof super._prepareContext === 'function')
+      ? await super._prepareContext(options)
+      : (typeof super.getData === 'function' ? await super.getData(options) : {});
 
-    context.system = actorData.system;
-    context.flags = actorData.flags;
+    const actor = this.document || this.actor;
+    const actorData = context.data || actor;
+
+    context.actor = actor;
+    context.document = actor;
+    context.data = actor;
+    context.system = actor?.system || actorData?.system || {};
+    context.flags = actor?.flags || actorData?.flags || {};
 
     // Prepare creature size options
     const currentSize = context.system.attributes?.size ?? 'Medium';
@@ -743,9 +814,33 @@ export class DCCCrawlerSheet extends ActorSheet {
     return context;
   }
 
+  /**
+   * Compatibility method for FormApplication V1 callers
+   * @override
+   */
+  async getData(options) {
+    return this._prepareContext(options);
+  }
+
+  /**
+   * Application V2 render hook
+   * @override
+   */
+  _onRender(context, options) {
+    if (typeof super._onRender === 'function') {
+      super._onRender(context, options);
+    }
+    if (this.element) {
+      const $el = globalThis.$ ? globalThis.$(this.element) : this.element;
+      this.activateListeners($el);
+    }
+  }
+
   /** @override */
   activateListeners(html) {
-    super.activateListeners(html);
+    if (typeof super.activateListeners === 'function') {
+      super.activateListeners(html);
+    }
 
     if (!this.isEditable) return;
 
@@ -1164,7 +1259,10 @@ export class DCCCrawlerSheet extends ActorSheet {
         formData[k] = formData[k][0] || '';
       }
     }
-    return super._updateObject(event, formData);
+    if (typeof super._updateObject === 'function') {
+      return super._updateObject(event, formData);
+    }
+    return this.actor.update(formData);
   }
 
   /**

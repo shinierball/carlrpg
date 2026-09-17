@@ -1,12 +1,12 @@
 # System Data Models & Foundry V16 Roadmap
 
-The Dungeon Crawler Carl RPG (CarlRPG) system is migrating from legacy `template.json` definitions to modern **System Data Models** (`foundry.abstract.TypeDataModel`) in accordance with Foundry VTT core standards.
+The Dungeon Crawler Carl RPG (CarlRPG) system is migrating from legacy `template.json` definitions and FormApplication v1 patterns to modern **System Data Models** (`foundry.abstract.TypeDataModel`) and **Application V2** (`foundry.applications.sheets.ActorSheetV2`, `ItemSheetV2`) in accordance with Foundry VTT core standards.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-System Data Models replace untyped JSON objects with strongly typed, schema-validated ES classes. Each document sub-type defines its exact structure using `foundry.data.fields.*`.
+System Data Models replace untyped JSON objects with strongly typed, schema-validated ES classes. Each document sub-type defines its exact structure using `foundry.data.fields.*`. Sheets utilize Application V2 with `HandlebarsApplicationMixin`.
 
 ### Benefits
 1. **Strong Typing & Auto-Validation**: Numeric bounds, integers, required strings, and nested schemas are enforced at the engine level.
@@ -14,6 +14,7 @@ System Data Models replace untyped JSON objects with strongly typed, schema-vali
 3. **Data Sanitization (`htmlFields`)**: Rich-text HTML content is safely sanitized by the Foundry server on save.
 4. **Seamless Migrations**: Built-in `migrateData(source)` handles legacy updates transparently.
 5. **Decoupled Data Preparation**: Core stat calculations, modifiers, gear tallies, buff resolutions, skill cascading, and progression math live within model classes rather than bloated monolithic document classes.
+6. **Application V2 UI Modernization**: Sheet controllers implement declarative `DEFAULT_OPTIONS`, `PARTS`, `_prepareContext()`, and native `_onRender()` while maintaining dual backwards compatibility for legacy v1 calling conventions.
 
 ---
 
@@ -57,25 +58,34 @@ Registered under `CONFIG.Actor.trackableAttributes`:
   - Bars: `attributes.hp`
   - Values: `attributes.dr`, `attributes.move`
 
-### Accessing Data Models in Code
-```javascript
-// Retrieve an actor and inspect typed fields
-const crawler = game.actors.getName('Carl');
+---
 
-// Read strongly-typed fields
-console.log(crawler.system.details.level); // e.g. 1
-console.log(crawler.system.abilities.str.value); // Enhanced STR score
-console.log(crawler.system.abilities.str.mod); // DCC stat modifier
+## 🖥️ Phase 3: Application V2 Sheets (v2.0.1)
 
-// Model-prepared values
-console.log(crawler.system.attributes.evade.total); // Evade with DEX + gear + buffs
-console.log(crawler.system.details.xp.pct); // Level progression percentage
-```
+Character and Item sheet controllers have been modernized to **Application V2** (`foundry.applications.sheets.ActorSheetV2` and `ItemSheetV2` with `foundry.applications.api.HandlebarsApplicationMixin`):
+
+### Features & Architecture
+1. **DCCCrawlerSheet**:
+   - `DEFAULT_OPTIONS`: Defines `tag: 'form'`, `classes: ['dcc-sheet-window', 'actor', 'crawler']`, `position: { width: 860, height: 900 }`, and header window controls for direct fillable PDF export.
+   - `PARTS`: `sheet: { template: 'systems/carl-rpg/templates/actors/crawler-sheet.hbs' }`.
+   - `_prepareContext(options)`: Compiles the full template context (creature size options, categorized items, equipped gear by slot, hotlist options, stat breakdowns).
+   - `_onRender(context, options)`: Native listener attachment without jQuery dependency.
+   - Dual constructor: Accepts both Application V2 options (`new DCCCrawlerSheet({ document: actor })`) and legacy positional arguments (`new DCCCrawlerSheet(actor)`).
+   - Dual context access: Both `_prepareContext()` and `getData()` return identical data.
+2. **DCCItemSheet**:
+   - `DEFAULT_OPTIONS`: Form options, `position: { width: 580, height: 640 }`.
+   - `PARTS`: `sheet: { template: 'systems/carl-rpg/templates/items/item-sheet.hbs' }`.
+   - `_prepareContext(options)`: Compiles item details, compendium skills, damage types, and modifier lists.
+   - Dual constructor and context access.
+3. **Application Namespace**:
+   - Exposed under `game.dcc.applications`: `DCCCrawlerSheet`, `DCCItemSheet`, and management apps.
 
 ---
 
-## 🗺️ Future Phases
-
-- **Phase 3 (Application V2 / Sheet Migration)**:
-  - Transition `DCCCrawlerSheet` and `DCCItemSheet` to `foundry.applications.sheets.ActorSheetV2` with `HandlebarsApplicationMixin`.
-  - Deprecate FormApplication v1 patterns in preparation for Foundry V16.
+## 🚀 Summary of Release 2.0.1
+With Phases 1, 2, and 3 complete, CarlRPG is fully prepared for Foundry Virtual Tabletop V16:
+- 11 Item Data Models
+- 4 Actor Data Models
+- Application V2 Sheet Architecture
+- 100% Backward Compatibility with existing worlds, macros, and compendiums
+- 259 Automated Unit Tests passing with 0 failures

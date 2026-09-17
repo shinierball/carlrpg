@@ -17,6 +17,24 @@ import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
 import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from './data/crawler-creation.mjs';
 import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 import { DCC_MACROS } from './data/macros.mjs';
+import {
+  SkillDataModel,
+  AttackDataModel,
+  SpellDataModel,
+  GearDataModel,
+  BuffDataModel,
+  DebuffDataModel,
+  LootDataModel,
+  RaceDataModel,
+  ClassDataModel,
+  DeityDataModel,
+  SponsorDataModel,
+  BaseActorDataModel,
+  CrawlerDataModel,
+  PetDataModel,
+  MountVehicleDataModel,
+  NPCDataModel
+} from './models/index.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
@@ -35,7 +53,27 @@ Hooks.once('init', async function() {
     DCCCombatArchiveApp,
     DCCSessionEngine,
     DCCSessionManagerApp,
-    DCCCrawlerCreatorApp
+    DCCCrawlerCreatorApp,
+    models: {
+      // Items
+      SkillDataModel,
+      AttackDataModel,
+      SpellDataModel,
+      GearDataModel,
+      BuffDataModel,
+      DebuffDataModel,
+      LootDataModel,
+      RaceDataModel,
+      ClassDataModel,
+      DeityDataModel,
+      SponsorDataModel,
+      // Actors
+      BaseActorDataModel,
+      CrawlerDataModel,
+      PetDataModel,
+      MountVehicleDataModel,
+      NPCDataModel
+    }
   };
 
   CONFIG.DCC = {
@@ -59,6 +97,50 @@ Hooks.once('init', async function() {
   // Register document classes
   CONFIG.Actor.documentClass = DCCActor;
   CONFIG.Item.documentClass = DCCItem;
+
+  // Register Actor Type Data Models (Foundry System Data Models)
+  CONFIG.Actor.dataModels = {
+    crawler: CrawlerDataModel,
+    pet: PetDataModel,
+    mount_vehicle: MountVehicleDataModel,
+    npc: NPCDataModel
+  };
+
+  // Register trackable attributes for tokens
+  CONFIG.Actor.trackableAttributes = {
+    crawler: {
+      bar: ['attributes.hp', 'attributes.mana'],
+      value: ['attributes.evade.total', 'attributes.dr.total', 'details.level']
+    },
+    pet: {
+      bar: ['attributes.hp', 'attributes.mana'],
+      value: ['attributes.evade.total', 'attributes.dr.total', 'details.level']
+    },
+    mount_vehicle: {
+      bar: ['attributes.hp'],
+      value: ['attributes.dr', 'attributes.move']
+    },
+    npc: {
+      bar: ['attributes.hp', 'attributes.mana'],
+      value: ['attributes.evade.total', 'attributes.dr.total', 'details.level']
+    }
+  };
+
+  // Register Item Type Data Models (Foundry System Data Models)
+  CONFIG.Item.dataModels = {
+    skill: SkillDataModel,
+    attack: AttackDataModel,
+    spell: SpellDataModel,
+    gear: GearDataModel,
+    buff: BuffDataModel,
+    debuff: DebuffDataModel,
+    loot: LootDataModel,
+    race: RaceDataModel,
+    class: ClassDataModel,
+    deity: DeityDataModel,
+    sponsor: SponsorDataModel
+  };
+
   CONFIG.Combat.documentClass = DCCCombat;
   CONFIG.Combat.initiative = {
     formula: null,

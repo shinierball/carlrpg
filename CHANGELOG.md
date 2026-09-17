@@ -1,3 +1,38 @@
+## 2.0.1
+
+### System Data Models Architecture (Phase 1 & 2: Items, Actors & Foundry V16 Preparation)
+
+- **System Data Models for All Actor Types (Phase 2)**:
+  - Implemented typed `foundry.abstract.TypeDataModel` classes for all 4 canonical Actor subtypes in `src/models/actors/`:
+    - `BaseActorDataModel`: Shared core class defining standard schemas for the 5 abilities (`str`, `int`, `con`, `dex`, `cha`) and base attributes (`hp`, `mana`, `evade`, `dr`, `speed`, `aiFavor`, `size`, `externalBuffs`). Encapsulates shared derived calculation methods (`prepareDerivedBaseStats()`) for size normalization, equipped gear stat/DR/evade bonuses, external buff resolutions, debuff penalties, DCC stat modifier lookups, and attribute totals.
+    - `CrawlerDataModel`: Full schema for Player Characters (Crawlers) including `details` (`floor`, `race`, `class`, `level`, `xp`, `personalSpace`, etc.), `gearSlots`, and `hotlist`. Implements `prepareDerivedData()` handling skill cascading bonuses across weapon groups, generic type bonuses, and experience progression thresholds.
+    - `PetDataModel`: Companion/pet model with level, attacks, and CON-derived durability.
+    - `MountVehicleDataModel`: Structural durability model for mounts and vehicles with size normalization, speed, and DR.
+    - `NPCDataModel`: Monster/NPC model with level, defeat XP values, notes, and special traits.
+  - Registered all Actor Data Models under `CONFIG.Actor.dataModels` and exposed via `game.dcc.models`.
+  - Configured `CONFIG.Actor.trackableAttributes` across all 4 actor types for token bar and status tracking.
+  - Updated `DCCActor.prepareDerivedData()` and `prepareBaseData()` to delegate directly to `this.system.prepareDerivedData()` and `prepareBaseData()`.
+  - Added dedicated test suite `tests/actor-data-models.test.mjs` with 11 unit tests covering all actor types, derived calculations, cascading weapon groups, and document class actions.
+
+- **System Data Models for All Item Types (Phase 1)**:
+  - Implemented typed `foundry.abstract.TypeDataModel` classes for all 11 canonical Item subtypes in `src/models/items/`:
+    - `SkillDataModel`: Declarative schema for skill ranks, stat governing bonuses, damage modifiers, and computed `totalRank` getter.
+    - `AttackDataModel`: Combat to-hit stats, ranks, dice formulas, damage stats, and structured `damageParts`.
+    - `SpellDataModel`: Mana costs, range, duration, cooldowns, spell types, quotes, descriptions, and upgrade tiers (`rank5`, `rank10`, `rank15`).
+    - `GearDataModel`: Equipment slots, quantities, equipped state, DR/Evade bonuses, and nested `abilityModifiers`.
+    - `BuffDataModel`: Buff types, stat/damage multipliers, damage types, and duration tracking.
+    - `DebuffDataModel`: Severity tiers, damage reductions, rounding behaviors, and duration tracking.
+    - `LootDataModel`: Item quantities and descriptions.
+    - `RaceDataModel`, `ClassDataModel`, `DeityDataModel`, `SponsorDataModel`: Structured lore models with HTML-sanitized fields.
+  - Registered all Item Data Models under `CONFIG.Item.dataModels` and exposed via `game.dcc.models`.
+- **System Manifest Modernization**:
+  - Added explicit `documentTypes` definition in `system.json` for all 4 Actor types and 11 Item types.
+  - Configured automated HTML sanitization paths (`htmlFields`) to safeguard rich-text fields.
+  - Bumped maximum verified compatibility to Foundry V16.
+- **Test Harness Integration**:
+  - Enhanced headless Node.js test harness in `tests/setup.mjs` with lightweight implementations of `foundry.abstract.DataModel`, `TypeDataModel`, and `foundry.data.fields.*`.
+  - Added test suites `tests/item-data-models.test.mjs` and `tests/actor-data-models.test.mjs` verifying schema defaults, validation, serialization, and document binding.
+
 ## 1.0.28
 
 ### Visual Readability & Contrast Enhancements

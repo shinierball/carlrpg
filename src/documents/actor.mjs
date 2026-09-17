@@ -111,6 +111,9 @@ export class DCCActor extends Actor {
   /** @override */
   prepareBaseData() {
     super.prepareBaseData();
+    if (typeof this.system?.prepareBaseData === 'function') {
+      this.system.prepareBaseData();
+    }
     if ((this.type === 'crawler' || this.type === 'pet') && !this.isToken) {
       if (this.prototypeToken && !this.prototypeToken.actorLink) {
         this.prototypeToken.actorLink = true;
@@ -129,6 +132,10 @@ export class DCCActor extends Actor {
   /** @override */
   prepareDerivedData() {
     super.prepareDerivedData();
+    if (typeof this.system?.prepareDerivedData === 'function') {
+      this.system.prepareDerivedData();
+      return;
+    }
     const system = this.system;
 
     // Derive size normalization
@@ -936,24 +943,30 @@ export class DCCActor extends Actor {
     const owned = this.items?.get?.(str) ||
       (Array.isArray(this.items) ? this.items.find(i => i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()) : this.items?.find?.(i => i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()));
     if (owned && (owned.type === 'buff' || owned.system?.buffType)) {
+      const sysData = (typeof owned.system?.toObject === 'function')
+        ? owned.system.toObject(false)
+        : (globalThis.foundry?.utils?.deepClone ? foundry.utils.deepClone(owned.system || {}) : structuredClone(owned.system || {}));
       return {
         id: owned.id || owned._id,
         name: owned.name,
         type: 'buff',
         img: owned.img || 'icons/svg/aura.svg',
-        system: structuredClone(owned.system || {})
+        system: sysData
       };
     }
 
     // 2. Check compendium dataset in CONFIG.DCC.buffs
     const compBuff = CONFIG.DCC?.buffs?.find(b => b._id === str || b.name.toLowerCase() === str.toLowerCase());
     if (compBuff) {
+      const sysData = (typeof compBuff.system?.toObject === 'function')
+        ? compBuff.system.toObject(false)
+        : (globalThis.foundry?.utils?.deepClone ? foundry.utils.deepClone(compBuff.system || {}) : structuredClone(compBuff.system || {}));
       return {
         id: compBuff._id,
         name: compBuff.name,
         type: 'buff',
         img: compBuff.img || 'icons/svg/aura.svg',
-        system: structuredClone(compBuff.system || {})
+        system: sysData
       };
     }
 
@@ -961,12 +974,15 @@ export class DCCActor extends Actor {
     if (globalThis.game?.items) {
       const worldItem = Array.from(game.items).find(i => (i.id === str || i._id === str || i.name.toLowerCase() === str.toLowerCase()) && i.type === 'buff');
       if (worldItem) {
+        const sysData = (typeof worldItem.system?.toObject === 'function')
+          ? worldItem.system.toObject(false)
+          : (globalThis.foundry?.utils?.deepClone ? foundry.utils.deepClone(worldItem.system || {}) : structuredClone(worldItem.system || {}));
         return {
           id: worldItem.id || worldItem._id,
           name: worldItem.name,
           type: 'buff',
           img: worldItem.img || 'icons/svg/aura.svg',
-          system: structuredClone(worldItem.system || {})
+          system: sysData
         };
       }
     }

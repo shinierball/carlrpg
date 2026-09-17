@@ -16,7 +16,15 @@ export class MockActor {
     this._id = this.id;
     this.name = data.name || 'Test Crawler';
     this.type = data.type || 'crawler';
-    this.system = structuredClone(data.system || {});
+    if (data.system && typeof data.system === 'object' && typeof data.system.prepareDerivedData === 'function') {
+      this.system = data.system;
+      this.system.parent = this;
+    } else if (globalThis.CONFIG?.Actor?.dataModels?.[this.type]) {
+      const ModelClass = globalThis.CONFIG.Actor.dataModels[this.type];
+      this.system = new ModelClass(data.system || {}, { parent: this });
+    } else {
+      this.system = structuredClone(data.system || {});
+    }
     this.isOwner = data.isOwner ?? true;
     this.items = (data.items || []).map(i => i instanceof MockItem ? i : new MockItem(i, this));
     this.sheet = {
@@ -42,11 +50,31 @@ export class MockActor {
     return actor;
   }
   async _preCreate(data, options, user) {}
-  prepareBaseData() {}
-  prepareDerivedData() {}
+  prepareBaseData() {
+    if (typeof this.system?.prepareBaseData === 'function') {
+      this.system.prepareBaseData();
+    }
+  }
+  prepareDerivedData() {
+    if (typeof this.system?.prepareDerivedData === 'function') {
+      this.system.prepareDerivedData();
+    }
+  }
   prepareData() {
     this.prepareBaseData();
     this.prepareDerivedData();
+  }
+  toObject(source = true) {
+    const sys = (typeof this.system?.toObject === 'function')
+      ? this.system.toObject(source)
+      : structuredClone(this.system || {});
+    return {
+      _id: this.id,
+      name: this.name,
+      type: this.type,
+      system: sys,
+      items: (this.items || []).map(i => i.toObject ? i.toObject() : i)
+    };
   }
   updateSource(data) {
     for (const [k, v] of Object.entries(data)) {
@@ -57,36 +85,31 @@ export class MockActor {
       } else if (k === 'prototypeToken') {
         this.prototypeToken = Object.assign(this.prototypeToken || {}, v);
       } else if (k.startsWith('system.')) {
-        const path = k.replace('system.', '').split('.');
-        let curr = this.system;
-        for (let i = 0; i < path.length - 1; i++) {
-          if (!curr[path[i]]) curr[path[i]] = {};
-          curr = curr[path[i]];
+        const subKey = k.replace('system.', '');
+        if (typeof this.system?.updateSource === 'function') {
+          this.system.updateSource({ [subKey]: v });
+        } else {
+          const path = subKey.split('.');
+          let curr = this.system;
+          for (let i = 0; i < path.length - 1; i++) {
+            if (!curr[path[i]]) curr[path[i]] = {};
+            curr = curr[path[i]];
+          }
+          curr[path[path.length - 1]] = v;
         }
-        curr[path[path.length - 1]] = v;
       } else if (k === 'system') {
-        Object.assign(this.system, v);
+        if (typeof this.system?.updateSource === 'function') {
+          this.system.updateSource(v);
+        } else {
+          Object.assign(this.system, v);
+        }
       } else {
         this[k] = v;
       }
     }
   }
   async update(data) {
-    for (const [k, v] of Object.entries(data)) {
-      if (k.startsWith('system.')) {
-        const path = k.replace('system.', '').split('.');
-        let curr = this.system;
-        for (let i = 0; i < path.length - 1; i++) {
-          if (!curr[path[i]]) curr[path[i]] = {};
-          curr = curr[path[i]];
-        }
-        curr[path[path.length - 1]] = v;
-      } else if (k === 'system') {
-        Object.assign(this.system, v);
-      } else {
-        this[k] = v;
-      }
-    }
+    this.updateSource(data);
     return this;
   }
   async createEmbeddedDocuments(embeddedType, dataArray) {
@@ -114,31 +137,55 @@ export class MockItem {
     this.name = data.name || 'Test Item';
     this.type = data.type || 'gear';
     this.img = data.img || 'icons/svg/item-bag.svg';
-    this.system = structuredClone(data.system || {});
+    if (globalThis.CONFIG?.Item?.dataModels?.[this.type]) {
+      const ModelClass = globalThis.CONFIG.Item.dataModels[this.type];
+      this.system = new ModelClass(data.system || {}, { parent: this });
+    } else {
+      this.system = structuredClone(data.system || {});
+    }
     this.actor = actor;
   }
   get isEmbedded() {
     return this.actor !== null;
   }
   toObject() {
+    const sys = (typeof this.system?.toObject === 'function')
+      ? this.system.toObject(false)
+      : structuredClone(this.system || {});
     return {
       _id: this.id,
       name: this.name,
       type: this.type,
       img: this.img,
-      system: structuredClone(this.system || {})
+      system: sys
     };
   }
-  prepareBaseData() {}
-  prepareDerivedData() {}
+  prepareBaseData() {
+    if (typeof this.system?.prepareBaseData === 'function') {
+      this.system.prepareBaseData();
+    }
+  }
+  prepareDerivedData() {
+    if (typeof this.system?.prepareDerivedData === 'function') {
+      this.system.prepareDerivedData();
+    }
+  }
 
   async update(data) {
     for (const [k, v] of Object.entries(data)) {
       if (k.startsWith('system.')) {
         const subKey = k.replace('system.', '');
-        this.system[subKey] = v;
+        if (typeof this.system?.updateSource === 'function') {
+          this.system.updateSource({ [subKey]: v });
+        } else {
+          this.system[subKey] = v;
+        }
       } else if (k === 'system') {
-        Object.assign(this.system, v);
+        if (typeof this.system?.updateSource === 'function') {
+          this.system.updateSource(v);
+        } else {
+          Object.assign(this.system, v);
+        }
       } else {
         this[k] = v;
       }
@@ -423,28 +470,253 @@ if (!globalThis.ItemSheet) {
 }
 
 if (!globalThis.foundry) {
-  globalThis.foundry = {
-    utils: {
-      mergeObject: (target, source) => Object.assign(target, source),
-      duplicate: (obj) => structuredClone(obj),
-      deepClone: (obj) => structuredClone(obj),
-      expandObject: (obj) => {
-        const result = {};
-        for (const [key, val] of Object.entries(obj)) {
-          const parts = key.split('.');
-          let curr = result;
-          for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (!(part in curr)) curr[part] = {};
-            curr = curr[part];
-          }
-          curr[parts[parts.length - 1]] = val;
+  globalThis.foundry = {};
+}
+
+if (!globalThis.foundry.utils) {
+  globalThis.foundry.utils = {
+    mergeObject: (target, source) => Object.assign(target, source),
+    duplicate: (obj) => structuredClone(obj),
+    deepClone: (obj) => structuredClone(obj),
+    expandObject: (obj) => {
+      const result = {};
+      for (const [key, val] of Object.entries(obj)) {
+        const parts = key.split('.');
+        let curr = result;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const part = parts[i];
+          if (!(part in curr)) curr[part] = {};
+          curr = curr[part];
         }
-        return result;
+        curr[parts[parts.length - 1]] = val;
       }
+      return result;
     }
   };
 }
+
+class MockDataField {
+  constructor(options = {}) {
+    this.options = options;
+    this.required = options.required ?? false;
+    this.nullable = options.nullable ?? false;
+    this.initial = options.initial;
+    this.choices = options.choices;
+  }
+  getInitialValue() {
+    if (typeof this.initial === 'function') return this.initial();
+    if (this.initial !== undefined) return structuredClone(this.initial);
+    return this.nullable ? null : undefined;
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    if (value === null && this.nullable) return null;
+    return value;
+  }
+}
+
+class MockStringField extends MockDataField {
+  constructor(options = {}) {
+    super(options);
+    this.blank = options.blank ?? true;
+    if (this.initial === undefined) this.initial = '';
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    if (value === null && this.nullable) return null;
+    return String(value ?? '');
+  }
+}
+
+class MockNumberField extends MockDataField {
+  constructor(options = {}) {
+    super(options);
+    this.integer = options.integer ?? false;
+    this.min = options.min;
+    this.max = options.max;
+    if (this.initial === undefined) this.initial = 0;
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    if (value === null && this.nullable) return null;
+    let n = Number(value);
+    if (Number.isNaN(n)) return this.getInitialValue();
+    if (this.integer) n = Math.trunc(n);
+    if (this.min != null) n = Math.max(this.min, n);
+    if (this.max != null) n = Math.min(this.max, n);
+    return n;
+  }
+}
+
+class MockBooleanField extends MockDataField {
+  constructor(options = {}) {
+    super(options);
+    if (this.initial === undefined) this.initial = false;
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    return Boolean(value);
+  }
+}
+
+class MockArrayField extends MockDataField {
+  constructor(element, options = {}) {
+    super(options);
+    this.element = element;
+    if (this.initial === undefined) this.initial = () => [];
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    let arr = value;
+    if (arr && !Array.isArray(arr) && typeof arr === 'object') {
+      arr = Object.values(arr);
+    }
+    if (!Array.isArray(arr)) arr = [];
+    if (this.element) {
+      return arr.map(el => this.element.clean(el, options));
+    }
+    return arr;
+  }
+}
+
+class MockObjectField extends MockDataField {
+  constructor(options = {}) {
+    super(options);
+    if (this.initial === undefined) this.initial = () => ({});
+  }
+  clean(value, options = {}) {
+    if (value === undefined) return this.getInitialValue();
+    if (value && typeof value === 'object') return structuredClone(value);
+    return this.getInitialValue();
+  }
+}
+
+class MockSchemaField extends MockDataField {
+  constructor(fields = {}, options = {}) {
+    super(options);
+    this.fields = fields;
+  }
+  clean(value, options = {}) {
+    const raw = (value && typeof value === 'object') ? value : {};
+    const result = {};
+    for (const [key, field] of Object.entries(this.fields)) {
+      result[key] = field.clean(raw[key], options);
+    }
+    return result;
+  }
+}
+
+class MockHTMLField extends MockStringField {}
+class MockFilePathField extends MockStringField {
+  constructor(options = {}) {
+    super(options);
+    this.categories = options.categories || [];
+  }
+}
+
+class MockDataModel {
+  constructor(data = {}, { parent = null } = {}) {
+    this.parent = parent;
+    const schema = this.constructor.schema;
+    const migrated = this.constructor.migrateData(data ? structuredClone(data) : {});
+    const cleaned = schema.clean(migrated);
+    Object.assign(this, cleaned);
+    if (typeof this.prepareBaseData === 'function') {
+      this.prepareBaseData();
+    }
+  }
+
+  static defineSchema() {
+    return {};
+  }
+
+  static get schema() {
+    if (!this._schema) {
+      this._schema = new MockSchemaField(this.defineSchema());
+    }
+    return this._schema;
+  }
+
+  static cleanData(source = {}) {
+    const migrated = this.migrateData(structuredClone(source));
+    return this.schema.clean(migrated);
+  }
+
+  static migrateData(source = {}) {
+    return source;
+  }
+
+  toObject(source = true) {
+    if (!source) {
+      const obj = {};
+      for (const [k, v] of Object.entries(this)) {
+        if (k === 'parent') continue;
+        obj[k] = structuredClone(v);
+      }
+      return obj;
+    }
+    const obj = {};
+    for (const key of Object.keys(this.constructor.schema.fields)) {
+      obj[key] = structuredClone(this[key]);
+    }
+    return obj;
+  }
+
+  updateSource(changes = {}) {
+    const merge = (target, source) => {
+      for (const [key, val] of Object.entries(source)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+          merge(target[key], val);
+        } else {
+          target[key] = val;
+        }
+      }
+    };
+
+    for (const [k, v] of Object.entries(changes)) {
+      if (k.includes('.')) {
+        const parts = k.split('.');
+        let curr = this;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!curr[parts[i]]) curr[parts[i]] = {};
+          curr = curr[parts[i]];
+        }
+        const last = parts[parts.length - 1];
+        if (v && typeof v === 'object' && !Array.isArray(v) && curr[last] && typeof curr[last] === 'object' && !Array.isArray(curr[last])) {
+          merge(curr[last], v);
+        } else {
+          curr[last] = v;
+        }
+      } else {
+        if (v && typeof v === 'object' && !Array.isArray(v) && this[k] && typeof this[k] === 'object' && !Array.isArray(this[k])) {
+          merge(this[k], v);
+        } else {
+          this[k] = v;
+        }
+      }
+    }
+  }
+}
+
+class MockTypeDataModel extends MockDataModel {}
+
+globalThis.foundry.data = globalThis.foundry.data || {};
+globalThis.foundry.data.fields = globalThis.foundry.data.fields || {
+  DataField: MockDataField,
+  StringField: MockStringField,
+  NumberField: MockNumberField,
+  BooleanField: MockBooleanField,
+  ArrayField: MockArrayField,
+  ObjectField: MockObjectField,
+  SchemaField: MockSchemaField,
+  HTMLField: MockHTMLField,
+  FilePathField: MockFilePathField
+};
+
+globalThis.foundry.abstract = globalThis.foundry.abstract || {};
+globalThis.foundry.abstract.DataModel = globalThis.foundry.abstract.DataModel || MockDataModel;
+globalThis.foundry.abstract.TypeDataModel = globalThis.foundry.abstract.TypeDataModel || MockTypeDataModel;
 
 export class MockCombatant {
   constructor(data = {}, combat = null) {
@@ -608,8 +880,8 @@ if (!globalThis.CombatTracker) {
 
 if (!globalThis.CONFIG) {
   globalThis.CONFIG = {
-    Actor: { documentClass: MockActor },
-    Item: { documentClass: MockItem },
+    Actor: { documentClass: MockActor, dataModels: {} },
+    Item: { documentClass: MockItem, dataModels: {} },
     DCC: {
       skills: DCC_SKILLS,
       spells: DCC_SPELLS,
@@ -624,8 +896,10 @@ if (!globalThis.CONFIG) {
     ui: { combat: MockCombatTracker }
   };
 } else {
-  globalThis.CONFIG.Actor = globalThis.CONFIG.Actor || { documentClass: MockActor };
-  globalThis.CONFIG.Item = globalThis.CONFIG.Item || { documentClass: MockItem };
+  globalThis.CONFIG.Actor = globalThis.CONFIG.Actor || { documentClass: MockActor, dataModels: {} };
+  globalThis.CONFIG.Actor.dataModels = globalThis.CONFIG.Actor.dataModels || {};
+  globalThis.CONFIG.Item = globalThis.CONFIG.Item || { documentClass: MockItem, dataModels: {} };
+  globalThis.CONFIG.Item.dataModels = globalThis.CONFIG.Item.dataModels || {};
   globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
   globalThis.CONFIG.DCC.skills = DCC_SKILLS;
   globalThis.CONFIG.DCC.spells = DCC_SPELLS;

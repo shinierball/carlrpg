@@ -2,14 +2,103 @@
   "id": "carl-rpg",
   "title": "Dungeon Crawler Carl RPG",
   "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
-  "version": "1.0.28",
+  "version": "2.0.1",
   "url": "https://github.com/shinierball/carlrpg",
   "manifest": "https://raw.githubusercontent.com/shinierball/carlrpg/main/system.json",
   "download": "https://github.com/shinierball/carlrpg/archive/refs/heads/main.zip",
   "compatibility": {
     "minimum": "12",
     "verified": "12",
-    "maximum": "14"
+    "maximum": "16"
+  },
+  "documentTypes": {
+    "Actor": {
+      "crawler": {
+        "htmlFields": [
+          "details.notes",
+          "details.pastTrauma",
+          "details.looseEnds",
+          "details.regrets"
+        ]
+      },
+      "pet": {
+        "htmlFields": [
+          "special"
+        ]
+      },
+      "mount_vehicle": {},
+      "npc": {
+        "htmlFields": [
+          "details.notes",
+          "details.special"
+        ]
+      }
+    },
+    "Item": {
+      "skill": {
+        "htmlFields": [
+          "notes",
+          "description"
+        ]
+      },
+      "attack": {
+        "htmlFields": [
+          "effects"
+        ]
+      },
+      "spell": {
+        "htmlFields": [
+          "description",
+          "quote"
+        ]
+      },
+      "gear": {
+        "htmlFields": [
+          "notes",
+          "description"
+        ]
+      },
+      "race": {
+        "htmlFields": [
+          "abilities",
+          "description"
+        ]
+      },
+      "class": {
+        "htmlFields": [
+          "abilities",
+          "description"
+        ]
+      },
+      "deity": {
+        "htmlFields": [
+          "boons",
+          "description"
+        ]
+      },
+      "sponsor": {
+        "htmlFields": [
+          "gifts",
+          "notes"
+        ]
+      },
+      "loot": {
+        "htmlFields": [
+          "notes",
+          "description"
+        ]
+      },
+      "buff": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "debuff": {
+        "htmlFields": [
+          "description"
+        ]
+      }
+    }
   },
   "authors": [
     {

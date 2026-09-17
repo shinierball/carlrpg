@@ -1,3 +1,29 @@
+## 2.0.3
+
+### Party Progression & Session Manager — Customized Event Dialog & Real-Time Live Updates
+
+- **Customized Add Event Dialog (`promptAddEventDialog`)**:
+  - Replaced immediate default manual event generation with an interactive modal dialog powered by `templates/apps/add-event-dialog.hbs` (with programmatic fallback `DCCSessionManagerApp.getAddEventDialogHtml`).
+  - Contains all parameters supported by the search and filter suite:
+    - **Crawler selection**: choose any world crawler to associate the event with.
+    - **Action / Event Type**: Trained Skill, Untrained Skill Attempt, Attack / Strike, Spell Cast, AI Favor Adjustment, Popularity Shift, Damage Dealt, Damage Taken, Loot Box Awarded, Stat Check, and Manual / Custom Event.
+    - **Event Name**: custom label / descriptor.
+    - **Untrained Attempt flag**: checkbox flagging attempts for end-of-session promotion review.
+    - **Formula, Total & d20 Face**: explicit roll details and natural die result.
+    - **Target DC / AC**: numeric challenge threshold.
+    - **7-Tier Outcome**: choice between Auto-Calculate and explicit override (Critical Failure, Major Failure, Failure, Near Miss, Success, Major Success, Critical Success, Pending DC).
+    - **Stat / Resource Delta**: +/- modifiers for AI Favor, Popularity, and Damage.
+    - **Notes / Description**: freeform notes for GM tracking.
+  - Automatically resets/aligns active search filters upon submission so newly added events are immediately visible in the active table.
+
+- **Real-Time Live Event Synchronization**:
+  - Live window refresh for open `DCCSessionManagerApp` instances via robust `ui.windows` tracking and `dccSessionUpdated` hook broadcasts.
+  - Fixed session reference detachment in `DCCSessionEngine` to guarantee changes persist cleanly.
+  - Wired `DCCActor.rollStat` and `DCCActor.rollEvade` to automatically log checks to the active session ledger in real time.
+  - Wired `DCCCombatMetrics.applyDamageToTarget` so all damage (in or out of combat) logs directly to the active session ledger with damage dealt/taken entries.
+  - Pushed damage dealt, damage taken, and loot box dispatch directly to `session.ledger`.
+  - Added unit test suite covering full manual event customization and real-time live updates across multiple open windows.
+
 ## 2.0.1
 
 ### System Data Models & Application V2 Architecture (Phases 1, 2 & 3: Foundry V16 Preparation)

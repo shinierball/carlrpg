@@ -30,6 +30,8 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 - **Party Progression & Session Hub (`DCCSessionManagerApp`)**:
   - Live party dashboard providing real-time party vitals, health bars, mana, net damage dealt/taken, AI favor, popularity, and untrained checks attempted.
   - Full activity and roll ledger tracking trained skills, untrained checks (with disadvantage), spells, attacks, damage, and DM events.
+  - **Customized Add Event Dialog (`promptAddEventDialog`)**: Interactive modal dialog supporting all filter options (Crawler selector, Action/Event Type, Untrained Attempt flag, Roll Formula, Total, d20 die face, Target DC, 7-Tier Outcome selector/auto-calculator, Stat/Resource Delta for Favor/Popularity/Damage, and Notes) with automatic filter alignment so new events are immediately visible.
+  - **Real-Time Live Event Synchronization**: Open tracker windows update dynamically without requiring screen refresh or search adjustments when events are manually added, attacks/spells/skills/stats/evade checks are rolled, or combat/environmental damage occurs.
   - **7-Tier Roll Outcome Engine**: Automated outcome classification (Critical Failure, Major Failure, Failure, Near Miss, Success, Major Success, Critical Success) based on exact CarlRPG margin thresholds, with inline DM DC and outcome overrides.
   - **End-of-Session Progression**: Field training opportunities allowing one-click promotion of attempted untrained skills to Rank 1, session XP pool distribution across the party, Dungeon AI recap card broadcast, and session archiving.
 - **Universal Macros Compendium & Initial Macro Bar**:

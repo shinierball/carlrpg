@@ -366,6 +366,19 @@ export class DCCCombatMetrics {
       });
     }
 
+    // Always ensure damage logs to session progression even if out of combat
+    if ((!loggedMetrics || !loggedMetrics.logged) && actualDamage > 0) {
+      if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordDamage === 'function') {
+        DCCSessionEngine.recordDamage({
+          attackerActor,
+          targetActor,
+          actualDamage,
+          attackName,
+          type: attackType
+        }).catch(() => {});
+      }
+    }
+
     return {
       targetId: targetActor.id,
       targetName: targetActor.name,

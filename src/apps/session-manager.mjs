@@ -300,16 +300,32 @@ export class DCCSessionEngine {
    * @param {string|null} [params.sessionId=null]
    * @returns {Promise<object|null>}
    */
-  static async recordRoll({ actor, roll, type = 'skill', name = 'Action', isUntrained = false, targetDC = null, notes = '', sessionId = null } = {}) {
+  /**
+   * Record a roll action (Skill, Untrained Check, Attack, Spell, Stat) to active session
+   * @param {object} params
+   * @param {Actor} params.actor
+   * @param {Roll|object} params.roll
+   * @param {string} [params.type='skill'] - 'skill', 'untrained_skill', 'spell', 'attack', 'stat', 'manual'
+   * @param {string} [params.name='Action']
+   * @param {boolean} [params.isUntrained=false]
+   * @param {number|null} [params.targetDC=null]
+   * @param {string|null} [params.explicitOutcome=null]
+   * @param {string} [params.notes='']
+   * @param {string|null} [params.sessionId=null]
+   * @returns {Promise<object|null>}
+   */
+  static async recordRoll({ actor, roll, type = 'skill', name = 'Action', isUntrained = false, targetDC = null, explicitOutcome = null, notes = '', sessionId = null } = {}) {
     if (!actor) return null;
 
-    const sessions = this.getAllSessions();
+    let sessions = this.getAllSessions();
     const activeId = sessionId || this.getActiveSessionId();
     let session = sessions.find(s => s.id === activeId);
     if (!session) {
-      session = await this.getActiveSession();
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
     }
-    if (!session || session.status !== 'active') return null;
+    if (!session) return null;
 
     // Ensure crawler accumulator exists
     if (!session.crawlers[actor.id]) {
@@ -323,7 +339,9 @@ export class DCCSessionEngine {
     // Roll evaluation
     const total = Number(roll?.total ?? roll?.result ?? 0);
     const d20 = extractD20Result(roll);
-    const outcome = evaluateRollOutcome({ total, d20Result: d20, targetDC });
+    const outcome = (explicitOutcome && Object.values(DCC_ROLL_OUTCOMES).includes(explicitOutcome))
+      ? explicitOutcome
+      : evaluateRollOutcome({ total, d20Result: d20, targetDC });
 
     // Update crawler specific counts
     const cleanName = (name || 'Unknown Action').trim();
@@ -350,7 +368,7 @@ export class DCCSessionEngine {
       targetDC: targetDC !== null && targetDC !== undefined && targetDC !== '' ? Number(targetDC) : null,
       outcome,
       notes: notes || '',
-      gmEdited: false
+      gmEdited: Boolean(explicitOutcome)
     };
 
     session.ledger.push(ledgerEntry);
@@ -361,16 +379,21 @@ export class DCCSessionEngine {
   }
 
   /**
-   * Record damage applied/taken to active session
+   * Record damage applied/taken to active session and log to ledger
    * @param {object} params
    */
   static async recordDamage({ attackerActor = null, targetActor = null, actualDamage = 0, attackName = 'Attack', type = 'damage' } = {}) {
     const netDamage = Math.max(0, Number(actualDamage) || 0);
     if (netDamage === 0) return;
 
-    const sessions = this.getAllSessions();
+    let sessions = this.getAllSessions();
     const activeId = this.getActiveSessionId();
-    const session = sessions.find(s => s.id === activeId && s.status === 'active');
+    let session = sessions.find(s => s.id === activeId && s.status === 'active');
+    if (!session) {
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
+    }
     if (!session) return;
 
     if (attackerActor && (attackerActor.type === 'crawler' || (attackerActor.id && session.crawlers[attackerActor.id]))) {
@@ -383,6 +406,24 @@ export class DCCSessionEngine {
           session.crawlers[attackerActor.id].kills = (session.crawlers[attackerActor.id].kills || 0) + 1;
         }
       }
+
+      session.ledger.push({
+        id: `dmg-dealt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: Date.now(),
+        actorId: attackerActor.id,
+        actorName: attackerActor.name,
+        actorImg: attackerActor.img || '',
+        type: 'damage_dealt',
+        name: attackName || 'Damage Dealt',
+        isUntrained: false,
+        rollFormula: `${netDamage}`,
+        d20Result: null,
+        total: netDamage,
+        targetDC: null,
+        outcome: DCC_ROLL_OUTCOMES.SUCCESS,
+        notes: targetActor ? `Dealt ${netDamage} damage to ${targetActor.name}` : `Dealt ${netDamage} damage`,
+        gmEdited: false
+      });
     }
 
     if (targetActor && (targetActor.type === 'crawler' || (targetActor.id && session.crawlers[targetActor.id]))) {
@@ -392,6 +433,24 @@ export class DCCSessionEngine {
       if (session.crawlers[targetActor.id]) {
         session.crawlers[targetActor.id].damageTaken = (session.crawlers[targetActor.id].damageTaken || 0) + netDamage;
       }
+
+      session.ledger.push({
+        id: `dmg-taken-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: Date.now(),
+        actorId: targetActor.id,
+        actorName: targetActor.name,
+        actorImg: targetActor.img || '',
+        type: 'damage_taken',
+        name: attackName || 'Damage Taken',
+        isUntrained: false,
+        rollFormula: `${netDamage}`,
+        d20Result: null,
+        total: netDamage,
+        targetDC: null,
+        outcome: DCC_ROLL_OUTCOMES.MAJOR_FAILURE,
+        notes: attackerActor ? `Took ${netDamage} damage from ${attackerActor.name}` : `Took ${netDamage} damage`,
+        gmEdited: false
+      });
     }
 
     this._recomputeSessionSummaries(session);
@@ -399,12 +458,17 @@ export class DCCSessionEngine {
   }
 
   /**
-   * Record AI Loot Box award to active session
+   * Record AI Loot Box award to active session and ledger
    */
   static async recordLootBox({ actorId, tier = 'bronze', title = '', defaultQuote = '' } = {}) {
-    const sessions = this.getAllSessions();
+    let sessions = this.getAllSessions();
     const activeId = this.getActiveSessionId();
-    const session = sessions.find(s => s.id === activeId && s.status === 'active');
+    let session = sessions.find(s => s.id === activeId && s.status === 'active');
+    if (!session) {
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
+    }
     if (!session) return;
 
     const actor = this._getActor(actorId);
@@ -416,14 +480,34 @@ export class DCCSessionEngine {
       session.crawlers[actorId].lootBoxesAwarded.push(tier);
     }
 
+    const boxTitle = title || `${tier.toUpperCase()} LOOT BOX`;
+
     session.lootBoxes.push({
       id: `loot-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       timestamp: Date.now(),
       actorId,
       actorName: actor?.name || 'Unknown Crawler',
       tier,
-      title: title || `${tier.toUpperCase()} LOOT BOX`,
+      title: boxTitle,
       notes: defaultQuote || ''
+    });
+
+    session.ledger.push({
+      id: `ledger-loot-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: Date.now(),
+      actorId,
+      actorName: actor?.name || 'Unknown Crawler',
+      actorImg: actor?.img || '',
+      type: 'loot',
+      name: boxTitle,
+      isUntrained: false,
+      rollFormula: '1 Box',
+      d20Result: null,
+      total: 1,
+      targetDC: null,
+      outcome: DCC_ROLL_OUTCOMES.CRITICAL_SUCCESS,
+      notes: defaultQuote || `${tier.toUpperCase()} Loot Box awarded`,
+      gmEdited: false
     });
 
     await this.saveAllSessions(sessions);
@@ -433,9 +517,14 @@ export class DCCSessionEngine {
    * Adjust crawler AI favor in active session
    */
   static async adjustAIFavor({ actorId, delta = 0, reason = '' } = {}) {
-    const sessions = this.getAllSessions();
+    let sessions = this.getAllSessions();
     const activeId = this.getActiveSessionId();
-    const session = sessions.find(s => s.id === activeId && s.status === 'active');
+    let session = sessions.find(s => s.id === activeId && s.status === 'active');
+    if (!session) {
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
+    }
     if (!session) return;
 
     const actor = this._getActor(actorId);
@@ -452,14 +541,20 @@ export class DCCSessionEngine {
       timestamp: Date.now(),
       actorId,
       actorName: actor?.name || 'Crawler',
+      actorImg: actor?.img || '',
       type: 'favor',
       name: `AI Favor ${delta >= 0 ? `+${delta}` : delta}`,
+      isUntrained: false,
+      rollFormula: `${delta >= 0 ? '+' : ''}${delta}`,
+      d20Result: null,
       total: delta,
+      targetDC: null,
       outcome: delta >= 0 ? DCC_ROLL_OUTCOMES.SUCCESS : DCC_ROLL_OUTCOMES.FAILURE,
       notes: reason || 'AI Favor adjustment',
       gmEdited: false
     });
 
+    this._recomputeSessionSummaries(session);
     await this.saveAllSessions(sessions);
   }
 
@@ -467,9 +562,14 @@ export class DCCSessionEngine {
    * Adjust crawler popularity in active session
    */
   static async adjustPopularity({ actorId, delta = 0, reason = '' } = {}) {
-    const sessions = this.getAllSessions();
+    let sessions = this.getAllSessions();
     const activeId = this.getActiveSessionId();
-    const session = sessions.find(s => s.id === activeId && s.status === 'active');
+    let session = sessions.find(s => s.id === activeId && s.status === 'active');
+    if (!session) {
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
+    }
     if (!session) return;
 
     const actor = this._getActor(actorId);
@@ -486,15 +586,138 @@ export class DCCSessionEngine {
       timestamp: Date.now(),
       actorId,
       actorName: actor?.name || 'Crawler',
+      actorImg: actor?.img || '',
       type: 'popularity',
       name: `Popularity ${delta >= 0 ? `+${delta}` : delta}`,
+      isUntrained: false,
+      rollFormula: `${delta >= 0 ? '+' : ''}${delta}`,
+      d20Result: null,
       total: delta,
+      targetDC: null,
       outcome: delta >= 0 ? DCC_ROLL_OUTCOMES.SUCCESS : DCC_ROLL_OUTCOMES.FAILURE,
       notes: reason || 'Popularity adjustment',
       gmEdited: false
     });
 
+    this._recomputeSessionSummaries(session);
     await this.saveAllSessions(sessions);
+  }
+
+  /**
+   * Create a manual event / action entry in a session with full support for all search filter options.
+   * @param {object} params
+   * @param {string} params.actorId
+   * @param {string} [params.type='manual'] - 'manual', 'skill', 'untrained_skill', 'attack', 'spell', 'favor', 'popularity', 'damage_dealt', 'damage_taken', 'loot', 'stat'
+   * @param {string} [params.name='Manual Event']
+   * @param {boolean} [params.isUntrained=false]
+   * @param {string|number} [params.rollFormula='1d20']
+   * @param {number} [params.total=10]
+   * @param {number|null} [params.d20Result=null]
+   * @param {number|null} [params.targetDC=null]
+   * @param {string} [params.outcome='auto'] - 'auto' or one of DCC_ROLL_OUTCOMES
+   * @param {number} [params.statDelta=0]
+   * @param {string} [params.notes='']
+   * @param {string|null} [sessionId=null]
+   * @returns {Promise<object|null>}
+   */
+  static async createManualEvent({
+    actorId,
+    type = 'manual',
+    name = 'Manual Event',
+    isUntrained = false,
+    rollFormula = '1d20',
+    total = 10,
+    d20Result = null,
+    targetDC = null,
+    outcome = 'auto',
+    statDelta = 0,
+    notes = ''
+  } = {}, sessionId = null) {
+    let sessions = this.getAllSessions();
+    const targetSessionId = sessionId || this.getActiveSessionId();
+    let session = sessions.find(s => s.id === targetSessionId);
+    if (!session) {
+      const active = await this.getActiveSession();
+      sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === active?.id);
+    }
+    if (!session) return null;
+
+    const actor = this._getActor(actorId) || this.getPartyCrawlers().find(a => a.id === actorId);
+    const cleanActorId = actor?.id || actorId || 'unknown-actor';
+    const actorName = actor?.name || 'Party / Crawler';
+    const actorImg = actor?.img || 'icons/svg/mystery-man.svg';
+
+    if (!session.crawlers[cleanActorId] && actor) {
+      session.crawlers[cleanActorId] = this._createCrawlerRecord(actor);
+    }
+    const crawlerEntry = session.crawlers[cleanActorId];
+
+    const cleanName = (name || 'Manual Event').trim();
+    const numTotal = Number(total) || 0;
+    const numD20 = (d20Result !== null && d20Result !== undefined && d20Result !== '') ? Number(d20Result) : null;
+    const dc = (targetDC !== null && targetDC !== undefined && targetDC !== '') ? Number(targetDC) : null;
+    const delta = Number(statDelta) || 0;
+    const isUntrainedFlag = Boolean(isUntrained || type === 'untrained_skill');
+
+    // Determine final outcome
+    let evaluatedOutcome;
+    if (outcome && outcome !== 'auto' && Object.values(DCC_ROLL_OUTCOMES).includes(outcome)) {
+      evaluatedOutcome = outcome;
+    } else {
+      evaluatedOutcome = evaluateRollOutcome({ total: numTotal, d20Result: numD20, targetDC: dc });
+    }
+
+    // Apply stat deltas & metric accumulators to crawler
+    if (crawlerEntry) {
+      if (type === 'favor') {
+        const amt = delta !== 0 ? delta : numTotal;
+        crawlerEntry.aiFavorDelta = (crawlerEntry.aiFavorDelta || 0) + amt;
+      } else if (type === 'popularity') {
+        const amt = delta !== 0 ? delta : numTotal;
+        crawlerEntry.popularityDelta = (crawlerEntry.popularityDelta || 0) + amt;
+      } else if (type === 'damage_dealt') {
+        const dmg = Math.max(0, delta !== 0 ? delta : numTotal);
+        crawlerEntry.damageDealt = (crawlerEntry.damageDealt || 0) + dmg;
+      } else if (type === 'damage_taken') {
+        const dmg = Math.max(0, delta !== 0 ? delta : numTotal);
+        crawlerEntry.damageTaken = (crawlerEntry.damageTaken || 0) + dmg;
+      } else if (type === 'loot') {
+        crawlerEntry.lootBoxesAwarded.push(cleanName.toLowerCase().includes('gold') ? 'gold' : cleanName.toLowerCase().includes('silver') ? 'silver' : 'bronze');
+      }
+
+      if (isUntrainedFlag) {
+        crawlerEntry.untrainedAttempted[cleanName] = (crawlerEntry.untrainedAttempted[cleanName] || 0) + 1;
+      } else if (type === 'skill') {
+        crawlerEntry.skillsUsed[cleanName] = (crawlerEntry.skillsUsed[cleanName] || 0) + 1;
+      } else if (type === 'spell') {
+        crawlerEntry.spellsCast[cleanName] = (crawlerEntry.spellsCast[cleanName] || 0) + 1;
+      }
+    }
+
+    const ledgerEntry = {
+      id: `manual-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: Date.now(),
+      actorId: cleanActorId,
+      actorName,
+      actorImg,
+      type,
+      name: cleanName,
+      isUntrained: isUntrainedFlag,
+      rollFormula: String(rollFormula || numTotal),
+      d20Result: numD20,
+      total: numTotal,
+      targetDC: dc,
+      outcome: evaluatedOutcome,
+      notes: notes.trim(),
+      gmEdited: true
+    };
+
+    session.ledger.push(ledgerEntry);
+    this._recomputeSessionSummaries(session);
+    await this.saveAllSessions(sessions);
+
+    return ledgerEntry;
   }
 
   /**
@@ -863,11 +1086,18 @@ export class DCCSessionEngine {
    * Rerender open windows
    */
   static _refreshOpenWindows() {
-    if (typeof ui === 'undefined' || !ui.windows) return;
-    for (const app of Object.values(ui.windows)) {
-      if (app instanceof DCCSessionManagerApp) {
-        app.render(false);
+    if (typeof ui !== 'undefined' && ui.windows) {
+      for (const app of Object.values(ui.windows)) {
+        if (app instanceof DCCSessionManagerApp ||
+            app.constructor?.name === 'DCCSessionManagerApp' ||
+            app.id === 'dcc-session-manager' ||
+            app.options?.id === 'dcc-session-manager') {
+          app.render(false);
+        }
       }
+    }
+    if (typeof Hooks !== 'undefined' && Hooks.callAll) {
+      Hooks.callAll('dccSessionUpdated');
     }
   }
 }
@@ -884,6 +1114,36 @@ export class DCCSessionManagerApp extends BaseApplication {
     this.filterType = 'all';
     this.filterOutcome = 'all';
     this.searchQuery = '';
+    this.rendered = false;
+
+    if (typeof Hooks !== 'undefined' && Hooks.on) {
+      this._hookId = Hooks.on('dccSessionUpdated', () => {
+        if (this.rendered) {
+          this.render(false);
+        }
+      });
+    }
+  }
+
+  render(force = false, options = {}) {
+    if (typeof ui !== 'undefined' && ui.windows) {
+      const key = this.appId || this.id || 'dcc-session-manager';
+      ui.windows[key] = this;
+    }
+    this.rendered = true;
+    return super.render(force, options);
+  }
+
+  async close(options = {}) {
+    if (typeof ui !== 'undefined' && ui.windows) {
+      const key = this.appId || this.id || 'dcc-session-manager';
+      delete ui.windows[key];
+    }
+    if (this._hookId && typeof Hooks !== 'undefined' && Hooks.off) {
+      Hooks.off('dccSessionUpdated', this._hookId);
+    }
+    this.rendered = false;
+    return super.close(options);
   }
 
   static get defaultOptions() {
@@ -1013,6 +1273,240 @@ export class DCCSessionManagerApp extends BaseApplication {
     };
   }
 
+  /**
+   * Generate HTML for the Add Event Dialog
+   */
+  static getAddEventDialogHtml({ crawlers = [], currentCrawlerId = '', currentType = 'manual', currentOutcome = 'auto', outcomes = [] } = {}) {
+    const crawlerOptions = crawlers.map(c => `
+      <option value="${c.actorId}" ${c.actorId === currentCrawlerId ? 'selected' : ''}>${c.name} (Lvl ${c.level})</option>
+    `).join('');
+
+    const outcomeOptions = outcomes.map(o => `
+      <option value="${o.key}" ${o.key === currentOutcome ? 'selected' : ''}>${o.label}</option>
+    `).join('');
+
+    return `
+      <form class="dcc-add-event-form" style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 10px; color: #ecf0f1; padding: 4px;">
+        <div style="font-size: 11px; color: #f1c40f; border-bottom: 1px solid #444; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <i class="fa-solid fa-pen-to-square"></i> Log Party or Crawler Event
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+          <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Crawler:</label>
+          <select name="actorId" class="dcc-dialog-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+            ${crawlerOptions}
+          </select>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+          <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Action / Event Type:</label>
+          <select name="type" class="dcc-dialog-select dcc-event-type-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+            <option value="manual" ${currentType === 'manual' ? 'selected' : ''}>Manual / Custom Event</option>
+            <option value="skill" ${currentType === 'skill' ? 'selected' : ''}>Trained Skill Check</option>
+            <option value="untrained_skill" ${currentType === 'untrained_skill' ? 'selected' : ''}>Untrained Skill Attempt (Disadvantage)</option>
+            <option value="attack" ${currentType === 'attack' ? 'selected' : ''}>Attack / Strike</option>
+            <option value="spell" ${currentType === 'spell' ? 'selected' : ''}>Spell Cast</option>
+            <option value="favor" ${currentType === 'favor' ? 'selected' : ''}>AI Favor Adjustment</option>
+            <option value="popularity" ${currentType === 'popularity' ? 'selected' : ''}>Popularity Shift</option>
+            <option value="damage_dealt" ${currentType === 'damage_dealt' ? 'selected' : ''}>Damage Dealt</option>
+            <option value="damage_taken" ${currentType === 'damage_taken' ? 'selected' : ''}>Damage Taken</option>
+            <option value="loot" ${currentType === 'loot' ? 'selected' : ''}>Loot Box Awarded</option>
+            <option value="stat" ${currentType === 'stat' ? 'selected' : ''}>Stat Check</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+          <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Action / Event Name:</label>
+          <input type="text" name="name" class="dcc-dialog-input" placeholder="e.g. Lockpicking, Warhammer Smash, Audience Cheer..." value="" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif;" required />
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" name="isUntrained" id="dcc-event-is-untrained" ${currentType === 'untrained_skill' ? 'checked' : ''} style="cursor: pointer;" />
+          <label for="dcc-event-is-untrained" style="font-size: 11px; color: #f5b7b1; cursor: pointer; font-weight: bold;">Flag as Untrained Attempt (Tracked for End-of-Session Promotion)</label>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+            <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Formula:</label>
+            <input type="text" name="rollFormula" value="1d20" placeholder="1d20" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+          </div>
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+            <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Roll Total:</label>
+            <input type="number" name="total" value="10" placeholder="Total" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+          </div>
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+            <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Natural d20 (1-20):</label>
+            <input type="number" name="d20Result" min="1" max="20" placeholder="Die face" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px;">
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+            <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Target DC / AC:</label>
+            <input type="number" name="targetDC" placeholder="e.g. 15" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+          </div>
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+            <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">7-Tier Outcome:</label>
+            <select name="outcome" class="dcc-dialog-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;">
+              <option value="auto" ${currentOutcome === 'auto' ? 'selected' : ''}>[Auto-Calculate from DC & Total]</option>
+              ${outcomeOptions}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+          <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Stat / Resource Delta (+/- Favor, Popularity, or Damage):</label>
+          <input type="number" name="statDelta" value="0" placeholder="e.g. +5, -2, 20" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+          <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Notes / Description:</label>
+          <textarea name="notes" rows="2" placeholder="Optional notes or details..." style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px; resize: vertical;"></textarea>
+        </div>
+      </form>
+    `;
+  }
+
+  /**
+   * Prompt the interactive Add Event Dialog with all search filter options.
+   * On submission, records the event and ensures the newly created event is immediately visible in real time.
+   * @returns {Promise<object|null>}
+   */
+  async promptAddEventDialog() {
+    const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+    const worldCrawlers = DCCSessionEngine.getPartyCrawlers();
+    if (!worldCrawlers.length) {
+      if (typeof ui !== 'undefined' && ui.notifications?.warn) {
+        ui.notifications.warn('No crawler actors found in world to associate event with.');
+      }
+      return null;
+    }
+
+    const crawlers = worldCrawlers.map(a => ({
+      actorId: a.id,
+      name: a.name,
+      level: Number(a.system?.details?.level) || 1
+    }));
+
+    const currentCrawlerId = (this.filterCrawlerId && this.filterCrawlerId !== 'all')
+      ? this.filterCrawlerId
+      : crawlers[0]?.actorId;
+
+    const currentType = (this.filterType && this.filterType !== 'all') ? this.filterType : 'manual';
+    const currentOutcome = (this.filterOutcome && this.filterOutcome !== 'all') ? this.filterOutcome : 'auto';
+
+    const outcomes = Object.entries(DCC_OUTCOME_CONFIG).map(([key, cfg]) => ({
+      key,
+      label: cfg.label
+    }));
+
+    const dialogData = {
+      crawlers,
+      currentCrawlerId,
+      currentType,
+      currentOutcome,
+      outcomes
+    };
+
+    let contentHtml = '';
+    if (typeof renderTemplate === 'function') {
+      try {
+        contentHtml = await renderTemplate('systems/carl-rpg/templates/apps/add-event-dialog.hbs', dialogData);
+      } catch (_) {
+        contentHtml = DCCSessionManagerApp.getAddEventDialogHtml(dialogData);
+      }
+    } else {
+      contentHtml = DCCSessionManagerApp.getAddEventDialogHtml(dialogData);
+    }
+
+    const DialogClass = (typeof Dialog !== 'undefined') ? Dialog : (globalThis.Dialog || null);
+    if (!DialogClass) return null;
+
+    return new Promise((resolve) => {
+      const dlg = new DialogClass({
+        title: 'Log Party or Crawler Event',
+        content: contentHtml,
+        buttons: {
+          create: {
+            icon: '<i class="fa-solid fa-plus"></i>',
+            label: 'Add Event',
+            callback: async (html) => {
+              const form = (html && typeof html.find === 'function')
+                ? (html.is?.('.dcc-add-event-form') ? html : (html.find('.dcc-add-event-form')?.length ? html.find('.dcc-add-event-form') : html))
+                : ((typeof $ !== 'undefined') ? $(html) : html);
+
+              const getVal = (selector) => {
+                if (form?.find) {
+                  const el = form.find(selector);
+                  return (typeof el?.val === 'function') ? el.val() : (el?.value !== undefined ? el.value : '');
+                }
+                return '';
+              };
+              const isChecked = (selector) => {
+                if (form?.find) {
+                  const el = form.find(selector);
+                  if (typeof el?.is === 'function') return el.is(':checked');
+                  return Boolean(el?.checked);
+                }
+                return false;
+              };
+
+              const actorId = getVal('[name="actorId"]') || currentCrawlerId;
+              const type = getVal('[name="type"]') || 'manual';
+              const name = getVal('[name="name"]') || 'Manual Event';
+              const isUntrained = isChecked('[name="isUntrained"]');
+              const rollFormula = getVal('[name="rollFormula"]') || '1d20';
+              const total = Number(getVal('[name="total"]')) || 0;
+              const d20Val = getVal('[name="d20Result"]');
+              const d20Result = (d20Val !== '' && d20Val !== undefined && d20Val !== null) ? Number(d20Val) : null;
+              const dcVal = getVal('[name="targetDC"]');
+              const targetDC = (dcVal !== '' && dcVal !== undefined && dcVal !== null) ? Number(dcVal) : null;
+              const outcome = getVal('[name="outcome"]') || 'auto';
+              const statDelta = Number(getVal('[name="statDelta"]')) || 0;
+              const notes = getVal('[name="notes"]') || '';
+
+              const entry = await DCCSessionEngine.createManualEvent({
+                actorId,
+                type,
+                name,
+                isUntrained,
+                rollFormula,
+                total,
+                d20Result,
+                targetDC,
+                outcome,
+                statDelta,
+                notes
+              }, sId);
+
+              // Auto-adjust filters so the newly created event is immediately visible
+              if (this.filterCrawlerId !== 'all' && this.filterCrawlerId !== actorId) {
+                this.filterCrawlerId = 'all';
+              }
+              if (this.filterType !== 'all' && this.filterType !== type) {
+                this.filterType = 'all';
+              }
+              if (this.filterOutcome !== 'all' && this.filterOutcome !== outcome && outcome !== 'auto') {
+                this.filterOutcome = 'all';
+              }
+              this.searchQuery = '';
+              this.activeTab = 'ledger';
+              this.render(false);
+              resolve(entry);
+            }
+          },
+          cancel: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'Cancel',
+            callback: () => resolve(null)
+          }
+        },
+        default: 'create'
+      });
+      dlg.render(true);
+    });
+  }
+
   activateListeners(html) {
     super.activateListeners(html);
 
@@ -1133,24 +1627,10 @@ export class DCCSessionManagerApp extends BaseApplication {
       this.render(false);
     });
 
-    // Add Manual Ledger Event Button
+    // Add Manual Ledger Event Button (opens customized dialog with search filter options)
     html.find('.dcc-add-manual-event-btn').click(async ev => {
       ev.preventDefault();
-      const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
-      const crawlers = DCCSessionEngine.getPartyCrawlers();
-      if (!crawlers.length) return;
-
-      const actor = crawlers[0];
-      await DCCSessionEngine.recordRoll({
-        actor,
-        type: 'manual',
-        name: 'Manual Event',
-        total: 10,
-        targetDC: 10,
-        notes: 'Manual DM adjustment',
-        sessionId: sId
-      });
-      this.render(false);
+      await this.promptAddEventDialog();
     });
 
     // Wrap-up: Promote Untrained Skill to Rank 1

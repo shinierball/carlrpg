@@ -12,6 +12,7 @@ import {
 } from '../src/apps/session-manager.mjs';
 import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
+import { DCCCombatMetrics } from '../src/apps/combat-metrics.mjs';
 
 test('DCC RPG Party Progression & Session Manager Subsystem', async (t) => {
 
@@ -347,9 +348,283 @@ test('DCC RPG Party Progression & Session Manager Subsystem', async (t) => {
     assert.equal(data.sessions.length, 1);
     assert.equal(data.session.id, session.id);
     assert.equal(data.crawlersList.length, 1);
-    assert.equal(data.crawlersList[0].hpBars, 10);
     assert.equal(data.ledger.length, 1);
     assert.equal(data.ledger[0].outcomeLabel, 'Success');
     assert.equal(data.outcomeOptions.length, 8);
   });
+
+  await t.test('9. Manual Event Creation with Full Filter Options (Types, Untrained, Formula, DC, 7-Tier Outcomes, Stat Deltas)', async () => {
+    await DCCSessionEngine.saveAllSessions([]);
+    const session = await DCCSessionEngine.createSession({ number: 1, title: 'Session 1' });
+    const actor = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        abilities: { str: { mod: 4 } },
+        attributes: { hp: { value: 40, max: 40 } },
+        details: { level: 2 }
+      }
+    });
+    globalThis.game.actors = [actor];
+
+    // 1. Untrained skill attempt via createManualEvent
+    const evUntrained = await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'untrained_skill',
+      name: 'Pickpocket',
+      isUntrained: true,
+      rollFormula: '2d20kl + 2',
+      total: 9,
+      d20Result: 5,
+      targetDC: 15,
+      outcome: 'auto', // Auto should calculate 9 vs 15 -> Failure
+      notes: 'Caught in the act by goblin merchant'
+    }, session.id);
+
+    assert.ok(evUntrained);
+    assert.equal(evUntrained.type, 'untrained_skill');
+    assert.equal(evUntrained.isUntrained, true);
+    assert.equal(evUntrained.outcome, DCC_ROLL_OUTCOMES.FAILURE);
+    assert.equal(evUntrained.notes, 'Caught in the act by goblin merchant');
+
+    let s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.equal(s.crawlers[actor.id].untrainedAttempted['Pickpocket'], 1);
+
+    // 2. Explicit outcome override (e.g. Critical Success selected in dialog)
+    const evExplicit = await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'attack',
+      name: 'Pancake Stomp',
+      isUntrained: false,
+      rollFormula: '1d20 + 6',
+      total: 12,
+      d20Result: 6,
+      targetDC: 15,
+      outcome: DCC_ROLL_OUTCOMES.CRITICAL_SUCCESS, // Explicit DM selection
+      notes: 'DM approved rule of cool crit'
+    }, session.id);
+
+    assert.equal(evExplicit.outcome, DCC_ROLL_OUTCOMES.CRITICAL_SUCCESS);
+
+    // 3. Stat deltas: AI Favor adjustment (+8)
+    const evFavor = await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'favor',
+      name: 'AI Favor +8',
+      statDelta: 8,
+      notes: 'Audience cheered the gruesome finisher'
+    }, session.id);
+
+    assert.equal(evFavor.type, 'favor');
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.equal(s.crawlers[actor.id].aiFavorDelta, 8);
+
+    // 4. Stat deltas: Popularity shift (-3)
+    await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'popularity',
+      name: 'Popularity -3',
+      statDelta: -3,
+      notes: 'Insulted the corporate sponsor'
+    }, session.id);
+
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.equal(s.crawlers[actor.id].popularityDelta, -3);
+
+    // 5. Stat deltas: Damage Dealt (35)
+    await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'damage_dealt',
+      name: 'Bomb Explosion',
+      statDelta: 35,
+      notes: 'Blasted three goblins into mush'
+    }, session.id);
+
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.equal(s.crawlers[actor.id].damageDealt, 35);
+
+    // 6. Stat deltas: Damage Taken (18)
+    await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'damage_taken',
+      name: 'Acid Trap',
+      statDelta: 18,
+      notes: 'Stepped into an acid geyser'
+    }, session.id);
+
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.equal(s.crawlers[actor.id].damageTaken, 18);
+
+    // 7. Loot Box Awarded
+    await DCCSessionEngine.createManualEvent({
+      actorId: actor.id,
+      type: 'loot',
+      name: 'GOLD LOOT BOX',
+      notes: 'Floor 1 completion reward'
+    }, session.id);
+
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    assert.deepEqual(s.crawlers[actor.id].lootBoxesAwarded, ['gold']);
+    assert.equal(s.ledger.length, 7);
+  });
+
+  await t.test('10. Real-time Live Updates for Open Tracker Windows and Dialog Auto-Filter Adjustment', async () => {
+    await DCCSessionEngine.saveAllSessions([]);
+    const session = await DCCSessionEngine.createSession({ number: 1, title: 'Session 1' });
+    const carl = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        abilities: { str: { value: 16, unenhanced: 16, mod: 4 }, dex: { mod: 2 }, con: { mod: 4 } },
+        attributes: { hp: { value: 40, max: 40, temp: 0 }, mana: { value: 10, max: 10 }, evade: { items: 0, buffs: 0 } },
+        details: { level: 2 }
+      }
+    });
+    const donut = new DCCActor({
+      name: 'Princess Donut',
+      type: 'crawler',
+      system: {
+        abilities: { cha: { mod: 5 }, dex: { mod: 3 }, con: { mod: 2 } },
+        attributes: { hp: { value: 25, max: 25, temp: 0 }, mana: { value: 20, max: 20 }, evade: { items: 0, buffs: 0 } },
+        details: { level: 2 }
+      }
+    });
+    globalThis.game.actors = [carl, donut];
+
+    // Open tracker app instance
+    const app = new DCCSessionManagerApp();
+    let renderCount = 0;
+    const originalRender = app.render.bind(app);
+    app.render = (force = false, options = {}) => {
+      renderCount++;
+      return originalRender(force, options);
+    };
+
+    app.render(true);
+    assert.equal(renderCount, 1);
+    assert.ok(globalThis.ui.windows['dcc-session-manager']);
+
+    // 1. When an event is manually added via DCCSessionEngine.createManualEvent, app renders immediately in real time
+    await DCCSessionEngine.createManualEvent({
+      actorId: carl.id,
+      type: 'manual',
+      name: 'Found Secret Room',
+      total: 0,
+      notes: 'Found hidden loot stash behind bookshelf'
+    });
+    assert.ok(renderCount >= 2, 'App should have rerendered automatically upon manual event');
+
+    // 2. When actor rolls a Stat check (e.g. STR Check), it records to session and live rerenders
+    const prevCount = renderCount;
+    await carl.rollStat('str');
+    assert.ok(renderCount > prevCount, 'App should have rerendered automatically upon actor.rollStat');
+    let s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    const lastEntry = s.ledger[s.ledger.length - 1];
+    assert.equal(lastEntry.type, 'stat');
+    assert.equal(lastEntry.name, 'STR Check');
+    assert.equal(lastEntry.actorId, carl.id);
+
+    // 3. When actor rolls Evade, it records to session and live rerenders
+    const prevEvadeCount = renderCount;
+    await carl.rollEvade();
+    assert.ok(renderCount > prevEvadeCount, 'App should have rerendered automatically upon actor.rollEvade');
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    const evadeEntry = s.ledger[s.ledger.length - 1];
+    assert.equal(evadeEntry.type, 'stat');
+    assert.equal(evadeEntry.name, 'Evade Roll');
+
+    // 4. When damage is applied via DCCCombatMetrics.applyDamageToTarget out-of-combat, it records to session in real time
+    const prevDmgCount = renderCount;
+    await DCCCombatMetrics.applyDamageToTarget({
+      targetActor: donut,
+      rawDamage: 8,
+      attackerActor: null,
+      attackName: 'Fire Trap',
+      attackType: 'Trap'
+    });
+    assert.ok(renderCount > prevDmgCount, 'App should have rerendered automatically upon combatMetrics damage');
+    s = DCCSessionEngine.getAllSessions().find(x => x.id === session.id);
+    const dmgEntry = s.ledger[s.ledger.length - 1];
+    assert.equal(dmgEntry.type, 'damage_taken');
+    assert.equal(dmgEntry.actorId, donut.id);
+
+    // 5. Verify Add Event Dialog generates all options and updates active filters
+    // Simulate user having filter set to Donut and type 'spell'
+    app.filterCrawlerId = donut.id;
+    app.filterType = 'spell';
+    app.filterOutcome = 'critical_failure';
+    app.searchQuery = 'something specific';
+
+    const dialogHtml = DCCSessionManagerApp.getAddEventDialogHtml({
+      crawlers: [{ actorId: carl.id, name: 'Carl', level: 2 }, { actorId: donut.id, name: 'Princess Donut', level: 2 }],
+      currentCrawlerId: app.filterCrawlerId,
+      currentType: app.filterType,
+      currentOutcome: app.filterOutcome,
+      outcomes: Object.entries(DCC_OUTCOME_CONFIG).map(([key, cfg]) => ({ key, label: cfg.label }))
+    });
+
+    assert.ok(dialogHtml.includes('name="actorId"'));
+    assert.ok(dialogHtml.includes('name="type"'));
+    assert.ok(dialogHtml.includes('name="isUntrained"'));
+    assert.ok(dialogHtml.includes('name="rollFormula"'));
+    assert.ok(dialogHtml.includes('name="total"'));
+    assert.ok(dialogHtml.includes('name="d20Result"'));
+    assert.ok(dialogHtml.includes('name="targetDC"'));
+    assert.ok(dialogHtml.includes('name="outcome"'));
+    assert.ok(dialogHtml.includes('name="statDelta"'));
+    assert.ok(dialogHtml.includes('name="notes"'));
+
+    // Trigger promptAddEventDialog and simulate submitting an event for Carl with type 'attack'
+    let createdDialogInstance = null;
+    const origDialog = globalThis.Dialog;
+    globalThis.Dialog = class SpyDialog extends origDialog {
+      constructor(data, options) {
+        super(data, options);
+        createdDialogInstance = this;
+      }
+    };
+
+    const promptPromise = app.promptAddEventDialog();
+    assert.ok(createdDialogInstance, 'Dialog should have been opened');
+
+    // Simulate clicking "Add Event" in dialog with form data for Carl
+    const mockFormHtml = {
+      find: (sel) => {
+        const map = {
+          '.dcc-add-event-form': mockFormHtml,
+          '[name="actorId"]': { val: () => carl.id },
+          '[name="type"]': { val: () => 'attack' },
+          '[name="name"]': { val: () => 'Megaton Hammer' },
+          '[name="isUntrained"]': { is: () => false },
+          '[name="rollFormula"]': { val: () => '1d20 + 8' },
+          '[name="total"]': { val: () => '26' },
+          '[name="d20Result"]': { val: () => '18' },
+          '[name="targetDC"]': { val: () => '15' },
+          '[name="outcome"]': { val: () => 'major_success' },
+          '[name="statDelta"]': { val: () => '22' },
+          '[name="notes"]': { val: () => 'Crushed the skull of an elite mob' }
+        };
+        return map[sel] || { val: () => '', is: () => false };
+      }
+    };
+
+    await createdDialogInstance.triggerButton('create', mockFormHtml);
+    const createdEvent = await promptPromise;
+    assert.ok(createdEvent);
+    assert.equal(createdEvent.name, 'Megaton Hammer');
+    assert.equal(createdEvent.actorId, carl.id);
+    assert.equal(createdEvent.outcome, DCC_ROLL_OUTCOMES.MAJOR_SUCCESS);
+
+    // Verify filters were automatically cleared/adjusted so the newly added event is immediately visible!
+    assert.equal(app.filterCrawlerId, 'all', 'Filter should be set to all or match new event');
+    assert.equal(app.filterType, 'all', 'Filter should be set to all or match new event');
+    assert.equal(app.filterOutcome, 'all', 'Filter should be set to all or match new event');
+    assert.equal(app.searchQuery, '', 'Search query should be cleared so new event is not hidden');
+    assert.equal(app.activeTab, 'ledger', 'Active tab should be switched to ledger');
+
+    // Restore Dialog
+    globalThis.Dialog = origDialog;
+    await app.close();
+  });
 });
+

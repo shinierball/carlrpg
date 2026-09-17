@@ -568,6 +568,16 @@ export class DCCActor extends Actor {
     const formula = `1d20 + ${mod}`;
     const roll = await new Roll(formula, { mod }).evaluate();
 
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll,
+        type: 'stat',
+        name: `${statName} Check`,
+        isUntrained: false
+      }).catch(() => {});
+    }
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name}</strong>: ${statName} Check`
@@ -588,6 +598,16 @@ export class DCCActor extends Actor {
     const parts = [`DEX Mod ${dexMod}`];
     if (items) parts.push(`Items ${items >= 0 ? '+' : ''}${items}`);
     if (buffs) parts.push(`Buffs ${buffs >= 0 ? '+' : ''}${buffs}`);
+
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll,
+        type: 'stat',
+        name: 'Evade Roll',
+        isUntrained: false
+      }).catch(() => {});
+    }
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),

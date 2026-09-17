@@ -241,6 +241,7 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/combat-tracker.hbs',
     'systems/carl-rpg/templates/apps/combat-archive.hbs',
     'systems/carl-rpg/templates/apps/session-manager.hbs',
+    'systems/carl-rpg/templates/apps/add-event-dialog.hbs',
     'systems/carl-rpg/templates/apps/crawler-creator.hbs'
   ]);
 

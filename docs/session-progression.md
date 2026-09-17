@@ -34,11 +34,23 @@ During an active session, the system automatically captures:
 
 ---
 
-## 3. Manual DM Overrides
+## 3. Manual DM Overrides & Customized Add Event Dialog
 
 Every recorded event is editable inline:
 - Adjust Target DC or override the outcome tier with a single click.
-- Add manual events for environmental damage or roleplaying deeds.
+- **Customized Add Event Dialog (`+ Add Event`)**:
+  - Modal dialog with full form inputs matching all ledger filter options:
+    - **Crawler**: select any member of the crawler party.
+    - **Action / Event Type**: Trained Skill, Untrained Skill Attempt, Attack, Spell, AI Favor, Popularity, Damage Dealt, Damage Taken, Loot Box, Stat Check, or Manual / Custom Event.
+    - **Untrained Flag**: checkbox flagging attempts for promotion.
+    - **Formula, Total & Natural d20**: custom roll parameters.
+    - **Target DC / AC**: numeric threshold.
+    - **7-Tier Outcome**: automatic calculation or explicit degree selection.
+    - **Stat / Resource Delta**: numeric increment for favor, popularity, or damage.
+    - **Notes**: custom roleplaying or descriptive notes.
+  - Automatically aligns filters upon creation so the newly added event appears immediately.
+- **Real-Time Live Updates**:
+  - Open tracker windows update dynamically without requiring page refreshes or filter changes when rolls occur from sheets, damage is applied in/out of combat, or manual events are logged.
 - Quick `[+5] / [-5]` or `[+1] / [-1]` adjustments for damage, favor, and popularity directly on crawler cards.
 
 ---

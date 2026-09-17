@@ -398,9 +398,23 @@ if (!globalThis.Dialog) {
       this.options = options;
     }
     render() {
+      if (globalThis.ui?.windows) {
+        const id = this.options?.id || `mock-dialog-${Date.now()}`;
+        globalThis.ui.windows[id] = this;
+      }
       return this;
     }
-    close() {}
+    close() {
+      if (globalThis.ui?.windows && this.options?.id) {
+        delete globalThis.ui.windows[this.options.id];
+      }
+    }
+    async triggerButton(buttonKey, html = null) {
+      const btn = this.data?.buttons?.[buttonKey];
+      if (btn && typeof btn.callback === 'function') {
+        return btn.callback(html || { find: () => ({ val: () => '', is: () => false }) });
+      }
+    }
   };
 }
 

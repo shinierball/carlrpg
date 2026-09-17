@@ -1,0 +1,89 @@
+<form class="dcc-add-event-form" style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 10px; color: #ecf0f1; padding: 4px;">
+  <div style="font-size: 11px; color: #f1c40f; border-bottom: 1px solid #444; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+    <i class="fa-solid fa-pen-to-square"></i> Log Party or Crawler Event
+  </div>
+
+  {{!-- Crawler selector --}}
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+    <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Crawler:</label>
+    <select name="actorId" class="dcc-dialog-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+      {{#each crawlers}}
+        <option value="{{this.actorId}}" {{#if (eq this.actorId ../currentCrawlerId)}}selected{{/if}}>{{this.name}} (Lvl {{this.level}})</option>
+      {{/each}}
+    </select>
+  </div>
+
+  {{!-- Action Type --}}
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+    <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Action / Event Type:</label>
+    <select name="type" class="dcc-dialog-select dcc-event-type-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+      <option value="manual" {{#if (eq currentType 'manual')}}selected{{/if}}>Manual / Custom Event</option>
+      <option value="skill" {{#if (eq currentType 'skill')}}selected{{/if}}>Trained Skill Check</option>
+      <option value="untrained_skill" {{#if (eq currentType 'untrained_skill')}}selected{{/if}}>Untrained Skill Attempt (Disadvantage)</option>
+      <option value="attack" {{#if (eq currentType 'attack')}}selected{{/if}}>Attack / Strike</option>
+      <option value="spell" {{#if (eq currentType 'spell')}}selected{{/if}}>Spell Cast</option>
+      <option value="favor" {{#if (eq currentType 'favor')}}selected{{/if}}>AI Favor Adjustment</option>
+      <option value="popularity" {{#if (eq currentType 'popularity')}}selected{{/if}}>Popularity Shift</option>
+      <option value="damage_dealt" {{#if (eq currentType 'damage_dealt')}}selected{{/if}}>Damage Dealt</option>
+      <option value="damage_taken" {{#if (eq currentType 'damage_taken')}}selected{{/if}}>Damage Taken</option>
+      <option value="loot" {{#if (eq currentType 'loot')}}selected{{/if}}>Loot Box Awarded</option>
+    </select>
+  </div>
+
+  {{!-- Event Name --}}
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+    <label style="font-size: 11px; text-transform: uppercase; color: #bdc3c7; font-weight: bold;">Action / Event Name:</label>
+    <input type="text" name="name" class="dcc-dialog-input" placeholder="e.g. Lockpicking, Warhammer Smash, Audience Cheer..." value="" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif;" required />
+  </div>
+
+  {{!-- Untrained flag --}}
+  <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+    <input type="checkbox" name="isUntrained" id="dcc-event-is-untrained" {{#if (eq currentType 'untrained_skill')}}checked{{/if}} style="cursor: pointer;" />
+    <label for="dcc-event-is-untrained" style="font-size: 11px; color: #f5b7b1; cursor: pointer; font-weight: bold;">Flag as Untrained Attempt (Tracked for End-of-Session Promotion)</label>
+  </div>
+
+  {{!-- Roll Formula, Total, and d20 Result --}}
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+      <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Formula:</label>
+      <input type="text" name="rollFormula" value="1d20" placeholder="1d20" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+    </div>
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+      <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Roll Total:</label>
+      <input type="number" name="total" value="10" placeholder="Total" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+    </div>
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+      <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Natural d20 (1-20):</label>
+      <input type="number" name="d20Result" min="1" max="20" placeholder="Die face" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+    </div>
+  </div>
+
+  {{!-- Target DC & 7-Tier Outcome --}}
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px;">
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+      <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Target DC / AC:</label>
+      <input type="number" name="targetDC" placeholder="e.g. 15" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+    </div>
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+      <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">7-Tier Outcome:</label>
+      <select name="outcome" class="dcc-dialog-select" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;">
+        <option value="auto" selected>[Auto-Calculate from DC & Total]</option>
+        {{#each outcomes}}
+          <option value="{{this.key}}" {{#if (eq this.key ../currentOutcome)}}selected{{/if}}>{{this.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </div>
+
+  {{!-- Stat Delta (for Favor, Pop, Damage) --}}
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+    <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Stat / Resource Delta (+/- Favor, Popularity, or Damage):</label>
+    <input type="number" name="statDelta" value="0" placeholder="e.g. +5, -2, 20" style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+  </div>
+
+  {{!-- Notes --}}
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 3px;">
+    <label style="font-size: 10px; text-transform: uppercase; color: #bdc3c7;">Notes / Description:</label>
+    <textarea name="notes" rows="2" placeholder="Optional notes or details..." style="background: #1e1e28; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px; resize: vertical;"></textarea>
+  </div>
+</form>

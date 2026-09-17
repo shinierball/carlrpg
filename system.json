@@ -2,7 +2,7 @@
   "id": "carl-rpg",
   "title": "Dungeon Crawler Carl RPG",
   "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
-  "version": "1.0.25",
+  "version": "1.0.27",
   "url": "https://github.com/shinierball/carlrpg",
   "manifest": "https://raw.githubusercontent.com/shinierball/carlrpg/main/system.json",
   "download": "https://github.com/shinierball/carlrpg/archive/refs/heads/main.zip",
@@ -15,6 +15,9 @@
     {
       "name": "DCC RPG Community"
     }
+  ],
+  "scripts": [
+    "lib/pdf-lib.min.js"
   ],
   "esmodules": [
     "src/dcc.mjs"

@@ -71,6 +71,18 @@ export class DCCCrawlerSheet extends ActorSheet {
   }
 
   /** @override */
+  _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
+    buttons.unshift({
+      label: 'Save to PDF',
+      class: 'save-pdf-btn',
+      icon: 'fa-solid fa-file-pdf',
+      onclick: () => this._onExportPdf()
+    });
+    return buttons;
+  }
+
+  /** @override */
   async getData(options) {
     const context = await super.getData(options);
     const actorData = context.data;
@@ -737,6 +749,12 @@ export class DCCCrawlerSheet extends ActorSheet {
 
     if (!this.isEditable) return;
 
+    // Save to PDF Export button
+    html.find('.dcc-btn-save-pdf, .export-pdf-btn').click(ev => {
+      ev.preventDefault();
+      this._onExportPdf();
+    });
+
     // Open Skill Library Picker
     html.find('.open-skill-picker').click(ev => {
       ev.preventDefault();
@@ -1147,5 +1165,26 @@ export class DCCCrawlerSheet extends ActorSheet {
       }
     }
     return super._updateObject(event, formData);
+  }
+
+  /**
+   * Export character sheet to official fillable PDF
+   */
+  async _onExportPdf() {
+    try {
+      if (globalThis.ui?.notifications) {
+        ui.notifications.info(`Exporting ${this.actor.name || 'crawler'} to fillable PDF...`);
+      }
+      const { saveCrawlerPdf } = await import('../apps/pdf-exporter.mjs');
+      await saveCrawlerPdf(this.actor);
+      if (globalThis.ui?.notifications) {
+        ui.notifications.info(`Successfully exported ${this.actor.name || 'crawler'} to character sheet PDF.`);
+      }
+    } catch (err) {
+      console.error('Failed to export crawler sheet to PDF:', err);
+      if (globalThis.ui?.notifications) {
+        ui.notifications.error(`Failed to export PDF: ${err.message}`);
+      }
+    }
   }
 }

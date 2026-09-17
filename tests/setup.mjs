@@ -366,6 +366,9 @@ if (!globalThis.ActorSheet) {
     get isEditable() {
       return true;
     }
+    _getHeaderButtons() {
+      return [];
+    }
     activateListeners(html) {}
     async getData() {
       return {

@@ -1,3 +1,25 @@
+## 1.0.27
+
+### Fillable Character Sheet PDF Export
+
+- **Official 6-Page PDF Character Sheet Integration**:
+  - Added direct export of Crawler character sheets to the official 6-page fillable character sheet PDF (`assets/sheet/fillable_character_sheet.pdf`).
+  - Seamlessly maps all 429 AcroForm fields across all six pages:
+    - **Page 1: Core**: Name, Race, Gender, Level, Crawler Number, Class, Floor, Ability Scores (Enhanced, Unenhanced, Modifiers), calibrated Health Bar (10 boxes displaying crawler CON modifier, blank checkboxes ready for play), Evade & Damage Resistance totals, Mana, Debuffs, External Buffs (automatically resolved into clean human-readable descriptions instead of internal hashes), and up to 5 Attacks.
+    - **Page 2: Hotlist & Gear**: 10 Hotlist slots with damage/mana cost labels, equipped Gear slots (Head, Torso, Arms, Hands, Legs, Feet, Accessories), Popularity, Past Trauma, Loose Ends, Regrets, and Notes.
+    - **Page 3: Skills & Known Spells**: Up to 20 rows with Name, Rank, Governing Stat & Modifier, Check Type / Spell MP Cost, Description/Notes (including damage, range, and effects for spells), and Trained checkboxes. Known spells are automatically appended directly to the skills list.
+    - **Page 4: Inventory**: Up to 20 inventory items with Item Name, Quantity, and Description.
+    - **Page 5: Extras & Space**: Pet attributes, levels, and attacks, Mount/Vehicle stats, Important Things I've Killed (13 lines), Clubs & Societies (6 lines), Personal Space (Tier, Size, Amenities over 11 lines), and Deity details.
+    - **Page 6: Abilities & Sponsors**: Racial Abilities (22 lines), Class Abilities (22 lines), and Sponsor cards (up to 3 sponsors).
+- **Sheet Integration & One-Click Download**:
+  - Added a "Save to PDF" header button (`save-pdf-btn`) in `DCCCrawlerSheet._getHeaderButtons()` for quick window-level access.
+  - Added a stylized "Save to PDF" action button in the Page 1 Core header box (`.dcc-btn-save-pdf`).
+  - Triggers automatic download of `<Crawler_Name>_CharacterSheet.pdf` in browser/Foundry client.
+- **Embedded Zero-Dependency PDF Engine**:
+  - Bundled minified `pdf-lib.min.js` in `lib/` and registered in `system.json` under `"scripts"`, with an ES module wrapper `lib/pdf-lib.mjs` for seamless headless Node.js testing and client-side execution.
+- **Automated Test Suite**:
+  - Added comprehensive unit tests in `tests/pdf-export.test.mjs` verifying document structure, complete field mapping across all 6 pages, and sheet controller integration.
+
 ## 1.0.25
 
 ### System Macros Compendium & Initial Hotbar Quick-Access

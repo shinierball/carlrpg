@@ -14,8 +14,6 @@ export class DCCItemSheet extends ItemSheet {
       sheetOptions = itemOrOptions;
     }
     super(itemDoc, sheetOptions);
-    this.item = itemDoc || this.item || this.object;
-    this.document = this.item;
   }
 
   /**
@@ -163,7 +161,7 @@ export class DCCItemSheet extends ItemSheet {
       ? await super._prepareContext(options)
       : (typeof super.getData === 'function' ? await super.getData(options) : {});
 
-    const item = this.document || this.item;
+    const item = this.item || this.document || this.object;
     context.item = item;
     context.document = item;
     context.data = item;

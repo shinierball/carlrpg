@@ -418,11 +418,62 @@ if (!globalThis.Dialog) {
   };
 }
 
+if (!globalThis.Application) {
+  globalThis.Application = class MockApplication {
+    constructor(options = {}) {
+      const defaults = this.constructor.defaultOptions || {};
+      this.options = Object.assign({}, defaults, options);
+      this.id = this.options.id || 'mock-app';
+      this.appId = Math.floor(1000 + Math.random() * 9000);
+      this._state = -1;
+    }
+    get rendered() {
+      return this._state > 0;
+    }
+    static get defaultOptions() {
+      return {
+        id: 'mock-app',
+        title: 'Mock Application'
+      };
+    }
+    async getData() {
+      return {};
+    }
+    render(force = false, options = {}) {
+      this._state = 2;
+      if (globalThis.ui && globalThis.ui.windows) {
+        globalThis.ui.windows[this.appId] = this;
+        const key = this.id || this.options?.id;
+        if (key) globalThis.ui.windows[key] = this;
+      }
+      return this;
+    }
+    async close(options = {}) {
+      this._state = 0;
+      if (globalThis.ui && globalThis.ui.windows) {
+        if (this.appId) delete globalThis.ui.windows[this.appId];
+        const key = this.id || this.options?.id;
+        if (key) delete globalThis.ui.windows[key];
+      }
+      return Promise.resolve();
+    }
+  };
+}
+
+class MockDocumentSheet extends globalThis.Application {
+  constructor(object, options = {}) {
+    super(options);
+    this.object = object;
+  }
+  get document() {
+    return this.object;
+  }
+}
+
 if (!globalThis.ActorSheet) {
-  globalThis.ActorSheet = class MockActorSheet {
-    constructor(actor, options = {}) {
-      this.actor = actor;
-      this.options = options;
+  globalThis.ActorSheet = class MockActorSheet extends MockDocumentSheet {
+    get actor() {
+      return this.object;
     }
     get isEditable() {
       return true;
@@ -434,45 +485,23 @@ if (!globalThis.ActorSheet) {
     async getData() {
       return {
         actor: this.actor,
+        document: this.document,
         data: this.actor,
-        items: this.actor.items
+        items: this.actor?.items || []
       };
-    }
-  };
-}
-
-if (!globalThis.Application) {
-  globalThis.Application = class MockApplication {
-    constructor(options = {}) {
-      this.options = options;
-    }
-    static get defaultOptions() {
-      return {
-        id: 'mock-app',
-        title: 'Mock Application'
-      };
-    }
-    async getData() {
-      return {};
-    }
-    render(force, options) {
-      return this;
-    }
-    close() {
-      return Promise.resolve();
     }
   };
 }
 
 if (!globalThis.ItemSheet) {
-  globalThis.ItemSheet = class MockItemSheet {
-    constructor(item, options = {}) {
-      this.item = item;
-      this.options = options;
+  globalThis.ItemSheet = class MockItemSheet extends MockDocumentSheet {
+    get item() {
+      return this.object;
     }
     async getData() {
       return {
         item: this.item,
+        document: this.document,
         data: this.item
       };
     }

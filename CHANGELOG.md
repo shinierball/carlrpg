@@ -1,3 +1,18 @@
+## 2.0.4
+
+### Sheet & Application Window Rendering Fix
+
+- **Resolved Read-Only Getter Collision on Sheet & Application Instances**:
+  - Fixed an issue where `DCCCrawlerSheet` failed to open due to assignments to read-only getters (`this.actor`, `this.document`) inherited from Foundry's `ActorSheet` and `DocumentSheet`.
+  - Fixed an issue where `DCCItemSheet` failed to open due to assignments to read-only getters (`this.item`, `this.document`) inherited from Foundry's `ItemSheet` and `DocumentSheet`.
+  - Fixed an issue where `DCCSessionManagerApp` failed to open due to setting `this.rendered = false / true`, which collided with Foundry's native `Application.prototype.rendered` getter without a setter.
+- **Foundry Native Lifecycle Integration**:
+  - Fully delegated window lifecycle management (`this.rendered`, `ui.windows`) to Foundry's core `Application` system.
+  - Retained real-time `Hooks.on('dccSessionUpdated')` subscriber using the native `this.rendered` getter check.
+- **Test Harness Parity**:
+  - Updated `tests/setup.mjs` to faithfully mirror Foundry VTT prototype getters for `actor`, `item`, `document`, and `rendered`.
+  - Added dedicated test suite `tests/sheet-rendering.test.mjs` preventing any future regressions on sheet or app initialization and rendering.
+
 ## 2.0.3
 
 ### Party Progression & Session Manager — Customized Event Dialog & Real-Time Live Updates

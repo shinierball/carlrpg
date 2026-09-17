@@ -1114,7 +1114,6 @@ export class DCCSessionManagerApp extends BaseApplication {
     this.filterType = 'all';
     this.filterOutcome = 'all';
     this.searchQuery = '';
-    this.rendered = false;
 
     if (typeof Hooks !== 'undefined' && Hooks.on) {
       this._hookId = Hooks.on('dccSessionUpdated', () => {
@@ -1125,24 +1124,10 @@ export class DCCSessionManagerApp extends BaseApplication {
     }
   }
 
-  render(force = false, options = {}) {
-    if (typeof ui !== 'undefined' && ui.windows) {
-      const key = this.appId || this.id || 'dcc-session-manager';
-      ui.windows[key] = this;
-    }
-    this.rendered = true;
-    return super.render(force, options);
-  }
-
   async close(options = {}) {
-    if (typeof ui !== 'undefined' && ui.windows) {
-      const key = this.appId || this.id || 'dcc-session-manager';
-      delete ui.windows[key];
-    }
     if (this._hookId && typeof Hooks !== 'undefined' && Hooks.off) {
       Hooks.off('dccSessionUpdated', this._hookId);
     }
-    this.rendered = false;
     return super.close(options);
   }
 

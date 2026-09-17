@@ -66,8 +66,6 @@ export class DCCCrawlerSheet extends ActorSheet {
       sheetOptions = actorOrOptions;
     }
     super(actorDoc, sheetOptions);
-    this.actor = actorDoc || this.actor || this.object;
-    this.document = this.actor;
   }
 
   /**
@@ -147,7 +145,7 @@ export class DCCCrawlerSheet extends ActorSheet {
       ? await super._prepareContext(options)
       : (typeof super.getData === 'function' ? await super.getData(options) : {});
 
-    const actor = this.document || this.actor;
+    const actor = this.actor || this.document || this.object;
     const actorData = context.data || actor;
 
     context.actor = actor;

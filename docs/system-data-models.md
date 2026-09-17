@@ -60,12 +60,13 @@ Registered under `CONFIG.Actor.trackableAttributes`:
 
 ---
 
-## 🖥️ Phase 3: Application V2 Sheets (v2.0.1)
-
-Character and Item sheet controllers have been modernized to **Application V2** (`foundry.applications.sheets.ActorSheetV2` and `ItemSheetV2` with `foundry.applications.api.HandlebarsApplicationMixin`):
-
+## 🖥️ Phase 3: Application V2 Forward-Compatible Sheets (v2.0.1)
+ 
+Character and Item sheet controllers have been modernized to use **Application V2** paradigms (`DEFAULT_OPTIONS`, `PARTS`, `_prepareContext(options)`, `_onRender()`, dual constructor support) while inheriting from `ActorSheet` and `ItemSheet` (`FormApplication`) to maintain 100% native compatibility with Foundry V12's `Actors.registerSheet` and `Items.registerSheet`:
+ 
 ### Features & Architecture
 1. **DCCCrawlerSheet**:
+   - Extends `ActorSheet` directly to guarantee seamless registration and form handling in Foundry V12/V13.
    - `DEFAULT_OPTIONS`: Defines `tag: 'form'`, `classes: ['dcc-sheet-window', 'actor', 'crawler']`, `position: { width: 860, height: 900 }`, and header window controls for direct fillable PDF export.
    - `PARTS`: `sheet: { template: 'systems/carl-rpg/templates/actors/crawler-sheet.hbs' }`.
    - `_prepareContext(options)`: Compiles the full template context (creature size options, categorized items, equipped gear by slot, hotlist options, stat breakdowns).

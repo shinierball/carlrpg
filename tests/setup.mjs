@@ -518,13 +518,6 @@ class MockActorSheetV2 extends MockApplicationV2 {
     this.document = opts.document || null;
     this.actor = this.document;
   }
-  static mixin(...mixins) {
-    let cls = this;
-    for (const mixin of mixins) {
-      cls = mixin(cls);
-    }
-    return cls;
-  }
   get isEditable() {
     return true;
   }
@@ -546,13 +539,6 @@ class MockItemSheetV2 extends MockApplicationV2 {
     super(opts);
     this.document = opts.document || null;
     this.item = this.document;
-  }
-  static mixin(...mixins) {
-    let cls = this;
-    for (const mixin of mixins) {
-      cls = mixin(cls);
-    }
-    return cls;
   }
   get isEditable() {
     return true;

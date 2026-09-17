@@ -2,14 +2,14 @@
 
 ### System Data Models & Application V2 Architecture (Phases 1, 2 & 3: Foundry V16 Preparation)
 
-- **Application V2 Sheet Architecture (Phase 3)**:
-  - Modernized `DCCCrawlerSheet` and `DCCItemSheet` to Application V2 (`foundry.applications.sheets.ActorSheetV2` and `ItemSheetV2` with `foundry.applications.api.HandlebarsApplicationMixin`).
+- **Application V2 Forward-Compatible Sheet Architecture (Phase 3)**:
+  - Modernized `DCCCrawlerSheet` and `DCCItemSheet` with Application V2 paradigms (`DEFAULT_OPTIONS`, `PARTS`, `_prepareContext(options)`, `_onRender(context, options)`), while retaining base inheritance from `ActorSheet` and `ItemSheet` for native stability in Foundry V12 where `Actors.registerSheet` and `Items.registerSheet` require standard document sheet controllers.
   - Defined static `DEFAULT_OPTIONS` specifying semantic tags, position dimensions, form handlers, and header window controls (direct "Save to PDF" AcroForm export).
   - Defined static `PARTS` mapping Handlebars templates (`systems/carl-rpg/templates/actors/crawler-sheet.hbs` and `systems/carl-rpg/templates/items/item-sheet.hbs`).
   - Implemented Application V2 `_prepareContext(options)` and `_onRender(context, options)` lifecycle methods.
   - Provided dual compatibility: supports both Application V2 calling conventions (`new DCCCrawlerSheet({ document: actor })`, `_prepareContext()`) and legacy FormApplication v1 conventions (`new DCCCrawlerSheet(actor)`, `getData()`, `_getHeaderButtons()`).
   - Exposed `game.dcc.applications` namespace grouping all system sheets and manager apps.
-  - Added dedicated test suite `tests/application-v2-sheets.test.mjs` with 6 unit tests covering options, parts, dual constructors, context compilation, and render hooks.
+  - Added dedicated test suite `tests/application-v2-sheets.test.mjs` with 6 unit tests covering options, parts, dual constructors, context compilation, prototype inheritance, and render hooks.
 
 - **System Data Models for All Actor Types (Phase 2)**:
   - Implemented typed `foundry.abstract.TypeDataModel` classes for all 4 canonical Actor subtypes in `src/models/actors/`:

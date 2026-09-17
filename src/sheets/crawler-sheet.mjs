@@ -52,26 +52,21 @@ export function formatGearBonuses(gearItem) {
   return parts.join(', ');
 }
 
-const BaseCrawlerSheet = (globalThis.foundry?.applications?.sheets?.ActorSheetV2 && globalThis.foundry?.applications?.api?.HandlebarsApplicationMixin)
-  ? foundry.applications.sheets.ActorSheetV2.mixin(foundry.applications.api.HandlebarsApplicationMixin)
-  : (globalThis.ActorSheet || class {});
-
 /**
- * Dungeon Crawler Carl Character Sheet Controller (Application V2 with V1 Compatibility)
+ * Dungeon Crawler Carl Character Sheet Controller
+ * Extends ActorSheet (FormApplication V1) for native Foundry V12/V13 stability,
+ * while maintaining Application V2 structure (_prepareContext, DEFAULT_OPTIONS, PARTS).
  */
-export class DCCCrawlerSheet extends BaseCrawlerSheet {
+export class DCCCrawlerSheet extends ActorSheet {
   constructor(actorOrOptions, options = {}) {
-    let opts = options;
-    let actorDoc = null;
+    let actorDoc = actorOrOptions;
+    let sheetOptions = options;
     if (actorOrOptions && typeof actorOrOptions === 'object' && actorOrOptions.document) {
-      opts = actorOrOptions;
       actorDoc = actorOrOptions.document;
-    } else {
-      actorDoc = actorOrOptions;
-      opts = { document: actorOrOptions, ...options };
+      sheetOptions = actorOrOptions;
     }
-    super(opts);
-    this.actor = actorDoc || this.document || this.actor;
+    super(actorDoc, sheetOptions);
+    this.actor = actorDoc || this.actor || this.object;
     this.document = this.actor;
   }
 

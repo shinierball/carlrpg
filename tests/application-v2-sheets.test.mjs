@@ -146,8 +146,15 @@ test('Application V2 Sheet Modernization (Phase 3)', async (t) => {
     });
   });
 
-  await t.test('5. Global Applications Namespace', () => {
+  await t.test('5. Foundry V12 Sheet Inheritance & Prototype Safety', () => {
+    // Both sheet controllers must inherit from ActorSheet and ItemSheet for native V12 compatibility
+    assert.ok(DCCCrawlerSheet.prototype instanceof ActorSheet, 'DCCCrawlerSheet inherits from ActorSheet');
+    assert.ok(DCCItemSheet.prototype instanceof ItemSheet, 'DCCItemSheet inherits from ItemSheet');
+  });
+
+  await t.test('6. Global Applications Namespace', () => {
     assert.strictEqual(game.dcc.applications.DCCCrawlerSheet, DCCCrawlerSheet);
     assert.strictEqual(game.dcc.applications.DCCItemSheet, DCCItemSheet);
   });
 });
+

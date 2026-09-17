@@ -1,25 +1,20 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 
-const BaseItemSheet = (globalThis.foundry?.applications?.sheets?.ItemSheetV2 && globalThis.foundry?.applications?.api?.HandlebarsApplicationMixin)
-  ? foundry.applications.sheets.ItemSheetV2.mixin(foundry.applications.api.HandlebarsApplicationMixin)
-  : (globalThis.ItemSheet || class {});
-
 /**
- * Dungeon Crawler Carl Item Sheet Controller (Application V2 with V1 Compatibility)
+ * Dungeon Crawler Carl Item Sheet Controller
+ * Extends ItemSheet (FormApplication V1) for native Foundry V12/V13 stability,
+ * while maintaining Application V2 structure (_prepareContext, DEFAULT_OPTIONS, PARTS).
  */
-export class DCCItemSheet extends BaseItemSheet {
+export class DCCItemSheet extends ItemSheet {
   constructor(itemOrOptions, options = {}) {
-    let opts = options;
-    let itemDoc = null;
+    let itemDoc = itemOrOptions;
+    let sheetOptions = options;
     if (itemOrOptions && typeof itemOrOptions === 'object' && itemOrOptions.document) {
-      opts = itemOrOptions;
       itemDoc = itemOrOptions.document;
-    } else {
-      itemDoc = itemOrOptions;
-      opts = { document: itemOrOptions, ...options };
+      sheetOptions = itemOrOptions;
     }
-    super(opts);
-    this.item = itemDoc || this.document || this.item;
+    super(itemDoc, sheetOptions);
+    this.item = itemDoc || this.item || this.object;
     this.document = this.item;
   }
 

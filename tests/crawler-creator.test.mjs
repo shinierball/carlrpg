@@ -372,4 +372,29 @@ test('DCC RPG Crawler Character Creator Subsystem', async (t) => {
     assert.strictEqual(directActor.system.attributes.mana.value, 4, 'Direct creation sets current Mana to max Mana (4)');
     assert.strictEqual(directActor.system.attributes.mana.max, 4, 'Direct creation sets max Mana to 4');
   });
+
+  await t.test('8. Step 9: Psychological Background & Story Traumas Integration', async () => {
+    const creator = new DCCCrawlerCreatorApp({
+      name: 'Trauma & Regret Crawler',
+      species: 'human',
+      stats: { str: 6, dex: 5, con: 4, int: 3, cha: 2 },
+      pastTrauma: 'I was in a terrible accident.',
+      looseEnds: 'I was about to open a restaurant or other business.',
+      regrets: 'I didn’t ask them to marry me.'
+    });
+
+    const data = await creator.getData();
+    assert.strictEqual(data.pastTrauma, 'I was in a terrible accident.');
+    assert.strictEqual(data.looseEnds, 'I was about to open a restaurant or other business.');
+    assert.strictEqual(data.regrets, 'I didn’t ask them to marry me.');
+    assert.ok(data.backgroundTables.pastTrauma);
+    assert.ok(data.backgroundTables.looseEnds);
+    assert.ok(data.backgroundTables.regrets);
+
+    const actor = await creator.createCrawler();
+    assert.ok(actor);
+    assert.strictEqual(actor.system.details.pastTrauma, 'I was in a terrible accident.');
+    assert.strictEqual(actor.system.details.looseEnds, 'I was about to open a restaurant or other business.');
+    assert.strictEqual(actor.system.details.regrets, 'I didn’t ask them to marry me.');
+  });
 });

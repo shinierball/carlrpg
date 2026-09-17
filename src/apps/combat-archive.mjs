@@ -8,7 +8,12 @@
 import { DCCCombat, DCC_ACTION_TYPES } from '../documents/combat.mjs';
 import { DCCExperienceTracker } from './xp-tracker.mjs';
 
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
+
+const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
+  ?? globalThis.Dialog;
 
 export class DCCCombatArchiveApp extends BaseApplication {
   constructor(options = {}) {
@@ -339,8 +344,8 @@ export class DCCCombatArchiveApp extends BaseApplication {
       const id = $(ev.currentTarget).data('combat-id') || this.selectedCombatId;
       if (!id) return;
 
-      const confirmed = globalThis.Dialog?.confirm
-        ? await globalThis.Dialog.confirm({
+      const confirmed = DialogClass?.confirm
+        ? await DialogClass.confirm({
             title: 'Delete Archived Combat',
             content: '<p>Are you sure you want to permanently delete this archived combat record?</p>'
           })
@@ -359,8 +364,8 @@ export class DCCCombatArchiveApp extends BaseApplication {
     // 9. Clear all archived encounters (GM only)
     $html.find('.dcc-archive-clear-all-btn').click(async ev => {
       ev.preventDefault();
-      const confirmed = globalThis.Dialog?.confirm
-        ? await globalThis.Dialog.confirm({
+      const confirmed = DialogClass?.confirm
+        ? await DialogClass.confirm({
             title: 'Clear All Archived Combats',
             content: '<p>Are you sure you want to permanently delete <strong>ALL</strong> archived combats in this world?</p>'
           })

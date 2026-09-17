@@ -13,7 +13,9 @@ import { DCCCombat, DCC_ACTION_TYPES } from '../documents/combat.mjs';
 import { DCCCombatMetricsApp } from './combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './combat-archive.mjs';
 
-const BaseCombatTracker = typeof CombatTracker !== 'undefined' ? CombatTracker : (globalThis.CombatTracker || class {});
+const BaseCombatTracker = globalThis.foundry?.appv1?.sidebar?.tabs?.CombatTracker
+  ?? globalThis.CombatTracker
+  ?? class {};
 
 export class DCCCombatTracker extends BaseCombatTracker {
   constructor(options = {}) {

@@ -4,6 +4,8 @@
  * species rules, duplicate skill rank resolution, and crawler generation logic.
  */
 
+import { DCC_BACKGROUND_TABLES } from './background-tables.mjs';
+
 export const DCC_STANDARD_ARRAY = [2, 3, 4, 5, 6];
 
 export const DCC_SPECIES_DATA = {
@@ -1104,6 +1106,14 @@ export function generateRandomCrawler(chosenSpecies = null, floor = '1st Floor')
     ? ['Tiny', 'Small', 'Petite', 'Medium', 'Large'][Math.floor(Math.random() * 5)]
     : 'Medium';
 
+  const pastTraumaRoll = Math.floor(Math.random() * 12) + 1;
+  const looseEndsRoll = Math.floor(Math.random() * 12) + 1;
+  const regretsRoll = Math.floor(Math.random() * 12) + 1;
+
+  const pastTrauma = DCC_BACKGROUND_TABLES.pastTrauma.results.find(r => r.roll === pastTraumaRoll)?.text || '';
+  const looseEnds = DCC_BACKGROUND_TABLES.looseEnds.results.find(r => r.roll === looseEndsRoll)?.text || '';
+  const regrets = DCC_BACKGROUND_TABLES.regrets.results.find(r => r.roll === regretsRoll)?.text || '';
+
   return {
     name,
     crawlerNumber: `#${randomNum}`,
@@ -1118,6 +1128,9 @@ export function generateRandomCrawler(chosenSpecies = null, floor = '1st Floor')
     starterWeapon,
     starterSpell,
     starterUnarmed: starterUnarmedPkg.key,
+    pastTrauma,
+    looseEnds,
+    regrets,
     skills: resolved.skills,
     duplicates: resolved.duplicates,
     warnings: resolved.warnings

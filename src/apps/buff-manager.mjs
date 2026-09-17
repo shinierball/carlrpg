@@ -2,7 +2,9 @@
  * DCC RPG — Buff & Debuff Condition Manager Application
  * Centralized interface for browsing, inspecting, and applying status effects, buffs, and debuffs.
  */
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
 
 export class DCCBuffDebuffManager extends BaseApplication {
   constructor(options = {}) {

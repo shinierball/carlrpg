@@ -12,7 +12,9 @@
 
 import { DCCExperienceTracker } from './xp-tracker.mjs';
 
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
 
 /**
  * Canonical 7-Tier Roll Outcome Definitions for CarlRPG
@@ -1404,7 +1406,7 @@ export class DCCSessionManagerApp extends BaseApplication {
       contentHtml = DCCSessionManagerApp.getAddEventDialogHtml(dialogData);
     }
 
-    const DialogClass = (typeof Dialog !== 'undefined') ? Dialog : (globalThis.Dialog || null);
+    const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog ?? null;
     if (!DialogClass) return null;
 
     return new Promise((resolve) => {

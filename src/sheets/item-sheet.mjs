@@ -5,7 +5,9 @@ import { DCCSkillManager } from '../apps/skill-manager.mjs';
  * Extends ItemSheet (FormApplication V1) for native Foundry V12/V13 stability,
  * while maintaining Application V2 structure (_prepareContext, DEFAULT_OPTIONS, PARTS).
  */
-export class DCCItemSheet extends ItemSheet {
+const BaseItemSheet = globalThis.foundry?.appv1?.sheets?.ItemSheet ?? globalThis.ItemSheet;
+
+export class DCCItemSheet extends BaseItemSheet {
   constructor(itemOrOptions, options = {}) {
     let itemDoc = itemOrOptions;
     let sheetOptions = options;

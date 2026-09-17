@@ -1,3 +1,7 @@
-2026/09/17-09:29:04.086173 1771d7000 Log #92: 0 ops saved to Table #93 OK
-2026/09/17-09:29:04.086244 1771d7000 Archiving /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/buffs/000092.log: OK
-2026/09/17-09:29:04.086745 1771d7000 **** Repaired leveldb /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/buffs; recovered 0 files; 0 bytes. Some data may have been lost. ****
+2026/09/17-10:56:14.765670 1779e3000 Recovering log #100
+2026/09/17-10:56:14.766098 1779e3000 Delete type=3 #98
+2026/09/17-10:56:14.766136 1779e3000 Delete type=0 #100
+2026/09/17-12:37:04.538796 16f79b000 Level-0 table #105: started
+2026/09/17-12:37:04.538810 16f79b000 Level-0 table #105: 0 bytes OK
+2026/09/17-12:37:04.538898 16f79b000 Delete type=0 #103
+2026/09/17-12:37:04.538976 16f79b000 Manual compaction at level-0 from 'undefined' @ 72057594037927935 : 1 .. 'undefined' @ 0 : 0; will stop at (end)

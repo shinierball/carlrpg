@@ -2,7 +2,12 @@
  * DCC RPG — Skill Library & Manager Application
  * Centralized interface for browsing, creating, and maintaining skills.
  */
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
+
+const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
+  ?? globalThis.Dialog;
 
 export class DCCSkillManager extends BaseApplication {
   constructor(options = {}) {
@@ -264,7 +269,7 @@ export class DCCSkillManager extends BaseApplication {
       </form>
     `;
 
-    new Dialog({
+    new DialogClass({
       title: 'DCC RPG — Create New Custom Skill',
       content,
       buttons: {
@@ -359,7 +364,7 @@ export class DCCSkillManager extends BaseApplication {
       const item = game.items?.get(skillId);
       if (!item) return;
 
-      Dialog.confirm({
+      DialogClass?.confirm?.({
         title: `Delete Skill: ${item.name}`,
         content: `<p>Are you sure you want to permanently delete the custom skill <strong>${item.name}</strong> from the world skills library?</p>`,
         yes: async () => {

@@ -1,4 +1,7 @@
-2026/09/17-09:29:04.088778 1779e3000 Log #44: 0 ops saved to Table #45 OK
-2026/09/17-09:29:04.088894 1779e3000 Archiving /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/macros/000044.log: OK
-2026/09/17-09:29:04.089008 1779e3000 Table #9: 3 entries OK
-2026/09/17-09:29:04.089394 1779e3000 **** Repaired leveldb /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/macros; recovered 1 files; 1086 bytes. Some data may have been lost. ****
+2026/09/17-10:56:14.767045 1761bf000 Recovering log #53
+2026/09/17-10:56:14.767463 1761bf000 Delete type=0 #53
+2026/09/17-10:56:14.767497 1761bf000 Delete type=3 #51
+2026/09/17-12:37:04.538635 16f79b000 Level-0 table #58: started
+2026/09/17-12:37:04.538650 16f79b000 Level-0 table #58: 0 bytes OK
+2026/09/17-12:37:04.538742 16f79b000 Delete type=0 #56
+2026/09/17-12:37:04.538969 16f79b000 Manual compaction at level-0 from '!macros!dccmacro00000001' @ 72057594037927935 : 1 .. '!macros!dccmacro00000003' @ 0 : 0; will stop at (end)

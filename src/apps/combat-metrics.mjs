@@ -10,7 +10,12 @@ import { DCCExperienceTracker } from './xp-tracker.mjs';
 import { DCCCombatArchiveApp } from './combat-archive.mjs';
 import { DCCSessionEngine } from './session-manager.mjs';
 
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
+
+const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
+  ?? globalThis.Dialog;
 
 /**
  * Calculate HP per damage bar for an actor.
@@ -856,7 +861,7 @@ export class DCCCombatMetricsApp extends BaseApplication {
       const targetCombat = this.getTargetCombat();
       if (!targetCombat) return;
 
-      const confirm = await Dialog.confirm({
+      const confirm = await DialogClass?.confirm?.({
         title: 'Reset Combat Metrics?',
         content: '<p>Are you sure you want to reset all tracked damage and skill stats for this combat encounter?</p>'
       });
@@ -874,7 +879,7 @@ export class DCCCombatMetricsApp extends BaseApplication {
       const targetCombat = this.getTargetCombat();
       if (!targetCombat || !actorId) return;
 
-      new Dialog({
+      new DialogClass({
         title: 'Manual Damage Adjustment',
         content: `
           <div style="padding: 6px;">

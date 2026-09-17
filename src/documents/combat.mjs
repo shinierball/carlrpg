@@ -11,7 +11,10 @@
  * - Health Thresholds: Green (100%-66%), Yellow (66%-33%), Red (33%-0%).
  */
 
-const BaseCombat = typeof Combat !== 'undefined' ? Combat : (globalThis.Combat || class {});
+const BaseCombat = CONFIG.Combat?.documentClass
+  ?? globalThis.foundry?.documents?.BaseCombat
+  ?? globalThis.Combat
+  ?? class {};
 const deepClone = (obj) => {
   if (typeof foundry !== 'undefined' && foundry?.utils?.deepClone) {
     return foundry.utils.deepClone(obj);

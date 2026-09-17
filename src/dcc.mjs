@@ -18,6 +18,12 @@ import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from '.
 import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 import { DCC_MACROS } from './data/macros.mjs';
 import {
+  DCC_BACKGROUND_TABLES,
+  getBackgroundTable,
+  rollBackgroundTable,
+  ensureBackgroundTables
+} from './data/background-tables.mjs';
+import {
   SkillDataModel,
   AttackDataModel,
   SpellDataModel,
@@ -54,6 +60,12 @@ Hooks.once('init', async function() {
     DCCSessionEngine,
     DCCSessionManagerApp,
     DCCCrawlerCreatorApp,
+    backgroundTables: DCC_BACKGROUND_TABLES,
+    getBackgroundTable,
+    rollBackgroundTable,
+    ensureBackgroundTables,
+    onRenderChatMessage,
+    registerChatMessageHook,
     applications: {
       DCCCrawlerSheet,
       DCCItemSheet,
@@ -103,7 +115,9 @@ Hooks.once('init', async function() {
       standardArray: DCC_STANDARD_ARRAY,
       species: DCC_SPECIES_DATA,
       matrices: DCC_BACKGROUND_MATRICES
-    }
+    },
+    backgroundTables: DCC_BACKGROUND_TABLES,
+    rollBackgroundTable
   };
 
   // Register document classes
@@ -162,18 +176,27 @@ Hooks.once('init', async function() {
   // Register sheet & UI classes
   CONFIG.ui.combat = DCCCombatTracker;
 
-  Actors.unregisterSheet('core', ActorSheet);
-  Actors.registerSheet('carl-rpg', DCCCrawlerSheet, {
-    types: ['crawler', 'pet', 'mount_vehicle', 'npc'],
-    makeDefault: true,
-    label: 'DCC.CrawlerSheet'
-  });
+  const ActorsClass = globalThis.foundry?.documents?.collections?.Actors ?? globalThis.Actors;
+  const ItemsClass = globalThis.foundry?.documents?.collections?.Items ?? globalThis.Items;
+  const BaseActorSheet = globalThis.foundry?.appv1?.sheets?.ActorSheet ?? globalThis.ActorSheet;
+  const BaseItemSheet = globalThis.foundry?.appv1?.sheets?.ItemSheet ?? globalThis.ItemSheet;
 
-  Items.unregisterSheet('core', ItemSheet);
-  Items.registerSheet('carl-rpg', DCCItemSheet, {
-    makeDefault: true,
-    label: 'DCC.ItemSheet'
-  });
+  if (ActorsClass) {
+    ActorsClass.unregisterSheet('core', BaseActorSheet);
+    ActorsClass.registerSheet('carl-rpg', DCCCrawlerSheet, {
+      types: ['crawler', 'pet', 'mount_vehicle', 'npc'],
+      makeDefault: true,
+      label: 'DCC.CrawlerSheet'
+    });
+  }
+
+  if (ItemsClass) {
+    ItemsClass.unregisterSheet('core', BaseItemSheet);
+    ItemsClass.registerSheet('carl-rpg', DCCItemSheet, {
+      makeDefault: true,
+      label: 'DCC.ItemSheet'
+    });
+  }
 
   // Register System Settings
   game.settings.register('carl-rpg', 'archivedCombats', {
@@ -216,7 +239,11 @@ Hooks.once('init', async function() {
   Handlebars.registerHelper('upper', str => (str ? String(str).toUpperCase() : ''));
 
   // Preload Handlebars templates
-  await loadTemplates([
+  const loadTemplatesFn = globalThis.foundry?.applications?.handlebars?.loadTemplates
+    ?? globalThis.foundry?.utils?.loadTemplates
+    ?? globalThis.loadTemplates;
+
+  await loadTemplatesFn([
     'systems/carl-rpg/templates/actors/parts/page1-core.hbs',
     'systems/carl-rpg/templates/actors/parts/page2-hotlist.hbs',
     'systems/carl-rpg/templates/actors/parts/hotlist.hbs',
@@ -270,6 +297,9 @@ Hooks.once('init', async function() {
   window.carl = {
     combatMetrics: DCCCombatMetrics,
     sessionEngine: DCCSessionEngine,
+    backgroundTables: DCC_BACKGROUND_TABLES,
+    rollBackgroundTable,
+    ensureBackgroundTables,
     setupInitialHotbar,
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
@@ -296,6 +326,9 @@ Hooks.once('init', async function() {
       ui.notifications?.info('DCC RPG | Re-rendered all open sheets.');
     }
   };
+
+  // Register or re-verify chat message hook on Foundry init
+  registerChatMessageHook();
 });
 
 /**
@@ -354,9 +387,11 @@ export async function setupInitialHotbar(user = globalThis.game?.user, { force =
   }
 }
 
-// Hook into the Foundry Items Directory sidebar to add a top-level Skill Library & Manager button
-Hooks.on('renderItemDirectory', (app, html) => {
-  if (html.find('.dcc-open-skill-manager-btn').length) return;
+// Helper function to inject Skill Library & Manager button into the Items Directory
+function injectItemDirectoryButtons(app, html) {
+  const $html = $(html ?? app?.element);
+  if (!$html || !$html.length) return;
+  if ($html.find('.dcc-open-skill-manager-btn').length) return;
 
   const btn = $(`
     <button type="button" class="dcc-open-skill-manager-btn" style="width: 100%; margin: 4px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
@@ -369,17 +404,22 @@ Hooks.on('renderItemDirectory', (app, html) => {
     new DCCSkillManager().render(true);
   });
 
-  const headerActions = html.find('.header-actions');
+  const headerActions = $html.find('.header-actions');
   if (headerActions.length) {
     headerActions.after(btn);
   } else {
-    html.find('.directory-footer').before(btn);
+    $html.find('.directory-footer').before(btn);
   }
+}
+
+// Hook into the Foundry Items Directory sidebar to add a top-level Skill Library & Manager button
+Hooks.on('renderItemDirectory', (app, html) => {
+  injectItemDirectoryButtons(app, html);
 });
 
 // Helper function to inject New Crawler and Session Manager buttons into the Actors Directory
 function injectActorDirectoryButtons(app, html) {
-  const $html = (html instanceof jQuery) ? html : $(html ?? app?.element);
+  const $html = $(html ?? app?.element);
   if (!$html || !$html.length) return;
 
   // 1. New Crawler Button next to default Create Actor button inside .header-actions
@@ -447,6 +487,8 @@ Hooks.on('renderActorDirectory', (app, html) => {
 Hooks.on('renderSidebarTab', (app, html) => {
   if (app?.tabName === 'actors' || app?.id === 'actors' || app?.options?.id === 'actors') {
     injectActorDirectoryButtons(app, html);
+  } else if (app?.tabName === 'items' || app?.id === 'items' || app?.options?.id === 'items') {
+    injectItemDirectoryButtons(app, html);
   }
 });
 
@@ -464,7 +506,7 @@ Hooks.on('getApplicationHeaderButtons', (app, buttons) => {
 
 // Hook into Combat Tracker sidebar to inject CarlRPG Action Tracker & AI Awards, and remove initiative rolling
 Hooks.on('renderCombatTracker', (app, html, data) => {
-  const $html = (html instanceof jQuery) ? html : $(html);
+  const $html = $(html ?? app?.element);
 
   // 1. Remove all initiative roll buttons and inputs to prevent confusion
   $html.find('[data-action="rollAll"], [data-action="rollNPC"], [data-control="rollAll"], [data-control="rollNPC"]').remove();
@@ -663,92 +705,197 @@ Hooks.on('renderCombatTracker', (app, html, data) => {
   }
 });
 
-// Hook into Chat Messages to handle "Apply Damage to Target(s)" button clicks
-Hooks.on('renderChatMessage', (message, html, data) => {
-  html.find('.dcc-apply-damage-btn').click(async ev => {
-    ev.preventDefault();
-    const btn = $(ev.currentTarget);
-    const card = btn.closest('.dcc-damage-card');
-    const attackerId = card.data('attacker-id');
-    const itemName = card.data('item-name') || 'Attack';
-    const attackType = card.data('attack-type') || 'attack';
-    const rawDamage = Number(card.data('damage-value')) || 0;
-    const multiplier = Number(btn.data('multiplier')) || 1;
-    const ignoreDR = Boolean(btn.data('ignore-dr'));
+let _registeredChatHook = null;
 
-    const attacker = game.actors?.get(attackerId) || null;
+/**
+ * Hook handler for Chat Message rendering.
+ * Compatible with both Foundry v13+ (renderChatMessageHTML with HTMLElement)
+ * and v12 (renderChatMessage with jQuery).
+ * @param {ChatMessage} message
+ * @param {HTMLElement|jQuery} html
+ * @param {object} data
+ */
+export function onRenderChatMessage(message, html, data) {
+  const root = (typeof HTMLElement !== 'undefined' && html instanceof HTMLElement)
+    ? html
+    : (html?.[0] || html);
 
-    let targetTokens = Array.from(game.user?.targets || []);
-    if (!targetTokens.length && canvas?.tokens) {
-      targetTokens = canvas.tokens.controlled.filter(t => t.actor && t.actor.id !== attackerId);
+  if (!root) return;
+
+  const query = (selector) => {
+    if (typeof root.querySelectorAll === 'function') {
+      return Array.from(root.querySelectorAll(selector));
+    }
+    if (typeof $ !== 'undefined' && typeof $(root).find === 'function') {
+      return Array.from($(root).find(selector));
+    }
+    return [];
+  };
+
+  // 1. Handle "Apply Damage to Target(s)" buttons
+  const applyDamageButtons = query('.dcc-apply-damage-btn');
+  for (const btn of applyDamageButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
     }
 
-    if (!targetTokens.length) {
-      ui.notifications?.warn('DCC RPG | No targets selected! Please target or select at least one token on the canvas.');
-      return;
-    }
+    const clickHandler = async (ev) => {
+      ev.preventDefault();
+      const card = (typeof btn.closest === 'function')
+        ? btn.closest('.dcc-damage-card')
+        : (typeof $ !== 'undefined' ? $(btn).closest('.dcc-damage-card')[0] : null);
+      if (!card) return;
 
-    const rawTyped = card.attr('data-typed-damage') || card.data('typed-damage');
-    let typedDamage = null;
-    if (rawTyped) {
-      try {
-        typedDamage = typeof rawTyped === 'string' ? JSON.parse(rawTyped) : rawTyped;
-      } catch (_) {}
-    }
-    const damageType = card.data('damage-type') || '';
+      const $card = (typeof $ !== 'undefined') ? $(card) : null;
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
 
-    const results = [];
-    for (const token of targetTokens) {
-      const targetActor = token.actor;
-      if (!targetActor) continue;
+      const attackerId = card.dataset?.attackerId || $card?.data('attacker-id');
+      const itemName = card.dataset?.itemName || $card?.data('item-name') || 'Attack';
+      const attackType = card.dataset?.attackType || $card?.data('attack-type') || 'attack';
+      const rawDamage = Number(card.dataset?.damageValue ?? $card?.data('damage-value')) || 0;
+      const multiplier = Number(btn.dataset?.multiplier ?? $btn?.data('multiplier')) || 1;
+      const ignoreDR = Boolean(btn.dataset?.ignoreDr ?? $btn?.data('ignore-dr'));
 
-      const res = await DCCCombatMetrics.applyDamageToTarget({
-        targetActor,
-        rawDamage,
-        typedDamage,
-        damageType,
-        attackerActor: attacker,
-        attackName: itemName,
-        attackType,
-        ignoreDR,
-        multiplier
-      });
-      results.push(res);
-    }
+      const attacker = game.actors?.get(attackerId) || null;
 
-    const summary = results.map(r => {
-      let text = `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.barsRemoved ?? 0} bar${r.barsRemoved === 1 ? '' : 's'}, ${r.newHp} HP left`;
-      if (r.excessDamage > 0) {
-        text += `, ${r.excessDamage} excess ignored`;
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && canvas?.tokens) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor && t.actor.id !== attackerId);
       }
-      text += ')';
-      return text;
-    }).join(', ');
-    ui.notifications?.info(`DCC RPG | Damage applied: ${summary}`);
 
-    card.find('.dcc-damage-applied-feedback').remove();
-    card.append(`
-      <div class="dcc-damage-applied-feedback" style="margin-top: 6px; font-size: 11px; background: #e8f8f5; border: 1px solid #27ae60; color: #1e8449; padding: 4px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
-        <i class="fa-solid fa-check"></i> Applied to ${results.length} target(s). Logged to combat!
-      </div>
-    `);
-  });
+      if (!targetTokens.length) {
+        ui.notifications?.warn('DCC RPG | No targets selected! Please target or select at least one token on the canvas.');
+        return;
+      }
 
-  // Handle click on "Roll Spell Damage" from a cast spell card in chat
-  html.find('.roll-spell-dmg-from-card').click(async ev => {
-    ev.preventDefault();
-    const btn = $(ev.currentTarget);
-    const actorId = btn.data('actor-id');
-    const spellId = btn.data('spell-id');
-    const actor = game.actors?.get(actorId) || null;
-    if (!actor) return;
-    const spell = actor.items?.get(spellId) ||
-      (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId) : actor.items.find?.(it => it.id === spellId));
-    if (spell && typeof actor.rollSpellDamage === 'function') {
-      await actor.rollSpellDamage(spell);
+      const rawTyped = card.dataset?.typedDamage ||
+        card.getAttribute?.('data-typed-damage') ||
+        $card?.attr('data-typed-damage') ||
+        $card?.data('typed-damage');
+      let typedDamage = null;
+      if (rawTyped) {
+        try {
+          typedDamage = typeof rawTyped === 'string' ? JSON.parse(rawTyped) : rawTyped;
+        } catch (_) {}
+      }
+      const damageType = card.dataset?.damageType || $card?.data('damage-type') || '';
+
+      const results = [];
+      for (const token of targetTokens) {
+        const targetActor = token.actor;
+        if (!targetActor) continue;
+
+        const res = await DCCCombatMetrics.applyDamageToTarget({
+          targetActor,
+          rawDamage,
+          typedDamage,
+          damageType,
+          attackerActor: attacker,
+          attackName: itemName,
+          attackType,
+          ignoreDR,
+          multiplier
+        });
+        results.push(res);
+      }
+
+      const summary = results.map(r => {
+        let text = `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.barsRemoved ?? 0} bar${r.barsRemoved === 1 ? '' : 's'}, ${r.newHp} HP left`;
+        if (r.excessDamage > 0) {
+          text += `, ${r.excessDamage} excess ignored`;
+        }
+        text += ')';
+        return text;
+      }).join(', ');
+      ui.notifications?.info(`DCC RPG | Damage applied: ${summary}`);
+
+      if (typeof card.querySelectorAll === 'function') {
+        card.querySelectorAll('.dcc-damage-applied-feedback').forEach(el => el.remove());
+      } else if ($card) {
+        $card.find('.dcc-damage-applied-feedback').remove();
+      }
+
+      const feedbackHtml = `
+        <div class="dcc-damage-applied-feedback" style="margin-top: 6px; font-size: 11px; background: #e8f8f5; border: 1px solid #27ae60; color: #1e8449; padding: 4px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+          <i class="fa-solid fa-check"></i> Applied to ${results.length} target(s). Logged to combat!
+        </div>
+      `;
+      if (typeof card.insertAdjacentHTML === 'function') {
+        card.insertAdjacentHTML('beforeend', feedbackHtml);
+      } else if ($card) {
+        $card.append(feedbackHtml);
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', clickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(clickHandler);
     }
-  });
-});
+  }
+
+  // 2. Handle click on "Roll Spell Damage" from a cast spell card in chat
+  const rollSpellButtons = query('.roll-spell-dmg-from-card');
+  for (const btn of rollSpellButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const spellClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
+      const spellId = btn.dataset?.spellId || $btn?.data('spell-id');
+      const actor = game.actors?.get(actorId) || null;
+      if (!actor) return;
+      const spell = (typeof actor.items?.get === 'function')
+        ? actor.items.get(spellId)
+        : (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId) : actor.items?.find?.(it => it.id === spellId));
+      if (spell && typeof actor.rollSpellDamage === 'function') {
+        await actor.rollSpellDamage(spell);
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', spellClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(spellClickHandler);
+    }
+  }
+}
+
+/**
+ * Register chat message hook using renderChatMessageHTML on Foundry v13+ (or renderChatMessage on v12)
+ * to eliminate deprecation warnings.
+ * @returns {string} The registered hook name
+ */
+export function registerChatMessageHook() {
+  const isV13Plus = Boolean(
+    (typeof game !== 'undefined' && (
+      (game.release?.generation >= 13) ||
+      (typeof game.version === 'string' && Number(game.version.split('.')[0]) >= 13) ||
+      (typeof foundry !== 'undefined' && foundry.utils?.isNewerVersion?.(game.version ?? '0', '12.999'))
+    ))
+  );
+
+  const hookName = isV13Plus ? 'renderChatMessageHTML' : 'renderChatMessage';
+  if (_registeredChatHook === hookName) return hookName;
+
+  if (_registeredChatHook && typeof Hooks !== 'undefined' && typeof Hooks.off === 'function') {
+    Hooks.off(_registeredChatHook, onRenderChatMessage);
+  }
+
+  if (typeof Hooks !== 'undefined' && typeof Hooks.on === 'function') {
+    Hooks.on(hookName, onRenderChatMessage);
+    _registeredChatHook = hookName;
+  }
+  return hookName;
+}
+
+// Register chat message render hook on module evaluation
+registerChatMessageHook();
 
 /**
  * Enforce linked actor data for player characters (crawlers) and companion pets
@@ -763,6 +910,9 @@ Hooks.on('preCreateToken', (tokenDoc, createData, options, userId) => {
 
 Hooks.once('ready', async function() {
   if (game.user.isGM) {
+    // 0. Ensure official background RollTables (Tables 11, 12, 13) exist in the world
+    await ensureBackgroundTables();
+
     // 1. Ensure existing world crawlers and pets have prototypeToken.actorLink = true
     if (game.actors) {
       for (const actor of game.actors) {

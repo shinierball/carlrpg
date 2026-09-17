@@ -2,7 +2,9 @@
  * DCC RPG — Spell Library & Manager Application
  * Centralized interface for browsing, filtering, and learning spells.
  */
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
 
 export class DCCSpellManager extends BaseApplication {
   constructor(options = {}) {

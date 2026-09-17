@@ -17,12 +17,15 @@ import {
   resolveSkillRanks,
   generateRandomCrawler
 } from '../data/crawler-creation.mjs';
+import { DCC_BACKGROUND_TABLES, rollBackgroundTable } from '../data/background-tables.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { DCC_SKILLS } from '../data/skills.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { getDCCStatModifier } from '../documents/actor.mjs';
 
-const BaseApplication = typeof Application !== 'undefined' ? Application : (globalThis.Application || class {});
+const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
+  ?? globalThis.Application
+  ?? class {};
 
 export class DCCCrawlerCreatorApp extends BaseApplication {
   constructor(options = {}) {
@@ -33,6 +36,11 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
     this.species = options.species || 'human';
     this.floor = options.floor || '1st Floor';
     this.size = options.size || 'Medium';
+
+    // Background story traits (Step 9: Traumas, Loose Ends, Regrets)
+    this.pastTrauma = options.pastTrauma || '';
+    this.looseEnds = options.looseEnds || '';
+    this.regrets = options.regrets || '';
 
     // Starter combat loadout (Level 1)
     this.starterMode = options.starterMode || 'weapon'; // 'weapon' | 'spell' | 'unarmed'
@@ -247,6 +255,42 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
     const startingHp = 10 * conMod;
     const startingMana = Number(this.stats.int) || 0;
 
+    const backgroundTables = {
+      pastTrauma: {
+        key: 'pastTrauma',
+        tableNumber: 11,
+        name: 'Table 11: Past Traumas',
+        value: this.pastTrauma,
+        options: DCC_BACKGROUND_TABLES.pastTrauma.results.map(r => ({
+          roll: r.roll,
+          text: r.text,
+          selected: r.text === this.pastTrauma
+        }))
+      },
+      looseEnds: {
+        key: 'looseEnds',
+        tableNumber: 12,
+        name: 'Table 12: Loose Ends',
+        value: this.looseEnds,
+        options: DCC_BACKGROUND_TABLES.looseEnds.results.map(r => ({
+          roll: r.roll,
+          text: r.text,
+          selected: r.text === this.looseEnds
+        }))
+      },
+      regrets: {
+        key: 'regrets',
+        tableNumber: 13,
+        name: 'Table 13: Regrets',
+        value: this.regrets,
+        options: DCC_BACKGROUND_TABLES.regrets.results.map(r => ({
+          roll: r.roll,
+          text: r.text,
+          selected: r.text === this.regrets
+        }))
+      }
+    };
+
     return {
       name: this.name,
       crawlerNumber: this.crawlerNumber,
@@ -278,6 +322,10 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       starterWeaponOptions,
       starterSpellOptions,
       starterUnarmedOptions,
+      pastTrauma: this.pastTrauma,
+      looseEnds: this.looseEnds,
+      regrets: this.regrets,
+      backgroundTables,
       resolvedSkills: Array.from(displaySkillsMap.values()),
       duplicates: resolved.duplicates,
       warnings: resolved.warnings,
@@ -392,6 +440,51 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       this.render(false);
     });
 
+    // Story Background Traits (Step 9) - Manual Text Input
+    html.find('.dcc-trait-input').on('input', ev => {
+      const trait = ev.currentTarget.dataset.trait;
+      if (trait && trait in this) {
+        this[trait] = ev.currentTarget.value;
+      }
+    });
+
+    // Story Background Traits (Step 9) - Dropdown Select Option
+    html.find('.dcc-trait-select').on('change', ev => {
+      const trait = ev.currentTarget.dataset.trait;
+      const val = ev.currentTarget.value;
+      if (trait && trait in this) {
+        this[trait] = val;
+        this.render(false);
+      }
+    });
+
+    // Story Background Traits (Step 9) - Roll Single Table (1d12)
+    html.find('.dcc-roll-trait-btn').on('click', async ev => {
+      ev.preventDefault();
+      const trait = ev.currentTarget.dataset.trait;
+      if (trait && trait in this) {
+        const res = await rollBackgroundTable(trait);
+        this[trait] = res.text;
+        this.render(false);
+        ui.notifications?.info(`Rolled [${res.roll}] on ${res.tableName}: "${res.text}"`);
+      }
+    });
+
+    // Story Background Traits (Step 9) - Roll All 3 Tables
+    html.find('.dcc-roll-all-traits-btn').on('click', async ev => {
+      ev.preventDefault();
+      const [tRes, lRes, rRes] = await Promise.all([
+        rollBackgroundTable('pastTrauma'),
+        rollBackgroundTable('looseEnds'),
+        rollBackgroundTable('regrets')
+      ]);
+      this.pastTrauma = tRes.text;
+      this.looseEnds = lRes.text;
+      this.regrets = rRes.text;
+      this.render(false);
+      ui.notifications?.info('Rolled all 3 background tables for Past Trauma, Loose Ends, and Regrets.');
+    });
+
     // Randomize button
     html.find('.dcc-randomize-btn').on('click', ev => {
       ev.preventDefault();
@@ -405,6 +498,9 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       if (generated.starterWeapon) this.starterWeapon = generated.starterWeapon;
       if (generated.starterSpell) this.starterSpell = generated.starterSpell;
       if (generated.starterUnarmed) this.starterUnarmed = generated.starterUnarmed;
+      this.pastTrauma = generated.pastTrauma || '';
+      this.looseEnds = generated.looseEnds || '';
+      this.regrets = generated.regrets || '';
       this.render(false);
       ui.notifications?.info(`Generated random Crawler build: ${this.name} (${this.species.toUpperCase()})`);
     });
@@ -417,6 +513,9 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
       this.starterWeapon = 'Longsword';
       this.starterSpell = 'Fire Fingers';
       this.starterUnarmed = 'pugilism';
+      this.pastTrauma = '';
+      this.looseEnds = '';
+      this.regrets = '';
       this._initializeDefaultSelections();
       this.render(false);
     });
@@ -688,7 +787,10 @@ export class DCCCrawlerCreatorApp extends BaseApplication {
           race: speciesData.label,
           floor: this.floor,
           level: floorNumber,
-          crawlerNumber: this.crawlerNumber || ''
+          crawlerNumber: this.crawlerNumber || '',
+          pastTrauma: this.pastTrauma || '',
+          looseEnds: this.looseEnds || '',
+          regrets: this.regrets || ''
         }
       },
       items: itemPayloads

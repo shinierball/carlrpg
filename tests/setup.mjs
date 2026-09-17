@@ -270,6 +270,11 @@ if (!globalThis.Macro) {
 if (!globalThis.CONST) {
   globalThis.CONST = {};
 }
+globalThis.CONST.TABLE_RESULT_TYPES = globalThis.CONST.TABLE_RESULT_TYPES || {
+  TEXT: 0,
+  DOCUMENT: 1,
+  COMPENDIUM: 2
+};
 globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS = globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS || {
   NONE: 0,
   LIMITED: 1,
@@ -316,6 +321,7 @@ if (!globalThis.game) {
     items: [],
     macros: [],
     folders: [],
+    tables: [],
     packs: new Map(),
     settings: {
       register: (module, key, options) => {
@@ -1057,6 +1063,7 @@ if (!globalThis.window) {
 if (!globalThis.Hooks) {
   const _hooks = {};
   globalThis.Hooks = {
+    events: _hooks,
     once: (event, fn) => {
       _hooks[event] = _hooks[event] || [];
       _hooks[event].push({ fn, once: true });
@@ -1064,6 +1071,11 @@ if (!globalThis.Hooks) {
     on: (event, fn) => {
       _hooks[event] = _hooks[event] || [];
       _hooks[event].push({ fn, once: false });
+    },
+    off: (event, fn) => {
+      if (!_hooks[event]) return;
+      const idx = _hooks[event].findIndex(e => e.fn === fn || e === fn);
+      if (idx !== -1) _hooks[event].splice(idx, 1);
     },
     callAll: (event, ...args) => {
       const cbs = _hooks[event] || [];
@@ -1157,6 +1169,56 @@ if (!globalThis.Roll) {
   };
 }
 
+if (!globalThis.RollTable) {
+  globalThis.RollTable = class MockRollTable {
+    constructor(data = {}) {
+      Object.assign(this, structuredClone(data));
+      this.id = data.id || data._id || ('mock-table-' + Math.random().toString(36).substring(2, 9));
+      this._id = this.id;
+      if (Array.isArray(this.results)) {
+        this.results = this.results.map((r, idx) => ({
+          _id: r._id || ('res' + Math.random().toString(36).substring(2, 10) + '00000000').slice(0, 16),
+          ...r
+        }));
+      } else {
+        this.results = [];
+      }
+    }
+    static async create(data, options = {}) {
+      if (!data.name || typeof data.name !== 'string') {
+        throw new Error('RollTable#name: must be a non-empty string');
+      }
+      if (Array.isArray(data.results)) {
+        for (const [index, r] of data.results.entries()) {
+          if (r._id && !/^[a-zA-Z0-9]{16}$/.test(r._id)) {
+            throw new Error(`TableResult#_id: "${r._id}" at index ${index} is not a valid 16-character alphanumeric string`);
+          }
+          if (r.type === 1 && !r.documentCollection) {
+            throw new Error(`TableResult#documentCollection: must be specified for type 1 (DOCUMENT)`);
+          }
+        }
+      }
+      const t = new MockRollTable(data);
+      if (globalThis.game?.tables) {
+        if (Array.isArray(globalThis.game.tables)) globalThis.game.tables.push(t);
+        else if (typeof globalThis.game.tables.set === 'function') globalThis.game.tables.set(t.id, t);
+      }
+      return t;
+    }
+    async createEmbeddedDocuments(embeddedType, dataArray) {
+      if (embeddedType === 'TableResult') {
+        const created = dataArray.map((r, idx) => ({
+          _id: ('res' + Math.random().toString(36).substring(2, 10) + '00000000').slice(0, 16),
+          ...r
+        }));
+        this.results.push(...created);
+        return created;
+      }
+      return [];
+    }
+  };
+}
+
 if (!globalThis.foundry) {
   globalThis.foundry = {
     utils: {
@@ -1171,18 +1233,64 @@ if (!globalThis.foundry) {
   };
 }
 
+
+globalThis.foundry.appv1 = globalThis.foundry.appv1 || {
+  sheets: {
+    ActorSheet: globalThis.ActorSheet,
+    ItemSheet: globalThis.ItemSheet
+  },
+  applications: {
+    Application: globalThis.Application,
+    get Dialog() {
+      return globalThis.Dialog;
+    }
+  },
+  get sidebar() {
+    return {
+      tabs: {
+        CombatTracker: MockCombatTracker
+      }
+    };
+  }
+};
+
+globalThis.foundry.documents = globalThis.foundry.documents || {
+  collections: {
+    Actors: globalThis.Actors,
+    Items: globalThis.Items
+  }
+};
+
+globalThis.foundry.applications = globalThis.foundry.applications || {};
+globalThis.foundry.applications.handlebars = globalThis.foundry.applications.handlebars || {
+  loadTemplates: globalThis.loadTemplates
+};
+
 if (!globalThis.$) {
-  const createMockJQuery = (target) => ({
-    data: (key) => target?.dataset?.[key],
-    val: () => target?.value,
-    attr: (attr) => target?.getAttribute?.(attr) || target?.[attr],
-    find: () => createMockJQuery(null),
-    closest: (sel) => target?.closest?.(sel),
-    on: () => createMockJQuery(null),
-    click: () => createMockJQuery(null),
-    change: () => createMockJQuery(null),
-    length: 0,
-    [Symbol.iterator]: function* () {}
-  });
+  const createMockJQuery = (target) => {
+    const mock = {
+      data: (key) => target?.dataset?.[key],
+      val: () => target?.value,
+      attr: (attr) => target?.getAttribute?.(attr) || target?.[attr],
+      find: () => createMockJQuery(null),
+      closest: (sel) => target?.closest?.(sel),
+      on: () => mock,
+      off: () => mock,
+      click: () => mock,
+      change: () => mock,
+      remove: () => mock,
+      after: () => mock,
+      before: () => mock,
+      prepend: () => mock,
+      append: () => mock,
+      each: () => mock,
+      not: () => mock,
+      hide: () => mock,
+      show: () => mock,
+      length: 0,
+      [Symbol.iterator]: function* () {}
+    };
+    return mock;
+  };
   globalThis.$ = createMockJQuery;
 }

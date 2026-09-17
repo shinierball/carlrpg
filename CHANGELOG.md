@@ -1,3 +1,98 @@
+## 2.0.9
+
+### Foundry v13 Global Namespace Migration & Deprecation Cleanup
+
+- **Sheet & Tracker Base Class Namespacing**:
+  - Migrated `DCCCrawlerSheet` to extend `foundry.appv1.sheets.ActorSheet` (with fallback to `globalThis.ActorSheet`).
+  - Migrated `DCCItemSheet` to extend `foundry.appv1.sheets.ItemSheet` (with fallback to `globalThis.ItemSheet`).
+  - Migrated `DCCCombatTracker` to extend `foundry.appv1.sidebar.tabs.CombatTracker` (with fallback to `globalThis.CombatTracker`).
+  - Completely eliminates Foundry v13 deprecation warnings:
+    - `"Error: You are accessing the global 'ActorSheet' which is now namespaced under foundry.appv1.sheets.ActorSheet"`
+    - `"Error: You are accessing the global 'ItemSheet' which is now namespaced under foundry.appv1.sheets.ItemSheet"`
+    - `"Error: You are accessing the global 'CombatTracker' which is now namespaced under foundry.appv1.sidebar.tabs.CombatTracker"`
+- **Document Collection & Template Loading Namespacing (`src/dcc.mjs`)**:
+  - Sheet unregistration and registration now resolve `Actors` from `foundry.documents.collections.Actors` and `Items` from `foundry.documents.collections.Items`.
+  - Handlebars template preloading resolves `foundry.applications.handlebars.loadTemplates` (with fallbacks to `foundry.utils.loadTemplates` and `loadTemplates`).
+  - Eliminates v13 deprecation warnings for `Actors`, `Items`, and `loadTemplates`.
+- **Application & Dialog Class Namespacing**:
+  - Updated custom applications (`DCCCrawlerCreatorApp`, `DCCSessionManagerApp`, `DCCCombatArchiveApp`, `DCCSkillManager`, `DCCSpellManager`, `DCCBuffDebuffManager`, `DCCCombatMetricsApp`) to extend `foundry.appv1.applications.Application`.
+  - Updated interactive prompts and confirmation dialogs across all managers to resolve `foundry.appv1.applications.Dialog`.
+- **Combat Base Document Resolution (`src/documents/combat.mjs`)**:
+  - Updated `BaseCombat` to check `CONFIG.Combat.documentClass` and `foundry.documents.BaseCombat` before falling back to `Combat`.
+- **Automated Testing**:
+  - Added dedicated test suite `tests/v13-namespacing.test.mjs` verifying class hierarchy under `foundry.appv1`, namespaced collection lookups, and the absence of deprecated global property accesses in v13 environments.
+
+## 2.0.8
+
+### Sidebar Directory Hooks & Foundry v13 HTMLElement Normalization
+
+- **Items Directory Hook Fix (`renderItemDirectory`)**:
+  - Normalized `html` argument via `$(html ?? app?.element)` instead of directly calling `html.find()`.
+  - Fixed `TypeError: html.find is not a function` occurring in Foundry v13 when sidebar directories pass native `HTMLElement` instances.
+- **Unified Sidebar Directory Injection**:
+  - Refactored `injectItemDirectoryButtons` and `injectActorDirectoryButtons` to safely handle both `HTMLElement` and jQuery instances across `renderItemDirectory`, `renderActorDirectory`, `renderSidebarTab`, and `renderCombatTracker`.
+  - Added support in `renderSidebarTab` for dynamically injecting the Skill Library & Manager button when switching to the `items` tab.
+- **Automated Testing**:
+  - Added `tests/sidebar-hooks.test.mjs` verifying that `renderItemDirectory`, `renderActorDirectory`, `renderSidebarTab`, and `renderCombatTracker` handle native `HTMLElement` arguments without errors.
+
+## 2.0.7
+
+### Chat Message Rendering Hook & Foundry v13+ Migration
+
+- **Foundry v13+ Compatibility (`renderChatMessageHTML`)**:
+  - Migrated chat message rendering from the deprecated `renderChatMessage` hook to `renderChatMessageHTML` on Foundry v13+.
+  - Fully eliminates the deprecation warning: `"Error: The renderChatMessage hook is deprecated. Please use renderChatMessageHTML instead, which now passes an HTMLElement argument instead of jQuery."`
+  - Maintains automatic backwards compatibility with Foundry v12 by dynamically registering `renderChatMessage` when running on v12.
+- **Modern DOM Event Handling (`onRenderChatMessage`)**:
+  - Rewrote the chat message action handler (`src/dcc.mjs`) to work natively with `HTMLElement` instances using standard DOM APIs (`querySelectorAll`, `closest`, `dataset`, `addEventListener`, `insertAdjacentHTML`).
+  - Added safe fallbacks for jQuery wrappers when running on older Foundry versions or test environments.
+  - Ensured event listener idempotent binding via `dataset.dccBound` to prevent duplicate click handling.
+- **Test Suite**:
+  - Added dedicated test suite `tests/chat-message-hook.test.mjs` verifying hook registration across Foundry v12 and v13 environments, unbinding logic, `HTMLElement` click execution, and backwards-compatible jQuery handling.
+
+## 2.0.6
+
+### Rollable Tables Schema Validation & Directory Registration Fix
+
+- **RollTable & TableResult Schema Compliance (`src/data/background-tables.mjs`)**:
+  - **Fixed TableResult Type Resolution**: Corrected `CONST.TABLE_RESULT_TYPES.TEXT` evaluation (`0`), which previously failed a truthy check and defaulted to `1` (`DOCUMENT`), causing Foundry's `TableResultData` DataModel to throw validation errors due to missing `documentCollection`.
+  - **Omitted Invalid Manual Result IDs**: Removed custom non-conforming IDs (such as `respastTrauma1`) on embedded `TableResult` objects so Foundry's `DocumentIdField` automatically assigns valid 16-character alphanumeric IDs.
+  - **Explicit Document Reference Fields**: Set `documentCollection: null`, `documentId: null`, and standard SVG icons (`icons/svg/d20-grey.svg` for table, `icons/svg/d20-black.svg` for results).
+  - **Empty Table Result Recovery**: If world tables already exist from an earlier boot without results, `ensureBackgroundTables()` automatically backfills their 12 table results via `createEmbeddedDocuments`.
+  - **GM Creation Guard**: Added explicit GM user check in `ensureBackgroundTables()` to prevent non-GM players from throwing permission errors on world document creation during world load.
+- **Testing & Test Harness**:
+  - Updated `tests/setup.mjs` to define `CONST.TABLE_RESULT_TYPES` and enforce strict schema validation in `MockRollTable.create`.
+  - Added unit tests in `tests/background-tables.test.mjs` verifying schema validity, result backfilling, and GM permissions.
+
+## 2.0.5
+
+### Step 9 Background Rollable Tables & Character Creator Integration
+
+- **Crawler Background Rollable Tables Dataset (`src/data/background-tables.mjs`)**:
+  - Added official rollable tables matching Step 9 of Crawler Character Creation:
+    - **Table 11: Past Traumas (1d12)**: 12 entries defining hardships, losses, and psychological wounds.
+    - **Table 12: Loose Ends (1d12)**: 12 entries detailing unresolved surface-world business and obligations.
+    - **Table 13: Regrets (1d12)**: 12 entries capturing personal remorse and past missteps.
+  - Implemented `rollBackgroundTable(key, options)` supporting evaluated 1d12 dice rolls and explicit choice lookups.
+  - Implemented `createBackgroundRollTableData(key)` generating standard Foundry VTT `RollTable` document data schemas.
+  - Implemented `ensureBackgroundTables()` to automatically initialize official Rollable Tables in Foundry's `game.tables` directory on world startup (`Hooks.once('ready')`).
+  - Registered tables under `CONFIG.DCC.backgroundTables`, `game.dcc.backgroundTables`, and `window.carl.backgroundTables`.
+
+- **Character Creator Terminal Integration (`DCCCrawlerCreatorApp`)**:
+  - Added dedicated **Step 9: Psychological Background & Story Matrices** section to the character creation terminal.
+  - Interactive trait cards for Past Trauma, Loose Ends, and Regrets with:
+    - Dedicated `[ 🎲 Roll 1d12 ]` buttons for each table.
+    - Dropdown selectors allowing direct choice from all 12 entries per table.
+    - Multi-line editable textareas allowing players to tweak rolled text or write custom backstories.
+    - Top-level `[ 🎲 Roll All 3 Tables ]` action button to roll all traits simultaneously.
+  - Integrated with the procedural randomizer (`[ 🎲 Randomize All ]`) and reset functionality.
+  - Persists `pastTrauma`, `looseEnds`, and `regrets` directly into `actor.system.details` upon creation.
+
+- **Character Sheet Manual Editability & Creative Freedom (`DCCCrawlerSheet`)**:
+  - Enhanced Page 2 (Gear & Story) Past Trauma, Loose Ends, and Regrets story boxes with inline `[ 🎲 Roll 1d12 ]` buttons in their headers.
+  - Rolling from the sheet posts an interactive chat card with the roll total and story quote, non-destructively updating or appending to the field.
+  - Story textareas remain standard, fully editable form inputs (`system.details.pastTrauma`, `looseEnds`, `regrets`), guaranteeing full creative freedom for players.
+
 ## 2.0.4
 
 ### Sheet & Application Window Rendering Fix

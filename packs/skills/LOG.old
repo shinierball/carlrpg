@@ -1,4 +1,7 @@
-2026/09/17-09:29:04.079803 1779e3000 Log #136: 0 ops saved to Table #137 OK
-2026/09/17-09:29:04.079892 1779e3000 Archiving /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/skills/000136.log: OK
-2026/09/17-09:29:04.080019 1779e3000 Table #101: 121 entries OK
-2026/09/17-09:29:04.080372 1779e3000 **** Repaired leveldb /Users/jeremy/Library/Application Support/FoundryVTT/Data/systems/carl-rpg/packs/skills; recovered 1 files; 44862 bytes. Some data may have been lost. ****
+2026/09/17-10:56:14.762411 1769cb000 Recovering log #145
+2026/09/17-10:56:14.762856 1769cb000 Delete type=3 #143
+2026/09/17-10:56:14.762911 1769cb000 Delete type=0 #145
+2026/09/17-12:37:04.538438 16f79b000 Level-0 table #150: started
+2026/09/17-12:37:04.538457 16f79b000 Level-0 table #150: 0 bytes OK
+2026/09/17-12:37:04.538577 16f79b000 Delete type=0 #148
+2026/09/17-12:37:04.538961 16f79b000 Manual compaction at level-0 from '!items!07eQapR9o553qo7T' @ 72057594037927935 : 1 .. '!items!ye9ZLuJSY4kZlEy4' @ 0 : 0; will stop at (end)

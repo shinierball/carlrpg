@@ -231,6 +231,90 @@
     </div>
   </section>
 
+  <!-- STEP 9: BACKGROUND TRAUMAS, LOOSE ENDS & REGRETS -->
+  <section class="dcc-creator-section dcc-background-traits-section">
+    <div class="dcc-section-header flexrow">
+      <h3><i class="fa-solid fa-masks-theater"></i> STEP 9: PSYCHOLOGICAL BACKGROUND &amp; STORY MATRICES</h3>
+      <div class="dcc-section-actions flexrow">
+        <button type="button" class="dcc-roll-all-traits-btn" title="Roll 1d12 for all 3 background tables">
+          <i class="fa-solid fa-dice-d20"></i> Roll All 3 Tables
+        </button>
+      </div>
+    </div>
+    <span class="dcc-rule-hint"><i class="fa-solid fa-circle-info"></i> Roll 1d12 on each background table, pick an official entry from the dropdown, or type custom text for maximum creativity.</span>
+
+    <div class="dcc-traits-grid flexrow">
+      <!-- Past Trauma (Table 11) -->
+      <div class="dcc-trait-card flexcol">
+        <div class="dcc-trait-card-header flexrow">
+          <span class="dcc-trait-title"><i class="fa-solid fa-heart-crack"></i> Past Trauma (Table 11)</span>
+          <button type="button" class="dcc-roll-trait-btn" data-trait="pastTrauma" title="Roll 1d12 on Table 11: Past Traumas">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <div class="dcc-trait-select-wrapper">
+          <label><small>Choose from Table 11:</small></label>
+          <select class="dcc-trait-select" data-trait="pastTrauma">
+            <option value="">— Choose from Table 11 or edit below —</option>
+            {{#each backgroundTables.pastTrauma.options}}
+              <option value="{{this.text}}" {{#if this.selected}}selected{{/if}}>{{this.roll}}. {{this.text}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="dcc-trait-input-wrapper flexcol">
+          <label><small>Trauma Description (Editable):</small></label>
+          <textarea class="dcc-trait-input" data-trait="pastTrauma" name="creator-past-trauma" rows="3" placeholder="Enter or edit crawler trauma...">{{pastTrauma}}</textarea>
+        </div>
+      </div>
+
+      <!-- Loose Ends (Table 12) -->
+      <div class="dcc-trait-card flexcol">
+        <div class="dcc-trait-card-header flexrow">
+          <span class="dcc-trait-title"><i class="fa-solid fa-hourglass-half"></i> Loose Ends (Table 12)</span>
+          <button type="button" class="dcc-roll-trait-btn" data-trait="looseEnds" title="Roll 1d12 on Table 12: Loose Ends">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <div class="dcc-trait-select-wrapper">
+          <label><small>Choose from Table 12:</small></label>
+          <select class="dcc-trait-select" data-trait="looseEnds">
+            <option value="">— Choose from Table 12 or edit below —</option>
+            {{#each backgroundTables.looseEnds.options}}
+              <option value="{{this.text}}" {{#if this.selected}}selected{{/if}}>{{this.roll}}. {{this.text}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="dcc-trait-input-wrapper flexcol">
+          <label><small>Loose End Description (Editable):</small></label>
+          <textarea class="dcc-trait-input" data-trait="looseEnds" name="creator-loose-ends" rows="3" placeholder="Enter or edit crawler loose end...">{{looseEnds}}</textarea>
+        </div>
+      </div>
+
+      <!-- Regrets (Table 13) -->
+      <div class="dcc-trait-card flexcol">
+        <div class="dcc-trait-card-header flexrow">
+          <span class="dcc-trait-title"><i class="fa-solid fa-clock-rotate-left"></i> Regrets (Table 13)</span>
+          <button type="button" class="dcc-roll-trait-btn" data-trait="regrets" title="Roll 1d12 on Table 13: Regrets">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <div class="dcc-trait-select-wrapper">
+          <label><small>Choose from Table 13:</small></label>
+          <select class="dcc-trait-select" data-trait="regrets">
+            <option value="">— Choose from Table 13 or edit below —</option>
+            {{#each backgroundTables.regrets.options}}
+              <option value="{{this.text}}" {{#if this.selected}}selected{{/if}}>{{this.roll}}. {{this.text}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="dcc-trait-input-wrapper flexcol">
+          <label><small>Regret Description (Editable):</small></label>
+          <textarea class="dcc-trait-input" data-trait="regrets" name="creator-regrets" rows="3" placeholder="Enter or edit crawler regret...">{{regrets}}</textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- DUPLICATE WARNINGS & RESOLVED SKILLS TRAY -->
   <section class="dcc-creator-section dcc-summary-tray">
     {{#if warnings.length}}

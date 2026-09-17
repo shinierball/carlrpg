@@ -3,6 +3,7 @@ import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCC_WEAPON_GROUP_MAP } from '../documents/actor.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
+import { rollBackgroundTable } from '../data/background-tables.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -57,7 +58,9 @@ export function formatGearBonuses(gearItem) {
  * Extends ActorSheet (FormApplication V1) for native Foundry V12/V13 stability,
  * while maintaining Application V2 structure (_prepareContext, DEFAULT_OPTIONS, PARTS).
  */
-export class DCCCrawlerSheet extends ActorSheet {
+const BaseActorSheet = globalThis.foundry?.appv1?.sheets?.ActorSheet ?? globalThis.ActorSheet;
+
+export class DCCCrawlerSheet extends BaseActorSheet {
   constructor(actorOrOptions, options = {}) {
     let actorDoc = actorOrOptions;
     let sheetOptions = options;
@@ -841,6 +844,41 @@ export class DCCCrawlerSheet extends ActorSheet {
     html.find('.dcc-btn-save-pdf, .export-pdf-btn').click(ev => {
       ev.preventDefault();
       this._onExportPdf();
+    });
+
+    // Roll Story Background Table (Past Trauma, Loose Ends, Regrets)
+    html.find('.dcc-roll-story-table-btn').click(async ev => {
+      ev.preventDefault();
+      const tableKey = $(ev.currentTarget).data('table');
+      if (!tableKey) return;
+      try {
+        const res = await rollBackgroundTable(tableKey);
+        // Post chat card with the roll and story result
+        if (typeof ChatMessage !== 'undefined' && typeof ChatMessage.create === 'function') {
+          const content = `
+            <div class="dcc-chat-card dcc-story-roll-card">
+              <header class="dcc-card-header flexrow">
+                <span class="dcc-card-title"><strong>${res.tableName}</strong></span>
+                <span class="dcc-badge roll-badge">Roll: ${res.roll}</span>
+              </header>
+              <div class="dcc-card-body">
+                <p class="dcc-story-result-text"><em>"${res.text}"</em></p>
+              </div>
+            </div>
+          `;
+          await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            content
+          });
+        }
+        // Update actor field (if actor has existing text, append, else set)
+        const currentText = this.actor.system?.details?.[tableKey] || '';
+        const newText = currentText ? `${currentText}\n${res.text}` : res.text;
+        await this.actor.update({ [`system.details.${tableKey}`]: newText });
+        ui.notifications?.info(`Rolled [${res.roll}] on ${res.tableName}: "${res.text}"`);
+      } catch (err) {
+        console.error('DCC RPG | Error rolling story table:', err);
+      }
     });
 
     // Open Skill Library Picker

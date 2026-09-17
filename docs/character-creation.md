@@ -160,3 +160,25 @@ $$\text{Max HP} = 10 \times \text{getDCCStatModifier}(\text{CON})$$
 $$\text{Max Mana} = \text{Intelligence Score (INT)}$$
 - Current mana (`mana.value`) and maximum mana (`mana.max`) are initialized to the exact same value ($100\%$ full mana).
 - E.g., INT 2 starts with $2\text{ MP}$, INT 5 starts with $5\text{ MP}$, INT 6 starts with $6\text{ MP}$.
+
+---
+
+## 11. Step 9: Psychological Background & Story Rollable Tables
+
+During Step 9 of character creation, crawlers establish their backstory, emotional baggage, and unresolved motivations using three official rollable tables:
+- **Table 11: Past Traumas (1d12)**: Endured hardships, losses, or phobias (e.g. *I witnessed a death*, *I have a fear of heights*).
+- **Table 12: Loose Ends (1d12)**: Unfinished business from the surface world (e.g. *I didn’t finish writing my novel*, *I was about to open a restaurant*).
+- **Table 13: Regrets (1d12)**: Lingering remorse or past moral dilemmas (e.g. *I didn’t ask them to marry me*, *I trusted the wrong people*).
+
+### Induction Terminal Integration
+- **1d12 Roll Buttons**: Each trait card includes a dedicated `[ 🎲 Roll 1d12 ]` button to generate a random entry directly from the table.
+- **Table Dropdowns**: Players can choose any of the 12 official entries from a selector dropdown.
+- **Full Text Editing**: A multi-line textarea lets players edit, elaborate, or type completely custom backstories from scratch.
+- **1-Click Roll All**: A top-level `[ 🎲 Roll All 3 Tables ]` action button rolls all three background tables in a single click.
+- **Randomize All Support**: The procedural randomizer (`[ 🎲 Randomize All ]`) rolls on all three tables automatically.
+
+### Character Sheet Manual Editability & Creative Freedom
+- **Page 2 (Gear & Story)**: The Past Trauma, Loose Ends, and Regrets story boxes feature inline `[ 🎲 Roll 1d12 ]` buttons in their headers.
+- **Chat Cards**: Rolling from the sheet produces an interactive chat card displaying the table name, roll total, and italicized result quote.
+- **Non-Destructive Appending**: Rolling on the character sheet preserves existing text by appending new rolls on a new line.
+- **100% Freeform Editing**: The textareas remain standard, fully editable form fields bound to `system.details.pastTrauma`, `system.details.looseEnds`, and `system.details.regrets`, ensuring players never lose the option to be creative.

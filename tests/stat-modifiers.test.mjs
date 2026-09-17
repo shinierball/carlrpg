@@ -128,4 +128,23 @@ describe('DCC RPG Stat Modifiers', () => {
     assert.equal(crawler.system.abilities.cha.value, 12);
     assert.equal(crawler.system.abilities.cha.mod, 4);
   });
+
+  test('Page 1 Core template and stylesheet define high-contrast Enhanced and Unenhanced labels', async () => {
+    const fs = await import('node:fs');
+    const templateContent = fs.readFileSync('templates/actors/parts/page1-core.hbs', 'utf-8');
+    const cssContent = fs.readFileSync('styles/dcc.css', 'utf-8');
+
+    // Verify all 5 ability score cards use dedicated high-contrast classes
+    const enhancedMatches = templateContent.match(/class="[^"]*dcc-stat-enhanced-label[^"]*"/g) || [];
+    assert.equal(enhancedMatches.length, 5, 'Must have 5 Enhanced labels with dcc-stat-enhanced-label class');
+
+    const unenhancedMatches = templateContent.match(/class="[^"]*dcc-stat-unenhanced-label[^"]*"/g) || [];
+    assert.equal(unenhancedMatches.length, 5, 'Must have 5 Unenhanced labels with dcc-stat-unenhanced-label class');
+
+    // Verify stylesheet has high-contrast rules
+    assert.ok(cssContent.includes('.dcc-stat-sublabel.dcc-stat-enhanced-label'), 'Stylesheet must style dcc-stat-enhanced-label');
+    assert.ok(cssContent.includes('#c0392b'), 'Enhanced label must use high-contrast DCC theme red');
+    assert.ok(cssContent.includes('.dcc-stat-sublabel.dcc-stat-unenhanced-label'), 'Stylesheet must style dcc-stat-unenhanced-label');
+    assert.ok(cssContent.includes('#111111'), 'Unenhanced label must use high-contrast dark color');
+  });
 });

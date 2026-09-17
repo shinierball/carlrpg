@@ -398,15 +398,27 @@
 .dcc-stat-slash {
   font-size: 16px;
   font-weight: bold;
-  color: #555;
+  color: #111111;
 }
 
 .dcc-stat-sublabel {
-  font-size: 9px;
-  font-weight: bold;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  color: #555;
+  letter-spacing: 0.5px;
+  color: #111111;
   margin-top: 2px;
+}
+
+.dcc-stat-sublabel.dcc-stat-enhanced-label {
+  color: #c0392b; /* High-contrast DCC theme red */
+  font-weight: 700;
+}
+
+.dcc-stat-sublabel.dcc-stat-unenhanced-label {
+  color: #111111; /* High-contrast deep black */
+  font-weight: 700;
 }
 
 .dcc-attribute-mod-container {

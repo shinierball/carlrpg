@@ -1,3 +1,15 @@
+## 1.0.28
+
+### Visual Readability & Contrast Enhancements
+
+- **Page 1 Core Ability Sublabel Readability**:
+  - Replaced low-contrast `#555` stat sublabels with crisp `#111111` typography (`'Oswald'`, 10px, bold 700, 0.5px letter-spacing).
+  - Added dedicated high-contrast classes `.dcc-stat-enhanced-label` (DCC theme red `#c0392b`, 700) and `.dcc-stat-unenhanced-label` (deep black `#111111`, 700) across all 5 ability score cards on Page 1.
+  - Increased contrast on stat divider slashes from `#555` to `#111111`.
+- **Character Sheet PDF Export Polish**:
+  - Appended known spells directly to the Page 3 Skills table with rank, governing stat modifier, spell type, MP cost, and formatted effects/damage.
+  - Calibrated Page 1 Health Bar slots to uniformly display crawler CON modifier with clean, unchecked boxes for tabletop play.
+
 ## 1.0.27
 
 ### Fillable Character Sheet PDF Export

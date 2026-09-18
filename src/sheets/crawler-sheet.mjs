@@ -155,7 +155,22 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.document = actor;
     context.data = actor;
     context.system = actor?.system || actorData?.system || {};
-    context.flags = actor?.flags || actorData?.flags || {};
+    context.isMob = actor?.type === 'mob';
+    context.isCrawler = actor?.type === 'crawler';
+    context.isPet = actor?.type === 'pet';
+    context.isNPC = actor?.type === 'npc';
+
+    // Dynamic health segments for health bar visualization
+    const numBars = context.isMob
+      ? Math.max(1, Number(context.system.attributes?.hp?.bars) || 2)
+      : 10;
+    context.healthSegments = [];
+    for (let i = 1; i <= numBars; i++) {
+      context.healthSegments.push({
+        pct: Math.round((i / numBars) * 100),
+        label: `${Math.round((i / numBars) * 100)}%`
+      });
+    }
 
     // Prepare creature size options
     const currentSize = context.system.attributes?.size ?? 'Medium';

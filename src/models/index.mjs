@@ -15,3 +15,4 @@ export { CrawlerDataModel } from './actors/crawler-model.mjs';
 export { PetDataModel } from './actors/pet-model.mjs';
 export { MountVehicleDataModel } from './actors/mount-model.mjs';
 export { NPCDataModel } from './actors/npc-model.mjs';
+export { MobDataModel } from './actors/mob-model.mjs';

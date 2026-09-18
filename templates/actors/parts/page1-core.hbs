@@ -11,6 +11,45 @@
     </div>
     
     <div class="dcc-details-container">
+      {{#if isMob}}
+      <div class="dcc-field-row">
+        <div class="dcc-field-group flex-2">
+          <span class="dcc-field-label">Name</span>
+          <input class="dcc-field-input" name="name" type="text" value="{{actor.name}}" placeholder="Mob Name" />
+        </div>
+        <div class="dcc-field-group flex-1">
+          <span class="dcc-field-label">Classification</span>
+          <input class="dcc-field-input" name="system.details.classification" type="text" value="{{system.details.classification}}" placeholder="Mob" />
+        </div>
+        <div class="dcc-field-group small">
+          <span class="dcc-field-label">Level</span>
+          <input class="dcc-field-input" name="system.details.level" type="number" value="{{system.details.level}}" placeholder="1" />
+        </div>
+        <div class="dcc-field-group flex-1">
+          <span class="dcc-field-label">Creature Type</span>
+          <input class="dcc-field-input" name="system.details.creatureType" type="text" value="{{system.details.creatureType}}" placeholder="Animal" />
+        </div>
+      </div>
+
+      <div class="dcc-field-row">
+        <div class="dcc-field-group flex-1">
+          <span class="dcc-field-label">Floor</span>
+          <input class="dcc-field-input" name="system.details.floor" type="text" value="{{system.details.floor}}" placeholder="Floor 1" />
+        </div>
+        <div class="dcc-field-group flex-2">
+          <span class="dcc-field-label">Location</span>
+          <input class="dcc-field-input" name="system.details.location" type="text" value="{{system.details.location}}" placeholder="Location" />
+        </div>
+        <div class="dcc-field-group flex-1">
+          <span class="dcc-field-label">XP Value</span>
+          <input class="dcc-field-input" name="system.attributes.xp" type="number" value="{{system.attributes.xp}}" placeholder="0" />
+        </div>
+        <div class="dcc-field-group flex-2">
+          <span class="dcc-field-label">Treasure</span>
+          <input class="dcc-field-input" name="system.attributes.treasure" type="text" value="{{system.attributes.treasure}}" placeholder="Treasure Drop" />
+        </div>
+      </div>
+      {{else}}
       <div class="dcc-field-row">
         <div class="dcc-field-group flex-2">
           <span class="dcc-field-label">Name</span>
@@ -58,6 +97,7 @@
           <input class="dcc-field-input" name="system.details.floor" type="text" value="{{system.details.floor}}" placeholder="1st Floor" />
         </div>
       </div>
+      {{/if}}
     </div>
   </header>
 
@@ -68,8 +108,14 @@
       <div class="dcc-hp-input-group">
         <input class="dcc-hp-input" name="system.attributes.hp.value" type="number" value="{{system.attributes.hp.value}}" title="Current HP" />
         <span class="dcc-hp-slash">/</span>
-        <input class="dcc-hp-input" name="system.attributes.hp.max" type="number" value="{{system.attributes.hp.max}}" title="Max HP (10 × CON Mod)" readonly />
+        <input class="dcc-hp-input" name="system.attributes.hp.max" type="number" value="{{system.attributes.hp.max}}" title="Max HP ({{#if isMob}}{{system.attributes.hp.bars}} bars × {{system.attributes.hp.hpPerBar}} HP{{else}}10 × CON Mod{{/if}})" readonly />
       </div>
+      {{#if isMob}}
+      <span class="dcc-field-label" style="margin-left: 10px; margin-right: 4px;">Bars:</span>
+      <input class="dcc-hp-input" name="system.attributes.hp.bars" type="number" value="{{system.attributes.hp.bars}}" min="1" placeholder="2" style="border: 1px solid #000; width: 44px;" title="Health Bar Slots" />
+      <span class="dcc-field-label" style="margin-left: 8px; margin-right: 4px;">HP/Bar:</span>
+      <input class="dcc-hp-input" name="system.attributes.hp.hpPerBar" type="number" value="{{system.attributes.hp.hpPerBar}}" placeholder="{{system.abilities.con.mod}}" style="border: 1px solid #000; width: 44px;" title="HP Per Bar (Defaults to CON Mod: {{system.abilities.con.mod}})" />
+      {{/if}}
       <span class="dcc-field-label" style="margin-left: 10px; margin-right: 4px;">Temp:</span>
       <input class="dcc-hp-input" name="system.attributes.hp.temp" type="number" value="{{system.attributes.hp.temp}}" placeholder="0" style="border: 1px solid #000; width: 44px;" />
     </div>
@@ -77,16 +123,9 @@
     <div class="dcc-health-bar-wrapper" style="--hp-val: {{system.attributes.hp.value}}; --hp-max: {{system.attributes.hp.max}};" data-tooltip="HP: {{system.attributes.hp.value}} / {{system.attributes.hp.max}}">
       <div class="dcc-health-fill-overlay"></div>
       <div class="dcc-health-segments">
-        <div class="dcc-hp-seg">10%</div>
-        <div class="dcc-hp-seg">20%</div>
-        <div class="dcc-hp-seg">30%</div>
-        <div class="dcc-hp-seg">40%</div>
-        <div class="dcc-hp-seg">50%</div>
-        <div class="dcc-hp-seg">60%</div>
-        <div class="dcc-hp-seg">70%</div>
-        <div class="dcc-hp-seg">80%</div>
-        <div class="dcc-hp-seg">90%</div>
-        <div class="dcc-hp-seg">100%</div>
+        {{#each healthSegments}}
+        <div class="dcc-hp-seg">{{this.label}}</div>
+        {{/each}}
       </div>
     </div>
   </div>
@@ -288,6 +327,22 @@
           </div>
         </div>
       </div>
+
+      {{#if isMob}}
+      <div class="dcc-stat-block" style="margin-top: 8px;">
+        <div class="dcc-banner-header">DIFFICULTIES &amp; COMBAT VALUES</div>
+        <div class="dcc-formula-row dcc-centered-row">
+          <div class="dcc-formula-item">
+            <input class="dcc-box-input medium" name="system.attributes.evadeDifficulty" type="text" value="{{system.attributes.evadeDifficulty}}" placeholder="12+F" title="Evade Difficulty (e.g. 12+F)" />
+            <span class="dcc-stat-sublabel">Evade Diff</span>
+          </div>
+          <div class="dcc-formula-item">
+            <input class="dcc-box-input medium" name="system.attributes.surpriseDifficulty" type="text" value="{{system.attributes.surpriseDifficulty}}" placeholder="11+F" title="Surprise Difficulty (e.g. 11+F)" />
+            <span class="dcc-stat-sublabel">Surprise Diff</span>
+          </div>
+        </div>
+      </div>
+      {{/if}}
 
       {{!-- MANA & DEBUFFS --}}
       <div class="dcc-mana-debuffs">

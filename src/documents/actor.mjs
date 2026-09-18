@@ -106,6 +106,29 @@ export class DCCActor extends Actor {
       }
 
       this.updateSource(updates);
+    } else if (this.type === 'mob') {
+      const updates = {
+        'prototypeToken.actorLink': false,
+        'prototypeToken.disposition': -1
+      };
+
+      const conVal = data?.system?.abilities?.con?.value ?? this.system?.abilities?.con?.value ?? 10;
+      const conMod = getDCCStatModifier(conVal);
+      const bars = Math.max(1, Number(data?.system?.attributes?.hp?.bars ?? this.system?.attributes?.hp?.bars) || 2);
+      const explicitHpPerBar = Number(data?.system?.attributes?.hp?.hpPerBar ?? this.system?.attributes?.hp?.hpPerBar) || 0;
+      const hpPerBar = explicitHpPerBar > 0 ? explicitHpPerBar : (conMod > 0 ? conMod : 1);
+      const computedMaxHp = bars * hpPerBar;
+
+      const rawHp = data?.system?.attributes?.hp?.value;
+      if (rawHp === undefined || rawHp === 40 || rawHp === 4) {
+        updates['system.attributes.hp.value'] = computedMaxHp;
+        updates['system.attributes.hp.max'] = computedMaxHp;
+        updates['system.attributes.hp.pct'] = 100;
+        updates['system.attributes.hp.bars'] = bars;
+        updates['system.attributes.hp.hpPerBar'] = hpPerBar;
+      }
+
+      this.updateSource(updates);
     }
   }
 
@@ -118,6 +141,10 @@ export class DCCActor extends Actor {
     if ((this.type === 'crawler' || this.type === 'pet') && !this.isToken) {
       if (this.prototypeToken && !this.prototypeToken.actorLink) {
         this.prototypeToken.actorLink = true;
+      }
+    } else if (this.type === 'mob' && !this.isToken) {
+      if (this.prototypeToken && this.prototypeToken.actorLink) {
+        this.prototypeToken.actorLink = false;
       }
     }
     // Ensure abilities have unenhanced initialized if missing
@@ -335,12 +362,21 @@ export class DCCActor extends Actor {
 
       if (system.attributes.hp) {
         const conMod = system.abilities?.con?.mod ?? 1;
-        system.attributes.hp.max = 10 * conMod;
+        if (this.type === 'mob') {
+          const bars = Math.max(1, Number(system.attributes.hp?.bars) || 2);
+          const explicitHpPerBar = Number(system.attributes.hp?.hpPerBar) || 0;
+          const hpPerBar = explicitHpPerBar > 0 ? explicitHpPerBar : (conMod > 0 ? conMod : 1);
+          system.attributes.hp.bars = bars;
+          system.attributes.hp.hpPerBar = hpPerBar;
+          system.attributes.hp.max = bars * hpPerBar;
+        } else {
+          system.attributes.hp.max = 10 * conMod;
+        }
         const rawVal = Number(system.attributes.hp.value);
         const hpVal = Number.isFinite(rawVal) ? rawVal : system.attributes.hp.max;
-        system.attributes.hp.value = hpVal;
+        system.attributes.hp.value = Math.max(0, hpVal);
         const hpMax = Number(system.attributes.hp.max) || 1;
-        system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((hpVal / hpMax) * 100)));
+        system.attributes.hp.pct = Math.min(100, Math.max(0, Math.round((system.attributes.hp.value / hpMax) * 100)));
 
         if (buffTempHp > 0) {
           system.attributes.hp.buffTemp = buffTempHp;

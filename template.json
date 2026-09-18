@@ -4,7 +4,8 @@
       "crawler",
       "pet",
       "mount_vehicle",
-      "npc"
+      "npc",
+      "mob"
     ],
     "templates": {
       "baseStats": {
@@ -104,6 +105,29 @@
         "xpValue": 0,
         "notes": "",
         "special": ""
+      }
+    },
+    "mob": {
+      "templates": ["baseStats"],
+      "attributes": {
+        "treasure": "",
+        "xp": 0,
+        "hp": {
+          "bars": 2,
+          "hpPerBar": 0
+        },
+        "surpriseDifficulty": "",
+        "evadeDifficulty": ""
+      },
+      "details": {
+        "level": 1,
+        "classification": "Mob",
+        "creatureType": "",
+        "floor": "",
+        "location": "",
+        "notes": "",
+        "special": "",
+        "source": ""
       }
     }
   },

@@ -18,6 +18,12 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - **Page 4 (Inventory)**: Gear and Loot management with slot equipping that dynamically calculates ability, DR, Evade, and skill bonuses, plus a dedicated **Character Debuffs & Conditions** management table.
   - **Page 5 (Extras & Space)**: Pet and Mount/Vehicle blocks, Important Things I've Killed, Clubs/Societies, Personal Space, and Deity tracking.
   - **Page 6 (Abilities & Sponsors)**: Racial Abilities, Class Abilities, and 3 Sponsor blocks.
+- **Mob Actor Type & Monster Statblocks**:
+  - Dedicated `mob` actor type designed for dungeon monsters, beasts, and enemies.
+  - **Variable Health Bars**: Mobs support variable health bar slots (`hp.bars`, e.g. 2 slots for Pack Rat), rather than being locked to 10 bars. Health per bar defaults to the mob's CON modifier (`getDCCStatModifier(CON)`), with support for explicit overrides via `hp.hpPerBar`. Damage resolution removes full bars and ignores excess damage.
+  - **Independent Unlinked Scene Tokens**: Placed mob tokens default to `prototypeToken.actorLink: false` and hostile disposition. Each token operates completely independently on scenes.
+  - **Auto-Incrementing Sequential Token Naming**: Dropping or pasting tokens on a scene automatically appends sequential numbering (`Goblin 1`, `Goblin 2`, `Goblin 3`).
+  - **Unique Mob Attributes**: Dedicated fields for `Treasure` drops, `XP` defeat rewards, `Classification` (Mob, Elite, Boss), `Creature Type` (Animal, Humanoid, etc.), `Floor & Location`, `Surprise Difficulty` (e.g. `11+F`), and `Evade Difficulty` (e.g. `12+F` based on $10 + \text{DEX Mod} + \text{Floor Number}$).
 - **Fillable Character Sheet PDF Export**:
   - One-click **Save to PDF** export directly into the official 6-page fillable character sheet (`assets/sheet/fillable_character_sheet.pdf`).
   - Populates all 429 AcroForm fields (Core vitals & stats, HP gradient threshold boxes, Evade, DR, Attacks, Hotlist, Equipped Gear, Skills, Inventory, Pet & Mount blocks, Personal Space, Kills, Deity, Racial & Class Abilities, and Sponsors).

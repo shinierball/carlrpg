@@ -24,6 +24,12 @@ const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
 export function getHpPerBar(targetActor) {
   if (!targetActor) return 1;
 
+  // 0. Explicit hpPerBar if specified on the actor (especially for mobs or custom creatures)
+  const explicitHpPerBar = Number(targetActor.system?.attributes?.hp?.hpPerBar);
+  if (Number.isFinite(explicitHpPerBar) && explicitHpPerBar > 0) {
+    return explicitHpPerBar;
+  }
+
   // 1. Direct CON modifier if already prepared
   const conMod = Number(targetActor.system?.abilities?.con?.mod);
   if (Number.isFinite(conMod) && conMod > 0) {
@@ -46,10 +52,11 @@ export function getHpPerBar(targetActor) {
     if (val >= 1) return 1;
   }
 
-  // 3. Max HP fallback (in CarlRPG max HP = 10 * CON mod, so 10 bars)
+  // 3. Max HP fallback (divided by bars: default 10 for crawlers, or mob bars)
+  const bars = Number(targetActor.system?.attributes?.hp?.bars) || (targetActor.type === 'mob' ? 2 : 10);
   const maxHp = Number(targetActor.system?.attributes?.hp?.max);
   if (Number.isFinite(maxHp) && maxHp > 0) {
-    return Math.max(1, Math.floor(maxHp / 10));
+    return Math.max(1, Math.floor(maxHp / bars));
   }
 
   return 1;

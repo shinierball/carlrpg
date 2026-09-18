@@ -1,3 +1,32 @@
+## 2.0.17
+
+### Mob Actor Type, Variable Health Bars & Sequential Token Placement
+
+- **Mob Actor Type & Data Model (`src/models/actors/mob-model.mjs`, `template.json`, `system.json`)**:
+  - Registered new `mob` actor type and `MobDataModel` extending `BaseActorDataModel`.
+  - Added unique mob attributes: `system.attributes.treasure` (string description of loot/coins) and `system.attributes.xp` (defeat experience value).
+  - Added mob details: `classification` ("Mob", "Elite", "Boss"), `creatureType` ("Animal", "Humanoid", etc.), `floor`, `location`, `notes`, `special`, and `source`.
+  - Added combat difficulty attributes: `surpriseDifficulty` and `evadeDifficulty` (defaults to attacker target DC $10 + \text{DEX Mod} + \text{Floor Number}$, e.g. `12+F`).
+- **Variable Health Bars Architecture (`src/documents/actor.mjs`, `src/apps/combat-metrics.mjs`)**:
+  - Implemented variable health bar slots on mobs (`hp.bars`, default 2), replacing the fixed 10-bar crawler constraint.
+  - Health per bar (`hpPerBar`) defaults to the mob's CON modifier (`getDCCStatModifier(CON)`), with support for explicit overrides via `system.attributes.hp.hpPerBar`.
+  - Derived $\text{Max HP} = \text{bars} \times \text{hpPerBar}$ in both `MobDataModel` and `DCCActor.prepareDerivedData`.
+  - Updated `getHpPerBar(targetActor)` in `combat-metrics.mjs` to resolve mob variable bars and explicit `hpPerBar`, preserving strict CarlRPG bar-by-bar damage deduction and excess damage ignoring.
+- **Independent Unlinked Tokens (`prototypeToken.actorLink: false`)**:
+  - Configured `DCCActor._preCreate` and `prepareBaseData` to enforce `prototypeToken.actorLink: false` and hostile disposition (`-1`) for all mobs.
+  - Placed and copy/pasted mob tokens operate as independent synthetic actors; mutations on one token (e.g. damage, conditions) do not alter the world actor or sister tokens.
+- **Auto-Incrementing Sequential Token Naming (`src/dcc.mjs`)**:
+  - Enhanced `preCreateToken` hook to automatically detect mob token placements and copy-pastes.
+  - Strips trailing numbers from the base name and queries existing tokens on the target scene to sequentially number them (e.g. `Goblin` -> `Goblin 1`, `Goblin 2`; copying `Goblin 2` increments to `Goblin 3`).
+- **Crawler Sheet Mob Integration (`src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`)**:
+  - Exposes `isMob` context flag.
+  - Custom mob header section rendering classification, level, creature type, floor, location, XP value, and treasure.
+  - Dynamic health bar segment visualization generated from the mob's configured number of bars (e.g. 50% and 100% for 2 bars).
+  - Dedicated Difficulties & Combat Values section displaying Evade Difficulty and Surprise Difficulty.
+- **Canonical Example & Unit Test Suite (`tests/mobs.test.mjs`)**:
+  - Full automated test suite verifying Pack Rat (Level 2 Mob, Page 32 Game Master's Campaign Toolkit): CON 3 (+2 CON mod), 2 bars of 2 HP (4 Max HP), Evade Difficulty `12+F`, Surprise Difficulty `11+F`, Bite attack (`1d20 + 3` to hit, `1d4+1` Piercing).
+  - Verified bar-based damage deduction (3 damage removes 1 bar of 2 HP and ignores 1 excess damage, leaving 2 HP; 1 damage removes 0 bars).
+
 ## 2.0.15
 
 ### Attack Rolling from Skills Table & Interactive Chat Damage Execution

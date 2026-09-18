@@ -38,9 +38,9 @@ All 11 Item document sub-types are registered in `CONFIG.Item.dataModels`:
 
 ---
 
-## 👥 Phase 2: Actor Data Models (v2.0.1)
+## 👥 Phase 2: Actor Data Models (v2.0.1 - v2.0.17)
 
-All 4 Actor document sub-types are registered in `CONFIG.Actor.dataModels`:
+All 5 Actor document sub-types are registered in `CONFIG.Actor.dataModels`:
 
 | Actor Type | Model Class | Base Class | Key Schema Fields & Capabilities |
 | :--- | :--- | :--- | :--- |
@@ -48,6 +48,7 @@ All 4 Actor document sub-types are registered in `CONFIG.Actor.dataModels`:
 | `pet` | `PetDataModel` | `BaseActorDataModel` | Core abilities, attributes (`hp` from CON mod, `evade` from DEX mod), `details` (`level`, `special`, `attack1`, `attack2`). |
 | `mount_vehicle` | `MountVehicleDataModel` | `TypeDataModel` | Structural attributes: `hp` (`value`, `max`, `pct`), `size` (normalized via `getSizeInfo`), `move`, `dr`, `occupants`, `accessories`. |
 | `npc` | `NPCDataModel` | `BaseActorDataModel` | Core abilities and attributes, `details` (`level`, `xpValue`, `notes`, `special`). |
+| `mob` | `MobDataModel` | `BaseActorDataModel` | Dungeon monster/enemy model. Features variable health bar slots (`hp.bars`, default 2), `hp.hpPerBar` (defaults to CON mod), `attributes.treasure`, `attributes.xp`, `surpriseDifficulty`, `evadeDifficulty`, unlinked scene tokens (`actorLink: false`), and auto-incrementing sequential naming on scene placement/pasting (e.g. `Goblin 1`, `Goblin 2`). |
 
 ### Token Trackable Attributes
 Registered under `CONFIG.Actor.trackableAttributes`:
@@ -57,6 +58,9 @@ Registered under `CONFIG.Actor.trackableAttributes`:
 - `mount_vehicle`:
   - Bars: `attributes.hp`
   - Values: `attributes.dr`, `attributes.move`
+- `mob`:
+  - Bars: `attributes.hp`
+  - Values: `attributes.evadeDifficulty`, `attributes.surpriseDifficulty`, `details.level`, `attributes.xp`
 
 ---
 

@@ -27,13 +27,13 @@ describe('DCC RPG Foundry v13 Namespaced Globals Compatibility', () => {
       assert.ok(DCCItemSheet.prototype instanceof TargetBase || DCCItemSheet.prototype === TargetBase.prototype || Object.getPrototypeOf(DCCItemSheet) === TargetBase);
     });
 
-    test('DCCCombatTracker inherits from foundry.appv1.sidebar.tabs.CombatTracker', () => {
-      const TargetBase = globalThis.foundry.appv1.sidebar.tabs.CombatTracker;
+    test('DCCCombatTracker inherits from foundry.applications.sidebar.tabs.CombatTracker', () => {
+      const TargetBase = globalThis.foundry.applications.sidebar.tabs.CombatTracker;
       assert.ok(DCCCombatTracker.prototype instanceof TargetBase || DCCCombatTracker.prototype === TargetBase.prototype || Object.getPrototypeOf(DCCCombatTracker) === TargetBase);
     });
 
-    test('Application classes inherit from foundry.appv1.applications.Application', () => {
-      const TargetBase = globalThis.foundry.appv1.applications.Application;
+    test('Application classes inherit from foundry.applications.api.ApplicationV2', () => {
+      const TargetBase = globalThis.foundry.applications.api.ApplicationV2;
       const apps = [
         DCCCrawlerCreatorApp,
         DCCCombatMetricsApp,
@@ -47,7 +47,7 @@ describe('DCC RPG Foundry v13 Namespaced Globals Compatibility', () => {
       for (const AppClass of apps) {
         assert.ok(
           AppClass.prototype instanceof TargetBase || Object.getPrototypeOf(AppClass) === TargetBase,
-          `${AppClass.name} must inherit from foundry.appv1.applications.Application`
+          `${AppClass.name} must inherit from foundry.applications.api.ApplicationV2`
         );
       }
     });
@@ -120,6 +120,136 @@ describe('DCC RPG Foundry v13 Namespaced Globals Compatibility', () => {
           configurable: true
         });
       }
+    });
+
+    test('CombatTracker resolution prioritizes foundry.applications.sidebar.tabs.CombatTracker without accessing deprecated global', () => {
+      let accessedDeprecatedCombatTracker = false;
+      const originalCombatTrackerDesc = Object.getOwnPropertyDescriptor(globalThis, 'CombatTracker');
+
+      try {
+        Object.defineProperty(globalThis, 'CombatTracker', {
+          get() {
+            accessedDeprecatedCombatTracker = true;
+            return globalThis.foundry.applications.sidebar.tabs.CombatTracker;
+          },
+          configurable: true
+        });
+
+        const BaseCombatTracker = globalThis.foundry?.applications?.sidebar?.tabs?.CombatTracker
+          ?? globalThis.foundry?.appv1?.sidebar?.tabs?.CombatTracker
+          ?? globalThis.CombatTracker
+          ?? class {};
+
+        assert.equal(BaseCombatTracker, globalThis.foundry.applications.sidebar.tabs.CombatTracker);
+        assert.equal(accessedDeprecatedCombatTracker, false, 'Should not access deprecated global CombatTracker');
+      } finally {
+        if (originalCombatTrackerDesc) Object.defineProperty(globalThis, 'CombatTracker', originalCombatTrackerDesc);
+      }
+    });
+
+    test('ActorDirectory resolution in getApplicationHeaderButtons does not touch deprecated global', () => {
+      let accessedDeprecatedActorDirectory = false;
+      const originalActorDirectoryDesc = Object.getOwnPropertyDescriptor(globalThis, 'ActorDirectory');
+
+      try {
+        Object.defineProperty(globalThis, 'ActorDirectory', {
+          get() {
+            accessedDeprecatedActorDirectory = true;
+            return globalThis.foundry.applications.sidebar.tabs.ActorDirectory;
+          },
+          configurable: true
+        });
+
+        // Trigger getApplicationHeaderButtons hook with an arbitrary app
+        const buttons = [];
+        const mockApp = new DCCCombatMetricsApp();
+        globalThis.Hooks.callAll('getApplicationHeaderButtons', mockApp, buttons);
+
+        assert.equal(accessedDeprecatedActorDirectory, false, 'Should not access deprecated global ActorDirectory');
+      } finally {
+        if (originalActorDirectoryDesc) Object.defineProperty(globalThis, 'ActorDirectory', originalActorDirectoryDesc);
+      }
+    });
+
+    test('DCCCombatMetricsApp and other apps instantiate without invoking deprecated V1 Application constructor', () => {
+      let accessedDeprecatedV1App = false;
+      const originalV1App = globalThis.foundry.appv1.applications.Application;
+
+      try {
+        globalThis.foundry.appv1.applications.Application = class SpyV1App extends originalV1App {
+          constructor(...args) {
+            super(...args);
+            accessedDeprecatedV1App = true;
+          }
+        };
+
+        const app = new DCCCombatMetricsApp();
+        assert.ok(app);
+        assert.equal(accessedDeprecatedV1App, false, 'DCCCombatMetricsApp must not instantiate V1 Application');
+      } finally {
+        globalThis.foundry.appv1.applications.Application = originalV1App;
+      }
+    });
+  });
+
+  describe('3. ApplicationV2 Options Initialization & id.replace Safety', () => {
+    test('DCCSessionManagerApp, DCCCrawlerCreatorApp, and DCCCombatMetricsApp instantiate without TypeError on replace()', () => {
+      const sessionApp = new DCCSessionManagerApp();
+      assert.ok(sessionApp);
+      assert.equal(typeof sessionApp.id, 'string');
+      assert.equal(sessionApp.id, 'dcc-session-manager');
+      assert.ok(sessionApp.options.id, 'options.id must be defined');
+
+      const creatorApp = new DCCCrawlerCreatorApp();
+      assert.ok(creatorApp);
+      assert.equal(typeof creatorApp.id, 'string');
+      assert.equal(creatorApp.id, 'dcc-crawler-creator');
+
+      const metricsApp = new DCCCombatMetricsApp();
+      assert.ok(metricsApp);
+      assert.equal(typeof metricsApp.id, 'string');
+      assert.equal(metricsApp.id, 'dcc-combat-metrics-app');
+    });
+
+    test('All DCC Application classes initialize valid string IDs and window options', () => {
+      const apps = [
+        { cls: DCCSessionManagerApp, expectedId: 'dcc-session-manager' },
+        { cls: DCCCrawlerCreatorApp, expectedId: 'dcc-crawler-creator' },
+        { cls: DCCCombatMetricsApp, expectedId: 'dcc-combat-metrics-app' },
+        { cls: DCCCombatArchiveApp, expectedId: 'dcc-combat-archive' },
+        { cls: DCCSpellManager, expectedId: 'dcc-spell-manager' },
+        { cls: DCCBuffDebuffManager, expectedId: 'dcc-buff-manager' },
+        { cls: DCCSkillManager, expectedId: 'dcc-skill-manager' }
+      ];
+
+      for (const { cls: AppClass, expectedId } of apps) {
+        const instance = new AppClass();
+        assert.ok(instance, `${AppClass.name} should instantiate`);
+        assert.equal(typeof instance.id, 'string', `${AppClass.name}.id must be a string`);
+        assert.ok(instance.id.length > 0, `${AppClass.name}.id must not be empty`);
+        assert.equal(instance.id, expectedId, `${AppClass.name}.id should match expected default ID`);
+        assert.ok(instance.title, `${AppClass.name}.title should be defined`);
+      }
+    });
+
+    test('Custom options passed to constructor correctly override default options without error', () => {
+      const customApp = new DCCSessionManagerApp({
+        id: 'custom-session-manager',
+        window: { title: 'Custom Session Title' }
+      });
+      assert.equal(customApp.id, 'custom-session-manager');
+      assert.equal(customApp.title, 'Custom Session Title');
+    });
+
+    test('render(true) and close() lifecycle methods operate without errors and maintain ui.windows registry', async () => {
+      const app = new DCCSessionManagerApp();
+      await app.render(true);
+      assert.ok(app.rendered);
+      assert.equal(globalThis.ui.windows[app.id], app);
+
+      await app.close();
+      assert.equal(app.rendered, false);
+      assert.equal(globalThis.ui.windows[app.id], undefined);
     });
   });
 });

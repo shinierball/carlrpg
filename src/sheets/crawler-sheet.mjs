@@ -340,6 +340,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         skill.system.totalSkill = totalSkill;
         skill.system.statMod = mod;
       }
+
+      const dmgData = this.actor.getSkillDamageData(skill);
+      skill.hasDamage = dmgData.hasDamage;
+      skill.damageFormulaWithStat = dmgData.formulaWithStat;
     }
 
     // Add granted skills from equipped gear that the actor doesn't own
@@ -400,6 +404,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
             checked: false
           }
         };
+
+        const grantedDmg = this.actor.getSkillDamageData(grantedSkill);
+        grantedSkill.hasDamage = grantedDmg.hasDamage;
+        grantedSkill.damageFormulaWithStat = grantedDmg.formulaWithStat;
 
         this._grantedSkills.set(grantedId, grantedSkill);
         context.skills.push(grantedSkill);
@@ -935,6 +943,13 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
       if (item) this.actor.rollSkill(item);
+    });
+
+    // Roll Skill Damage (owned or gear-granted)
+    html.find('.roll-skill-dmg, .roll-skill-damage').click(ev => {
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
+      if (item) this.actor.rollSkillDamage(item);
     });
 
     // Roll / Cast Spell

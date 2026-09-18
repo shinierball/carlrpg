@@ -54,6 +54,23 @@ describe('DCC RPG Chat Message Rendering Hook & Foundry v13+ Compatibility', () 
       assert.equal(globalThis.Hooks.events['renderChatMessage']?.length || 0, 0, 'Old v12 hook should be unbound');
       assert.equal(globalThis.Hooks.events['renderChatMessageHTML']?.length, 1, 'New v13 hook should be active');
     });
+
+    test('correctly identifies v13 at early module evaluation time when game is undefined', () => {
+      const origGame = globalThis.game;
+      try {
+        delete globalThis.game;
+        delete globalThis.Hooks.events['renderChatMessage'];
+        delete globalThis.Hooks.events['renderChatMessageHTML'];
+
+        const hookName = registerChatMessageHook();
+        assert.equal(hookName, 'renderChatMessageHTML');
+
+        const legacyListeners = globalThis.Hooks.events['renderChatMessage'] || [];
+        assert.equal(legacyListeners.length, 0, 'renderChatMessage must not be registered even when game is undefined');
+      } finally {
+        globalThis.game = origGame;
+      }
+    });
   });
 
   describe('2. DOM / HTMLElement Compatibility (v13+ HTMLElement)', () => {

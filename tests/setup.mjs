@@ -519,8 +519,26 @@ if (!globalThis.ItemSheet) {
 }
 
 class MockApplicationV2 {
+  static _appId = 0;
+  static DEFAULT_OPTIONS = {
+    id: 'app-{id}',
+    tag: 'div',
+    classes: ['application'],
+    window: {
+      title: '',
+      resizable: false
+    },
+    position: { width: 'auto', height: 'auto' }
+  };
+  static PARTS = {};
+
+  #id;
+
   constructor(options = {}) {
-    this.options = options;
+    this.options = Object.freeze(this._initializeApplicationOptions(options));
+    this.#id = this.options.id.replace("{id}", this.options.uniqueId);
+    this._appId = Number(this.options.uniqueId);
+    this._state = -1;
     this.element = {
       querySelectorAll: () => [],
       querySelector: () => null,
@@ -529,16 +547,62 @@ class MockApplicationV2 {
       dataset: {}
     };
   }
-  static DEFAULT_OPTIONS = {
-    tag: 'div',
-    classes: ['application'],
-    position: { width: 'auto', height: 'auto' }
-  };
-  static PARTS = {};
+
+  get id() {
+    return this.#id;
+  }
+
+  get appId() {
+    return this._appId || Number(this.options?.uniqueId) || 0;
+  }
+
+  get rendered() {
+    return this._state > 0;
+  }
+
+  static *inheritanceChain() {
+    let cls = this;
+    while ( cls ) {
+      yield cls;
+      if ( cls === MockApplicationV2 ) return;
+      cls = Object.getPrototypeOf(cls);
+    }
+  }
+
+  _initializeApplicationOptions(options = {}) {
+    const order = [options];
+    for ( const cls of this.constructor.inheritanceChain() ) {
+      if ( Object.prototype.hasOwnProperty.call(cls, 'DEFAULT_OPTIONS') ) {
+        order.unshift(cls.DEFAULT_OPTIONS);
+      }
+    }
+    const applicationOptions = {};
+    for ( const opts of order ) {
+      Object.assign(applicationOptions, opts);
+      if (opts.window) applicationOptions.window = Object.assign({}, applicationOptions.window, opts.window);
+      if (opts.position) applicationOptions.position = Object.assign({}, applicationOptions.position, opts.position);
+    }
+    applicationOptions.uniqueId = String(++MockApplicationV2._appId);
+    return applicationOptions;
+  }
+
   async render(force = false, options = {}) {
+    this._state = 2;
+    if (globalThis.ui && globalThis.ui.windows) {
+      globalThis.ui.windows[this.appId] = this;
+      const key = this.id || this.options?.id;
+      if (key) globalThis.ui.windows[key] = this;
+    }
     return this;
   }
+
   async close(options = {}) {
+    this._state = 0;
+    if (globalThis.ui && globalThis.ui.windows) {
+      if (this.appId) delete globalThis.ui.windows[this.appId];
+      const key = this.id || this.options?.id;
+      if (key) delete globalThis.ui.windows[key];
+    }
     return Promise.resolve();
   }
 }
@@ -1262,6 +1326,13 @@ globalThis.foundry.documents = globalThis.foundry.documents || {
 };
 
 globalThis.foundry.applications = globalThis.foundry.applications || {};
+globalThis.foundry.applications.sidebar = globalThis.foundry.applications.sidebar || {
+  tabs: {
+    CombatTracker: MockCombatTracker,
+    ActorDirectory: globalThis.ActorDirectory,
+    ItemDirectory: globalThis.ItemDirectory
+  }
+};
 globalThis.foundry.applications.handlebars = globalThis.foundry.applications.handlebars || {
   loadTemplates: globalThis.loadTemplates
 };

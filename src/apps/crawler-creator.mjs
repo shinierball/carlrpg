@@ -22,12 +22,9 @@ import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { DCC_SKILLS } from '../data/skills.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { getDCCStatModifier } from '../documents/actor.mjs';
+import { DCCBaseApplication } from './base-application.mjs';
 
-const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
-  ?? globalThis.Application
-  ?? class {};
-
-export class DCCCrawlerCreatorApp extends BaseApplication {
+export class DCCCrawlerCreatorApp extends DCCBaseApplication {
   constructor(options = {}) {
     super(options);
 

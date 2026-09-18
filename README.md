@@ -48,6 +48,20 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - Damage multiplier buffs (e.g. `*2 Total Damage`) doubling all rolled damage components.
   - Type-specific target debuffs and resistance reductions (e.g. 50% Fire reduction rounded up) applied before DR and CON damage bars.
   - Interactive chat cards displaying color-coded typed damage breakdowns and one-click damage application to targeted tokens.
+- **Rank Damage Die System & Skill/Spell Damage Calculations**:
+  - Full automated implementation of the official DCC RPG Rank Damage Die scaling table:
+    - **Rank 0**: +0 (Untrained Attack Check with Disadvantage `2d20kl + mod` vs Target Evade).
+    - **Rank 1**: +1 flat damage bonus.
+    - **Ranks 2–3**: +1d2.
+    - **Ranks 4–5**: +1d4.
+    - **Ranks 6–7**: +1d6.
+    - **Ranks 8–9**: +1d8.
+    - **Ranks 10–13**: +1d10.
+    - **Ranks 14–15+**: +1d12.
+  - Automatically factors into Spell Attack Damage, Weapon Attack Damage, and Attack Skill Damage formulas alongside governing ability modifiers and rank upgrades.
+  - **Hand-to-Hand Damage Effects & Combinations**: Unarmed Combat ($1d4 + \text{Str}$) cannot combine with Hand-to-Hand damage effects, whereas Pugilism ($1d2 + \text{Str}$, DEX to hit) combines with Iron Punch (adding $+1d2$ base damage, scaling to $+2d2$ at R5, $+3d2$ at R10, $+4d2$ at R15, and adding a secondary Iron Punch rank damage die at Rank 5+ for $4d2 + 2d4 + \text{Str}$).
+  - **Fire Fingers Rank 15 Passive**: Automatically adds $+1d12\text{ Fire}$ damage to Pugilism, Unarmed Combat, and Slice Attack.
+  - **Interactive Damage Cards & Roll Buttons**: Skills on Page 3 embed inline Roll Attack Damage buttons with dynamic tooltips and formula previews.
 - **Multi-Modifier Buffs & Debuffs**:
   - Create buffs with multiple stat bonuses (e.g. +2 STR, +2 DEX) and multiple damage/defense modifiers (damage multipliers, bonus typed damage, resistances, immunities, and Temp HP).
   - Create debuffs with multiple stat penalties (-2 STR, -4 CON) and multi-typed incoming damage reductions.

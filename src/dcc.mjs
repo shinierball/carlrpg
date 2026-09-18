@@ -45,6 +45,9 @@ import {
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
 
+  // Ensure chat message hook is registered with canonical version detection
+  registerChatMessageHook();
+
   game.dcc = {
     DCCActor,
     DCCItem,
@@ -494,7 +497,16 @@ Hooks.on('renderSidebarTab', (app, html) => {
 
 // Add header button if ActorDirectory is popped out into a floating window
 Hooks.on('getApplicationHeaderButtons', (app, buttons) => {
-  if (app?.constructor?.name === 'ActorDirectory' || (typeof ActorDirectory !== 'undefined' && app instanceof ActorDirectory)) {
+  const ActorDirectoryClass = globalThis.foundry?.applications?.sidebar?.tabs?.ActorDirectory
+    ?? globalThis.foundry?.appv1?.sidebar?.tabs?.ActorDirectory
+    ?? globalThis.ActorDirectory;
+
+  const isActorDirectory = app?.constructor?.name === 'ActorDirectory'
+    || (ActorDirectoryClass && app instanceof ActorDirectoryClass)
+    || app?.id === 'actors'
+    || app?.tabName === 'actors';
+
+  if (isActorDirectory) {
     buttons.unshift({
       label: 'New Crawler',
       class: 'dcc-header-crawler-btn',
@@ -867,28 +879,68 @@ export function onRenderChatMessage(message, html, data) {
 }
 
 /**
+ * Detect whether the current Foundry environment is Version 13 or newer.
+ * Safely evaluates across module evaluation (when `game` may not be initialized yet)
+ * and runtime hooks.
+ * @returns {boolean}
+ */
+export function isFoundryV13Plus() {
+  // If game is defined and has explicit release or version info, use it as source of truth
+  if (typeof game !== 'undefined' && game) {
+    if (typeof game.release?.generation === 'number') {
+      return game.release.generation >= 13;
+    }
+    if (typeof game.version === 'string') {
+      return Number(game.version.split('.')[0]) >= 13;
+    }
+  }
+  // If foundry has explicit release info
+  if (typeof foundry !== 'undefined' && foundry) {
+    if (typeof foundry.release?.generation === 'number') {
+      return foundry.release.generation >= 13;
+    }
+  }
+  // If CONST has explicit version info
+  if (typeof CONST !== 'undefined' && CONST) {
+    if (typeof CONST.BUILD_RELEASE?.generation === 'number') {
+      return CONST.BUILD_RELEASE.generation >= 13;
+    }
+    if (typeof CONST.VERSION === 'string') {
+      return Number(CONST.VERSION.split('.')[0]) >= 13;
+    }
+  }
+  // Structural checks if release/version properties are not yet populated (e.g. at early module load)
+  if (typeof foundry !== 'undefined' && foundry) {
+    if (Boolean(foundry.appv1)) return true;
+    if (Boolean(foundry.applications?.sidebar?.tabs?.CombatTracker)) return true;
+  }
+  return false;
+}
+
+/**
  * Register chat message hook using renderChatMessageHTML on Foundry v13+ (or renderChatMessage on v12)
  * to eliminate deprecation warnings.
  * @returns {string} The registered hook name
  */
 export function registerChatMessageHook() {
-  const isV13Plus = Boolean(
-    (typeof game !== 'undefined' && (
-      (game.release?.generation >= 13) ||
-      (typeof game.version === 'string' && Number(game.version.split('.')[0]) >= 13) ||
-      (typeof foundry !== 'undefined' && foundry.utils?.isNewerVersion?.(game.version ?? '0', '12.999'))
-    ))
-  );
-
+  const isV13Plus = isFoundryV13Plus();
   const hookName = isV13Plus ? 'renderChatMessageHTML' : 'renderChatMessage';
-  if (_registeredChatHook === hookName) return hookName;
 
-  if (_registeredChatHook && typeof Hooks !== 'undefined' && typeof Hooks.off === 'function') {
+  // In v13+, ensure legacy hook is cleanly removed if it was ever registered
+  if (isV13Plus && typeof Hooks !== 'undefined' && typeof Hooks.off === 'function') {
+    Hooks.off('renderChatMessage', onRenderChatMessage);
+  }
+
+  if (_registeredChatHook && _registeredChatHook !== hookName && typeof Hooks !== 'undefined' && typeof Hooks.off === 'function') {
     Hooks.off(_registeredChatHook, onRenderChatMessage);
   }
 
   if (typeof Hooks !== 'undefined' && typeof Hooks.on === 'function') {
-    Hooks.on(hookName, onRenderChatMessage);
+    const currentListeners = Hooks.events?.[hookName] || [];
+    const alreadyRegistered = currentListeners.some(e => e === onRenderChatMessage || e?.fn === onRenderChatMessage);
+    if (!alreadyRegistered) {
+      Hooks.on(hookName, onRenderChatMessage);
+    }
     _registeredChatHook = hookName;
   }
   return hookName;

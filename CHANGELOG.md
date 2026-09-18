@@ -1,3 +1,93 @@
+## 2.0.14
+
+### Official DCC RPG Rank Damage Die & Damage Rules Integration
+
+- **Rank Damage Die Scaling Module (`src/data/rank-dice.mjs`)**:
+  - Implemented `getRankDamageDie(rank)` with full fidelity to the official DCC RPG scaling table:
+    - **Rank 0**: +0 (Untrained Check with Disadvantage: `2d20kl + Stat Mod` vs Target Evade)
+    - **Rank 1**: +1 flat damage bonus
+    - **Ranks 2–3**: +1d2
+    - **Ranks 4–5**: +1d4
+    - **Ranks 6–7**: +1d6
+    - **Ranks 8–9**: +1d8
+    - **Ranks 10–13**: +1d10
+    - **Ranks 14–15+**: +1d12
+  - Added `parseUpgrades(upgrades)` supporting string, nested object, and dictionary schemas.
+  - Implemented `getEvadeTargetDifficulty(foeDexMod, floorNumber)` computing $10 + \text{Foe DEX Mod} + \text{Floor Number}$.
+- **Comprehensive Damage Calculations (`src/documents/actor.mjs`)**:
+  - `getSkillDamageData(skillItem, options)`: Resolves base damage, rank upgrades, governing stat modifier, rank damage die, Hand-to-Hand damage effects (Pugilism + Iron Punch), and Fire Fingers Rank 15 passive melee bonus.
+  - `getSpellDamageData(spellItem)`: Integrates rank damage die scaling, rank upgrades (+dice, multi-target, blast/line), Rank 15 base dice multiplier (e.g. Magic Missile $\times 3$ dice), and debuff tracking (Burned on 1+ HB loss).
+  - `getAttackDamageParts(attackItem, options)`: Accurately associates weapon skills to weapons, adds matching Rank Damage Dice, and factors in Fire Fingers Rank 15 melee bonuses for natural/brawling strikes.
+  - `rollSkillDamage(skillItem, options)`: Evaluates damage parts, applies multipliers, and generates interactive CarlRPG damage cards with targeted token damage application.
+  - `rollSkill(skillItem)`: Embeds inline `Roll Attack Damage` buttons on skill check cards whenever the skill possesses damage formulas.
+- **Character Sheet UI Integration (`src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page3-skills.hbs`)**:
+  - Extended Page 3 (Skills) with inline `.roll-skill-dmg` burst buttons displaying damage formula tooltips.
+  - Added event listeners on crawler sheet controller to dispatch `actor.rollSkillDamage()` directly from the sheet.
+- **Test Suite Updates (`tests/rank-damage-dice.test.mjs`, `tests/spell-actions.test.mjs`)**:
+  - Added 81 automated unit tests in `tests/rank-damage-dice.test.mjs` verifying all milestones (R1, R2, R4, R5, R6, R8, R10, R14, R15, R16) across Fire Fingers, Fireball, Magic Missile, Unarmed Combat, Pugilism, Combined Pugilism + Iron Punch, Longsword, Fire Fingers R15 passive, Untrained disadvantage checks, and non-stacking rules.
+  - Updated `tests/spell-actions.test.mjs` to reflect the Rank Damage Die in spell formulas.
+
+## 2.0.13
+
+### ApplicationV2 Options Initialization & `id.replace` Safety Fix
+
+- **Fix ApplicationV2 Options Initialization (`src/apps/base-application.mjs`)**:
+  - Resolved `TypeError: Cannot read properties of undefined (reading 'replace')` in `ApplicationV2` constructor when instantiating `DCCSessionManagerApp`, `DCCCrawlerCreatorApp`, `DCCCombatMetricsApp`, and other custom applications.
+  - Subclasses defining legacy `defaultOptions` did not have own-property `DEFAULT_OPTIONS`, causing Foundry's `_initializeApplicationOptions` inheritance chain merge to omit their configuration and clobber `id` with `undefined`.
+  - Implemented `_initializeApplicationOptions(options)` in `DCCBaseApplication` to dynamically pull `v1` default options from `this.constructor.defaultOptions`, map `id`, `classes`, `window.title`, `window.resizable`, and `position`, and ensure `initialized.id` is always a valid string before `ApplicationV2` executes `.replace('{id}', ...)`.
+  - Defined `static DEFAULT_OPTIONS = { classes: ['dcc-app'] }` on `DCCBaseApplication` without `id: undefined`, preventing pollution of the inheritance chain defaults.
+  - Added `appId` getter and `close()` cleanup to ensure backwards-compatible integration with `ui.windows`.
+- **Test Suite Updates (`tests/setup.mjs`, `tests/v13-namespacing.test.mjs`)**:
+  - Enhanced `MockApplicationV2` in `tests/setup.mjs` to faithfully mirror Foundry v12/v13's `_initializeApplicationOptions` inheritance chain traversal and `id.replace("{id}", uniqueId)`.
+  - Added unit test suite in `tests/v13-namespacing.test.mjs` validating instantiation, valid string IDs, window options, override handling, and render/close lifecycle for all 7 DCC application classes.
+
+## 2.0.12
+
+### ApplicationV2 Migration & ActorDirectory Namespacing
+
+- **ActorDirectory Global Namespacing Fix (`src/dcc.mjs`)**:
+  - Replaced unsafe `(typeof ActorDirectory !== 'undefined' && app instanceof ActorDirectory)` in `getApplicationHeaderButtons` with safe resolution via `foundry.applications.sidebar.tabs.ActorDirectory`.
+  - Completely eliminates the deprecation warning: `"Error: You are accessing the global 'ActorDirectory' which is now namespaced under foundry.applications.sidebar.tabs.ActorDirectory"`.
+- **ApplicationV2 Framework Migration (`src/apps/base-application.mjs`)**:
+  - Implemented `DCCBaseApplication` extending `foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2)` on Foundry v12+.
+  - Migrated all 7 custom applications to extend `DCCBaseApplication`:
+    - `DCCCombatMetricsApp` ([src/apps/combat-metrics.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/combat-metrics.mjs))
+    - `DCCCombatArchiveApp` ([src/apps/combat-archive.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/combat-archive.mjs))
+    - `DCCCrawlerCreatorApp` ([src/apps/crawler-creator.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/crawler-creator.mjs))
+    - `DCCSessionManagerApp` ([src/apps/session-manager.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/session-manager.mjs))
+    - `DCCSkillManager` ([src/apps/skill-manager.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/skill-manager.mjs))
+    - `DCCSpellManager` ([src/apps/spell-manager.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/spell-manager.mjs))
+    - `DCCBuffDebuffManager` ([src/apps/buff-manager.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/buff-manager.mjs))
+  - Implemented automatic translation bridges in `DCCBaseApplication` so `defaultOptions` -> `DEFAULT_OPTIONS`/`PARTS`, `getData()` -> `_prepareContext()`, and `activateListeners()` -> `_onRender()` work seamlessly without changing application business logic.
+  - Completely eliminates the deprecation warning: `"The V1 Application framework is deprecated, and will be removed in a later core software version. Please use the V2 version of the Application framework available under foundry.applications.api.ApplicationV2."`.
+- **Automated Testing**:
+  - Updated `tests/v13-namespacing.test.mjs` verifying that all application classes inherit from `foundry.applications.api.ApplicationV2`.
+  - Added unit tests asserting that neither the deprecated `ActorDirectory` getter nor the deprecated V1 `Application` constructor is invoked during application lifecycle.
+
+## 2.0.11
+
+### Chat Message Rendering Hook Early Module Detection (`renderChatMessageHTML`)
+
+- **Early Module Load Version Detection (`isFoundryV13Plus`)**:
+  - Fixed an issue where version checks during initial script/module evaluation returned `false` because `globalThis.game` is not yet instantiated when ES modules first load.
+  - Implemented `isFoundryV13Plus()` checking `game.release`, `foundry.release`, `CONST.BUILD_RELEASE`, `CONST.VERSION`, and architectural markers like `foundry.appv1` and `foundry.applications.sidebar.tabs.CombatTracker`.
+  - Added hook cleanup via `Hooks.off('renderChatMessage', onRenderChatMessage)` whenever running on v13+ to guarantee no legacy hook listeners remain registered.
+  - Re-invoked `registerChatMessageHook()` inside `Hooks.once('init')` to verify registration once `game` is initialized.
+  - Completely eliminates the deprecation warning: `"Error: The renderChatMessage hook is deprecated. Please use renderChatMessageHTML instead, which now passes an HTMLElement argument instead of jQuery."`.
+- **Automated Testing**:
+  - Added unit test in `tests/chat-message-hook.test.mjs` verifying that `registerChatMessageHook()` accurately identifies Foundry v13 and binds `renderChatMessageHTML` even when `globalThis.game` is completely undefined.
+
+## 2.0.10
+
+### CombatTracker v13 Namespacing (`foundry.applications.sidebar.tabs.CombatTracker`)
+
+- **CombatTracker Base Resolution**:
+  - Updated `DCCCombatTracker` ([src/apps/combat-tracker.mjs](file:///Users/jeremy/Code/CarlRPG/src/apps/combat-tracker.mjs)) to check `foundry.applications.sidebar.tabs.CombatTracker` first.
+  - In Foundry v13, sidebar tabs were moved under the Application V2 namespace `foundry.applications.sidebar.tabs.*` (unlike V1 sheets which moved to `foundry.appv1.sheets.*`).
+  - Eliminates the deprecation warning: `"You are accessing the global 'CombatTracker' which is now namespaced under foundry.applications.sidebar.tabs.CombatTracker"`.
+- **Automated Testing**:
+  - Updated `tests/v13-namespacing.test.mjs` and `tests/setup.mjs` to verify `DCCCombatTracker` inherits from `foundry.applications.sidebar.tabs.CombatTracker` without accessing deprecated `globalThis.CombatTracker`.
+
 ## 2.0.9
 
 ### Foundry v13 Global Namespace Migration & Deprecation Cleanup

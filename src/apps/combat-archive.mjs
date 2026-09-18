@@ -7,15 +7,12 @@
 
 import { DCCCombat, DCC_ACTION_TYPES } from '../documents/combat.mjs';
 import { DCCExperienceTracker } from './xp-tracker.mjs';
-
-const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
-  ?? globalThis.Application
-  ?? class {};
+import { DCCBaseApplication } from './base-application.mjs';
 
 const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
   ?? globalThis.Dialog;
 
-export class DCCCombatArchiveApp extends BaseApplication {
+export class DCCCombatArchiveApp extends DCCBaseApplication {
   constructor(options = {}) {
     super(options);
     this.selectedCombatId = options.combatId || null;

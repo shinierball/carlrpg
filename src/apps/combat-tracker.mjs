@@ -13,7 +13,8 @@ import { DCCCombat, DCC_ACTION_TYPES } from '../documents/combat.mjs';
 import { DCCCombatMetricsApp } from './combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './combat-archive.mjs';
 
-const BaseCombatTracker = globalThis.foundry?.appv1?.sidebar?.tabs?.CombatTracker
+const BaseCombatTracker = globalThis.foundry?.applications?.sidebar?.tabs?.CombatTracker
+  ?? globalThis.foundry?.appv1?.sidebar?.tabs?.CombatTracker
   ?? globalThis.CombatTracker
   ?? class {};
 

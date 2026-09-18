@@ -2,14 +2,12 @@
  * DCC RPG — Skill Library & Manager Application
  * Centralized interface for browsing, creating, and maintaining skills.
  */
-const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
-  ?? globalThis.Application
-  ?? class {};
+import { DCCBaseApplication } from './base-application.mjs';
 
 const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
   ?? globalThis.Dialog;
 
-export class DCCSkillManager extends BaseApplication {
+export class DCCSkillManager extends DCCBaseApplication {
   constructor(options = {}) {
     super(options);
     this.actor = options.actor || null;

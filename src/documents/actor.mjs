@@ -1,6 +1,7 @@
 import { DCCCombatMetrics, getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCCSessionEngine } from '../apps/session-manager.mjs';
 import { getSizeInfo } from '../data/sizes.mjs';
+import { getRankDamageDie, parseUpgrades, getEvadeTargetDifficulty } from '../data/rank-dice.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -631,24 +632,369 @@ export class DCCActor extends Actor {
   /**
    * Resolve all damage parts for an attack from the weapon/attack item itself,
    * equipped gear bonuses, and active skill modifiers (with rank gating).
+  /**
+   * Parse and calculate skill attack damage formula and metadata based on official DCC RPG rules.
+   * Weapon Attack Damage = Weapon Base Damage + Skill Rank Damage Die + Stat Mod.
+   * Handles Hand-to-Hand Damage Effects (Pugilism + Iron Punch), rank damage die scaling table,
+   * Fire Fingers rank 15 passive melee bonus, and rank upgrade additions.
+   *
+   * @param {Item} skillItem
+   * @param {object} [options={}]
+   * @returns {object}
+   */
+  getSkillDamageData(skillItem, options = {}) {
+    const sys = skillItem?.system || {};
+    const skillName = skillItem?.name || 'Skill';
+    const rank = options.rank !== undefined
+      ? Number(options.rank)
+      : (Number(skillItem?.modifiedRank ?? sys.modifiedRank ?? skillItem?.effectiveRank ?? sys.rank) || 0);
+
+    const rawNotes = sys.notes || '';
+    const rawBaseDamage = sys.baseDamage || '';
+    const textToSearch = rawBaseDamage || rawNotes;
+
+    let baseCount = 1;
+    let baseSides = 4;
+    let statKey = (sys.stat || 'str').toLowerCase();
+    let damageType = sys.damageType || 'Physical';
+
+    // Parse Base Damage e.g. "Base Damage: 1d4 + Str Bludgeoning", "1d2 + Str Bludgeoning", or "Deal +1d2 base damage"
+    const diceMatch = textToSearch.match(/(?:(?:Base Damage|deal)\s*:?\s*)?(\+?\d+d\d+)(?:\s*\+\s*([a-zA-Z]+))?\s*([a-zA-Z\s]+)?/i);
+    if (diceMatch) {
+      const dParts = diceMatch[1].replace('+', '').match(/(\d+)d(\d+)/i);
+      if (dParts) {
+        baseCount = parseInt(dParts[1], 10);
+        baseSides = parseInt(dParts[2], 10);
+      }
+      if (diceMatch[2] && !/per|ft|\//i.test(diceMatch[2])) {
+        statKey = diceMatch[2].toLowerCase();
+      }
+      if (diceMatch[3]) {
+        const dt = diceMatch[3].trim().split(/[.,\n]/)[0].trim();
+        if (dt && !/base|damage|upgrade/i.test(dt)) damageType = dt;
+      }
+    } else {
+      const simpleDice = textToSearch.match(/(\d+)d(\d+)/i);
+      if (simpleDice) {
+        baseCount = parseInt(simpleDice[1], 10);
+        baseSides = parseInt(simpleDice[2], 10);
+      }
+    }
+
+    // Ensure statKey is valid ability on this actor
+    if (!this.system?.abilities?.[statKey]) {
+      statKey = (sys.stat || 'str').toLowerCase();
+    }
+    const statMod = this.system?.abilities?.[statKey]?.mod ?? 0;
+
+    // Upgrades parsing
+    const upgrades = parseUpgrades(sys.upgrades);
+    if (rank >= 5 && upgrades.rank5) {
+      const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
+      if (u5 && parseInt(u5[2], 10) === baseSides) {
+        baseCount += parseInt(u5[1], 10);
+      }
+    }
+    if (rank >= 10 && upgrades.rank10) {
+      const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)\s+base damage/i);
+      if (u10 && parseInt(u10[2], 10) === baseSides) {
+        baseCount += parseInt(u10[1], 10);
+      }
+    }
+    if (rank >= 15 && upgrades.rank15) {
+      const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
+      if (u15 && parseInt(u15[2], 10) === baseSides) {
+        baseCount += parseInt(u15[1], 10);
+      }
+      const multMatch = upgrades.rank15.match(/base damage\s*[×x*]\s*(\d+)/i) || upgrades.rank15.match(/(\d+)\s*[×x*]\s*base damage/i);
+      if (multMatch) {
+        baseCount *= parseInt(multMatch[1], 10);
+      }
+    }
+
+    // Hand-to-Hand Damage Effects:
+    // Unarmed Combat cannot combine with Damage Effects.
+    // Pugilism can combine with Iron Punch.
+    const isUnarmed = /unarmed combat/i.test(skillName);
+    const isPugilism = /pugilism/i.test(skillName);
+    let ironPunchApplied = false;
+    let ironPunchRank = 0;
+
+    if (!isUnarmed && (isPugilism || options.effect)) {
+      const effectParam = options.effect;
+      const effectName = typeof effectParam === 'string' ? effectParam : (effectParam?.name || '');
+      let ironPunchItem = null;
+
+      if (/iron punch/i.test(effectName)) {
+        ironPunchItem = typeof effectParam === 'object' ? effectParam : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
+        ironPunchApplied = true;
+      } else if (options.ironPunch) {
+        ironPunchApplied = true;
+        ironPunchItem = typeof options.ironPunch === 'object' ? options.ironPunch : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
+      } else if (isPugilism) {
+        const ownedIp = this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null;
+        if (ownedIp) {
+          ironPunchApplied = true;
+          ironPunchItem = ownedIp;
+        }
+      }
+
+      if (ironPunchApplied) {
+        ironPunchRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(ironPunchItem?.system?.modifiedRank ?? ironPunchItem?.system?.rank ?? rank) || 0);
+
+        // Iron Punch adds +1d2 base damage to Pugilism strike, plus +1d2 at R5, R10, R15 milestones
+        if (baseSides === 2) {
+          let ipBonusCount = 1;
+          if (ironPunchRank >= 5) ipBonusCount += 1;
+          if (ironPunchRank >= 10) ipBonusCount += 1;
+          if (ironPunchRank >= 15) ipBonusCount += 1;
+          baseCount += ipBonusCount;
+        }
+      }
+    }
+
+    // Rank Damage Die
+    const rankDie = getRankDamageDie(rank);
+    let ironPunchRankDie = null;
+    if (ironPunchApplied && ironPunchRank >= 5) {
+      ironPunchRankDie = getRankDamageDie(ironPunchRank);
+    }
+
+    let combinedRankDieStr = '';
+    if (ironPunchRankDie && ironPunchRankDie.dice && rankDie.dice) {
+      const m1 = rankDie.dice.match(/(\d+)d(\d+)/i);
+      const m2 = ironPunchRankDie.dice.match(/(\d+)d(\d+)/i);
+      if (m1 && m2 && m1[2] === m2[2]) {
+        const totalRankCount = parseInt(m1[1], 10) + parseInt(m2[1], 10);
+        combinedRankDieStr = `${totalRankCount}d${m1[2]}`;
+      } else {
+        combinedRankDieStr = `${rankDie.dice} + ${ironPunchRankDie.dice}`;
+      }
+    } else if (ironPunchRankDie && ironPunchRankDie.dice) {
+      combinedRankDieStr = ironPunchRankDie.dice;
+    } else if (rankDie.dice) {
+      combinedRankDieStr = rankDie.dice;
+    } else if (rankDie.value > 0) {
+      combinedRankDieStr = String(rankDie.value);
+    }
+
+    // Fire Fingers Rank 15 Passive Melee Bonus:
+    // "Your Pugilism, Unarmed Combat, and Slice Attack strikes add 1 Fire Fingers Rank damage die (Fire)."
+    let fireFingersBonus = null;
+    if (isPugilism || isUnarmed || /slice attack/i.test(skillName)) {
+      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && /fire fingers/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && /fire fingers/i.test(i.name))) : null;
+      const ffRank = Number(ffSpell?.system?.modifiedRank ?? ffSpell?.system?.rank) || 0;
+      if (ffRank >= 15) {
+        const ffDie = getRankDamageDie(ffRank);
+        fireFingersBonus = {
+          type: 'Fire',
+          dice: ffDie.dice || '1d12',
+          value: ffDie.value || 0,
+          source: `Fire Fingers (Rank ${ffRank} Passive)`
+        };
+      }
+    }
+
+    const baseDiceStr = `${baseCount}d${baseSides}`;
+    const formulaElements = [baseDiceStr];
+    if (combinedRankDieStr) {
+      formulaElements.push(combinedRankDieStr);
+    }
+    if (fireFingersBonus && (fireFingersBonus.dice || fireFingersBonus.value)) {
+      formulaElements.push(fireFingersBonus.dice || String(fireFingersBonus.value));
+    }
+    if (statKey) {
+      formulaElements.push(statMod >= 0 ? `+ ${statMod}` : `- ${Math.abs(statMod)}`);
+    }
+    const formula = formulaElements.join(' + ').replace(/\+\s*\+/g, '+').replace(/\+\s*-\s*/g, '- ').trim();
+
+    const formulaWithStatElements = [baseDiceStr];
+    if (combinedRankDieStr) {
+      formulaWithStatElements.push(combinedRankDieStr);
+    }
+    if (statKey) {
+      formulaWithStatElements.push(statKey.charAt(0).toUpperCase() + statKey.slice(1));
+    }
+    let formulaWithStat = `${formulaWithStatElements.join(' + ')} ${damageType}`.trim();
+    if (fireFingersBonus && (fireFingersBonus.dice || fireFingersBonus.value)) {
+      formulaWithStat += ` + ${fireFingersBonus.dice || fireFingersBonus.value} ${fireFingersBonus.type}`;
+    }
+
+    return {
+      hasDamage: true,
+      skillName,
+      rank,
+      baseDice: baseDiceStr,
+      baseCount,
+      baseSides,
+      stat: statKey,
+      statMod,
+      damageType,
+      rankDie,
+      ironPunchApplied,
+      ironPunchRank,
+      ironPunchRankDie,
+      combinedRankDieStr,
+      fireFingersBonus,
+      formula,
+      formulaWithStat,
+      rawNotes
+    };
+  }
+
+  /**
+   * Resolve all damage parts for an attack from the weapon/attack item itself,
+   * equipped gear bonuses, active skill modifiers (with rank gating),
+   * and official DCC Rank damage dice.
    * @param {Item} attackItem
+   * @param {object} [options={}]
    * @returns {Array<object>}
    */
-  getAttackDamageParts(attackItem) {
+  getAttackDamageParts(attackItem, options = {}) {
+    if (attackItem?.type === 'skill') {
+      const sData = this.getSkillDamageData(attackItem, options);
+      const parts = [];
+
+      // 1. Base damage part
+      parts.push({
+        id: `skill-base-${attackItem.id || 'part'}`,
+        type: sData.damageType || 'Physical',
+        dice: sData.baseDice,
+        stat: sData.stat,
+        statMod: sData.statMod,
+        value: 0,
+        source: `${sData.skillName} (Base)`
+      });
+
+      // 2. Rank damage die
+      if (sData.combinedRankDieStr) {
+        const isFlat = /^\d+$/.test(sData.combinedRankDieStr);
+        parts.push({
+          id: `skill-rank-die-${attackItem.id || 'part'}`,
+          type: sData.damageType || 'Physical',
+          dice: isFlat ? '' : sData.combinedRankDieStr,
+          stat: '',
+          statMod: 0,
+          value: isFlat ? Number(sData.combinedRankDieStr) : 0,
+          source: sData.ironPunchApplied && sData.ironPunchRank >= 5
+            ? `Rank Die (${sData.skillName} R${sData.rank} + Iron Punch R${sData.ironPunchRank})`
+            : `Rank ${sData.rank} Damage Die`
+        });
+      }
+
+      // 3. Fire Fingers Rank 15 Passive
+      if (sData.fireFingersBonus) {
+        parts.push({
+          id: `fire-fingers-passive-${attackItem.id || 'part'}`,
+          type: sData.fireFingersBonus.type,
+          dice: sData.fireFingersBonus.dice,
+          stat: '',
+          statMod: 0,
+          value: sData.fireFingersBonus.value,
+          source: sData.fireFingersBonus.source
+        });
+      }
+
+      // 4. Equipped Gear damage parts
+      const equippedGear = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' && i.system?.equipped)) : [];
+      for (const gear of equippedGear) {
+        if (gear.id === attackItem.id) continue;
+        const gearParts = Array.isArray(gear.system?.damageParts) ? gear.system.damageParts : Object.values(gear.system?.damageParts || {});
+        for (const gp of gearParts) {
+          if (!gp) continue;
+          const statKey = (gp.stat || '').toLowerCase();
+          const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+          parts.push({
+            id: gp.id || `gear-${gear.id}-${parts.length}`,
+            type: gp.type || 'Physical',
+            dice: (gp.dice || '').trim(),
+            stat: statKey,
+            statMod,
+            value: Number(gp.value) || 0,
+            source: gear.name
+          });
+        }
+      }
+
+      // 5. Active Buffs
+      const activeBuffs = this.getActiveBuffs();
+      for (const buff of activeBuffs) {
+        if (!buff) continue;
+        const bSys = buff.system || buff;
+        const mods = Array.isArray(bSys.damageModifiers) ? bSys.damageModifiers : Object.values(bSys.damageModifiers || {});
+        for (const dm of mods) {
+          if (!dm) continue;
+          const kind = (dm.kind || dm.type || '').toLowerCase();
+          if (kind === 'damagebonus' || kind === 'bonus') {
+            const statKey = (dm.stat || '').toLowerCase();
+            const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+            parts.push({
+              id: dm.id || `buff-${buff.id || 'buff'}-${parts.length}`,
+              type: dm.damageType || dm.type || 'Physical',
+              dice: (dm.dice || '').trim(),
+              stat: statKey,
+              statMod,
+              value: Number(dm.value) || 0,
+              source: buff.name
+            });
+          }
+        }
+      }
+
+      return parts;
+    }
+
     const parts = [];
     const sys = attackItem?.system || {};
+    let primaryType = sys.damageType || 'Physical';
+
+    // Identify skill rank for weapon attack
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
+    const skillRank = matchingSkill
+      ? Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0
+      : (sys.toHitRank !== undefined ? Number(sys.toHitRank) || 0 : (sys.rank !== undefined ? Number(sys.rank) || 0 : 0));
+
+    // Base damage scaling from matching skill rank upgrades
+    let upgradedDice = '';
+    if (matchingSkill && skillRank >= 5) {
+      const upgrades = parseUpgrades(matchingSkill.system?.upgrades);
+      const baseDiceStr = sys.damageDice || sys.damageParts?.[0]?.dice || '';
+      const dm = baseDiceStr.match(/(\d+)d(\d+)/i);
+      if (dm) {
+        let count = parseInt(dm[1], 10);
+        const sides = parseInt(dm[2], 10);
+        if (skillRank >= 5 && upgrades.rank5) {
+          const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
+        }
+        if (skillRank >= 10 && upgrades.rank10) {
+          const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
+        }
+        if (skillRank >= 15 && upgrades.rank15) {
+          const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
+        }
+        upgradedDice = `${count}d${sides}`;
+      }
+    }
 
     // 1. Primary parts on attackItem
     const rawParts = sys.damageParts || [];
     const itemParts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts);
 
     if (itemParts.length > 0) {
+      let isFirst = true;
       for (const p of itemParts) {
         if (!p) continue;
         const statKey = (p.stat || '').toLowerCase();
         const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
         const type = p.type || sys.damageType || 'Physical';
-        const dice = (p.dice || '').trim();
+        if (isFirst) primaryType = type;
+        const dice = (isFirst && upgradedDice ? upgradedDice : (p.dice || '')).trim();
         const value = Number(p.value) || 0;
         parts.push({
           id: p.id || `item-part-${parts.length}`,
@@ -659,13 +1005,15 @@ export class DCCActor extends Actor {
           value,
           source: attackItem.name || 'Weapon'
         });
+        isFirst = false;
       }
     } else {
       // Legacy fallback: damageDice + damageStat + effects/damageType
       const statKey = (sys.damageStat || 'str').toLowerCase();
       const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
-      const dice = (sys.damageDice || '1d6').trim();
+      const dice = (upgradedDice || sys.damageDice || '1d6').trim();
       const type = sys.damageType || 'Physical';
+      primaryType = type;
       parts.push({
         id: 'legacy-base',
         type,
@@ -675,6 +1023,42 @@ export class DCCActor extends Actor {
         value: 0,
         source: attackItem.name || 'Weapon'
       });
+    }
+
+    // Rank Damage Die for Weapon Attack
+    if (skillRank > 0) {
+      const rankDie = getRankDamageDie(skillRank);
+      if (rankDie.dice || rankDie.value) {
+        parts.push({
+          id: `rank-die-${attackItem.id || 'atk'}`,
+          type: primaryType,
+          dice: rankDie.dice,
+          stat: '',
+          statMod: 0,
+          value: rankDie.value,
+          source: matchingSkill ? `${matchingSkill.name} (Rank ${skillRank} Die)` : `Rank ${skillRank} Damage Die`
+        });
+      }
+    }
+
+    // Fire Fingers Rank 15 Passive Melee Bonus on Weapon Attack
+    const isMeleeH2H = /pugilism|unarmed combat|slice attack/i.test(attackItem.name || '') ||
+      (matchingSkill && /pugilism|unarmed combat|slice attack/i.test(matchingSkill.name || ''));
+    if (isMeleeH2H) {
+      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && /fire fingers/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && /fire fingers/i.test(i.name))) : null;
+      const ffRank = Number(ffSpell?.system?.modifiedRank ?? ffSpell?.system?.rank) || 0;
+      if (ffRank >= 15) {
+        const ffDie = getRankDamageDie(ffRank);
+        parts.push({
+          id: 'fire-fingers-passive',
+          type: 'Fire',
+          dice: ffDie.dice || '1d12',
+          stat: '',
+          statMod: 0,
+          value: ffDie.value || 0,
+          source: `Fire Fingers (Rank ${ffRank} Passive)`
+        });
+      }
     }
 
     // 2. Equipped Gear damage parts
@@ -699,7 +1083,6 @@ export class DCCActor extends Actor {
     }
 
     // 3. Skills: Rank-gated damage bonuses
-    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
     for (const skill of skills) {
       const rank = Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
       const rawMods = skill.system?.damageModifiers;
@@ -756,8 +1139,9 @@ export class DCCActor extends Actor {
    * Roll Attack: To-Hit and Multi-Typed Damage
    * @param {Item} attackItem
    * @param {'hit'|'damage'} type
+   * @param {object} [options={}]
    */
-  async rollAttack(attackItem, type = 'hit') {
+  async rollAttack(attackItem, type = 'hit', options = {}) {
     if (attackItem.type === 'spell') {
       if (type === 'damage') {
         return this.rollSpellDamage(attackItem);
@@ -767,26 +1151,52 @@ export class DCCActor extends Actor {
 
     const sys = attackItem.system || {};
     if (type === 'hit') {
-      const statMod = this.system.abilities?.[sys.toHitStat]?.mod ?? 0;
-      const rank = Number(sys.toHitRank) || 0;
-      const total = rank + statMod;
-      const formula = `1d20 + ${total}`;
-      const roll = await new Roll(formula).evaluate();
+      let toHitStat = 'dex';
+      let rank = 0;
+
+      if (attackItem.type === 'skill') {
+        const checkType = (sys.checkType || '').toLowerCase();
+        const statMatch = checkType.match(/,\s*([a-zA-Z]+)/);
+        toHitStat = statMatch ? statMatch[1].toLowerCase() : (sys.stat || 'str').toLowerCase();
+        rank = Number(attackItem.modifiedRank ?? sys.modifiedRank ?? attackItem.effectiveRank ?? sys.rank) || 0;
+      } else {
+        toHitStat = (sys.toHitStat || 'dex').toLowerCase();
+        const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+        const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
+        rank = matchingSkill ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0) : (Number(sys.toHitRank ?? sys.rank) || 0);
+      }
+
+      const statMod = this.system.abilities?.[toHitStat]?.mod ?? 0;
+      const isUntrained = rank <= 0;
+
+      let roll;
+      let flavorText = '';
+      if (isUntrained) {
+        const formula = `2d20kl + ${statMod}`;
+        roll = await new Roll(formula, { mod: statMod }).evaluate();
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>Untrained Attack Check with Disadvantage</strong>: 2d20kl + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+      } else {
+        const total = rank + statMod;
+        const formula = `1d20 + ${total}`;
+        roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + Rank ${rank} + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+      }
+
       if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
         DCCSessionEngine.recordRoll({
           actor: this,
           roll,
-          type: 'attack',
+          type: isUntrained ? 'untrained_attack' : 'attack',
           name: attackItem.name,
-          isUntrained: false
+          isUntrained
         }).catch(() => {});
       }
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + Rank ${rank} + ${sys.toHitStat.toUpperCase()} Mod ${statMod})`
+        flavor: flavorText
       });
     } else {
-      const parts = this.getAttackDamageParts(attackItem);
+      const parts = this.getAttackDamageParts(attackItem, options);
       const evaluatedParts = [];
       const typedDamage = {};
 
@@ -906,6 +1316,16 @@ export class DCCActor extends Actor {
         }
       });
     }
+  }
+
+  /**
+   * Roll Skill Damage, producing an interactive CarlRPG damage card
+   * @param {Item} skillItem
+   * @param {object} [options={}]
+   * @returns {Promise<ChatMessage>}
+   */
+  async rollSkillDamage(skillItem, options = {}) {
+    return this.rollAttack(skillItem, 'damage', options);
   }
 
   /**
@@ -1350,9 +1770,20 @@ export class DCCActor extends Actor {
       }).catch(() => {});
     }
 
+    const dmgData = this.getSkillDamageData(skillItem);
+    const hasDmg = dmgData.hasDamage;
+    const dmgBtnHtml = hasDmg ? `
+      <div style="margin-top: 6px;">
+        <button type="button" class="dcc-attack-roll-btn roll-skill-dmg roll-skill-dmg-from-card" data-item-id="${skillItem.id}" data-formula="${dmgData.formula}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px;">
+          <i class="fa-solid fa-burst"></i> Roll Attack Damage (${dmgData.formulaWithStat || dmgData.formula})
+        </button>
+      </div>
+    ` : '';
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`
+      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`,
+      content: dmgBtnHtml || undefined
     });
   }
 
@@ -1365,38 +1796,60 @@ export class DCCActor extends Actor {
     const sys = spellItem?.system || {};
     const baseDmg = (sys.baseDamage || '').trim();
     if (!baseDmg || sys.spellType === 'Heal' || /health bar|resistance/i.test(baseDmg)) {
-      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '' };
+      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '', debuffs: [] };
     }
 
     const diceMatch = baseDmg.match(/(\d+)d(\d+)/i);
     const flatMatch = !diceMatch ? baseDmg.match(/^[+]?(\d+)/) : null;
 
     if (!diceMatch && !flatMatch) {
-      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '' };
+      return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '', debuffs: [] };
     }
 
     let diceStr = '';
     let sides = 0;
     let count = 0;
+    let damageType = sys.damageType || '';
+    const debuffs = [];
+
+    const rank = Number(sys.modifiedRank ?? sys.rank) || 1;
+    const rawUpgrades = sys.upgrades || {};
+    const upgrades = parseUpgrades(rawUpgrades);
 
     if (diceMatch) {
       count = parseInt(diceMatch[1], 10);
       sides = parseInt(diceMatch[2], 10);
 
-      // Check rank upgrades for bonus damage dice
-      const rank = Number(sys.rank) || 1;
-      const upgrades = sys.upgrades || {};
+      // Check rank upgrades for bonus damage dice and effects
       if (rank >= 5 && upgrades.rank5) {
         const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)/i);
         if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
+        if (/Burned Debuff/i.test(upgrades.rank5)) {
+          debuffs.push(/1\s*or\s*more\s*Health\s*Bar/i.test(upgrades.rank5) ? 'Burned (on 1+ HB loss)' : 'Burned');
+        }
       }
       if (rank >= 10 && upgrades.rank10) {
         const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)/i);
         if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
+        if (/Force and Fire/i.test(upgrades.rank10)) {
+          damageType = 'Force & Fire';
+        }
+        if (/Burned Debuff/i.test(upgrades.rank10) && !debuffs.includes('Burned')) {
+          debuffs.push('Burned');
+        }
       }
       if (rank >= 15 && upgrades.rank15) {
         const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)/i);
         if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
+        const multMatch = upgrades.rank15.match(/multiply\s+(?:the\s+)?base damage(?:\s+dice)?\s+by\s+(\d+)/i) ||
+          upgrades.rank15.match(/base damage(?:\s+dice)?\s*(?:multiplied by|[×x*])\s*(\d+)/i) ||
+          upgrades.rank15.match(/(\d+)\s*[×x*]\s*base damage/i);
+        if (multMatch) {
+          count *= parseInt(multMatch[1], 10);
+        }
+        if (/Burned Debuff/i.test(upgrades.rank15) && !debuffs.includes('Burned')) {
+          debuffs.push('Burned');
+        }
       }
       diceStr = `${count}d${sides}`;
     }
@@ -1412,10 +1865,28 @@ export class DCCActor extends Actor {
 
     const statMod = statKey && this.system.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
 
+    // Rank Damage Die scaling table
+    const rankDie = getRankDamageDie(rank);
     let formula = diceStr;
+
     if (flatMatch) {
       formula = flatMatch[1];
-    } else if (statKey) {
+      if (sys.spellType !== 'Passive') {
+        if (rankDie.dice) {
+          formula += ` + ${rankDie.dice}`;
+        } else if (rankDie.value) {
+          formula += ` + ${rankDie.value}`;
+        }
+      }
+    } else {
+      if (rankDie.dice) {
+        formula += ` + ${rankDie.dice}`;
+      } else if (rankDie.value) {
+        formula += ` + ${rankDie.value}`;
+      }
+    }
+
+    if (statKey) {
       formula += statMod >= 0 ? ` + ${statMod}` : ` - ${Math.abs(statMod)}`;
     }
 
@@ -1425,19 +1896,35 @@ export class DCCActor extends Actor {
       effects = baseDmg.split(',').slice(1).join(',').trim();
     }
 
-    const damageType = sys.damageType || '';
+    // Formulate readable formulaWithStat
+    const formulaWithStatParts = [diceStr || (flatMatch ? flatMatch[1] : '')];
+    if (rankDie.dice) {
+      formulaWithStatParts.push(rankDie.dice);
+    } else if (rankDie.value && sys.spellType !== 'Passive') {
+      formulaWithStatParts.push(String(rankDie.value));
+    }
+    if (statKey) {
+      formulaWithStatParts.push(statKey.charAt(0).toUpperCase() + statKey.slice(1));
+    }
+    const formulaWithStat = `${formulaWithStatParts.join(' + ')}${damageType ? ` ${damageType}` : ''}`.trim();
 
     return {
       hasDamage: true,
       dice: diceStr,
+      baseDice: diceStr,
+      rankDie: rankDie.dice || (rankDie.value ? String(rankDie.value) : ''),
+      rankDieObj: rankDie,
       count,
       sides,
       stat: statKey,
       statMod,
       formula,
+      formulaWithStat,
       damageType,
       effects,
-      rawBase: baseDmg
+      debuffs,
+      rawBase: baseDmg,
+      rank
     };
   }
 
@@ -1452,7 +1939,13 @@ export class DCCActor extends Actor {
     const roll = await new Roll(formula).evaluate();
 
     const damageTypeStr = dmgData.damageType ? ` (${dmgData.damageType})` : '';
-    const effectsStr = dmgData.effects || sys.limitations || '';
+    const effectsList = [];
+    if (dmgData.effects) effectsList.push(dmgData.effects);
+    if (sys.limitations) effectsList.push(sys.limitations);
+    if (dmgData.debuffs && dmgData.debuffs.length > 0) {
+      effectsList.push(`Inflicts: ${dmgData.debuffs.map(d => `<strong>[${d} Debuff]</strong>`).join(', ')}`);
+    }
+    const effectsStr = effectsList.join(' | ');
 
     const cardContent = `
       <div class="dcc-chat-card dcc-damage-card" data-attacker-id="${this.id}" data-item-id="${spellItem.id}" data-item-name="${spellItem.name}" data-damage-value="${roll.total}" data-attack-type="spell">
@@ -1489,7 +1982,8 @@ export class DCCActor extends Actor {
           itemName: spellItem.name,
           attackType: 'spell',
           damageType: dmgData.damageType || '',
-          rawDamage: roll.total
+          rawDamage: roll.total,
+          debuffs: dmgData.debuffs || []
         }
       }
     });

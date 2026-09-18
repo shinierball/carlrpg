@@ -54,3 +54,34 @@ $$\text{Total Skill Check} = \text{Modified Rank} + \text{Governing Stat Modifie
 - **Compendium Packs**: All 120+ official skills from the rulebook are preloaded in the `carl-rpg.skills` compendium pack and accessible through the **DCC Skill Library & Manager** (`open-skill-picker`).
 - **Crawler Sheet Badges**: Skills display crisp type badges (`[EDGE]`, `[BASHING]`, `[REACH]`, `[RANGED]`, `[STRIKE]`, `[HAND TO HAND]`, `[UTILITY]`) and separate item/group/boon breakdown pills.
 - **Roll Cards**: Chat cards display a full breakdown of Base, Item, Type, and Boon bonuses when rolling skill checks or viewing passive skills.
+
+---
+
+## Rank Damage Die Rules & Scaling Table
+
+Whenever rolling damage for a weapon attack, attack skill, or attack spell, the actor adds their **Rank Damage Die** based on their skill/spell rank:
+
+| Skill / Spell Rank | Rank Damage Die |
+| :--- | :--- |
+| **Rank 0** | +0 (Untrained Check with Disadvantage: `2d20kl + Stat Mod`) |
+| **Rank 1** | +1 flat bonus |
+| **Rank 2 – 3** | +1d2 |
+| **Rank 4 – 5** | +1d4 |
+| **Rank 6 – 7** | +1d6 |
+| **Rank 8 – 9** | +1d8 |
+| **Rank 10 – 13** | +1d10 |
+| **Rank 14 – 15+** | +1d12 |
+
+### Core Damage Formulas:
+- **Spell Attack Damage** = $\text{Spell Base Damage} + \text{Rank Upgrade Additions} + \text{Skill Rank Damage Die} + \text{Stat Mod}$
+- **Weapon Attack Damage** = $\text{Weapon Base Damage} + \text{Skill Rank Damage Die} + \text{Stat Mod}$
+- **Attack Skill Damage** = $\text{Skill Base Damage} + \text{Rank Upgrade Additions} + \text{Skill Rank Damage Die} + \text{Stat Mod}$
+
+### Hand-to-Hand Combos & Interactions:
+- **Unarmed Combat**: $1d4 + \text{Str Bludgeoning}$. *Cannot combine with Hand-to-Hand Damage Effects.*
+- **Pugilism**: $1d2 + \text{Str Bludgeoning}$ (to hit rolled with DEX). *Combines with Hand-to-Hand Damage Effects.*
+- **Iron Punch Combo**: Adds $+1d2$ base damage to Pugilism strike (scaling to $+2d2$ at Rank 5, $+3d2$ at Rank 10, $+4d2$ at Rank 15). At Iron Punch Rank 5+, adds an additional Iron Punch Rank Damage Die (e.g. at Rank 5, Pugilism 1d4 + Iron Punch 1d4 = 2d4 rank dice; total $4d2 + 2d4 + \text{Str Bludgeoning}$).
+- **Fire Fingers Rank 15 Passive**: Adds $+1d12\text{ Fire}$ to Pugilism, Unarmed Combat, and Slice Attack strikes.
+- **Untrained Attack Checks**: Ranks $\le 0$ roll with Disadvantage (`2d20kl + Stat Mod` vs Target Evade).
+- **Evade Target Difficulty**: $\text{Target DC} = 10 + \text{Foe DEX Mod} + \text{Floor Number}$.
+- **Skill Non-Stacking Rule**: Skill ranks from different skills do not stack together.

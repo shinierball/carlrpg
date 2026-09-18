@@ -9,10 +9,7 @@ import { DCCCombat } from '../documents/combat.mjs';
 import { DCCExperienceTracker } from './xp-tracker.mjs';
 import { DCCCombatArchiveApp } from './combat-archive.mjs';
 import { DCCSessionEngine } from './session-manager.mjs';
-
-const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
-  ?? globalThis.Application
-  ?? class {};
+import { DCCBaseApplication } from './base-application.mjs';
 
 const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
   ?? globalThis.Dialog;
@@ -669,7 +666,7 @@ export class DCCCombatMetrics {
 /**
  * The Dungeon Crawler Carl AI Combat Awards & Performance Dashboard
  */
-export class DCCCombatMetricsApp extends BaseApplication {
+export class DCCCombatMetricsApp extends DCCBaseApplication {
   constructor(options = {}) {
     super(options);
     this.selectedCombatId = options.combatId || null;

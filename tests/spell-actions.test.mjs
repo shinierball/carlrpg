@@ -44,7 +44,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(fbData.dice, '1d12');
     assert.equal(fbData.stat, 'int');
     assert.equal(fbData.statMod, 3);
-    assert.equal(fbData.formula, '1d12 + 3');
+    assert.equal(fbData.formula, '1d12 + 1 + 3');
     assert.equal(fbData.damageType, 'Fire');
     assert.ok(fbData.effects.includes('10ft Blast radius'));
 
@@ -65,7 +65,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(bbData.dice, '1d8');
     assert.equal(bbData.stat, 'cha');
     assert.equal(bbData.statMod, 2);
-    assert.equal(bbData.formula, '1d8 + 2');
+    assert.equal(bbData.formula, '1d8 + 1 + 2');
     assert.equal(bbData.damageType, 'Necrotic');
 
     // 3. Flat damage bonus without dice (Bad Faith)
@@ -139,25 +139,25 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       }
     });
 
-    // Rank 1: 1d12 + 2
+    // Rank 1: 1d12 + 1 + 2
     const r1 = crawler.getSpellDamageData(createFireballAtRank(1));
     assert.equal(r1.dice, '1d12');
-    assert.equal(r1.formula, '1d12 + 2');
+    assert.equal(r1.formula, '1d12 + 1 + 2');
 
-    // Rank 5: 2d12 + 2
+    // Rank 5: 2d12 + 1d4 + 2
     const r5 = crawler.getSpellDamageData(createFireballAtRank(5));
     assert.equal(r5.dice, '2d12');
-    assert.equal(r5.formula, '2d12 + 2');
+    assert.equal(r5.formula, '2d12 + 1d4 + 2');
 
-    // Rank 10: 3d12 + 2
+    // Rank 10: 3d12 + 1d10 + 2
     const r10 = crawler.getSpellDamageData(createFireballAtRank(10));
     assert.equal(r10.dice, '3d12');
-    assert.equal(r10.formula, '3d12 + 2');
+    assert.equal(r10.formula, '3d12 + 1d10 + 2');
 
-    // Rank 15: 4d12 + 2
+    // Rank 15: 4d12 + 1d12 + 2
     const r15 = crawler.getSpellDamageData(createFireballAtRank(15));
     assert.equal(r15.dice, '4d12');
-    assert.equal(r15.formula, '4d12 + 2');
+    assert.equal(r15.formula, '4d12 + 1d12 + 2');
   });
 
   test('rollSpellDamage generates interactive damage card with flags and action buttons', async () => {
@@ -254,7 +254,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
 
     const damageSpellMsg = await crawler.rollSpell(frostScar);
     assert.ok(damageSpellMsg.content.includes('roll-spell-dmg-from-card'), 'Cast card should embed a Roll Damage button');
-    assert.ok(damageSpellMsg.content.includes('1d4 + 3'), 'Damage button should indicate formula');
+    assert.ok(damageSpellMsg.content.includes('1d4 + 1 + 3'), 'Damage button should indicate formula');
 
     // Spell without damage
     const airBuddy = new DCCItem({

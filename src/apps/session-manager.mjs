@@ -11,10 +11,7 @@
  */
 
 import { DCCExperienceTracker } from './xp-tracker.mjs';
-
-const BaseApplication = globalThis.foundry?.appv1?.applications?.Application
-  ?? globalThis.Application
-  ?? class {};
+import { DCCBaseApplication } from './base-application.mjs';
 
 /**
  * Canonical 7-Tier Roll Outcome Definitions for CarlRPG
@@ -1107,7 +1104,7 @@ export class DCCSessionEngine {
 /**
  * Dedicated Party Progression & Session Manager Application UI
  */
-export class DCCSessionManagerApp extends BaseApplication {
+export class DCCSessionManagerApp extends DCCBaseApplication {
   constructor(options = {}) {
     super(options);
     this.activeTab = options.tab || 'party';

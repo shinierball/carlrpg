@@ -1,3 +1,21 @@
+## 2.0.15
+
+### Attack Rolling from Skills Table & Interactive Chat Damage Execution
+
+- **Skills Table Attack Rolling Integration (`src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page3-skills.hbs`)**:
+  - Clicking the roll icon (`.roll-skill`) for an attack or combat skill on the Skills page (Page 3) now rolls **To Hit vs Target Evade** via `actor.rollAttack(item, 'hit')`, identically to attacks rolled from the first-page attacks table or the hotlist.
+  - Automatically identifies attack skills based on damage capabilities (`hasDamage`), `checkType` containing "attack", attack types (`Edge`, `Bashing`, `Reach`, `Ranged`, `Strike`, `Hand to Hand`), or category `Combat`.
+  - Non-attack utility skills continue to roll standard stat/skill checks via `actor.rollSkill(item)`.
+  - Updated button tooltips dynamically: Attack skills display `Roll Attack (To Hit): 1d20 + Rank [X] + [Mod] vs Target Evade`, while utility skills display `Roll Skill Check: 1d20 + Total [X] | Modified Rank: [Y]`.
+- **Chat Damage Roll Button & Dice Evaluation Fix (`src/documents/actor.mjs`, `src/dcc.mjs`)**:
+  - Preserved Foundry VTT core dice roll rendering (`roll.render()`) when including interactive action buttons in message content, resolving an issue where only calculation flavor was shown without dice boxes.
+  - Embedded `data-actor-id`, `data-item-id`, and `data-skill-id` attributes on chat card damage buttons.
+  - Implemented event delegation handler for `.roll-skill-dmg-from-card, .roll-attack-dmg-from-card` in `onRenderChatMessage` (`renderChatMessageHTML` / `renderChatMessage`), enabling players to click the **[ 💥 Roll Attack Damage ]** button directly from the chat card to roll damage and post full typed damage cards with token target application.
+  - Updated `getSkillDamageData` to accurately return `hasDamage: false` for non-combat utility skills lacking damage formulas or dice.
+- **Automated Test Suite (`tests/skills-attack-roll.test.mjs`, `tests/setup.mjs`)**:
+  - Added full test suite verifying skill classification, attack roll routing from the sheet, dice roll rendering, chat card button delegation, and damage card generation.
+  - Enhanced headless test harness `MockRoll.prototype.evaluate` with `.render()` support mirroring Foundry VTT core.
+
 ## 2.0.14
 
 ### Official DCC RPG Rank Damage Die & Damage Rules Integration

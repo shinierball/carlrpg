@@ -116,9 +116,15 @@
               {{/if}}
             </td>
             <td style="text-align: center; white-space: nowrap;">
-              <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check: 1d20 + Total ({{skill.totalSkillStr}}) | Modified Rank: {{skill.modifiedRank}}" style="font-size: 10px; padding: 2px 6px;">
-                <i class="fa-solid fa-dice-d20"></i>
-              </button>
+              {{#if skill.isAttack}}
+                <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Attack (To Hit): 1d20 + Rank {{skill.modifiedRank}} + {{skill.statModStr}} vs Target Evade" style="font-size: 10px; padding: 2px 6px;">
+                  <i class="fa-solid fa-dice-d20"></i>
+                </button>
+              {{else}}
+                <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check: 1d20 + Total ({{skill.totalSkillStr}}) | Modified Rank: {{skill.modifiedRank}}" style="font-size: 10px; padding: 2px 6px;">
+                  <i class="fa-solid fa-dice-d20"></i>
+                </button>
+              {{/if}}
               {{#if skill.hasDamage}}
                 <button type="button" class="dcc-attack-roll-btn roll-skill-dmg" data-tooltip="Roll Attack Damage: {{skill.damageFormulaWithStat}}" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff; margin-left: 2px;">
                   <i class="fa-solid fa-burst"></i>

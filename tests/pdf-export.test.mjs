@@ -37,16 +37,16 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
           classAbilities: 'Primal Rage: Double melee damage when below 25% HP\nBarefoot Brawler: +2 to-hit and +3 damage when unarmored on feet\nEarthquake Stomp: 10ft shockwave'
         },
         abilities: {
-          str: { value: 20, unenhanced: 16, mod: 4 },
-          int: { value: 14, unenhanced: 14, mod: 1 },
-          con: { value: 18, unenhanced: 18, mod: 3 },
-          dex: { value: 16, unenhanced: 14, mod: 2 },
-          cha: { value: 12, unenhanced: 12, mod: 0 }
+          str: { value: 50, unenhanced: 45, mod: 6 },
+          int: { value: 24, unenhanced: 20, mod: 5 },
+          con: { value: 14, unenhanced: 14, mod: 4 },
+          dex: { value: 8, unenhanced: 8, mod: 3 },
+          cha: { value: 4, unenhanced: 4, mod: 2 }
         },
         attributes: {
-          hp: { value: 60, max: 60, pct: 100 },
-          mana: { value: 18, max: 20 },
-          evade: { buffs: 2, total: 14 },
+          hp: { value: 40, max: 40, pct: 100 },
+          mana: { value: 18, max: 24 },
+          evade: { buffs: 2, total: 5 },
           dr: { armor: 4, buffs: 2, total: 6 },
           speed: { move: 25, step: 10 },
           aiFavor: 8,
@@ -112,12 +112,12 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
         {
           type: 'attack',
           name: 'Primal Punch',
-          system: { rank: 5, toHitMod: 4, damageDice: '2d6', damageMod: 4, effects: 'Knockback 5ft' }
+          system: { rank: 5, toHitMod: 6, damageDice: '2d6', damageMod: 6, effects: 'Knockback 5ft' }
         },
         {
           type: 'attack',
           name: 'Thunderous Stomp',
-          system: { rank: 4, toHitMod: 4, damageDice: '1d10', damageMod: 4, effects: 'Stun DC 14' }
+          system: { rank: 4, toHitMod: 6, damageDice: '1d10', damageMod: 6, effects: 'Stun DC 14' }
         },
         {
           type: 'attack',
@@ -128,22 +128,22 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
         {
           type: 'skill',
           name: 'Brawling',
-          system: { rank: 5, stat: 'str', statMod: 4, checkType: 'Attack', description: 'Unarmed melee mastery' }
+          system: { rank: 5, stat: 'str', statMod: 6, checkType: 'Attack', description: 'Unarmed melee mastery' }
         },
         {
           type: 'skill',
           name: 'Athletics',
-          system: { rank: 4, stat: 'str', statMod: 4, checkType: 'Physical', description: 'Climbing and jumping' }
+          system: { rank: 4, stat: 'str', statMod: 6, checkType: 'Physical', description: 'Climbing and jumping' }
         },
         {
           type: 'skill',
           name: 'Acrobatics',
-          system: { rank: 3, stat: 'dex', statMod: 2, checkType: 'Agility', description: 'Tumbling and balance' }
+          system: { rank: 3, stat: 'dex', statMod: 3, checkType: 'Agility', description: 'Tumbling and balance' }
         },
         {
           type: 'skill',
           name: 'Demolitions',
-          system: { rank: 4, stat: 'int', statMod: 1, checkType: 'Utility', description: 'Crafting explosive charges' }
+          system: { rank: 4, stat: 'int', statMod: 5, checkType: 'Utility', description: 'Crafting explosive charges' }
         },
         // Known Spells (appended to Skills table on Page 3)
         {
@@ -222,35 +222,35 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     assert.equal(form.getTextField('Floor').getText(), '4th Floor (The Iron Tangle)');
 
     // Ability scores (STR, INT, CON, DEX, CHA)
-    assert.equal(form.getTextField('Text Field 21').getText(), '20', 'STR Enhanced');
-    assert.equal(form.getTextField('Text Field 22').getText(), '16', 'STR Unenhanced');
-    assert.equal(form.getTextField('Text Field 23').getText(), '+4', 'STR Mod');
+    assert.equal(form.getTextField('Text Field 21').getText(), '50', 'STR Enhanced');
+    assert.equal(form.getTextField('Text Field 22').getText(), '45', 'STR Unenhanced');
+    assert.equal(form.getTextField('Text Field 23').getText(), '+6', 'STR Mod');
 
-    assert.equal(form.getTextField('Text Field 34').getText(), '14', 'INT Enhanced');
-    assert.equal(form.getTextField('Text Field 35').getText(), '14', 'INT Unenhanced');
-    assert.equal(form.getTextField('Text Field 36').getText(), '+1', 'INT Mod');
+    assert.equal(form.getTextField('Text Field 34').getText(), '24', 'INT Enhanced');
+    assert.equal(form.getTextField('Text Field 35').getText(), '20', 'INT Unenhanced');
+    assert.equal(form.getTextField('Text Field 36').getText(), '+5', 'INT Mod');
 
-    assert.equal(form.getTextField('Text Field 43').getText(), '18', 'CON Enhanced');
-    assert.equal(form.getTextField('Text Field 45').getText(), '+3', 'CON Mod');
+    assert.equal(form.getTextField('Text Field 43').getText(), '14', 'CON Enhanced');
+    assert.equal(form.getTextField('Text Field 45').getText(), '+4', 'CON Mod');
 
-    assert.equal(form.getTextField('Text Field 46').getText(), '16', 'DEX Enhanced');
-    assert.equal(form.getTextField('Text Field 48').getText(), '+2', 'DEX Mod');
+    assert.equal(form.getTextField('Text Field 46').getText(), '8', 'DEX Enhanced');
+    assert.equal(form.getTextField('Text Field 48').getText(), '+3', 'DEX Mod');
 
-    assert.equal(form.getTextField('Text Field 49').getText(), '12', 'CHA Enhanced');
-    assert.equal(form.getTextField('Text Field 51').getText(), '+0', 'CHA Mod');
+    assert.equal(form.getTextField('Text Field 49').getText(), '4', 'CHA Enhanced');
+    assert.equal(form.getTextField('Text Field 51').getText(), '+2', 'CHA Mod');
 
     // Health Bar (10% to 100% capacity and check state)
-    // Each of the 10 boxes displays the CON Mod (e.g. 3 for Carl), with checkboxes left blank for play
-    assert.equal(form.getTextField('10').getText(), '3', '10% box displays CON Mod 3');
-    assert.equal(form.getTextField('50').getText(), '3', '50% box displays CON Mod 3');
-    assert.equal(form.getTextField('100').getText(), '3', '100% box displays CON Mod 3');
+    // Each of the 10 boxes displays the CON Mod (e.g. 4 for Carl), with checkboxes left blank for play
+    assert.equal(form.getTextField('10').getText(), '4', '10% box displays CON Mod 4');
+    assert.equal(form.getTextField('50').getText(), '4', '50% box displays CON Mod 4');
+    assert.equal(form.getTextField('100').getText(), '4', '100% box displays CON Mod 4');
     assert.equal(form.getCheckBox('Check Box6 2').isChecked(), false, '10% checkbox is unchecked');
     assert.equal(form.getCheckBox('Check Box6 1 8').isChecked(), false, '100% checkbox is unchecked');
 
     // Evade and Damage Resistance
-    assert.equal(form.getTextField('Text Field 24').getText(), '+2', 'Evade DEX mod');
+    assert.equal(form.getTextField('Text Field 24').getText(), '+3', 'Evade DEX mod');
     assert.equal(form.getTextField('Text Field 25').getText(), '2', 'Evade Buffs');
-    assert.equal(form.getTextField('Text Field 26').getText(), '14', 'Evade Total');
+    assert.equal(form.getTextField('Text Field 26').getText(), '5', 'Evade Total');
     assert.equal(form.getTextField('Text Field 27').getText(), '25', 'Speed Move');
     assert.equal(form.getTextField('Text Field 28').getText(), '10', 'Speed Step');
 
@@ -261,7 +261,7 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     assert.equal(form.getTextField('Text Field 33').getText(), 'Medium', 'Size');
 
     // Mana & Debuffs & External Buffs
-    assert.equal(form.getTextField('Text Field 38').getText(), '20', 'Max Mana');
+    assert.equal(form.getTextField('Text Field 38').getText(), '24', 'Max Mana');
     assert.equal(form.getTextField('Text Field 37').getText(), '18', 'Current Mana');
     assert.equal(form.getTextField('Text Field 39').getText(), 'Slightly Singed (-1 DR)');
     assert.equal(form.getTextField('Text Field 40').getText(), 'Iron Skin (+2 DR)');
@@ -271,9 +271,9 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     // Attacks (Row 1 & Row 2)
     assert.equal(form.getTextField('Text Field 55').getText(), 'Primal Punch');
     assert.equal(form.getTextField('Text Field 551').getText(), '5', 'Attack 1 Rank');
-    assert.equal(form.getTextField('Text Field 52').getText(), '+4', 'Attack 1 to-hit mod');
+    assert.equal(form.getTextField('Text Field 52').getText(), '+6', 'Attack 1 to-hit mod');
     assert.equal(form.getTextField('Text Field 53').getText(), '2d6', 'Attack 1 damage dice');
-    assert.equal(form.getTextField('Text Field 54').getText(), '+4', 'Attack 1 damage mod');
+    assert.equal(form.getTextField('Text Field 54').getText(), '+6', 'Attack 1 damage mod');
     assert.equal(form.getTextField('Text Field 56').getText(), 'Knockback 5ft');
 
     assert.equal(form.getTextField('Text Field 61').getText(), 'Thunderous Stomp');
@@ -316,7 +316,7 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     // Skill 1: Brawling
     assert.equal(form.getTextField('Text Field 103').getText(), 'Brawling');
     assert.equal(form.getTextField('Text Field 104').getText(), '5');
-    assert.equal(form.getTextField('Text Field 105').getText(), 'STR +4');
+    assert.equal(form.getTextField('Text Field 105').getText(), 'STR +6');
     assert.equal(form.getTextField('Text Field 106').getText(), 'Attack');
     assert.equal(form.getTextField('Text Field 107').getText(), 'Unarmed melee mastery');
     assert.equal(form.getCheckBox('Check Box 1').isChecked(), true);
@@ -324,23 +324,23 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     // Skill 2: Athletics
     assert.equal(form.getTextField('Text Field 109').getText(), 'Athletics');
     assert.equal(form.getTextField('Text Field 110').getText(), '4');
-    assert.equal(form.getTextField('Text Field 111').getText(), 'STR +4');
+    assert.equal(form.getTextField('Text Field 111').getText(), 'STR +6');
     assert.equal(form.getTextField('Text Field 112').getText(), 'Physical');
     assert.equal(form.getCheckBox('Check Box 2').isChecked(), true);
 
     // Skill 3: Acrobatics
     assert.equal(form.getTextField('Text Field 115').getText(), 'Acrobatics');
-    assert.equal(form.getTextField('Text Field 117').getText(), 'DEX +2');
+    assert.equal(form.getTextField('Text Field 117').getText(), 'DEX +3');
 
     // Skill 4: Demolitions
     assert.equal(form.getTextField('Text Field 121').getText(), 'Demolitions');
     assert.equal(form.getTextField('Text Field 122').getText(), '4');
-    assert.equal(form.getTextField('Text Field 123').getText(), 'INT +1');
+    assert.equal(form.getTextField('Text Field 123').getText(), 'INT +5');
 
     // Appended Spell 1 (Row 4): Magic Missile
     assert.equal(form.getTextField('Text Field 127').getText(), 'Magic Missile');
     assert.equal(form.getTextField('Text Field 128').getText(), '3');
-    assert.equal(form.getTextField('Text Field 129').getText(), 'INT +1');
+    assert.equal(form.getTextField('Text Field 129').getText(), 'INT +5');
     assert.equal(form.getTextField('Text Field 130').getText(), 'Spell: Attack (4 MP)');
     assert.match(form.getTextField('Text Field 131').getText(), /3d6 Magic/);
     assert.equal(form.getCheckBox('Check Box 5').isChecked(), true);
@@ -348,7 +348,7 @@ describe('DCC RPG Fillable Character Sheet PDF Export', () => {
     // Appended Spell 2 (Row 5): Heal
     assert.equal(form.getTextField('Text Field 133').getText(), 'Heal');
     assert.equal(form.getTextField('Text Field 134').getText(), '2');
-    assert.equal(form.getTextField('Text Field 135').getText(), 'CHA +0');
+    assert.equal(form.getTextField('Text Field 135').getText(), 'CHA +2');
     assert.equal(form.getTextField('Text Field 136').getText(), 'Spell: Healing (2 MP)');
     assert.match(form.getTextField('Text Field 137').getText(), /2 Health Bar slots/);
     assert.equal(form.getCheckBox('Check Box 6').isChecked(), true);

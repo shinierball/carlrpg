@@ -53,7 +53,9 @@ $$\text{Total Skill Check} = \text{Modified Rank} + \text{Governing Stat Modifie
 
 - **Compendium Packs**: All 120+ official skills from the rulebook are preloaded in the `carl-rpg.skills` compendium pack and accessible through the **DCC Skill Library & Manager** (`open-skill-picker`).
 - **Crawler Sheet Badges**: Skills display crisp type badges (`[EDGE]`, `[BASHING]`, `[REACH]`, `[RANGED]`, `[STRIKE]`, `[HAND TO HAND]`, `[UTILITY]`) and separate item/group/boon breakdown pills.
-- **Roll Cards**: Chat cards display a full breakdown of Base, Item, Type, and Boon bonuses when rolling skill checks or viewing passive skills.
+- **Attack Skill Rolling**: Clicking the `.roll-skill` icon on an attack/combat skill directly rolls **To Hit vs Target Evade** (`actor.rollAttack(item, 'hit')`), matching the attacks tab and hotlist behaviors. Non-combat utility skills roll standard skill checks (`actor.rollSkill(item)`).
+- **Inline Burst Damage Button**: Attack skills with damage feature a dedicated `.roll-skill-dmg` burst button next to the d20 roll icon for rolling damage directly from the sheet.
+- **Interactive Chat Damage Cards**: To-Hit and skill roll cards embed a **[ 💥 Roll Attack Damage ]** button. Clicking the button from chat calculates multi-typed damage, includes Rank Damage Dice, and renders an interactive CarlRPG damage card with target application buttons (`Apply to Target(s)`, `Half`, `Ignore DR`, `Crit`).
 
 ---
 

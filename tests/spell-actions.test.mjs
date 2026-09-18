@@ -12,11 +12,11 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       type: 'crawler',
       system: {
         abilities: {
-          int: { mod: 3 },
-          cha: { mod: 2 },
-          con: { mod: 1 },
-          dex: { mod: 4 },
-          str: { mod: 0 }
+          int: { value: 24, mod: 5 },
+          cha: { value: 16, mod: 4 },
+          con: { value: 8, mod: 3 },
+          dex: { value: 4, mod: 2 },
+          str: { value: 2, mod: 1 }
         }
       }
     });
@@ -43,8 +43,8 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(fbData.hasDamage, true);
     assert.equal(fbData.dice, '1d12');
     assert.equal(fbData.stat, 'int');
-    assert.equal(fbData.statMod, 3);
-    assert.equal(fbData.formula, '1d12 + 1 + 3');
+    assert.equal(fbData.statMod, 5);
+    assert.equal(fbData.formula, '1d12 + 1 + 5');
     assert.equal(fbData.damageType, 'Fire');
     assert.ok(fbData.effects.includes('10ft Blast radius'));
 
@@ -64,8 +64,8 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(bbData.hasDamage, true);
     assert.equal(bbData.dice, '1d8');
     assert.equal(bbData.stat, 'cha');
-    assert.equal(bbData.statMod, 2);
-    assert.equal(bbData.formula, '1d8 + 1 + 2');
+    assert.equal(bbData.statMod, 4);
+    assert.equal(bbData.formula, '1d8 + 1 + 4');
     assert.equal(bbData.damageType, 'Necrotic');
 
     // 3. Flat damage bonus without dice (Bad Faith)
@@ -118,7 +118,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 2 } }
+        abilities: { int: { value: 16, mod: 4 } }
       }
     });
 
@@ -139,25 +139,25 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       }
     });
 
-    // Rank 1: 1d12 + 1 + 2
+    // Rank 1: 1d12 + 1 + 4
     const r1 = crawler.getSpellDamageData(createFireballAtRank(1));
     assert.equal(r1.dice, '1d12');
-    assert.equal(r1.formula, '1d12 + 1 + 2');
+    assert.equal(r1.formula, '1d12 + 1 + 4');
 
-    // Rank 5: 2d12 + 1d4 + 2
+    // Rank 5: 2d12 + 1d4 + 4
     const r5 = crawler.getSpellDamageData(createFireballAtRank(5));
     assert.equal(r5.dice, '2d12');
-    assert.equal(r5.formula, '2d12 + 1d4 + 2');
+    assert.equal(r5.formula, '2d12 + 1d4 + 4');
 
-    // Rank 10: 3d12 + 1d10 + 2
+    // Rank 10: 3d12 + 1d10 + 4
     const r10 = crawler.getSpellDamageData(createFireballAtRank(10));
     assert.equal(r10.dice, '3d12');
-    assert.equal(r10.formula, '3d12 + 1d10 + 2');
+    assert.equal(r10.formula, '3d12 + 1d10 + 4');
 
-    // Rank 15: 4d12 + 1d12 + 2
+    // Rank 15: 4d12 + 1d12 + 4
     const r15 = crawler.getSpellDamageData(createFireballAtRank(15));
     assert.equal(r15.dice, '4d12');
-    assert.equal(r15.formula, '4d12 + 1d12 + 2');
+    assert.equal(r15.formula, '4d12 + 1d12 + 4');
   });
 
   test('rollSpellDamage generates interactive damage card with flags and action buttons', async () => {
@@ -165,7 +165,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 3 } }
+        abilities: { int: { value: 16, mod: 4 } }
       }
     });
 
@@ -204,7 +204,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 4 } }
+        abilities: { int: { value: 16, mod: 4 } }
       }
     });
 
@@ -233,7 +233,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 3 } },
+        abilities: { int: { value: 16, mod: 4 } },
         attributes: { mana: { value: 20, max: 20 } }
       }
     });
@@ -254,7 +254,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
 
     const damageSpellMsg = await crawler.rollSpell(frostScar);
     assert.ok(damageSpellMsg.content.includes('roll-spell-dmg-from-card'), 'Cast card should embed a Roll Damage button');
-    assert.ok(damageSpellMsg.content.includes('1d4 + 1 + 3'), 'Damage button should indicate formula');
+    assert.ok(damageSpellMsg.content.includes('1d4 + 1 + 4'), 'Damage button should indicate formula');
 
     // Spell without damage
     const airBuddy = new DCCItem({
@@ -277,7 +277,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Carl',
       type: 'crawler',
       system: {
-        abilities: { cha: { mod: 2 } }
+        abilities: { cha: { value: 14, mod: 4 } }
       }
     });
 
@@ -316,7 +316,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       name: 'Mage Carl',
       type: 'crawler',
       system: {
-        abilities: { int: { mod: 3 } }
+        abilities: { int: { value: 16, mod: 4 } }
       }
     });
 
@@ -427,7 +427,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       }
     });
 
-    const cantrip = new DCCItem({
+    const zeroCostSpell = new DCCItem({
       name: 'Dirt Clod',
       type: 'spell',
       system: {
@@ -437,7 +437,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
       }
     }, crawler);
 
-    const msg = await crawler.rollSpell(cantrip);
+    const msg = await crawler.rollSpell(zeroCostSpell);
     assert.ok(msg);
     assert.equal(crawler.system.attributes.mana.value, 0);
     assert.equal(msg.flags['carl-rpg'].spellSuccess, true);

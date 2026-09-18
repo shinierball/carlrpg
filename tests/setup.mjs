@@ -1223,6 +1223,7 @@ if (!globalThis.Roll) {
       return {
         formula: this.formula,
         total,
+        render: async () => `<div class="dice-roll"><div class="dice-result"><div class="dice-formula">${this.formula}</div><h4 class="dice-total">${total}</h4></div></div>`,
         toMessage: async (opts = {}) => ({
           formula: this.formula,
           total,

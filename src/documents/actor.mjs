@@ -681,6 +681,32 @@ export class DCCActor extends Actor {
       }
     }
 
+    const skillType = sys.skillType || sys.type || '';
+    const checkType = (sys.checkType || '').toLowerCase();
+    const isCombatSkill = /combat/i.test(sys.category || '') ||
+      ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
+      checkType.includes('attack') ||
+      /pugilism|unarmed combat/i.test(skillName);
+
+    const hasExplicitDamage = Boolean(rawBaseDamage || diceMatch || textToSearch.match(/(\d+)d(\d+)/i) || /base damage/i.test(textToSearch));
+
+    if (!isCombatSkill && !hasExplicitDamage) {
+      return {
+        hasDamage: false,
+        skillName,
+        rank,
+        baseDice: '',
+        baseCount: 0,
+        baseSides: 0,
+        stat: statKey,
+        statMod: this.system?.abilities?.[statKey]?.mod ?? 0,
+        damageType: '',
+        formula: '',
+        formulaWithStat: '',
+        rawNotes
+      };
+    }
+
     // Ensure statKey is valid ability on this actor
     if (!this.system?.abilities?.[statKey]) {
       statKey = (sys.stat || 'str').toLowerCase();
@@ -1191,9 +1217,49 @@ export class DCCActor extends Actor {
           isUntrained
         }).catch(() => {});
       }
+
+      let dmgBtnHtml = '';
+      let dmgFormula = '';
+      if (attackItem.type === 'skill') {
+        const dmgData = this.getSkillDamageData(attackItem);
+        if (dmgData.hasDamage) {
+          dmgFormula = dmgData.formulaWithStat || dmgData.formula;
+        }
+      } else if (attackItem.type === 'spell') {
+        const dmgData = this.getSpellDamageData(attackItem);
+        if (dmgData.hasDamage) {
+          dmgFormula = dmgData.formulaWithStat || dmgData.formula;
+        }
+      } else {
+        const parts = this.getAttackDamageParts(attackItem, options);
+        if (parts.length > 0) {
+          const pFormulas = parts.map(p => {
+            const dice = p.dice || '';
+            const mod = p.statMod ? (p.statMod >= 0 ? `+${p.statMod}` : `${p.statMod}`) : '';
+            const val = p.value ? (p.value >= 0 ? `+${p.value}` : `${p.value}`) : '';
+            return [dice, mod, val].filter(Boolean).join(' ');
+          }).filter(Boolean);
+          dmgFormula = pFormulas.join(' + ');
+        }
+      }
+
+      if (dmgFormula) {
+        dmgBtnHtml = `
+          <div style="margin-top: 6px;">
+            <button type="button" class="dcc-attack-roll-btn roll-attack-dmg-from-card roll-skill-dmg-from-card" data-actor-id="${this.id}" data-item-id="${attackItem.id}" data-skill-id="${attackItem.id}" data-item-type="${attackItem.type || 'attack'}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif);">
+              <i class="fa-solid fa-burst"></i> Roll Attack Damage (${dmgFormula})
+            </button>
+          </div>
+        `;
+      }
+
+      const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
+      const content = rollHtml ? `${rollHtml}${dmgBtnHtml}` : (dmgBtnHtml || undefined);
+
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
-        flavor: flavorText
+        flavor: flavorText,
+        content
       });
     } else {
       const parts = this.getAttackDamageParts(attackItem, options);
@@ -1774,16 +1840,19 @@ export class DCCActor extends Actor {
     const hasDmg = dmgData.hasDamage;
     const dmgBtnHtml = hasDmg ? `
       <div style="margin-top: 6px;">
-        <button type="button" class="dcc-attack-roll-btn roll-skill-dmg roll-skill-dmg-from-card" data-item-id="${skillItem.id}" data-formula="${dmgData.formula}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px;">
+        <button type="button" class="dcc-attack-roll-btn roll-skill-dmg roll-skill-dmg-from-card" data-actor-id="${this.id}" data-item-id="${skillItem.id}" data-skill-id="${skillItem.id}" data-item-type="skill" data-formula="${dmgData.formula}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif);">
           <i class="fa-solid fa-burst"></i> Roll Attack Damage (${dmgData.formulaWithStat || dmgData.formula})
         </button>
       </div>
     ` : '';
 
+    const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
+    const content = rollHtml ? `${rollHtml}${dmgBtnHtml}` : (dmgBtnHtml || undefined);
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
       flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`,
-      content: dmgBtnHtml || undefined
+      content
     });
   }
 

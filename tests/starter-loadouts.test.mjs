@@ -262,11 +262,11 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
       type: 'crawler',
       system: {
         abilities: {
-          con: { value: 10, mod: 4 }, // 4 HP per bar, 10 bars = 40 max HP
+          con: { value: 20, mod: 5 }, // 5 HP per bar, 10 bars = 50 max HP
           int: { value: 10, mod: 4 }
         },
         attributes: {
-          hp: { value: 20, max: 40, temp: 0, pct: 50 },
+          hp: { value: 25, max: 50, temp: 0, pct: 50 },
           mana: { value: 10, max: 10, pct: 100 }
         }
       }
@@ -287,11 +287,11 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
 
     crawler.items = [healSpell];
 
-    // Cast Heal (should heal 2 bars * 4 HP/bar = 8 HP)
+    // Cast Heal (should heal 2 bars * 5 HP/bar = 10 HP)
     const chatMsg = await crawler.rollSpell(healSpell);
 
     assert.equal(crawler.system.attributes.mana.value, 8, 'Mana should reduce by 2 from 10 to 8');
-    assert.equal(crawler.system.attributes.hp.value, 28, 'HP should increase by 8 from 20 to 28 (2 bars of 4 HP)');
+    assert.equal(crawler.system.attributes.hp.value, 35, 'HP should increase by 10 from 25 to 35 (2 bars of 5 HP)');
     assert.equal(crawler.system.attributes.hp.pct, 70, 'HP percentage should update to 70%');
 
     const flags = chatMsg.flags?.['carl-rpg'];
@@ -300,10 +300,10 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
     assert.equal(flags?.isHeal, true);
     assert.equal(flags?.healInfo?.target, 'self', 'Target must be self only');
     assert.equal(flags?.healInfo?.barsToHeal, 2);
-    assert.equal(flags?.healInfo?.actualHealed, 8);
-    assert.equal(flags?.healInfo?.newHp, 28);
+    assert.equal(flags?.healInfo?.actualHealed, 10);
+    assert.equal(flags?.healInfo?.newHp, 35);
 
-    assert.ok(chatMsg.content.includes('Healed +8 HP'), 'Chat card should display actual HP healed');
+    assert.ok(chatMsg.content.includes('Healed +10 HP'), 'Chat card should display actual HP healed');
     assert.ok(chatMsg.content.includes('up to 2 Health Bar slots'), 'Chat card should state 2 Health Bar slots');
     assert.ok(chatMsg.content.includes('Self only'), 'Chat card should indicate Self only target');
   });
@@ -314,11 +314,11 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
       type: 'crawler',
       system: {
         abilities: {
-          con: { value: 10, mod: 4 }, // 4 HP per bar, 40 max HP
+          con: { value: 20, mod: 5 }, // 5 HP per bar, 50 max HP
           int: { value: 10, mod: 4 }
         },
         attributes: {
-          hp: { value: 37, max: 40, temp: 0, pct: 93 },
+          hp: { value: 47, max: 50, temp: 0, pct: 94 },
           mana: { value: 6, max: 10, pct: 60 }
         }
       }
@@ -337,16 +337,16 @@ test('DCC RPG - Level 1 Starter Combat Loadouts & Universal Heal Spell', async (
       }
     }, crawler);
 
-    // 2 bars would be 8 HP, but only 3 HP needed to reach max 40 HP
+    // 2 bars would be 10 HP, but only 3 HP needed to reach max 50 HP
     const chatMsg = await crawler.rollSpell(healSpell);
 
-    assert.equal(crawler.system.attributes.hp.value, 40, 'HP must cap at max HP 40');
+    assert.equal(crawler.system.attributes.hp.value, 50, 'HP must cap at max HP 50');
     assert.equal(crawler.system.attributes.hp.pct, 100, 'HP percentage should be 100%');
     assert.equal(crawler.system.attributes.mana.value, 4, 'Mana reduced from 6 to 4');
 
     const flags = chatMsg.flags?.['carl-rpg'];
     assert.equal(flags?.healInfo?.actualHealed, 3, 'Actual healed must be 3 HP');
-    assert.equal(flags?.healInfo?.newHp, 40);
+    assert.equal(flags?.healInfo?.newHp, 50);
   });
 
   await t.test('10. Casting Heal at full health heals 0 HP and does not exceed max HP', async () => {

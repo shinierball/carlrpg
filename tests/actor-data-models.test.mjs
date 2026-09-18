@@ -41,7 +41,7 @@ test('Actor System Data Models (Phase 2)', async (t) => {
       assert.ok(model.abilities[stat], `Ability ${stat} exists`);
       assert.strictEqual(model.abilities[stat].value, 10);
       assert.strictEqual(model.abilities[stat].unenhanced, 10);
-      assert.strictEqual(model.abilities[stat].mod, 0);
+      assert.strictEqual(model.abilities[stat].mod, 4);
     }
 
     // Base attributes
@@ -111,9 +111,9 @@ test('Actor System Data Models (Phase 2)', async (t) => {
       type: 'crawler',
       system: {
         abilities: {
-          str: { unenhanced: 10, value: 10 },
-          con: { unenhanced: 10, value: 10 },
-          dex: { unenhanced: 10, value: 10 }
+          str: { unenhanced: 15, value: 15 },
+          con: { unenhanced: 4, value: 4 },
+          dex: { unenhanced: 8, value: 8 }
         },
         attributes: {
           externalBuffs: { buff1: 'buff-str', buff2: '', buff3: '' }
@@ -147,19 +147,19 @@ test('Actor System Data Models (Phase 2)', async (t) => {
 
     actor.prepareData();
 
-    // STR: unenhanced 10 + gear 4 + buff 2 = 16 (mod: 4)
+    // STR: unenhanced 15 + gear 4 + buff 2 = 21 (mod: 5)
     assert.strictEqual(actor.system.abilities.str.gearBonus, 4);
     assert.strictEqual(actor.system.abilities.str.buffBonus, 2);
-    assert.strictEqual(actor.system.abilities.str.value, 16);
-    assert.strictEqual(actor.system.abilities.str.mod, 4);
+    assert.strictEqual(actor.system.abilities.str.value, 21);
+    assert.strictEqual(actor.system.abilities.str.mod, 5);
 
     // DR: 2 from gear
     assert.strictEqual(actor.system.attributes.dr.items, 2);
     assert.strictEqual(actor.system.attributes.dr.total, 2);
 
-    // Evade: DEX mod 4 + 1 from gear = 5
+    // Evade: DEX mod 3 + 1 from gear = 4
     assert.strictEqual(actor.system.attributes.evade.items, 1);
-    assert.strictEqual(actor.system.attributes.evade.total, 5);
+    assert.strictEqual(actor.system.attributes.evade.total, 4);
   });
 
   await t.test('5. Skill Cascading & Generic Weapon Group Bonuses', async () => {

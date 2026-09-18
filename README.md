@@ -61,7 +61,10 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - Automatically factors into Spell Attack Damage, Weapon Attack Damage, and Attack Skill Damage formulas alongside governing ability modifiers and rank upgrades.
   - **Hand-to-Hand Damage Effects & Combinations**: Unarmed Combat ($1d4 + \text{Str}$) cannot combine with Hand-to-Hand damage effects, whereas Pugilism ($1d2 + \text{Str}$, DEX to hit) combines with Iron Punch (adding $+1d2$ base damage, scaling to $+2d2$ at R5, $+3d2$ at R10, $+4d2$ at R15, and adding a secondary Iron Punch rank damage die at Rank 5+ for $4d2 + 2d4 + \text{Str}$).
   - **Fire Fingers Rank 15 Passive**: Automatically adds $+1d12\text{ Fire}$ damage to Pugilism, Unarmed Combat, and Slice Attack.
-  - **Interactive Damage Cards & Roll Buttons**: Skills on Page 3 embed inline Roll Attack Damage buttons with dynamic tooltips and formula previews.
+  - **Attack Skill Rolling & Interactive Damage Execution**:
+    - Clicking the roll icon on Page 3 (Skills) for any attack skill rolls **To Hit vs Target Evade** identically to attacks in the hotlist and attacks section. Non-combat utility skills roll standard skill checks.
+    - Inline `.roll-skill-dmg` burst buttons allow rolling damage directly from the skills table.
+    - Embedded `[ 💥 Roll Attack Damage ]` buttons on chat cards allow players to click directly from chat to roll multi-typed damage and apply damage to targeted tokens with one click.
 - **Multi-Modifier Buffs & Debuffs**:
   - Create buffs with multiple stat bonuses (e.g. +2 STR, +2 DEX) and multiple damage/defense modifiers (damage multipliers, bonus typed damage, resistances, immunities, and Temp HP).
   - Create debuffs with multiple stat penalties (-2 STR, -4 CON) and multi-typed incoming damage reductions.

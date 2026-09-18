@@ -20,6 +20,24 @@ This document defines the core directives, workflow rules, architecture standard
      ```
    - **You are NOT done until all tests pass with 0 failures.** If any test fails, diagnose the root cause, fix the issue, and rerun until 100% passing.
 
+4. **Strict CarlRPG Mechanics — Absolutely No D&D Math, D&D Spell Descriptions, or D&D Rules**:
+   - **Never use D&D math `(score - 10) / 2`** or standard D&D stat modifier tables under any circumstances.
+   - Always use the official Dungeon Crawler Carl RPG stat modifier table (`getDCCStatModifier`):
+     - $\le 0$: `+0`
+     - 1–2: `+1`
+     - 3–5: `+2`
+     - 6–9: `+3`
+     - 10–19: `+4`
+     - 20–49: `+5`
+     - 50–99: `+6`
+     - 100–149: `+7`
+     - 150–199: `+8`
+     - 200–299: `+9`
+     - 300+: `+10`
+   - **There are NO negative ability modifiers** in CarlRPG.
+   - Evade is calculated as $\text{DEX Mod} + \text{Gear} + \text{Buffs}$ (attacker target DC is $10 + \text{Foe DEX Mod} + \text{Floor Number}$), never $10 + \text{DEX Mod}$ as a character's base AC.
+   - **Never use D&D terminology or mechanics**: No cantrips, spell slots, saving throws, proficiency bonuses, or D&D spell text/components. All spells, skills, damage bars (10 bars of CON mod HP each), actions, and combat mechanics must strictly conform to official DCC RPG rules.
+
 ---
 
 ## 🏗️ Project Architecture & Conventions

@@ -19,8 +19,8 @@ describe('DCC RPG Damage Type Integration Subsystem', () => {
         type: 'crawler',
         system: {
           abilities: {
-            str: { value: 10, unenhanced: 10, mod: 4 },
-            dex: { value: 10, unenhanced: 10, mod: 4 }
+            str: { value: 20, unenhanced: 20, mod: 5 },
+            dex: { value: 8, unenhanced: 8, mod: 3 }
           },
           attributes: { hp: { value: 40, max: 40, temp: 0 } }
         }

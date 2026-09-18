@@ -49,11 +49,11 @@ test('DCC RPG Hotlist on Main Character Sheet & Inventory/Spell Population', asy
       type: 'crawler',
       system: {
         abilities: {
-          str: { value: 16, unenhanced: 16, mod: 3 },
-          dex: { value: 14, unenhanced: 14, mod: 2 },
-          con: { value: 14, unenhanced: 14, mod: 2 },
-          int: { value: 12, unenhanced: 12, mod: 1 },
-          cha: { value: 10, unenhanced: 10, mod: 0 }
+          str: { value: 24, unenhanced: 24, mod: 5 },
+          dex: { value: 16, unenhanced: 16, mod: 4 },
+          con: { value: 8, unenhanced: 8, mod: 3 },
+          int: { value: 4, unenhanced: 4, mod: 2 },
+          cha: { value: 2, unenhanced: 2, mod: 1 }
         },
         hotlist: {
           slot1: ['spell-fireball', 'spell-ice'], // Corrupted array of IDs in slot1

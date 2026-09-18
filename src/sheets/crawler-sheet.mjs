@@ -344,6 +344,11 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const dmgData = this.actor.getSkillDamageData(skill);
       skill.hasDamage = dmgData.hasDamage;
       skill.damageFormulaWithStat = dmgData.formulaWithStat;
+      const checkType = (skill.system?.checkType || '').toLowerCase();
+      skill.isAttack = dmgData.hasDamage ||
+        checkType.includes('attack') ||
+        ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
+        (skill.system?.category || '').toLowerCase() === 'combat';
     }
 
     // Add granted skills from equipped gear that the actor doesn't own
@@ -408,6 +413,11 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         const grantedDmg = this.actor.getSkillDamageData(grantedSkill);
         grantedSkill.hasDamage = grantedDmg.hasDamage;
         grantedSkill.damageFormulaWithStat = grantedDmg.formulaWithStat;
+        const checkType = (grantedSkill.system?.checkType || '').toLowerCase();
+        grantedSkill.isAttack = grantedDmg.hasDamage ||
+          checkType.includes('attack') ||
+          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
+          (grantedSkill.system?.category || '').toLowerCase() === 'combat';
 
         this._grantedSkills.set(grantedId, grantedSkill);
         context.skills.push(grantedSkill);
@@ -942,7 +952,23 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.roll-skill').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
-      if (item) this.actor.rollSkill(item);
+      if (!item) return;
+
+      const checkType = (item.system?.checkType || '').toLowerCase();
+      const skillType = item.system?.skillType || item.system?.type || '';
+      const dmgData = typeof this.actor.getSkillDamageData === 'function' ? this.actor.getSkillDamageData(item) : { hasDamage: false };
+      const isAttack = item.isAttack ?? (
+        dmgData.hasDamage ||
+        checkType.includes('attack') ||
+        ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
+        (item.system?.category || '').toLowerCase() === 'combat'
+      );
+
+      if (isAttack) {
+        this.actor.rollAttack(item, 'hit');
+      } else {
+        this.actor.rollSkill(item);
+      }
     });
 
     // Roll Skill Damage (owned or gear-granted)

@@ -9,16 +9,16 @@
     "templates": {
       "baseStats": {
         "abilities": {
-          "str": { "value": 10, "unenhanced": 10, "mod": 0 },
-          "int": { "value": 10, "unenhanced": 10, "mod": 0 },
-          "con": { "value": 10, "unenhanced": 10, "mod": 0 },
-          "dex": { "value": 10, "unenhanced": 10, "mod": 0 },
-          "cha": { "value": 10, "unenhanced": 10, "mod": 0 }
+          "str": { "value": 10, "unenhanced": 10, "mod": 4 },
+          "int": { "value": 10, "unenhanced": 10, "mod": 4 },
+          "con": { "value": 10, "unenhanced": 10, "mod": 4 },
+          "dex": { "value": 10, "unenhanced": 10, "mod": 4 },
+          "cha": { "value": 10, "unenhanced": 10, "mod": 4 }
         },
         "attributes": {
           "hp": { "value": 40, "max": 40, "temp": 0, "pct": 100 },
           "mana": { "value": 10, "max": 10 },
-          "evade": { "items": 0, "buffs": 0, "total": 10 },
+          "evade": { "items": 0, "buffs": 0, "total": 4 },
           "dr": { "armor": 0, "items": 0, "buffs": 0, "total": 0 },
           "speed": { "move": 20, "step": 10 },
           "aiFavor": 0,

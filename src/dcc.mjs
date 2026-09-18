@@ -876,6 +876,40 @@ export function onRenderChatMessage(message, html, data) {
       $(btn).click(spellClickHandler);
     }
   }
+
+  // 3. Handle click on "Roll Attack Damage" / "Roll Skill Damage" from a hit/check card in chat
+  const rollAttackButtons = query('.roll-skill-dmg-from-card, .roll-attack-dmg-from-card');
+  for (const btn of rollAttackButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const attackClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
+      const itemId = btn.dataset?.itemId || btn.dataset?.skillId || $btn?.data('item-id') || $btn?.data('skill-id');
+      const actor = (typeof game !== 'undefined' && game.actors?.get) ? game.actors.get(actorId) : null;
+      if (!actor) return;
+      const item = (typeof actor.items?.get === 'function')
+        ? actor.items.get(itemId)
+        : (Array.isArray(actor.items) ? actor.items.find(it => it.id === itemId) : actor.items?.find?.(it => it.id === itemId));
+      if (item) {
+        if (typeof actor.rollSkillDamage === 'function' && item.type === 'skill') {
+          await actor.rollSkillDamage(item);
+        } else if (typeof actor.rollAttack === 'function') {
+          await actor.rollAttack(item, 'damage');
+        }
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', attackClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(attackClickHandler);
+    }
+  }
 }
 
 /**

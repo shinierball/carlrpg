@@ -23,7 +23,7 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
     const defineAbility = () => new fields.SchemaField({
       value: new fields.NumberField({ required: true, integer: true, initial: 10 }),
       unenhanced: new fields.NumberField({ required: true, integer: true, initial: 10 }),
-      mod: new fields.NumberField({ required: true, integer: true, initial: 0 })
+      mod: new fields.NumberField({ required: true, integer: true, initial: 4 })
     });
 
     return new fields.SchemaField({
@@ -57,7 +57,7 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
       evade: new fields.SchemaField({
         items: new fields.NumberField({ integer: true, initial: 0 }),
         buffs: new fields.NumberField({ integer: true, initial: 0 }),
-        total: new fields.NumberField({ integer: true, initial: 10 })
+        total: new fields.NumberField({ integer: true, initial: 4 })
       }),
       dr: new fields.SchemaField({
         armor: new fields.NumberField({ integer: true, initial: 0 }),

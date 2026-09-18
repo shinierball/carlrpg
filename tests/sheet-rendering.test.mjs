@@ -19,11 +19,11 @@ test('Sheet & App Rendering Stability: Prevents read-only getter collisions in F
           size: 'Medium'
         },
         abilities: {
-          str: { value: 14, unenhanced: 14, mod: 2 },
-          dex: { value: 16, unenhanced: 16, mod: 3 },
-          con: { value: 14, unenhanced: 14, mod: 2 },
-          int: { value: 10, unenhanced: 10, mod: 0 },
-          cha: { value: 8, unenhanced: 8, mod: -1 }
+          str: { value: 55, unenhanced: 55, mod: 6 },
+          dex: { value: 24, unenhanced: 24, mod: 5 },
+          con: { value: 14, unenhanced: 14, mod: 4 },
+          int: { value: 8, unenhanced: 8, mod: 3 },
+          cha: { value: 4, unenhanced: 4, mod: 2 }
         }
       }
     });

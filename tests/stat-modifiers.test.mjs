@@ -68,7 +68,7 @@ describe('DCC RPG Stat Modifiers', () => {
           dex: { unenhanced: 5 }, // without gear = 5 -> +2
           con: { unenhanced: 1 }, // without gear = 1 -> +1
           int: { unenhanced: 8 }, // without gear = 8 -> +3
-          cha: { unenhanced: 12 } // without gear = 12 -> +4
+          cha: { unenhanced: 2 } // without gear = 2 -> +1
         }
       },
       items: [
@@ -124,9 +124,9 @@ describe('DCC RPG Stat Modifiers', () => {
     assert.equal(crawler.system.abilities.int.value, 8);
     assert.equal(crawler.system.abilities.int.mod, 3);
 
-    // CHA: unenhanced 12, no gear -> 12 -> +4
-    assert.equal(crawler.system.abilities.cha.value, 12);
-    assert.equal(crawler.system.abilities.cha.mod, 4);
+    // CHA: unenhanced 2, no gear -> 2 -> +1
+    assert.equal(crawler.system.abilities.cha.value, 2);
+    assert.equal(crawler.system.abilities.cha.mod, 1);
   });
 
   test('Page 1 Core template and stylesheet define high-contrast Enhanced and Unenhanced labels', async () => {

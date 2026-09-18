@@ -84,29 +84,29 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
         type: 'crawler',
         system: {
           abilities: {
-            str: { value: 10, unenhanced: 10 },
-            int: { value: 10, unenhanced: 10 },
-            con: { value: 10, unenhanced: 10 },
-            dex: { value: 10, unenhanced: 10 },
-            cha: { value: 10, unenhanced: 10 }
+            str: { value: 20, unenhanced: 20 },
+            int: { value: 14, unenhanced: 14 },
+            con: { value: 8, unenhanced: 8 },
+            dex: { value: 4, unenhanced: 4 },
+            cha: { value: 2, unenhanced: 2 }
           },
           attributes: {
             externalBuffs: {
-              buff1: 'Strength Buff',     // +2 STR -> 12 STR (mod +4)
-              buff2: 'Constitution Buff', // +2 CON -> 12 CON (mod +4)
+              buff1: 'Strength Buff',     // +2 STR -> 22 STR (mod +5)
+              buff2: 'Constitution Buff', // +2 CON -> 10 CON (mod +4, max HP 40)
               buff3: ''
             },
             hp: { value: 40, max: 40, temp: 0 },
-            mana: { value: 10, max: 10 }
+            mana: { value: 14, max: 14 }
           }
         }
       });
 
       crawler.prepareDerivedData();
 
-      assert.equal(crawler.system.abilities.str.value, 12, 'STR should be increased by +2');
+      assert.equal(crawler.system.abilities.str.value, 22, 'STR should be increased by +2');
       assert.equal(crawler.system.abilities.str.buffBonus, 2);
-      assert.equal(crawler.system.abilities.con.value, 12, 'CON should be increased by +2');
+      assert.equal(crawler.system.abilities.con.value, 10, 'CON should be increased by +2');
       assert.equal(crawler.system.abilities.con.buffBonus, 2);
 
       // Now set base CON to 19 (mod +4). A +2 buff takes it to 21 (mod +5)!
@@ -149,11 +149,11 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
         type: 'crawler',
         system: {
           abilities: {
-            str: { value: 10, unenhanced: 10 },
-            int: { value: 10, unenhanced: 10 },
-            con: { value: 10, unenhanced: 10 },
-            dex: { value: 10, unenhanced: 10 },
-            cha: { value: 10, unenhanced: 10 }
+            str: { value: 20, unenhanced: 20 },
+            int: { value: 14, unenhanced: 14 },
+            con: { value: 8, unenhanced: 8 },
+            dex: { value: 4, unenhanced: 4 },
+            cha: { value: 2, unenhanced: 2 }
           },
           attributes: {
             externalBuffs: {
@@ -168,7 +168,7 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
 
       crawler.prepareDerivedData();
 
-      assert.equal(crawler.system.abilities.str.value, 12);
+      assert.equal(crawler.system.abilities.str.value, 22);
       assert.ok(crawler.hasResistance('Fire'), 'Actor should have Fire resistance');
       assert.ok(crawler.hasImmunity('Ice'), 'Actor should have Ice immunity');
       assert.equal(crawler.hasResistance('Acid'), false, 'Actor should not have Acid resistance');
@@ -299,7 +299,7 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
         type: 'crawler',
         system: {
           abilities: {
-            str: { value: 10, unenhanced: 10 },
+            str: { value: 20, unenhanced: 20 },
             con: { value: 10, unenhanced: 10 }
           },
           attributes: {

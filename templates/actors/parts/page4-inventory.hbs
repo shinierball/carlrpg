@@ -1,202 +1,188 @@
-{{!-- PAGE 4: INVENTORY --}}
-<div class="dcc-page-container">
-  <div class="dcc-stat-block">
-    <div class="dcc-banner-header">
-      <span>INVENTORY</span>
-      <div>
-        <a class="item-create" data-type="gear" data-tooltip="Add Gear" style="color: #fff; cursor: pointer; margin-right: 12px;"><i class="fa-solid fa-shield"></i> Add Gear</a>
-        <a class="item-create" data-type="loot" data-tooltip="Add Item" style="color: #fff; cursor: pointer; margin-right: 12px;"><i class="fa-solid fa-plus"></i> Add Item</a>
-        <a class="item-create" data-type="buff" data-tooltip="Add Buff" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-sparkles"></i> Add Buff</a>
+{{!-- PAGE 4: EQUIPMENT & INVENTORY --}}
+<div class="dcc-page-container dcc-equipment-inventory-container">
+  <div style="display: grid; grid-template-columns: 340px 1fr; gap: 14px; align-items: start;">
+    
+    {{!-- LEFT COLUMN: EQUIPPED GEAR SLOTS / TATTOOS / PATCHES --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">
+        <span><i class="fa-solid fa-shield-halved"></i> EQUIPPED GEAR SLOTS</span>
+      </div>
+      <div class="dcc-gear-slots-list" style="padding: 6px;">
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Head</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.head}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.head.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.head.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.head" value="{{system.gearSlots.head}}" placeholder="{{#if equippedBySlot.head}}{{equippedBySlot.head.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Torso</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.torso}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.torso.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.torso.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.torso" value="{{system.gearSlots.torso}}" placeholder="{{#if equippedBySlot.torso}}{{equippedBySlot.torso.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Arms</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.arms}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.arms.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.arms.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.arms" value="{{system.gearSlots.arms}}" placeholder="{{#if equippedBySlot.arms}}{{equippedBySlot.arms.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Hands/Holding</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.hands}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.hands.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.hands.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.hands" value="{{system.gearSlots.hands}}" placeholder="{{#if equippedBySlot.hands}}{{equippedBySlot.hands.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Legs</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.legs}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.legs.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.legs.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.legs" value="{{system.gearSlots.legs}}" placeholder="{{#if equippedBySlot.legs}}{{equippedBySlot.legs.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Feet</span>
+          <div style="display: flex; gap: 4px; flex: 1; align-items: center;">
+            {{#if equippedBySlot.feet}}
+              <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 3px; white-space: nowrap;" title="{{equippedBySlot.feet.bonusesSummary}}">
+                <i class="fa-solid fa-shield-halved"></i> {{equippedBySlot.feet.name}}
+              </span>
+            {{/if}}
+            <input class="dcc-field-input" type="text" name="system.gearSlots.feet" value="{{system.gearSlots.feet}}" placeholder="{{#if equippedBySlot.feet}}{{equippedBySlot.feet.name}}{{else}}Notes...{{/if}}" />
+          </div>
+        </div>
+        <div class="dcc-gear-row">
+          <span class="dcc-gear-label">Accessories (Max 10)</span>
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            {{#if equippedBySlot.accessory.length}}
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                {{#each equippedBySlot.accessory as |acc|}}
+                  <span class="dcc-badge" style="background: #c0392b; color: #fff; padding: 1px 5px; font-size: 9px; border-radius: 2px;" title="{{acc.bonusesSummary}}">
+                    {{acc.name}}
+                  </span>
+                {{/each}}
+              </div>
+            {{/if}}
+            <textarea class="dcc-field-input" name="system.gearSlots.accessories" style="height: 80px; resize: vertical;">{{system.gearSlots.accessories}}</textarea>
+          </div>
+        </div>
       </div>
     </div>
 
-    <table class="dcc-attacks-table">
-      <thead>
-        <tr>
-          <th style="width: 35%;">Item</th>
-          <th style="width: 10%;">Quantity</th>
-          <th style="width: 45%;">Notes / Slot</th>
-          <th style="width: 10%;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{!-- Gear Items --}}
-        {{#each gear as |item|}}
-          <tr data-item-id="{{item.id}}" style="{{#if item.system.equipped}}background: #fdf2f2;{{/if}}">
-            <td>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" class="gear-toggle-equipped" data-tooltip="{{#if item.system.equipped}}Equipped to {{upper item.system.slot}} (Click to unequip){{else}}Unequipped (Click to equip to {{upper item.system.slot}}){{/if}}" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 14px;">
-                  {{#if item.system.equipped}}
-                    <i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>
-                  {{else}}
-                    <i class="fa-regular fa-circle" style="color: #999;"></i>
-                  {{/if}}
-                </button>
-                <div>
-                  <span style="font-weight: bold;">{{item.name}}</span>
-                  <span class="dcc-stat-sublabel" style="display: inline-block; margin-left: 4px; text-transform: uppercase;">[{{item.system.slot}}]</span>
-                  {{#if item.system.equipped}}
-                    <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px; margin-left: 4px;">EQUIPPED</span>
-                  {{/if}}
-                  {{#if item.bonusesSummary}}
-                    <div style="font-size: 10px; color: #555; margin-top: 2px;">
-                      <i class="fa-solid fa-sparkles" style="color: #c0392b;"></i> {{item.bonusesSummary}}
-                    </div>
-                  {{/if}}
-                </div>
-              </div>
-            </td>
-            <td>
-              <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
-            </td>
-            <td>
-              <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
-            </td>
-            <td>
-              <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
-              <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px;"><i class="fa-solid fa-trash"></i></a>
-            </td>
-          </tr>
-        {{/each}}
-
-        {{!-- Loot / Other Items --}}
-        {{#each loot as |item|}}
-          <tr data-item-id="{{item.id}}">
-            <td>
-              <span style="font-weight: bold;">{{item.name}}</span>
-            </td>
-            <td>
-              <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
-            </td>
-            <td>
-              <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
-            </td>
-            <td>
-              <a class="item-use" data-tooltip="Use Item" style="color: #2980b9; cursor: pointer; margin-right: 6px;"><i class="fa-solid fa-flask"></i></a>
-              <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
-              <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px;"><i class="fa-solid fa-trash"></i></a>
-            </td>
-          </tr>
-        {{/each}}
-
-        {{#unless gear.length}}
-          {{#unless loot.length}}
-            <tr>
-              <td colspan="4" style="text-align: center; color: #777; padding: 14px;">
-                Inventory is empty. Drag and drop items or click <strong>Add Item</strong>.
-              </td>
-            </tr>
-          {{/unless}}
-        {{/unless}}
-      </tbody>
-    </table>
-  </div>
-
-  {{!-- BUFFS TABLE (IF OWNED) --}}
-  {{#if buffs.length}}
-    <div class="dcc-stat-block" style="margin-top: 14px;">
-      <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <span>CHARACTER BUFFS & ACTIVE EFFECTS</span>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <a class="open-buff-picker" data-tooltip="Browse Buffs Compendium" style="color: #f1c40f; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
-            <i class="fa-solid fa-sparkles"></i> Browse Buffs
-          </a>
-          <a class="item-create" data-type="buff" data-tooltip="Add Buff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
-            <i class="fa-solid fa-plus"></i> Add Buff
-          </a>
+    {{!-- RIGHT COLUMN: INVENTORY & BACKPACK ITEMS --}}
+    <div class="dcc-stat-block">
+      <div class="dcc-banner-header">
+        <span><i class="fa-solid fa-boxes-stacked"></i> INVENTORY &amp; BACKPACK</span>
+        <div>
+          <a class="item-create" data-type="gear" data-tooltip="Add Gear" style="color: #fff; cursor: pointer; margin-right: 12px;"><i class="fa-solid fa-shield"></i> Add Gear</a>
+          <a class="item-create" data-type="loot" data-tooltip="Add Item" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Item</a>
         </div>
       </div>
+
       <table class="dcc-attacks-table">
         <thead>
           <tr>
-            <th style="width: 35%;">Buff Name</th>
-            <th style="width: 25%;">Type</th>
-            <th style="width: 30%;">Duration / Notes</th>
-            <th style="width: 10%;">Actions</th>
+            <th style="width: 40%;">Item</th>
+            <th style="width: 12%;">Qty</th>
+            <th style="width: 36%;">Notes / Slot</th>
+            <th style="width: 12%; text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {{#each buffs as |item|}}
-            <tr data-item-id="{{item.id}}">
+          {{!-- Gear Items --}}
+          {{#each gear as |item|}}
+            <tr data-item-id="{{item.id}}" draggable="true" style="{{#if item.system.equipped}}background: #fdf2f2;{{/if}}">
               <td>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <img src="{{item.img}}" style="width: 20px; height: 20px; border-radius: 2px; border: 1px solid #333;" />
-                  <span style="font-weight: bold;">{{item.name}}</span>
+                  <button type="button" class="gear-toggle-equipped" data-tooltip="{{#if item.system.equipped}}Equipped to {{upper item.system.slot}} (Click to unequip){{else}}Unequipped (Click to equip to {{upper item.system.slot}}){{/if}}" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 14px;">
+                    {{#if item.system.equipped}}
+                      <i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>
+                    {{else}}
+                      <i class="fa-regular fa-circle" style="color: #999;"></i>
+                    {{/if}}
+                  </button>
+                  <div>
+                    <span style="font-weight: bold;">{{item.name}}</span>
+                    <span class="dcc-stat-sublabel" style="display: inline-block; margin-left: 4px; text-transform: uppercase;">[{{item.system.slot}}]</span>
+                    {{#if item.system.equipped}}
+                      <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px; margin-left: 4px;">EQUIPPED</span>
+                    {{/if}}
+                    {{#if item.bonusesSummary}}
+                      <div style="font-size: 10px; color: #555; margin-top: 2px;">
+                        <i class="fa-solid fa-sparkles" style="color: #c0392b;"></i> {{item.bonusesSummary}}
+                      </div>
+                    {{/if}}
+                  </div>
                 </div>
               </td>
               <td>
-                <span class="dcc-stat-sublabel" style="text-transform: uppercase;">{{item.system.buffType}}</span>
+                <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
               </td>
               <td>
-                <span>{{item.system.duration}}</span>
+                <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
               </td>
-              <td>
+              <td style="text-align: center;">
                 <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
                 <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px;"><i class="fa-solid fa-trash"></i></a>
               </td>
             </tr>
           {{/each}}
+
+          {{!-- Loot / Other Items --}}
+          {{#each loot as |item|}}
+            <tr data-item-id="{{item.id}}" draggable="true">
+              <td>
+                <span style="font-weight: bold;">{{item.name}}</span>
+              </td>
+              <td>
+                <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
+              </td>
+              <td>
+                <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
+              </td>
+              <td style="text-align: center;">
+                <a class="item-use" data-tooltip="Use Item" style="color: #2980b9; cursor: pointer; margin-right: 6px;"><i class="fa-solid fa-flask"></i></a>
+                <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+
+          {{#unless gear.length}}
+            {{#unless loot.length}}
+              <tr>
+                <td colspan="4" style="text-align: center; color: #777; padding: 14px;">
+                  Inventory is empty. Drag and drop items or click <strong>Add Gear</strong> / <strong>Add Item</strong>.
+                </td>
+              </tr>
+            {{/unless}}
+          {{/unless}}
         </tbody>
       </table>
     </div>
-  {{/if}}
 
-  {{!-- DEBUFFS & CONDITIONS TABLE --}}
-  <div class="dcc-stat-block" style="margin-top: 14px;">
-    <div class="dcc-banner-header" style="background: #962d22; display: flex; justify-content: space-between; align-items: center;">
-      <span>CHARACTER DEBUFFS & CONDITIONS</span>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <a class="open-debuff-picker" data-tooltip="Browse Conditions Compendium" style="color: #f1c40f; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
-          <i class="fa-solid fa-book-skull"></i> Browse
-        </a>
-        <a class="item-create" data-type="debuff" data-tooltip="Add Custom Debuff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
-          <i class="fa-solid fa-plus"></i> Add Debuff
-        </a>
-      </div>
-    </div>
-    <table class="dcc-attacks-table">
-      <thead>
-        <tr>
-          <th style="width: 30%;">Debuff / Condition</th>
-          <th style="width: 15%;">Severity</th>
-          <th style="width: 25%;">Effects & Penalties</th>
-          <th style="width: 20%;">Duration</th>
-          <th style="width: 10%; text-align: center;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each debuffs as |item|}}
-          <tr data-item-id="{{item.id}}">
-            <td>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <img src="{{item.img}}" style="width: 20px; height: 20px; border-radius: 2px; border: 1px solid #333;" />
-                <span style="font-weight: bold;">{{item.name}}</span>
-              </div>
-            </td>
-            <td>
-              <span class="dcc-badge {{#if (eq item.system.severity 'Major')}}dcc-badge-attack{{else}}dcc-badge-item{{/if}}" style="font-size: 9px; padding: 2px 5px;">
-                {{upper item.system.severity}}
-              </span>
-            </td>
-            <td>
-              <span style="font-size: 11px; color: #c0392b; font-weight: bold;">{{item.summary}}</span>
-            </td>
-            <td>
-              <span style="font-size: 11px;">{{item.system.duration}}</span>
-            </td>
-            <td style="text-align: center;">
-              <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
-              <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
-            </td>
-          </tr>
-        {{else}}
-          <tr>
-            <td colspan="5" style="text-align: center; color: #777; padding: 10px; font-style: italic;">
-              No active debuffs or conditions.
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
   </div>
 </div>

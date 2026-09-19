@@ -1,0 +1,263 @@
+{{!-- TAB 5: STORY, COMPANIONS & SPONSORS --}}
+<div class="dcc-page-container dcc-story-extras-container">
+
+  {{!-- TOP SECTION: STORY & PSYCHOLOGICAL BACKGROUND --}}
+  <div class="dcc-stat-block" style="margin-bottom: 14px;">
+    <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-feather-pointed"></i>
+        <span>NARRATIVE &amp; PSYCHOLOGICAL BACKGROUND</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="dcc-field-label" style="color: #fff; margin: 0; font-size: 11px;">Popularity:</span>
+        <input class="dcc-field-input" type="text" name="system.details.popularity" value="{{system.details.popularity}}" placeholder="Popularity Rating..." style="width: 140px; height: 22px; font-size: 11px; background: #fff;" />
+      </div>
+    </div>
+    <div style="padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+      <div class="dcc-story-box">
+        <div class="dcc-story-box-header flexrow" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span class="dcc-field-label" style="font-weight: bold; color: #c0392b; margin: 0;"><i class="fa-solid fa-heart-crack"></i> PAST TRAUMAS (Table 11)</span>
+          <button type="button" class="dcc-roll-story-table-btn" data-table="pastTrauma" title="Roll 1d12 on Table 11: Past Traumas" style="font-size: 10px; padding: 1px 5px; cursor: pointer;">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <textarea class="dcc-field-input" name="system.details.pastTrauma" rows="4" placeholder="Type custom trauma or click Roll 1d12...">{{system.details.pastTrauma}}</textarea>
+      </div>
+      <div class="dcc-story-box">
+        <div class="dcc-story-box-header flexrow" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span class="dcc-field-label" style="font-weight: bold; color: #d35400; margin: 0;"><i class="fa-solid fa-link-slash"></i> LOOSE ENDS (Table 12)</span>
+          <button type="button" class="dcc-roll-story-table-btn" data-table="looseEnds" title="Roll 1d12 on Table 12: Loose Ends" style="font-size: 10px; padding: 1px 5px; cursor: pointer;">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <textarea class="dcc-field-input" name="system.details.looseEnds" rows="4" placeholder="Type custom loose ends or click Roll 1d12...">{{system.details.looseEnds}}</textarea>
+      </div>
+      <div class="dcc-story-box">
+        <div class="dcc-story-box-header flexrow" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span class="dcc-field-label" style="font-weight: bold; color: #2980b9; margin: 0;"><i class="fa-solid fa-clock-rotate-left"></i> REGRETS (Table 13)</span>
+          <button type="button" class="dcc-roll-story-table-btn" data-table="regrets" title="Roll 1d12 on Table 13: Regrets" style="font-size: 10px; padding: 1px 5px; cursor: pointer;">
+            <i class="fa-solid fa-dice-d20"></i> Roll 1d12
+          </button>
+        </div>
+        <textarea class="dcc-field-input" name="system.details.regrets" rows="4" placeholder="Type custom regrets or click Roll 1d12...">{{system.details.regrets}}</textarea>
+      </div>
+    </div>
+    <div style="padding: 0 10px 10px 10px;">
+      <span class="dcc-field-label" style="font-weight: bold; color: #333;"><i class="fa-solid fa-notes"></i> CHARACTER &amp; SESSION NOTES</span>
+      <textarea class="dcc-field-input" name="system.details.notes" rows="3" placeholder="General crawler notes, tactics, session developments...">{{system.details.notes}}</textarea>
+    </div>
+  </div>
+
+  {{!-- MIDDLE SECTION: COMPANIONS & PERSONAL SPACE --}}
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+    {{!-- PET & MOUNT --}}
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      {{!-- PET BLOCK --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header" style="background: #27ae60;">
+          <span><i class="fa-solid fa-paw"></i> PET COMPANION</span>
+        </div>
+        <div class="dcc-block-content" style="padding: 8px;">
+          <div class="dcc-field-row" style="margin-bottom: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Special Traits</span>
+              <input class="dcc-field-input" type="text" name="system.details.petSpecial" value="{{system.details.petSpecial}}" placeholder="Pet Special Abilities..." />
+            </div>
+            <div class="dcc-field-group small" style="width: 70px;">
+              <span class="dcc-field-label">Level</span>
+              <input class="dcc-field-input" type="number" name="system.details.petLevel" value="{{system.details.petLevel}}" placeholder="1" />
+            </div>
+          </div>
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Attack 1</span>
+              <input class="dcc-field-input" type="text" name="system.details.petAttack1" value="{{system.details.petAttack1}}" placeholder="Attack 1 (e.g. Bite 1d6+STR)..." />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Attack 2</span>
+              <input class="dcc-field-input" type="text" name="system.details.petAttack2" value="{{system.details.petAttack2}}" placeholder="Attack 2 (e.g. Claw 1d4+DEX)..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- MOUNT / VEHICLE BLOCK --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header" style="background: #2980b9;">
+          <span><i class="fa-solid fa-horse"></i> MOUNT / VEHICLE</span>
+        </div>
+        <div class="dcc-block-content" style="padding: 8px;">
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Size</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountSize" value="{{system.details.mountSize}}" placeholder="Large" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Move</span>
+              <input class="dcc-field-input" type="number" name="system.details.mountMove" value="{{system.details.mountMove}}" placeholder="40" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">DR</span>
+              <input class="dcc-field-input" type="number" name="system.details.mountDR" value="{{system.details.mountDR}}" placeholder="2" />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Occupants</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountOccupants" value="{{system.details.mountOccupants}}" placeholder="Riders / Cargo..." />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Accessories / Upgrades</span>
+              <input class="dcc-field-input" type="text" name="system.details.mountAccessories" value="{{system.details.mountAccessories}}" placeholder="Mounted armor, weaponry..." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- PERSONAL SPACE & DEITY --}}
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      {{!-- PERSONAL SPACE BLOCK --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header" style="background: #8e44ad;">
+          <span><i class="fa-solid fa-door-closed"></i> PERSONAL SPACE</span>
+        </div>
+        <div class="dcc-block-content" style="padding: 8px;">
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Size</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpaceSize" value="{{system.details.personalSpaceSize}}" placeholder="Studio / 1-Bedroom" />
+            </div>
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Type</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpaceType" value="{{system.details.personalSpaceType}}" placeholder="Apartment / Bunker" />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Amenities / Comfort</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpaceAmenities" value="{{system.details.personalSpaceAmenities}}" placeholder="Bath, Alchemy Station, Bed..." />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Defense / Security</span>
+              <input class="dcc-field-input" type="text" name="system.details.personalSpaceDefense" value="{{system.details.personalSpaceDefense}}" placeholder="Lock level, Alarm wards..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- DEITY BLOCK --}}
+      <div class="dcc-stat-block">
+        <div class="dcc-banner-header" style="background: #e67e22; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-sun"></i> DEITY / PATRON</span>
+          <a class="item-create" data-type="deity" data-tooltip="Add Deity Item" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        <div class="dcc-block-content" style="padding: 8px;">
+          {{#each deities as |item|}}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding: 4px; background: #fff; border: 1px solid #ddd; border-radius: 3px;" data-item-id="{{item.id}}">
+              <span style="font-weight: bold;">{{item.name}}</span>
+              <div>
+                <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+          {{/each}}
+          <div class="dcc-field-row">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Granted Boons</span>
+              <input class="dcc-field-input" type="text" name="system.details.deityBoons" value="{{system.details.deityBoons}}" placeholder="Divine blessings, passive perks..." />
+            </div>
+          </div>
+          <div class="dcc-field-row" style="margin-top: 6px;">
+            <div class="dcc-field-group flex-1">
+              <span class="dcc-field-label">Offerings &amp; Sins</span>
+              <input class="dcc-field-input" type="text" name="system.details.deitySins" value="{{system.details.deitySins}}" placeholder="Required sacrifices, forbidden actions..." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{!-- BOTTOM SECTION: RACIAL & CLASS ABILITIES & SPONSORS --}}
+  <div class="dcc-stat-block">
+    <div class="dcc-banner-header" style="background: #111;">
+      <span><i class="fa-solid fa-star"></i> CHARACTER FEATURES &amp; CORPORATE SPONSORS</span>
+    </div>
+    <div style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      {{!-- RACIAL & CLASS ABILITIES --}}
+      <div>
+        {{!-- Race Block --}}
+        <div class="dcc-banner-header" style="font-size: 11px; padding: 4px 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span>RACIAL TRAITS &amp; ABILITIES</span>
+          <a class="item-create" data-type="race" data-tooltip="Add Race" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        <div style="margin-bottom: 10px;">
+          {{#each races as |item|}}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #fafafa; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 4px;" data-item-id="{{item.id}}">
+              <div>
+                <span style="font-weight: bold; font-size: 12px;">{{item.name}}</span>
+                {{#if item.system.description}}<span style="font-size: 11px; color: #555; margin-left: 6px;">— {{item.system.description}}</span>{{/if}}
+              </div>
+              <div>
+                <a class="item-edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+          {{else}}
+            <input class="dcc-field-input" type="text" name="system.details.raceAbilities" value="{{system.details.raceAbilities}}" placeholder="Racial traits..." />
+          {{/each}}
+        </div>
+
+        {{!-- Class Block --}}
+        <div class="dcc-banner-header" style="font-size: 11px; padding: 4px 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span>CLASS FEATURES &amp; TALENTS</span>
+          <a class="item-create" data-type="class" data-tooltip="Add Class" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        <div>
+          {{#each classes as |item|}}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #fafafa; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 4px;" data-item-id="{{item.id}}">
+              <div>
+                <span style="font-weight: bold; font-size: 12px;">{{item.name}}</span>
+                {{#if item.system.description}}<span style="font-size: 11px; color: #555; margin-left: 6px;">— {{item.system.description}}</span>{{/if}}
+              </div>
+              <div>
+                <a class="item-edit"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </div>
+          {{else}}
+            <input class="dcc-field-input" type="text" name="system.details.classAbilities" value="{{system.details.classAbilities}}" placeholder="Class abilities..." />
+          {{/each}}
+        </div>
+      </div>
+
+      {{!-- SPONSORS --}}
+      <div>
+        <div class="dcc-banner-header" style="font-size: 11px; padding: 4px 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span>CORPORATE SPONSORS (Max 3)</span>
+          <a class="item-create" data-type="sponsor" data-tooltip="Add Sponsor" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        {{#each sponsors as |item|}}
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #fafafa; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 4px;" data-item-id="{{item.id}}">
+            <span style="font-weight: bold; font-size: 12px;">{{item.name}}</span>
+            <div>
+              <a class="item-edit"><i class="fa-solid fa-edit"></i></a>
+              <a class="item-delete" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+            </div>
+          </div>
+        {{/each}}
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+          <input class="dcc-field-input" type="text" name="system.details.sponsor1" value="{{system.details.sponsor1}}" placeholder="Sponsor 1 details..." />
+          <input class="dcc-field-input" type="text" name="system.details.sponsor2" value="{{system.details.sponsor2}}" placeholder="Sponsor 2 details..." />
+          <input class="dcc-field-input" type="text" name="system.details.sponsor3" value="{{system.details.sponsor3}}" placeholder="Sponsor 3 details..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

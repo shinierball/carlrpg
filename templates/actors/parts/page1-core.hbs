@@ -459,7 +459,7 @@
       </thead>
       <tbody>
         {{#each attacks as |attack|}}
-          <tr data-item-id="{{attack.id}}">
+          <tr data-item-id="{{attack.id}}" draggable="true">
             <td>
               <a class="roll-attack-hit" data-tooltip="Roll To Hit" style="font-weight: bold; cursor: pointer;">{{attack.name}}</a>
             </td>
@@ -512,7 +512,7 @@
       </thead>
       <tbody>
         {{#each loot as |item|}}
-          <tr data-item-id="{{item.id}}">
+          <tr data-item-id="{{item.id}}" draggable="true">
             <td>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <img src="{{item.img}}" width="20" height="20" style="border: none; border-radius: 2px;" />

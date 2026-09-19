@@ -263,6 +263,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/actors/parts/page3-skills.hbs',
     'systems/carl-rpg/templates/actors/parts/spells.hbs',
     'systems/carl-rpg/templates/actors/parts/page4-inventory.hbs',
+    'systems/carl-rpg/templates/actors/parts/conditions.hbs',
+    'systems/carl-rpg/templates/actors/parts/story-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
     'systems/carl-rpg/templates/items/parts/header.hbs',

@@ -30,9 +30,12 @@
       "TypeLoot": "Loot"
     },
     "Tabs": {
-      "Core": "Page 1: Core",
-      "Hotlist": "Page 2: Hotlist & Gear",
-      "Skills": "Page 3: Skills",
+      "Core": "1: Core & Combat",
+      "Equipment": "2: Equipment & Inventory",
+      "Skills": "3: Skills & Spells",
+      "Conditions": "4: Conditions & Effects",
+      "Story": "5: Story & Sponsors",
+      "Hotlist": "Page 2: Gear & Story",
       "Inventory": "Page 4: Inventory",
       "Extras": "Page 5: Pets & Space",
       "Abilities": "Page 6: Abilities & Sponsors"

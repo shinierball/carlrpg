@@ -145,6 +145,7 @@ export class MockItem {
       this.system = structuredClone(data.system || {});
     }
     this.actor = actor;
+    this.sort = Number(data.sort) || 0;
   }
   get isEmbedded() {
     return this.actor !== null;
@@ -155,6 +156,7 @@ export class MockItem {
       : structuredClone(this.system || {});
     return {
       _id: this.id,
+      sort: this.sort,
       name: this.name,
       type: this.type,
       img: this.img,
@@ -480,6 +482,9 @@ class MockDocumentSheet extends globalThis.Application {
   get document() {
     return this.object;
   }
+  get isEditable() {
+    return true;
+  }
 }
 
 if (!globalThis.ActorSheet) {
@@ -501,6 +506,17 @@ if (!globalThis.ActorSheet) {
         data: this.actor,
         items: this.actor?.items || []
       };
+    }
+    async _onDropItemCreate(itemData) {
+      if (typeof this.actor?.createEmbeddedDocuments === 'function') {
+        return this.actor.createEmbeddedDocuments('Item', Array.isArray(itemData) ? itemData : [itemData]);
+      }
+      return [];
+    }
+    async _onDropItem(event, data) {
+      const item = await globalThis.Item.fromDropData(data);
+      const itemData = item.toObject ? item.toObject() : item;
+      return this._onDropItemCreate(itemData);
     }
   };
 }
@@ -1151,17 +1167,19 @@ if (!globalThis.Hooks) {
     },
     callAll: (event, ...args) => {
       const cbs = _hooks[event] || [];
+      const promises = [];
       for (const entry of [...cbs]) {
-        entry.fn(...args);
+        const res = entry.fn(...args);
+        if (res instanceof Promise) promises.push(res);
         if (entry.once) {
           const idx = _hooks[event].indexOf(entry);
           if (idx !== -1) _hooks[event].splice(idx, 1);
         }
       }
+      return Promise.all(promises);
     },
     call: (event, ...args) => {
-      globalThis.Hooks.callAll(event, ...args);
-      return true;
+      return globalThis.Hooks.callAll(event, ...args);
     }
   };
 }

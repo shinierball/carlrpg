@@ -347,6 +347,153 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
       assert.equal(slot3.isEmpty, true);
       assert.equal(slot3.name, '');
     });
+
+    test('custom buff with name "Strength +5" correctly applies +5 and preserves custom selection without defaulting to +2 buff', async () => {
+      const customBuff = new DCCItem({
+        id: 'custom-str-5',
+        name: 'Strength +5',
+        type: 'buff',
+        system: {
+          buffType: 'stat',
+          stat: 'str',
+          value: 5,
+          duration: '1 Hour',
+          description: 'Grants +5 Strength'
+        }
+      });
+
+      const crawler = new DCCActor({
+        name: 'BuffedCrawler',
+        type: 'crawler',
+        system: {
+          abilities: {
+            str: { value: 20, unenhanced: 20 },
+            con: { value: 10, unenhanced: 10 }
+          },
+          attributes: {
+            externalBuffs: {
+              buff1: 'custom-str-5',
+              buff2: '',
+              buff3: ''
+            }
+          }
+        },
+        items: [customBuff]
+      });
+      crawler.prepareDerivedData();
+
+      // Check mechanics: +5 STR correctly applied (20 -> 25)
+      assert.equal(crawler.system.abilities.str.value, 25, 'STR must be increased by +5');
+      assert.equal(crawler.system.abilities.str.buffBonus, 5, 'buffBonus must be 5');
+
+      // Check sheet rendering: custom buff selected, NOT default +2 buff
+      const sheet = new DCCCrawlerSheet(crawler);
+      const data = await sheet.getData();
+      const slot1 = data.externalBuffSlots[0];
+
+      assert.equal(slot1.name, 'Strength +5', 'Slot 1 name should be custom buff name');
+      assert.equal(slot1.badge, 'STAT');
+      assert.equal(slot1.detail, '+5 STR', 'Detail must show +5 STR');
+
+      // Verify character buffs group has the custom buff selected
+      const charGroup = slot1.groups.find(g => g.label.includes('Character Buffs'));
+      assert.ok(charGroup, 'Must have Character Buffs group');
+      const customOpt = charGroup.items.find(i => i.id === 'custom-str-5');
+      assert.ok(customOpt, 'Character Buffs must include custom-str-5 option');
+      assert.equal(customOpt.selected, true, 'Custom buff option must be selected');
+
+      // Verify ability score buffs compendium group DOES NOT have default Strength Buff (+2) selected
+      const statGroup = slot1.groups.find(g => g.label.includes('Ability Score'));
+      assert.ok(statGroup, 'Must have Ability Score group');
+      const defaultStrOpt = statGroup.items.find(i => i.id === 'dccbuf0000000001');
+      assert.ok(defaultStrOpt, 'Compendium must have default Strength Buff option');
+      assert.equal(defaultStrOpt.selected, false, 'Default +2 Strength Buff must NOT be selected');
+
+      // Verify across ALL groups, exactly ONE option is selected
+      const totalSelected = slot1.groups.flatMap(g => g.items).filter(i => i.selected);
+      assert.equal(totalSelected.length, 1, 'Exactly one option must be selected in the external buff dropdown');
+      assert.equal(totalSelected[0].id, 'custom-str-5', 'The selected option must be the custom buff');
+    });
+
+    test('custom buff named "Strength Buff" (+5 STR) prioritizes character owned buff over compendium default', async () => {
+      // Even when the owned item shares the exact same name as the compendium default,
+      // the owned character buff (+5 STR) must be selected, NOT the compendium (+2 STR).
+      const customBuff = new DCCItem({
+        id: 'owned-str-buff-5',
+        name: 'Strength Buff',
+        type: 'buff',
+        system: {
+          buffType: 'stat',
+          stat: 'str',
+          value: 5,
+          duration: '1 Hour'
+        }
+      });
+
+      const crawler = new DCCActor({
+        name: 'Carl',
+        type: 'crawler',
+        system: {
+          abilities: {
+            str: { value: 10, unenhanced: 10 }
+          },
+          attributes: {
+            externalBuffs: {
+              buff1: 'owned-str-buff-5',
+              buff2: '',
+              buff3: ''
+            }
+          }
+        },
+        items: [customBuff]
+      });
+      crawler.prepareDerivedData();
+
+      assert.equal(crawler.system.abilities.str.value, 15, 'STR must be increased by +5');
+
+      const sheet = new DCCCrawlerSheet(crawler);
+      const data = await sheet.getData();
+      const slot1 = data.externalBuffSlots[0];
+
+      assert.equal(slot1.detail, '+5 STR');
+
+      // Character buff option is selected
+      const charGroup = slot1.groups.find(g => g.label.includes('Character Buffs'));
+      const ownedOpt = charGroup.items.find(i => i.id === 'owned-str-buff-5');
+      assert.equal(ownedOpt.selected, true, 'Owned buff option must be selected');
+
+      // Compendium default option is NOT selected
+      const statGroup = slot1.groups.find(g => g.label.includes('Ability Score'));
+      const compOpt = statGroup.items.find(i => i.id === 'dccbuf0000000001');
+      assert.equal(compOpt.selected, false, 'Compendium default +2 buff must NOT be selected');
+
+      const totalSelected = slot1.groups.flatMap(g => g.items).filter(i => i.selected);
+      assert.equal(totalSelected.length, 1);
+    });
+
+    test('resolveBuff accurately parses postfixed numbers for custom stat strings (e.g. Strength +5, STR +5)', () => {
+      const crawler = new DCCActor({ name: 'Tester', type: 'crawler' });
+
+      const b1 = crawler.resolveBuff('Strength +5');
+      assert.ok(b1);
+      assert.equal(b1.system.stat, 'str');
+      assert.equal(b1.system.value, 5);
+
+      const b2 = crawler.resolveBuff('+5 STR');
+      assert.ok(b2);
+      assert.equal(b2.system.stat, 'str');
+      assert.equal(b2.system.value, 5);
+
+      const b3 = crawler.resolveBuff('Constitution +3');
+      assert.ok(b3);
+      assert.equal(b3.system.stat, 'con');
+      assert.equal(b3.system.value, 3);
+
+      const b4 = crawler.resolveBuff('Strength');
+      assert.ok(b4);
+      assert.equal(b4.system.stat, 'str');
+      assert.equal(b4.system.value, 2, 'Default value is +2 if no number is given');
+    });
   });
 
   describe('5. Multiple Stat & Damage Modifiers on Buffs and Debuffs', () => {

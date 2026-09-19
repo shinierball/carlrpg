@@ -325,14 +325,27 @@ export class DCCSpellManager extends DCCBaseApplication {
     const spellName = el.dataset.spellName;
     if (!spellName) return;
 
+    let spellData = null;
+    const norm = spellName.toLowerCase().trim();
+    if (typeof CONFIG !== 'undefined' && Array.isArray(CONFIG.DCC?.spells)) {
+      spellData = CONFIG.DCC.spells.find(s => s.name?.toLowerCase().trim() === norm);
+    }
+    if (!spellData && typeof game !== 'undefined' && game.items) {
+      spellData = game.items.find(i => i.type === 'spell' && i.name?.toLowerCase().trim() === norm);
+    }
+
+    const uuid = spellData?.uuid || (spellData?._id ? `Compendium.carl-rpg.spells.${spellData._id}` : undefined);
     const dragData = {
       type: 'Item',
       name: spellName,
+      uuid: uuid,
       data: {
         name: spellName,
-        type: 'spell'
+        type: 'spell',
+        img: spellData?.img || 'icons/svg/wand.svg',
+        system: spellData?.system ? structuredClone(spellData.system) : {}
       }
     };
-    event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+    event.dataTransfer?.setData('text/plain', JSON.stringify(dragData));
   }
 }

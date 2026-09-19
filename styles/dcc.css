@@ -6165,3 +6165,53 @@ select.dcc-box-input.dcc-size-select,
   background: #e74c3c;
   color: #fff;
 }
+
+/* Quick Slot Assignment Group for Buffs */
+.dcc-slot-assign-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #2c3e50;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.buff-assign-slot-btn {
+  background: #34495e;
+  color: #fff;
+  border: 1px solid #1a252f;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px 4px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.buff-assign-slot-btn:hover {
+  background: #27ae60;
+  color: #fff;
+  border-color: #219653;
+  transform: scale(1.05);
+}
+
+/* Modern Character Sheet 5-Tab Layout Containers */
+.dcc-equipment-inventory-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dcc-conditions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dcc-story-extras-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+

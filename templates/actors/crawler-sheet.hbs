@@ -1,50 +1,41 @@
 <form class="{{cssClass}} dcc-sheet" autocomplete="off">
-  {{!-- Navigation Bar matching DCC pages --}}
+  {{!-- Modern 5-Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="page1"><i class="fa-solid fa-address-card"></i> 1: Core</a>
-    <a class="item" data-tab="page2"><i class="fa-solid fa-vest-patches"></i> 2: Hotlist & Gear</a>
-    <a class="item" data-tab="page3"><i class="fa-solid fa-bolt"></i> 3: Skills</a>
-    <a class="item" data-tab="spells"><i class="fa-solid fa-wand-magic-sparkles"></i> Spells</a>
-    <a class="item" data-tab="page4"><i class="fa-solid fa-backpack"></i> 4: Inventory</a>
-    <a class="item" data-tab="page5"><i class="fa-solid fa-paw"></i> 5: Extras & Space</a>
-    <a class="item" data-tab="page6"><i class="fa-solid fa-handshake"></i> 6: Abilities & Sponsors</a>
+    <a class="item" data-tab="page1"><i class="fa-solid fa-address-card"></i> 1: Core &amp; Combat</a>
+    <a class="item" data-tab="page4"><i class="fa-solid fa-shield-halved"></i> 2: Equipment &amp; Inventory</a>
+    <a class="item" data-tab="page3"><i class="fa-solid fa-bolt"></i> 3: Skills &amp; Spells</a>
+    <a class="item" data-tab="conditions"><i class="fa-solid fa-shield-virus"></i> 4: Conditions &amp; Effects</a>
+    <a class="item" data-tab="story"><i class="fa-solid fa-book-open"></i> 5: Story &amp; Sponsors</a>
   </nav>
 
   {{!-- Sheet Content --}}
   <section class="sheet-body">
-    {{!-- Page 1: Core Sheet --}}
+    {{!-- Tab 1: Core & Combat --}}
     <div class="tab page1" data-group="primary" data-tab="page1">
       {{> "systems/carl-rpg/templates/actors/parts/page1-core.hbs"}}
     </div>
 
-    {{!-- Page 2: Hotlist & Gear --}}
-    <div class="tab page2" data-group="primary" data-tab="page2">
-      {{> "systems/carl-rpg/templates/actors/parts/page2-hotlist.hbs"}}
-    </div>
-
-    {{!-- Page 3: Skills --}}
-    <div class="tab page3" data-group="primary" data-tab="page3">
-      {{> "systems/carl-rpg/templates/actors/parts/page3-skills.hbs"}}
-    </div>
-
-    {{!-- Spells --}}
-    <div class="tab spells" data-group="primary" data-tab="spells">
-      {{> "systems/carl-rpg/templates/actors/parts/spells.hbs"}}
-    </div>
-
-    {{!-- Page 4: Inventory --}}
+    {{!-- Tab 2: Equipment & Inventory --}}
     <div class="tab page4" data-group="primary" data-tab="page4">
       {{> "systems/carl-rpg/templates/actors/parts/page4-inventory.hbs"}}
     </div>
 
-    {{!-- Page 5: Extras (Pet, Mount, Deity, Space) --}}
-    <div class="tab page5" data-group="primary" data-tab="page5">
-      {{> "systems/carl-rpg/templates/actors/parts/page5-extras.hbs"}}
+    {{!-- Tab 3: Skills & Spells (Unified Abilities & Magic) --}}
+    <div class="tab page3" data-group="primary" data-tab="page3">
+      {{> "systems/carl-rpg/templates/actors/parts/page3-skills.hbs"}}
+      <div class="dcc-spells-section" data-tab="spells" style="margin-top: 14px;">
+        {{> "systems/carl-rpg/templates/actors/parts/spells.hbs"}}
+      </div>
     </div>
 
-    {{!-- Page 6: Abilities & Sponsors --}}
-    <div class="tab page6" data-group="primary" data-tab="page6">
-      {{> "systems/carl-rpg/templates/actors/parts/page6-abilities.hbs"}}
+    {{!-- Tab 4: Conditions & Effects --}}
+    <div class="tab conditions" data-group="primary" data-tab="conditions">
+      {{> "systems/carl-rpg/templates/actors/parts/conditions.hbs"}}
+    </div>
+
+    {{!-- Tab 5: Story & Sponsors --}}
+    <div class="tab story" data-group="primary" data-tab="story">
+      {{> "systems/carl-rpg/templates/actors/parts/story-extras.hbs"}}
     </div>
   </section>
 </form>

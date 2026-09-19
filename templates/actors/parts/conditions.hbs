@@ -1,0 +1,162 @@
+{{!-- TAB 4: CONDITIONS & EFFECTS --}}
+<div class="dcc-page-container dcc-conditions-container">
+
+  {{!-- TOP BANNER CONTROLS --}}
+  <div class="dcc-stat-block" style="margin-bottom: 12px;">
+    <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-shield-virus" style="color: #e74c3c;"></i>
+        <span>ACTIVE CONDITIONS &amp; STATUS EFFECTS</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <a class="open-buff-picker" data-tooltip="Browse Buffs Compendium" style="color: #f1c40f; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-sparkles"></i> Browse Buffs
+        </a>
+        <a class="open-debuff-picker" data-tooltip="Browse Conditions Compendium" style="color: #f1c40f; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none; margin-left: 6px;">
+          <i class="fa-solid fa-book-skull"></i> Browse Debuffs
+        </a>
+        <a class="item-create" data-type="buff" data-tooltip="Create Custom Buff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none; margin-left: 10px;">
+          <i class="fa-solid fa-plus"></i> New Buff
+        </a>
+        <a class="item-create" data-type="debuff" data-tooltip="Add Custom Debuff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none; margin-left: 6px;">
+          <i class="fa-solid fa-plus"></i> New Debuff
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {{!-- CHARACTER BUFFS TABLE --}}
+  <div class="dcc-stat-block" style="margin-bottom: 14px;">
+    <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center; background: #27ae60;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-sparkles"></i>
+        <span>CHARACTER BUFFS &amp; ACTIVE EFFECTS ({{buffs.length}})</span>
+      </div>
+      <a class="item-create" data-type="buff" data-tooltip="Add Buff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
+        <i class="fa-solid fa-plus"></i> Add Buff
+      </a>
+    </div>
+    <table class="dcc-attacks-table">
+      <thead>
+        <tr>
+          <th style="width: 30%;">Buff Name</th>
+          <th style="width: 15%;">Type</th>
+          <th style="width: 25%;">Effects / Value</th>
+          <th style="width: 15%;">Duration</th>
+          <th style="width: 15%; text-align: center;">Assign / Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each buffs as |item|}}
+          <tr data-item-id="{{item.id}}" draggable="true">
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="{{item.img}}" style="width: 22px; height: 22px; border-radius: 3px; border: 1px solid #333;" />
+                <span style="font-weight: bold;">{{item.name}}</span>
+              </div>
+            </td>
+            <td>
+              <span class="dcc-badge dcc-badge-spell" style="text-transform: uppercase; font-size: 9px;">{{item.system.buffType}}</span>
+            </td>
+            <td>
+              <span style="font-size: 11px; font-weight: bold; color: #27ae60;">
+                {{#if item.system.statModifiers.length}}
+                  {{#each item.system.statModifiers as |mod|}}+{{mod.value}} {{upper mod.stat}} {{/each}}
+                {{else if (eq item.system.buffType "stat")}}
+                  +{{item.system.value}} {{upper item.system.stat}}
+                {{else if (eq item.system.buffType "tempHp")}}
+                  +{{item.system.value}} Temp HP
+                {{else if (eq item.system.buffType "damageMultiplier")}}
+                  *{{item.system.damageMultiplier}} Damage
+                {{else if (eq item.system.buffType "resistance")}}
+                  Resist {{item.system.damageType}}
+                {{else if (eq item.system.buffType "immunity")}}
+                  Immune {{item.system.damageType}}
+                {{else}}
+                  {{item.system.description}}
+                {{/if}}
+              </span>
+            </td>
+            <td>
+              <span style="font-size: 11px;">{{item.system.duration}}</span>
+            </td>
+            <td style="text-align: center;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <div class="dcc-slot-assign-btn-group" title="Assign to Core Slot 1, 2, or 3">
+                  <button type="button" class="buff-assign-slot-btn" data-item-id="{{item.id}}" data-slot="buff1" data-tooltip="Assign to Slot 1">1</button>
+                  <button type="button" class="buff-assign-slot-btn" data-item-id="{{item.id}}" data-slot="buff2" data-tooltip="Assign to Slot 2">2</button>
+                  <button type="button" class="buff-assign-slot-btn" data-item-id="{{item.id}}" data-slot="buff3" data-tooltip="Assign to Slot 3">3</button>
+                </div>
+                <a class="item-edit" data-tooltip="Edit Buff" style="margin-left: 4px;"><i class="fa-solid fa-edit"></i></a>
+                <a class="item-delete" data-tooltip="Delete Buff" style="margin-left: 4px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+        {{else}}
+          <tr>
+            <td colspan="5" style="text-align: center; color: #777; padding: 14px; font-style: italic;">
+              No character buffs defined. Click <strong>Browse Buffs</strong> or <strong>Add Buff</strong> to grant bonuses.
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  {{!-- CHARACTER DEBUFFS TABLE --}}
+  <div class="dcc-stat-block">
+    <div class="dcc-banner-header" style="background: #962d22; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-skull"></i>
+        <span>CHARACTER DEBUFFS &amp; CONDITIONS ({{debuffs.length}})</span>
+      </div>
+      <a class="item-create" data-type="debuff" data-tooltip="Add Custom Debuff" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
+        <i class="fa-solid fa-plus"></i> Add Debuff
+      </a>
+    </div>
+    <table class="dcc-attacks-table">
+      <thead>
+        <tr>
+          <th style="width: 30%;">Debuff / Condition</th>
+          <th style="width: 15%;">Severity</th>
+          <th style="width: 25%;">Effects &amp; Penalties</th>
+          <th style="width: 20%;">Duration</th>
+          <th style="width: 10%; text-align: center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each debuffs as |item|}}
+          <tr data-item-id="{{item.id}}" draggable="true">
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="{{item.img}}" style="width: 22px; height: 22px; border-radius: 3px; border: 1px solid #333;" />
+                <span style="font-weight: bold;">{{item.name}}</span>
+              </div>
+            </td>
+            <td>
+              <span class="dcc-badge {{#if (eq item.system.severity 'Major')}}dcc-badge-attack{{else}}dcc-badge-item{{/if}}" style="font-size: 9px; padding: 2px 5px;">
+                {{upper item.system.severity}}
+              </span>
+            </td>
+            <td>
+              <span style="font-size: 11px; color: #c0392b; font-weight: bold;">{{item.summary}}</span>
+            </td>
+            <td>
+              <span style="font-size: 11px;">{{item.system.duration}}</span>
+            </td>
+            <td style="text-align: center;">
+              <a class="item-edit" data-tooltip="Edit Condition"><i class="fa-solid fa-edit"></i></a>
+              <a class="item-delete" data-tooltip="Delete Condition" style="margin-left: 6px; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+            </td>
+          </tr>
+        {{else}}
+          <tr>
+            <td colspan="5" style="text-align: center; color: #777; padding: 14px; font-style: italic;">
+              No active debuffs or negative conditions affecting this character.
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

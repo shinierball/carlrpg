@@ -29,7 +29,7 @@
       </thead>
       <tbody>
         {{#each skills as |skill|}}
-          <tr data-item-id="{{skill.id}}" style="{{#if skill.isGranted}}background: #fdf5e6;{{/if}}">
+          <tr data-item-id="{{skill.id}}" draggable="true" style="{{#if skill.isGranted}}background: #fdf5e6;{{/if}}">
             <td>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <img src="{{skill.img}}" style="width: 20px; height: 20px; border: 1px solid #333; border-radius: 3px; object-fit: contain; background: #222;" />

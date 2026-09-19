@@ -131,11 +131,11 @@ describe('DCC RPG Debuff Visibility & Management Subsystem', () => {
       assert.ok(content.includes('system.attributes.debuffs'), 'page1-core.hbs must preserve freeform textarea');
     });
 
-    test('page4-inventory.hbs includes debuffs & conditions table', () => {
-      const content = fs.readFileSync('templates/actors/parts/page4-inventory.hbs', 'utf-8');
-      assert.ok(content.includes('CHARACTER DEBUFFS & CONDITIONS'), 'page4-inventory.hbs must include Debuffs table header');
-      assert.ok(content.includes('open-debuff-picker'), 'page4-inventory.hbs must include open-debuff-picker');
-      assert.ok(content.includes('data-type="debuff"'), 'page4-inventory.hbs must allow creating debuff items');
+    test('conditions.hbs includes dedicated debuffs & conditions table', () => {
+      const conditionsContent = fs.readFileSync('templates/actors/parts/conditions.hbs', 'utf-8');
+      assert.ok(conditionsContent.includes('CHARACTER DEBUFFS &amp; CONDITIONS') || conditionsContent.includes('CHARACTER DEBUFFS & CONDITIONS'), 'conditions.hbs must include Debuffs table header');
+      assert.ok(conditionsContent.includes('open-debuff-picker'), 'conditions.hbs must include open-debuff-picker');
+      assert.ok(conditionsContent.includes('data-type="debuff"'), 'conditions.hbs must allow creating debuff items');
     });
   });
 });

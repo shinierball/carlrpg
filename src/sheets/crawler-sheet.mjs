@@ -121,10 +121,25 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       width: 860,
       height: 900,
       tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'page1' }],
+      dragDrop: [{ dragSelector: '[data-item-id]', dropSelector: null }],
       submitOnChange: true,
       submitOnClose: true,
       closeOnSubmit: false
     });
+  }
+
+  /** @override */
+  _onDragStart(event) {
+    const li = event.currentTarget.closest?.('[data-item-id]');
+    if (!li) return super._onDragStart ? super._onDragStart(event) : undefined;
+    const itemId = li.dataset?.itemId;
+    const item = this.actor.items.get?.(itemId) ||
+      (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+    if (!item) return super._onDragStart ? super._onDragStart(event) : undefined;
+    const dragData = typeof item.toDragData === 'function'
+      ? item.toDragData()
+      : { type: 'Item', uuid: item.uuid || item.id, id: item.id, data: item.toObject ? item.toObject() : item };
+    event.dataTransfer?.setData('text/plain', JSON.stringify(dragData));
   }
 
   /** @override (V1 compatibility) */
@@ -439,8 +454,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     }
 
-    // Sort skills alphabetically
-    context.skills.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort helper: prioritize item.sort index, fallback to alphabetical
+    const sortItems = (a, b) => (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name);
+
+    context.skills.sort(sortItems);
 
     // Prepare spells (stat modifiers, damage data, sorting)
     for (const spell of context.spells) {
@@ -455,7 +472,12 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       spell.damageType = dmgData?.damageType || spell.system?.damageType || '';
       spell.isAttack = spell.system?.spellType === 'Attack';
     }
-    context.spells.sort((a, b) => a.name.localeCompare(b.name));
+    context.spells.sort(sortItems);
+    context.gear.sort(sortItems);
+    context.loot.sort(sortItems);
+    context.buffs.sort(sortItems);
+    context.debuffs.sort(sortItems);
+    context.attacks.sort(sortItems);
 
     // Prepare Hotlist Slots (1-10)
     const hotlistData = context.system.hotlist || {};
@@ -556,6 +578,23 @@ export class DCCCrawlerSheet extends BaseActorSheet {
           if (resolvedItem.system?.damageStat) {
             detail += ` + ${resolvedItem.system.damageStat.toUpperCase()}`;
           }
+        } else if (slotType === 'skill') {
+          const dmgData = typeof this.actor.getSkillDamageData === 'function' ? this.actor.getSkillDamageData(resolvedItem) : null;
+          slotHasDamage = dmgData?.hasDamage ?? false;
+          const checkType = (resolvedItem.system?.checkType || '').toLowerCase();
+          const skillType = resolvedItem.system?.skillType || resolvedItem.system?.type || '';
+          isAttack = slotHasDamage ||
+            checkType.includes('attack') ||
+            ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
+            (resolvedItem.system?.category || '').toLowerCase() === 'combat';
+          badge = isAttack ? 'ATTACK' : 'SKILL';
+          const rk = resolvedItem.system?.modifiedRank ?? resolvedItem.system?.rank ?? 1;
+          detail = `Rank ${rk}`;
+          if (slotHasDamage && dmgData?.formulaWithStat) {
+            detail += ` • ${dmgData.formulaWithStat}`;
+          } else if (resolvedItem.statModStr) {
+            detail += ` (${resolvedItem.statModStr})`;
+          }
         } else {
           badge = slotType.toUpperCase();
         }
@@ -590,6 +629,18 @@ export class DCCCrawlerSheet extends BaseActorSheet {
             id: a.id,
             label: `⚔️ ${a.name}${a.system?.damageDice ? ` (${a.system.damageDice})` : ''}`,
             selected: a.id === valStr || a.name.toLowerCase() === valStr.toLowerCase() || a.id === resolvedItem?.id
+          }))
+        });
+      }
+
+      // Skills group
+      if (context.skills.length) {
+        groups.push({
+          label: 'Skills',
+          items: context.skills.map(sk => ({
+            id: sk.id,
+            label: `🎯 ${sk.name} (Rank ${sk.system?.modifiedRank ?? sk.system?.rank ?? 1})`,
+            selected: sk.id === valStr || sk.name.toLowerCase() === valStr.toLowerCase() || sk.id === resolvedItem?.id
           }))
         });
       }
@@ -791,40 +842,71 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         }
       }
 
-      const groups = [];
-      const mapOpts = (opts) => opts.map(o => {
-        const isSel = Boolean(valStr && (valStr === o.id || valStr.toLowerCase() === o.name.toLowerCase() || resolvedBuff?.id === o.id || resolvedBuff?.name.toLowerCase() === o.name.toLowerCase()));
-        if (isSel) isKnownOption = true;
-        return { ...o, selected: isSel };
-      });
+      // Build available buff option groups in display order
+      const rawGroups = [
+        { label: '📦 Character Buffs', options: ownedBuffOptions },
+        { label: '🌍 World Buffs', options: worldBuffOptions },
+        { label: '⚡ Ability Score Buffs', options: statBuffOptions },
+        { label: '❤️ Temporary Health Buffs', options: tempHpBuffOptions },
+        { label: '🛡️ Damage Resistance Buffs', options: resistBuffOptions },
+        { label: '🌟 Damage Immunity Buffs', options: immuneBuffOptions },
+        { label: '⚔️ Damage Multiplier & Combat Buffs', options: combatBuffOptions },
+        { label: '✨ Other Compendium Buffs', options: otherBuffOptions }
+      ].filter(g => g.options.length > 0);
 
-      // 1. Character's owned buffs
-      if (ownedBuffOptions.length) {
-        groups.push({ label: '📦 Character Buffs', items: mapOpts(ownedBuffOptions) });
+      // Determine the single matching option to mark selected across all groups
+      let selectedOptionId = null;
+
+      if (valStr) {
+        // Priority 1: Exact ID match against resolvedBuff.id
+        if (resolvedBuff?.id) {
+          for (const g of rawGroups) {
+            const match = g.options.find(o => o.id === resolvedBuff.id);
+            if (match) {
+              selectedOptionId = match.id;
+              break;
+            }
+          }
+        }
+
+        // Priority 2: Exact ID match against valStr
+        if (!selectedOptionId) {
+          for (const g of rawGroups) {
+            const match = g.options.find(o => o.id === valStr);
+            if (match) {
+              selectedOptionId = match.id;
+              break;
+            }
+          }
+        }
+
+        // Priority 3: Exact Name match against valStr or resolvedBuff.name
+        // Priority order ensures Character Buffs are chosen over Compendium defaults
+        if (!selectedOptionId) {
+          const lowerVal = valStr.toLowerCase();
+          const lowerResolvedName = resolvedBuff?.name?.toLowerCase();
+          for (const g of rawGroups) {
+            const match = g.options.find(o => {
+              const oNameLower = o.name?.toLowerCase();
+              return oNameLower && (oNameLower === lowerVal || oNameLower === lowerResolvedName);
+            });
+            if (match) {
+              selectedOptionId = match.id;
+              break;
+            }
+          }
+        }
       }
-      // 2. World buff items
-      if (worldBuffOptions.length) {
-        groups.push({ label: '🌍 World Buffs', items: mapOpts(worldBuffOptions) });
-      }
-      // 3. Predefined / Compendium Buffs
-      if (statBuffOptions.length) {
-        groups.push({ label: '⚡ Ability Score Buffs', items: mapOpts(statBuffOptions) });
-      }
-      if (tempHpBuffOptions.length) {
-        groups.push({ label: '❤️ Temporary Health Buffs', items: mapOpts(tempHpBuffOptions) });
-      }
-      if (resistBuffOptions.length) {
-        groups.push({ label: '🛡️ Damage Resistance Buffs', items: mapOpts(resistBuffOptions) });
-      }
-      if (immuneBuffOptions.length) {
-        groups.push({ label: '🌟 Damage Immunity Buffs', items: mapOpts(immuneBuffOptions) });
-      }
-      if (combatBuffOptions.length) {
-        groups.push({ label: '⚔️ Damage Multiplier & Combat Buffs', items: mapOpts(combatBuffOptions) });
-      }
-      if (otherBuffOptions.length) {
-        groups.push({ label: '✨ Other Compendium Buffs', items: mapOpts(otherBuffOptions) });
-      }
+
+      isKnownOption = Boolean(selectedOptionId);
+
+      const groups = rawGroups.map(g => ({
+        label: g.label,
+        items: g.options.map(o => ({
+          ...o,
+          selected: Boolean(selectedOptionId && o.id === selectedOptionId)
+        }))
+      }));
 
       context.externalBuffSlots.push({
         index: i,
@@ -1025,8 +1107,8 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
-    // Immediate form submission on input blur
-    html.find('input, select, textarea').on('blur', () => {
+    // Immediate form submission on input blur (excluding auxiliary hotlist and buff dropdowns)
+    html.find('input, select:not(.hotlist-select):not(.external-buff-select), textarea').on('blur', () => {
       if (this.isEditable) this.submit();
     });
 
@@ -1050,9 +1132,30 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     // Item Delete
     html.find('.item-delete').click(async ev => {
-      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
+      ev.preventDefault();
+      ev.stopPropagation();
+      const el = $(ev.currentTarget);
+      const itemId = el.data('itemId') || el.closest('[data-item-id]').data('itemId') || ev.currentTarget.dataset?.itemId || ev.currentTarget.closest?.('[data-item-id]')?.dataset?.itemId;
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === itemId) : this.actor.items.find?.(i => i.id === itemId));
       if (item) {
+        // Clean up any references in hotlist or external buffs if this item was assigned
+        const updates = {};
+        const hotlist = this.actor.system?.hotlist || {};
+        for (const [slot, val] of Object.entries(hotlist)) {
+          if (val === itemId || (val && typeof val === 'string' && val.toLowerCase() === item.name?.toLowerCase())) {
+            updates[`system.hotlist.${slot}`] = '';
+          }
+        }
+        const buffs = this.actor.system?.attributes?.externalBuffs || {};
+        for (const [slot, val] of Object.entries(buffs)) {
+          if (val === itemId || (val && typeof val === 'string' && val.toLowerCase() === item.name?.toLowerCase())) {
+            updates[`system.attributes.externalBuffs.${slot}`] = '';
+          }
+        }
+        if (Object.keys(updates).length > 0) {
+          await this.actor.update(updates);
+        }
         await item.delete();
       }
     });
@@ -1073,8 +1176,9 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // Hotlist Slot Selection
     html.find('.hotlist-select').change(async ev => {
       ev.preventDefault();
+      ev.stopPropagation();
       const select = $(ev.currentTarget);
-      const slot = select.data('slot');
+      const slot = select.data('slot') || ev.currentTarget.dataset?.slot;
       const val = select.val();
       if (slot) {
         await this.actor.update({ [`system.hotlist.${slot}`]: val });
@@ -1084,8 +1188,9 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // External Buff Slot Selection
     html.find('.external-buff-select').change(async ev => {
       ev.preventDefault();
+      ev.stopPropagation();
       const select = $(ev.currentTarget);
-      const slot = select.data('slot');
+      const slot = select.data('slot') || ev.currentTarget.dataset?.slot;
       const val = select.val();
       if (slot) {
         await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: val });
@@ -1099,6 +1204,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const slot = $(ev.currentTarget).data('slot');
       if (slot) {
         await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: '' });
+      }
+    });
+
+    // Assign Buff to External Buff Slot (from Conditions tab)
+    html.find('.buff-assign-slot-btn').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const itemId = $(ev.currentTarget).data('itemId');
+      const slot = $(ev.currentTarget).data('slot');
+      if (itemId && slot) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: itemId });
+        const item = this.actor.items.get?.(itemId) ||
+          (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+        const slotNum = slot.replace('buff', '');
+        ui.notifications?.info?.(`Assigned ${item?.name || 'Buff'} to External Buff Slot ${slotNum}`);
       }
     });
 
@@ -1195,13 +1315,20 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
-    // Hotlist Action: Use Item (Loot / Consumables)
+    // Hotlist Action: Use Item (Loot / Consumables / Skills)
     html.find('.roll-hotlist-use').click(async ev => {
       ev.preventDefault();
       const itemId = $(ev.currentTarget).data('itemId');
       const item = this.actor.items.get?.(itemId) ||
         (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
       if (!item) return;
+
+      if (item.type === 'skill') {
+        if (typeof this.actor.rollSkill === 'function') {
+          return this.actor.rollSkill(item);
+        }
+        return;
+      }
 
       if (typeof item.useLoot === 'function') {
         await item.useLoot();
@@ -1289,12 +1416,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     const buffSlotKey = buffSlotBox?.dataset?.slot;
 
     if (buffSlotKey && item.type === 'buff') {
-      const isOwned = item.actor?.id === this.actor.id ||
+      const isDirectlyOwned = item.actor?.id === this.actor.id ||
         (this.actor.items.get ? this.actor.items.get(item.id) : (Array.isArray(this.actor.items) && this.actor.items.some(i => i.id === item.id)));
 
-      if (isOwned) {
+      if (isDirectlyOwned) {
         await this.actor.update({ [`system.attributes.externalBuffs.${buffSlotKey}`]: item.id });
         return item;
+      }
+
+      const existingOwned = Array.isArray(this.actor.items)
+        ? this.actor.items.find(i => i.id === item.id || (i.name.toLowerCase().trim() === item.name?.toLowerCase().trim() && i.type === 'buff'))
+        : this.actor.items.find?.(i => i.id === item.id || (i.name.toLowerCase().trim() === item.name?.toLowerCase().trim() && i.type === 'buff'));
+
+      if (existingOwned) {
+        await this.actor.update({ [`system.attributes.externalBuffs.${buffSlotKey}`]: existingOwned.id });
+        return existingOwned;
       }
 
       const createdItems = await super._onDropItem(event, data);
@@ -1312,16 +1448,26 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     const hotlistSlot = hotlistBox?.dataset?.slot;
 
     if (hotlistSlot) {
-      // If item is already on this actor, assign directly without creating duplicate
-      const isOwned = item.actor?.id === this.actor.id ||
-        (this.actor.items.get ? this.actor.items.get(item.id) : this.actor.items.some(i => i.id === item.id));
+      // If item is already on this actor (by reference or ID), assign directly without creating duplicate
+      const isDirectlyOwned = item.actor?.id === this.actor.id ||
+        (this.actor.items.get ? this.actor.items.get(item.id) : (Array.isArray(this.actor.items) && this.actor.items.some(i => i.id === item.id)));
 
-      if (isOwned) {
+      if (isDirectlyOwned) {
         await this.actor.update({ [`system.hotlist.${hotlistSlot}`]: item.id });
         return item;
       }
 
-      // If from compendium or world, create item on actor first and assign to slot
+      // Check if actor already has an item with matching name and type (e.g. from compendium or spell library)
+      const existingOwned = Array.isArray(this.actor.items)
+        ? this.actor.items.find(i => i.id === item.id || (i.name.toLowerCase().trim() === item.name?.toLowerCase().trim() && i.type === item.type))
+        : this.actor.items.find?.(i => i.id === item.id || (i.name.toLowerCase().trim() === item.name?.toLowerCase().trim() && i.type === item.type));
+
+      if (existingOwned) {
+        await this.actor.update({ [`system.hotlist.${hotlistSlot}`]: existingOwned.id });
+        return existingOwned;
+      }
+
+      // If from compendium or world and not yet on actor, create item on actor first and assign to slot
       const createdItems = await super._onDropItem(event, data);
       const createdItem = Array.isArray(createdItems) ? createdItems[0] : createdItems;
       if (createdItem?.id) {
@@ -1330,7 +1476,111 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       return createdItems;
     }
 
-    return super._onDropItem(event, data);
+    // Handle item reordering/sorting within the sheet if dropped on another item row
+    const isDirectlyOwned = item.actor?.id === this.actor.id ||
+      item.parent?.id === this.actor.id ||
+      (this.actor.items.get ? this.actor.items.get(item.id) : (Array.isArray(this.actor.items) && this.actor.items.some(i => i.id === item.id)));
+
+    const dropTarget = event.target?.closest?.('[data-item-id]');
+    if (isDirectlyOwned && dropTarget && dropTarget.dataset?.itemId && dropTarget.dataset.itemId !== item.id) {
+      return this._onSortItem(event, item.toObject ? item.toObject() : item);
+    }
+
+    return super._onDropItem ? super._onDropItem(event, data) : this._onDropItemCreate(item.toObject ? item.toObject() : item);
+  }
+
+  /**
+   * Handle reordering/sorting an item within the sheet.
+   * @param {DragEvent} event
+   * @param {object} itemData
+   */
+  async _onSortItem(event, itemData) {
+    const sourceId = itemData._id || itemData.id;
+    const dropTarget = event.target?.closest?.('[data-item-id]');
+    const targetId = dropTarget?.dataset?.itemId;
+    if (!dropTarget || !targetId || targetId === sourceId) return;
+
+    const source = this.actor.items.get?.(sourceId) ||
+      (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === sourceId) : this.actor.items.find?.(i => i.id === sourceId));
+    const target = this.actor.items.get?.(targetId) ||
+      (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === targetId) : this.actor.items.find?.(i => i.id === targetId));
+    if (!source || !target) return;
+
+    // Sibling items in the same collection/category
+    const allItems = Array.from(this.actor.items.values ? this.actor.items.values() : this.actor.items);
+    const siblings = allItems.filter(i => {
+      if (i.id === source.id) return false;
+      if (['gear', 'loot'].includes(source.type)) {
+        return ['gear', 'loot'].includes(i.type);
+      }
+      return i.type === source.type;
+    });
+
+    // Determine drop position (sortBefore: dropped in upper half vs lower half)
+    let sortBefore = true;
+    if (typeof dropTarget.getBoundingClientRect === 'function' && event.clientY) {
+      const rect = dropTarget.getBoundingClientRect();
+      sortBefore = (event.clientY - rect.top) < (rect.height / 2);
+    }
+
+    // Sort siblings by existing sort key
+    siblings.sort((a, b) => (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name));
+
+    // Try Foundry SortingHelpers first
+    const SortingHelpers = globalThis.foundry?.utils?.SortingHelpers || globalThis.SortingHelpers;
+    if (typeof SortingHelpers?.performIntegerSort === 'function') {
+      try {
+        const sortUpdates = SortingHelpers.performIntegerSort(source, {
+          target,
+          siblings,
+          sortBefore
+        });
+        if (Array.isArray(sortUpdates) && sortUpdates.length > 0) {
+          if (typeof this.actor.updateEmbeddedDocuments === 'function') {
+            const updateData = sortUpdates.map(u => ({ _id: u.target.id, sort: u.update.sort }));
+            return await this.actor.updateEmbeddedDocuments('Item', updateData);
+          } else {
+            for (const u of sortUpdates) {
+              await u.target.update?.({ sort: u.update.sort });
+            }
+            return sortUpdates;
+          }
+        }
+      } catch (err) {
+        // Fall back to manual sort below
+      }
+    }
+
+    // Fallback: manual sort calculation
+    const DENSITY = (typeof CONST !== 'undefined' && CONST.SORT_INTEGER_DENSITY) ? CONST.SORT_INTEGER_DENSITY : 100000;
+    const targetIdx = siblings.findIndex(s => s.id === target.id);
+    let newSort;
+    if (targetIdx === -1) {
+      newSort = (target.sort || DENSITY) + (sortBefore ? -DENSITY : DENSITY);
+    } else if (sortBefore) {
+      const prev = siblings[targetIdx - 1];
+      const next = siblings[targetIdx];
+      const prevSort = prev ? (prev.sort || 0) : ((next.sort || 0) - DENSITY);
+      const nextSort = next.sort || 0;
+      newSort = Math.round((prevSort + nextSort) / 2);
+      if (newSort === prevSort || newSort === nextSort) {
+        newSort = prevSort - DENSITY;
+      }
+    } else {
+      const prev = siblings[targetIdx];
+      const next = siblings[targetIdx + 1];
+      const prevSort = prev.sort || 0;
+      const nextSort = next ? (next.sort || 0) : (prevSort + DENSITY);
+      newSort = Math.round((prevSort + nextSort) / 2);
+      if (newSort === prevSort || newSort === nextSort) {
+        newSort = prevSort + DENSITY;
+      }
+    }
+
+    if (typeof this.actor.updateEmbeddedDocuments === 'function') {
+      return await this.actor.updateEmbeddedDocuments('Item', [{ _id: source.id, sort: newSort }]);
+    }
+    return await source.update({ sort: newSort });
   }
 
   /** @override */

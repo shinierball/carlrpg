@@ -10,14 +10,12 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 
 - Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
 
-- **7-Tab Character Sheet**: Recreates the official DCC RPG character sheet with expanded crawler features:
-  - **Page 1 (Core)**: Character details, 10-segment gradient Health Bar (10%–100%), 5 Core Stats (STR, INT, CON, DEX, CHA), EVADE ($d20 + \text{DEX Mod} + \text{Gear} + \text{Buffs}$), DAMAGE RESISTANCE ($\text{Armor} + \text{Gear} + \text{Buffs}$), Mana, AI Favor & Selectable Creature Size category dropdown (1 Tiny to 8 Gargantuan), Active Debuffs strip with severity chips and 1-click removal, Portrait, External Buffs, ATTACKS table with interactive damage application, and the 10-slot combat **Hotlist**.
-  - **Page 2 (Gear & Story)**: Equipped Gear Slots (Head, Torso, Arms, Hands/Holding, Legs, Feet, 10 Accessories, Tattoos, and Patches) with active bonus badges, plus roleplay tracking (Popularity, Past Trauma, Loose Ends, Regrets, Notes). Features inline `[ 🎲 Roll 1d12 ]` buttons for Table 11 (Past Traumas), Table 12 (Loose Ends), and Table 13 (Regrets) with chat card results and full manual textarea editability to preserve player creativity.
-  - **Page 3 (Skills)**: Full skills table tracking Base Rank, Gear Bonuses, Weapon Group / Type Bonuses, Boon Bonuses, Modified Rank, and Total Skill. Explicit skill types (`Edge`, `Bashing`, `Reach`, `Ranged`, `Strike`, `Hand to Hand`, `Utility`) with automatic cascading bonuses from generic mastery skills (e.g. *Edged Weapons*, *Blunt Weapons*, *Reach Weapons*). Automatic Untrained Disadvantage (`2d20kl`), Trained (`1d20 + Total`), *Call a Play* (`2d6`), and *Intervene* (`1d6`) rolls, backed by the **DCC Skill Library & Manager**.
-  - **Spells**: Dedicated spellbook with mana tracking, spell ranks, quotes, range, duration, damage, upgrades, and cast roll cards, backed by the **DCC Spell Library & Manager**.
-  - **Page 4 (Inventory)**: Gear and Loot management with slot equipping that dynamically calculates ability, DR, Evade, and skill bonuses, plus a dedicated **Character Debuffs & Conditions** management table.
-  - **Page 5 (Extras & Space)**: Pet and Mount/Vehicle blocks, Important Things I've Killed, Clubs/Societies, Personal Space, and Deity tracking.
-  - **Page 6 (Abilities & Sponsors)**: Racial Abilities, Class Abilities, and 3 Sponsor blocks.
+- **5-Tab Modern Character Sheet**: Recreates the official DCC RPG character sheet with modern UX improvements, consolidated workflows, and full PDF export compatibility:
+  - **Tab 1 (Core & Combat)**: Character details, 10-segment gradient Health Bar (10%–100%), 5 Core Stats (STR, INT, CON, DEX, CHA), EVADE ($d20 + \text{DEX Mod} + \text{Gear} + \text{Buffs}$), DAMAGE RESISTANCE ($\text{Armor} + \text{Gear} + \text{Buffs}$), Mana, AI Favor & Selectable Creature Size category dropdown (1 Tiny to 8 Gargantuan), Active Debuffs strip with severity chips and 1-click removal, Portrait, External Buff Slots (1–3), ATTACKS table with interactive damage application, and the 10-slot combat **Hotlist** (with drag-and-drop item, spell, attack, and skill assignment, quick dropdown selection, smart owned-item duplicate prevention, and 1-click execution for attack rolls, damage, gear toggling, and spellcasting).
+  - **Tab 2 (Equipment & Inventory)**: Combines Equipped Gear Slots (Head, Torso, Arms, Hands/Holding, Legs, Feet, 10 Accessories) with active bonus badges and notes inputs directly alongside the physical Backpack Items table (Gear & Loot) with drag-and-drop reordering, quantity editing, 1-click equipping, and deletion. All buffs and debuffs have been moved to their own dedicated tab to keep inventory strictly physical.
+  - **Tab 3 (Skills & Spells)**: Unified abilities and magic center combining combat/utility skills and the character spellbook. Full skills table tracking Base Rank, Gear Bonuses, Weapon Group / Type Bonuses, Boon Bonuses, Modified Rank, and Total Skill, with drag-and-drop custom list reordering and 1-click deletion. Spells section includes mana tracking, quotes, ranges, durations, damage, rank scaling, and cast roll cards, backed by both the **DCC Skill Library** and **DCC Spell Library**.
+  - **Tab 4 (Conditions & Effects)**: Dedicated status effect center managing character buffs, active effects, debuffs, and negative conditions. Displays severity badges (`Minor`, `Moderate`, `Major`), durations, and 1-click quick-assignment buttons (`[1]`, `[2]`, `[3]`) to assign owned buffs directly to Page 1 External Buff slots 1, 2, or 3, with direct launch to the Condition & Buff Library.
+  - **Tab 5 (Story & Sponsors)**: Consolidated narrative background (Popularity, Past Traumas, Loose Ends, Regrets, Notes) featuring inline `[ 🎲 Roll 1d12 ]` buttons for Table 11 (Past Traumas), Table 12 (Loose Ends), and Table 13 (Regrets) with chat card results, Companions & Personal Space (Pet Companion with special traits & attacks, Mount/Vehicle with DR & speed, Personal Space with defense & amenities, Deity/Patron with boons & sins), and Character Features (Racial Traits, Class Talents, Corporate Sponsors 1–3).
 - **Mob Actor Type, Monster Statblocks & Compendium**:
   - **Official Mob Compendium (`carl-rpg.mobs`)**: Pre-packaged Actor compendium populated with all 22 monsters and bosses from the official *Game Master's Toolkit - Entities List* (including *Aranaea Magnus*, *Chef BoyardOoze*, *Rat Brute*, *Rat Shaman*, *Rat Hooligan*, *Critical Consensus*, *Canis Knights*, *Grimes*, *Trollogs*, *Dread Wizard Grimblegore*, *Cocaine Kobold*, *Danger Dingo*, *Jacked Kangaroo*, *Jazmanian Devil*, *Whambat*, *Mick Moran*, *Brindle Grub*, *Cow-Tailed Brindle Grub*, *Brindled Vespa*, *Unvaccinated Clurichaun Rev-Up Consultant*, *Laminak Rev-Up Consultant Manager*, and *Smombie*, plus the tutorial *Pack Rat*).
   - **Variable Health Bars**: Mobs support variable health bar slots (`hp.bars`, e.g. 2 slots for Pack Rat, 10 bars for Aranaea Magnus, 12 bars for Grimblegore and Mick Moran), rather than being locked to 10 bars. Health per bar defaults to the mob's CON modifier (`getDCCStatModifier(CON)`), with support for explicit overrides via `hp.hpPerBar`. Damage resolution removes full bars and ignores excess damage.
@@ -34,7 +32,8 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 - **Dedicated Interactive Catalog Managers**:
   - **Crawler Character Creator (`DCCCrawlerCreatorApp`)**: Fast matrix character creation terminal accessible right from the Actors directory (`[ ⚔️ New Crawler ]`). Full support for Human and Animal species, standard stat arrays `[2, 3, 4, 5, 6]`, dynamic starting Health & Mana initialization (ensuring current health and mana match max values at 100% on creation based on CON and INT), 4-tier life-stage background matrices (Childhood/Youth, Adolescence/Training, Career/Adult, Hobby/Quirk), non-additive duplicate skill rank resolution (`Math.max`), **Step 9 Psychological Background Rollable Tables** for Past Traumas (Table 11), Loose Ends (Table 12), and Regrets (Table 13) with 1d12 roll buttons, table selection dropdowns, and freeform editable textareas, **Level 1 Starter Combat Loadouts** (choose a Basic Weapon at Rank 3 with physical weapon equipped to Hands and attack item configured, Starter Spell at Rank 3 + 5 Normal Mana Potions with 100% mana refill, or Unarmed Combat H2H + Damage Effect combo at Rank 3), universal baseline **Heal (Rank 1)** for all Crawlers (actively restores up to 2 health bars to self only, capped at maximum HP), 1-click procedural randomizer, and starting floor selection (Floors 1–5).
   - **DCC Spell Library & Manager (`DCCSpellManager`)**: Comprehensive popup search catalog indexing all canonical DCC spells. Filter by spell category and governing stat, view quotes, costs, ranges, and add spells directly to character sheets with a single click.
-  - **DCC Condition & Buff Manager (`DCCBuffDebuffManager`)**: Unified browser for buffs and debuffs with live search, severity indicators, and 1-click assignment to External Buff slots or character debuffs.
+  - **DCC Condition & Buff Manager (`DCCBuffDebuffManager`)**: Unified browser for buffs and debuffs with live search, severity indicators, and 1-click assignment to External Buff slots or character debuffs. Supports direct discovery of character-owned custom buffs alongside world and compendium effects.
+  - **External Buff Slots & Custom Buff Management**: Up to 3 active external buffs on Page 1 (Core) with single-match option selection. Character-owned custom buffs take precedence over compendium defaults, ensuring custom modifiers (e.g. custom +5 STR) are visually preserved upon reopening the sheet and accurately reflected in derived ability score totals.
 - **Combat Performance & AI Awards**: Real-time tracking of net damage applied (factoring in target DR and Temp HP), kills, and tactical skills linked to Foundry's Combat Tracker, plus the **Dungeon AI Award Console** for dispensing Loot Boxes (Bronze through Celestial) and AI Favor.
 - **Party Progression & Session Hub (`DCCSessionManagerApp`)**:
   - Live party dashboard providing real-time party vitals, health bars, mana, net damage dealt/taken, AI favor, popularity, and untrained checks attempted.
@@ -131,3 +130,26 @@ New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\FoundryVTT\Data\systems
 3. Set your World Title (e.g., *Dungeon Crawler Carl Campaign*).
 4. Under **Game System**, select **Dungeon Crawler Carl RPG**.
 5. Launch the world and start crawling!
+
+---
+
+## 🧪 Testing & Code Coverage
+
+The CarlRPG system features a headless automated test harness powered by Node.js built-in test runner (`node:test`). Tests run natively without browser dependencies or heavy bundlers.
+
+### Running Unit Tests
+Execute the full test suite (470+ assertions):
+```bash
+node --test tests/*.test.mjs
+```
+
+### Running Test Coverage Audit
+Run native V8 code coverage analysis across all system source files in `src/`:
+```bash
+node scripts/coverage.mjs
+```
+Or directly via Node:
+```bash
+node --test --experimental-test-coverage --test-coverage-include="src/**" tests/*.test.mjs
+```
+*Current benchmark: **>90%** overall line coverage, with every individual module in `src/` exceeding the strict 75% coverage threshold.*

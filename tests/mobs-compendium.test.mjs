@@ -340,7 +340,7 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.ok(files.some(f => f.startsWith('MANIFEST') || f.endsWith('.ldb') || f === 'CURRENT'), 'packs/mobs must contain LevelDB database files');
     });
 
-    test('packs/mobs ClassicLevel database can be read and contains all actors', async () => {
+    test('packs/mobs ClassicLevel database can be read and contains all actors', async (t) => {
       let ClassicLevel;
       const foundryModulePath = '/Applications/Foundry Virtual Tabletop.app/Contents/Resources/app/node_modules/classic-level';
       if (fs.existsSync(foundryModulePath)) {
@@ -353,7 +353,15 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
 
       const packDir = path.resolve(__dirname, '../packs/mobs');
       const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
-      await db.open();
+      try {
+        await db.open();
+      } catch (err) {
+        if (err?.code === 'LEVEL_DATABASE_NOT_OPEN' && err?.cause?.code === 'LEVEL_LOCKED') {
+          t.skip('Database locked by active Foundry VTT instance');
+          return;
+        }
+        throw err;
+      }
 
       for (const mob of DCC_MOBS) {
         const doc = await db.get(`!actors!${mob._id}`);
@@ -434,7 +442,7 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(sac.system.quantity, 1);
     });
 
-    test('packs/mobs LevelDB database contains embedded loot items for all actors', async () => {
+    test('packs/mobs LevelDB database contains embedded loot items for all actors', async (t) => {
       let ClassicLevel;
       const foundryModulePath = '/Applications/Foundry Virtual Tabletop.app/Contents/Resources/app/node_modules/classic-level';
       if (fs.existsSync(foundryModulePath)) {
@@ -447,7 +455,15 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
 
       const packDir = path.resolve(__dirname, '../packs/mobs');
       const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
-      await db.open();
+      try {
+        await db.open();
+      } catch (err) {
+        if (err?.code === 'LEVEL_DATABASE_NOT_OPEN' && err?.cause?.code === 'LEVEL_LOCKED') {
+          t.skip('Database locked by active Foundry VTT instance');
+          return;
+        }
+        throw err;
+      }
 
       for (const mob of DCC_MOBS) {
         const doc = await db.get(`!actors!${mob._id}`);

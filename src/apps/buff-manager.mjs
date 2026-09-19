@@ -78,6 +78,25 @@ export class DCCBuffDebuffManager extends DCCBaseApplication {
       }
     }
 
+    // 4. Actor-Specific Items (Buffs & Debuffs on Actor)
+    if (this.actor?.items) {
+      for (const item of this.actor.items) {
+        if (item.type === 'buff' || item.type === 'debuff') {
+          const norm = item.name?.toLowerCase().trim();
+          if (!list.some(c => c.id === item.id || (c.name?.toLowerCase().trim() === norm && c.type === item.type))) {
+            list.push({
+              id: item.id,
+              name: item.name,
+              type: item.type,
+              img: item.img || (item.type === 'buff' ? 'icons/svg/aura.svg' : 'icons/svg/skull.svg'),
+              source: 'actor',
+              system: structuredClone(item.system || {})
+            });
+          }
+        }
+      }
+    }
+
     // Determine if active on bound actor
     const ownedItemNames = new Set(
       this.actor?.items?.filter

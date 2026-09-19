@@ -199,8 +199,10 @@ export class DCCCombatTracker extends BaseCombatTracker {
    * @param {jQuery} html
    */
   activateListeners(html) {
-    super.activateListeners(html);
-    const $html = (html instanceof jQuery) ? html : $(html);
+    if (typeof super.activateListeners === 'function') {
+      super.activateListeners(html);
+    }
+    const $html = (typeof jQuery !== 'undefined' && html instanceof jQuery) ? html : $(html);
 
     // 1. Surprise Round Toggle Button
     $html.find('.dcc-surprise-toggle').click(async ev => {
@@ -400,8 +402,10 @@ export class DCCCombatTracker extends BaseCombatTracker {
     });
 
     // Close open action menus when clicking anywhere else
-    $(document).off('click.dccCombatTracker').on('click.dccCombatTracker', () => {
-      $html.find('.dcc-action-picker-popover').hide();
-    });
+    if (typeof document !== 'undefined') {
+      $(document).off('click.dccCombatTracker').on('click.dccCombatTracker', () => {
+        $html.find('.dcc-action-picker-popover').hide();
+      });
+    }
   }
 }

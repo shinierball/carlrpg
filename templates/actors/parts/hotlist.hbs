@@ -8,7 +8,7 @@
   </div>
   <div class="dcc-hotlist-grid">
     {{#each hotlistSlots as |slot|}}
-      <div class="dcc-hotlist-box {{#if slot.isEmpty}}is-empty{{else}}is-populated{{/if}}" data-slot="{{slot.key}}" {{#if slot.itemId}}data-item-id="{{slot.itemId}}"{{/if}}>
+      <div class="dcc-hotlist-box {{#if slot.isEmpty}}is-empty{{else}}is-populated{{/if}}" data-slot="{{slot.key}}" {{#if slot.itemId}}data-item-id="{{slot.itemId}}" draggable="true"{{/if}}>
         <div class="dcc-hotlist-header">
           <span class="dcc-hotlist-num">{{slot.index}}</span>
           {{#if slot.badge}}

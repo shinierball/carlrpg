@@ -1566,11 +1566,11 @@ export class DCCActor extends Actor {
       };
     }
 
-    const statMatch = lower.match(/\+?(\d+)?\s*(str|int|con|dex|cha|strength|intelligence|constitution|dexterity|charisma)/i);
+    const statMatch = lower.match(/(?:\+?(\d+)\s*)?(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)(?:\s*\+?(\d+))?/i);
     if (statMatch) {
       const statMap = { str: 'str', strength: 'str', int: 'int', intelligence: 'int', con: 'con', constitution: 'con', dex: 'dex', dexterity: 'dex', cha: 'cha', charisma: 'cha' };
       const stat = statMap[statMatch[2].toLowerCase()];
-      const val = Number(statMatch[1]) || 2;
+      const val = Number(statMatch[1] || statMatch[3]) || 2;
       return {
         id: 'custom-' + str,
         name: str,

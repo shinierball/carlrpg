@@ -1,3 +1,102 @@
+## 2.0.24
+
+### Test Suite Evaluation, Automated Coverage Auditing, & High-Coverage Hardening
+
+- **Test Evaluation & Cleanup**:
+  - Removed obsolete and Foundry-core testing files:
+    - Removed `tests/v13-namespacing.test.mjs` (tested Foundry core v13 global getter deprecation traps).
+    - Removed `tests/sidebar-hooks.test.mjs` (tested Foundry core HTMLElement vs jQuery wrapper handling).
+  - Cleaned obsolete negative-template checks across test suites:
+    - Updated `tests/spells.test.mjs`, `tests/hotlist.test.mjs`, and `tests/debuffs-management.test.mjs` to eliminate stale checks referencing legacy removed template comments or partial inclusions.
+- **Node.js Native Coverage Tooling**:
+  - Established native V8 coverage reporting using Node.js built-in test runner:
+    `node --test --experimental-test-coverage --test-coverage-include="src/**" tests/*.test.mjs`
+  - Created automated audit script `scripts/coverage.mjs` (`npm run test:coverage`) that evaluates per-file line coverage against a strict $\ge 75\%$ threshold and outputs a status table.
+- **Coverage Expansion to $\ge 75\%$ Across All Repository Modules**:
+  - Added targeted test suites to bring every single module in `src/` to $\ge 75\%$ line coverage (overall codebase coverage now **91.34%** with 0 failing tests across 471 assertions):
+    - `tests/mob-and-item-models-extended.test.mjs`: Raised `mob-model.mjs` from 18.10% to 100.00% and `documents/item.mjs` from 60.36% to 84.73%.
+    - `tests/item-sheet-actions.test.mjs`: Raised `sheets/item-sheet.mjs` from 51.88% to 81.51%.
+    - `tests/combat-archive-and-tracker-extended.test.mjs`: Raised `apps/combat-archive.mjs` from 38.13% to 78.09% and `apps/combat-tracker.mjs` from 48.16% to 75.18%.
+    - `tests/managers-extended.test.mjs`: Raised `apps/buff-manager.mjs` from 67.01% to 97.57%, `apps/skill-manager.mjs` from 45.66% to 80.85%, `apps/spell-manager.mjs` from 52.99% to 85.75%, and `apps/crawler-creator.mjs` from 69.70% to 83.11%.
+    - `tests/dcc-entry-extended.test.mjs`: Raised system entry point `src/dcc.mjs` from 55.44% to 76.97%.
+- **Engine Reliability & Environment Hardening**:
+  - Added safety checks for headless and Node.js testing environments in `src/apps/combat-tracker.mjs` (safely guards `typeof document !== 'undefined'`) and `tests/setup.mjs` (`MockDocumentSheet.isEditable = true`, chained jQuery mock, and async `Hooks.callAll` promise resolution).
+
+## 2.0.23
+
+### Character Sheet Modernization (Option A: 5-Tab Modern Layout)
+
+- **Option A Clean 5-Tab Character Sheet Architecture**:
+  - Restructured the Crawler character sheet into an intuitive 5-tab workflow:
+    1. **Tab 1: Core & Combat** (`1: Core & Combat`): Vitals, Enhanced/Unenhanced Ability Scores, Health Bar, Mana, Evade & DR, Attacks, Active External Buff Slots (1–3), Active Debuffs chip summary, and 10-slot Hotlist.
+    2. **Tab 2: Equipment & Inventory** (`2: Equipment & Inventory`): Consolidates equipped body slots (`Head`, `Torso`, `Arms`, `Hands/Holding`, `Legs`, `Feet`, `Accessories (Max 10)`) alongside physical backpack items (`Gear` and `Loot`). Includes equipped state badges, notes inputs, quantity editing, equip toggles, and item deletion. Buffs and debuffs have been completely removed from this tab.
+    3. **Tab 3: Skills & Spells** (`3: Skills & Spells`): Unified abilities and magic center presenting combat/utility skills and the character spellbook in a single view with direct compendium pickers, roll buttons, damage calculations, and drag-and-drop reordering.
+    4. **Tab 4: Conditions & Effects** (`4: Conditions & Effects`): Dedicated condition management hub tracking all character buffs, active effects, and debuffs with severity badges (`Minor`, `Moderate`, `Major`), duration tracking, and quick-assignment buttons (`1`, `2`, `3`) to directly assign buffs to External Buff slots 1–3.
+    5. **Tab 5: Story & Sponsors** (`5: Story & Sponsors`): Consolidated narrative and crawler background (Popularity, Past Traumas with 1d12 roll button, Loose Ends with 1d12 roll button, Regrets with 1d12 roll button, Notes), Companions & Personal Space (Pet Companion, Mount/Vehicle, Personal Space, Deity/Patron), and Features & Sponsors (Racial Traits, Class Talents, Corporate Sponsors 1–3).
+- **Controller & Event Handling**:
+  - Added `.buff-assign-slot-btn` click handler in `DCCCrawlerSheet` (`src/sheets/crawler-sheet.mjs`) allowing players to assign any character-owned buff to External Buff slots `buff1`, `buff2`, or `buff3` with a single click and user notification.
+- **Template Preloading & Styling**:
+  - Registered `conditions.hbs` and `story-extras.hbs` in `loadTemplates` in `src/dcc.mjs`.
+  - Added CSS rules in `styles/dcc.css` for `.dcc-slot-assign-btn-group`, `.buff-assign-slot-btn`, and tab container styling.
+- **Full PDF Parity Maintained**:
+  - 100% data schema compatibility preserved across all 6 pages of the official fillable PDF exporter (`src/apps/pdf-exporter.mjs`), ensuring AcroForm mappings for gear slots, story details, items, skills, and spells function without interruption.
+- **Automated Test Coverage**:
+  - Added `tests/character-sheet-modern-tabs.test.mjs` verifying tab structure, partial preloading, inventory gear slots consolidation, buff/debuff removal from inventory, conditions tab quick-assignment, and story details.
+  - Verified 100% pass rate across all 457 unit tests in the repository.
+
+## 2.0.22
+
+### Custom Buff Option Selection & External Buff Prioritization
+
+- **Single-Match External Buff Option Selection**:
+  - Refactored `context.externalBuffSlots` option selection in `DCCCrawlerSheet` (`src/sheets/crawler-sheet.mjs`). Replaced uncoordinated multi-group mapping with strict single-match resolution that guarantees only ONE `<option selected>` exists across all dropdown optgroups.
+  - Prioritizes character-owned buffs (`📦 Character Buffs`) over compendium defaults. When an actor creates a custom buff with the same name or type as a compendium buff (e.g. custom "Strength Buff" or "Strength +5" granting +5 STR), the character's owned buff is marked selected, preventing the compendium default `⚡ Strength Buff (+2 STR)` from overriding it in the DOM.
+  - Implemented prioritized hierarchical resolution: (1) exact ID match with `resolvedBuff.id`, (2) exact ID match with `valStr`, (3) exact name match checking owned buffs before compendium options.
+- **Custom Buff String Parsing & Regex Optimization**:
+  - Optimized ability score regex parsing in `DCCActor.resolveBuff` (`src/documents/actor.mjs`). Placed full stat names (`strength`, `intelligence`, `constitution`, `dexterity`, `charisma`) ahead of 3-letter abbreviations (`str`, `int`, `con`, `dex`, `cha`) in alternation, and added support for postfixed values (e.g. `Strength +5`, `STR +5`, `Strength 5`).
+- **Condition Library Character Buff Discovery**:
+  - Extended `DCCBuffDebuffManager.getUnifiedConditions` (`src/apps/buff-manager.mjs`) to include buffs and debuffs directly owned by the bound character, making custom actor-specific conditions visible and manageable in the condition browser.
+- **Automated Test Suite**:
+  - Added test coverage in `tests/buffs.test.mjs` validating custom buff selection with +5 STR, name collision resolution between owned and compendium buffs, and postfixed custom buff string parsing. Verified 100% passing test suite across all 451 unit tests.
+
+## 2.0.21
+
+### Inventory, Spells, & Skills Drag Reordering & Item Removal
+
+- **Drag-and-Drop List Reordering**:
+  - Implemented `_onSortItem(event, itemData)` on `DCCCrawlerSheet` to handle dynamic reordering of items within the sheet.
+  - Dropping an owned item onto another row in the same collection (spells, skills, gear, loot) calculates new relative sort values and updates `item.sort`.
+  - Updated context preparation in `getData()` to prioritize `item.sort` with alphabetical name fallback across `context.gear`, `context.loot`, `context.spells`, `context.skills`, `context.buffs`, `context.debuffs`, and `context.attacks`.
+- **Item Removal & Slot Cleanup**:
+  - Enhanced the `.item-delete` click listener with event bubbling isolation (`preventDefault` and `stopPropagation`).
+  - Automatically unbinds deleted items from `system.hotlist` and `system.attributes.externalBuffs`, preventing dead ID references.
+  - Confirmed and unified `.item-delete` delete buttons with trash icons and tooltips across all lists in `page4-inventory.hbs`, `spells.hbs`, and `page3-skills.hbs`.
+- **Sheet Navigation & Tab Cleanup**:
+  - Renamed the second tab from `2: Hotlist & Gear` to `2: Gear & Story` in `crawler-sheet.hbs` and `lang/en.json`, reflecting that the Hotlist is located on Page 1 (Core).
+- **Automated Test Coverage**:
+  - Added dedicated test suite in `tests/item-sorting-deletion.test.mjs` validating `item.sort` ordering, `_onSortItem` drop calculations, drag-and-drop routing, and hotlist/buff cleanup on deletion.
+  - Verified 100% passing test suite across all 448 unit tests.
+
+## 2.0.20
+
+### Hotlist Drag-and-Drop & Dropdown Population Restoration
+
+- **Hotlist Drag-and-Drop & Owned Item Resolution**:
+  - Configured native drag-and-drop selector `[data-item-id]` on `DCCCrawlerSheet` so all items, spells, attacks, and skills can be dragged directly onto any of the 10 Hotlist slot boxes.
+  - Implemented smart compendium and world item matching: dragging a compendium spell, item, or buff onto a character sheet or hotlist slot checks if an item with the same name and type is already owned by the actor. If found, it reuses the existing owned item rather than creating redundant duplicates.
+  - Added `draggable="true"` attributes to item table rows across `page1-core.hbs`, `spells.hbs`, `page4-inventory.hbs`, `page3-skills.hbs`, and populated hotlist boxes in `hotlist.hbs`.
+- **Spell Manager Item Drag Serialization**:
+  - Enhanced `_onDragStart` in `DCCSpellManager` to locate full spell system definitions from `CONFIG.DCC.spells` and `game.items`. Spells dragged from the catalog carry complete type, image, and system payloads for seamless dropping.
+- **Dropdown Selection Event Isolation**:
+  - Added `ev.stopPropagation()` to `.hotlist-select` and `.external-buff-select` change handlers. This prevents the change event from bubbling up to Foundry's form harvester, eliminating race conditions where generic form submission clobbered the hotlist slot update.
+  - Excluded `.hotlist-select` and `.external-buff-select` from the generic form blur submission listener.
+- **Combat & Utility Skills on Hotlist**:
+  - Added a dedicated **Skills** optgroup to the Hotlist slot dropdowns so players can directly assign combat masteries (Edge, Bashing, Reach, etc.) and utility skills to hotlist slots.
+  - Expanded `getData()` slot parsing to support `slotType === 'skill'`: determines attack classification, assigns `ATTACK` or `SKILL` badges, renders Rank and damage formulas, and wires `.roll-hotlist-attack`, `.roll-hotlist-attack-dmg`, and `.roll-hotlist-use` to trigger `actor.rollAttack` or `actor.rollSkill`.
+- **Automated Test Coverage**:
+  - Expanded `tests/hotlist.test.mjs` with subtests covering unowned compendium item drops, existing item duplicate prevention, skills optgroup selection, event bubbling isolation, and skill roll execution.
+  - Verified 100% passing test suite across all 443 unit tests.
+
 ## 2.0.19
 
 ### Mob Embedded Loot Items & Combat Sheet Integration

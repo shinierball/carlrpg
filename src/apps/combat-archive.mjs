@@ -219,8 +219,10 @@ export class DCCCombatArchiveApp extends DCCBaseApplication {
    * @param {jQuery} html
    */
   activateListeners(html) {
-    super.activateListeners(html);
-    const $html = (html instanceof jQuery) ? html : $(html);
+    if (typeof super.activateListeners === 'function') {
+      super.activateListeners(html);
+    }
+    const $html = (typeof jQuery !== 'undefined' && html instanceof jQuery) ? html : $(html);
 
     // 1. Dropdown Combat Selector
     $html.find('.dcc-archive-combat-select').change(ev => {

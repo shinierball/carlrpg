@@ -66,6 +66,17 @@ Page 1 (Core) of the mob sheet features a dedicated **Mob Lore & AI Announcement
 - **Special Traits & Rules**: Passives, split mechanics, immunities, vulnerabilities, and environmental interactions.
 - **Tactics & Notes**: Combat positioning, preferred targets, and attack sequences.
 
+### 5. Embedded Loot Items & Page 1 Treasure Drops
+All mob treasures are embedded directly into the mob actor as first-class items of `type: "loot"`.
+- **64 Unique Loot Items**: Each entity holds its specific drops with custom icons, quantities, descriptions, and lore notes.
+- **Page 1 Quick-Access**: The Mob sheet includes a dedicated **Treasure & Loot Drops** table on Page 1 (Core), allowing GMs to view, edit quantities inline, chat-share, or drag-and-drop loot onto player character sheets during combat encounters.
+- **Inventory Parity**: Loot items are also accessible and editable on Page 4 (Inventory).
+
+### 6. Attacks & Tactical Spells as Direct Attack Items
+In CarlRPG, mobs do not manage player-style spell slots or complex mana preparation.
+- **Unified Attack Table**: All 52 mob offensive actions and tactical spells (*Fireball*, *Mini Fireball*, *Firestrike*, *Firebolt*, *Heal Others*, *Clap Cloud*, *Magic Missile*, *Scream*, *Gloat*, and *Devour*) are structured as `type: "attack"` items.
+- **Direct Combat Rolling**: GMs can click any attack or spell to-hit or damage button directly from Page 1 to roll `1d20 + Stat Mod` (no untrained disadvantage) and damage with full typed damage packets, debuffs, and blast/burst areas.
+
 ---
 
 ## 🛠️ Rebuilding the Compendium
@@ -75,3 +86,4 @@ To regenerate the binary LevelDB compendium after editing `src/data/mobs.mjs`:
 node scripts/build-packs.mjs
 ```
 The script writes all actor records into `packs/mobs` using `ClassicLevel`.
+

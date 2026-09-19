@@ -177,7 +177,13 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(mob.system.attributes.speed.move, 30);
       assert.equal(mob.system.attributes.evadeDifficulty, '14+F');
       assert.equal(mob.system.attributes.surpriseDifficulty, '12+F');
-      assert.equal(mob.items.length, 6, 'Aranaea Magnus has 6 attacks');
+      const attacks = mob.items.filter(i => i.type === 'attack');
+      const loot = mob.items.filter(i => i.type === 'loot');
+      assert.equal(attacks.length, 6, 'Aranaea Magnus has 6 attacks');
+      assert.equal(loot.length, 3, 'Aranaea Magnus has 3 loot drops');
+      assert.ok(loot.some(i => i.name === 'Venom Sac'));
+      assert.ok(loot.some(i => i.name === 'Burning Silk Glands'));
+      assert.ok(loot.some(i => i.name === 'Spider Silk'));
     });
 
     test('Dread Wizard Grimblegore: Level 10 Neighborhood Boss with 12 bars (5 HP/bar), 60 Max HP, DR 2', () => {
@@ -191,9 +197,12 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(mob.system.attributes.dr.total, 2);
       assert.equal(mob.system.attributes.evadeDifficulty, '14+F');
       assert.equal(mob.system.attributes.surpriseDifficulty, '14+F');
-      assert.ok(mob.items.some(i => i.name === 'Fireball Spell'));
-      assert.ok(mob.items.some(i => i.name === 'Gloat Spell'));
-      assert.ok(mob.items.some(i => i.name === 'Jump Smash'));
+      assert.ok(mob.items.some(i => i.name === 'Fireball Spell' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Gloat Spell' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Jump Smash' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Dread Robes of Grimblegore' && i.type === 'loot'));
+      assert.ok(mob.items.some(i => i.name === 'Potion of Frog Leaping' && i.type === 'loot'));
+      assert.ok(mob.items.some(i => i.name === 'Arcane Grime Focus' && i.type === 'loot'));
     });
 
     test('Critical Consensus: Level 8 Neighborhood Boss, Huge (3x3), 11 bars (5 HP/bar), 55 Max HP', () => {
@@ -359,4 +368,97 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       await db.close();
     });
   });
+
+  describe('7. Embedded Loot Items & Attack System Verification', () => {
+    test('every mob in DCC_MOBS has at least one embedded loot item', () => {
+      for (const mob of DCC_MOBS) {
+        const lootItems = (mob.items || []).filter(i => i.type === 'loot');
+        assert.ok(
+          lootItems.length >= 1,
+          `Mob "${mob.name}" must have at least 1 embedded loot item (found ${lootItems.length})`
+        );
+        for (const item of lootItems) {
+          assert.equal(item.type, 'loot');
+          assert.ok(item._id && item._id.length === 16, `Loot item ${item.name} must have 16-char _id`);
+          assert.ok(item.name?.length > 0, `Loot item must have a name`);
+          assert.ok(item.img?.startsWith('icons/svg/'), `Loot item ${item.name} must have valid svg icon`);
+          assert.ok(typeof item.system.quantity === 'number' && item.system.quantity >= 1, `Loot ${item.name} quantity must be >= 1`);
+          assert.ok(item.system.notes?.length > 0 || item.system.description?.length > 0, `Loot ${item.name} must have notes or description`);
+        }
+      }
+    });
+
+    test('every attack across all mobs is type: "attack" with valid toHitStat, damageDice, and damageType', () => {
+      for (const mob of DCC_MOBS) {
+        const attacks = (mob.items || []).filter(i => i.type === 'attack');
+        assert.ok(attacks.length >= 1, `Mob "${mob.name}" must have at least 1 attack`);
+        for (const atk of attacks) {
+          assert.equal(atk.type, 'attack');
+          assert.ok(atk._id && atk._id.length === 16, `Attack ${atk.name} must have 16-char _id`);
+          assert.ok(atk.name?.length > 0, `Attack must have a name`);
+          assert.ok(atk.img?.startsWith('icons/svg/'), `Attack ${atk.name} must have valid svg icon`);
+          assert.ok(atk.system.damageDice?.length > 0, `Attack ${atk.name} on ${mob.name} must specify damageDice`);
+          assert.ok(atk.system.damageType?.length > 0, `Attack ${atk.name} on ${mob.name} must specify damageType`);
+          assert.ok(atk.system.effects?.length > 0, `Attack ${atk.name} on ${mob.name} must specify effects`);
+        }
+      }
+    });
+
+    test('Critical Consensus includes both Slam and Devour attack actions', () => {
+      const cc = DCC_MOBS.find(m => m.name === 'Critical Consensus');
+      assert.ok(cc);
+      const slam = cc.items.find(i => i.name === 'Slam' && i.type === 'attack');
+      const devour = cc.items.find(i => i.name === 'Devour' && i.type === 'attack');
+      assert.ok(slam, 'Critical Consensus must have Slam attack');
+      assert.ok(devour, 'Critical Consensus must have Devour healing action');
+      assert.equal(devour.system.damageType, 'Healing');
+      assert.equal(devour.system.damageDice, '1d4');
+    });
+
+    test('CrawlerSheet populates both context.loot and context.attacks for mob actor', async () => {
+      const data = DCC_MOBS.find(m => m.name === 'Aranaea Magnus');
+      const actor = new DCCActor(data);
+      actor.prepareData();
+
+      const sheet = new DCCCrawlerSheet(actor);
+      const context = await sheet._prepareContext();
+
+      assert.equal(context.isMob, true);
+      assert.equal(context.attacks.length, 6, 'Aranaea Magnus has 6 attacks in context');
+      assert.equal(context.loot.length, 3, 'Aranaea Magnus has 3 loot items in context');
+
+      const sac = context.loot.find(l => l.name === 'Venom Sac');
+      const glands = context.loot.find(l => l.name === 'Burning Silk Glands');
+      const silk = context.loot.find(l => l.name === 'Spider Silk');
+      assert.ok(sac && glands && silk, 'All 3 loot items must be present in context.loot');
+      assert.equal(sac.system.quantity, 1);
+    });
+
+    test('packs/mobs LevelDB database contains embedded loot items for all actors', async () => {
+      let ClassicLevel;
+      const foundryModulePath = '/Applications/Foundry Virtual Tabletop.app/Contents/Resources/app/node_modules/classic-level';
+      if (fs.existsSync(foundryModulePath)) {
+        const mod = await import(foundryModulePath + '/index.js');
+        ClassicLevel = mod.ClassicLevel || mod.default?.ClassicLevel || mod.default;
+      } else {
+        const mod = await import('classic-level');
+        ClassicLevel = mod.ClassicLevel;
+      }
+
+      const packDir = path.resolve(__dirname, '../packs/mobs');
+      const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+      await db.open();
+
+      for (const mob of DCC_MOBS) {
+        const doc = await db.get(`!actors!${mob._id}`);
+        const loot = (doc.items || []).filter(i => i.type === 'loot');
+        const attacks = (doc.items || []).filter(i => i.type === 'attack');
+        assert.ok(loot.length >= 1, `Compendium actor ${doc.name} must have embedded loot items`);
+        assert.ok(attacks.length >= 1, `Compendium actor ${doc.name} must have embedded attack items`);
+      }
+
+      await db.close();
+    });
+  });
 });
+

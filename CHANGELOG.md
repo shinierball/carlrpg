@@ -1,3 +1,26 @@
+## 2.0.19
+
+### Mob Embedded Loot Items & Combat Sheet Integration
+
+- **Embedded Loot Items on All Mobs**:
+  - Converted all mob treasure notes across all 23 entities in `DCC_MOBS` (`src/data/mobs.mjs`) into 64 embedded items of `type: "loot"`.
+  - Each loot item features unique IDs, descriptive names, custom SVG icons (`icons/svg/`), quantities (e.g. 10 Crossbow Bolts, 7 Copper Nibs), and atmospheric flavor notes.
+  - Players and GMs can now inspect, use, or drag-and-drop loot items directly between mob tokens and crawler character sheets.
+- **Mob Attacks & Spells Integration**:
+  - Validated and structured all 52 attacks and tactical spells as `type: "attack"` items with exact toHitStat, damageDice, damageStat, damageType, and debuff effects.
+  - Offensives and tactical spells (*Fireball*, *Mini Fireball*, *Firestrike*, *Firebolt*, *Heal Others*, *Clap Cloud*, *Magic Missile*, *Scream*, *Gloat*) roll directly from the Attacks table on the Mob sheet without requiring spell slots or mana prep.
+  - Added dedicated **Devour** action (`1d4 Healing`) to **Critical Consensus** for its *Constant Hunger* ability.
+- **Page 1 (Core) Mob Treasure & Loot Drops Section**:
+  - Added a dedicated **TREASURE & LOOT DROPS** table directly to Page 1 (Core) of the Mob sheet.
+  - Features real-time item rows with icon, name, inline quantity editing (`item-inline-edit`), notes, use/chat-drop, sheet edit, and delete buttons, plus an "Add Loot" button.
+  - Retained header summary field for backwards compatibility while giving GMs direct in-combat access to mob drops.
+- **Template & Data Schema Updates**:
+  - Added `description` field to `loot` item schema in `template.json`.
+  - Rebuilt binary LevelDB compendium pack `packs/mobs` with all embedded loot and attack items.
+- **Automated Test Coverage**:
+  - Added section 7 to `tests/mobs-compendium.test.mjs` verifying embedded loot existence, attack validity, Devour action, crawler sheet context population, and LevelDB compendium integrity.
+  - Verified 100% passing test suite across 438 tests.
+
 ## 2.0.18
 
 ### Game Master's Toolkit Mob Compendium & Entity Dataset

@@ -228,7 +228,8 @@
     },
     "loot": {
       "quantity": 1,
-      "notes": ""
+      "notes": "",
+      "description": ""
     },
     "buff": {
       "buffType": "stat",

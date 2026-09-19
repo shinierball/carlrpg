@@ -1,0 +1,422 @@
+[
+  {
+    "name": "Aranaea Magnus",
+    "type": "Neighborhood Boss",
+    "page": "59"
+  },
+  {
+    "name": "Bad Llama",
+    "type": "Mob",
+    "page": "51"
+  },
+  {
+    "name": "Ball of Swine",
+    "type": "Borough Boss",
+    "page": "142"
+  },
+  {
+    "name": "The Bar Render",
+    "type": "Neighborhood Boss",
+    "page": "37"
+  },
+  {
+    "name": "Barflie",
+    "type": "Mob",
+    "page": "30"
+  },
+  {
+    "name": "Beloved Mimic",
+    "type": "City Boss",
+    "page": "145"
+  },
+  {
+    "name": "Blind Goblin Survivor",
+    "type": "Mob",
+    "page": "129"
+  },
+  {
+    "name": "Brindle Grub",
+    "type": "Janitor Mob",
+    "page": "106, 139"
+  },
+  {
+    "name": "Brindled Vespa",
+    "type": "Janitor Mob",
+    "page": "107, 140"
+  },
+  {
+    "name": "Bruiser",
+    "type": "Crawler",
+    "page": "136"
+  },
+  {
+    "name": "Bugaboo Goblin-napper",
+    "type": "Mob",
+    "page": "128"
+  },
+  {
+    "name": "Bugaboo Socket-Picker",
+    "type": "Mob",
+    "page": "128"
+  },
+  {
+    "name": "Canidna",
+    "type": "Mob",
+    "page": "31"
+  },
+  {
+    "name": "Canis Knights",
+    "type": "Mob",
+    "page": "87"
+  },
+  {
+    "name": "Cardium Clam",
+    "type": "Neighborhood Boss",
+    "page": "125"
+  },
+  {
+    "name": "Chef BoyardOoze",
+    "type": "Mob",
+    "page": "62"
+  },
+  {
+    "name": "Chilly Goat",
+    "type": "Mob",
+    "page": "40"
+  },
+  {
+    "name": "Cocaine Kobold",
+    "type": "Mob",
+    "page": "96"
+  },
+  {
+    "name": "Cow-Tailed Brindle Grub",
+    "type": "Janitor Mob",
+    "page": "106, 139"
+  },
+  {
+    "name": "Critical Consensus",
+    "type": "Neighborhood Boss",
+    "page": "69"
+  },
+  {
+    "name": "Danger Dingo (Floor 2)",
+    "type": "Mob",
+    "page": "97"
+  },
+  {
+    "name": "Danger Dingo (Floor 2 Swarm)",
+    "type": "Mob",
+    "page": "141"
+  },
+  {
+    "name": "Dread Wizard Grimblegore",
+    "type": "Neighborhood Boss",
+    "page": "93"
+  },
+  {
+    "name": "Dream Eaters",
+    "type": "Mob",
+    "page": "118"
+  },
+  {
+    "name": "Fire-Fighter",
+    "type": "Mob",
+    "page": "41"
+  },
+  {
+    "name": "Giant Spiders",
+    "type": "Mob",
+    "page": "51"
+  },
+  {
+    "name": "Gnawtria",
+    "type": "Mob",
+    "page": "18"
+  },
+  {
+    "name": "Gobblin’ Gators",
+    "type": "Mob",
+    "page": "18"
+  },
+  {
+    "name": "Goblin",
+    "type": "Mob",
+    "page": "136"
+  },
+  {
+    "name": "Goblin Bomb Bard",
+    "type": "Mob",
+    "page": "137"
+  },
+  {
+    "name": "Goblin Engineer",
+    "type": "Mob",
+    "page": "137"
+  },
+  {
+    "name": "Goblin Shamanka",
+    "type": "Mob",
+    "page": "137"
+  },
+  {
+    "name": "Grimes",
+    "type": "Mob",
+    "page": "87"
+  },
+  {
+    "name": "Hide-Hitter Crib Daddy",
+    "type": "Neighborhood Boss",
+    "page": "27"
+  },
+  {
+    "name": "Hissing Scatterer",
+    "type": "Mob",
+    "page": "139"
+  },
+  {
+    "name": "The Hoarder",
+    "type": "Neighborhood Boss",
+    "page": "143"
+  },
+  {
+    "name": "Homogenous Humors",
+    "type": "Mob",
+    "page": "32"
+  },
+  {
+    "name": "Jacked Kangaroo",
+    "type": "Mob",
+    "page": "97"
+  },
+  {
+    "name": "Jazmanian Devil",
+    "type": "Mob",
+    "page": "98"
+  },
+  {
+    "name": "The Juicer",
+    "type": "Neighborhood Boss",
+    "page": "147"
+  },
+  {
+    "name": "Kobold",
+    "type": "Mob",
+    "page": "140"
+  },
+  {
+    "name": "Kobold Rider",
+    "type": "Mob",
+    "page": "140"
+  },
+  {
+    "name": "Krakaren Clone",
+    "type": "Neighborhood Boss",
+    "page": "115, 146"
+  },
+  {
+    "name": "Laminak Rev-Up Consultant Manager",
+    "type": "Mob",
+    "page": "108"
+  },
+  {
+    "name": "Literal Murder Hornets",
+    "type": "Mob",
+    "page": "52"
+  },
+  {
+    "name": "Lost Souls",
+    "type": "Mob",
+    "page": "119"
+  },
+  {
+    "name": "Melon-Baller Marvin, Head Bugaboo Socket-Picker",
+    "type": "Mob",
+    "page": "130"
+  },
+  {
+    "name": "Mick Moran, Hulking Crockodilian Chef",
+    "type": "Neighborhood Boss",
+    "page": "103"
+  },
+  {
+    "name": "Mind Horror",
+    "type": "Mob",
+    "page": "119"
+  },
+  {
+    "name": "Mirror Cat",
+    "type": "Mob",
+    "page": "31"
+  },
+  {
+    "name": "MisChief",
+    "type": "Neighborhood Boss",
+    "page": "47"
+  },
+  {
+    "name": "Pack Rat",
+    "type": "Mob",
+    "page": "32"
+  },
+  {
+    "name": "Pickmees",
+    "type": "Mob",
+    "page": "109"
+  },
+  {
+    "name": "Prosperity Prophet",
+    "type": "City Boss",
+    "page": "144"
+  },
+  {
+    "name": "Rage Elemental",
+    "type": "Mob",
+    "page": "141"
+  },
+  {
+    "name": "Rakish Werehound Shocker",
+    "type": "Borough Boss",
+    "page": "147"
+  },
+  {
+    "name": "Ralph the Frenzied Gerbil",
+    "type": "Neighborhood Boss",
+    "page": "148"
+  },
+  {
+    "name": "Rat Janitor",
+    "type": "Mob",
+    "page": "138"
+  },
+  {
+    "name": "Rat Brute",
+    "type": "Mob",
+    "page": "41, 62"
+  },
+  {
+    "name": "Rat Hooligan",
+    "type": "Mob",
+    "page": "42, 64"
+  },
+  {
+    "name": "Rat Shaman",
+    "type": "Mob",
+    "page": "42, 63"
+  },
+  {
+    "name": "Rayzer",
+    "type": "Mob",
+    "page": "19"
+  },
+  {
+    "name": "Riff Roughers",
+    "type": "Mob",
+    "page": "19"
+  },
+  {
+    "name": "Rot Sticker",
+    "type": "Mob",
+    "page": "138"
+  },
+  {
+    "name": "Scat Thug",
+    "type": "Mob",
+    "page": "20"
+  },
+  {
+    "name": "Scatterer",
+    "type": "Mob",
+    "page": "138"
+  },
+  {
+    "name": "Scatterer Brood Guardian",
+    "type": "Mob",
+    "page": "139"
+  },
+  {
+    "name": "Screye Drone",
+    "type": "Mob",
+    "page": "129"
+  },
+  {
+    "name": "Shambling Acid Impaler",
+    "type": "Mob",
+    "page": "86"
+  },
+  {
+    "name": "Slimy Croakers",
+    "type": "Mob",
+    "page": "52"
+  },
+  {
+    "name": "Smombie",
+    "type": "Mob",
+    "page": "108"
+  },
+  {
+    "name": "Spit—Goblin Survivor Who Lives in the Now",
+    "type": "Mob",
+    "page": "130"
+  },
+  {
+    "name": "Spit—Goblin Who Just Can’t Seem to Let Go of the Past",
+    "type": "Mob",
+    "page": "131"
+  },
+  {
+    "name": "Sprites",
+    "type": "Mob",
+    "page": "86"
+  },
+  {
+    "name": "Stiggy, Dungeon Surveillance Architect",
+    "type": "Borough Boss",
+    "page": "135"
+  },
+  {
+    "name": "Trash Princess",
+    "type": "Mob",
+    "page": "21"
+  },
+  {
+    "name": "Troglodyte Basher",
+    "type": "Mob",
+    "page": "120, 142"
+  },
+  {
+    "name": "Troglodyte Pygmy",
+    "type": "Mob",
+    "page": "142"
+  },
+  {
+    "name": "Troglodyte Virtuoso",
+    "type": "Mob",
+    "page": "142"
+  },
+  {
+    "name": "Trollogs",
+    "type": "Mob",
+    "page": "88"
+  },
+  {
+    "name": "Unvaccinated Clurichaun Rev-Up Consultant",
+    "type": "Mob",
+    "page": "107"
+  },
+  {
+    "name": "Vine Creeper",
+    "type": "Mob",
+    "page": "50"
+  },
+  {
+    "name": "Whambat",
+    "type": "Mob",
+    "page": "98"
+  },
+  {
+    "name": "Wise-Guyy",
+    "type": "Crawler",
+    "page": "136"
+  }
+]

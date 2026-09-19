@@ -55,35 +55,97 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
   describe('2. Game Master\'s Toolkit - Entities List Dataset Integrity', () => {
     const requiredMobNames = [
       'Aranaea Magnus',
-      'Chef BoyardOoze',
-      'Rat Brute',
-      'Rat Shaman',
-      'Rat Hooligan',
-      'Critical Consensus',
+      'Bad Llama',
+      'Ball of Swine',
+      'The Bar Render',
+      'Barflie',
+      'Beloved Mimic',
+      'Blind Goblin Survivor',
+      'Brindle Grub',
+      'Brindled Vespa',
+      'Bruiser',
+      'Bugaboo Goblin-napper',
+      'Bugaboo Socket-Picker',
+      'Canidna',
       'Canis Knights',
-      'Grimes',
-      'Trollogs',
-      'Dread Wizard Grimblegore',
+      'Cardium Clam',
+      'Chef BoyardOoze',
+      'Chilly Goat',
       'Cocaine Kobold',
+      'Cow-Tailed Brindle Grub',
+      'Critical Consensus',
       'Danger Dingo',
+      'Danger Dingo (Floor 2 Swarm)',
+      'Dread Wizard Grimblegore',
+      'Dream Eaters',
+      'Fire-Fighter',
+      'Giant Spiders',
+      'Gnawtria',
+      'Gobblin’ Gators',
+      'Goblin',
+      'Goblin Bomb Bard',
+      'Goblin Engineer',
+      'Goblin Shamanka',
+      'Grimes',
+      'Hide-Hitter Crib Daddy',
+      'Hissing Scatterer',
+      'The Hoarder',
+      'Homogenous Humors',
       'Jacked Kangaroo',
       'Jazmanian Devil',
-      'Whambat',
-      'Mick Moran',
-      'Brindle Grub',
-      'Cow-Tailed Brindle Grub',
-      'Brindled Vespa',
-      'Unvaccinated Clurichaun Rev-Up Consultant',
+      'The Juicer',
+      'Kobold',
+      'Kobold Rider',
+      'Krakaren Clone',
       'Laminak Rev-Up Consultant Manager',
-      'Smombie'
+      'Literal Murder Hornets',
+      'Lost Souls',
+      'Melon-Baller Marvin, Head Bugaboo Socket-Picker',
+      'Mick Moran',
+      'Mind Horror',
+      'Mirror Cat',
+      'MisChief',
+      'Pack Rat',
+      'Pickmees',
+      'Prosperity Prophet',
+      'Rage Elemental',
+      'Rakish Werehound Shocker',
+      'Ralph the Frenzied Gerbil',
+      'Rat Janitor',
+      'Rat Brute',
+      'Rat Hooligan',
+      'Rat Shaman',
+      'Rayzer',
+      'Riff Roughers',
+      'Rot Sticker',
+      'Scat Thug',
+      'Scatterer',
+      'Scatterer Brood Guardian',
+      'Screye Drone',
+      'Shambling Acid Impaler',
+      'Slimy Croakers',
+      'Smombie',
+      'Spit—Goblin Survivor Who Lives in the Now',
+      'Spit—Goblin Who Just Can’t Seem to Let Go of the Past',
+      'Sprites',
+      'Stiggy, Dungeon Surveillance Architect',
+      'Trash Princess',
+      'Troglodyte Basher',
+      'Troglodyte Pygmy',
+      'Troglodyte Virtuoso',
+      'Trollogs',
+      'Unvaccinated Clurichaun Rev-Up Consultant',
+      'Vine Creeper',
+      'Whambat',
+      'Wise-Guyy'
     ];
 
-    test('DCC_MOBS contains all 22 entities from the Game Master\'s Toolkit', () => {
+    test('DCC_MOBS contains all 84 canonical entities from the Game Master\'s Toolkit', () => {
       const mobNames = DCC_MOBS.map(m => m.name);
       for (const reqName of requiredMobNames) {
         assert.ok(mobNames.includes(reqName), `DCC_MOBS must include "${reqName}"`);
       }
-      assert.ok(DCC_MOBS.length >= 22, `DCC_MOBS must contain at least 22 mobs (found ${DCC_MOBS.length})`);
+      assert.equal(DCC_MOBS.length, 84, `DCC_MOBS must contain exactly 84 mobs (found ${DCC_MOBS.length})`);
     });
 
     test('CONFIG.DCC.mobs and game.dcc.mobs expose the dataset globally', () => {
@@ -251,6 +313,117 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(mob.system.attributes.hp.bars, 12);
       assert.equal(mob.system.attributes.hp.hpPerBar, 5);
       assert.equal(mob.system.attributes.hp.max, 60);
+    });
+
+    test('Ball of Swine: Level 15 Borough Boss, Colossal (7), 16 bars (6 HP/bar), 96 Max HP, Con 50', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Ball of Swine');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 15);
+      assert.equal(mob.system.details.classification, 'Borough Boss');
+      assert.equal(mob.system.attributes.size, 'Colossal');
+      assert.equal(mob.tokenWidth, 3);
+      assert.equal(mob.tokenHeight, 3);
+      assert.equal(mob.system.abilities.con.value, 50);
+      assert.equal(mob.system.abilities.con.mod, 6);
+      assert.equal(mob.system.attributes.hp.bars, 16);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 6);
+      assert.equal(mob.system.attributes.hp.max, 96);
+      assert.equal(mob.system.attributes.dr.total, 1);
+      assert.ok(mob.items.some(i => i.name === 'Assimilated' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Bowled Over' && i.type === 'attack'));
+    });
+
+    test('The Bar Render: Level 8 Neighborhood Boss, Large, 11 bars (4 HP/bar), 44 Max HP, DR 1', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'The Bar Render');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 8);
+      assert.equal(mob.system.details.classification, 'Neighborhood Boss');
+      assert.equal(mob.system.attributes.size, 'Large');
+      assert.equal(mob.tokenWidth, 2);
+      assert.equal(mob.system.attributes.hp.bars, 11);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 4);
+      assert.equal(mob.system.attributes.hp.max, 44);
+      assert.equal(mob.system.attributes.dr.total, 1);
+      assert.ok(mob.items.some(i => i.name === 'Fiery Cocktail' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Punch' && i.type === 'attack'));
+    });
+
+    test('Beloved Mimic: Level 25 City Boss, Colossal (7), 20 bars (7 HP/bar), 140 Max HP, Con 100', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Beloved Mimic');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 25);
+      assert.equal(mob.system.details.classification, 'City Boss');
+      assert.equal(mob.system.abilities.con.value, 100);
+      assert.equal(mob.system.abilities.con.mod, 7);
+      assert.equal(mob.system.attributes.hp.bars, 20);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 7);
+      assert.equal(mob.system.attributes.hp.max, 140);
+      assert.equal(mob.system.attributes.dr.total, 2);
+      assert.ok(mob.items.some(i => i.name === 'Heartstrings' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Psionic Strike' && i.type === 'attack'));
+    });
+
+    test('Stiggy, Dungeon Surveillance Architect: Level 14 Borough Boss, Int 50 (+6), Surprise 22+F', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Stiggy, Dungeon Surveillance Architect');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 14);
+      assert.equal(mob.system.details.classification, 'Borough Boss');
+      assert.equal(mob.system.abilities.int.value, 50);
+      assert.equal(mob.system.abilities.int.mod, 6);
+      assert.equal(mob.system.attributes.hp.bars, 10);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 3);
+      assert.equal(mob.system.attributes.hp.max, 30);
+      assert.equal(mob.system.attributes.surpriseDifficulty, '22+F');
+      assert.equal(mob.system.attributes.dr.total, 3);
+      assert.ok(mob.items.some(i => i.name === 'Probe' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Camera Flash' && i.type === 'attack'));
+    });
+
+    test('Prosperity Prophet: Level 23 City Boss, 23 bars (5 HP/bar), 115 Max HP, Int 55 (+6)', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Prosperity Prophet');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 23);
+      assert.equal(mob.system.details.classification, 'City Boss');
+      assert.equal(mob.system.abilities.int.value, 55);
+      assert.equal(mob.system.abilities.int.mod, 6);
+      assert.equal(mob.system.attributes.hp.bars, 23);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 5);
+      assert.equal(mob.system.attributes.hp.max, 115);
+      assert.equal(mob.system.attributes.dr.total, 1);
+      assert.ok(mob.items.some(i => i.name === 'Sleep Spell' && i.type === 'attack'));
+    });
+
+    test('Rage Elemental: Level 93 Colossal, 10 bars (6 HP/bar), 60 Max HP, DR 13, Str 136 (+7)', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Rage Elemental');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 93);
+      assert.equal(mob.system.abilities.str.value, 136);
+      assert.equal(mob.system.abilities.str.mod, 7);
+      assert.equal(mob.system.abilities.con.value, 66);
+      assert.equal(mob.system.abilities.con.mod, 6);
+      assert.equal(mob.system.attributes.hp.bars, 10);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 6);
+      assert.equal(mob.system.attributes.hp.max, 60);
+      assert.equal(mob.system.attributes.dr.total, 13);
+      assert.equal(mob.system.attributes.speed.move, 60);
+      assert.ok(mob.items.some(i => i.name === 'Claw' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Roar' && i.type === 'attack'));
+    });
+
+    test('Ralph the Frenzied Gerbil: Level 11 Neighborhood Boss, Tiny, 12 bars (3 HP/bar), Dex 20 (+5)', () => {
+      const mob = DCC_MOBS.find(m => m.name === 'Ralph the Frenzied Gerbil');
+      assert.ok(mob);
+      assert.equal(mob.system.details.level, 11);
+      assert.equal(mob.system.details.classification, 'Neighborhood Boss');
+      assert.equal(mob.system.attributes.size, 'Tiny');
+      assert.equal(mob.system.abilities.dex.value, 20);
+      assert.equal(mob.system.abilities.dex.mod, 5);
+      assert.equal(mob.system.attributes.hp.bars, 12);
+      assert.equal(mob.system.attributes.hp.hpPerBar, 3);
+      assert.equal(mob.system.attributes.hp.max, 36);
+      assert.equal(mob.system.attributes.evadeDifficulty, '15+F');
+      assert.ok(mob.items.some(i => i.name === 'Ravening Jaw' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Squeal' && i.type === 'attack'));
     });
   });
 

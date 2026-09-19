@@ -1,3 +1,26 @@
+## 2.0.25
+
+### Official Game Master's Campaign Toolkit Mob Compendium Expansion (All 84 Entities)
+
+- **Complete Page 3 Entity Compendium Integration (`carl-rpg.mobs`)**:
+  - Added and updated all **84 canonical entities** from the official *Game Master's Campaign Toolkit* (Page 3: `MOBS, BOSSES, AND RIVAL CRAWLERS` index).
+  - Populated complete statblocks, health bar segments, move speeds, DR armor, official CarlRPG ability modifiers, AI announcement broadcasts, lore descriptions, tactical notes, and source page citations across all entities:
+    - **Floor 1 Entities**: *Gobblin’ Gators* (p. 18), *Gnawtria* (p. 18), *Rayzer* (p. 19), *Riff Roughers* (p. 19), *Scat Thug* (p. 20), *Trash Princess* (p. 21), *Hide-Hitter Crib Daddy* (p. 27), *Barflie* (p. 30), *Canidna* (p. 31), *Mirror Cat* (p. 31), *Homogenous Humors* (p. 32), *Pack Rat* (p. 32), *The Bar Render* (p. 37), *Chilly Goat* (p. 40), *Fire-Fighter* (p. 41), *Rat Brute* (p. 41, 62), *Rat Hooligan* (p. 42, 64), *Rat Shaman* (p. 42, 63), *MisChief* (p. 47), *Vine Creeper* (p. 50), *Bad Llama* (p. 51, 136), *Giant Spiders* (p. 51), *Literal Murder Hornets* (p. 52), *Slimy Croakers* (p. 52), *Aranaea Magnus* (p. 59), *Chef BoyardOoze* (p. 62), *Critical Consensus* (p. 69), *Shambling Acid Impaler* (p. 86), *Sprites* (p. 86), *Canis Knights* (p. 87), *Grimes* (p. 87), *Trollogs* (p. 88), *Dread Wizard Grimblegore* (p. 93), *Bugaboo Goblin-napper* (p. 128), *Bugaboo Socket-Picker* (p. 128), *Blind Goblin Survivor* (p. 129), *Screye Drone* (p. 129), *Melon-Baller Marvin* (p. 130), *Spit (Lives in the Now)* (p. 130), *Spat (Let Go of the Past)* (p. 131), and *Stiggy, Dungeon Surveillance Architect* (p. 135).
+    - **Floor 2 Entities**: *Cocaine Kobold* (p. 96), *Danger Dingo* (p. 97), *Jacked Kangaroo* (p. 97), *Jazmanian Devil* (p. 98), *Whambat* (p. 98), *Mick Moran* (p. 103), *Brindle Grub* (p. 106, 139), *Cow-Tailed Brindle Grub* (p. 106, 139), *Brindled Vespa* (p. 107, 140), *Unvaccinated Clurichaun* (p. 107), *Laminak Manager* (p. 107), *Smombie* (p. 108), *Pickmees* (p. 109), *Krakaren Clone* (p. 115, 146), *Dream Eaters* (p. 118), *Lost Souls* (p. 119), *Mind Horror* (p. 119), *Troglodyte Basher* (p. 120, 142), and *Cardium Clam* (p. 125).
+    - **Threat Appendix & Special Entities**: *Bruiser Crawler* (p. 136), *Wise-Guyy Crawler* (p. 136), *Goblin* (p. 136), *Goblin Bomb Bard* (p. 137), *Goblin Engineer* (p. 137), *Goblin Shamanka* (p. 137), *Rat Janitor* (p. 138), *Rot Sticker* (p. 138), *Scatterer* (p. 138), *Hissing Scatterer* (p. 139), *Scatterer Brood Guardian* (p. 139), *Kobold* (p. 140), *Kobold Rider* (p. 140), *Danger Dingo (Floor 2 Swarm)* (p. 141), *Rage Elemental* (p. 141), *Ball of Swine* (p. 142), *Troglodyte Pygmy* (p. 142), *Troglodyte Virtuoso* (p. 142), *The Hoarder* (p. 143), *Prosperity Prophet* (p. 144), *Beloved Mimic* (p. 145), *The Juicer* (p. 147), *Rakish Werehound Shocker* (p. 147), and *Ralph the Frenzied Gerbil* (p. 148).
+- **Strict CarlRPG Mechanics & Rule Conformance**:
+  - Variable health bars calculated from CON modifier (`getDCCStatModifier`), ranging from 1 to 23 bars.
+  - Evade difficulty ($10 + \text{Foe DEX Mod} + \text{Floor Number}$) and Surprise difficulty ratings formatted as canonical `X+F`.
+  - Zero D&D math, zero negative ability modifiers, zero saving throws or spell slots.
+- **Embedded Loot Items & Multi-Typed Attacks**:
+  - Every entity contains embedded, tailored `loot` items with custom SVG icons, quantities, descriptions, and lore notes.
+  - All attacks modeled as embedded `attack` items with multi-typed damage, ranges, debuff triggers, and single-click roll actions.
+- **LevelDB Compendium Build**:
+  - Rebuilt binary `packs/mobs` LevelDB database containing all 84 actor documents with unlinked tokens and auto-configured prototype settings.
+- **Automated Testing & Coverage**:
+  - Extended `tests/mobs-compendium.test.mjs` to validate all 84 canonical entities and statistical profiles for major bosses.
+  - 100% passing test suite (478 passing tests across 83 suites, 0 failures) and $\ge 75\%$ line coverage across all source files.
+
 ## 2.0.24
 
 ### Test Suite Evaluation, Automated Coverage Auditing, & High-Coverage Hardening

@@ -1,3 +1,49 @@
+## 2.0.18
+
+### Game Master's Toolkit Mob Compendium & Entity Dataset
+
+- **Official Mob Compendium (`carl-rpg.mobs`, `packs/mobs`)**:
+  - Created and registered the official `mobs` compendium pack in `system.json` as an `Actor` compendium with `PLAYER: OBSERVER` ownership.
+  - Built and populated the LevelDB compendium with all 22 monsters and bosses from the official *Game Master's Toolkit - Entities List* (plus the canonical Pack Rat).
+- **Entities List Dataset (`src/data/mobs.mjs`)**:
+  - Implemented `DCC_MOBS` comprising 23 fully articulated creature entries with complete stats, descriptions, AI broadcasts, attacks, and special rules:
+    1. **Aranaea Magnus** (Level 7 Neighborhood Boss, Large Monstrous spider, 10 bars of 4 HP = 40 Max HP, DR 1, Move 30+S, Evade 14+F, Surprise 12+F; 6 attacks including Venomous Fangs, Web, Caustic Silk Spray, Drop, Paralyzing Pedipalps; Eight Middle Fingers to Gravity, Webbing, Tangled).
+    2. **Chef BoyardOoze** (Level 4 Mob, Small Ooze, 4 bars of 3 HP = 12 Max HP, DR 2, Move 10+S, Evade 12+F, Surprise 11+F; Tendril attack with Held and Saucy Debuffs; Slick trails, Cold/Heat Vulnerabilities, Regenerate Health).
+    3. **Rat Brute** (Level 4 Mob, Petite Humanoid, 4 bars of 3 HP = 12 Max HP, DR 1, Move 20+S, Evade 12+F, Surprise 11+F; Knife & Crossbow; Roid Rage & Weak-Minded).
+    4. **Rat Shaman** (Level 5 Mob, Petite Humanoid, 5 bars of 2 HP = 10 Max HP, DR 1, Move 20+S, Evade 12+F, Surprise 14+F; Clap Cloud, Firestrike, Mini Fireball Spells; Backline tactics).
+    5. **Rat Hooligan** (Level 8 Mob, Petite Rat Hybrid, 8 bars of 2 HP = 16 Max HP, DR 2, Move 20+S, Evade 12+F, Surprise 14+F; Longsword, Firebolt, Heal Others Spell; Ambush tactics).
+    6. **Critical Consensus** (Level 8 Neighborhood Boss, Huge Zombie influencer amalgamation, 11 bars of 5 HP = 55 Max HP, DR 2, Move 10+S, Evade 12+F, Surprise 12+F; Slam attack with Held & Staggered; Constant Hunger, Foodporn, Over-Seasoned, Power Boost in darkness).
+    7. **Canis Knights** (Level 5 Mob, Petite Humanoid, 5 bars of 2 HP = 10 Max HP, DR 2, Move 20+S, Evade 12+F, Surprise 11+F; Spear & Sword; Adorable Fascinated aura, Strict Adherence).
+    8. **Grimes** (Level 5 Mob, Petite Ooze, 5 bars of 4 HP = 20 Max HP, DR 2, Move 15+S, Evade 11+F, Surprise 11+F; Gloop & Tendril; Split replication feature).
+    9. **Trollogs** (Level 5 Mob, Large Humanoid, 5 bars of 2 HP = 10 Max HP, DR 2, Move 20+S, Evade 13+F, Surprise 12+F; Bite & Javelin; Mirror Change, Sprite Shapeshifting).
+    10. **Dread Wizard Grimblegore** (Level 10 Neighborhood Boss, Large Humanoid amphibian overlord, 12 bars of 5 HP = 60 Max HP, DR 2, Move 20+S, Evade 14+F, Surprise 14+F; Fireball, Gloat, Jump Smash; Fixed sequence Fireball-Fireball-Jump-Jump-Gloat-Gloat).
+    11. **Cocaine Kobold** (Level 6 Mob, Petite Lizard, 6 bars of 3 HP = 18 Max HP, DR 2, Move 20+S, Evade 13+F, Surprise 13+F; Rock & Spear; Mounted bonus, Enraged coke dusting).
+    12. **Danger Dingo** (Level 5 Mob, Medium Beastly, 5 bars of 3 HP = 15 Max HP, DR 2, Move 30+S, Evade 11+F, Surprise 12+F; Bite & Ravage with Rabies & Take Down; Good Impressions metal music pacification, Ravager charge bonus).
+    13. **Jacked Kangaroo** (Level 8 Mob, Medium Animal, 8 bars of 4 HP = 32 Max HP, DR 2, Move 25+S, Evade 12+F, Surprise 12+F; Kick, Punch, Tail Whip; Tail balance immunity, Squat vanity distraction).
+    14. **Jazmanian Devil** (Level 7 Mob, Petite Humanoid, 7 bars of 3 HP = 21 Max HP, DR 2, Move 20+S, Evade 13+F, Surprise 11+F; Wrist Weight, Sweatband, Kick, Lunge; Hard Fighting Fatigued on kill).
+    15. **Whambat** (Level 3 Mob, Petite Animal, 3 bars of 2 HP = 6 Max HP, DR 2, Move 20+S, Evade 13+F, Surprise 11+F; Bite & Hell Dive; Flight, Sacrificial Hell Dive).
+    16. **Mick Moran** (Level 12 Neighborhood Boss, Large Humanoid Crocodilian Chef, 12 bars of 5 HP = 60 Max HP, DR 2, Move 20+S, Evade 13+F, Surprise 14+F; That's a Knife & Thunderstrike with Blood Trail & Shocked; For Those About To Rock action limiter, Water Scarcity drowning hazard).
+    17. **Brindle Grub** (Level 2 Mob, Small Beastly, 2 bars of 3 HP = 6 Max HP, DR 2, Move 5+S, Evade 11+F, Surprise 11+F; Chew attack; Janitor Mob corpse-eating, Overcrowding trip hazard).
+    18. **Cow-Tailed Brindle Grub** (Level 3 Mob, Petite Beastly, 3 bars of 3 HP = 9 Max HP, DR 2, Move 10+S, Evade 11+F, Surprise 11+F; Sting attack; Cocoon pupation into Vespa, Goo Explosion on Amazing Success).
+    19. **Brindled Vespa** (Level 8 Mob, Medium Mutated wasp, 8 bars of 4 HP = 32 Max HP, DR 0, Move 20+S, Evade 14+F, Surprise 11+F; Acid Goo & Sting; Flight, Fragile Wings targetable).
+    20. **Unvaccinated Clurichaun Rev-Up Consultant** (Level 3 Mob, Petite Humanoid, 3 bars of 1 HP = 3 Max HP, DR 2, Move 25+S, Evade 13+F, Surprise 11+F; Slingshot, Claw, Sneeze spreading Diseased, The Taint, Stiff Legs).
+    21. **Laminak Rev-Up Consultant Manager** (Level 6 Mob, Small Humanoid, 6 bars of 2 HP = 12 Max HP, DR 2, Move 45+S, Evade 13+F, Surprise 13+F; Magic Missile & Scream; Natural Immunity to debuff damage, Flight 45ft).
+    22. **Smombie** (Level 4 Mob, Medium Undead, 4 bars of 3 HP = 12 Max HP, DR 2, Move 20+S, Evade 12+F, Surprise 11+F; Tantrum attack; Mindless doomscrolling trance).
+    23. **Pack Rat** (Level 2 Mob, Tiny Animal, 2 bars of 2 HP = 4 Max HP, DR 1, Move 20+S, Evade 12+F, Surprise 11+F; Bite attack, Pack tactics).
+- **Strict CarlRPG Mechanics Adherence**:
+  - Stat modifiers strictly calculated using `getDCCStatModifier` (no D&D `(score-10)/2` math, no negative modifiers).
+  - Health per bar precisely corresponds to CON modifier for every entity.
+  - Attack checks for mobs roll `1d20 + modifiers` without false untrained disadvantage.
+- **Mob Sheet & Presentation (`src/models/actors/mob-model.mjs`, `template.json`, `templates/actors/parts/page1-core.hbs`)**:
+  - Added native `description` and `aiDescription` fields to `MobDataModel` and `template.json`.
+  - Added dedicated **MOB LORE, AI BROADCAST & SPECIAL TRAITS** display card on Page 1 (Core) of the Mob sheet.
+  - Added Source / Book citation field to mob header.
+  - Omitted crawler hotlist when rendering mob actors, avoiding input name duplication.
+- **Compendium Build Script (`scripts/build-packs.mjs`)**:
+  - Added `buildMobs()` using `ClassicLevel` to serialize `DCC_MOBS` directly into `packs/mobs` with key format `!actors!${mob._id}`.
+- **Automated Test Suite (`tests/mobs-compendium.test.mjs`)**:
+  - 21 comprehensive automated tests covering schema, dataset contents, statistics, actor instantiation, attack rolls, sheet context generation, and LevelDB database integrity.
+
 ## 2.0.17
 
 ### Mob Actor Type, Variable Health Bars & Sequential Token Placement

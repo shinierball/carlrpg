@@ -3,6 +3,7 @@ import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 import { DCC_SIZES, getSizeInfo } from '../src/data/sizes.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
+import { DCC_MOBS } from '../src/data/mobs.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -334,9 +335,14 @@ if (!globalThis.game) {
         _settingsStore.set(`${module}.${key}`, value);
         return value;
       }
+    },
+    dcc: {
+      mobs: DCC_MOBS
     }
   };
 } else {
+  globalThis.game.dcc = globalThis.game.dcc || {};
+  globalThis.game.dcc.mobs = DCC_MOBS;
   if (!globalThis.game.folders) globalThis.game.folders = [];
   if (!globalThis.game.macros) globalThis.game.macros = [];
   if (!globalThis.game.user.hotbar) globalThis.game.user.hotbar = {};
@@ -1093,6 +1099,7 @@ if (!globalThis.CONFIG) {
       spells: DCC_SPELLS,
       buffs: DCC_BUFFS,
       macros: DCC_MACROS,
+      mobs: DCC_MOBS,
       damageTypes: DCC_DAMAGE_TYPES,
       debuffs: DCC_DEBUFFS,
       sizes: DCC_SIZES,
@@ -1111,6 +1118,7 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG.DCC.spells = DCC_SPELLS;
   globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
   globalThis.CONFIG.DCC.macros = DCC_MACROS;
+  globalThis.CONFIG.DCC.mobs = DCC_MOBS;
   globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
   globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
   globalThis.CONFIG.DCC.sizes = DCC_SIZES;

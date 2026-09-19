@@ -1229,7 +1229,7 @@ export class DCCActor extends Actor {
       }
 
       const statMod = this.system.abilities?.[toHitStat]?.mod ?? 0;
-      const isUntrained = rank <= 0;
+      const isUntrained = this.type === 'mob' ? false : (rank <= 0);
 
       let roll;
       let flavorText = '';
@@ -1241,7 +1241,8 @@ export class DCCActor extends Actor {
         const total = rank + statMod;
         const formula = `1d20 + ${total}`;
         roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
-        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + Rank ${rank} + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+        const rankPart = rank > 0 ? `Rank ${rank} + ` : '';
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + ${rankPart}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
       }
 
       if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {

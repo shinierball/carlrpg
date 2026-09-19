@@ -65,6 +65,8 @@ export class MobDataModel extends BaseActorDataModel {
         creatureType: new fields.StringField({ initial: 'Animal' }),
         floor: new fields.StringField({ initial: '' }),
         location: new fields.StringField({ initial: '' }),
+        description: new fields.HTMLField({ initial: '' }),
+        aiDescription: new fields.HTMLField({ initial: '' }),
         notes: new fields.HTMLField({ initial: '' }),
         special: new fields.HTMLField({ initial: '' }),
         source: new fields.StringField({ initial: '' })

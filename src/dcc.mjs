@@ -17,6 +17,7 @@ import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
 import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from './data/crawler-creation.mjs';
 import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 import { DCC_MACROS } from './data/macros.mjs';
+import { DCC_MOBS } from './data/mobs.mjs';
 import {
   DCC_BACKGROUND_TABLES,
   getBackgroundTable,
@@ -64,6 +65,7 @@ Hooks.once('init', async function() {
     DCCSessionEngine,
     DCCSessionManagerApp,
     DCCCrawlerCreatorApp,
+    mobs: DCC_MOBS,
     backgroundTables: DCC_BACKGROUND_TABLES,
     getBackgroundTable,
     rollBackgroundTable,
@@ -110,6 +112,7 @@ Hooks.once('init', async function() {
     spells: DCC_SPELLS,
     buffs: DCC_BUFFS,
     macros: DCC_MACROS,
+    mobs: DCC_MOBS,
     damageTypes: DCC_DAMAGE_TYPES,
     debuffs: DCC_DEBUFFS,
     outcomes: DCC_ROLL_OUTCOMES,

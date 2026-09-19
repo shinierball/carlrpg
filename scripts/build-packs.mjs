@@ -5,6 +5,7 @@ import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS } from '../src/data/buffs.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
+import { DCC_MOBS } from '../src/data/mobs.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -246,7 +247,126 @@ async function buildMacros() {
   console.log(`Successfully built macros compendium at ${packDir}`);
 }
 
+// 5. Build Mobs Pack
+async function buildMobs() {
+  const packDir = path.resolve(__dirname, '../packs/mobs');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building mobs compendium with ${DCC_MOBS.length} actors...`);
+  const batch = db.batch();
+
+  for (const mob of DCC_MOBS) {
+    const doc = {
+      _id: mob._id,
+      name: mob.name,
+      type: "mob",
+      img: mob.img || "icons/svg/skull.svg",
+      system: {
+        abilities: {
+          str: { value: mob.system.abilities.str.value, unenhanced: mob.system.abilities.str.unenhanced ?? mob.system.abilities.str.value, mod: mob.system.abilities.str.mod },
+          int: { value: mob.system.abilities.int.value, unenhanced: mob.system.abilities.int.unenhanced ?? mob.system.abilities.int.value, mod: mob.system.abilities.int.mod },
+          con: { value: mob.system.abilities.con.value, unenhanced: mob.system.abilities.con.unenhanced ?? mob.system.abilities.con.value, mod: mob.system.abilities.con.mod },
+          dex: { value: mob.system.abilities.dex.value, unenhanced: mob.system.abilities.dex.unenhanced ?? mob.system.abilities.dex.value, mod: mob.system.abilities.dex.mod },
+          cha: { value: mob.system.abilities.cha.value, unenhanced: mob.system.abilities.cha.unenhanced ?? mob.system.abilities.cha.value, mod: mob.system.abilities.cha.mod }
+        },
+        attributes: {
+          hp: {
+            value: mob.system.attributes.hp.value,
+            max: mob.system.attributes.hp.max,
+            temp: 0,
+            pct: 100,
+            bars: mob.system.attributes.hp.bars,
+            hpPerBar: mob.system.attributes.hp.hpPerBar
+          },
+          mana: {
+            value: mob.system.attributes.mana?.value ?? 0,
+            max: mob.system.attributes.mana?.max ?? 0,
+            pct: 100
+          },
+          evade: {
+            items: 0,
+            buffs: 0,
+            total: mob.system.attributes.evade?.total ?? 0
+          },
+          dr: {
+            armor: mob.system.attributes.dr?.armor ?? 0,
+            items: 0,
+            buffs: 0,
+            total: mob.system.attributes.dr?.total ?? (mob.system.attributes.dr?.armor ?? 0)
+          },
+          speed: {
+            move: mob.system.attributes.speed?.move ?? 20,
+            step: mob.system.attributes.speed?.step ?? 10
+          },
+          aiFavor: 0,
+          size: mob.system.attributes.size || "Medium",
+          debuffs: "",
+          externalBuffs: { buff1: "", buff2: "", buff3: "" },
+          treasure: mob.system.attributes.treasure || "",
+          xp: mob.system.attributes.xp ?? 0,
+          surpriseDifficulty: mob.system.attributes.surpriseDifficulty || "",
+          evadeDifficulty: mob.system.attributes.evadeDifficulty || ""
+        },
+        details: {
+          level: mob.system.details.level || 1,
+          classification: mob.system.details.classification || "Mob",
+          creatureType: mob.system.details.creatureType || "",
+          floor: mob.system.details.floor || "",
+          location: mob.system.details.location || "",
+          description: mob.system.details.description || "",
+          aiDescription: mob.system.details.aiDescription || "",
+          notes: mob.system.details.notes || "",
+          special: mob.system.details.special || "",
+          source: mob.system.details.source || ""
+        }
+      },
+      items: mob.items || [],
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      prototypeToken: {
+        name: mob.name,
+        actorLink: false,
+        disposition: -1,
+        displayName: 20,
+        displayBars: 40,
+        bar1: { attribute: "attributes.hp" },
+        texture: {
+          src: mob.img || "icons/svg/skull.svg"
+        },
+        width: mob.tokenWidth || (mob.system.attributes.size === 'Huge' ? 3 : mob.system.attributes.size === 'Large' ? 2 : 1),
+        height: mob.tokenHeight || (mob.system.attributes.size === 'Huge' ? 3 : mob.system.attributes.size === 'Large' ? 2 : 1)
+      },
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion: "2.0.18",
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!actors!${mob._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built mobs compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
 await buildBuffs();
 await buildMacros();
+await buildMobs();

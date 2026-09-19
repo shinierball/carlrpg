@@ -127,10 +127,12 @@
         <textarea class="dcc-field-input" name="system.details.regrets" style="height: 70px;" placeholder="Type custom regrets or click Roll 1d12...">{{system.details.regrets}}</textarea>
       </div>
 
+      {{#unless isMob}}
       <div class="dcc-story-box">
         <span class="dcc-field-label">Notes</span>
         <textarea class="dcc-field-input" name="system.details.notes" style="height: 100px;">{{system.details.notes}}</textarea>
       </div>
+      {{/unless}}
     </div>
   </div>
 </div>

@@ -48,6 +48,10 @@
           <span class="dcc-field-label">Treasure</span>
           <input class="dcc-field-input" name="system.attributes.treasure" type="text" value="{{system.attributes.treasure}}" placeholder="Treasure Drop" />
         </div>
+        <div class="dcc-field-group flex-2">
+          <span class="dcc-field-label">Source Citation</span>
+          <input class="dcc-field-input" name="system.details.source" type="text" value="{{system.details.source}}" placeholder="Page / Book Citation" />
+        </div>
       </div>
       {{else}}
       <div class="dcc-field-row">
@@ -488,6 +492,35 @@
     </table>
   </div>
 
+  {{#if isMob}}
+  {{!-- MOB LORE, AI BROADCAST & SPECIAL TRAITS --}}
+  <div class="dcc-stat-block mob-lore-block" style="margin-top: 8px;">
+    <div class="dcc-banner-header">
+      <span><i class="fa-solid fa-scroll"></i> MOB LORE, AI BROADCAST &amp; SPECIAL TRAITS</span>
+    </div>
+    <div style="padding: 8px; display: flex; flex-direction: column; gap: 8px;">
+      <div>
+        <span class="dcc-field-label" style="display: block; margin-bottom: 2px; font-weight: bold; color: #2c3e50;">MOB DESCRIPTION</span>
+        <textarea class="dcc-field-input" name="system.details.description" rows="3" placeholder="Mob visual description, characteristics, and biology...">{{system.details.description}}</textarea>
+      </div>
+      <div style="background: #fdf2f2; border: 1px solid #e74c3c; border-radius: 4px; padding: 6px 8px;">
+        <span class="dcc-field-label" style="display: block; margin-bottom: 2px; font-weight: bold; color: #c0392b;"><i class="fa-solid fa-tower-broadcast"></i> DUNGEON AI ANNOUNCEMENT</span>
+        <textarea class="dcc-field-input" name="system.details.aiDescription" rows="3" style="font-style: italic; color: #5c1d1d;" placeholder="Dungeon AI announcement quote...">{{system.details.aiDescription}}</textarea>
+      </div>
+      <div>
+        <span class="dcc-field-label" style="display: block; margin-bottom: 2px; font-weight: bold; color: #2c3e50;">SPECIAL TRAITS &amp; RULES</span>
+        <textarea class="dcc-field-input" name="system.details.special" rows="3" placeholder="Special immunities, vulnerabilities, passives, and unique mechanics...">{{system.details.special}}</textarea>
+      </div>
+      <div>
+        <span class="dcc-field-label" style="display: block; margin-bottom: 2px; font-weight: bold; color: #2c3e50;">TACTICS &amp; GENERAL NOTES</span>
+        <textarea class="dcc-field-input" name="system.details.notes" rows="3" placeholder="Mob behavior, positioning, combat sequence, and notes...">{{system.details.notes}}</textarea>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#unless isMob}}
   {{!-- HOTLIST (BOTTOM OF MAIN CHARACTER SHEET) --}}
   {{> "systems/carl-rpg/templates/actors/parts/hotlist.hbs"}}
+  {{/unless}}
 </div>

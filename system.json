@@ -2,7 +2,7 @@
   "id": "carl-rpg",
   "title": "Dungeon Crawler Carl RPG",
   "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "url": "https://github.com/shinierball/carlrpg",
   "manifest": "https://raw.githubusercontent.com/shinierball/carlrpg/main/system.json",
   "download": "https://github.com/shinierball/carlrpg/archive/refs/heads/main.zip",
@@ -37,6 +37,8 @@
         "htmlFields": [
           "details.notes",
           "details.special",
+          "details.description",
+          "details.aiDescription",
           "attributes.treasure"
         ]
       }
@@ -172,6 +174,17 @@
       "label": "DCC Macros",
       "path": "packs/macros",
       "type": "Macro",
+      "system": "carl-rpg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "mobs",
+      "label": "DCC Mobs",
+      "path": "packs/mobs",
+      "type": "Actor",
       "system": "carl-rpg",
       "ownership": {
         "PLAYER": "OBSERVER",

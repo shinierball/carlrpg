@@ -192,9 +192,11 @@ export class DCCSessionEngine {
    * @param {number} [params.number=1]
    * @param {string} [params.title='Session']
    * @param {string} [params.notes='']
+   * @param {string|null} [params.party=null] - Specific party to track for this session
+   * @param {Array<string>|null} [params.trackedCrawlerIds=null] - Explicit crawler IDs to track
    * @returns {Promise<object>}
    */
-  static async createSession({ number = null, title = '', notes = '' } = {}) {
+  static async createSession({ number = null, title = '', notes = '', party = null, trackedCrawlerIds = null } = {}) {
     const sessions = this.getAllSessions();
     const nextNumber = number || (sessions.length ? Math.max(...sessions.map(s => Number(s.number) || 0)) + 1 : 1);
     const sessionTitle = title.trim() || `Session ${nextNumber}`;
@@ -207,6 +209,8 @@ export class DCCSessionEngine {
       createdAt: Date.now(),
       endedAt: null,
       notes: notes.trim(),
+      party: party ? party.trim() : null,
+      trackedCrawlerIds: null,
       crawlers: {},
       ledger: [],
       quests: [],
@@ -222,9 +226,25 @@ export class DCCSessionEngine {
       }
     };
 
-    // Pre-populate with all world crawlers
-    const crawlers = this.getPartyCrawlers();
-    for (const crawler of crawlers) {
+    // Determine initial tracked crawlers
+    const allWorldCrawlers = this.getPartyCrawlers();
+    let initialCrawlers = allWorldCrawlers;
+
+    if (Array.isArray(trackedCrawlerIds)) {
+      newSession.trackedCrawlerIds = Array.from(new Set(trackedCrawlerIds));
+      initialCrawlers = allWorldCrawlers.filter(c => newSession.trackedCrawlerIds.includes(c.id));
+    } else if (party && party !== 'all') {
+      const pNorm = party.trim().toLowerCase();
+      initialCrawlers = allWorldCrawlers.filter(c => (c.system?.details?.party || '').trim().toLowerCase() === pNorm);
+      newSession.trackedCrawlerIds = initialCrawlers.map(c => c.id);
+    } else {
+      // By default, null indicates all world crawlers are tracked (open roster)
+      newSession.trackedCrawlerIds = null;
+      initialCrawlers = allWorldCrawlers;
+    }
+
+    // Pre-populate with tracked crawlers
+    for (const crawler of initialCrawlers) {
       newSession.crawlers[crawler.id] = this._createCrawlerRecord(crawler);
     }
 
@@ -243,6 +263,7 @@ export class DCCSessionEngine {
       name: actor?.name || 'Crawler',
       img: actor?.img || actor?.prototypeToken?.texture?.src || 'icons/svg/mystery-man.svg',
       level: Number(actor?.system?.details?.level) || 1,
+      party: actor?.system?.details?.party || '',
       damageDealt: 0,
       damageTaken: 0,
       kills: 0,
@@ -256,21 +277,193 @@ export class DCCSessionEngine {
   }
 
   /**
-   * Get all crawler actors from world
+   * Get crawler actors from world, with optional filtering by party or tracked status
+   * @param {object} [options={}]
+   * @param {string|null} [options.sessionId=null]
+   * @param {boolean} [options.trackedOnly=false]
+   * @param {string|null} [options.party=null]
    * @returns {Array<Actor>}
    */
-  static getPartyCrawlers() {
+  static getPartyCrawlers({ sessionId = null, trackedOnly = false, party = null } = {}) {
     if (!globalThis.game?.actors) return [];
+    let crawlers = [];
     if (typeof globalThis.game.actors.filter === 'function') {
-      return Array.from(globalThis.game.actors.filter(a => a.type === 'crawler'));
+      crawlers = Array.from(globalThis.game.actors.filter(a => a.type === 'crawler'));
+    } else if (Array.isArray(globalThis.game.actors)) {
+      crawlers = globalThis.game.actors.filter(a => a.type === 'crawler');
+    } else if (Array.isArray(globalThis.game.actors.contents)) {
+      crawlers = globalThis.game.actors.contents.filter(a => a.type === 'crawler');
     }
-    if (Array.isArray(globalThis.game.actors)) {
-      return globalThis.game.actors.filter(a => a.type === 'crawler');
+
+    if (party && party !== 'all') {
+      const pNorm = String(party).trim().toLowerCase();
+      if (pNorm === 'unassigned') {
+        crawlers = crawlers.filter(a => !a.system?.details?.party?.trim());
+      } else {
+        crawlers = crawlers.filter(a => (a.system?.details?.party || '').trim().toLowerCase() === pNorm);
+      }
     }
-    if (Array.isArray(globalThis.game.actors.contents)) {
-      return globalThis.game.actors.contents.filter(a => a.type === 'crawler');
+
+    if (trackedOnly) {
+      const sId = sessionId || this.getActiveSessionId();
+      crawlers = crawlers.filter(a => this.isCrawlerTracked(sId, a.id));
     }
-    return [];
+
+    return crawlers;
+  }
+
+  /**
+   * Get all distinct party names across all world crawlers
+   * @returns {Array<string>}
+   */
+  static getDistinctParties() {
+    const crawlers = this.getPartyCrawlers();
+    const parties = new Set();
+    for (const c of crawlers) {
+      const p = (c.system?.details?.party || '').trim();
+      if (p) parties.add(p);
+    }
+    return Array.from(parties).sort((a, b) => a.localeCompare(b));
+  }
+
+  /**
+   * Check if a crawler is currently tracked in a session
+   * @param {string|object} sessionOrId
+   * @param {string} actorId
+   * @returns {boolean}
+   */
+  static isCrawlerTracked(sessionOrId, actorId) {
+    if (!actorId) return false;
+    let session = sessionOrId;
+    if (typeof sessionOrId === 'string' || !sessionOrId) {
+      const sId = sessionOrId || this.getActiveSessionId();
+      const sessions = this.getAllSessions();
+      session = sessions.find(s => s.id === sId) || null;
+    }
+    if (!session) return true;
+
+    // If trackedCrawlerIds is not explicitly set (e.g. legacy session), default to true
+    if (session.trackedCrawlerIds === undefined || session.trackedCrawlerIds === null) {
+      return true;
+    }
+
+    if (Array.isArray(session.trackedCrawlerIds)) {
+      return session.trackedCrawlerIds.includes(actorId);
+    }
+
+    return true;
+  }
+
+  /**
+   * Set the list of tracked crawler IDs for a session
+   * @param {string} sessionId
+   * @param {Array<string>} actorIds
+   * @returns {Promise<Array<string>>}
+   */
+  static async setTrackedCrawlerIds(sessionId, actorIds) {
+    const sessions = this.getAllSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return [];
+
+    session.trackedCrawlerIds = Array.from(new Set((actorIds || []).filter(Boolean)));
+    session.crawlers = session.crawlers || {};
+
+    // Ensure accumulator records exist for all newly tracked crawlers
+    for (const id of session.trackedCrawlerIds) {
+      if (!session.crawlers[id]) {
+        const actor = this._getActor(id);
+        if (actor) {
+          session.crawlers[id] = this._createCrawlerRecord(actor);
+        }
+      }
+    }
+
+    this._recomputeSessionSummaries(session);
+    await this.saveAllSessions(sessions);
+    return session.trackedCrawlerIds;
+  }
+
+  /**
+   * Add a single crawler to the session's tracked group
+   * @param {string} sessionId
+   * @param {string} actorId
+   * @returns {Promise<Array<string>>}
+   */
+  static async addTrackedCrawler(sessionId, actorId) {
+    const sessions = this.getAllSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session || !actorId) return [];
+
+    if (!Array.isArray(session.trackedCrawlerIds)) {
+      session.trackedCrawlerIds = this.getPartyCrawlers().map(a => a.id);
+    }
+
+    if (!session.trackedCrawlerIds.includes(actorId)) {
+      session.trackedCrawlerIds.push(actorId);
+    }
+
+    if (!session.crawlers[actorId]) {
+      const actor = this._getActor(actorId);
+      if (actor) {
+        session.crawlers[actorId] = this._createCrawlerRecord(actor);
+      }
+    }
+
+    this._recomputeSessionSummaries(session);
+    await this.saveAllSessions(sessions);
+    return session.trackedCrawlerIds;
+  }
+
+  /**
+   * Remove a crawler from the session's tracked group
+   * @param {string} sessionId
+   * @param {string} actorId
+   * @returns {Promise<Array<string>>}
+   */
+  static async removeTrackedCrawler(sessionId, actorId) {
+    const sessions = this.getAllSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session || !actorId) return [];
+
+    if (!Array.isArray(session.trackedCrawlerIds)) {
+      session.trackedCrawlerIds = this.getPartyCrawlers().map(a => a.id);
+    }
+
+    session.trackedCrawlerIds = session.trackedCrawlerIds.filter(id => id !== actorId);
+    this._recomputeSessionSummaries(session);
+    await this.saveAllSessions(sessions);
+    return session.trackedCrawlerIds;
+  }
+
+  /**
+   * Toggle a crawler's tracked status in a session
+   * @param {string} sessionId
+   * @param {string} actorId
+   * @returns {Promise<boolean>} new tracked state
+   */
+  static async toggleTrackedCrawler(sessionId, actorId) {
+    const isCurrentlyTracked = this.isCrawlerTracked(sessionId, actorId);
+    if (isCurrentlyTracked) {
+      await this.removeTrackedCrawler(sessionId, actorId);
+      return false;
+    } else {
+      await this.addTrackedCrawler(sessionId, actorId);
+      return true;
+    }
+  }
+
+  /**
+   * Update a crawler's party affiliation
+   * @param {string} actorId
+   * @param {string} partyName
+   * @returns {Promise<Actor|null>}
+   */
+  static async setCrawlerParty(actorId, partyName) {
+    const actor = this._getActor(actorId);
+    if (!actor) return null;
+    await actor.update({ 'system.details.party': (partyName || '').trim() });
+    this._refreshOpenWindows();
+    return actor;
   }
 
   /**
@@ -325,6 +518,11 @@ export class DCCSessionEngine {
       session = sessions.find(s => s.id === active?.id);
     }
     if (!session) return null;
+
+    // Only record if actor is tracked in this session
+    if (!this.isCrawlerTracked(session, actor.id)) {
+      return null;
+    }
 
     // Ensure crawler accumulator exists
     if (!session.crawlers[actor.id]) {
@@ -396,60 +594,70 @@ export class DCCSessionEngine {
     if (!session) return;
 
     if (attackerActor && (attackerActor.type === 'crawler' || (attackerActor.id && session.crawlers[attackerActor.id]))) {
-      if (!session.crawlers[attackerActor.id] && attackerActor.type === 'crawler') {
-        session.crawlers[attackerActor.id] = this._createCrawlerRecord(attackerActor);
-      }
-      if (session.crawlers[attackerActor.id]) {
-        session.crawlers[attackerActor.id].damageDealt = (session.crawlers[attackerActor.id].damageDealt || 0) + netDamage;
-        if (targetActor && Number(targetActor.system?.attributes?.hp?.value) <= 0) {
-          session.crawlers[attackerActor.id].kills = (session.crawlers[attackerActor.id].kills || 0) + 1;
+      // Skip if attacker is an untracked crawler
+      if (attackerActor.type === 'crawler' && !this.isCrawlerTracked(session, attackerActor.id)) {
+        // Not tracked in this session
+      } else {
+        if (!session.crawlers[attackerActor.id] && attackerActor.type === 'crawler') {
+          session.crawlers[attackerActor.id] = this._createCrawlerRecord(attackerActor);
         }
-      }
+        if (session.crawlers[attackerActor.id]) {
+          session.crawlers[attackerActor.id].damageDealt = (session.crawlers[attackerActor.id].damageDealt || 0) + netDamage;
+          if (targetActor && Number(targetActor.system?.attributes?.hp?.value) <= 0) {
+            session.crawlers[attackerActor.id].kills = (session.crawlers[attackerActor.id].kills || 0) + 1;
+          }
+        }
 
-      session.ledger.push({
-        id: `dmg-dealt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        timestamp: Date.now(),
-        actorId: attackerActor.id,
-        actorName: attackerActor.name,
-        actorImg: attackerActor.img || '',
-        type: 'damage_dealt',
-        name: attackName || 'Damage Dealt',
-        isUntrained: false,
-        rollFormula: `${netDamage}`,
-        d20Result: null,
-        total: netDamage,
-        targetDC: null,
-        outcome: DCC_ROLL_OUTCOMES.SUCCESS,
-        notes: targetActor ? `Dealt ${netDamage} damage to ${targetActor.name}` : `Dealt ${netDamage} damage`,
-        gmEdited: false
-      });
+        session.ledger.push({
+          id: `dmg-dealt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          timestamp: Date.now(),
+          actorId: attackerActor.id,
+          actorName: attackerActor.name,
+          actorImg: attackerActor.img || '',
+          type: 'damage_dealt',
+          name: attackName || 'Damage Dealt',
+          isUntrained: false,
+          rollFormula: `${netDamage}`,
+          d20Result: null,
+          total: netDamage,
+          targetDC: null,
+          outcome: DCC_ROLL_OUTCOMES.SUCCESS,
+          notes: targetActor ? `Dealt ${netDamage} damage to ${targetActor.name}` : `Dealt ${netDamage} damage`,
+          gmEdited: false
+        });
+      }
     }
 
     if (targetActor && (targetActor.type === 'crawler' || (targetActor.id && session.crawlers[targetActor.id]))) {
-      if (!session.crawlers[targetActor.id] && targetActor.type === 'crawler') {
-        session.crawlers[targetActor.id] = this._createCrawlerRecord(targetActor);
-      }
-      if (session.crawlers[targetActor.id]) {
-        session.crawlers[targetActor.id].damageTaken = (session.crawlers[targetActor.id].damageTaken || 0) + netDamage;
-      }
+      // Skip if target is an untracked crawler
+      if (targetActor.type === 'crawler' && !this.isCrawlerTracked(session, targetActor.id)) {
+        // Not tracked in this session
+      } else {
+        if (!session.crawlers[targetActor.id] && targetActor.type === 'crawler') {
+          session.crawlers[targetActor.id] = this._createCrawlerRecord(targetActor);
+        }
+        if (session.crawlers[targetActor.id]) {
+          session.crawlers[targetActor.id].damageTaken = (session.crawlers[targetActor.id].damageTaken || 0) + netDamage;
+        }
 
-      session.ledger.push({
-        id: `dmg-taken-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        timestamp: Date.now(),
-        actorId: targetActor.id,
-        actorName: targetActor.name,
-        actorImg: targetActor.img || '',
-        type: 'damage_taken',
-        name: attackName || 'Damage Taken',
-        isUntrained: false,
-        rollFormula: `${netDamage}`,
-        d20Result: null,
-        total: netDamage,
-        targetDC: null,
-        outcome: DCC_ROLL_OUTCOMES.MAJOR_FAILURE,
-        notes: attackerActor ? `Took ${netDamage} damage from ${attackerActor.name}` : `Took ${netDamage} damage`,
-        gmEdited: false
-      });
+        session.ledger.push({
+          id: `dmg-taken-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          timestamp: Date.now(),
+          actorId: targetActor.id,
+          actorName: targetActor.name,
+          actorImg: targetActor.img || '',
+          type: 'damage_taken',
+          name: attackName || 'Damage Taken',
+          isUntrained: false,
+          rollFormula: `${netDamage}`,
+          d20Result: null,
+          total: netDamage,
+          targetDC: null,
+          outcome: DCC_ROLL_OUTCOMES.MAJOR_FAILURE,
+          notes: attackerActor ? `Took ${netDamage} damage from ${attackerActor.name}` : `Took ${netDamage} damage`,
+          gmEdited: false
+        });
+      }
     }
 
     this._recomputeSessionSummaries(session);
@@ -468,7 +676,7 @@ export class DCCSessionEngine {
       sessions = this.getAllSessions();
       session = sessions.find(s => s.id === active?.id);
     }
-    if (!session) return;
+    if (!session || !this.isCrawlerTracked(session, actorId)) return;
 
     const actor = this._getActor(actorId);
     if (!session.crawlers[actorId] && actor) {
@@ -509,6 +717,37 @@ export class DCCSessionEngine {
       gmEdited: false
     });
 
+    // Also persist achievement item on actor so crawler's trophy collection includes session awards
+    if (actor) {
+      const itemsList = actor.items?.contents || actor.items || [];
+      const alreadyHas = itemsList.some?.(i => i.type === 'achievement' && i.name === boxTitle);
+      if (!alreadyHas) {
+        const achData = {
+          name: boxTitle,
+          type: 'achievement',
+          img: 'icons/svg/trophy.svg',
+          system: {
+            quote: defaultQuote || `${tier.toUpperCase()} Loot Box awarded by Dungeon AI.`,
+            reward: `1x ${tier.toUpperCase()} Loot Box`,
+            rewardContents: '',
+            tier: ['bronze', 'silver', 'gold', 'platinum', 'legendary', 'celestial'].includes(tier) ? tier : 'special',
+            floor: actor.system?.details?.floor || '1st Floor',
+            dateEarned: new Date().toLocaleDateString(),
+            session: session.title || `Session ${session.number}`,
+            favor: 0,
+            xp: 0,
+            unlocked: true,
+            description: `Awarded during session ${session.number}.`
+          }
+        };
+        if (typeof actor.createEmbeddedDocuments === 'function') {
+          actor.createEmbeddedDocuments('Item', [achData]).catch(() => {});
+        } else if (Array.isArray(actor.items)) {
+          actor.items.push(achData);
+        }
+      }
+    }
+
     await this.saveAllSessions(sessions);
   }
 
@@ -524,7 +763,7 @@ export class DCCSessionEngine {
       sessions = this.getAllSessions();
       session = sessions.find(s => s.id === active?.id);
     }
-    if (!session) return;
+    if (!session || !this.isCrawlerTracked(session, actorId)) return;
 
     const actor = this._getActor(actorId);
     if (!session.crawlers[actorId] && actor) {
@@ -569,7 +808,7 @@ export class DCCSessionEngine {
       sessions = this.getAllSessions();
       session = sessions.find(s => s.id === active?.id);
     }
-    if (!session) return;
+    if (!session || !this.isCrawlerTracked(session, actorId)) return;
 
     const actor = this._getActor(actorId);
     if (!session.crawlers[actorId] && actor) {
@@ -924,7 +1163,8 @@ export class DCCSessionEngine {
     const session = sessions.find(s => s.id === sessionId);
     if (!session) return { distributed: 0, crawlers: [] };
 
-    const crawlerRecords = Object.values(session.crawlers || {});
+    // Only distribute XP to crawlers currently tracked in this session
+    const crawlerRecords = Object.values(session.crawlers || {}).filter(c => this.isCrawlerTracked(session, c.actorId));
     if (!crawlerRecords.length) return { distributed: 0, crawlers: [] };
 
     // Calculate baseline encounter pool or explicit
@@ -982,10 +1222,15 @@ export class DCCSessionEngine {
     if (!session) return null;
 
     this._recomputeSessionSummaries(session);
-    const mvp = session.summary.mvpActorId ? session.crawlers[session.summary.mvpActorId] : null;
-    const chump = session.summary.chumpActorId ? session.crawlers[session.summary.chumpActorId] : null;
+    const trackedCrawlers = Object.values(session.crawlers || {}).filter(c => this.isCrawlerTracked(session, c.actorId));
+    const mvp = (session.summary.mvpActorId && this.isCrawlerTracked(session, session.summary.mvpActorId))
+      ? session.crawlers[session.summary.mvpActorId]
+      : (trackedCrawlers[0] || null);
+    const chump = (session.summary.chumpActorId && this.isCrawlerTracked(session, session.summary.chumpActorId))
+      ? session.crawlers[session.summary.chumpActorId]
+      : (trackedCrawlers[trackedCrawlers.length - 1] || null);
 
-    const crawlerRows = Object.values(session.crawlers || {}).map(c => `
+    const crawlerRows = trackedCrawlers.map(c => `
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #444; padding: 4px 0; font-size: 11px;">
         <span style="font-weight: bold; color: #fff;">${c.name}</span>
         <span style="color: #e74c3c;">${c.damageDealt} DMG</span>
@@ -1055,6 +1300,9 @@ export class DCCSessionEngine {
 
     let totalUntrained = 0;
     for (const c of Object.values(session.crawlers || {})) {
+      // Only include metrics from crawlers tracked in this session
+      if (!this.isCrawlerTracked(session, c.actorId)) continue;
+
       totalDmg += (c.damageDealt || 0);
       totalTaken += (c.damageTaken || 0);
       totalKills += (c.kills || 0);
@@ -1110,6 +1358,8 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     this.activeTab = options.tab || 'party';
     this.selectedSessionId = options.sessionId || null;
     this.filterCrawlerId = options.crawlerId || 'all';
+    this.filterParty = options.party || 'all';
+    this.trackedOnly = options.trackedOnly ?? false;
     this.filterType = 'all';
     this.filterOutcome = 'all';
     this.searchQuery = '';
@@ -1161,9 +1411,11 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       session = sessions[0];
     }
 
-    // Party crawlers
+    // Party crawlers & distinct parties
     const worldCrawlers = DCCSessionEngine.getPartyCrawlers();
-    const crawlersList = worldCrawlers.map(actor => {
+    const distinctParties = DCCSessionEngine.getDistinctParties();
+
+    const allMappedCrawlers = worldCrawlers.map(actor => {
       const record = session?.crawlers?.[actor.id] || DCCSessionEngine._createCrawlerRecord(actor);
       const hp = actor.system?.attributes?.hp || {};
       const mana = actor.system?.attributes?.mana || {};
@@ -1173,10 +1425,14 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       const totalSkillsCount = Object.values(record.skillsUsed || {}).reduce((a, b) => a + b, 0);
       const totalUntrainedCount = Object.values(record.untrainedAttempted || {}).reduce((a, b) => a + b, 0);
       const totalSpellsCount = Object.values(record.spellsCast || {}).reduce((a, b) => a + b, 0);
+      const isTracked = DCCSessionEngine.isCrawlerTracked(session, actor.id);
+      const party = (actor.system?.details?.party || '').trim();
 
       return {
         ...record,
         actor,
+        party,
+        isTracked,
         hpValue: hp.value ?? 0,
         hpMax: hp.max ?? 40,
         hpBars: bars,
@@ -1188,6 +1444,25 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
         isSelected: this.filterCrawlerId === actor.id
       };
     });
+
+    const trackedCount = allMappedCrawlers.filter(c => c.isTracked).length;
+    const allWorldCrawlersCount = allMappedCrawlers.length;
+
+    // Filter crawlersList according to party and trackedOnly for Party Overview tab
+    let crawlersList = allMappedCrawlers;
+    if (this.filterParty && this.filterParty !== 'all') {
+      const normP = this.filterParty.toLowerCase().trim();
+      if (normP === 'unassigned') {
+        crawlersList = crawlersList.filter(c => !c.party);
+      } else {
+        crawlersList = crawlersList.filter(c => c.party.toLowerCase() === normP);
+      }
+    }
+    if (this.trackedOnly) {
+      crawlersList = crawlersList.filter(c => c.isTracked);
+    }
+
+    const crawlersDropdownList = allMappedCrawlers;
 
     // Process Activity Ledger
     let ledger = (session?.ledger || []).map(entry => {
@@ -1202,6 +1477,14 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     }).reverse(); // Most recent first
 
     // Filtering
+    if (this.filterParty && this.filterParty !== 'all') {
+      const normP = this.filterParty.toLowerCase().trim();
+      ledger = ledger.filter(e => {
+        const actor = DCCSessionEngine._getActor(e.actorId);
+        const p = (actor?.system?.details?.party || '').toLowerCase().trim();
+        return normP === 'unassigned' ? !p : p === normP;
+      });
+    }
     if (this.filterCrawlerId && this.filterCrawlerId !== 'all') {
       ledger = ledger.filter(e => e.actorId === this.filterCrawlerId);
     }
@@ -1220,10 +1503,11 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       );
     }
 
-    // Untrained skills for Wrap-up Review
+    // Untrained skills for Wrap-up Review (only for tracked crawlers)
     const untrainedSkillsReview = [];
     if (session?.crawlers) {
       for (const [actorId, c] of Object.entries(session.crawlers)) {
+        if (!DCCSessionEngine.isCrawlerTracked(session, actorId)) continue;
         for (const [skillName, count] of Object.entries(c.untrainedAttempted || {})) {
           untrainedSkillsReview.push({
             actorId,
@@ -1235,6 +1519,12 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       }
     }
 
+    const partyOptions = [
+      { key: 'all', label: 'All Parties' },
+      ...distinctParties.map(p => ({ key: p, label: p })),
+      { key: 'unassigned', label: 'Unassigned / Solo' }
+    ];
+
     return {
       ...data,
       sessions,
@@ -1244,6 +1534,12 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       currentSessionId,
       activeTab: this.activeTab,
       crawlersList,
+      crawlersDropdownList,
+      trackedCount,
+      allWorldCrawlersCount,
+      filterParty: this.filterParty,
+      trackedOnly: this.trackedOnly,
+      partyOptions,
       ledger,
       untrainedSkillsReview,
       filterCrawlerId: this.filterCrawlerId,
@@ -1258,11 +1554,197 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
   }
 
   /**
+   * Prompt the interactive Manage Tracked Party Roster Dialog.
+   * Allows adding/removing crawlers from active tracking and assigning party names.
+   * @returns {Promise<Array<string>|null>}
+   */
+  async promptManageRosterDialog() {
+    const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+    const sessions = DCCSessionEngine.getAllSessions();
+    const session = sessions.find(s => s.id === sId);
+    if (!session) return null;
+
+    const worldCrawlers = DCCSessionEngine.getPartyCrawlers();
+    const distinctParties = DCCSessionEngine.getDistinctParties();
+
+    return new Promise((resolve) => {
+      const rowsHtml = worldCrawlers.map(c => {
+        const isTracked = DCCSessionEngine.isCrawlerTracked(session, c.id);
+        const party = c.system?.details?.party || '';
+        const level = c.system?.details?.level || 1;
+        const img = c.img || 'icons/svg/mystery-man.svg';
+
+        return `
+          <tr class="dcc-roster-row" data-actor-id="${c.id}" data-party="${party.toLowerCase()}" style="border-bottom: 1px solid #333;">
+            <td style="text-align: center; padding: 6px;">
+              <input type="checkbox" class="dcc-roster-checkbox" data-actor-id="${c.id}" ${isTracked ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px;" />
+            </td>
+            <td style="padding: 6px; display: flex; align-items: center; gap: 8px;">
+              <img src="${img}" style="width: 28px; height: 28px; border-radius: 3px; border: 1px solid #c0392b; object-fit: cover;" />
+              <div>
+                <strong style="color: #fff; font-size: 13px;">${c.name}</strong>
+                <span style="font-size: 10px; color: #bdc3c7; margin-left: 4px;">LVL ${level}</span>
+              </div>
+            </td>
+            <td style="padding: 6px;">
+              <input type="text" class="dcc-roster-party-input" data-actor-id="${c.id}" value="${party}" placeholder="e.g. Royal Court, Alpha Squad" style="width: 100%; background: #1e1e28; color: #fff; border: 1px solid #444; border-radius: 3px; padding: 3px 6px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const partySelectOptions = distinctParties.map(p => `<option value="${p}">${p}</option>`).join('');
+
+      const content = `
+        <div class="dcc-manage-roster-dialog" style="font-family: 'Oswald', sans-serif; color: #ecf0f1;">
+          <div style="font-size: 11px; color: #bdc3c7; margin-bottom: 10px; line-height: 1.4;">
+            Select which crawlers are tracked in this session's party matrix, activity ledger, and end-of-session progression. You can also assign or edit crawler party affiliations.
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 6px 8px; background: #1a1a24; border-radius: 4px; border: 1px solid #333;">
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="dcc-btn-roster-select-all" style="background: #27ae60; color: #fff; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: 'Oswald', sans-serif;">
+                <i class="fa-solid fa-check-double"></i> Select All
+              </button>
+              <button type="button" class="dcc-btn-roster-deselect-all" style="background: #7f8c8d; color: #fff; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: 'Oswald', sans-serif;">
+                <i class="fa-solid fa-xmark"></i> Deselect All
+              </button>
+            </div>
+
+            ${distinctParties.length ? `
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <label style="font-size: 10px; color: #bdc3c7; text-transform: uppercase;">Select by Party:</label>
+              <select class="dcc-roster-select-party-bulk" style="background: #1e1e28; color: #fff; border: 1px solid #444; border-radius: 3px; padding: 2px 6px; font-size: 11px; font-family: 'Oswald', sans-serif;">
+                <option value="">-- Choose Party --</option>
+                ${partySelectOptions}
+              </select>
+            </div>
+            ` : ''}
+          </div>
+
+          <div style="max-height: 320px; overflow-y: auto; border: 1px solid #333; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead style="background: #111118; position: sticky; top: 0; z-index: 2;">
+                <tr style="border-bottom: 1px solid #444; color: #f1c40f; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">
+                  <th style="width: 40px; padding: 6px; text-align: center;">Track</th>
+                  <th style="padding: 6px; text-align: left;">Crawler</th>
+                  <th style="padding: 6px; text-align: left;">Party / Team</th>
+                </tr>
+              </thead>
+              <tbody class="dcc-roster-tbody">
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog ?? null;
+      if (!DialogClass) return resolve(null);
+
+      const dlg = new DialogClass({
+        title: 'Manage Tracked Party Roster',
+        content,
+        buttons: {
+          save: {
+            icon: '<i class="fa-solid fa-check"></i>',
+            label: 'Save Roster',
+            callback: async (html) => {
+              const form = (html && typeof html.find === 'function')
+                ? html
+                : ((typeof $ !== 'undefined') ? $(html) : html);
+
+              const trackedIds = [];
+              const partyUpdates = [];
+
+              if (typeof form.find === 'function') {
+                form.find('.dcc-roster-row').each((_, el) => {
+                  const row = (typeof $ !== 'undefined' && typeof el?.find !== 'function') ? $(el) : el;
+                  const actorId = (typeof row?.data === 'function')
+                    ? (row.data('actor-id') ?? row.data('actorId'))
+                    : (row?.dataset?.actorId ?? (typeof row?.getAttribute === 'function' ? row.getAttribute('data-actor-id') : null));
+                  const checkbox = (typeof row?.find === 'function')
+                    ? row.find('.dcc-roster-checkbox')
+                    : (typeof row?.querySelector === 'function' ? row.querySelector('.dcc-roster-checkbox') : null);
+                  const isChecked = typeof checkbox?.is === 'function'
+                    ? checkbox.is(':checked')
+                    : (typeof checkbox?.prop === 'function' ? checkbox.prop('checked') : Boolean(checkbox?.checked));
+                  const partyInput = (typeof row?.find === 'function')
+                    ? row.find('.dcc-roster-party-input')
+                    : (typeof row?.querySelector === 'function' ? row.querySelector('.dcc-roster-party-input') : null);
+                  const partyVal = (typeof partyInput?.val === 'function')
+                    ? partyInput.val()
+                    : (partyInput?.value || '');
+
+                  if (actorId && isChecked) trackedIds.push(actorId);
+                  if (actorId) partyUpdates.push({ actorId, party: partyVal });
+                });
+              }
+
+              // Apply party updates to actors
+              for (const { actorId, party } of partyUpdates) {
+                const actor = DCCSessionEngine._getActor(actorId);
+                if (actor && actor.system?.details?.party !== party) {
+                  await actor.update({ 'system.details.party': (party || '').trim() });
+                }
+              }
+
+              // Update session tracked crawler IDs
+              await DCCSessionEngine.setTrackedCrawlerIds(sId, trackedIds);
+              this.render(false);
+              resolve(trackedIds);
+            }
+          },
+          cancel: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'Cancel',
+            callback: () => resolve(null)
+          }
+        },
+        default: 'save'
+      }, {
+        width: 560,
+        classes: ['dcc-manage-roster-dialog-window']
+      });
+
+      // Hook up bulk selection buttons after rendering
+      const origActivate = dlg.activateListeners?.bind(dlg);
+      dlg.activateListeners = (html) => {
+        if (origActivate) origActivate(html);
+        const root = (html && typeof html.find === 'function') ? html : ((typeof $ !== 'undefined') ? $(html) : html);
+        if (root?.find) {
+          root.find('.dcc-btn-roster-select-all').click(() => {
+            root.find('.dcc-roster-checkbox').prop('checked', true);
+          });
+          root.find('.dcc-btn-roster-deselect-all').click(() => {
+            root.find('.dcc-roster-checkbox').prop('checked', false);
+          });
+          root.find('.dcc-roster-select-party-bulk').change(ev => {
+            const chosen = (ev.target.value || '').toLowerCase().trim();
+            if (!chosen) return;
+            root.find('.dcc-roster-row').each((_, el) => {
+              const row = (typeof $ !== 'undefined') ? $(el) : el;
+              const inputParty = (row.find ? row.find('.dcc-roster-party-input').val() : '').toLowerCase().trim();
+              if (inputParty === chosen) {
+                if (row.find) row.find('.dcc-roster-checkbox').prop('checked', true);
+              }
+            });
+          });
+        }
+      };
+
+      dlg.render(true);
+    });
+  }
+
+  /**
    * Generate HTML for the Add Event Dialog
    */
   static getAddEventDialogHtml({ crawlers = [], currentCrawlerId = '', currentType = 'manual', currentOutcome = 'auto', outcomes = [] } = {}) {
     const crawlerOptions = crawlers.map(c => `
-      <option value="${c.actorId}" ${c.actorId === currentCrawlerId ? 'selected' : ''}>${c.name} (Lvl ${c.level})</option>
+      <option value="${c.actorId || c.id}" ${(c.actorId || c.id) === currentCrawlerId ? 'selected' : ''}>
+        ${c.name} (Lvl ${c.level || c.system?.details?.level || 1})${c.party ? ` [${c.party}]` : ''}
+      </option>
     `).join('');
 
     const outcomeOptions = outcomes.map(o => `
@@ -1538,6 +2020,36 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       ev.preventDefault();
       const sId = $(ev.currentTarget).data('session-id');
       await DCCSessionEngine.reopenSession(sId);
+      this.render(false);
+    });
+
+    // Party Overview: Filter by Party
+    html.find('#dcc-filter-party, #dcc-filter-party-ledger').change(ev => {
+      this.filterParty = ev.target.value;
+      this.render(false);
+    });
+
+    // Party Overview: Tracked Only / All Crawlers Toggle
+    html.find('.dcc-btn-tracked-toggle').click(ev => {
+      ev.preventDefault();
+      const val = $(ev.currentTarget).data('tracked-only');
+      this.trackedOnly = String(val) === 'true';
+      this.render(false);
+    });
+
+    // Party Overview: Manage Roster Button
+    html.find('.dcc-manage-roster-btn').click(async ev => {
+      ev.preventDefault();
+      await this.promptManageRosterDialog();
+    });
+
+    // Party Overview: Quick Track/Untrack Toggle on Crawler Card
+    html.find('.dcc-btn-toggle-track').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const actorId = $(ev.currentTarget).data('actor-id');
+      const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+      await DCCSessionEngine.toggleTrackedCrawler(sId, actorId);
       this.render(false);
     });
 

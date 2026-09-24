@@ -15,6 +15,7 @@ export class CrawlerDataModel extends BaseActorDataModel {
       abilities: BaseActorDataModel.defineAbilitiesField(),
       attributes: BaseActorDataModel.defineBaseAttributesField(),
       details: new fields.SchemaField({
+        party: new fields.StringField({ initial: '' }),
         crawlerNumber: new fields.StringField({ initial: '' }),
         floor: new fields.StringField({ initial: '1st Floor' }),
         race: new fields.StringField({ initial: '' }),

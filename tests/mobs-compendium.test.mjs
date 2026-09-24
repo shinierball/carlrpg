@@ -259,8 +259,8 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(mob.system.attributes.dr.total, 2);
       assert.equal(mob.system.attributes.evadeDifficulty, '14+F');
       assert.equal(mob.system.attributes.surpriseDifficulty, '14+F');
-      assert.ok(mob.items.some(i => i.name === 'Fireball Spell' && i.type === 'attack'));
-      assert.ok(mob.items.some(i => i.name === 'Gloat Spell' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Fireball' && i.type === 'spell'));
+      assert.ok(mob.items.some(i => i.name === 'Gloat' && i.type === 'spell'));
       assert.ok(mob.items.some(i => i.name === 'Jump Smash' && i.type === 'attack'));
       assert.ok(mob.items.some(i => i.name === 'Dread Robes of Grimblegore' && i.type === 'loot'));
       assert.ok(mob.items.some(i => i.name === 'Potion of Frog Leaping' && i.type === 'loot'));
@@ -390,7 +390,7 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(mob.system.attributes.hp.hpPerBar, 5);
       assert.equal(mob.system.attributes.hp.max, 115);
       assert.equal(mob.system.attributes.dr.total, 1);
-      assert.ok(mob.items.some(i => i.name === 'Sleep Spell' && i.type === 'attack'));
+      assert.ok(mob.items.some(i => i.name === 'Sleep' && i.type === 'spell'));
     });
 
     test('Rage Elemental: Level 93 Colossal, 10 bars (6 HP/bar), 60 Max HP, DR 13, Str 136 (+7)', () => {
@@ -455,24 +455,26 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(flags.parts[0]?.type, 'Piercing');
     });
 
-    test('DCCActor instantiates Grimblegore and executes Fireball attack and damage', async () => {
+    test('DCCActor instantiates Grimblegore and executes Fireball spell and damage', async () => {
       const data = DCC_MOBS.find(m => m.name === 'Dread Wizard Grimblegore');
       const actor = new DCCActor(data);
       actor.prepareData();
 
-      const fireball = actor.items.find(i => i.name === 'Fireball Spell');
+      const fireball = actor.items.find(i => i.name === 'Fireball' && i.type === 'spell');
       assert.ok(fireball);
 
-      const hitRoll = await actor.rollAttack(fireball, 'hit');
-      assert.ok(hitRoll);
-      // INT mod +4 -> 1d20 + 4
-      assert.match(hitRoll.formula, /1d20 \+ 4/);
+      // Cast Fireball spell
+      const castMsg = await actor.rollSpell(fireball);
+      assert.ok(castMsg);
 
-      const dmgMsg = await actor.rollAttack(fireball, 'damage');
+      // Roll spell damage
+      const dmgMsg = await actor.rollSpellDamage(fireball);
       assert.ok(dmgMsg);
       const flags = dmgMsg.flags?.['carl-rpg'];
-      assert.equal(flags.parts[0]?.type, 'Fire');
-      assert.equal(flags.parts[0]?.dice, '2d12');
+      assert.ok(flags?.isDamageRoll);
+      assert.equal(flags.damageType, 'Fire');
+      assert.equal(flags.attackType, 'spell');
+      assert.ok(flags.rawDamage >= 2 && flags.rawDamage <= 24);
     });
   });
 
@@ -615,7 +617,7 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
       assert.equal(sac.system.quantity, 1);
     });
 
-    test('packs/mobs LevelDB database contains embedded loot items for all actors', async (t) => {
+    test('packs/mobs LevelDB database contains embedded items for all actors in sublevels', async (t) => {
       let ClassicLevel;
       const foundryModulePath = '/Applications/Foundry Virtual Tabletop.app/Contents/Resources/app/node_modules/classic-level';
       if (fs.existsSync(foundryModulePath)) {
@@ -640,13 +642,65 @@ describe('DCC RPG Mobs Compendium Subsystem', () => {
 
       for (const mob of DCC_MOBS) {
         const doc = await db.get(`!actors!${mob._id}`);
-        const loot = (doc.items || []).filter(i => i.type === 'loot');
-        const attacks = (doc.items || []).filter(i => i.type === 'attack');
-        assert.ok(loot.length >= 1, `Compendium actor ${doc.name} must have embedded loot items`);
-        assert.ok(attacks.length >= 1, `Compendium actor ${doc.name} must have embedded attack items`);
+        assert.ok(Array.isArray(doc.items), `Compendium actor ${doc.name} must have items array of IDs`);
+        assert.ok(doc.items.length >= 2, `Compendium actor ${doc.name} must have at least 2 item IDs`);
+
+        // In Foundry v12, items are stored in !actors.items!${actorId}.${itemId}
+        const items = [];
+        for (const itemId of doc.items) {
+          const itemDoc = await db.get(`!actors.items!${mob._id}.${itemId}`);
+          assert.ok(itemDoc, `Item ${itemId} for mob ${mob.name} must exist in !actors.items!`);
+          assert.equal(itemDoc._id, itemId);
+          items.push(itemDoc);
+        }
+
+        const loot = items.filter(i => i.type === 'loot');
+        const attacks = items.filter(i => i.type === 'attack');
+        assert.ok(loot.length >= 1, `Compendium actor ${doc.name} must have embedded loot items in sublevel`);
+        assert.ok(attacks.length >= 1, `Compendium actor ${doc.name} must have embedded attack items in sublevel`);
       }
 
       await db.close();
+    });
+
+    test('spellcaster mobs have authentic spell items and mana pools', () => {
+      const grimble = DCC_MOBS.find(m => m.name === 'Dread Wizard Grimblegore');
+      assert.ok(grimble, 'Grimblegore must exist');
+      const spells = (grimble.items || []).filter(i => i.type === 'spell');
+      assert.ok(spells.length >= 2, 'Grimblegore must have at least 2 spells');
+      assert.ok(grimble.system.attributes.mana?.max >= 20, 'Grimblegore must have mana pool');
+      const fireball = spells.find(s => s.name === 'Fireball');
+      assert.ok(fireball, 'Grimblegore must have Fireball spell');
+      assert.equal(fireball.system.damageType, 'Fire');
+      assert.equal(fireball.system.baseDamage, '2d12');
+
+      const shaman = DCC_MOBS.find(m => m.name === 'Rat Shaman');
+      assert.ok(shaman, 'Rat Shaman must exist');
+      const shamanSpells = (shaman.items || []).filter(i => i.type === 'spell');
+      assert.ok(shamanSpells.length >= 2, 'Rat Shaman must have at least 2 spells');
+
+      const wiseGuy = DCC_MOBS.find(m => m.name === 'Wise-Guyy');
+      assert.ok(wiseGuy, 'Wise-Guyy must exist');
+      const wiseSpells = (wiseGuy.items || []).filter(i => i.type === 'spell');
+      assert.ok(wiseSpells.length >= 2, 'Wise-Guyy must have Magic Missile and Arcane Shield');
+    });
+
+    test('CrawlerSheet populates context.spells for spellcaster mobs', async () => {
+      const data = DCC_MOBS.find(m => m.name === 'Dread Wizard Grimblegore');
+      const actor = new DCCActor(data);
+      actor.prepareData();
+
+      const sheet = new DCCCrawlerSheet(actor);
+      const context = await sheet._prepareContext();
+
+      assert.equal(context.isMob, true);
+      assert.ok(context.attacks.length >= 1, 'Grimblegore has attacks in context');
+      assert.ok(context.spells.length >= 2, 'Grimblegore has spells in context');
+      assert.ok(context.loot.length >= 1, 'Grimblegore has loot in context');
+
+      const fb = context.spells.find(s => s.name === 'Fireball');
+      assert.ok(fb, 'Fireball is in context.spells');
+      assert.equal(fb.system.manaCost, 20);
     });
   });
 });

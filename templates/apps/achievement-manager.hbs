@@ -1,0 +1,205 @@
+<div class="dcc-app-window dcc-achievement-manager-app">
+  {{!-- App Header --}}
+  <header class="dcc-manager-header" style="background: #111; border-bottom: 3px solid #c0392b; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fa-solid fa-trophy" style="color: #f1c40f; font-size: 24px;"></i>
+      <div>
+        <h2 style="margin: 0; color: #fff; font-family: 'Oswald', sans-serif; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">
+          DUNGEON CRAWLER CARL — ACHIEVEMENT TROPHY ROOM
+        </h2>
+        <span style="font-size: 11px; color: #aaa;">Dungeon AI Canonical Library &amp; Party Trophy Collection</span>
+      </div>
+    </div>
+
+    {{!-- Crawler Selector for Granting --}}
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label style="color: #fff; font-size: 11px; text-transform: uppercase; font-weight: bold; margin: 0;">Target Crawler:</label>
+      <select class="dcc-crawler-select" style="background: #222; color: #fff; border: 1px solid #c0392b; border-radius: 4px; padding: 3px 8px; font-family: 'Oswald', sans-serif; font-size: 12px;">
+        {{#each crawlers}}
+          <option value="{{this.id}}" {{#if (eq this.id ../currentActor.id)}}selected{{/if}}>
+            {{this.name}} (Floor: {{this.system.details.floor}})
+          </option>
+        {{else}}
+          <option value="">No Active Crawlers</option>
+        {{/each}}
+      </select>
+    </div>
+  </header>
+
+  {{!-- Navigation Tabs --}}
+  <nav class="dcc-manager-nav" style="display: flex; background: #222; border-bottom: 1px solid #333;">
+    <a class="dcc-nav-tab {{#if (eq activeTab 'library')}}active{{/if}}" data-tab="library" style="flex: 1; text-align: center; padding: 8px 12px; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 13px; text-transform: uppercase; color: {{#if (eq activeTab 'library')}}#fff{{else}}#aaa{{/if}}; background: {{#if (eq activeTab 'library')}}#c0392b{{else}}transparent{{/if}}; cursor: pointer; text-decoration: none;">
+      <i class="fa-solid fa-book-bookmark"></i> Canonical Library ({{totalLibraryCount}})
+    </a>
+    <a class="dcc-nav-tab {{#if (eq activeTab 'party')}}active{{/if}}" data-tab="party" style="flex: 1; text-align: center; padding: 8px 12px; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 13px; text-transform: uppercase; color: {{#if (eq activeTab 'party')}}#fff{{else}}#aaa{{/if}}; background: {{#if (eq activeTab 'party')}}#c0392b{{else}}transparent{{/if}}; cursor: pointer; text-decoration: none;">
+      <i class="fa-solid fa-users"></i> Party Trophy Room ({{crawlers.length}} Crawlers)
+    </a>
+  </nav>
+
+  {{!-- Body Content --}}
+  <div class="dcc-manager-body" style="padding: 12px; max-height: calc(100% - 105px); overflow-y: auto; background: #181818;">
+
+    {{!-- TAB 1: CANONICAL LIBRARY --}}
+    {{#if (eq activeTab 'library')}}
+      {{!-- Filters Bar --}}
+      <div style="display: flex; gap: 10px; margin-bottom: 12px; background: #222; padding: 8px 10px; border-radius: 4px; border: 1px solid #333; align-items: center;">
+        <div style="flex: 1; position: relative;">
+          <input type="text" class="dcc-search-input" placeholder="Search achievements by name, quote, reward, or tag..." value="{{searchQuery}}" style="width: 100%; background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 6px 10px; font-size: 12px;" />
+        </div>
+        <div>
+          <select class="dcc-tier-select" style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 6px 10px; font-size: 12px; font-family: 'Oswald', sans-serif;">
+            {{#each tierOptions}}
+              <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+
+      {{!-- Achievements Grid --}}
+      <div class="dcc-library-grid" style="display: flex; flex-direction: column; gap: 10px;">
+        {{#each libraryAchievements}}
+          <div class="dcc-library-card" style="background: #242424; border: 1.5px solid {{this.tierConfig.borderColor}}; border-radius: 6px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="{{this.tierConfig.icon}}" style="color: {{this.tierConfig.color}}; font-size: 18px;"></i>
+                <h3 style="margin: 0; color: #fff; font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">
+                  {{this.name}}
+                </h3>
+                <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; padding: 2px 6px; border-radius: 3px; background: {{this.tierConfig.bgColor}}; color: {{this.tierConfig.color}}; border: 1px solid {{this.tierConfig.borderColor}};">
+                  {{this.tierConfig.label}}
+                </span>
+                {{#if this.system.category}}
+                  <span style="font-size: 10px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; background: #333; color: #aaa;">
+                    {{this.system.category}}
+                  </span>
+                {{/if}}
+              </div>
+
+              {{!-- Grant Button --}}
+              <button type="button" class="dcc-grant-achievement-btn" data-ach-id="{{this.id}}" style="background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 4px 10px; font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-gift"></i> Award to Selected Crawler
+              </button>
+            </div>
+
+            {{!-- AI Quote --}}
+            {{#if this.system.quote}}
+              <div style="background: rgba(0,0,0,0.4); border-left: 3px solid #c0392b; padding: 6px 10px; font-style: italic; font-size: 12px; color: #eee; margin-bottom: 8px; line-height: 1.4;">
+                “{{this.system.quote}}”
+              </div>
+            {{/if}}
+
+            {{!-- Details & Reward Footer --}}
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; background: #1c1c1c; border: 1px solid #333; border-radius: 4px; padding: 6px 10px; font-size: 11px;">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div>
+                  <span style="color: #aaa; text-transform: uppercase;">Reward:</span>
+                  <strong style="color: #2ecc71; margin-left: 4px;">{{this.system.reward}}</strong>
+                </div>
+                {{#if this.system.favor}}
+                  <div style="color: #f1c40f;">
+                    <i class="fa-solid fa-hand-sparkles"></i> +{{this.system.favor}} Favor
+                  </div>
+                {{/if}}
+                {{#if this.system.xp}}
+                  <div style="color: #3498db;">
+                    <i class="fa-solid fa-bolt"></i> +{{this.system.xp}} XP
+                  </div>
+                {{/if}}
+              </div>
+
+              {{#if this.system.rewardContents}}
+                <div style="color: #bbb;">
+                  <strong>Contents:</strong> {{this.system.rewardContents}}
+                </div>
+              {{/if}}
+            </div>
+          </div>
+        {{else}}
+          <div style="text-align: center; padding: 30px; color: #aaa;">
+            <i class="fa-solid fa-trophy" style="font-size: 32px; color: #444; margin-bottom: 8px;"></i>
+            <p>No achievements match the selected filters.</p>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+
+    {{!-- TAB 2: PARTY TROPHY ROOM --}}
+    {{#if (eq activeTab 'party')}}
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        {{#each partyData}}
+          <div class="dcc-crawler-trophy-block" style="background: #242424; border: 1.5px solid #444; border-radius: 6px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.5);">
+            {{!-- Crawler Banner --}}
+            <div style="background: #111; border-bottom: 2px solid #c0392b; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="{{this.actorImg}}" style="width: 32px; height: 32px; border-radius: 4px; border: 1.5px solid #c0392b; object-fit: cover;" />
+                <div>
+                  <h3 style="margin: 0; color: #fff; font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: bold;">
+                    {{this.actorName}}
+                  </h3>
+                  <span style="font-size: 10px; color: #aaa;">Floor: {{this.floor}}</span>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="background: #333; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                  <i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> {{this.count}} Trophies
+                </span>
+                {{#if this.totalFavor}}
+                  <span style="background: #2c3e50; color: #f1c40f; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                    <i class="fa-solid fa-hand-sparkles"></i> +{{this.totalFavor}} Favor
+                  </span>
+                {{/if}}
+              </div>
+            </div>
+
+            {{!-- Achievements List for this Crawler --}}
+            <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+              {{#each this.achievements}}
+                <div style="background: #1c1c1c; border: 1px solid {{this.tierConfig.borderColor}}; border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                      <i class="{{this.tierConfig.icon}}" style="color: {{this.tierConfig.color}};"></i>
+                      <strong style="color: #fff; font-family: 'Oswald', sans-serif; font-size: 14px;">{{this.name}}</strong>
+                      <span style="font-size: 9px; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; color: {{this.tierConfig.color}}; border: 1px solid {{this.tierConfig.borderColor}};">
+                        {{this.tierConfig.label}}
+                      </span>
+                      {{#if this.system.floor}}
+                        <span style="font-size: 10px; color: #888;">({{this.system.floor}})</span>
+                      {{/if}}
+                    </div>
+                    {{#if this.system.quote}}
+                      <div style="font-size: 11px; color: #ccc; font-style: italic; margin-bottom: 4px;">
+                        “{{this.system.quote}}”
+                      </div>
+                    {{/if}}
+                    <div style="font-size: 11px; color: #2ecc71;">
+                      <i class="fa-solid fa-gift"></i> {{this.system.reward}}
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    <button type="button" class="dcc-party-announce-btn" data-actor-id="{{../actorId}}" data-item-id="{{this.id}}" title="Announce to Chat" style="background: #27ae60; color: #fff; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; cursor: pointer;">
+                      <i class="fa-solid fa-bullhorn"></i> Announce
+                    </button>
+                    <button type="button" class="dcc-party-delete-btn" data-actor-id="{{../actorId}}" data-item-id="{{this.id}}" title="Delete Achievement" style="background: #c0392b; color: #fff; border: none; border-radius: 3px; padding: 3px 6px; font-size: 11px; cursor: pointer;">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              {{else}}
+                <div style="text-align: center; padding: 12px; color: #777; font-style: italic; font-size: 12px;">
+                  No achievements collected yet. Time to enter the dungeon and earn some glory!
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        {{else}}
+          <div style="text-align: center; padding: 40px; color: #aaa;">
+            <p>No active crawlers found in the world.</p>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+
+  </div>
+</div>

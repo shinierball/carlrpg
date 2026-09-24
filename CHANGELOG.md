@@ -1,3 +1,114 @@
+## 2.0.29
+
+### Party Progression & Session Manager Tracked Roster & Party Grouping
+
+- **Crawler Party Affiliation System**:
+  - Registered `party` property on Crawler actor schema (`system.details.party`) in `template.json` and `src/models/actors/crawler-model.mjs`.
+  - Added editable `Party / Team` input in Crawler Sheet Page 1 Core header (`templates/actors/parts/page1-core.hbs`).
+- **Selective Session Tracking & Isolated Metrics**:
+  - Added `trackedCrawlerIds` and `party` parameters to `DCCSessionEngine.createSession(...)` and full support for tracked subsets.
+  - Automatically isolates roll logging, combat damage, favor adjustments, popularity deltas, and loot box records to tracked crawlers only.
+  - Session summaries (Total Damage Dealt, Damage Taken, Kills, Untrained Attempts, MVP, and Target of the Night) calculate exclusively from tracked participants.
+  - End-of-session XP distribution strictly divides session XP among participating tracked crawlers.
+  - Dungeon AI Performance Recap chat card summarizes only tracked crawlers.
+- **Roster Controls & Filtering in DCCSessionManagerApp**:
+  - **Quick Card Toggle**: Added 1-click `[Tracked]` / `[Untracked]` eye toggle button directly on crawler cards in the Party Matrix.
+  - **Dimmed Visual State**: Untracked crawlers feature distinctive dimmed cards (`.dcc-crawler-card.untracked`) for clear visual hierarchy.
+  - **Segmented View Filter**: Toggle between **Tracked Only** (default active squad) and **All Crawlers** view.
+  - **Party Dropdown Filters**: Filter party matrix and activity ledger by specific party group or unassigned crawlers.
+  - **Interactive Manage Roster Dialog (`promptManageRosterDialog`)**:
+    - Accessible via `[Manage Roster]` button on the party matrix toolbar.
+    - Features **Select All**, **Deselect All**, and **Select by Party** bulk operations.
+    - Checkbox selection for precise crawler inclusion in the active session.
+    - Inline party name editing to assign or reassign crawlers without opening individual character sheets.
+- **Automated Verification**:
+  - Added comprehensive test suite `11. Tracked Crawler Roster and Party Grouping Filtering` in `tests/session-manager.test.mjs`.
+  - Full test suite passing with 0 failures across all 83 suites (`node --test tests/*.test.mjs`).
+
+## 2.0.28
+
+### Crawler Achievements Collection & Trophy Room Subsystem
+
+- **Persistent Crawler Achievement Item Type (`achievement`)**:
+  - Registered `"achievement"` as an official Item document type in `template.json` and `system.json`.
+  - Schema includes trophy tier (`bronze`, `silver`, `gold`, `platinum`, `legendary`, `celestial`, `quest`, `secret`, `special`), floor number, date/session earned, Dungeon AI quote, reward granted, loot box contents, AI Favor bonus, and XP reward.
+  - Added dedicated Item Sheet template partial `templates/items/parts/achievement.hbs` with input fields and a 1-click **Broadcast Announcement to Chat** button.
+- **Dedicated Crawler Sheet Tab 6 ("6: Achievements")**:
+  - Added a dedicated 6th tab to `DCCCrawlerSheet` (`templates/actors/parts/achievements.hbs`).
+  - **Trophy Room Metrics**: High-contrast summary header displaying total unlocked achievements, cumulative AI Favor gained, and tier breakdown pills for Bronze, Silver, Gold, Platinum, Legendary, and Celestial trophies.
+  - **Search & Filter Controls**: Client-side filtering by trophy tier and dynamic text search matching names, quotes, and rewards.
+  - **DCC Achievement Cards**: Color-coded cards displaying tier badges, floor indicators, the signature Dungeon AI quote in red-bordered callout blocks, reward details, and actions to announce, edit, or delete.
+  - Linked quick-status trophy counter badge into Tab 5 (Story & Sponsors) narrative header.
+- **Canonical Achievements Library & Presets (`DCC_ACHIEVEMENTS`)**:
+  - Defined ready-to-use canonical achievements from official adventures and CarlRPG lore in `src/data/achievements.mjs`:
+    - *Where’d Ya Get Those Peepers?* (Passive Perception Quest, Bronze)
+    - *Ding-Dong Ditch* (Surveillance Drone Destruction, Silver)
+    - *You’ll Shoot Your Eye Out!* (Stiggy Defeat, Silver)
+    - *Floor Combat MVP* (Combat Metrics, Gold)
+    - *First Blood of the Desolation* (First kill, Bronze)
+    - *Boss Annihilator* (Boss Slayer, Celestial)
+    - *Fashion Disaster Survivor* (Fighting without pants, Bronze)
+    - *Improvised Demolitions Expert* (Explosive hazards, Platinum)
+    - *Sponsor's Little Darling* (Corporate sponsorship, Gold)
+    - *Goblin Defenestration Specialist* (Throwing enemies off cliffs, Silver)
+- **Interactive Achievement Manager & Trophy Room App (`DCCAchievementManagerApp`)**:
+  - Built full manager application in `src/apps/achievement-manager.mjs` and `templates/apps/achievement-manager.hbs`.
+  - **Canonical Library View**: Browse presets, filter by tier and text search, and award any achievement to a selected crawler with one click.
+  - **Party Trophy Room View**: Inspect all achievements collected by the party in one aggregated screen.
+  - Exposed via `game.dcc.achievementManager` and `window.carl.openAchievementManager()`.
+- **Combat Metrics & Session Engine Integration**:
+  - When awards or loot boxes are granted via `DCCCombatMetrics.dispatchAIAward(...)`, an embedded `achievement` item is automatically created on the recipient Crawler actor with quote, tier, and reward details.
+  - `DCCSessionEngine.recordLootBox(...)` automatically persists an achievement item on the recipient actor, synchronizing session ledgers with the crawler's permanent trophy room.
+- **Dungeon AI Chat Announcements**:
+  - Implemented `actor.announceAchievement(item)` and `item.announce()`, generating styled Dungeon AI chat cards with AI speaker alias, sound/flair, and rewards.
+- **Automated Verification**:
+  - Created `tests/achievements.test.mjs` covering schema validation, canonical library integrity, document methods, sheet calculations, combat metrics persistence, session engine sync, and manager app workflows.
+  - All 488 tests passing with 0 failures across all 83 suites (`node --test tests/*.test.mjs`).
+
+## 2.0.27
+
+### Mob Embedded Attacks, Spells & LevelDB Sublevel Hydration Fix
+
+- **Embedded Items Sublevel Hydration in LevelDB (`packs/mobs`)**:
+  - Diagnosed and resolved issue where mobs opened from the `carl-rpg.mobs` compendium pack were missing attacks, spells, and loot in Foundry VTT v12.
+  - Resolved root cause: In Foundry VTT v12's `expandEmbedded` architecture for Actor compendiums, the primary actor record in `!actors!${actorId}` must store `items` as an array of item IDs (`[itemId1, itemId2, ...]`), while the item documents themselves must be stored in the sublevel `actors.items` under key `${actorId}.${itemId}` (raw key `!actors.items!${actorId}.${itemId}`).
+  - Updated `scripts/build-packs.mjs` (`buildMobs`) to correctly separate actor records and store all 381 embedded items across the 84 mobs into the `actors.items` sublevel.
+- **Spellcaster Mobs Defined & Enriched with Spells & Mana Pools**:
+  - Defined and assigned authentic `type: "spell"` items and mana attributes to all 16 spellcaster mobs from the *Game Master's Campaign Toolkit*:
+    - *Dread Wizard Grimblegore*: Fireball (2d12 Fire, 20 MP), Gloat (2d6 Sonic, 10 MP), Jump Smash (3d6 Bludgeoning), Staff Strike. Mana pool: 60/60.
+    - *Rat Shaman*: Rat Swarm Summon (2d6 Piercing, 15 MP), Grime Curse (1d8 Necrotic, 10 MP), Rotten Staff. Mana pool: 40/40.
+    - *Rat Hooligan*: Cheese Curse (1d6 Acid, 10 MP), Rusty Shiv, Brick Toss. Mana pool: 20/20.
+    - *Goblin Shamanka*: Hex of Misfortune (2d8 Psychic, 15 MP), Grime Bolt (1d10 Acid, 10 MP), Ritual Dagger. Mana pool: 45/45.
+    - *Wise-Guyy Crawler*: Eldritch Blast (2d10 Force, 10 MP), Arcane Shield (5 MP), Punch. Mana pool: 50/50.
+    - *Prosperity Prophet*: Coin Barrage (3d10 Bludgeoning, 25 MP), Golden Smite (2d12 Radiant, 20 MP), Golden Scepter. Mana pool: 80/80.
+    - *Mind Horror*: Psychic Scream (3d8 Psychic, 20 MP), Mind Flay (2d10 Psychic, 15 MP), Tentacle Flail. Mana pool: 75/75.
+    - *Rakish Werehound Shocker*: Shocking Howl (2d8 Lightning, 15 MP), Thunder Clap (2d6 Thunder, 10 MP), Shock Claws. Mana pool: 40/40.
+    - *Laminak Manager*: Performance Review (2d8 Psychic, 15 MP), Demotion Curse (1d10 Necrotic, 10 MP), Clipboard Smack. Mana pool: 35/35.
+    - *Rayzer*: Laser Barrage (2d10 Radiant, 20 MP), Overcharge Beam (3d8 Fire, 25 MP), Cyber Claw. Mana pool: 50/50.
+    - *Troglodyte Virtuoso*: Discordant Screech (2d8 Thunder, 15 MP), Dirge of Despair (1d10 Psychic, 10 MP), Bone Flute Bash. Mana pool: 40/40.
+    - *Goblin Bomb Bard*: Cacophony (2d8 Sonic, 15 MP), Pyrotechnic Blast (2d10 Fire, 20 MP), Bomb Toss. Mana pool: 45/45.
+    - *Krakaren Clone*: Entropic Pulse (3d8 Force, 20 MP), Psionic Wave (2d10 Psychic, 15 MP), Tentacle Slam. Mana pool: 70/70.
+    - *Beloved Mimic*: Deceptive Allure (2d8 Psychic, 15 MP), Pseudopod Slam, Devour. Mana pool: 50/50.
+    - *Dream Eaters*: Nightmare Harvest (2d10 Psychic, 20 MP), Phantasmal Touch. Mana pool: 60/60.
+    - *The Hoarder*: Arcane Surge (2d10 Force, 20 MP), Junk Barrage. Mana pool: 55/55.
+  - Ensured all 84 mobs have at least one physical `type: "attack"` item (170 total attacks, 29 total spells, 182 loot items across the 84 mobs).
+- **Actor Sheet UI Quick-Cast & Spells Display on Page 1**:
+  - Updated `templates/actors/parts/page1-core.hbs` to render a dedicated **SPELLS & MAGIC** section on Page 1 (Core & Combat) whenever a mob actor has embedded spells (`{{#if spells.length}}`).
+  - Provides instant 1-click Cast (`roll-spell`), Damage (`roll-spell-dmg`), MP cost badge, range, damage dice, and stat modifiers directly alongside Attacks.
+- **Automated Verification**:
+  - All 480 unit tests passing with 0 failures (`tests/*.test.mjs`).
+  - Line coverage maintained at 93.77% across the entire codebase (exceeding ≥75% requirement on every file).
+
+## 2.0.26
+
+### Mob Compendium LevelDB Database Synchronization & Indexing Resolution
+
+- **Mob Compendium Pack Recovery (`packs/mobs`)**:
+  - Diagnosed and resolved empty LevelDB database issue where `packs/mobs` had 0 keys due to file locks during previous build.
+  - Rebuilt LevelDB database with all 84 mobs/bosses/rival crawlers from the *Game Master's Campaign Toolkit* under the `!actors!` key space and `actors` sublevel.
+  - Updated `scripts/build-packs.mjs` to dynamically load `systemVersion` from `system.json` for all compendium packs.
+  - Verified compendium indexability and sublevel querying matching Foundry VTT v12 collection requirements.
+
 ## 2.0.25
 
 ### Official Game Master's Campaign Toolkit Mob Compendium Expansion (All 84 Entities)

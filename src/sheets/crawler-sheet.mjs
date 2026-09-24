@@ -1,6 +1,8 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
+import { DCCAchievementManagerApp } from '../apps/achievement-manager.mjs';
+import { DCC_ACHIEVEMENT_TIERS } from '../data/achievements.mjs';
 import { DCC_WEAPON_GROUP_MAP } from '../documents/actor.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
@@ -210,6 +212,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.loot = [];
     context.buffs = [];
     context.debuffs = [];
+    context.achievements = [];
 
     // Track equipped items by slot
     context.equippedBySlot = {
@@ -263,7 +266,50 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         item.summary = parts.join(' • ') || sys.description || '';
         context.debuffs.push(item);
       }
+      else if (item.type === 'achievement') {
+        const sys = item.system || {};
+        const tier = (sys.tier || 'bronze').toLowerCase();
+        const tierConfig = DCC_ACHIEVEMENT_TIERS?.[tier] || {
+          label: tier.toUpperCase(),
+          color: '#e74c3c',
+          icon: 'fa-solid fa-trophy',
+          bgColor: 'rgba(231, 76, 60, 0.15)'
+        };
+        item.tierLabel = tierConfig.label || tier.toUpperCase();
+        item.tierColor = tierConfig.color || '#e74c3c';
+        item.tierIcon = tierConfig.icon || 'fa-solid fa-trophy';
+        item.tierBgColor = tierConfig.bgColor || 'rgba(231, 76, 60, 0.15)';
+        context.achievements.push(item);
+      }
     }
+
+    // Calculate achievement statistics
+    const tierCounts = {
+      bronze: 0,
+      silver: 0,
+      gold: 0,
+      platinum: 0,
+      legendary: 0,
+      celestial: 0,
+      quest: 0,
+      secret: 0,
+      special: 0
+    };
+    let totalAchievementFavor = 0;
+    let totalAchievementXP = 0;
+    for (const ach of context.achievements) {
+      const t = (ach.system?.tier || 'bronze').toLowerCase();
+      if (tierCounts[t] !== undefined) tierCounts[t]++;
+      else tierCounts.special = (tierCounts.special || 0) + 1;
+      totalAchievementFavor += Number(ach.system?.favor) || 0;
+      totalAchievementXP += Number(ach.system?.xp) || 0;
+    }
+    context.achievementStats = {
+      total: context.achievements.length,
+      byTier: tierCounts,
+      totalFavor: totalAchievementFavor,
+      totalXP: totalAchievementXP
+    };
 
     // Tally gear skill bonuses from equipped gear
     const gearSkillBonuses = new Map();
@@ -1021,6 +1067,44 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       this._openBuffPicker(null, 'debuffs');
     });
 
+    // Open Achievement Manager / Library
+    html.find('.open-achievement-picker').click(ev => {
+      ev.preventDefault();
+      this._openAchievementPicker();
+    });
+
+    // Announce Achievement to Chat
+    html.find('.announce-achievement').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      if (itemId && typeof this.actor.announceAchievement === 'function') {
+        await this.actor.announceAchievement(itemId);
+      }
+    });
+
+    // Filter Achievements by Tier or Search
+    const filterAchievements = () => {
+      const selectedTier = html.find('.dcc-achievement-filter-tier').val() || 'all';
+      const query = (html.find('.dcc-achievement-search').val() || '').toLowerCase().trim();
+
+      html.find('.dcc-achievement-card-entry').each((i, el) => {
+        const itemTier = ($(el).data('tier') || '').toLowerCase();
+        const text = $(el).text().toLowerCase();
+
+        const matchTier = selectedTier === 'all' || itemTier === selectedTier;
+        const matchQuery = !query || text.includes(query);
+
+        if (matchTier && matchQuery) {
+          $(el).show();
+        } else {
+          $(el).hide();
+        }
+      });
+    };
+
+    html.find('.dcc-achievement-filter-tier').change(filterAchievements);
+    html.find('.dcc-achievement-search').on('input', filterAchievements);
+
     // Roll Stat Check
     html.find('.roll-stat').click(ev => {
       const stat = $(ev.currentTarget).data('stat');
@@ -1394,6 +1478,13 @@ export class DCCCrawlerSheet extends BaseActorSheet {
    */
   _openBuffPicker(targetSlot = null, initialTab = 'all') {
     new DCCBuffDebuffManager({ actor: this.actor, targetSlot, activeTab: initialTab }).render(true);
+  }
+
+  /**
+   * Open interactive modal to browse and award achievements
+   */
+  _openAchievementPicker() {
+    new DCCAchievementManagerApp({ actor: this.actor }).render(true);
   }
 
   /** @override */

@@ -11,6 +11,8 @@ import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
+import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
+import { DCC_ACHIEVEMENTS, DCC_ACHIEVEMENT_TIERS } from './data/achievements.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
@@ -65,6 +67,9 @@ Hooks.once('init', async function() {
     DCCSessionEngine,
     DCCSessionManagerApp,
     DCCCrawlerCreatorApp,
+    DCCAchievementManagerApp,
+    achievements: DCC_ACHIEVEMENTS,
+    achievementTiers: DCC_ACHIEVEMENT_TIERS,
     mobs: DCC_MOBS,
     backgroundTables: DCC_BACKGROUND_TABLES,
     getBackgroundTable,
@@ -78,7 +83,8 @@ Hooks.once('init', async function() {
       DCCSkillManager,
       DCCSpellManager,
       DCCBuffDebuffManager,
-      DCCCombatMetrics,
+      DCCCrawlerCreatorApp,
+      DCCAchievementManagerApp,
       DCCCombatArchiveApp,
       DCCSessionEngine,
       DCCSessionManagerApp,
@@ -119,6 +125,9 @@ Hooks.once('init', async function() {
     outcomeConfig: DCC_OUTCOME_CONFIG,
     sizes: DCC_SIZES,
     getSizeInfo,
+    achievements: DCC_ACHIEVEMENTS,
+    achievementTiers: DCC_ACHIEVEMENT_TIERS,
+    achievementManager: DCCAchievementManagerApp,
     crawlerCreation: {
       standardArray: DCC_STANDARD_ARRAY,
       species: DCC_SPECIES_DATA,
@@ -265,6 +274,7 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/actors/parts/page4-inventory.hbs',
     'systems/carl-rpg/templates/actors/parts/conditions.hbs',
     'systems/carl-rpg/templates/actors/parts/story-extras.hbs',
+    'systems/carl-rpg/templates/actors/parts/achievements.hbs',
     'systems/carl-rpg/templates/actors/parts/page5-extras.hbs',
     'systems/carl-rpg/templates/actors/parts/page6-abilities.hbs',
     'systems/carl-rpg/templates/items/parts/header.hbs',
@@ -273,6 +283,7 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/items/parts/gear.hbs',
     'systems/carl-rpg/templates/items/parts/buff.hbs',
     'systems/carl-rpg/templates/items/parts/debuff.hbs',
+    'systems/carl-rpg/templates/items/parts/achievement.hbs',
     'systems/carl-rpg/templates/items/parts/skill.hbs',
     'systems/carl-rpg/templates/items/parts/loot.hbs',
     'systems/carl-rpg/templates/items/parts/traits.hbs',
@@ -284,7 +295,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/combat-archive.hbs',
     'systems/carl-rpg/templates/apps/session-manager.hbs',
     'systems/carl-rpg/templates/apps/add-event-dialog.hbs',
-    'systems/carl-rpg/templates/apps/crawler-creator.hbs'
+    'systems/carl-rpg/templates/apps/crawler-creator.hbs',
+    'systems/carl-rpg/templates/apps/achievement-manager.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -300,7 +312,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp) {
           app.render(false);
         }
       }
@@ -316,6 +328,9 @@ Hooks.once('init', async function() {
     rollBackgroundTable,
     ensureBackgroundTables,
     setupInitialHotbar,
+    openAchievementManager(options = {}) {
+      return new DCCAchievementManagerApp(options).render(true);
+    },
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
     },

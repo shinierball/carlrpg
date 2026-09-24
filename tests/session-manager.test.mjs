@@ -626,5 +626,234 @@ test('DCC RPG Party Progression & Session Manager Subsystem', async (t) => {
     globalThis.Dialog = origDialog;
     await app.close();
   });
+
+  await t.test('11. Tracked Crawler Roster and Party Grouping Filtering', async () => {
+    await DCCSessionEngine.saveAllSessions([]);
+    await DCCSessionEngine.setActiveSessionId('');
+
+    // Setup 4 crawlers with different parties and unassigned
+    const carl = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        details: { level: 3, party: 'The Royal Court', xp: { value: 100, max: 1000 } },
+        attributes: { hp: { value: 40, max: 40 }, mana: { value: 10, max: 10 } }
+      }
+    });
+
+    const donut = new DCCActor({
+      name: 'Princess Donut',
+      type: 'crawler',
+      system: {
+        details: { level: 3, party: 'The Royal Court', xp: { value: 100, max: 1000 } },
+        attributes: { hp: { value: 25, max: 25 }, mana: { value: 20, max: 20 } }
+      }
+    });
+
+    const katia = new DCCActor({
+      name: 'Katia',
+      type: 'crawler',
+      system: {
+        details: { level: 2, party: 'Team Meadow Lark', xp: { value: 50, max: 1000 } },
+        attributes: { hp: { value: 30, max: 30 }, mana: { value: 10, max: 10 } }
+      }
+    });
+
+    const louis = new DCCActor({
+      name: 'Louis',
+      type: 'crawler',
+      system: {
+        details: { level: 1, party: '', xp: { value: 0, max: 1000 } },
+        attributes: { hp: { value: 20, max: 20 }, mana: { value: 5, max: 5 } }
+      }
+    });
+
+    globalThis.game.actors = [carl, donut, katia, louis];
+
+    // 1. Validate getDistinctParties and party filtering
+    const distinct = DCCSessionEngine.getDistinctParties();
+    assert.deepEqual(distinct, ['Team Meadow Lark', 'The Royal Court']);
+
+    const royalCourtMembers = DCCSessionEngine.getPartyCrawlers({ party: 'The Royal Court' });
+    assert.equal(royalCourtMembers.length, 2);
+    assert.ok(royalCourtMembers.some(c => c.id === carl.id));
+    assert.ok(royalCourtMembers.some(c => c.id === donut.id));
+
+    const unassigned = DCCSessionEngine.getPartyCrawlers({ party: 'unassigned' });
+    assert.equal(unassigned.length, 1);
+    assert.equal(unassigned[0].id, louis.id);
+
+    // 2. Create session scoped to 'The Royal Court'
+    const session = await DCCSessionEngine.createSession({
+      number: 1,
+      title: 'Session 1: The Royal Court',
+      party: 'The Royal Court'
+    });
+
+    assert.equal(session.party, 'The Royal Court');
+    assert.equal(session.trackedCrawlerIds.length, 2);
+    assert.ok(session.trackedCrawlerIds.includes(carl.id));
+    assert.ok(session.trackedCrawlerIds.includes(donut.id));
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, carl.id), true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, katia.id), false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, louis.id), false);
+
+    // 3. Dynamic roster adjustments: add, remove, and toggle
+    await DCCSessionEngine.addTrackedCrawler(session.id, katia.id);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, katia.id), true);
+
+    await DCCSessionEngine.removeTrackedCrawler(session.id, donut.id);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), false);
+
+    // Toggle: currently untracked donut -> toggles to tracked
+    const toggledOn = await DCCSessionEngine.toggleTrackedCrawler(session.id, donut.id);
+    assert.equal(toggledOn, true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), true);
+
+    // Toggle again: currently tracked donut -> toggles to untracked
+    const toggledOff = await DCCSessionEngine.toggleTrackedCrawler(session.id, donut.id);
+    assert.equal(toggledOff, false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), false);
+
+    // 4. Selective tracking: Rolls from untracked crawlers are ignored
+    // Tracked Carl rolls a skill check -> recorded
+    const carlRoll = await DCCSessionEngine.recordRoll({
+      actor: carl,
+      roll: { total: 20, d20Result: 14 },
+      type: 'skill',
+      name: 'Bashing Weapons'
+    });
+    assert.ok(carlRoll);
+
+    // Untracked Donut rolls a skill check -> ignored
+    const donutRoll = await DCCSessionEngine.recordRoll({
+      actor: donut,
+      roll: { total: 25, d20Result: 18 },
+      type: 'skill',
+      name: 'Screaming Cat'
+    });
+    assert.equal(donutRoll, null);
+
+    // Selective tracking: Damage to untracked crawlers is ignored
+    const mob = new DCCActor({ name: 'Lava Fiend', type: 'mob', system: { attributes: { hp: { value: 10, max: 10 } } } });
+    await DCCSessionEngine.recordDamage({
+      attackerActor: mob,
+      targetActor: carl,
+      actualDamage: 10,
+      attackName: 'Fireball'
+    });
+
+    await DCCSessionEngine.recordDamage({
+      attackerActor: mob,
+      targetActor: donut,
+      actualDamage: 15,
+      attackName: 'Fireball'
+    });
+
+    const refreshedSession = DCCSessionEngine.getAllSessions().find(s => s.id === session.id);
+    assert.equal(refreshedSession.crawlers[carl.id].damageTaken, 10);
+    // Donut is untracked, so damageTaken was not recorded in session
+    assert.equal(refreshedSession.crawlers[donut.id]?.damageTaken || 0, 0);
+
+    // 5. Session summaries only aggregate tracked crawlers
+    await DCCSessionEngine.updateCrawlerStats(session.id, carl.id, { damageDealt: 100, kills: 2 });
+    await DCCSessionEngine.updateCrawlerStats(session.id, katia.id, { damageDealt: 60, kills: 1 });
+    const summarySession = DCCSessionEngine.getAllSessions().find(s => s.id === session.id);
+    // Manually force stats on untracked donut
+    summarySession.crawlers[donut.id] = { ...DCCSessionEngine._createCrawlerRecord(donut), damageDealt: 500, kills: 10 };
+    DCCSessionEngine._recomputeSessionSummaries(summarySession);
+
+    // Summary totals only aggregate Carl (100) and Katia (60) = 160, not Donut (500)
+    assert.equal(summarySession.summary.totalDamageDealt, 160);
+    assert.equal(summarySession.summary.totalKills, 3);
+    assert.equal(summarySession.summary.mvpActorId, carl.id);
+
+    // 6. XP distribution only awards participating tracked crawlers
+    const xpResult = await DCCSessionEngine.distributeSessionXP(session.id, { bonusXP: 200 });
+    assert.equal(xpResult.crawlers.length, 2); // Carl and Katia only
+    assert.ok(xpResult.crawlers.some(c => c.actorId === carl.id));
+    assert.ok(xpResult.crawlers.some(c => c.actorId === katia.id));
+    assert.equal(xpResult.crawlers.some(c => c.actorId === donut.id), false);
+
+    // Donut XP should remain unchanged
+    assert.equal(Number(donut.system.details.xp.value), 100);
+
+    // 7. AI recap card only displays tracked crawlers
+    const recapMsg = await DCCSessionEngine.broadcastAISessionReview(session.id);
+    assert.ok(recapMsg.content.includes('Carl'));
+    assert.ok(recapMsg.content.includes('Katia'));
+    assert.ok(!recapMsg.content.includes('Princess Donut'));
+
+    // 8. DCCSessionManagerApp View Model filtering and Manage Roster Modal
+    const app = new DCCSessionManagerApp({ sessionId: session.id, party: 'all', trackedOnly: true });
+    const data = await app.getData();
+
+    assert.equal(data.allWorldCrawlersCount, 4);
+    assert.equal(data.trackedCount, 2); // Carl, Katia
+    assert.equal(data.crawlersList.length, 2); // Filtered by trackedOnly: true
+    assert.ok(data.crawlersList.some(c => c.actorId === carl.id && c.isTracked === true));
+    assert.ok(data.crawlersList.some(c => c.actorId === katia.id && c.isTracked === true));
+
+    // When trackedOnly is false, all 4 crawlers are shown
+    app.trackedOnly = false;
+    const allData = await app.getData();
+    assert.equal(allData.crawlersList.length, 4);
+    const donutCard = allData.crawlersList.find(c => c.actorId === donut.id);
+    assert.equal(donutCard.isTracked, false);
+    assert.equal(donutCard.party, 'The Royal Court');
+
+    // Test promptManageRosterDialog
+    let rosterDlgSpy = null;
+    const origDialog = globalThis.Dialog;
+    globalThis.Dialog = class SpyRosterDialog extends origDialog {
+      constructor(dlgData, options) {
+        super(dlgData, options);
+        rosterDlgSpy = this;
+      }
+    };
+
+    const rosterPromise = app.promptManageRosterDialog();
+    assert.ok(rosterDlgSpy, 'Manage Roster Dialog should be opened');
+
+    // Simulate saving roster with all 4 crawlers tracked and updating Louis's party
+    const mockRosterForm = {
+      find: (selector) => {
+        if (selector === '.dcc-roster-row') {
+          return {
+            each: (cb) => {
+              const rows = [
+                { id: carl.id, tracked: true, party: 'The Royal Court' },
+                { id: donut.id, tracked: true, party: 'The Royal Court' },
+                { id: katia.id, tracked: true, party: 'Team Meadow Lark' },
+                { id: louis.id, tracked: true, party: 'Solo Crawlers' }
+              ];
+              rows.forEach((r, idx) => {
+                cb(idx, {
+                  data: (key) => key === 'actor-id' ? r.id : null,
+                  find: (sub) => {
+                    if (sub === '.dcc-roster-checkbox') return { is: () => r.tracked, checked: r.tracked };
+                    if (sub === '.dcc-roster-party-input') return { val: () => r.party, value: r.party };
+                    return { is: () => false, val: () => '' };
+                  }
+                });
+              });
+            }
+          };
+        }
+        return { is: () => false, val: () => '', click: () => {}, change: () => {} };
+      }
+    };
+
+    await rosterDlgSpy.triggerButton('save', mockRosterForm);
+    const updatedTrackedIds = await rosterPromise;
+    assert.equal(updatedTrackedIds.length, 4);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), true);
+    assert.equal(louis.system.details.party, 'Solo Crawlers');
+
+    // Restore Dialog
+    globalThis.Dialog = origDialog;
+    await app.close();
+  });
 });
 

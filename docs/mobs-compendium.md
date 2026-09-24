@@ -134,9 +134,16 @@ All mob treasures are embedded directly into the mob actor as first-class items 
 - Every single mob holds tailored loot drops with SVG icons, quantities, descriptions, and lore notes.
 - GMs can view, inline edit, chat-share, or drag-and-drop loot items directly from Page 1 (Core) or Page 4 (Inventory) onto player character sheets.
 
-### 6. Attacks & Tactical Spells as Direct Attack Items
-- All mob offensive actions, spells, and debuff triggers are structured as `type: "attack"` items with multi-typed damage, ranges, and debuff effects.
-- GMs can roll to-hit (`1d20 + Stat Mod`) and damage buttons with a single click.
+### 6. Attacks & Dedicated Spells System
+- **Physical Attacks**: All mob offensive maneuvers, weapons, and special strikes are structured as `type: "attack"` items with multi-typed damage, ranges, and debuff effects.
+- **Authentic Spells & Mana Pools**: All 16 spellcaster mobs (e.g. *Dread Wizard Grimblegore*, *Rat Shaman*, *Prosperity Prophet*, *Mind Horror*, *Wise-Guyy*) are equipped with dedicated `type: "spell"` items, mana costs, and full mana attributes.
+- **Page 1 Quick-Combat Interface**: GMs can trigger 1-click to-hit attack rolls, spell casts, and damage rolls directly on Page 1 (Core & Combat) of the mob sheet.
+
+### 7. Foundry VTT v12 Sublevel Storage (`actors.items`)
+In accordance with Foundry VTT v12's `expandEmbedded` architecture:
+- Mobs are stored in `!actors!` with an array of embedded item IDs (`items: [itemId1, itemId2, ...]`).
+- The item documents themselves are indexed and stored in the sublevel `actors.items` under key `${actorId}.${itemId}` (`!actors.items!${actorId}.${itemId}`).
+- This ensures full item hydration when actors are dragged or opened from the compendium into active scenes.
 
 ---
 
@@ -146,4 +153,4 @@ To regenerate the binary LevelDB compendium after editing `src/data/mobs.mjs`:
 ```bash
 node scripts/build-packs.mjs
 ```
-The script writes all 84 actor records into `packs/mobs` using `ClassicLevel`.
+The script writes all 84 actor records into `!actors!` and all 381 embedded items into `!actors.items!` in `packs/mobs` using `ClassicLevel`.

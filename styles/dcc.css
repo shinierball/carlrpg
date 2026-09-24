@@ -4727,6 +4727,68 @@ select.dcc-box-input.dcc-size-select,
   color: #bdc3c7;
 }
 
+/* Party & Roster Filter Toolbar */
+.dcc-party-filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #181822;
+  border: 1px solid #2e2e3e;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.dcc-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+}
+
+.dcc-select-toolbar {
+  background: #111118;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+}
+
+.dcc-toggle-segment {
+  display: inline-flex;
+  border: 1px solid #444;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dcc-btn-tracked-toggle {
+  background: #1e1e28;
+  color: #888;
+  border: none;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: 'Oswald', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dcc-btn-tracked-toggle:hover {
+  color: #fff;
+  background: #252535;
+}
+
+.dcc-btn-tracked-toggle.active {
+  background: #c0392b;
+  color: #fff;
+  font-weight: bold;
+}
+
 /* Party Grid */
 .dcc-party-grid {
   display: grid;
@@ -4743,6 +4805,17 @@ select.dcc-box-input.dcc-size-select,
   flex-direction: column;
   gap: 8px;
   transition: all 0.15s ease;
+}
+
+.dcc-crawler-card.untracked {
+  opacity: 0.55;
+  border: 1.5px dashed #444;
+  background: #15151f;
+}
+
+.dcc-crawler-card.untracked:hover {
+  opacity: 0.95;
+  border-color: #777;
 }
 
 .dcc-crawler-card:hover {
@@ -4773,11 +4846,65 @@ select.dcc-box-input.dcc-size-select,
   flex: 1;
 }
 
+.dcc-crawler-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 .dcc-crawler-name {
   margin: 0;
   font-size: 15px;
   color: #ffffff;
   font-weight: 700;
+}
+
+.dcc-btn-toggle-track {
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 3px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.dcc-btn-toggle-track.tracked {
+  color: #2ecc71;
+  border-color: #27ae60;
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.dcc-btn-toggle-track.tracked:hover {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border-color: #c0392b;
+}
+
+.dcc-btn-toggle-track.untracked {
+  color: #95a5a6;
+  border-color: #555;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dcc-btn-toggle-track.untracked:hover {
+  color: #2ecc71;
+  border-color: #27ae60;
+  background: rgba(39, 174, 96, 0.15);
+}
+
+.dcc-badge-party {
+  background: #8e44ad;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-weight: bold;
+  font-size: 9px;
+  text-transform: uppercase;
 }
 
 .dcc-crawler-meta {
@@ -6213,5 +6340,46 @@ select.dcc-box-input.dcc-size-select,
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* ---------------- CRAWLER ACHIEVEMENTS & TROPHY ROOM ---------------- */
+.dcc-achievements-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dcc-achievement-card-entry {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dcc-achievement-card-entry:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+}
+
+.dcc-tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.dcc-ai-announcement-card.dcc-achievement-card {
+  font-family: 'Oswald', sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.dcc-achievement-manager-app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dcc-achievement-manager-window .window-content {
+  padding: 0;
+  overflow: hidden;
+  background: #181818;
 }
 

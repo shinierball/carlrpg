@@ -10,7 +10,10 @@
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <span class="dcc-field-label" style="color: #fff; margin: 0; font-size: 11px;">Popularity:</span>
-        <input class="dcc-field-input" type="text" name="system.details.popularity" value="{{system.details.popularity}}" placeholder="Popularity Rating..." style="width: 140px; height: 22px; font-size: 11px; background: #fff;" />
+        <input class="dcc-field-input" type="text" name="system.details.popularity" value="{{system.details.popularity}}" placeholder="Popularity Rating..." style="width: 120px; height: 22px; font-size: 11px; background: #fff;" />
+        <span class="dcc-achievements-badge" style="background: #222; border: 1px solid #f1c40f; color: #f1c40f; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; cursor: default;" title="Total Achievements Unlocked">
+          <i class="fa-solid fa-trophy"></i> {{achievements.length}}
+        </span>
       </div>
     </div>
     <div style="padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">

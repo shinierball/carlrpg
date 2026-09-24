@@ -428,6 +428,14 @@ export class DCCItemSheet extends BaseItemSheet {
       this._openSkillPicker();
     });
 
+    // Broadcast Achievement
+    html.find('.dcc-broadcast-achievement-btn').click(async ev => {
+      ev.preventDefault();
+      if (typeof this.item.announce === 'function') {
+        await this.item.announce();
+      }
+    });
+
     // Pick Skill from Compendium for a specific row
     html.find('.pick-skill-for-row').click(ev => {
       ev.preventDefault();

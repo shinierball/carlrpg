@@ -1,0 +1,174 @@
+{{!-- TAB 6: ACHIEVEMENTS & TROPHY ROOM --}}
+<div class="dcc-page-container dcc-achievements-container">
+
+  {{!-- TOP BANNER: TROPHY ROOM SUMMARY METRICS --}}
+  <div class="dcc-stat-block" style="margin-bottom: 12px;">
+    <div class="dcc-banner-header" style="background: #111; border-bottom: 2px solid #c0392b; display: flex; justify-content: space-between; align-items: center; padding: 6px 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-trophy" style="color: #f1c40f; font-size: 16px;"></i>
+        <span style="font-family: 'Oswald', sans-serif; font-size: 14px; letter-spacing: 1px; color: #fff;">
+          DUNGEON AI TROPHY ROOM &amp; HALL OF ACCOMPLISHMENTS
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="background: #c0392b; color: #fff; font-family: 'Oswald', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold;">
+          {{achievements.length}} ACHIEVEMENTS UNLOCKED
+        </span>
+        {{#if achievementStats.totalFavor}}
+          <span style="background: #2c3e50; color: #f1c40f; font-family: 'Oswald', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold;">
+            <i class="fa-solid fa-hand-sparkles"></i> +{{achievementStats.totalFavor}} FAVOR
+          </span>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- Tier Breakdown Pills --}}
+    <div style="background: #1e1e1e; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid #333;">
+      <span style="color: #888; font-size: 11px; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Trophy Tiers:</span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #cd7f32; color: #cd7f32; background: rgba(205,127,50,0.15); font-weight: bold;">
+        <i class="fa-solid fa-medal"></i> Bronze: {{achievementStats.byTier.bronze}}
+      </span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #bdc3c7; color: #bdc3c7; background: rgba(189,195,199,0.15); font-weight: bold;">
+        <i class="fa-solid fa-shield"></i> Silver: {{achievementStats.byTier.silver}}
+      </span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #f1c40f; color: #f1c40f; background: rgba(241,196,15,0.15); font-weight: bold;">
+        <i class="fa-solid fa-trophy"></i> Gold: {{achievementStats.byTier.gold}}
+      </span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #00d2d3; color: #00d2d3; background: rgba(0,210,211,0.15); font-weight: bold;">
+        <i class="fa-solid fa-gem"></i> Platinum: {{achievementStats.byTier.platinum}}
+      </span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #e67e22; color: #e67e22; background: rgba(230,126,34,0.15); font-weight: bold;">
+        <i class="fa-solid fa-dragon"></i> Legendary: {{achievementStats.byTier.legendary}}
+      </span>
+      <span class="dcc-tier-pill" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; border: 1px solid #9b59b6; color: #9b59b6; background: rgba(155,89,182,0.15); font-weight: bold;">
+        <i class="fa-solid fa-crown"></i> Celestial: {{achievementStats.byTier.celestial}}
+      </span>
+    </div>
+  </div>
+
+  {{!-- ACTION BAR: FILTERS & BUTTONS --}}
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; background: #222; padding: 8px 10px; border-radius: 4px; border: 1px solid #333;">
+    <div style="display: flex; gap: 8px; flex: 1; align-items: center;">
+      <input type="text" class="dcc-field-input dcc-achievement-search" placeholder="Search achievements by name, quote, reward..." style="flex: 1; height: 26px; font-size: 11px; background: #111; color: #fff; border: 1px solid #444;" />
+      <select class="dcc-achievement-filter-tier" style="height: 26px; font-size: 11px; background: #111; color: #fff; border: 1px solid #444; border-radius: 3px; font-family: 'Oswald', sans-serif;">
+        <option value="all">All Tiers</option>
+        <option value="bronze">Bronze</option>
+        <option value="silver">Silver</option>
+        <option value="gold">Gold</option>
+        <option value="platinum">Platinum</option>
+        <option value="legendary">Legendary</option>
+        <option value="celestial">Celestial</option>
+        <option value="quest">Quest</option>
+        <option value="secret">Secret</option>
+        <option value="special">Special</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button type="button" class="open-achievement-picker" title="Browse Canonical Achievement Catalog & Grant Presets" style="background: #2c3e50; color: #fff; border: 1px solid #1a252f; border-radius: 3px; padding: 3px 8px; font-size: 11px; font-family: 'Oswald', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <i class="fa-solid fa-book-bookmark"></i> Achievement Catalog
+      </button>
+      <a class="item-create dcc-btn" data-type="achievement" title="Create Custom Achievement" style="background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 3px; padding: 3px 8px; font-size: 11px; font-family: 'Oswald', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 4px; text-decoration: none;">
+        <i class="fa-solid fa-plus"></i> New Achievement
+      </a>
+    </div>
+  </div>
+
+  {{!-- ACHIEVEMENTS LIST --}}
+  <div class="dcc-achievements-list" style="display: flex; flex-direction: column; gap: 10px;">
+    {{#each achievements as |item|}}
+      <div class="dcc-achievement-card-entry" data-item-id="{{item.id}}" data-tier="{{item.system.tier}}" style="background: #222; border: 1.5px solid {{item.tierColor}}; border-radius: 5px; padding: 10px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); position: relative;">
+        
+        {{!-- Top Row: Title, Tier, Badges, and Action Buttons --}}
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <i class="{{item.tierIcon}}" style="color: {{item.tierColor}}; font-size: 18px;"></i>
+            <h4 style="margin: 0; font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: bold; color: #fff; letter-spacing: 0.5px;">
+              {{item.name}}
+            </h4>
+            <span style="font-size: 10px; font-family: 'Oswald', sans-serif; text-transform: uppercase; font-weight: bold; padding: 1px 6px; border-radius: 3px; background: {{item.tierBgColor}}; color: {{item.tierColor}}; border: 1px solid {{item.tierColor}};">
+              {{item.tierLabel}}
+            </span>
+            {{#if item.system.floor}}
+              <span style="font-size: 10px; color: #aaa; background: #111; padding: 1px 6px; border-radius: 3px; border: 1px solid #333;">
+                <i class="fa-solid fa-layer-group"></i> {{item.system.floor}}
+              </span>
+            {{/if}}
+            {{#if item.system.dateEarned}}
+              <span style="font-size: 10px; color: #888;">
+                <i class="fa-regular fa-clock"></i> {{item.system.dateEarned}}
+              </span>
+            {{/if}}
+          </div>
+
+          {{!-- Action Buttons --}}
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button type="button" class="announce-achievement" title="Announce Achievement to Chat" style="background: #27ae60; color: #fff; border: 1px solid #1e8449; border-radius: 3px; padding: 2px 8px; font-size: 10px; font-family: 'Oswald', sans-serif; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <i class="fa-solid fa-bullhorn"></i> Announce
+            </button>
+            <a class="item-edit" title="Edit Achievement" style="color: #aaa; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-edit"></i></a>
+            <a class="item-delete" title="Delete Achievement" style="color: #c0392b; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-trash"></i></a>
+          </div>
+        </div>
+
+        {{!-- Dungeon AI Announcement Quote --}}
+        {{#if item.system.quote}}
+          <div style="background: rgba(0,0,0,0.5); border-left: 3px solid #c0392b; padding: 6px 10px; font-style: italic; font-size: 12px; color: #eee; margin-bottom: 8px; line-height: 1.45;">
+            “{{item.system.quote}}”
+          </div>
+        {{/if}}
+
+        {{!-- Reward & Contents Bar --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; background: #181818; border: 1px solid #333; border-radius: 4px; padding: 6px 10px; font-size: 11px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div>
+              <span style="color: #888; text-transform: uppercase; font-size: 10px;">Reward:</span>
+              <strong style="color: #2ecc71; font-size: 12px; margin-left: 4px;">
+                <i class="fa-solid fa-gift"></i> {{item.system.reward}}
+              </strong>
+            </div>
+            {{#if item.system.favor}}
+              <div style="color: #f1c40f; font-weight: bold;">
+                <i class="fa-solid fa-hand-sparkles"></i> +{{item.system.favor}} Favor
+              </div>
+            {{/if}}
+            {{#if item.system.xp}}
+              <div style="color: #3498db; font-weight: bold;">
+                <i class="fa-solid fa-bolt"></i> +{{item.system.xp}} XP
+              </div>
+            {{/if}}
+          </div>
+
+          {{#if item.system.rewardContents}}
+            <div style="color: #bbb;">
+              <span style="color: #888;">Contents:</span> {{item.system.rewardContents}}
+            </div>
+          {{/if}}
+        </div>
+
+        {{!-- Additional Notes / Description if present --}}
+        {{#if item.system.description}}
+          <div style="margin-top: 6px; font-size: 11px; color: #aaa; font-style: italic;">
+            {{item.system.description}}
+          </div>
+        {{/if}}
+
+      </div>
+    {{else}}
+      {{!-- Empty State --}}
+      <div style="text-align: center; padding: 40px 20px; background: #1f1f1f; border: 2px dashed #444; border-radius: 6px; color: #888;">
+        <i class="fa-solid fa-trophy" style="font-size: 36px; color: #555; margin-bottom: 10px;"></i>
+        <h3 style="margin: 0 0 6px 0; color: #fff; font-family: 'Oswald', sans-serif; font-size: 18px;">
+          NO ACHIEVEMENTS UNLOCKED YET
+        </h3>
+        <p style="margin: 0 0 14px 0; font-size: 12px; font-style: italic; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          “The Dungeon AI sees all, Crawler. And so far, it hasn't seen you do anything worth commemorating. Go kill a boss, blow something up, or humiliate yourself on live camera.”
+        </p>
+        <button type="button" class="open-achievement-picker" style="background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 6px 14px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; cursor: pointer;">
+          <i class="fa-solid fa-book-bookmark"></i> Open Achievement Catalog
+        </button>
+      </div>
+    {{/each}}
+  </div>
+
+</div>

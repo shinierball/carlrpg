@@ -75,15 +75,54 @@
           </div>
         </div>
 
+        {{!-- Party & Roster Filter Toolbar --}}
+        <div class="dcc-party-filter-toolbar">
+          <div class="dcc-toolbar-group">
+            <label for="dcc-filter-party"><i class="fa-solid fa-shield-halved"></i> Party:</label>
+            <select id="dcc-filter-party" class="dcc-select-toolbar">
+              {{#each partyOptions}}
+                <option value="{{this.key}}" {{#if (eq ../filterParty this.key)}}selected{{/if}}>{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="dcc-toolbar-group dcc-toggle-segment">
+            <button type="button" class="dcc-btn-tracked-toggle {{#if trackedOnly}}active{{/if}}" data-tracked-only="true" title="Show only tracked crawlers">
+              <i class="fa-solid fa-users"></i> Tracked Only ({{trackedCount}})
+            </button>
+            <button type="button" class="dcc-btn-tracked-toggle {{#unless trackedOnly}}active{{/unless}}" data-tracked-only="false" title="Show all world crawlers">
+              <i class="fa-solid fa-globe"></i> All Crawlers ({{allWorldCrawlersCount}})
+            </button>
+          </div>
+
+          <div class="dcc-toolbar-group">
+            <button type="button" class="dcc-btn dcc-btn-secondary dcc-manage-roster-btn" title="Open Party Roster Manager">
+              <i class="fa-solid fa-users-gear"></i> Manage Roster
+            </button>
+          </div>
+        </div>
+
         <div class="dcc-party-grid">
           {{#each crawlersList}}
-            <div class="dcc-crawler-card {{#if this.isSelected}}selected{{/if}}" data-actor-id="{{this.actorId}}">
+            <div class="dcc-crawler-card {{#if this.isSelected}}selected{{/if}} {{#unless this.isTracked}}untracked{{/unless}}" data-actor-id="{{this.actorId}}">
               <div class="dcc-crawler-card-header">
                 <img class="dcc-crawler-avatar" src="{{this.img}}" alt="{{this.name}}" />
                 <div class="dcc-crawler-identity">
-                  <h3 class="dcc-crawler-name">{{this.name}}</h3>
+                  <div class="dcc-crawler-name-row">
+                    <h3 class="dcc-crawler-name">{{this.name}}</h3>
+                    <button type="button" class="dcc-btn-toggle-track {{#if this.isTracked}}tracked{{else}}untracked{{/if}}" data-actor-id="{{this.actorId}}" title="{{#if this.isTracked}}Click to remove from tracked party{{else}}Click to add to tracked party{{/if}}">
+                      {{#if this.isTracked}}
+                        <i class="fa-solid fa-eye"></i> Tracked
+                      {{else}}
+                        <i class="fa-solid fa-eye-slash"></i> Untracked
+                      {{/if}}
+                    </button>
+                  </div>
                   <div class="dcc-crawler-meta">
                     <span class="dcc-badge-level">LVL {{this.level}}</span>
+                    {{#if this.party}}
+                      <span class="dcc-badge-party"><i class="fa-solid fa-shield-halved"></i> {{this.party}}</span>
+                    {{/if}}
                     <span class="dcc-crawler-bars">{{this.hpBars}} Bars ({{this.hpValue}}/{{this.hpMax}} HP)</span>
                     <span class="dcc-crawler-mana">{{this.manaValue}}/{{this.manaMax}} MP</span>
                   </div>
@@ -171,11 +210,22 @@
         {{!-- Filters bar --}}
         <div class="dcc-ledger-filter-bar">
           <div class="dcc-filter-item">
+            <label for="dcc-filter-party-ledger">Party:</label>
+            <select id="dcc-filter-party-ledger">
+              {{#each partyOptions}}
+                <option value="{{this.key}}" {{#if (eq ../filterParty this.key)}}selected{{/if}}>{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+
+          <div class="dcc-filter-item">
             <label for="dcc-filter-crawler">Crawler:</label>
             <select id="dcc-filter-crawler">
               <option value="all">All Crawlers</option>
-              {{#each crawlersList}}
-                <option value="{{this.actorId}}" {{#if (eq ../filterCrawlerId this.actorId)}}selected{{/if}}>{{this.name}}</option>
+              {{#each crawlersDropdownList}}
+                <option value="{{this.actorId}}" {{#if (eq ../filterCrawlerId this.actorId)}}selected{{/if}}>
+                  {{this.name}}{{#if this.party}} ({{this.party}}){{/if}}{{#unless this.isTracked}} [UNTRACKED]{{/unless}}
+                </option>
               {{/each}}
             </select>
           </div>

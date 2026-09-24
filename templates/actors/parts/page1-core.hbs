@@ -60,6 +60,10 @@
           <input class="dcc-field-input" name="name" type="text" value="{{actor.name}}" placeholder="Crawler Name" />
         </div>
         <div class="dcc-field-group flex-1">
+          <span class="dcc-field-label">Party / Team</span>
+          <input class="dcc-field-input" name="system.details.party" type="text" value="{{system.details.party}}" placeholder="Party / Team" />
+        </div>
+        <div class="dcc-field-group flex-1">
           <span class="dcc-field-label">Race</span>
           <input class="dcc-field-input" name="system.details.race" type="text" value="{{system.details.race}}" placeholder="Race" />
         </div>
@@ -491,6 +495,64 @@
       </tbody>
     </table>
   </div>
+
+  {{#if spells.length}}
+  {{!-- SPELLS & MAGIC SECTION (PAGE 1 QUICK-ACCESS) --}}
+  <div class="dcc-attacks-section mob-spells-section" style="margin-top: 8px;">
+    <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, #1b3a4b 0%, #2980b9 100%);">
+      <span><i class="fa-solid fa-wand-magic-sparkles"></i> SPELLS &amp; MAGIC</span>
+      <a class="item-create" data-type="spell" data-tooltip="Add Spell" style="color: #fff; cursor: pointer; font-size: 11px; font-weight: normal; text-transform: none;">
+        <i class="fa-solid fa-plus"></i> Add Spell
+      </a>
+    </div>
+    <table class="dcc-attacks-table">
+      <thead>
+        <tr>
+          <th style="width: 25%;">Spell</th>
+          <th style="width: 14%;">Cost / Stat</th>
+          <th style="width: 20%;">Damage / Effect</th>
+          <th style="width: 26%;">Range &amp; Details</th>
+          <th style="width: 15%; text-align: center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each spells as |spell|}}
+          <tr data-item-id="{{spell.id}}" draggable="true">
+            <td>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="{{spell.img}}" width="20" height="20" style="border: none; border-radius: 2px;" />
+                <a class="roll-spell" data-tooltip="Cast {{spell.name}}" style="font-weight: bold; cursor: pointer; color: #2980b9;">{{spell.name}}</a>
+              </div>
+            </td>
+            <td>
+              <span style="font-size: 11px; font-weight: bold; color: #2980b9;">{{spell.system.manaCost}} MP</span>
+              <small style="color: #888;">({{upper spell.system.stat}} {{spell.statModStr}})</small>
+            </td>
+            <td>
+              {{#if spell.hasDamage}}
+                <button type="button" class="dcc-attack-roll-btn roll-spell-dmg" data-tooltip="Roll Damage ({{spell.damageFormula}})" style="background: #c0392b; color: #fff; font-size: 10px; padding: 2px 6px;">
+                  {{spell.damageDice}} {{spell.damageType}}
+                </button>
+              {{else}}
+                <span style="font-size: 11px;">{{spell.system.spellType}}</span>
+              {{/if}}
+            </td>
+            <td>
+              <span style="font-size: 11px;">{{#if spell.system.range}}{{spell.system.range}} &bull; {{/if}}{{spell.system.description}}</span>
+            </td>
+            <td style="text-align: center; white-space: nowrap;">
+              <button type="button" class="dcc-attack-roll-btn roll-spell" data-tooltip="Cast {{spell.name}}" style="font-size: 10px; padding: 2px 6px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Cast
+              </button>
+              <a class="item-edit" data-tooltip="Edit Spell" style="margin-left: 3px; cursor: pointer;"><i class="fa-solid fa-edit"></i></a>
+              <a class="item-delete" data-tooltip="Delete Spell" style="margin-left: 3px; cursor: pointer; color: #c0392b;"><i class="fa-solid fa-trash"></i></a>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{/if}}
 
   {{#if isMob}}
   {{!-- MOB TREASURE & LOOT DROPS (PAGE 1 COMBAT QUICK-ACCESS) --}}

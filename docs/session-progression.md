@@ -55,10 +55,32 @@ Every recorded event is editable inline:
 
 ---
 
-## 4. End-of-Session Progression
+## 4. Tracked Roster & Party Grouping Management
+
+In large campaigns or multi-party worlds, GMs can selectively limit the crawlers tracked in a session:
+- **Crawler Party Affiliation**:
+  - Each crawler has a `Party / Team` field in their character sheet header (e.g. *"The Royal Court"*, *"Team Meadow Lark"*, or custom faction).
+  - Parties can also be viewed and updated in bulk via the Session Hub.
+- **Selective Session Tracking**:
+  - A session can track all world crawlers (open roster) or be scoped to a specific party or custom subset (`trackedCrawlerIds`).
+  - Only tracked crawlers have rolls, combat damage, favor, and loot logged into the active session ledger and crawler metrics.
+  - Summary metrics (Total Damage, Kills, MVP, and Target of the Night) and end-of-session XP distribution strictly isolate to tracked crawlers.
+- **Roster Controls & Filtering**:
+  - **Quick Card Toggle**: Click the eye badge (`[Tracked]` / `[Untracked]`) on any crawler card to add or remove them from the active session tracking roster with one click.
+  - **View Modes**: Switch between **Tracked Only** (hiding inactive crawlers) and **All Crawlers** (showing untracked crawlers dimmed with quick-add buttons).
+  - **Party Dropdown Filter**: Filter the Party Matrix and Activity Ledger by specific party group.
+  - **Manage Roster Modal (`[Manage Roster]`)**:
+    - Opens a management dialog showing all world crawlers.
+    - Quick actions: **Select All**, **Deselect All**, and **Select by Party**.
+    - Checkbox selection for precise crawler inclusion.
+    - Inline party name editing to reassign crawlers without opening individual character sheets.
+
+---
+
+## 5. End-of-Session Progression
 
 When concluding a session:
 1. **Untrained Skills Review**: Inspects all untrained attempts with a one-click `[Train to Rank 1]` action that updates the crawler's actor sheet.
-2. **Session XP Distribution**: Aggregates total damage dealt/taken, kills, quests, and tactical actions into an experience pool and distributes it across the party.
-3. **Dungeon AI Review Broadcast**: Posts an authentic Dungeon AI recap chat card highlighting the Session MVP, Target of the Night, and audience statistics.
+2. **Session XP Distribution**: Aggregates total damage dealt/taken, kills, quests, and tactical actions into an experience pool and distributes it across participating tracked crawlers.
+3. **Dungeon AI Review Broadcast**: Posts an authentic Dungeon AI recap chat card highlighting the Session MVP, Target of the Night, and audience statistics for tracked participants.
 4. **Session Archiving**: Seals the session record into the permanent archive and prepares a fresh session.

@@ -32,6 +32,7 @@
     "crawler": {
       "templates": ["baseStats"],
       "details": {
+        "party": "",
         "crawlerNumber": "",
         "floor": "1st Floor",
         "race": "",
@@ -145,7 +146,8 @@
       "sponsor",
       "loot",
       "buff",
-      "debuff"
+      "debuff",
+      "achievement"
     ],
     "skill": {
       "rank": 1,
@@ -250,6 +252,19 @@
       "statModifiers": [],
       "damageModifiers": [],
       "duration": "Combat",
+      "description": ""
+    },
+    "achievement": {
+      "quote": "",
+      "reward": "",
+      "rewardContents": "",
+      "tier": "bronze",
+      "floor": "1st Floor",
+      "dateEarned": "",
+      "session": "",
+      "favor": 0,
+      "xp": 0,
+      "unlocked": true,
       "description": ""
     }
   }

@@ -2322,4 +2322,106 @@ export class DCCActor extends Actor {
       }
     });
   }
+
+  /**
+   * Retrieve all achievements collected by this actor.
+   * @returns {Array<DCCItem>}
+   */
+  getAchievements() {
+    return (this.items || []).filter(i => i.type === 'achievement');
+  }
+
+  /**
+   * Announce an achievement unlocked by this crawler to the chat log with Dungeon AI flair.
+   * @param {DCCItem|string} achievement
+   */
+  async announceAchievement(achievement) {
+    const item = typeof achievement === 'string'
+      ? (this.items.get ? this.items.get(achievement) : (this.items || []).find(i => i.id === achievement))
+      : achievement;
+
+    if (!item) return null;
+
+    const sys = item.system || {};
+    const title = item.name || 'UNNAMED ACHIEVEMENT';
+    const quote = sys.quote || sys.description || 'The Dungeon AI watches in silent, amused judgment.';
+    const reward = sys.reward || 'Special Recognition';
+    const contents = sys.rewardContents || '';
+    const tier = (sys.tier || 'bronze').toLowerCase();
+    const floor = sys.floor || this.system?.details?.floor || '1st Floor';
+
+    // Tier styling
+    const tierIcons = {
+      bronze: 'fa-solid fa-medal',
+      silver: 'fa-solid fa-shield',
+      gold: 'fa-solid fa-trophy',
+      platinum: 'fa-solid fa-gem',
+      legendary: 'fa-solid fa-dragon',
+      celestial: 'fa-solid fa-crown',
+      quest: 'fa-solid fa-map',
+      secret: 'fa-solid fa-mask',
+      special: 'fa-solid fa-award'
+    };
+    const tierColors = {
+      bronze: '#cd7f32',
+      silver: '#bdc3c7',
+      gold: '#f1c40f',
+      platinum: '#00d2d3',
+      legendary: '#e67e22',
+      celestial: '#9b59b6',
+      quest: '#3498db',
+      secret: '#1abc9c',
+      special: '#e74c3c'
+    };
+
+    const icon = tierIcons[tier] || 'fa-solid fa-trophy';
+    const color = tierColors[tier] || '#e74c3c';
+
+    const chatContent = `
+      <div class="dcc-chat-card dcc-ai-announcement-card dcc-achievement-card" style="border: 2px solid #c0392b; background: #181818; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.6);">
+        <div style="background: #c0392b; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; padding: 5px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-bullhorn"></i> NEW ACHIEVEMENT UNLOCKED!
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 8px;">
+          <img src="${this.img || 'icons/svg/mystery-man.svg'}" style="width: 44px; height: 44px; border-radius: 4px; border: 2px solid ${color}; object-fit: cover;" />
+          <div style="flex: 1;">
+            <div style="color: #aaa; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Crawler: <strong style="color: #fff;">${this.name}</strong> • ${floor}</div>
+            <h3 style="margin: 2px 0 0 0; color: #fff; font-size: 17px; font-weight: bold; text-shadow: 0 1px 3px #000; line-height: 1.2;">
+              <i class="${icon}" style="color: ${color};"></i> ${title}
+            </h3>
+          </div>
+          <span style="border: 1px solid ${color}; color: ${color}; font-size: 10px; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; font-weight: bold;">
+            ${tier}
+          </span>
+        </div>
+        <div style="background: rgba(0,0,0,0.5); border-left: 3px solid #c0392b; padding: 8px 12px; font-style: italic; font-size: 13px; color: #eee; margin-bottom: 10px; line-height: 1.45;">
+          “${quote}”
+        </div>
+        <div style="background: #222; border: 1px solid #333; padding: 8px 10px; border-radius: 4px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #aaa; text-transform: uppercase; font-size: 11px;"><i class="fa-solid fa-gift"></i> Reward:</span>
+            <span style="color: #2ecc71; font-weight: bold; font-size: 13px;">${reward}</span>
+          </div>
+          ${contents ? `<div style="font-size: 11px; color: #ccc; border-top: 1px solid #333; padding-top: 4px;"><strong>Contents:</strong> ${contents}</div>` : ''}
+          ${sys.favor ? `<div style="font-size: 11px; color: #f1c40f;"><i class="fa-solid fa-hand-sparkles"></i> AI Favor: +${sys.favor}</div>` : ''}
+          ${sys.xp ? `<div style="font-size: 11px; color: #3498db;"><i class="fa-solid fa-bolt"></i> XP: +${sys.xp}</div>` : ''}
+        </div>
+      </div>
+    `;
+
+    return ChatMessage.create({
+      speaker: { alias: 'THE DUNGEON AI' },
+      content: chatContent,
+      flags: {
+        'carl-rpg': {
+          isAchievement: true,
+          actorId: this.id,
+          achievementId: item.id,
+          title,
+          tier,
+          reward
+        }
+      }
+    });
+  }
 }

@@ -1,0 +1,82 @@
+<div class="dcc-achievement-item-sheet">
+
+  {{!-- TIER & LOCATION ROW --}}
+  <div class="dcc-field-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div class="dcc-field-group flex-1">
+      <span class="dcc-field-label" style="font-weight: bold;">Trophy Tier</span>
+      <select class="dcc-field-input" name="system.tier" style="font-family: 'Oswald', sans-serif;">
+        <option value="bronze" {{#if (eq system.tier "bronze")}}selected{{/if}}>Bronze</option>
+        <option value="silver" {{#if (eq system.tier "silver")}}selected{{/if}}>Silver</option>
+        <option value="gold" {{#if (eq system.tier "gold")}}selected{{/if}}>Gold</option>
+        <option value="platinum" {{#if (eq system.tier "platinum")}}selected{{/if}}>Platinum</option>
+        <option value="legendary" {{#if (eq system.tier "legendary")}}selected{{/if}}>Legendary</option>
+        <option value="celestial" {{#if (eq system.tier "celestial")}}selected{{/if}}>Celestial</option>
+        <option value="quest" {{#if (eq system.tier "quest")}}selected{{/if}}>Quest</option>
+        <option value="secret" {{#if (eq system.tier "secret")}}selected{{/if}}>Secret</option>
+        <option value="special" {{#if (eq system.tier "special")}}selected{{/if}}>Special</option>
+      </select>
+    </div>
+
+    <div class="dcc-field-group flex-1">
+      <span class="dcc-field-label" style="font-weight: bold;">Floor Unlocked</span>
+      <input class="dcc-field-input" type="text" name="system.floor" value="{{system.floor}}" placeholder="e.g. 1st Floor" />
+    </div>
+
+    <div class="dcc-field-group flex-1">
+      <span class="dcc-field-label" style="font-weight: bold;">Date / Session</span>
+      <input class="dcc-field-input" type="text" name="system.dateEarned" value="{{system.dateEarned}}" placeholder="e.g. Session 3" />
+    </div>
+  </div>
+
+  {{!-- DUNGEON AI QUOTE --}}
+  <div class="dcc-field-group" style="margin-bottom: 10px;">
+    <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;">
+      <i class="fa-solid fa-bullhorn"></i> Dungeon AI Announcement Quote
+    </span>
+    <textarea class="dcc-field-input" name="system.quote" rows="3" placeholder="“You’ve made it so a Bugaboo Socket-Picker can only wink from now on...”" style="font-style: italic; background: #fafafa;">{{system.quote}}</textarea>
+  </div>
+
+  {{!-- REWARD & CONTENTS --}}
+  <div class="dcc-field-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div class="dcc-field-group flex-2">
+      <span class="dcc-field-label" style="font-weight: bold; color: #27ae60;">
+        <i class="fa-solid fa-gift"></i> Reward Granted
+      </span>
+      <input class="dcc-field-input" type="text" name="system.reward" value="{{system.reward}}" placeholder="e.g. Bronze Apparel Box" />
+    </div>
+
+    <div class="dcc-field-group flex-1">
+      <span class="dcc-field-label" style="font-weight: bold; color: #f39c12;">
+        <i class="fa-solid fa-hand-sparkles"></i> AI Favor
+      </span>
+      <input class="dcc-field-input" type="number" name="system.favor" value="{{system.favor}}" placeholder="0" />
+    </div>
+
+    <div class="dcc-field-group flex-1">
+      <span class="dcc-field-label" style="font-weight: bold; color: #2980b9;">
+        <i class="fa-solid fa-bolt"></i> XP
+      </span>
+      <input class="dcc-field-input" type="number" name="system.xp" value="{{system.xp}}" placeholder="0" />
+    </div>
+  </div>
+
+  {{!-- REWARD CONTENTS --}}
+  <div class="dcc-field-group" style="margin-bottom: 10px;">
+    <span class="dcc-field-label" style="font-weight: bold;">Reward Contents / Loot Box Details</span>
+    <textarea class="dcc-field-input" name="system.rewardContents" rows="2" placeholder="e.g. An eyepatch, glasses, contact lenses, or another eye-themed apparel item.">{{system.rewardContents}}</textarea>
+  </div>
+
+  {{!-- DESCRIPTION / BACKGROUND --}}
+  <div class="dcc-field-group" style="margin-bottom: 12px;">
+    <span class="dcc-field-label" style="font-weight: bold;">Achievement Description / Unlock Condition</span>
+    <textarea class="dcc-field-input" name="system.description" rows="2" placeholder="Unlock conditions, backstory, or player notes...">{{system.description}}</textarea>
+  </div>
+
+  {{!-- BROADCAST ACTION BUTTON --}}
+  <div style="border-top: 2px solid #eee; padding-top: 10px; text-align: center;">
+    <button type="button" class="dcc-broadcast-achievement-btn" style="background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 8px 16px; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-bullhorn"></i> Broadcast Announcement to Chat
+    </button>
+  </div>
+
+</div>

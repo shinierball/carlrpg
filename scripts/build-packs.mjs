@@ -10,6 +10,9 @@ import { DCC_MOBS } from '../src/data/mobs.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const systemJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../system.json'), 'utf8'));
+const systemVersion = systemJson.version || '2.0.26';
+
 let ClassicLevel;
 const foundryModulePath = '/Applications/Foundry Virtual Tabletop.app/Contents/Resources/app/node_modules/classic-level';
 if (fs.existsSync(foundryModulePath)) {
@@ -66,7 +69,7 @@ async function buildSkills() {
       flags: {},
       _stats: {
         systemId: "carl-rpg",
-        systemVersion: "1.0.0",
+        systemVersion,
         coreVersion: "12.331",
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -132,7 +135,7 @@ async function buildSpells() {
       flags: {},
       _stats: {
         systemId: "carl-rpg",
-        systemVersion: "1.0.0",
+        systemVersion,
         coreVersion: "12.331",
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -185,7 +188,7 @@ async function buildBuffs() {
       flags: {},
       _stats: {
         systemId: "carl-rpg",
-        systemVersion: "1.0.0",
+        systemVersion,
         coreVersion: "12.331",
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -231,7 +234,7 @@ async function buildMacros() {
       flags: macro.flags || {},
       _stats: {
         systemId: "carl-rpg",
-        systemVersion: "1.0.25",
+        systemVersion,
         coreVersion: "12.331",
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -326,7 +329,7 @@ async function buildMobs() {
           source: mob.system.details.source || ""
         }
       },
-      items: mob.items || [],
+      items: (mob.items || []).map(i => i._id),
       effects: [],
       folder: null,
       sort: 0,
@@ -349,7 +352,7 @@ async function buildMobs() {
       },
       _stats: {
         systemId: "carl-rpg",
-        systemVersion: "2.0.18",
+        systemVersion,
         coreVersion: "12.331",
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -358,6 +361,34 @@ async function buildMobs() {
     };
 
     batch.put(`!actors!${mob._id}`, doc);
+
+    // Write each embedded item into the actors.items sublevel
+    for (const item of (mob.items || [])) {
+      const itemDoc = {
+        _id: item._id,
+        name: item.name,
+        type: item.type,
+        img: item.img || (item.type === 'spell' ? 'icons/svg/wand.svg' : item.type === 'loot' ? 'icons/svg/chest.svg' : 'icons/svg/sword.svg'),
+        system: item.system || {},
+        effects: item.effects || [],
+        folder: null,
+        sort: 0,
+        ownership: {
+          default: 0
+        },
+        flags: item.flags || {},
+        _stats: {
+          systemId: "carl-rpg",
+          systemVersion,
+          coreVersion: "12.331",
+          createdTime: Date.now(),
+          modifiedTime: Date.now(),
+          lastModifiedBy: "dccRPG0000000001"
+        }
+      };
+
+      batch.put(`!actors.items!${mob._id}.${item._id}`, itemDoc);
+    }
   }
 
   await batch.write();

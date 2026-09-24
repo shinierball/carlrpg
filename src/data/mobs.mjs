@@ -543,8 +543,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 10,
-          "max": 10,
+          "value": 30,
+          "max": 30,
           "pct": 100
         },
         "evade": {
@@ -590,45 +590,101 @@ export const DCC_MOBS = [
     },
     "items": [
       {
-        "_id": "dccatkmob0000010",
-        "name": "Clap Cloud Spell",
+        "_id": "dccatkmob0000401",
+        "name": "Staff Whack",
         "type": "attack",
-        "img": "icons/svg/daze.svg",
+        "img": "icons/svg/sword.svg",
         "system": {
-          "toHitStat": "int",
+          "toHitStat": "str",
           "toHitRank": 0,
           "damageDice": "1d4",
-          "damageStat": "int",
-          "damageType": "Force",
-          "effects": "14+F to hit, 50ft range, 20ft Blast radius. On an Evade Major Fail or worse, the crawler gains the Queasy Debuff."
+          "damageStat": "str",
+          "damageType": "Bludgeoning",
+          "effects": "5ft range melee strike."
         }
       },
       {
-        "_id": "dccatkmob0000011",
-        "name": "Firestrike Spell",
-        "type": "attack",
-        "img": "icons/svg/fire.svg",
+        "_id": "dccsplmob0000401",
+        "name": "Clap Cloud",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d6",
-          "damageStat": "int",
-          "damageType": "Fire",
-          "effects": "14+F to hit, 30ft range (once per round)."
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "30 feet",
+          "duration": "1 round",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Sonic",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Clap Cloud",
+          "description": "30ft range. On Evade Major Fail or worse, crawler has Disadvantage on their next Action.",
+          "notes": "30ft range. On Evade Major Fail or worse, crawler has Disadvantage on their next Action.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
-        "_id": "dccatkmob0000012",
-        "name": "Mini Fireball Spell",
-        "type": "attack",
-        "img": "icons/svg/fire.svg",
+        "_id": "dccsplmob0000402",
+        "name": "Firestrike",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "1d6",
-          "damageStat": "int",
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
           "damageType": "Fire",
-          "effects": "14+F to hit, 60ft range, 15ft Blast radius."
+          "baseDamage": "1d10",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Firestrike",
+          "description": "60ft range, 5ft Blast radius.",
+          "notes": "60ft range, 5ft Blast radius.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0000403",
+        "name": "Mini Fireball",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Fire",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Mini Fireball",
+          "description": "60ft range. On Evade Major Fail or worse, target gains Burning Debuff.",
+          "notes": "60ft range. On Evade Major Fail or worse, target gains Burning Debuff.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -711,8 +767,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 11,
-          "max": 11,
+          "value": 20,
+          "max": 20,
           "pct": 100
         },
         "evade": {
@@ -772,31 +828,59 @@ export const DCC_MOBS = [
         }
       },
       {
-        "_id": "dccatkmob0000014",
-        "name": "Firebolt Spell",
-        "type": "attack",
-        "img": "icons/svg/fire.svg",
+        "_id": "dccsplmob0000501",
+        "name": "Firebolt",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d6",
-          "damageStat": "con",
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 6,
+          "range": "40 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
           "damageType": "Fire",
-          "effects": "14+F to hit, 30ft range."
+          "baseDamage": "1d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Firebolt",
+          "description": "40ft range bolt of magical fire.",
+          "notes": "40ft range bolt of magical fire.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
-        "_id": "dccatkmob0000015",
-        "name": "Heal Others Spell",
-        "type": "attack",
-        "img": "icons/svg/heal.svg",
+        "_id": "dccsplmob0000502",
+        "name": "Heal Others",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "1d6",
-          "damageStat": "",
-          "damageType": "Healing",
-          "effects": "None to hit, 10ft range. Heals one target within 10 feet for 1d6 Health Bar slots."
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "Touch",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Healing",
+          "damageType": "",
+          "baseDamage": "",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Heal Others",
+          "description": "Restores up to 2 health bars to an adjacent rat or ally.",
+          "notes": "Restores up to 2 health bars to an adjacent rat or ally.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -1484,8 +1568,8 @@ export const DCC_MOBS = [
           "hpPerBar": 5
         },
         "mana": {
-          "value": 10,
-          "max": 10,
+          "value": 60,
+          "max": 60,
           "pct": 100
         },
         "evade": {
@@ -1531,34 +1615,6 @@ export const DCC_MOBS = [
     },
     "items": [
       {
-        "_id": "dccatkmob0000023",
-        "name": "Fireball Spell",
-        "type": "attack",
-        "img": "icons/svg/fire.svg",
-        "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d12",
-          "damageStat": "int",
-          "damageType": "Fire",
-          "effects": "14+F to hit, 80ft range, 20ft Blast radius +20ft Splash. Rolled with Disadvantage: Difficulty to Evade reduced by 5, crawlers get free Evade Check."
-        }
-      },
-      {
-        "_id": "dccatkmob0000024",
-        "name": "Gloat Spell",
-        "type": "attack",
-        "img": "icons/svg/sound.svg",
-        "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d6",
-          "damageStat": "int",
-          "damageType": "Sonic",
-          "effects": "14+F to hit, 50ft range, 10ft Blast radius. On an Evade Major Fail or worse, the crawler gains the Muted Debuff."
-        }
-      },
-      {
         "_id": "dccatkmob0000025",
         "name": "Jump Smash",
         "type": "attack",
@@ -1570,6 +1626,104 @@ export const DCC_MOBS = [
           "damageStat": "str",
           "damageType": "Bludgeoning",
           "effects": "14+F to hit, 30ft range. On an Evade Major Fail or worse, the crawler gains the Take Down Debuff."
+        }
+      },
+      {
+        "_id": "dccatkmob0001002",
+        "name": "Staff Strike",
+        "type": "attack",
+        "img": "icons/svg/sword.svg",
+        "system": {
+          "toHitStat": "str",
+          "toHitRank": 0,
+          "damageDice": "1d8",
+          "damageStat": "str",
+          "damageType": "Bludgeoning",
+          "effects": "5ft range melee strike."
+        }
+      },
+      {
+        "_id": "dccsplmob0001001",
+        "name": "Fireball",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 20,
+          "range": "80 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Fire",
+          "baseDamage": "2d12",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Fireball",
+          "description": "80ft range, 20ft Blast radius +20ft Splash. Rolled with Disadvantage: Difficulty to Evade reduced by 5, crawlers get free Evade Check.",
+          "notes": "80ft range, 20ft Blast radius +20ft Splash. Rolled with Disadvantage: Difficulty to Evade reduced by 5, crawlers get free Evade Check.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0001002",
+        "name": "Gloat",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "50 feet",
+          "duration": "1 round",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Sonic",
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Gloat",
+          "description": "50ft range, 10ft Blast radius. On an Evade Major Fail or worse, the crawler gains the Muted Debuff.",
+          "notes": "50ft range, 10ft Blast radius. On an Evade Major Fail or worse, the crawler gains the Muted Debuff.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0001003",
+        "name": "Mini Fireball",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Fire",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Mini Fireball",
+          "description": "60ft range. On Evade Major Fail or worse, target catches fire.",
+          "notes": "60ft range. On Evade Major Fail or worse, target catches fire.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -3198,8 +3352,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 6,
-          "max": 6,
+          "value": 30,
+          "max": 30,
           "pct": 100
         },
         "evade": {
@@ -3245,20 +3399,6 @@ export const DCC_MOBS = [
     },
     "items": [
       {
-        "_id": "dccatkmob0000048",
-        "name": "Magic Missile Spell",
-        "type": "attack",
-        "img": "icons/svg/wand.svg",
-        "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d6",
-          "damageStat": "int",
-          "damageType": "Force",
-          "effects": "13+F to hit, 90ft range."
-        }
-      },
-      {
         "_id": "dccatkmob0000049",
         "name": "Scream",
         "type": "attack",
@@ -3270,6 +3410,62 @@ export const DCC_MOBS = [
           "damageStat": "cha",
           "damageType": "Sonic",
           "effects": "13+F to hit, 15ft Burst radius. Crawlers make free CHA Stat Checks to avoid this attack (cannot Evade)."
+        }
+      },
+      {
+        "_id": "dccsplmob0002101",
+        "name": "Magic Missile",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Force",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Magic Missile",
+          "description": "60ft range force dart targeting an unpaid crawler.",
+          "notes": "60ft range force dart targeting an unpaid crawler.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0002102",
+        "name": "Corporate Mandate",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "cha",
+          "manaCost": 10,
+          "range": "30 feet",
+          "duration": "1 round",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Psychic",
+          "baseDamage": "1d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Corporate Mandate",
+          "description": "30ft range. On an Evade Major Fail, the target gains the Woozy Debuff.",
+          "notes": "30ft range. On an Evade Major Fail, the target gains the Woozy Debuff.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -4179,8 +4375,8 @@ export const DCC_MOBS = [
           "hpPerBar": 7
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 50,
+          "max": 50,
           "pct": 100
         },
         "evade": {
@@ -4265,6 +4461,34 @@ export const DCC_MOBS = [
           "damageStat": "int",
           "damageType": "Psychic",
           "effects": "5ft range. On Evade Major Fail or worse, crawler gains Mental Scarring Debuff (-1 Int Mod)."
+        }
+      },
+      {
+        "_id": "dccsplmob0002801",
+        "name": "Psionic Shriek",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 15,
+          "range": "40 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Psychic",
+          "baseDamage": "2d10",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Psionic Shriek",
+          "description": "40ft Burst. Screeching telepathic broadcast overwhelming crawler minds.",
+          "notes": "40ft Burst. Screeching telepathic broadcast overwhelming crawler minds.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -5508,8 +5732,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 20,
+          "max": 20,
           "pct": 100
         },
         "evade": {
@@ -5566,6 +5790,34 @@ export const DCC_MOBS = [
           "damageStat": "int",
           "damageType": "Psychic",
           "effects": "5ft range. On Evade Major Fail or worse, crawler gains Nightmares Debuff (wakes Fatigued)."
+        }
+      },
+      {
+        "_id": "dccsplmob0003701",
+        "name": "Nightmare Touch",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "Touch",
+          "duration": "1 minute",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Psychic",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Nightmare Touch",
+          "description": "Touch attack. Target gains the Woozy Debuff on an Evade Major Fail.",
+          "notes": "Touch attack. Target gains the Woozy Debuff on an Evade Major Fail.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -6299,8 +6551,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 25,
+          "max": 25,
           "pct": 100
         },
         "evade": {
@@ -6371,6 +6623,34 @@ export const DCC_MOBS = [
           "damageStat": "dex",
           "damageType": "Bludgeoning",
           "effects": "40ft range, 5ft Blast + 5ft Splash."
+        }
+      },
+      {
+        "_id": "dccsplmob0004301",
+        "name": "Explosive Ballad",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "cha",
+          "manaCost": 10,
+          "range": "40 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Fire",
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Explosive Ballad",
+          "description": "40ft range, 10ft Blast radius detonating an acoustic fire charge.",
+          "notes": "40ft range, 10ft Blast radius detonating an acoustic fire charge.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -6585,8 +6865,8 @@ export const DCC_MOBS = [
           "hpPerBar": 3
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 30,
+          "max": 30,
           "pct": 100
         },
         "evade": {
@@ -6633,16 +6913,72 @@ export const DCC_MOBS = [
     "items": [
       {
         "_id": "dccatkmob0004501",
-        "name": "Agony Missile",
+        "name": "Ritual Bone Dagger",
         "type": "attack",
         "img": "icons/svg/sword.svg",
         "system": {
-          "toHitStat": "int",
+          "toHitStat": "dex",
           "toHitRank": 0,
-          "damageDice": "2d6",
-          "damageStat": "int",
-          "damageType": "Psychic",
-          "effects": "50ft range. On Evade Major Fail or worse, crawler gains Blood Trail, Woozy, or Stunned Debuff."
+          "damageDice": "1d6",
+          "damageStat": "dex",
+          "damageType": "Piercing",
+          "effects": "5ft range melee strike with a cursed bone dagger."
+        }
+      },
+      {
+        "_id": "dccsplmob0004501",
+        "name": "Agony Missile",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Force",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Agony Missile",
+          "description": "60ft range. On Evade Major Fail or worse, target takes an extra 1d6 Force damage.",
+          "notes": "60ft range. On Evade Major Fail or worse, target takes an extra 1d6 Force damage.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0004502",
+        "name": "Hex of Weakness",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "40 feet",
+          "duration": "3 rounds",
+          "cooldown": "None",
+          "spellType": "Utility",
+          "damageType": "",
+          "baseDamage": "",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Hex of Weakness",
+          "description": "40ft range. Target suffers a -1 penalty to all Stat Checks for 3 rounds.",
+          "notes": "40ft range. Target suffers a -1 penalty to all Stat Checks for 3 rounds.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -7025,8 +7361,8 @@ export const DCC_MOBS = [
           "hpPerBar": 4
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 25,
+          "max": 25,
           "pct": 100
         },
         "evade": {
@@ -7111,6 +7447,34 @@ export const DCC_MOBS = [
           "damageStat": "str",
           "damageType": "Bludgeoning",
           "effects": "60ft range."
+        }
+      },
+      {
+        "_id": "dccsplmob0004801",
+        "name": "Junk Swarm",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "30 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Physical",
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Junk Swarm",
+          "description": "30ft Cone of telekinetically hurled jagged dungeon trash.",
+          "notes": "30ft Cone of telekinetically hurled jagged dungeon trash.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -7754,8 +8118,8 @@ export const DCC_MOBS = [
           "hpPerBar": 4
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 40,
+          "max": 40,
           "pct": 100
         },
         "evade": {
@@ -7868,6 +8232,62 @@ export const DCC_MOBS = [
           "damageStat": "cha",
           "damageType": "Psychic",
           "effects": "50ft range. Free Cha Stat Check; on Fail, spends next Action attacking an ally."
+        }
+      },
+      {
+        "_id": "dccsplmob0005301",
+        "name": "Shrieking Entitlement",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "cha",
+          "manaCost": 10,
+          "range": "30 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Sonic",
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Shrieking Entitlement",
+          "description": "30ft Cone of deafening outrage. Crawlers gain Deafened Debuff on Major Fail.",
+          "notes": "30ft Cone of deafening outrage. Crawlers gain Deafened Debuff on Major Fail.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0005302",
+        "name": "Call the Manager",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "cha",
+          "manaCost": 15,
+          "range": "50 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Utility",
+          "damageType": "",
+          "baseDamage": "",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Call the Manager",
+          "description": "Summons 1d4 Smombies to defend the Krakaren Clone.",
+          "notes": "Summons 1d4 Smombies to defend the Krakaren Clone.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -8368,8 +8788,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 40,
+          "max": 40,
           "pct": 100
         },
         "evade": {
@@ -8415,34 +8835,6 @@ export const DCC_MOBS = [
     },
     "items": [
       {
-        "_id": "dccatkmob0005701",
-        "name": "Mindspike Spell",
-        "type": "attack",
-        "img": "icons/svg/sword.svg",
-        "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "1d12",
-          "damageStat": "int",
-          "damageType": "Psychic",
-          "effects": "30ft range."
-        }
-      },
-      {
-        "_id": "dccatkmob0005702",
-        "name": "Psionic Spell",
-        "type": "attack",
-        "img": "icons/svg/sword.svg",
-        "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "0",
-          "damageStat": "int",
-          "damageType": "Psychic",
-          "effects": "60ft Burst radius. Hits apply Splitting Headache Debuff (1d6+F Psychic/round, stackable)."
-        }
-      },
-      {
         "_id": "dccatkmob0005703",
         "name": "Splatter",
         "type": "attack",
@@ -8454,6 +8846,62 @@ export const DCC_MOBS = [
           "damageStat": "int",
           "damageType": "Acid",
           "effects": "5ft Burst radius. Hits apply Queasy Debuff."
+        }
+      },
+      {
+        "_id": "dccsplmob0005701",
+        "name": "Mindspike",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 14,
+          "range": "50 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Psychic",
+          "baseDamage": "2d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Mindspike",
+          "description": "50ft range. On Evade Major Fail or worse, target is Stunned until the end of their next turn.",
+          "notes": "50ft range. On Evade Major Fail or worse, target is Stunned until the end of their next turn.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0005702",
+        "name": "Psionic Blast",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 12,
+          "range": "30 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Psychic",
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Psionic Blast",
+          "description": "30ft Cone blast of psychic pressure.",
+          "notes": "30ft Cone blast of psychic pressure.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -8979,8 +9427,8 @@ export const DCC_MOBS = [
           "hpPerBar": 5
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 50,
+          "max": 50,
           "pct": 100
         },
         "evade": {
@@ -9054,17 +9502,59 @@ export const DCC_MOBS = [
         }
       },
       {
-        "_id": "dccatkmob0006103",
-        "name": "Sleep Spell",
-        "type": "attack",
-        "img": "icons/svg/sword.svg",
+        "_id": "dccsplmob0006101",
+        "name": "Sleep",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "0",
-          "damageStat": "int",
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 15,
+          "range": "40 feet",
+          "duration": "1 minute",
+          "cooldown": "None",
+          "spellType": "Attack",
           "damageType": "Psychic",
-          "effects": "50ft range, 20ft Blast radius. Con Stat Check vs 16+F or gain Unconscious Debuff."
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Sleep",
+          "description": "40ft range, 15ft Blast radius. Entities caught in the blast must make a CON Stat Check or fall asleep.",
+          "notes": "40ft range, 15ft Blast radius. Entities caught in the blast must make a CON Stat Check or fall asleep.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0006102",
+        "name": "Golden Radiance",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "cha",
+          "manaCost": 16,
+          "range": "30 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Radiant",
+          "baseDamage": "2d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Golden Radiance",
+          "description": "30ft Burst of golden light. Crawlers who suffer Major Fail on Evade are blinded for 1 round.",
+          "notes": "30ft Burst of golden light. Crawlers who suffer Major Fail on Evade are blinded for 1 round.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -9279,8 +9769,8 @@ export const DCC_MOBS = [
           "hpPerBar": 5
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 35,
+          "max": 35,
           "pct": 100
         },
         "evade": {
@@ -9368,17 +9858,59 @@ export const DCC_MOBS = [
         }
       },
       {
-        "_id": "dccatkmob0006304",
-        "name": "Lightning Bolt Spell",
-        "type": "attack",
-        "img": "icons/svg/sword.svg",
+        "_id": "dccsplmob0006301",
+        "name": "Lightning Bolt",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
         "system": {
-          "toHitStat": "int",
-          "toHitRank": 0,
-          "damageDice": "2d10",
-          "damageStat": "int",
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 16,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
           "damageType": "Electric",
-          "effects": "30ft Line. On Evade Major Fail or worse, crawler gains Shocked Debuff."
+          "baseDamage": "2d10",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Lightning Bolt",
+          "description": "60ft Line of crackling electricity. Crawlers suffer Shocked Debuff on Major Fail.",
+          "notes": "60ft Line of crackling electricity. Crawlers suffer Shocked Debuff on Major Fail.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0006302",
+        "name": "Static Discharge",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "10 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Electric",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Static Discharge",
+          "description": "10ft Burst around the Werehound.",
+          "notes": "10ft Burst around the Werehound.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -9725,8 +10257,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 20,
+          "max": 20,
           "pct": 100
         },
         "evade": {
@@ -9772,20 +10304,6 @@ export const DCC_MOBS = [
     },
     "items": [
       {
-        "_id": "dccatkmob0006601",
-        "name": "Magic Missile Spell",
-        "type": "attack",
-        "img": "icons/svg/sword.svg",
-        "system": {
-          "toHitStat": "dex",
-          "toHitRank": 0,
-          "damageDice": "1d4",
-          "damageStat": "con",
-          "damageType": "Force",
-          "effects": "Line of Sight range."
-        }
-      },
-      {
         "_id": "dccatkmob0006602",
         "name": "Tail Sting",
         "type": "attack",
@@ -9797,6 +10315,34 @@ export const DCC_MOBS = [
           "damageStat": "str",
           "damageType": "Poison",
           "effects": "5ft range. On Evade Major Fail or worse, crawler gains The Taint Debuff."
+        }
+      },
+      {
+        "_id": "dccsplmob0006601",
+        "name": "Magic Missile",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 8,
+          "range": "60 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Force",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Magic Missile",
+          "description": "60ft range mystical force darts.",
+          "notes": "60ft range mystical force darts.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -11941,8 +12487,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 25,
+          "max": 25,
           "pct": 100
         },
         "evade": {
@@ -12013,6 +12559,62 @@ export const DCC_MOBS = [
           "damageStat": "str",
           "damageType": "Piercing",
           "effects": "5ft range. On Evade Major Fail or worse, crawler gains Poisoned Debuff."
+        }
+      },
+      {
+        "_id": "dccsplmob0008201",
+        "name": "Dissonant Discord",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "cha",
+          "manaCost": 8,
+          "range": "40 feet",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
+          "damageType": "Sonic",
+          "baseDamage": "1d8",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Dissonant Discord",
+          "description": "40ft range screeching bone flute solo.",
+          "notes": "40ft range screeching bone flute solo.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0008202",
+        "name": "Song of Clumsiness",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "cha",
+          "manaCost": 10,
+          "range": "30 feet",
+          "duration": "2 rounds",
+          "cooldown": "None",
+          "spellType": "Utility",
+          "damageType": "",
+          "baseDamage": "",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Song of Clumsiness",
+          "description": "30ft range. Target suffers a -2 penalty to Evade for 2 rounds.",
+          "notes": "30ft range. Target suffers a -2 penalty to Evade for 2 rounds.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {
@@ -12227,8 +12829,8 @@ export const DCC_MOBS = [
           "hpPerBar": 2
         },
         "mana": {
-          "value": 0,
-          "max": 0,
+          "value": 40,
+          "max": 40,
           "pct": 100
         },
         "evade": {
@@ -12275,16 +12877,72 @@ export const DCC_MOBS = [
     "items": [
       {
         "_id": "dccatkmob0008401",
-        "name": "Magic Missile Spell",
+        "name": "Dagger Jab",
         "type": "attack",
         "img": "icons/svg/sword.svg",
         "system": {
-          "toHitStat": "int",
+          "toHitStat": "dex",
           "toHitRank": 0,
-          "damageDice": "2d4",
-          "damageStat": "int",
+          "damageDice": "1d4",
+          "damageStat": "dex",
+          "damageType": "Piercing",
+          "effects": "5ft range melee stab."
+        }
+      },
+      {
+        "_id": "dccsplmob0008401",
+        "name": "Magic Missile",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 2,
+          "stat": "int",
+          "manaCost": 12,
+          "range": "Line of Sight",
+          "duration": "Instantaneous",
+          "cooldown": "None",
+          "spellType": "Attack",
           "damageType": "Force",
-          "effects": "Line of Sight range."
+          "baseDamage": "2d6",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Magic Missile",
+          "description": "Hurls tracking magical missiles that strike with arcane force.",
+          "notes": "Hurls tracking magical missiles that strike with arcane force.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
+        }
+      },
+      {
+        "_id": "dccsplmob0008402",
+        "name": "Arcane Shield",
+        "type": "spell",
+        "img": "icons/svg/wand.svg",
+        "system": {
+          "rank": 1,
+          "stat": "int",
+          "manaCost": 10,
+          "range": "Self",
+          "duration": "1 minute",
+          "cooldown": "None",
+          "spellType": "Buff",
+          "damageType": "",
+          "baseDamage": "",
+          "aiFavor": 0,
+          "favored": "",
+          "limitations": "",
+          "quote": "Casting Arcane Shield",
+          "description": "Conjures a shimmering barrier granting +2 to Evade for 1 minute.",
+          "notes": "Conjures a shimmering barrier granting +2 to Evade for 1 minute.",
+          "upgrades": {
+            "rank5": "",
+            "rank10": "",
+            "rank15": ""
+          }
         }
       },
       {

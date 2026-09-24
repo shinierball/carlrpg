@@ -602,6 +602,35 @@ export class DCCCombatMetrics {
 
     const quote = customQuote.trim() || defaultQuote;
 
+    // Persist achievement item on recipient actor so they collect achievements over time
+    if (recipientActor) {
+      const achItemData = {
+        name: title,
+        type: 'achievement',
+        img: 'icons/svg/trophy.svg',
+        system: {
+          quote,
+          reward: rewardText,
+          rewardContents: '',
+          tier: awardType === 'mvp' ? 'gold' : (['bronze', 'silver', 'gold', 'platinum', 'legendary', 'celestial'].includes(awardType) ? awardType : 'special'),
+          floor: recipientActor.system?.details?.floor || '1st Floor',
+          dateEarned: new Date().toLocaleDateString(),
+          favor: favorDelta,
+          xp: 0,
+          unlocked: true,
+          description: `Awarded during combat encounter by Dungeon AI.`
+        }
+      };
+
+      if (typeof recipientActor.createEmbeddedDocuments === 'function') {
+        recipientActor.createEmbeddedDocuments('Item', [achItemData]).catch(err => {
+          console.warn('DCC RPG | Could not create achievement item on recipient actor:', err);
+        });
+      } else if (Array.isArray(recipientActor.items)) {
+        recipientActor.items.push(achItemData);
+      }
+    }
+
     const chatContent = `
       <div class="dcc-chat-card dcc-ai-announcement-card" style="border: 2px solid #c0392b; background: #181818; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
         <div style="background: #c0392b; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; padding: 4px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 8px;">

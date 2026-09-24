@@ -33,5 +33,9 @@
     {{#if (eq item.type "loot")}}
       {{> "systems/carl-rpg/templates/items/parts/loot.hbs"}}
     {{/if}}
+
+    {{#if (eq item.type "achievement")}}
+      {{> "systems/carl-rpg/templates/items/parts/achievement.hbs"}}
+    {{/if}}
   </div>
 </form>

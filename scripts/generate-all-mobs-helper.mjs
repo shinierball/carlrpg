@@ -35,6 +35,7 @@ function makeMob(index, {
   surpriseDifficulty,
   move,
   dr,
+  mana = 0,
   treasure = "",
   description,
   aiDescription,
@@ -42,6 +43,7 @@ function makeMob(index, {
   special = "",
   source,
   attacks = [],
+  spells = [],
   loot = []
 }) {
   const idStr = String(index).padStart(6, '0');
@@ -55,6 +57,7 @@ function makeMob(index, {
 
   const hpPerBar = conMod;
   const maxHp = bars * hpPerBar;
+  const calculatedMana = mana > 0 ? mana : (spells.length > 0 ? Math.max(20, intMod * 10) : 0);
 
   let tSize = 1;
   if (tokenSize) {
@@ -92,6 +95,33 @@ function makeMob(index, {
           damageStat: atk.damageStat || (atk.toHitStat || "str"),
           damageType: atk.damageType || "Physical",
           effects: atk.effects || (atk.range ? `Range: ${atk.range}` : "")
+        }
+      };
+    }),
+    ...spells.map((spl, sIdx) => {
+      const sIdStr = String(index * 100 + sIdx + 1).padStart(7, '0');
+      return {
+        _id: `dccsplmob${sIdStr}`,
+        name: spl.name,
+        type: "spell",
+        img: spl.img || "icons/svg/wand.svg",
+        system: {
+          rank: spl.rank ?? 1,
+          stat: spl.stat || "int",
+          manaCost: spl.manaCost ?? 10,
+          range: spl.range || "60 feet",
+          duration: spl.duration || "Instantaneous",
+          cooldown: spl.cooldown || "None",
+          spellType: spl.spellType || (spl.damageDice || spl.baseDamage ? "Attack" : "Utility"),
+          damageType: spl.damageType || "",
+          baseDamage: spl.baseDamage || spl.damageDice || "",
+          aiFavor: 0,
+          favored: "",
+          limitations: spl.limitations || "",
+          quote: spl.quote || `Casting ${spl.name}`,
+          description: spl.description || spl.effects || "",
+          notes: spl.notes || spl.effects || "",
+          upgrades: spl.upgrades || { rank5: "", rank10: "", rank15: "" }
         }
       };
     }),
@@ -136,8 +166,8 @@ function makeMob(index, {
           hpPerBar
         },
         mana: {
-          value: 0,
-          max: 0,
+          value: calculatedMana,
+          max: calculatedMana,
           pct: 100
         },
         evade: {

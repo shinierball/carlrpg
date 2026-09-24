@@ -272,4 +272,14 @@ export class DCCItem extends Item {
     if (this.type !== 'skill') return '';
     return this.system?.skillType || this.system?.type || 'Utility';
   }
+
+  /**
+   * Broadcast achievement to chat if this item is an achievement.
+   */
+  async announce() {
+    if (this.type === 'achievement' && this.actor && typeof this.actor.announceAchievement === 'function') {
+      return this.actor.announceAchievement(this);
+    }
+    return null;
+  }
 }

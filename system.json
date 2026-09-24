@@ -2,7 +2,7 @@
   "id": "carl-rpg",
   "title": "Dungeon Crawler Carl RPG",
   "description": "A Foundry VTT system for the Dungeon Crawler Carl Roleplaying Game.",
-  "version": "2.0.25",
+  "version": "2.0.29",
   "url": "https://github.com/shinierball/carlrpg",
   "manifest": "https://raw.githubusercontent.com/shinierball/carlrpg/main/system.json",
   "download": "https://github.com/shinierball/carlrpg/archive/refs/heads/main.zip",
@@ -105,6 +105,13 @@
       "debuff": {
         "htmlFields": [
           "description"
+        ]
+      },
+      "achievement": {
+        "htmlFields": [
+          "description",
+          "quote",
+          "rewardContents"
         ]
       }
     }

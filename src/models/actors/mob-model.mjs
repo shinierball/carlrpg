@@ -101,5 +101,11 @@ export class MobDataModel extends BaseActorDataModel {
     if (!this.attributes.evadeDifficulty) {
       this.attributes.evadeDifficulty = `${10 + dexMod}+F`;
     }
+    let baseEvade = 10 + dexMod;
+    const match = String(this.attributes.evadeDifficulty).trim().match(/^(\d+)/);
+    if (match) baseEvade = parseInt(match[1], 10);
+    this.attributes.evadeBaseDifficulty = baseEvade;
+    const currentFloor = typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function' ? DCCActor.getCurrentFloor() : 1;
+    this.attributes.effectiveEvadeDC = baseEvade + currentFloor;
   }
 }

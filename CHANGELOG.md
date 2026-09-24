@@ -1,3 +1,31 @@
+## 2.0.30
+
+### Global Floor Setting, Mob Evade DC (Base + F), Automatic Target Hit Resolution & Non-Crawler Evade Button
+
+- **Global World Floor Setting (`carl-rpg.currentFloor`)**:
+  - Registered world setting `carl-rpg.currentFloor` (Number, default 1, min 1).
+  - Exported `getCurrentFloor()` and `setCurrentFloor(floor)` helpers across `game.dcc`, `window.carl`, `CONFIG.DCC`, and `DCCActor`.
+  - Added dedicated Floor selector dropdown (`#dcc-global-floor-select`, Floors 1 through 18) directly in the **Party Progression & Session Hub** (`DCCSessionManagerApp`) header controls.
+  - Setting changes dynamically re-render open sheets and synchronize target DCs world-wide.
+- **Mob Evade Difficulty Formula ($\text{Base} + F$)**:
+  - Mob data models and document classes parse and calculate Evade difficulty as a base number plus current floor ($Base + F$).
+  - Derives `effectiveEvadeDC = base + currentFloor` (e.g. base 14 becomes DC 15 on Floor 1, DC 18 on Floor 4).
+  - Mob Page 1 Core character sheet dynamically displays the live effective DC `(DC X)` alongside the base statblock string.
+  - Added `getEvadeTargetDC()` method on `DCCActor` for polymorphic DC resolution.
+- **Automatic Attack Target Hit Resolution**:
+  - `actor.rollAttack(item, ...)` and `actor.rollSpellAttack(item, ...)` automatically evaluate against all active targets (from roll options or `game.user.targets`).
+  - Evaluates hit or miss: compares the attack total to target DC (mob Base $+ F$ or crawler Evade).
+  - Automatically embeds a high-contrast **Target Evaluation** matrix in the attack chat card showing target names, target DCs, and visual `[HIT (+X)]` or `[MISS (-X)]` pills.
+  - Stores full target resolution results in chat message flags (`flags['carl-rpg'].targetResults`).
+- **Non-Crawler Attack Evade Button & Crawler Evade Rolls**:
+  - Whenever an attack is rolled by a non-crawler (mob, boss, hostile NPC), the attack chat card embeds an interactive **Roll Evade** button (`.dcc-evade-roll-btn`).
+  - Any player crawler clicking the button triggers `crawler.rollEvade({ attackTotal, attackerName, floor })`.
+  - The crawler executes an official Evade roll ($d20 + \text{DEX Mod} + \text{Gear} + \text{Buffs}$) against the attack total.
+  - Generates an official chat card declaring `SUCCESSFULLY EVADED!` or `EVADE FAILED — HIT TAKEN!` with full roll formula and modifiers.
+- **Automated Verification**:
+  - Added test suite `tests/evade-and-floor.test.mjs` verifying global floor settings, mob evade base+F scaling, target hit evaluation, active target resolution from `game.user.targets`, non-crawler evade button insertion, and crawler rollEvade evaluation.
+  - All 83 test suites passing with 0 failures (`node --test tests/*.test.mjs`).
+
 ## 2.0.29
 
 ### Party Progression & Session Manager Tracked Roster & Party Grouping

@@ -341,8 +341,8 @@
         <div class="dcc-banner-header">DIFFICULTIES &amp; COMBAT VALUES</div>
         <div class="dcc-formula-row dcc-centered-row">
           <div class="dcc-formula-item">
-            <input class="dcc-box-input medium" name="system.attributes.evadeDifficulty" type="text" value="{{system.attributes.evadeDifficulty}}" placeholder="12+F" title="Evade Difficulty (e.g. 12+F)" />
-            <span class="dcc-stat-sublabel">Evade Diff</span>
+            <input class="dcc-box-input medium" name="system.attributes.evadeDifficulty" type="text" value="{{system.attributes.evadeDifficulty}}" placeholder="12+F" title="Evade Difficulty (e.g. 12+F) — Effective DC {{system.attributes.effectiveEvadeDC}} on Floor {{currentFloor}}" />
+            <span class="dcc-stat-sublabel">Evade Diff (DC {{system.attributes.effectiveEvadeDC}})</span>
           </div>
           <div class="dcc-formula-item">
             <input class="dcc-box-input medium" name="system.attributes.surpriseDifficulty" type="text" value="{{system.attributes.surpriseDifficulty}}" placeholder="11+F" title="Surprise Difficulty (e.g. 11+F)" />

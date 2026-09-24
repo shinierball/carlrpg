@@ -337,8 +337,8 @@ export class DCCActor extends Actor {
     }
 
     // Calculate Evade, DR, HP, and Mana for Crawler/Creature
-    if (system.attributes) {
-      system.attributes.resistances = Array.from(resistances);
+    system.attributes = system.attributes || {};
+    system.attributes.resistances = Array.from(resistances);
       system.attributes.immunities = Array.from(immunities);
       system.attributes.damageMultipliers = damageMultipliers;
       system.attributes.damageMultiplier = damageMultipliers.all;
@@ -350,6 +350,24 @@ export class DCCActor extends Actor {
         system.attributes.evade.items = gearEvade;
         system.attributes.evade.gear = gearEvade;
         system.attributes.evade.total = dexMod + evadeBuffs + gearEvade;
+      }
+
+      // Derive Evade Difficulty and effective Evade DC
+      const currentFloor = DCCActor.getCurrentFloor ? DCCActor.getCurrentFloor() : 1;
+      if (this.type === 'mob') {
+        let baseEvade = 10 + dexMod;
+        const rawDiff = system.attributes.evadeDifficulty;
+        if (typeof rawDiff === 'string' && rawDiff.trim()) {
+          const match = rawDiff.trim().match(/^(\d+)(?:\s*\+\s*F)?$/i);
+          if (match) baseEvade = parseInt(match[1], 10);
+        } else if (Number.isFinite(Number(rawDiff)) && Number(rawDiff) > 0) {
+          baseEvade = Number(rawDiff);
+        }
+        system.attributes.evadeDifficulty = `${baseEvade}+F`;
+        system.attributes.evadeBaseDifficulty = baseEvade;
+        system.attributes.effectiveEvadeDC = baseEvade + currentFloor;
+      } else {
+        system.attributes.effectiveEvadeDC = 10 + dexMod + currentFloor;
       }
 
       const drArmor = Number(system.attributes.dr?.armor) || 0;
@@ -404,7 +422,6 @@ export class DCCActor extends Actor {
           system.attributes.speed.step = 10;
         }
       }
-    }
 
     // -------------------------------------------------------------------------
     // SKILLS: Calculate Item Bonuses, Boon Bonuses, Modified Rank & Total Skill
@@ -622,9 +639,177 @@ export class DCCActor extends Actor {
   }
 
   /**
-   * Roll Evade check
+   * Get active global floor
+   * @returns {number}
    */
-  async rollEvade() {
+  static getCurrentFloor() {
+    try {
+      const val = globalThis.game?.settings?.get?.('carl-rpg', 'currentFloor');
+      const parsed = parseInt(val, 10);
+      return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+
+  /**
+   * Set active global floor
+   * @param {number|string} floor
+   * @returns {Promise<number>}
+   */
+  static async setCurrentFloor(floor) {
+    const parsed = Math.max(1, parseInt(floor, 10) || 1);
+    if (globalThis.game?.settings?.set) {
+      await globalThis.game.settings.set('carl-rpg', 'currentFloor', parsed);
+    }
+    if (typeof globalThis.ui !== 'undefined' && globalThis.ui?.windows) {
+      for (const app of Object.values(globalThis.ui.windows)) {
+        if (typeof app.render === 'function') app.render(false);
+      }
+    }
+    return parsed;
+  }
+
+  /**
+   * Get current floor for this actor
+   * @returns {number}
+   */
+  getCurrentFloor() {
+    return DCCActor.getCurrentFloor();
+  }
+
+  /**
+   * Calculate Target Evade DC for an attacker aiming at this actor
+   * For mobs: base evade difficulty + floor (e.g. 14 + F)
+   * For crawlers/others: 10 + dexMod + floor
+   * @param {number|null} [floor=null]
+   * @returns {number}
+   */
+  getEvadeTargetDC(floor = null) {
+    const currentFloor = floor !== null ? (parseInt(floor, 10) || 1) : DCCActor.getCurrentFloor();
+    if (this.type === 'mob') {
+      const existingDiff = this.system.attributes?.evadeDifficulty;
+      let base = 10 + (this.system.abilities?.dex?.mod ?? 0);
+      if (typeof existingDiff === 'string' && existingDiff.trim()) {
+        const match = existingDiff.trim().match(/^(\d+)/);
+        if (match) base = parseInt(match[1], 10);
+      } else if (Number.isFinite(Number(existingDiff)) && Number(existingDiff) > 0) {
+        base = Number(existingDiff);
+      }
+      return base + currentFloor;
+    }
+    const dexMod = this.system.abilities?.dex?.mod ?? 0;
+    return 10 + dexMod + currentFloor;
+  }
+
+  /**
+   * Determine and evaluate attack hits against active targets
+   * @param {Roll} roll
+   * @param {object} [options={}]
+   * @returns {{ targetResults: Array<object>, targetResultsHtml: string, currentFloor: number }}
+   */
+  _resolveAttackTargets(roll, options = {}) {
+    const currentFloor = DCCActor.getCurrentFloor();
+    let targetActors = [];
+    if (options.targets && Array.isArray(options.targets)) {
+      targetActors = options.targets.map(t => t.actor || t).filter(Boolean);
+    } else if (options.target) {
+      targetActors = [options.target.actor || options.target].filter(Boolean);
+    } else if (typeof game !== 'undefined' && game.user?.targets && game.user.targets.size > 0) {
+      targetActors = Array.from(game.user.targets).map(t => t.actor || t).filter(Boolean);
+    }
+
+    const d20Face = roll.dice?.[0]?.total ?? roll.terms?.[0]?.results?.[0]?.result ?? null;
+
+    const targetResults = targetActors.map(target => {
+      const targetDC = typeof target.getEvadeTargetDC === 'function'
+        ? target.getEvadeTargetDC(currentFloor)
+        : (10 + (target.system?.abilities?.dex?.mod ?? 0) + currentFloor);
+      const isHit = roll.total >= targetDC;
+      const diff = roll.total - targetDC;
+      let outcome = isHit ? 'Hit' : 'Miss';
+      if (d20Face === 20) {
+        outcome = 'Critical Hit';
+      } else if (d20Face === 1) {
+        outcome = 'Critical Miss';
+      } else if (diff >= 10) {
+        outcome = 'Major Hit';
+      } else if (diff >= -3 && !isHit) {
+        outcome = 'Near Miss';
+      } else if (diff <= -10) {
+        outcome = 'Major Miss';
+      }
+      return {
+        actor: target,
+        actorId: target.id,
+        actorName: target.name,
+        targetDC,
+        isHit,
+        diff,
+        outcome
+      };
+    });
+
+    let targetResultsHtml = '';
+    if (targetResults.length > 0) {
+      const rows = targetResults.map(tr => {
+        const img = tr.actor?.img || tr.actor?.prototypeToken?.texture?.src || 'icons/svg/mystery-man.svg';
+        const hit = tr.isHit;
+        const badgeBg = hit ? '#27ae60' : '#c0392b';
+        const diffStr = tr.diff >= 0 ? `+${tr.diff}` : `${tr.diff}`;
+        return `
+          <div class="dcc-target-eval-row ${hit ? 'hit' : 'miss'}" data-target-id="${tr.actorId}" style="display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 6px; background: ${hit ? 'rgba(39, 174, 96, 0.15)' : 'rgba(192, 57, 43, 0.15)'}; border: 1px solid ${hit ? '#27ae60' : '#c0392b'}; border-radius: 3px; margin-top: 3px;">
+            <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+              <img src="${img}" style="width: 20px; height: 20px; border-radius: 2px; border: 1px solid #555; object-fit: cover;" />
+              <span style="font-size: 11px; font-weight: bold; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${tr.actorName}</span>
+              <span style="font-size: 10px; color: #bdc3c7;">(DC ${tr.targetDC})</span>
+            </div>
+            <div style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 2px; background: ${badgeBg}; color: #fff; text-transform: uppercase; white-space: nowrap;">
+              ${tr.outcome.toUpperCase()} (${diffStr})
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      targetResultsHtml = `
+        <div class="dcc-attack-targets-container" style="margin-top: 6px; font-family: var(--font-primary, 'Oswald', sans-serif);">
+          <div style="font-size: 10px; font-weight: bold; color: #f1c40f; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between;">
+            <span><i class="fa-solid fa-crosshairs"></i> Target Evaluation</span>
+            <span>Floor ${currentFloor}</span>
+          </div>
+          ${rows}
+        </div>
+      `;
+    }
+
+    return { targetResults, targetResultsHtml, currentFloor };
+  }
+
+  /**
+   * Helper to build Evade button HTML for non-crawler attacks
+   * @param {Roll} roll
+   * @param {number} currentFloor
+   * @returns {string}
+   */
+  _getEvadeButtonHtml(roll, currentFloor) {
+    if (this.type === 'crawler') return '';
+    return `
+      <div class="dcc-evade-btn-container" style="margin-top: 6px;">
+        <button type="button" class="dcc-evade-roll-btn" data-attacker-id="${this.id}" data-attacker-name="${this.name}" data-attack-total="${roll.total}" data-floor="${currentFloor}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #2980b9; color: #fff; border: 1px solid #1f618d; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif); text-transform: uppercase;">
+          <i class="fa-solid fa-person-running"></i> Roll Evade vs Attack (${roll.total})
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Roll Evade check
+   * @param {object} [options={}]
+   * @param {number} [options.attackTotal] - Incoming attack total to evaluate against
+   * @param {string} [options.attackerName] - Name of the attacker
+   * @param {number} [options.floor] - Dungeon floor
+   */
+  async rollEvade(options = {}) {
     const dexMod = this.system.abilities?.dex?.mod ?? 0;
     const items = Number(this.system.attributes?.evade?.items ?? this.system.attributes?.evade?.gear) || 0;
     const buffs = Number(this.system.attributes?.evade?.buffs) || 0;
@@ -646,9 +831,39 @@ export class DCCActor extends Actor {
       }).catch(() => {});
     }
 
+    let resultHtml = '';
+    let flavor = `<strong>${this.name}</strong>: Evade Roll (1d20 + ${parts.join(' + ')})`;
+
+    if (options.attackTotal !== undefined && options.attackTotal !== null) {
+      const atkTotal = Number(options.attackTotal) || 0;
+      const isEvaded = roll.total >= atkTotal;
+      const attackerLabel = options.attackerName ? ` vs ${options.attackerName}` : '';
+      flavor = `<strong>${this.name}</strong>: Evade Roll${attackerLabel} (vs Attack Roll ${atkTotal})`;
+
+      resultHtml = `
+        <div class="dcc-evade-result-banner" style="margin-top: 6px; padding: 4px 8px; border-radius: 3px; font-family: var(--font-primary, 'Oswald', sans-serif); font-size: 12px; font-weight: bold; text-align: center; text-transform: uppercase; background: ${isEvaded ? '#27ae60' : '#c0392b'}; color: #fff; border: 1px solid ${isEvaded ? '#1e8449' : '#962d22'};">
+          <i class="fa-solid ${isEvaded ? 'fa-shield-halved' : 'fa-burst'}"></i>
+          ${isEvaded ? 'SUCCESSFULLY EVADED!' : 'EVADE FAILED — HIT TAKEN!'}
+          <span style="font-size: 10px; font-weight: normal; margin-left: 4px;">(${roll.total} vs ${atkTotal})</span>
+        </div>
+      `;
+    }
+
+    const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
+    const content = rollHtml ? `${rollHtml}${resultHtml}` : (resultHtml || undefined);
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: Evade Roll (1d20 + ${parts.join(' + ')})`
+      flavor,
+      content,
+      flags: {
+        'carl-rpg': {
+          isEvadeRoll: true,
+          evadeTotal: roll.total,
+          attackTotal: options.attackTotal !== undefined ? Number(options.attackTotal) : null,
+          isEvaded: options.attackTotal !== undefined ? (roll.total >= Number(options.attackTotal)) : null
+        }
+      }
     });
   }
 
@@ -1290,13 +1505,33 @@ export class DCCActor extends Actor {
         `;
       }
 
+      const { targetResults, targetResultsHtml, currentFloor } = this._resolveAttackTargets(roll, options);
+      const evadeBtnHtml = this._getEvadeButtonHtml(roll, currentFloor);
+
       const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
-      const content = rollHtml ? `${rollHtml}${dmgBtnHtml}` : (dmgBtnHtml || undefined);
+      const content = [rollHtml, targetResultsHtml, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
 
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
         flavor: flavorText,
-        content
+        content,
+        flags: {
+          'carl-rpg': {
+            isAttackRoll: true,
+            attackerId: this.id,
+            attackerType: this.type,
+            attackTotal: roll.total,
+            currentFloor,
+            targetResults: targetResults.map(tr => ({
+              actorId: tr.actorId,
+              actorName: tr.actorName,
+              targetDC: tr.targetDC,
+              isHit: tr.isHit,
+              diff: tr.diff,
+              outcome: tr.outcome
+            }))
+          }
+        }
       });
     } else {
       const parts = this.getAttackDamageParts(attackItem, options);
@@ -2099,7 +2334,7 @@ export class DCCActor extends Actor {
    * Roll Spell Attack / To-Hit
    * @param {DCCItem} spellItem
    */
-  async rollSpellAttack(spellItem) {
+  async rollSpellAttack(spellItem, options = {}) {
     const sys = spellItem.system || {};
     const statKey = (sys.stat || 'int').toLowerCase();
     const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
@@ -2117,9 +2352,47 @@ export class DCCActor extends Actor {
       }).catch(() => {});
     }
 
+    const { targetResults, targetResultsHtml, currentFloor } = this._resolveAttackTargets(roll, options);
+    const evadeBtnHtml = this._getEvadeButtonHtml(roll, currentFloor);
+
+    let dmgBtnHtml = '';
+    const dmgData = this.getSpellDamageData(spellItem);
+    if (dmgData?.hasDamage) {
+      const dmgFormula = dmgData.formulaWithStat || dmgData.formula;
+      dmgBtnHtml = `
+        <div style="margin-top: 6px;">
+          <button type="button" class="dcc-attack-roll-btn roll-spell-dmg-from-card" data-actor-id="${this.id}" data-spell-id="${spellItem.id}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #8e44ad; color: #fff; border: 1px solid #71368a; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif);">
+            <i class="fa-solid fa-burst"></i> Roll Spell Damage (${dmgFormula})
+          </button>
+        </div>
+      `;
+    }
+
+    const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
+    const content = [rollHtml, targetResultsHtml, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${spellItem.name} (Spell Attack / To Hit: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`
+      flavor: `<strong>${this.name}</strong>: ${spellItem.name} (Spell Attack / To Hit: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`,
+      content,
+      flags: {
+        'carl-rpg': {
+          isAttackRoll: true,
+          isSpellAttack: true,
+          attackerId: this.id,
+          attackerType: this.type,
+          attackTotal: roll.total,
+          currentFloor,
+          targetResults: targetResults.map(tr => ({
+            actorId: tr.actorId,
+            actorName: tr.actorName,
+            targetDC: tr.targetDC,
+            isHit: tr.isHit,
+            diff: tr.diff,
+            outcome: tr.outcome
+          }))
+        }
+      }
     });
   }
 

@@ -1525,6 +1525,15 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       { key: 'unassigned', label: 'Unassigned / Solo' }
     ];
 
+    const currentFloor = (typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function')
+      ? DCCActor.getCurrentFloor()
+      : (Number(globalThis.game?.settings?.get?.('carl-rpg', 'currentFloor')) || 1);
+    const floorOptions = Array.from({ length: 18 }, (_, idx) => ({
+      value: idx + 1,
+      label: `Floor ${idx + 1}`,
+      selected: (idx + 1) === currentFloor
+    }));
+
     return {
       ...data,
       sessions,
@@ -1546,6 +1555,8 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       filterType: this.filterType,
       filterOutcome: this.filterOutcome,
       searchQuery: this.searchQuery,
+      currentFloor,
+      floorOptions,
       outcomeOptions: Object.entries(DCC_OUTCOME_CONFIG).map(([key, cfg]) => ({
         key,
         label: cfg.label
@@ -1980,6 +1991,15 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     html.find('.dcc-tab-nav-btn').click(ev => {
       ev.preventDefault();
       this.activeTab = $(ev.currentTarget).data('tab');
+      this.render(false);
+    });
+
+    // Global Floor Switcher
+    html.find('#dcc-global-floor-select').change(async ev => {
+      const newFloor = parseInt(ev.target.value, 10) || 1;
+      if (typeof DCCActor !== 'undefined' && typeof DCCActor.setCurrentFloor === 'function') {
+        await DCCActor.setCurrentFloor(newFloor);
+      }
       this.render(false);
     });
 

@@ -12,6 +12,15 @@
     </div>
 
     <div class="dcc-session-controls">
+      <div class="dcc-floor-selector-wrap" style="display: flex; align-items: center; gap: 4px; background: #1a1a24; padding: 2px 6px; border-radius: 4px; border: 1px solid #333;">
+        <label for="dcc-global-floor-select" style="font-size: 11px; font-weight: bold; color: #f39c12; margin: 0;"><i class="fa-solid fa-stairs"></i> Floor:</label>
+        <select id="dcc-global-floor-select" class="dcc-select-floor" style="background: #252538; color: #fff; border: 1px solid #444; border-radius: 3px; padding: 2px 6px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;" title="Current Dungeon Floor (Global)">
+          {{#each floorOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>Floor {{this.value}}</option>
+          {{/each}}
+        </select>
+      </div>
+
       <div class="dcc-session-selector-wrap">
         <label for="dcc-session-select"><i class="fa-solid fa-calendar-days"></i> Session:</label>
         <select id="dcc-session-select" class="dcc-select-session">

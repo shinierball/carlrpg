@@ -75,6 +75,8 @@ Hooks.once('init', async function() {
     getBackgroundTable,
     rollBackgroundTable,
     ensureBackgroundTables,
+    getCurrentFloor,
+    setCurrentFloor,
     onRenderChatMessage,
     registerChatMessageHook,
     applications: {
@@ -248,6 +250,20 @@ Hooks.once('init', async function() {
     default: ''
   });
 
+  game.settings.register('carl-rpg', 'currentFloor', {
+    name: 'Current Dungeon Floor',
+    hint: 'The active dungeon floor (1-18) where all crawlers and encounters currently reside.',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 1
+  });
+
+  DCCActor.getCurrentFloor = getCurrentFloor;
+  DCCActor.setCurrentFloor = setCurrentFloor;
+  CONFIG.DCC.getCurrentFloor = getCurrentFloor;
+  CONFIG.DCC.setCurrentFloor = setCurrentFloor;
+
   // Register Handlebars Helpers
   Handlebars.registerHelper('eq', (a, b) => a === b);
   Handlebars.registerHelper('or', (a, b) => Boolean(a || b));
@@ -326,7 +342,8 @@ Hooks.once('init', async function() {
     sessionEngine: DCCSessionEngine,
     backgroundTables: DCC_BACKGROUND_TABLES,
     rollBackgroundTable,
-    ensureBackgroundTables,
+    getCurrentFloor,
+    setCurrentFloor,
     setupInitialHotbar,
     openAchievementManager(options = {}) {
       return new DCCAchievementManagerApp(options).render(true);
@@ -937,6 +954,96 @@ export function onRenderChatMessage(message, html, data) {
       $(btn).click(attackClickHandler);
     }
   }
+
+  // 4. Handle click on "Roll Evade" from an incoming attack card in chat
+  const rollEvadeButtons = query('.dcc-evade-roll-btn');
+  for (const btn of rollEvadeButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const evadeClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const attackerId = btn.dataset?.attackerId || $btn?.data('attacker-id');
+      const attackerName = btn.dataset?.attackerName || $btn?.data('attacker-name') || 'Attacker';
+      const attackTotal = Number(btn.dataset?.attackTotal ?? $btn?.data('attack-total'));
+      const floor = Number(btn.dataset?.floor ?? $btn?.data('floor')) || getCurrentFloor();
+
+      // Resolve acting crawler
+      let crawler = null;
+      if (game.user?.character && game.user.character.type === 'crawler') {
+        crawler = game.user.character;
+      } else if (canvas?.tokens?.controlled?.length) {
+        const controlled = canvas.tokens.controlled.find(t => t.actor?.type === 'crawler');
+        if (controlled) crawler = controlled.actor;
+      }
+      if (!crawler && typeof game !== 'undefined' && game.actors) {
+        const ownedCrawlers = Array.from(game.actors.values?.() || game.actors).filter(a => a.type === 'crawler' && a.isOwner);
+        if (ownedCrawlers.length >= 1) {
+          crawler = ownedCrawlers[0];
+        }
+      }
+
+      if (!crawler) {
+        ui.notifications?.warn('DCC RPG | Please select or assign a Crawler character to roll Evade!');
+        return;
+      }
+
+      if (typeof crawler.rollEvade === 'function') {
+        await crawler.rollEvade({ attackTotal, attackerName, floor });
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', evadeClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(evadeClickHandler);
+    }
+  }
+}
+
+/**
+ * Get current active dungeon floor number (global across all crawlers)
+ * @returns {number}
+ */
+export function getCurrentFloor() {
+  try {
+    const val = globalThis.game?.settings?.get?.('carl-rpg', 'currentFloor');
+    const parsed = parseInt(val, 10);
+    return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
+  } catch (_) {
+    return 1;
+  }
+}
+
+/**
+ * Set current active dungeon floor number
+ * @param {number|string} floor
+ * @returns {Promise<number>}
+ */
+export async function setCurrentFloor(floor) {
+  const parsed = Math.max(1, parseInt(floor, 10) || 1);
+  if (globalThis.game?.settings?.set) {
+    await globalThis.game.settings.set('carl-rpg', 'currentFloor', parsed);
+  }
+  if (typeof globalThis.ui !== 'undefined' && globalThis.ui?.windows) {
+    for (const app of Object.values(globalThis.ui.windows)) {
+      if (typeof app.render === 'function') app.render(false);
+    }
+  }
+  return parsed;
+}
+
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.window.carl = globalThis.window.carl || {};
+  globalThis.window.carl.getCurrentFloor = getCurrentFloor;
+  globalThis.window.carl.setCurrentFloor = setCurrentFloor;
+}
+if (globalThis.CONFIG?.DCC) {
+  globalThis.CONFIG.DCC.getCurrentFloor = getCurrentFloor;
+  globalThis.CONFIG.DCC.setCurrentFloor = setCurrentFloor;
 }
 
 /**

@@ -118,7 +118,9 @@
           "hpPerBar": 0
         },
         "surpriseDifficulty": "",
-        "evadeDifficulty": ""
+        "evadeDifficulty": "",
+        "evadeBaseDifficulty": 10,
+        "effectiveEvadeDC": 11
       },
       "details": {
         "level": 1,

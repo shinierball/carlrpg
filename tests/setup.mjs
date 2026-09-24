@@ -11,6 +11,8 @@ import { DCC_MOBS } from '../src/data/mobs.mjs';
  * without needing an active Foundry server or browser DOM.
  */
 
+if (!globalThis.window) globalThis.window = globalThis;
+
 export class MockActor {
   constructor(data = {}) {
     this.id = data.id || data._id || ('mock-actor-' + Math.random().toString(36).substring(2, 9));
@@ -286,6 +288,7 @@ globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS = globalThis.CONST.DOCUMENT_OWNERSHIP
 };
 
 const _settingsStore = new Map();
+_settingsStore.set('carl-rpg.currentFloor', 1);
 
 if (!globalThis.game) {
   globalThis.game = {
@@ -293,6 +296,8 @@ if (!globalThis.game) {
       id: 'test-user',
       isGM: true,
       can: () => true,
+      targets: new Set(),
+      character: null,
       hotbar: {},
       flags: {},
       getFlag(scope, key) {
@@ -339,12 +344,24 @@ if (!globalThis.game) {
       }
     },
     dcc: {
-      mobs: DCC_MOBS
+      mobs: DCC_MOBS,
+      getCurrentFloor: () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1,
+      setCurrentFloor: async (f) => {
+        const val = Math.max(1, parseInt(f, 10) || 1);
+        _settingsStore.set('carl-rpg.currentFloor', val);
+        return val;
+      }
     }
   };
 } else {
   globalThis.game.dcc = globalThis.game.dcc || {};
   globalThis.game.dcc.mobs = DCC_MOBS;
+  globalThis.game.dcc.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
+  globalThis.game.dcc.setCurrentFloor = async (f) => {
+    const val = Math.max(1, parseInt(f, 10) || 1);
+    _settingsStore.set('carl-rpg.currentFloor', val);
+    return val;
+  };
   if (!globalThis.game.folders) globalThis.game.folders = [];
   if (!globalThis.game.macros) globalThis.game.macros = [];
   if (!globalThis.game.user.hotbar) globalThis.game.user.hotbar = {};
@@ -371,6 +388,10 @@ if (!globalThis.game) {
     }
     return this;
   };
+  if (globalThis.game?.user) {
+    if (!globalThis.game.user.targets) globalThis.game.user.targets = new Set();
+    if (globalThis.game.user.character === undefined) globalThis.game.user.character = null;
+  }
   if (!globalThis.game.settings) {
     globalThis.game.settings = {
       register: (module, key, options) => {
@@ -1143,6 +1164,22 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG.Combat.initiative = globalThis.CONFIG.Combat.initiative || { formula: null, decimals: 0 };
   globalThis.CONFIG.ui = globalThis.CONFIG.ui || { combat: MockCombatTracker };
 }
+
+globalThis.CONFIG.DCC = globalThis.CONFIG.DCC || {};
+globalThis.CONFIG.DCC.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
+globalThis.CONFIG.DCC.setCurrentFloor = async (f) => {
+  const val = Math.max(1, parseInt(f, 10) || 1);
+  _settingsStore.set('carl-rpg.currentFloor', val);
+  return val;
+};
+globalThis.window = globalThis.window || globalThis;
+globalThis.window.carl = globalThis.window.carl || {};
+globalThis.window.carl.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
+globalThis.window.carl.setCurrentFloor = async (f) => {
+  const val = Math.max(1, parseInt(f, 10) || 1);
+  _settingsStore.set('carl-rpg.currentFloor', val);
+  return val;
+};
 
 if (!globalThis.window) {
   globalThis.window = globalThis;

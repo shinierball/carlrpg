@@ -60,9 +60,19 @@ export function parseUpgrades(upgrades) {
  * Standard Evade difficulty formula:
  * Target Evade (Standard Difficulty) = 10 + Foe Dex Mod + Floor Number
  * @param {number} [foeDexMod=0]
- * @param {number} [floorNumber=1]
+ * @param {number|null} [floorNumber=null]
  * @returns {number}
  */
-export function getEvadeTargetDifficulty(foeDexMod = 0, floorNumber = 1) {
-  return 10 + (Number(foeDexMod) || 0) + (Number(floorNumber) || 1);
+export function getEvadeTargetDifficulty(foeDexMod = 0, floorNumber = null) {
+  let floor = floorNumber;
+  if (floor === null || floor === undefined) {
+    try {
+      const stored = globalThis.game?.settings?.get?.('carl-rpg', 'currentFloor');
+      const parsed = parseInt(stored, 10);
+      floor = Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
+    } catch (_) {
+      floor = 1;
+    }
+  }
+  return 10 + (Number(foeDexMod) || 0) + (Number(floor) || 1);
 }

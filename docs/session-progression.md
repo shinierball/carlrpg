@@ -84,3 +84,50 @@ When concluding a session:
 2. **Session XP Distribution**: Aggregates total damage dealt/taken, kills, quests, and tactical actions into an experience pool and distributes it across participating tracked crawlers.
 3. **Dungeon AI Review Broadcast**: Posts an authentic Dungeon AI recap chat card highlighting the Session MVP, Target of the Night, and audience statistics for tracked participants.
 4. **Session Archiving**: Seals the session record into the permanent archive and prepares a fresh session.
+
+---
+
+## 6. Global Floor & Combat Evade Resolution System
+
+In the Dungeon Crawler Carl RPG, combat difficulty scales dynamically with the current dungeon floor. The entire game world is synchronized to a single active floor value at any given time.
+
+### Global Floor Setting
+- **Single Source of Truth**: The active floor is stored in the world setting `carl-rpg.currentFloor` (default: Floor 1, minimum: 1).
+- **GM Floor Controls**:
+  - Accessible directly in the **Party Progression & Session Hub** (`DCCSessionManagerApp`) header controls (`Floor: [ 1 - Floor 1 ... 18 - Floor 18 ]`).
+  - Accessible via standard Foundry VTT System Settings.
+  - Programmatic access via `game.dcc.getCurrentFloor()`, `game.dcc.setCurrentFloor(floor)`, `DCCActor.getCurrentFloor()`, `DCCActor.setCurrentFloor(floor)`, or `window.carl.getCurrentFloor()`.
+  - Changing the floor immediately re-renders open sheets and updates effective mob target DCs across the system.
+
+### Mob Evade Difficulty: Base + F
+- **Formula**: Every mob entity has an Evade difficulty defined as a base number plus the current floor:
+  $$\text{Target Evade DC} = \text{Base Evade} + F$$
+  where $F$ is the current floor number.
+- **Base Evade Value**:
+  - Extracted from the mob's statblock (e.g., `12+F`, `14+F`, `18+F`).
+  - If unspecified, defaults to $10 + \text{DEX Mod}$.
+- **Dynamic Derivation**:
+  - The mob's character sheet displays both the base formula (e.g. `14+F`) and the active threshold (e.g. `(DC 15)` on Floor 1, `(DC 18)` on Floor 4).
+  - Accessed programmatically via `mob.getEvadeTargetDC()` or `mob.system.attributes.effectiveEvadeDC`.
+
+### Automatic Attack Target Hit Resolution
+- When an attack roll (`rollAttack`) or spell attack (`rollSpellAttack`) is executed, the system automatically checks for active targets:
+  1. Targets passed explicitly via roll options (`options.targets` or `options.target`).
+  2. Targeted tokens currently selected by the rolling user (`game.user.targets`).
+- **Hit / Miss Evaluation**:
+  - Compares the attack total directly to each target's Target DC (for mobs: $\text{Base} + F$; for crawlers: $\text{Attack Total} \text{ vs Evade}$).
+  - Automatically embeds an interactive **Target Evaluation** badge row in the attack chat card:
+    - Target Name
+    - Target DC
+    - `[HIT (+X)]` in bright green or `[MISS (-X)]` in vivid red
+  - Recorded in the chat message flags (`flags['carl-rpg'].targetResults`).
+
+### Non-Crawler Attack Evade Button
+- When an attack is rolled by a **non-crawler** (such as a mob, boss, or hostile NPC), the attack chat card automatically embeds an interactive **Roll Evade** button (`.dcc-evade-roll-btn`).
+- **Crawler One-Click Evade**:
+  - Any player crawler who is the target of the attack can click the button.
+  - The system resolves the user's controlled token or assigned character (`game.user.character`).
+  - Executes `crawler.rollEvade({ attackTotal, attackerName, floor })`.
+  - Generates an official Evade roll card comparing the crawler's Evade roll ($d20 + \text{DEX Mod} + \text{Gear} + \text{Buffs}$) against the incoming attack total:
+    - **SUCCESSFULLY EVADED!** if Evade $\ge$ Attack Total.
+    - **EVADE FAILED — HIT TAKEN!** if Evade $<$ Attack Total.

@@ -176,6 +176,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.isCrawler = actor?.type === 'crawler';
     context.isPet = actor?.type === 'pet';
     context.isNPC = actor?.type === 'npc';
+    context.currentFloor = typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function' ? DCCActor.getCurrentFloor() : 1;
 
     // Dynamic health segments for health bar visualization
     const numBars = context.isMob

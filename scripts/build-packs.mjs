@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { DCC_SKILLS } from '../src/data/skills.mjs';
 import { DCC_SPELLS } from '../src/data/spells.mjs';
-import { DCC_BUFFS } from '../src/data/buffs.mjs';
+import { DCC_BUFFS, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
 import { DCC_MOBS } from '../src/data/mobs.mjs';
 
@@ -162,7 +162,7 @@ async function buildBuffs() {
   const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
   await db.open();
 
-  console.log(`Building buffs compendium with ${DCC_BUFFS.length} items...`);
+  console.log(`Building buffs & debuffs compendium with ${DCC_BUFFS.length} buffs and ${DCC_DEBUFFS.length} debuffs...`);
   const batch = db.batch();
 
   for (const buff of DCC_BUFFS) {
@@ -199,9 +199,45 @@ async function buildBuffs() {
     batch.put(`!items!${buff._id}`, doc);
   }
 
+  for (const debuff of DCC_DEBUFFS) {
+    const doc = {
+      _id: debuff._id,
+      name: debuff.name,
+      type: "debuff",
+      img: debuff.img,
+      system: {
+        severity: debuff.system?.severity || debuff.severity || "Minor",
+        damageType: debuff.system?.damageType || "",
+        reductionPercent: debuff.system?.reductionPercent ?? 0,
+        rounding: debuff.system?.rounding || "up",
+        statModifiers: debuff.system?.statModifiers || [],
+        damageModifiers: debuff.system?.damageModifiers || [],
+        duration: debuff.system?.duration || "Combat",
+        description: debuff.system?.description || debuff.description || ""
+      },
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion,
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${debuff._id}`, doc);
+  }
+
   await batch.write();
   await db.close();
-  console.log(`Successfully built buffs compendium at ${packDir}`);
+  console.log(`Successfully built buffs & debuffs compendium at ${packDir}`);
 }
 
 // 4. Build Macros Pack

@@ -61,6 +61,9 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
     - **Slot 1**: Character Creator (`DCCCrawlerCreatorApp`)
     - **Slot 2**: Open Combat Metrics (`DCCCombatMetricsApp`)
     - **Slot 3**: Party Progression and Session Hub (`DCCSessionManagerApp`)
+- **Crawler Token Selection Action HUDs**:
+  - **Dynamic Token Hotbar HUD**: Automatically appears directly above Foundry's macro bar (`#hotbar`) whenever a crawler token is selected on the canvas. Features all 10 character sheet hotlist slots with complete interactivity (Hit & Damage for attacks, Cast & Damage for spells, Equip/Unequip toggling for gear, Use for consumables/loot, Roll & Damage for skills, drag-and-drop item assignment, and slot clearing).
+  - **Left Action Panel (Attacks & Active Skills)**: Automatically appears on the left of the screen directly below the scene list (`#navigation` / `#scene-list`). Displays all character attacks with one-click Hit & Damage buttons, plus all active non-passive skills with Check/Hit & Damage buttons (passive skills are automatically filtered out). Fully reactive to actor updates, item changes, and canvas selection changes.
 - **Pure DCC Mechanics**: Automated modifier calculations, Evade checks, DR totals, and dice rolls.
 - **Damage Type Integration & Multi-Typed Attacks**:
   - Full support for 13 canonical CarlRPG damage types across weapons, attacks, spells, skills, buffs, and debuffs.

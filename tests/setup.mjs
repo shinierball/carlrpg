@@ -1429,3 +1429,12 @@ if (!globalThis.$) {
   };
   globalThis.$ = createMockJQuery;
 }
+
+if (!globalThis.canvas) {
+  globalThis.canvas = {
+    tokens: {
+      controlled: []
+    }
+  };
+}
+

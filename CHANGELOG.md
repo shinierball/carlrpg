@@ -1,3 +1,78 @@
+## 2.0.32
+
+### Crawler Token Selection Action HUDs (Hotbar & Left Action Panel)
+
+- **Crawler Token Hotbar HUD**:
+  - Automatically activates and displays directly above Foundry's macro bar (`#hotbar`) whenever a crawler token is selected on the canvas.
+  - Renders all 10 hotbar slots from the crawler's character sheet hotlist (`actor.system.hotlist`).
+  - Full item actions matching character sheet capabilities:
+    - **Attacks**: One-click **Hit** (attack roll vs target evade) and **Dmg** (damage packet breakdown).
+    - **Spells**: One-click **Cast** (mana cost verification & deduction) and **Dmg** (scaled spell damage).
+    - **Gear**: One-click **Equip / Unequip** toggle updating item equipped status.
+    - **Loot / Items**: One-click **Use** for consumables, potions, and inventory items.
+    - **Skills**: One-click **Hit / Dmg** for combat skills or **Roll** for utility skills.
+    - **Drag & Drop Assignment**: Drag any item from compendium or sheet directly onto a slot to assign it.
+    - **Slot Clear**: Quick clear button on populated slots.
+    - **Collapsible**: Header bar with crawler name and toggle button to minimize or expand.
+- **Left Action Panel HUD (Attacks & Non-Passive Skills)**:
+  - Automatically activates on the left of the screen, dynamically docked directly below the Scene Navigation bar (`#navigation` / `#scene-list`).
+  - **Attacks Section**: Lists all attacks configured on the crawler with item icon, name, damage formula, and immediate **Hit** and **Dmg** action buttons.
+  - **Active Skills Section**: Automatically gathers all non-passive skills on the crawler with rank and stat modifier, providing **Check / Hit** and **Dmg** buttons for combat skills and **Roll** buttons for active skills.
+  - **Passive Skill Filter**: Automatically filters out passive skills (skills marked with `category: "Passive"`, `checkType` containing "passive" or "no roll", or `skillType: "Passive"`).
+  - **Dynamic Positioning & Resizing**: Listens to Scene Navigation rendering and window resize events to ensure the panel always docks cleanly directly below the scene list.
+  - **Collapsible**: Toggle button to collapse to header bar for maximum canvas visibility.
+- **Master Lifecycle Controller (`DCCCrawlerTokenHUD`)**:
+  - Centralized hook integration responding to `controlToken`, `updateActor`, `createItem`, `updateItem`, `deleteItem`, `deleteToken`, and `canvasReady`.
+  - Automatically activates when selecting a crawler token and closes when selecting a non-crawler token (mobs, vehicles, NPCs) or clearing selection.
+  - Real-time reactivity: updates immediately when actor stats, inventory, equipment, or hotlist change without requiring re-selection.
+- **Developer Access**:
+  - Exposed on `window.carl.tokenHUD`, `window.carl.openHotbarHUD(actor, token)`, and `window.carl.openActionHUD(actor, token)`.
+- **Automated Verification**:
+  - Added comprehensive test suite in `tests/crawler-token-hud.test.mjs` verifying template preloading, passive skill discrimination, hotbar slot resolution, action triggers, attack/skill separation, token selection lifecycle, reactive updates, and position calculation.
+
+## 2.0.31
+
+### Canonical Table 11 Debuffs Compendium Synchronization
+
+- **Table 11 Canonical Debuffs Validation & Synchronization**:
+  - Validated and updated all debuffs against Table 11 of the Dungeon Crawler Carl Roleplaying Game rulebook.
+  - **14 New Canonical Debuffs Added**:
+    - `Blinded`: Roll all Skill Checks requiring sight with Disadvantage (Until end of next round).
+    - `Blood Trail`: Take 1d6+F at end of each round, stackable (Until cured with bandage or First Aid check).
+    - `Drowning`: Take 1d6+F damage at end of each round (Until head is above water).
+    - `Dying`: At 0% HB, countdown value of Con Mod rounds before death; taking damage subtracts 1 from countdown (Until death or heal 1+ HB slot).
+    - `Enraged`: Extreme uncontrolled fury, may only perform Attack and Move Actions (Until end of 2 rounds or 20s).
+    - `Fatigued`: −1 penalty on all Checks, Move speed halved, stackable (Until end of long rest).
+    - `Long-Term Major Injury`: −5 penalty to all Checks (Until end of full day of rest).
+    - `Long-Term Minor Injury`: −2 penalty to all Checks (Until end of long rest).
+    - `Paralyzed`: Can't take any Actions (Until end of next round).
+    - `Sepsis`: Staggered and take 1d10+F Poison damage at end of each round (As Staggered, damage continues until healed).
+    - `Shit-Faced`: Make all Checks with Disadvantage (Until end of 10 minutes).
+    - `Staggered`: Next Action cannot be Move, Attack check made with Disadvantage, cannot take 10ft Step (At end of next Action).
+    - `Take Down`: Fall prone; all attacks against you made with Advantage (Use 10ft Step to stand).
+    - `Terrified`: Cannot take Move Actions or 10ft Steps; all Attacks made with Disadvantage (Until end of next round or take 1+ HB slot damage).
+  - **13 Existing Debuffs Updated to Exact Table 11 Effects & Durations**:
+    - `Burned`: 1d10+F Fire damage at end of each round (Until end of combat or 5 min; Dex check to extinguish).
+    - `Held`: Actively held, cannot Move or Step, twist body to Evade, attacks against Held foe made with Advantage (Until released or Str-Opposed Escape Artist check).
+    - `Major Injury`: −5 penalty to all Checks; gaining a second time changes to Long-Term Major Injury (Until end of long rest).
+    - `Minor Injury`: −2 penalty to all Checks; gaining a second time changes to Long-Term Minor Injury (Until end of short rest).
+    - `Muted`: Cannot speak or cast Spells (Until end of combat or 5 min).
+    - `Poisoned`: 1d8+F Poison damage at end of each round, stackable (Until treated with antidote).
+    - `Queasy`: If next Action requires a roll, made with Disadvantage (At end of next Action).
+    - `Shocked`: Lose your next Action (Once you forfeit that Action).
+    - `Sore as Shit`: −1 penalty to all rolls (Until end of 1 hour).
+    - `Stiff Legs`: Cannot take 10ft Steps (Until end of combat or 5 min).
+    - `Stunned`: Disadvantage on next Check (Once you make a Check).
+    - `The Taint`: Cannot be healed (Until end of combat or 5 min).
+    - `Woozy`: Cannot add Dex Mod to Attack or Evade Checks (Until end of next round).
+  - **3 Unmatched Debuffs Preserved**:
+    - Retained `Bleeding`, `Frozen`, and `Crippled` in the canonical compendium to support legacy items, monster traits, and physical status effects.
+- **Compendium Build System Update (`scripts/build-packs.mjs`)**:
+  - Updated `buildBuffs()` in `scripts/build-packs.mjs` to automatically compile both `DCC_BUFFS` and `DCC_DEBUFFS` into `packs/buffs` (32 buffs + 30 debuffs = 62 items).
+- **Automated Verification**:
+  - Expanded `tests/debuffs-management.test.mjs` to validate all 27 Table 11 debuffs, correct effect descriptions, durations, and preservation of unmatched debuffs.
+  - All 500 unit tests passing with 0 failures (`node --test tests/*.test.mjs`).
+
 ## 2.0.30
 
 ### Global Floor Setting, Mob Evade DC (Base + F), Automatic Target Hit Resolution & Non-Crawler Evade Button

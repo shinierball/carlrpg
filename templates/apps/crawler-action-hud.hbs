@@ -1,0 +1,89 @@
+<div id="dcc-crawler-action-hud" class="dcc-crawler-action-hud {{#if isCollapsed}}is-collapsed{{/if}}" data-actor-id="{{actor.id}}">
+  <div class="dcc-action-hud-panel">
+    <div class="dcc-action-hud-header">
+      <div class="dcc-action-hud-title">
+        <i class="fa-solid fa-skull-crossbones"></i>
+        <span>{{crawlerName}} • ACTIONS</span>
+      </div>
+      <div class="dcc-action-hud-controls">
+        <button type="button" class="dcc-action-hud-toggle" title="Toggle Actions Panel">
+          <i class="fa-solid {{#if isCollapsed}}fa-chevron-right{{else}}fa-chevron-left{{/if}}"></i>
+        </button>
+      </div>
+    </div>
+
+    {{#unless isCollapsed}}
+    <div class="dcc-action-hud-content">
+      {{!-- ATTACKS SECTION --}}
+      <div class="dcc-action-hud-section">
+        <div class="dcc-action-section-header">
+          <span class="dcc-action-section-title"><i class="fa-solid fa-crosshairs"></i> ATTACKS ({{attackCount}})</span>
+        </div>
+        <div class="dcc-action-list">
+          {{#each attacks as |atk|}}
+            <div class="dcc-action-item" data-item-id="{{atk.id}}">
+              <div class="dcc-action-item-info">
+                <img class="dcc-action-item-icon" src="{{atk.img}}" alt="{{atk.name}}" />
+                <div class="dcc-action-item-details">
+                  <span class="dcc-action-item-name" title="{{atk.name}}">{{atk.name}}</span>
+                  {{#if atk.formula}}
+                    <span class="dcc-action-item-sub">{{atk.formula}}</span>
+                  {{/if}}
+                </div>
+              </div>
+              <div class="dcc-action-item-btns">
+                <button type="button" class="dcc-hud-btn dcc-hud-btn-hit roll-attack-hit" title="Roll Attack (To Hit): {{atk.name}}">
+                  <i class="fa-solid fa-crosshairs"></i> Hit
+                </button>
+                <button type="button" class="dcc-hud-btn dcc-hud-btn-dmg roll-attack-dmg" title="Roll Damage: {{atk.name}}">
+                  <i class="fa-solid fa-burst"></i> Dmg
+                </button>
+              </div>
+            </div>
+          {{else}}
+            <div class="dcc-action-empty">No attacks found.</div>
+          {{/each}}
+        </div>
+      </div>
+
+      {{!-- ACTIVE SKILLS SECTION --}}
+      <div class="dcc-action-hud-section">
+        <div class="dcc-action-section-header">
+          <span class="dcc-action-section-title"><i class="fa-solid fa-dice-d20"></i> ACTIVE SKILLS ({{skillCount}})</span>
+        </div>
+        <div class="dcc-action-list">
+          {{#each skills as |sk|}}
+            <div class="dcc-action-item" data-item-id="{{sk.id}}">
+              <div class="dcc-action-item-info">
+                <img class="dcc-action-item-icon" src="{{sk.img}}" alt="{{sk.name}}" />
+                <div class="dcc-action-item-details">
+                  <span class="dcc-action-item-name" title="{{sk.name}}">{{sk.name}}</span>
+                  <span class="dcc-action-item-sub">Rank {{sk.rank}} ({{sk.totalSkillStr}} {{sk.stat}})</span>
+                </div>
+              </div>
+              <div class="dcc-action-item-btns">
+                {{#if sk.isAttack}}
+                  <button type="button" class="dcc-hud-btn dcc-hud-btn-hit roll-skill" title="Roll Attack Check: {{sk.name}}">
+                    <i class="fa-solid fa-crosshairs"></i> Hit
+                  </button>
+                  {{#if sk.hasDamage}}
+                    <button type="button" class="dcc-hud-btn dcc-hud-btn-dmg roll-skill-dmg" title="Roll Damage: {{sk.name}}">
+                      <i class="fa-solid fa-burst"></i> Dmg
+                    </button>
+                  {{/if}}
+                {{else}}
+                  <button type="button" class="dcc-hud-btn dcc-hud-btn-use roll-skill" title="Roll Skill Check: {{sk.name}}">
+                    <i class="fa-solid fa-dice-d20"></i> Roll
+                  </button>
+                {{/if}}
+              </div>
+            </div>
+          {{else}}
+            <div class="dcc-action-empty">No active skills found.</div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+    {{/unless}}
+  </div>
+</div>

@@ -12,6 +12,13 @@ import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
+import {
+  initCrawlerTokenHUD,
+  getCrawlerTokenHUD,
+  DCCCrawlerHotbarHUD,
+  DCCCrawlerActionHUD,
+  isPassiveSkill
+} from './apps/crawler-token-hud.mjs';
 import { DCC_ACHIEVEMENTS, DCC_ACHIEVEMENT_TIERS } from './data/achievements.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
@@ -312,7 +319,9 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/session-manager.hbs',
     'systems/carl-rpg/templates/apps/add-event-dialog.hbs',
     'systems/carl-rpg/templates/apps/crawler-creator.hbs',
-    'systems/carl-rpg/templates/apps/achievement-manager.hbs'
+    'systems/carl-rpg/templates/apps/achievement-manager.hbs',
+    'systems/carl-rpg/templates/apps/crawler-hotbar-hud.hbs',
+    'systems/carl-rpg/templates/apps/crawler-action-hud.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -362,6 +371,13 @@ Hooks.once('init', async function() {
     },
     openCrawlerCreator(options = {}) {
       return new DCCCrawlerCreatorApp(options).render(true);
+    },
+    tokenHUD: getCrawlerTokenHUD(),
+    openHotbarHUD(actor, token) {
+      return new DCCCrawlerHotbarHUD(actor, token).render(true);
+    },
+    openActionHUD(actor, token) {
+      return new DCCCrawlerActionHUD(actor, token).render(true);
     },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
@@ -1320,6 +1336,9 @@ Hooks.once('ready', async function() {
   if (ui.combat) {
     ui.combat.render(false);
   }
+
+  // Initialize Crawler Token Action HUDs (Hotbar above macros bar & Actions on left)
+  initCrawlerTokenHUD();
 });
 
 

@@ -57,3 +57,42 @@ Accessible via the header button or macro, the **Condition & Buff Manager** prov
 - Live search across all canonical, world, and actor-owned conditions.
 - Categorized filter tabs (`All`, `Buffs`, `Debuffs`, `Stat Modifiers`, `Defenses & Temp HP`).
 - One-click application to any active external buff slot or embedded debuffs.
+
+---
+
+## Canonical Debuffs (Table 11: Debuffs)
+
+The system compendium (`carl-rpg.buffs`) includes all canonical debuffs from Table 11 of the Dungeon Crawler Carl Roleplaying Game, alongside legacy conditions:
+
+| Debuff Name | Severity | Effect | Duration |
+| :--- | :--- | :--- | :--- |
+| **Blinded** | Minor | Roll all Skill Checks that require sight with Disadvantage. | Until the end of the next round. |
+| **Blood Trail** | Minor | You take 1d6+F at the end of each round. Stackable. | Until cured with a bandage or a First Aid Skill Check. |
+| **Burned** | Minor | You take 1d10+F Fire damage at the end of each round. | Until the end of combat or 5 minutes. As an Action, a victim may perform a Dex Stat Check to extinguish the flames. |
+| **Drowning** | Major | You take 1d6+F damage at the end of each round. | Until your head is above water. |
+| **Dying** | Major | You are at 0% HB. Your Con Mod is how many rounds you have before you die. Subtract 1 from this countdown value at the end of each round. Additionally, each time a Dying Crawler would take damage from any source, they instead subtract 1 from the countdown value. | Until you die or heal at least 1 HB slot. |
+| **Enraged** | Minor | You are in a state of extreme uncontrolled fury. You may only perform Attack and Move Actions. | Until the end of 2 rounds or 20 seconds. |
+| **Fatigued** | Minor | You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest. | Until the end of a long rest. |
+| **Held** | Major | You are actively being held. You can’t use Move Actions or take a Step but may still twist your body to Evade. Attacks against a Held foe are made with Advantage. | Until you are released by whatever is holding you, or you escape. Make a Str-Opposed Escape Artist Skill Check. If not physically held, it is Unopposed. |
+| **Long-Term Major Injury** | Major | You take a −5 penalty to all Checks. | Until the end of a full day of rest. |
+| **Long-Term Minor Injury** | Minor | You take a −2 penalty to all Checks. | Until the end of a long rest. |
+| **Major Injury** | Major | You take a −5 penalty to all Checks. Gaining a Major Injury a second time changes it to a Long-Term Major Injury. | Until the end of a long rest. |
+| **Minor Injury** | Minor | You take a −2 penalty to all Checks. Gaining a Minor Injury a second time changes it to a Long-Term Minor Injury. | Until the end of a short rest. |
+| **Muted** | Minor | You can’t speak or cast Spells. | Until the end of the combat or 5 minutes. |
+| **Poisoned** | Minor | You take 1d8+F Poison damage at the end of each round. Stackable. | Until treated with an antidote. |
+| **Paralyzed** | Major | You can’t take any Actions. | Until the end of the next round. |
+| **Queasy** | Minor | If your next Action requires a roll, it’s made with Disadvantage. | At the end of the next Action you take. |
+| **Sepsis** | Major | You’re Staggered (see below) and take 1d10+F Poison damage at the end of each round. | As Staggered, and the damage continues until you’re healed. |
+| **Shit-Faced** | Minor | You make all your Checks with Disadvantage. | Until the end of 10 minutes. |
+| **Shocked** | Minor | You lose your next Action. | Once you forfeit that Action. |
+| **Sore as Shit** | Minor | You suffer a −1 penalty to all rolls. | Until the end of 1 hour. |
+| **Staggered** | Minor | The next Action you take can’t be a Move, and if it is an Attack, its Check is made with Disadvantage. You can’t take a 10ft Step with your next Action. | At the end of the next Action you take. |
+| **Stiff Legs** | Minor | You can’t take 10ft Steps. | Until the end of the combat or 5 minutes. |
+| **Stunned** | Minor | You gain Disadvantage on your next Check. | Once you make a Check. |
+| **Take Down** | Minor | You fall prone. While prone, all Attacks made against you are made with Advantage. | Use your 10ft Step to stand. |
+| **Terrified** | Major | You can’t take Move Actions or 10ft Steps. You make all Attacks with Disadvantage. | Until the end of the next round, or you take at least 1 HB slot damage. |
+| **The Taint** | Major | You can’t be healed. | Until the end of combat or 5 minutes. |
+| **Woozy** | Minor | You can’t add your Dex Mod to Attack or Evade Checks. | Until the end of the next round. |
+| *Bleeding (Legacy)* | Minor | Active open wound leaking blood each turn. | Combat |
+| *Frozen (Legacy)* | Minor | Deep chill numbing limbs and slowing reactions. -2 Dexterity. | Combat |
+| *Crippled (Legacy)* | Major | Severely broken limb or torn tendon. -4 Dexterity and -2 Strength. | Until Treated |

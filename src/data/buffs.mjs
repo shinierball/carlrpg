@@ -486,13 +486,14 @@ export const DCC_BUFFS = [
  * Common Canonical DCC RPG Debuffs and Status Conditions
  */
 export const DCC_DEBUFFS = [
+  // --- Canonical Debuffs from Table 11 & System Rules (30 items: 27 Table 11 + 3 Unmatched) ---
   {
     _id: "dccdeb0000000001",
     name: "Burned",
     type: "debuff",
     img: "icons/svg/fire.svg",
     severity: "Minor",
-    description: "Takes periodic fire damage and suffers lingering burning pain.",
+    description: "You take 1d10+F Fire damage at the end of each round.",
     system: {
       severity: "Minor",
       damageType: "Fire",
@@ -500,8 +501,8 @@ export const DCC_DEBUFFS = [
       rounding: "up",
       statModifiers: [],
       damageModifiers: [],
-      duration: "Combat",
-      description: "Takes periodic fire damage and suffers lingering burning pain."
+      duration: "Until the end of combat or 5 minutes. As an Action, a victim may perform a Dex Stat Check to extinguish the flames.",
+      description: "You take 1d10+F Fire damage at the end of each round."
     }
   },
   {
@@ -510,16 +511,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/lightning.svg",
     severity: "Minor",
-    description: "Muscles twitch violently from electric currents. Disadvantage on Dex-based checks.",
+    description: "You lose your next Action.",
     system: {
       severity: "Minor",
       damageType: "Electric",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "dex", value: -2 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Combat",
-      description: "Muscles twitch violently from electric currents. Disadvantage on Dex-based checks."
+      duration: "Once you forfeit that Action.",
+      description: "You lose your next Action."
     }
   },
   {
@@ -528,19 +529,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/poison.svg",
     severity: "Minor",
-    description: "Toxic venom coursing through the bloodstream. -2 to physical stats.",
+    description: "You take 1d8+F Poison damage at the end of each round. Stackable.",
     system: {
       severity: "Minor",
       damageType: "Poison",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "con", value: -2 },
-        { stat: "str", value: -2 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "1 Hour",
-      description: "Toxic venom coursing through the bloodstream. -2 to physical stats."
+      duration: "Until treated with an antidote.",
+      description: "You take 1d8+F Poison damage at the end of each round. Stackable."
     }
   },
   {
@@ -549,37 +547,34 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/net.svg",
     severity: "Major",
-    description: "Physically or magically restrained. Incapacitated and cannot move or take actions.",
+    description: "You are actively being held. You can’t use Move Actions or take a Step but may still twist your body to Evade. Attacks against a Held foe are made with Advantage.",
     system: {
       severity: "Major",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "dex", value: -5 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Combat",
-      description: "Physically or magically restrained. Incapacitated and cannot move or take actions."
+      duration: "Until you are released by whatever is holding you, or you escape. Make a Str-Opposed Escape Artist Skill Check. If not physically held, it is Unopposed.",
+      description: "You are actively being held. You can’t use Move Actions or take a Step but may still twist your body to Evade. Attacks against a Held foe are made with Advantage."
     }
   },
   {
     _id: "dccdeb0000000005",
     name: "Stunned",
     type: "debuff",
-    img: "icons/svg/daze.svg",
-    severity: "Major",
-    description: "Completely dazed and concussed. Cannot take actions or reactions.",
+    img: "icons/conditions/stunned.webp",
+    severity: "Minor",
+    description: "You gain Disadvantage on your next Check.",
     system: {
-      severity: "Major",
+      severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "dex", value: -4 },
-        { stat: "int", value: -4 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "1 Round",
-      description: "Completely dazed and concussed. Cannot take actions or reactions."
+      duration: "Once you make a Check.",
+      description: "You gain Disadvantage on your next Check."
     }
   },
   {
@@ -588,16 +583,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/sleep.svg",
     severity: "Minor",
-    description: "Dizzy and lightheaded. -2 penalty to attack, intelligence, and perception rolls.",
+    description: "You can’t add your Dex Mod to Attack or Evade Checks.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "int", value: -2 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "10 Minutes",
-      description: "Dizzy and lightheaded. -2 penalty to attack, intelligence, and perception rolls."
+      duration: "Until the end of the next round.",
+      description: "You can’t add your Dex Mod to Attack or Evade Checks."
     }
   },
   {
@@ -606,19 +601,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/acid.svg",
     severity: "Minor",
-    description: "Violent stomach cramps and nausea. -2 penalty to physical rolls.",
+    description: "If your next Action requires a roll, it’s made with Disadvantage.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "con", value: -2 },
-        { stat: "str", value: -1 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "30 Minutes",
-      description: "Violent stomach cramps and nausea. -2 penalty to physical rolls."
+      duration: "At the end of the next Action you take.",
+      description: "If your next Action requires a roll, it’s made with Disadvantage."
     }
   },
   {
@@ -627,16 +619,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/hazard.svg",
     severity: "Minor",
-    description: "Muscles or joints frozen. Movement speed reduced by 50% and -2 Dexterity.",
+    description: "You can’t take 10ft Steps.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "dex", value: -2 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Combat",
-      description: "Muscles or joints frozen. Movement speed reduced by 50% and -2 Dexterity."
+      duration: "Until the end of the combat or 5 minutes.",
+      description: "You can’t take 10ft Steps."
     }
   },
   {
@@ -645,19 +637,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/skull.svg",
     severity: "Major",
-    description: "Permanent dungeon corruption or creeping necrotic rot eating away at vitality.",
+    description: "You can’t be healed.",
     system: {
       severity: "Major",
       damageType: "Necrotic",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "con", value: -3 },
-        { stat: "cha", value: -3 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Permanent",
-      description: "Permanent dungeon corruption or creeping necrotic rot eating away at vitality."
+      duration: "Until the end of combat or 5 minutes.",
+      description: "You can’t be healed."
     }
   },
   {
@@ -666,20 +655,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/falling.svg",
     severity: "Minor",
-    description: "Every muscle aches after a brutal encounter. -1 to all physical stat checks.",
+    description: "You suffer a −1 penalty to all rolls.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "str", value: -1 },
-        { stat: "dex", value: -1 },
-        { stat: "con", value: -1 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Rest",
-      description: "Every muscle aches after a brutal encounter. -1 to all physical stat checks."
+      duration: "Until the end of 1 hour.",
+      description: "You suffer a −1 penalty to all rolls."
     }
   },
   {
@@ -688,16 +673,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/silenced.svg",
     severity: "Minor",
-    description: "Vocal cords silenced or magically sealed. Unable to speak or cast verbal spells.",
+    description: "You can’t speak or cast Spells.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "cha", value: -2 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "10 Minutes",
-      description: "Vocal cords silenced or magically sealed. Unable to speak or cast verbal spells."
+      duration: "Until the end of the combat or 5 minutes.",
+      description: "You can’t speak or cast Spells."
     }
   },
   {
@@ -763,16 +748,16 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/wound.svg",
     severity: "Minor",
-    description: "Laceration, sprain, or surface burn impairing physical actions.",
+    description: "You take a −2 penalty to all Checks. Gaining a Minor Injury a second time changes it to a Long-Term Minor Injury.",
     system: {
       severity: "Minor",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [{ stat: "con", value: -1 }],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Rest",
-      description: "Laceration, sprain, or surface burn impairing physical actions."
+      duration: "Until the end of a short rest.",
+      description: "You take a −2 penalty to all Checks. Gaining a Minor Injury a second time changes it to a Long-Term Minor Injury."
     }
   },
   {
@@ -781,20 +766,268 @@ export const DCC_DEBUFFS = [
     type: "debuff",
     img: "icons/svg/trauma.svg",
     severity: "Major",
-    description: "Severe compound fracture, punctured organ, or massive trauma. -3 to all stats.",
+    description: "You take a −5 penalty to all Checks. Gaining a Major Injury a second time changes it to a Long-Term Major Injury.",
     system: {
       severity: "Major",
       damageType: "",
       reductionPercent: 0,
       rounding: "up",
-      statModifiers: [
-        { stat: "str", value: -3 },
-        { stat: "dex", value: -3 },
-        { stat: "con", value: -3 }
-      ],
+      statModifiers: [],
       damageModifiers: [],
-      duration: "Until Med-Bay",
-      description: "Severe compound fracture, punctured organ, or massive trauma. -3 to all stats."
+      duration: "Until the end of a long rest.",
+      description: "You take a −5 penalty to all Checks. Gaining a Major Injury a second time changes it to a Long-Term Major Injury."
+    }
+  },
+  {
+    _id: "dccdeb0000000017",
+    name: "Blinded",
+    type: "debuff",
+    img: "icons/conditions/blinded.webp",
+    severity: "Minor",
+    description: "Roll all Skill Checks that require sight with Disadvantage.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of the next round.",
+      description: "Roll all Skill Checks that require sight with Disadvantage."
+    }
+  },
+  {
+    _id: "dccdeb0000000018",
+    name: "Blood Trail",
+    type: "debuff",
+    img: "icons/conditions-2/status_dotbleed.webp",
+    severity: "Minor",
+    description: "You take 1d6+F at the end of each round. Stackable.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until cured with a bandage or a First Aid Skill Check.",
+      description: "You take 1d6+F at the end of each round. Stackable."
+    }
+  },
+  {
+    _id: "dccdeb0000000019",
+    name: "Drowning",
+    type: "debuff",
+    img: "icons/spells/wall-of-water.webp",
+    severity: "Major",
+    description: "You take 1d6+F damage at the end of each round.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until your head is above water.",
+      description: "You take 1d6+F damage at the end of each round."
+    }
+  },
+  {
+    _id: "dccdeb0000000020",
+    name: "Dying",
+    type: "debuff",
+    img: "icons/conditions/dying.webp",
+    severity: "Major",
+    description: "You are at 0% HB. Your Con Mod is how many rounds you have before you die. Subtract 1 from this countdown value at the end of each round. Additionally, each time a Dying Crawler would take damage from any source, they instead subtract 1 from the countdown value.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until you die or heal at least 1 HB slot.",
+      description: "You are at 0% HB. Your Con Mod is how many rounds you have before you die. Subtract 1 from this countdown value at the end of each round. Additionally, each time a Dying Crawler would take damage from any source, they instead subtract 1 from the countdown value."
+    }
+  },
+  {
+    _id: "dccdeb0000000021",
+    name: "Enraged",
+    type: "debuff",
+    img: "icons/conditions-2/status_rage.webp",
+    severity: "Minor",
+    description: "You are in a state of extreme uncontrolled fury. You may only perform Attack and Move Actions.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of 2 rounds or 20 seconds.",
+      description: "You are in a state of extreme uncontrolled fury. You may only perform Attack and Move Actions."
+    }
+  },
+  {
+    _id: "dccdeb0000000022",
+    name: "Fatigued",
+    type: "debuff",
+    img: "icons/conditions/fatigued.webp",
+    severity: "Minor",
+    description: "You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of a long rest.",
+      description: "You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest."
+    }
+  },
+  {
+    _id: "dccdeb0000000023",
+    name: "Long-Term Major Injury",
+    type: "debuff",
+    img: "icons/conditions/wounded.webp",
+    severity: "Major",
+    description: "You take a −5 penalty to all Checks.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of a full day of rest.",
+      description: "You take a −5 penalty to all Checks."
+    }
+  },
+  {
+    _id: "dccdeb0000000024",
+    name: "Long-Term Minor Injury",
+    type: "debuff",
+    img: "icons/conditions/wounded.webp",
+    severity: "Minor",
+    description: "You take a −2 penalty to all Checks.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of a long rest.",
+      description: "You take a −2 penalty to all Checks."
+    }
+  },
+  {
+    _id: "dccdeb0000000025",
+    name: "Paralyzed",
+    type: "debuff",
+    img: "icons/conditions/paralyzed.webp",
+    severity: "Major",
+    description: "You can’t take any Actions.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of the next round.",
+      description: "You can’t take any Actions."
+    }
+  },
+  {
+    _id: "dccdeb0000000026",
+    name: "Sepsis",
+    type: "debuff",
+    img: "icons/conditions-2/status_dotpoison.webp",
+    severity: "Major",
+    description: "You’re Staggered (see below) and take 1d10+F Poison damage at the end of each round.",
+    system: {
+      severity: "Major",
+      damageType: "Poison",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "As Staggered, and the damage continues until you’re healed.",
+      description: "You’re Staggered (see below) and take 1d10+F Poison damage at the end of each round."
+    }
+  },
+  {
+    _id: "dccdeb0000000027",
+    name: "Shit-Faced",
+    type: "debuff",
+    img: "icons/conditions/confused.webp",
+    severity: "Minor",
+    description: "You make all your Checks with Disadvantage.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of 10 minutes.",
+      description: "You make all your Checks with Disadvantage."
+    }
+  },
+  {
+    _id: "dccdeb0000000028",
+    name: "Staggered",
+    type: "debuff",
+    img: "icons/conditions/slowed.webp",
+    severity: "Minor",
+    description: "The next Action you take can’t be a Move, and if it is an Attack, its Check is made with Disadvantage. You can’t take a 10ft Step with your next Action.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "At the end of the next Action you take.",
+      description: "The next Action you take can’t be a Move, and if it is an Attack, its Check is made with Disadvantage. You can’t take a 10ft Step with your next Action."
+    }
+  },
+  {
+    _id: "dccdeb0000000029",
+    name: "Take Down",
+    type: "debuff",
+    img: "icons/conditions/prone.webp",
+    severity: "Minor",
+    description: "You fall prone. While prone, all Attacks made against you are made with Advantage.",
+    system: {
+      severity: "Minor",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Use your 10ft Step to stand.",
+      description: "You fall prone. While prone, all Attacks made against you are made with Advantage."
+    }
+  },
+  {
+    _id: "dccdeb0000000030",
+    name: "Terrified",
+    type: "debuff",
+    img: "icons/conditions/frightened.webp",
+    severity: "Major",
+    description: "You can’t take Move Actions or 10ft Steps. You make all Attacks with Disadvantage.",
+    system: {
+      severity: "Major",
+      damageType: "",
+      reductionPercent: 0,
+      rounding: "up",
+      statModifiers: [],
+      damageModifiers: [],
+      duration: "Until the end of the next round, or you take at least 1 HB slot damage.",
+      description: "You can’t take Move Actions or 10ft Steps. You make all Attacks with Disadvantage."
     }
   }
 ];

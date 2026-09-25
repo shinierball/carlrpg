@@ -55,12 +55,22 @@ Every recorded event is editable inline:
 
 ---
 
-## 4. Tracked Roster & Party Grouping Management
+## 4. Tracked Roster & Party Grouping Management (West Marches Support)
 
-In large campaigns or multi-party worlds, GMs can selectively limit the crawlers tracked in a session:
+In large campaigns or West Marches style worlds with rotating player attendance, GMs can easily organize crawlers into named parties and activate them per session:
+- **Default Tracked-Only View**:
+  - The Party Progression and Session Manager (PPSM) defaults to showing only tracked crawlers in the active party roster (`trackedOnly: true`). Untracked crawlers from other groups are automatically hidden to keep the view focused and clean.
+- **Party Dropdown Roster Activation**:
+  - Selecting a named party in the PPSM **Party** dropdown immediately tracks all members of that party in the active session and unselects/untracks all other crawlers (`session.trackedCrawlerIds = memberIds`).
+  - Selecting *All Parties* tracks all world crawlers, while *Unassigned* tracks crawlers without a party affiliation.
+- **"+ New Party" Modal (`[+ New Party]`)**:
+  - Located directly on the Party Overview toolbar next to the Party dropdown.
+  - Allows entering a new Party / Team name (or selecting an existing one with autocomplete).
+  - Provides a full checkbox roster of all world crawlers with current affiliations and bulk **Select All** / **Deselect All** controls.
+  - On submission: assigns the party name to all checked crawlers (`system.details.party`), sets them as the session's active tracked roster, updates the active party filter, and hides non-members.
 - **Crawler Party Affiliation**:
   - Each crawler has a `Party / Team` field in their character sheet header (e.g. *"The Royal Court"*, *"Team Meadow Lark"*, or custom faction).
-  - Parties can also be viewed and updated in bulk via the Session Hub.
+  - Parties can also be viewed and updated in bulk via the Session Hub or the Manage Roster modal.
 - **Selective Session Tracking**:
   - A session can track all world crawlers (open roster) or be scoped to a specific party or custom subset (`trackedCrawlerIds`).
   - Only tracked crawlers have rolls, combat damage, favor, and loot logged into the active session ledger and crawler metrics.
@@ -68,10 +78,10 @@ In large campaigns or multi-party worlds, GMs can selectively limit the crawlers
 - **Roster Controls & Filtering**:
   - **Quick Card Toggle**: Click the eye badge (`[Tracked]` / `[Untracked]`) on any crawler card to add or remove them from the active session tracking roster with one click.
   - **View Modes**: Switch between **Tracked Only** (hiding inactive crawlers) and **All Crawlers** (showing untracked crawlers dimmed with quick-add buttons).
-  - **Party Dropdown Filter**: Filter the Party Matrix and Activity Ledger by specific party group.
+  - **Party Dropdown Filter**: Select a party to activate its members and filter the Party Matrix and Activity Ledger.
   - **Manage Roster Modal (`[Manage Roster]`)**:
     - Opens a management dialog showing all world crawlers.
-    - Quick actions: **Select All**, **Deselect All**, and **Select by Party**.
+    - Quick actions: **Select All**, **Deselect All**, and **Select by Party** (unselecting non-members automatically).
     - Checkbox selection for precise crawler inclusion.
     - Inline party name editing to reassign crawlers without opening individual character sheets.
 

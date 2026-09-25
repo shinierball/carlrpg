@@ -1,3 +1,25 @@
+## 2.0.33
+
+### West Marches Named Party Selection & Creation in PPSM
+
+- **Default Tracked-Only Roster Display**:
+  - The Party Progression and Session Manager (PPSM) now defaults to `trackedOnly: true`. Untracked crawlers from other parties or inactive groups are hidden automatically, keeping the session roster clean and focused.
+  - Added empty state notice in the crawler grid when no tracked crawlers exist for the active party filter with quick buttons to create a party or manage the roster.
+- **Party Dropdown Active Roster Selection**:
+  - Selecting a named party in the PPSM **Party** dropdown immediately sets that party as active, tracking all member crawlers in `session.trackedCrawlerIds` and unselecting/untracking all others.
+  - Selecting *All Parties* tracks all world crawlers, while *Unassigned* tracks crawlers without a party affiliation.
+- **`+ New Party` Dialog Integration**:
+  - Added a dedicated **`+ New Party`** button on the Party Overview toolbar next to the Party dropdown.
+  - Opens the interactive **Create / Define Named Party** modal dialog with party name text input (including existing party datalist autocomplete) and a full checkbox table of all world crawlers with current party affiliations and bulk **Select All** / **Deselect All** controls.
+  - On submission: assigns the party name to all checked crawlers (`system.details.party`), sets them as the session's active tracked roster, updates the active party filter, and hides non-members.
+- **Session Engine Enhancements**:
+  - Added `DCCSessionEngine.assignPartyToCrawlers(partyName, actorIds)` for bulk party affiliation assignment across crawler actors.
+  - Added `DCCSessionEngine.selectPartyForSession(sessionId, partyName)` to set active party and track only member crawlers.
+  - Added `DCCSessionManagerApp.prototype.selectParty(partyName)` and `DCCSessionManagerApp.prototype.promptCreatePartyDialog()`.
+  - Bulk party select in **Manage Roster Dialog** automatically deselects non-party crawlers when choosing a party.
+- **Automated Verification**:
+  - Added subtest 12 to `tests/session-manager.test.mjs` verifying default tracked-only view model, named party dropdown tracking, multi-crawler untracking, promptCreatePartyDialog execution, actor party affiliation persistence, and session roster synchronization.
+
 ## 2.0.32
 
 ### Crawler Token Selection Action HUDs (Hotbar & Left Action Panel)

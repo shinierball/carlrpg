@@ -855,5 +855,148 @@ test('DCC RPG Party Progression & Session Manager Subsystem', async (t) => {
     globalThis.Dialog = origDialog;
     await app.close();
   });
+
+  await t.test('12. Option 1 West Marches Named Party Selection & Creation', async () => {
+    // 1. Reset sessions and create test crawlers
+    await DCCSessionEngine.saveAllSessions([]);
+    await DCCSessionEngine.setActiveSessionId('');
+
+    const carl = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: { details: { level: 2, party: 'The Royal Court' }, attributes: { hp: { value: 30, max: 30 }, mana: { value: 10, max: 10 } } }
+    });
+    const donut = new DCCActor({
+      name: 'Princess Donut',
+      type: 'crawler',
+      system: { details: { level: 2, party: 'The Royal Court' }, attributes: { hp: { value: 25, max: 25 }, mana: { value: 15, max: 15 } } }
+    });
+    const katia = new DCCActor({
+      name: 'Katia',
+      type: 'crawler',
+      system: { details: { level: 1, party: 'Team Meadow Lark' }, attributes: { hp: { value: 20, max: 20 }, mana: { value: 5, max: 5 } } }
+    });
+    const louis = new DCCActor({
+      name: 'Louis',
+      type: 'crawler',
+      system: { details: { level: 1, party: '' }, attributes: { hp: { value: 20, max: 20 }, mana: { value: 5, max: 5 } } }
+    });
+
+    globalThis.game.actors = [carl, donut, katia, louis];
+
+    const session = await DCCSessionEngine.createSession({
+      number: 1,
+      title: 'West Marches Expedition'
+    });
+
+    // 2. DCCSessionManagerApp defaults to trackedOnly: true
+    const app = new DCCSessionManagerApp({ sessionId: session.id });
+    assert.equal(app.trackedOnly, true, 'PPSM should default to trackedOnly: true to hide untracked crawlers');
+
+    // 3. Select Party 'Team Meadow Lark': tracks Katia and unselects Carl, Donut, and Louis
+    const trackedKatia = await app.selectParty('Team Meadow Lark');
+    assert.deepEqual(trackedKatia, [katia.id]);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, katia.id), true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, carl.id), false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, louis.id), false);
+    assert.equal(app.filterParty, 'Team Meadow Lark');
+    assert.equal(app.trackedOnly, true);
+
+    const dataTeam = await app.getData();
+    assert.equal(dataTeam.crawlersList.length, 1);
+    assert.equal(dataTeam.crawlersList[0].actorId, katia.id);
+
+    // 4. Select Party 'The Royal Court': tracks Carl and Donut, unselects Katia and Louis
+    const trackedRoyal = await app.selectParty('The Royal Court');
+    assert.equal(trackedRoyal.length, 2);
+    assert.ok(trackedRoyal.includes(carl.id));
+    assert.ok(trackedRoyal.includes(donut.id));
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, katia.id), false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, louis.id), false);
+
+    const dataRoyal = await app.getData();
+    assert.equal(dataRoyal.crawlersList.length, 2);
+    assert.ok(dataRoyal.crawlersList.some(c => c.actorId === carl.id));
+    assert.ok(dataRoyal.crawlersList.some(c => c.actorId === donut.id));
+
+    // 5. Select Party 'all': tracks all world crawlers
+    const trackedAll = await app.selectParty('all');
+    assert.equal(trackedAll.length, 4);
+
+    // 6. Test promptCreatePartyDialog to create a new party (e.g. 'Delta Strike')
+    let createDlgSpy = null;
+    const origDialog = globalThis.Dialog;
+    globalThis.Dialog = class SpyCreatePartyDialog extends origDialog {
+      constructor(dlgData, options) {
+        super(dlgData, options);
+        createDlgSpy = this;
+      }
+    };
+
+    const createPromise = app.promptCreatePartyDialog();
+    assert.ok(createDlgSpy, 'Create Party Dialog should open');
+
+    const mockCreateForm = {
+      find: (selector) => {
+        if (selector === '.dcc-new-party-name-input') {
+          return { val: () => 'Delta Strike', value: 'Delta Strike' };
+        }
+        if (selector === '.dcc-new-party-row') {
+          return {
+            each: (cb) => {
+              const rows = [
+                { id: carl.id, checked: true },
+                { id: louis.id, checked: true },
+                { id: donut.id, checked: false },
+                { id: katia.id, checked: false }
+              ];
+              rows.forEach((r, idx) => {
+                cb(idx, {
+                  data: (key) => key === 'actor-id' ? r.id : null,
+                  find: (sub) => {
+                    if (sub === '.dcc-party-member-checkbox') return { is: () => r.checked, checked: r.checked };
+                    return { is: () => false, val: () => '' };
+                  }
+                });
+              });
+            }
+          };
+        }
+        return { is: () => false, val: () => '', click: () => {}, change: () => {} };
+      }
+    };
+
+    await createDlgSpy.triggerButton('save', mockCreateForm);
+    const result = await createPromise;
+
+    assert.equal(result.partyName, 'Delta Strike');
+    assert.deepEqual(result.memberIds.sort(), [carl.id, louis.id].sort());
+
+    // Verify actor party attributes were updated
+    assert.equal(carl.system.details.party, 'Delta Strike');
+    assert.equal(louis.system.details.party, 'Delta Strike');
+    assert.equal(donut.system.details.party, 'The Royal Court');
+    assert.equal(katia.system.details.party, 'Team Meadow Lark');
+
+    // Verify session active party and tracked crawler IDs
+    const updatedSession = DCCSessionEngine.getAllSessions().find(s => s.id === session.id);
+    assert.equal(updatedSession.party, 'Delta Strike');
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, carl.id), true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, louis.id), true);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, donut.id), false);
+    assert.equal(DCCSessionEngine.isCrawlerTracked(session.id, katia.id), false);
+
+    // Verify view model reflects new active party with untracked crawlers hidden
+    assert.equal(app.filterParty, 'Delta Strike');
+    assert.equal(app.trackedOnly, true);
+    const dataDelta = await app.getData();
+    assert.equal(dataDelta.crawlersList.length, 2);
+    assert.ok(dataDelta.crawlersList.some(c => c.actorId === carl.id));
+    assert.ok(dataDelta.crawlersList.some(c => c.actorId === louis.id));
+
+    globalThis.Dialog = origDialog;
+    await app.close();
+  });
 });
 

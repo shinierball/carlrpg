@@ -93,6 +93,9 @@
                 <option value="{{this.key}}" {{#if (eq ../filterParty this.key)}}selected{{/if}}>{{this.label}}</option>
               {{/each}}
             </select>
+            <button type="button" class="dcc-btn dcc-btn-primary dcc-create-party-btn" title="Create or Define a Named Party">
+              <i class="fa-solid fa-plus"></i> New Party
+            </button>
           </div>
 
           <div class="dcc-toolbar-group dcc-toggle-segment">
@@ -112,6 +115,7 @@
         </div>
 
         <div class="dcc-party-grid">
+          {{#if crawlersList.length}}
           {{#each crawlersList}}
             <div class="dcc-crawler-card {{#if this.isSelected}}selected{{/if}} {{#unless this.isTracked}}untracked{{/unless}}" data-actor-id="{{this.actorId}}">
               <div class="dcc-crawler-card-header">
@@ -209,6 +213,27 @@
               </div>
             </div>
           {{/each}}
+          {{else}}
+            <div class="dcc-party-empty-state" style="grid-column: 1 / -1; padding: 30px; text-align: center; background: #161620; border: 1px dashed #444; border-radius: 6px; color: #bdc3c7;">
+              <i class="fa-solid fa-users-slash" style="font-size: 28px; color: #e74c3c; margin-bottom: 10px; display: block;"></i>
+              <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 6px;">No Tracked Crawlers in View</strong>
+              <p style="font-size: 12px; margin: 0 0 14px 0;">
+                {{#if trackedOnly}}
+                  There are no crawlers tracked in the active session for the selected party.
+                {{else}}
+                  No world crawlers match the current party filter.
+                {{/if}}
+              </p>
+              <div style="display: flex; gap: 8px; justify-content: center;">
+                <button type="button" class="dcc-btn dcc-btn-primary dcc-manage-roster-btn">
+                  <i class="fa-solid fa-users-gear"></i> Manage Roster
+                </button>
+                <button type="button" class="dcc-btn dcc-btn-secondary dcc-create-party-btn">
+                  <i class="fa-solid fa-plus"></i> New Party
+                </button>
+              </div>
+            </div>
+          {{/if}}
         </div>
       </div>
     {{/if}}

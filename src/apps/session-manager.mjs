@@ -235,7 +235,11 @@ export class DCCSessionEngine {
       initialCrawlers = allWorldCrawlers.filter(c => newSession.trackedCrawlerIds.includes(c.id));
     } else if (party && party !== 'all') {
       const pNorm = party.trim().toLowerCase();
-      initialCrawlers = allWorldCrawlers.filter(c => (c.system?.details?.party || '').trim().toLowerCase() === pNorm);
+      if (pNorm === 'unassigned') {
+        initialCrawlers = allWorldCrawlers.filter(c => !(c.system?.details?.party || '').trim());
+      } else {
+        initialCrawlers = allWorldCrawlers.filter(c => (c.system?.details?.party || '').trim().toLowerCase() === pNorm);
+      }
       newSession.trackedCrawlerIds = initialCrawlers.map(c => c.id);
     } else {
       // By default, null indicates all world crawlers are tracked (open roster)
@@ -464,6 +468,73 @@ export class DCCSessionEngine {
     await actor.update({ 'system.details.party': (partyName || '').trim() });
     this._refreshOpenWindows();
     return actor;
+  }
+
+  /**
+   * Assign a party affiliation to a group of crawlers
+   * @param {string} partyName
+   * @param {Array<string>} actorIds
+   * @returns {Promise<Array<Actor>>}
+   */
+  static async assignPartyToCrawlers(partyName, actorIds = []) {
+    const cleanParty = (partyName || '').trim();
+    const updated = [];
+    for (const id of actorIds) {
+      const actor = this._getActor(id);
+      if (actor) {
+        await actor.update({ 'system.details.party': cleanParty });
+        updated.push(actor);
+      }
+    }
+    this._refreshOpenWindows();
+    return updated;
+  }
+
+  /**
+   * Select a named party for a session and track only that party's crawlers, unselecting all others
+   * @param {string} sessionId
+   * @param {string} partyName
+   * @returns {Promise<Array<string>>}
+   */
+  static async selectPartyForSession(sessionId, partyName) {
+    const sessions = this.getAllSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return [];
+
+    const worldCrawlers = this.getPartyCrawlers();
+    const norm = (partyName || '').trim().toLowerCase();
+
+    let targetIds = [];
+    if (!norm || norm === 'all') {
+      targetIds = worldCrawlers.map(c => c.id);
+      session.party = null;
+    } else if (norm === 'unassigned') {
+      targetIds = worldCrawlers
+        .filter(c => !(c.system?.details?.party || '').trim())
+        .map(c => c.id);
+      session.party = 'unassigned';
+    } else {
+      targetIds = worldCrawlers
+        .filter(c => (c.system?.details?.party || '').trim().toLowerCase() === norm)
+        .map(c => c.id);
+      session.party = partyName.trim();
+    }
+
+    session.trackedCrawlerIds = Array.from(new Set(targetIds));
+    session.crawlers = session.crawlers || {};
+    for (const id of session.trackedCrawlerIds) {
+      if (!session.crawlers[id]) {
+        const actor = this._getActor(id);
+        if (actor) {
+          session.crawlers[id] = this._createCrawlerRecord(actor);
+        }
+      }
+    }
+
+    this._recomputeSessionSummaries(session);
+    await this.saveAllSessions(sessions);
+    this._refreshOpenWindows();
+    return session.trackedCrawlerIds;
   }
 
   /**
@@ -1358,8 +1429,8 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     this.activeTab = options.tab || 'party';
     this.selectedSessionId = options.sessionId || null;
     this.filterCrawlerId = options.crawlerId || 'all';
-    this.filterParty = options.party || 'all';
-    this.trackedOnly = options.trackedOnly ?? false;
+    this.filterParty = options.party !== undefined ? options.party : null;
+    this.trackedOnly = options.trackedOnly ?? true;
     this.filterType = 'all';
     this.filterOutcome = 'all';
     this.searchQuery = '';
@@ -1409,6 +1480,10 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     let session = sessions.find(s => s.id === currentSessionId);
     if (!session && sessions.length) {
       session = sessions[0];
+    }
+
+    if (this.filterParty === null) {
+      this.filterParty = session?.party || 'all';
     }
 
     // Party crawlers & distinct parties
@@ -1733,6 +1808,7 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
           root.find('.dcc-roster-select-party-bulk').change(ev => {
             const chosen = (ev.target.value || '').toLowerCase().trim();
             if (!chosen) return;
+            root.find('.dcc-roster-checkbox').prop('checked', false);
             root.find('.dcc-roster-row').each((_, el) => {
               const row = (typeof $ !== 'undefined') ? $(el) : el;
               const inputParty = (row.find ? row.find('.dcc-roster-party-input').val() : '').toLowerCase().trim();
@@ -1740,6 +1816,198 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
                 if (row.find) row.find('.dcc-roster-checkbox').prop('checked', true);
               }
             });
+          });
+        }
+      };
+
+      dlg.render(true);
+    });
+  }
+
+  /**
+   * Select a named party for the session, tracking all its members and untracking all others.
+   * @param {string} partyName - Name of the party, 'all', or 'unassigned'
+   * @returns {Promise<Array<string>>} List of newly tracked crawler IDs
+   */
+  async selectParty(partyName) {
+    const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+    const trackedIds = await DCCSessionEngine.selectPartyForSession(sId, partyName);
+    this.filterParty = (partyName && partyName !== 'all') ? partyName : 'all';
+    this.trackedOnly = true;
+    this.render(false);
+    return trackedIds;
+  }
+
+  /**
+   * Prompt the interactive Create / Define Named Party Dialog.
+   * Allows giving a party name, picking crawlers for it, and automatically activating it for the session.
+   * @returns {Promise<{ partyName: string, memberIds: Array<string> }|null>}
+   */
+  async promptCreatePartyDialog() {
+    const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+    const sessions = DCCSessionEngine.getAllSessions();
+    const session = sessions.find(s => s.id === sId);
+    if (!session) return null;
+
+    const worldCrawlers = DCCSessionEngine.getPartyCrawlers();
+    const distinctParties = DCCSessionEngine.getDistinctParties();
+
+    return new Promise((resolve) => {
+      const rowsHtml = worldCrawlers.map(c => {
+        const party = c.system?.details?.party || '';
+        const level = c.system?.details?.level || 1;
+        const img = c.img || 'icons/svg/mystery-man.svg';
+
+        return `
+          <tr class="dcc-new-party-row" data-actor-id="${c.id}" style="border-bottom: 1px solid #333;">
+            <td style="text-align: center; padding: 6px;">
+              <input type="checkbox" class="dcc-party-member-checkbox" data-actor-id="${c.id}" style="cursor: pointer; width: 16px; height: 16px;" />
+            </td>
+            <td style="padding: 6px; display: flex; align-items: center; gap: 8px;">
+              <img src="${img}" style="width: 28px; height: 28px; border-radius: 3px; border: 1px solid #c0392b; object-fit: cover;" />
+              <div>
+                <strong style="color: #fff; font-size: 13px;">${c.name}</strong>
+                <span style="font-size: 10px; color: #bdc3c7; margin-left: 4px;">LVL ${level}</span>
+              </div>
+            </td>
+            <td style="padding: 6px; font-size: 11px; color: #f1c40f;">
+              ${party ? party : '<span style="color: #7f8c8d; font-style: italic;">Unassigned</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const datalistOptions = distinctParties.map(p => `<option value="${p}">`).join('');
+
+      const content = `
+        <div class="dcc-create-party-dialog" style="font-family: 'Oswald', sans-serif; color: #ecf0f1;">
+          <div style="font-size: 11px; color: #bdc3c7; margin-bottom: 12px; line-height: 1.4;">
+            Define a named party for your West Marches campaign or session. Select the crawlers belonging to this party. Saving will update their party affiliation and set them as the active session roster.
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: #f1c40f; margin-bottom: 4px;">
+              <i class="fa-solid fa-shield-halved"></i> Party Name:
+            </label>
+            <input type="text" class="dcc-new-party-name-input" list="dcc-existing-parties-list" placeholder="e.g. Royal Court, Alpha Squad, Tuesday Delvers" style="width: 100%; background: #1e1e28; color: #fff; border: 1px solid #c0392b; border-radius: 4px; padding: 6px 10px; font-family: 'Oswald', sans-serif; font-size: 13px;" />
+            <datalist id="dcc-existing-parties-list">
+              ${datalistOptions}
+            </datalist>
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+            <button type="button" class="dcc-btn-party-select-all" style="background: #27ae60; color: #fff; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: 'Oswald', sans-serif;">
+              <i class="fa-solid fa-check-double"></i> Select All
+            </button>
+            <button type="button" class="dcc-btn-party-deselect-all" style="background: #7f8c8d; color: #fff; border: none; border-radius: 3px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: 'Oswald', sans-serif;">
+              <i class="fa-solid fa-xmark"></i> Deselect All
+            </button>
+          </div>
+
+          <div style="max-height: 280px; overflow-y: auto; border: 1px solid #333; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead style="background: #111118; position: sticky; top: 0; z-index: 2;">
+                <tr style="border-bottom: 1px solid #444; color: #f1c40f; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">
+                  <th style="width: 40px; padding: 6px; text-align: center;">Member</th>
+                  <th style="padding: 6px; text-align: left;">Crawler</th>
+                  <th style="padding: 6px; text-align: left;">Current Party</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog ?? null;
+      if (!DialogClass) return resolve(null);
+
+      const dlg = new DialogClass({
+        title: 'Create / Define Named Party',
+        content,
+        buttons: {
+          save: {
+            icon: '<i class="fa-solid fa-shield-halved"></i>',
+            label: 'Save & Activate Party',
+            callback: async (html) => {
+              const form = (html && typeof html.find === 'function')
+                ? html
+                : ((typeof $ !== 'undefined') ? $(html) : html);
+
+              const nameInput = (typeof form.find === 'function')
+                ? form.find('.dcc-new-party-name-input')
+                : (typeof form.querySelector === 'function' ? form.querySelector('.dcc-new-party-name-input') : null);
+
+              const partyName = ((typeof nameInput?.val === 'function' ? nameInput.val() : nameInput?.value) || '').trim();
+
+              if (!partyName) {
+                if (typeof ui !== 'undefined' && ui.notifications?.warn) {
+                  ui.notifications.warn('DCC RPG | Please enter a valid party name.');
+                }
+                resolve(null);
+                return;
+              }
+
+              const checkedActorIds = [];
+              if (typeof form.find === 'function') {
+                form.find('.dcc-new-party-row').each((_, el) => {
+                  const row = (typeof $ !== 'undefined' && typeof el?.find !== 'function') ? $(el) : el;
+                  const actorId = (typeof row?.data === 'function')
+                    ? (row.data('actor-id') ?? row.data('actorId'))
+                    : (row?.dataset?.actorId ?? (typeof row?.getAttribute === 'function' ? row.getAttribute('data-actor-id') : null));
+                  const checkbox = (typeof row?.find === 'function')
+                    ? row.find('.dcc-party-member-checkbox')
+                    : (typeof row?.querySelector === 'function' ? row.querySelector('.dcc-party-member-checkbox') : null);
+                  const isChecked = typeof checkbox?.is === 'function'
+                    ? checkbox.is(':checked')
+                    : (typeof checkbox?.prop === 'function' ? checkbox.prop('checked') : Boolean(checkbox?.checked));
+
+                  if (actorId && isChecked) checkedActorIds.push(actorId);
+                });
+              }
+
+              // Update the party attribute on all checked crawlers
+              await DCCSessionEngine.assignPartyToCrawlers(partyName, checkedActorIds);
+
+              // Set as the active party roster for this session
+              await DCCSessionEngine.selectPartyForSession(sId, partyName);
+
+              this.filterParty = partyName;
+              this.trackedOnly = true;
+              this.render(false);
+
+              if (typeof ui !== 'undefined' && ui.notifications?.info) {
+                ui.notifications.info(`DCC RPG | Created party "${partyName}" with ${checkedActorIds.length} members and set as active session roster!`);
+              }
+
+              resolve({ partyName, memberIds: checkedActorIds });
+            }
+          },
+          cancel: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'Cancel',
+            callback: () => resolve(null)
+          }
+        },
+        default: 'save'
+      }, {
+        width: 560,
+        classes: ['dcc-create-party-dialog-window']
+      });
+
+      // Bulk select listeners
+      const origActivate = dlg.activateListeners?.bind(dlg);
+      dlg.activateListeners = (html) => {
+        if (origActivate) origActivate(html);
+        const root = (html && typeof html.find === 'function') ? html : ((typeof $ !== 'undefined') ? $(html) : html);
+        if (root?.find) {
+          root.find('.dcc-btn-party-select-all').click(() => {
+            root.find('.dcc-party-member-checkbox').prop('checked', true);
+          });
+          root.find('.dcc-btn-party-deselect-all').click(() => {
+            root.find('.dcc-party-member-checkbox').prop('checked', false);
           });
         }
       };
@@ -2043,10 +2311,30 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       this.render(false);
     });
 
-    // Party Overview: Filter by Party
-    html.find('#dcc-filter-party, #dcc-filter-party-ledger').change(ev => {
+    // Party Overview: Filter / Select Party (selects party members and unselects all others)
+    html.find('#dcc-filter-party').change(async ev => {
+      ev.preventDefault();
+      const selectedParty = ev.target.value;
+      await this.selectParty(selectedParty);
+      if (typeof ui !== 'undefined' && ui.notifications?.info) {
+        if (selectedParty && selectedParty !== 'all') {
+          ui.notifications.info(`DCC RPG | Selected party "${selectedParty}". Active session roster updated to member crawlers.`);
+        } else {
+          ui.notifications.info(`DCC RPG | Selected all parties. Active session roster updated.`);
+        }
+      }
+    });
+
+    // Ledger tab Party filter
+    html.find('#dcc-filter-party-ledger').change(ev => {
       this.filterParty = ev.target.value;
       this.render(false);
+    });
+
+    // Party Overview: Create / Define Named Party Button
+    html.find('.dcc-create-party-btn').click(async ev => {
+      ev.preventDefault();
+      await this.promptCreatePartyDialog();
     });
 
     // Party Overview: Tracked Only / All Crawlers Toggle

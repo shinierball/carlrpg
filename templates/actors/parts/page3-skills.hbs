@@ -16,15 +16,15 @@
     <table class="dcc-attacks-table dcc-skills-table">
       <thead>
         <tr>
-          <th style="width: 22%;">Skill Name</th>
-          <th style="width: 7%; text-align: center;" title="Base Trained Rank">Base</th>
-          <th style="width: 14%; text-align: center;" title="Bonuses from equipped gear, generic weapon groups, and boons">Item / Group / Boon</th>
-          <th style="width: 8%; text-align: center;" title="Calculated rank after boons, items, and weapon group bonuses">Mod Rank</th>
-          <th style="width: 11%;">Stat & Mod</th>
-          <th style="width: 9%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
-          <th style="width: 11%;">Check Type</th>
-          <th style="width: 10%;">Notes & Upgrades</th>
-          <th style="width: 8%; text-align: center;">Roll</th>
+          <th style="width: 21%;">Skill Name</th>
+          <th style="width: 6%; text-align: center;" title="Base Trained Rank">Base</th>
+          <th style="width: 13%; text-align: center;" title="Bonuses from equipped gear, generic weapon groups, and boons">Item / Group / Boon</th>
+          <th style="width: 7%; text-align: center;" title="Calculated rank after boons, items, and weapon group bonuses">Mod Rank</th>
+          <th style="width: 10%;">Stat & Mod</th>
+          <th style="width: 8%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
+          <th style="width: 10%;">Check Type</th>
+          <th style="width: 11%;">Notes & Upgrades</th>
+          <th style="width: 14%; text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -116,24 +116,28 @@
               {{/if}}
             </td>
             <td style="text-align: center; white-space: nowrap;">
-              {{#if skill.isAttack}}
-                <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Attack (To Hit): 1d20 + Rank {{skill.modifiedRank}} + {{skill.statModStr}} vs Target Evade" style="font-size: 10px; padding: 2px 6px;">
-                  <i class="fa-solid fa-dice-d20"></i>
-                </button>
-              {{else}}
-                <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check: 1d20 + Total ({{skill.totalSkillStr}}) | Modified Rank: {{skill.modifiedRank}}" style="font-size: 10px; padding: 2px 6px;">
-                  <i class="fa-solid fa-dice-d20"></i>
-                </button>
-              {{/if}}
-              {{#if skill.hasDamage}}
-                <button type="button" class="dcc-attack-roll-btn roll-skill-dmg" data-tooltip="Roll Attack Damage: {{skill.damageFormulaWithStat}}" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff; margin-left: 2px;">
-                  <i class="fa-solid fa-burst"></i>
-                </button>
-              {{/if}}
-              {{#unless skill.isGranted}}
-                <a class="item-edit" data-tooltip="Edit Skill" style="margin-left: 3px; font-size: 11px;"><i class="fa-solid fa-edit"></i></a>
-                <a class="item-delete" data-tooltip="Delete Skill" style="margin-left: 3px; font-size: 11px;"><i class="fa-solid fa-trash"></i></a>
-              {{/unless}}
+              <div class="item-actions">
+                {{#if skill.isAttack}}
+                  <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Attack (To Hit): 1d20 + Rank {{skill.modifiedRank}} + {{skill.statModStr}} vs Target Evade" style="font-size: 10px; padding: 2px 6px;">
+                    <i class="fa-solid fa-dice-d20"></i>
+                  </button>
+                {{else}}
+                  <button type="button" class="dcc-attack-roll-btn roll-skill" data-tooltip="Roll Skill Check: 1d20 + Total ({{skill.totalSkillStr}}) | Modified Rank: {{skill.modifiedRank}}" style="font-size: 10px; padding: 2px 6px;">
+                    <i class="fa-solid fa-dice-d20"></i>
+                  </button>
+                {{/if}}
+                {{#if skill.hasDamage}}
+                  <button type="button" class="dcc-attack-roll-btn roll-skill-dmg" data-tooltip="Roll Attack Damage: {{skill.damageFormulaWithStat}}" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff;">
+                    <i class="fa-solid fa-burst"></i>
+                  </button>
+                {{/if}}
+                {{#if skill.isGranted}}
+                  <span class="dcc-stat-sublabel" style="font-size: 9px; color: #888;" title="Granted by gear ({{skill.itemSources}}). Unequip gear to remove.">GEAR</span>
+                {{else}}
+                  <a class="item-edit" data-item-id="{{skill.id}}" data-tooltip="Edit Skill" title="Edit Skill"><i class="fa-solid fa-edit"></i></a>
+                  <a class="item-delete" data-item-id="{{skill.id}}" data-tooltip="Delete Skill" title="Delete Skill"><i class="fa-solid fa-trash"></i></a>
+                {{/if}}
+              </div>
             </td>
           </tr>
         {{else}}

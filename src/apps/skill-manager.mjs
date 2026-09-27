@@ -192,8 +192,8 @@ export class DCCSkillManager extends DCCBaseApplication {
       }
 
       // Text search query
-      if (this.searchQuery) {
-        const q = this.searchQuery;
+      const q = (this.searchQuery || '').toLowerCase().trim();
+      if (q) {
         const nameMatch = s.name.toLowerCase().includes(q);
         const statMatch = (s.system.stat || '').toLowerCase().includes(q);
         const notesMatch = (s.system.notes || '').toLowerCase().includes(q);
@@ -210,7 +210,7 @@ export class DCCSkillManager extends DCCBaseApplication {
       counts,
       activeCategory: this.activeCategory,
       activeStat: this.activeStat,
-      searchQuery: this.searchQuery,
+      searchQuery: this.rawSearchQuery !== undefined ? this.rawSearchQuery : this.searchQuery,
       isPicker: Boolean(this.actor || this.item || this.onSelect),
       isActorPicker: Boolean(this.actor),
       isItemPicker: Boolean(this.item),
@@ -321,9 +321,23 @@ export class DCCSkillManager extends DCCBaseApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
-    // Search input
+    // Search input with focus and cursor preservation
     html.find('.dcc-sm-search').on('input', ev => {
-      this.searchQuery = $(ev.currentTarget).val().toLowerCase().trim();
+      this._saveFocusState(ev.currentTarget);
+      const val = ev.currentTarget?.value !== undefined
+        ? ev.currentTarget.value
+        : (typeof $(ev.currentTarget).val === 'function' ? $(ev.currentTarget).val() : '');
+      this.rawSearchQuery = val;
+      this.searchQuery = String(val).toLowerCase().trim();
+      this.render(false);
+    });
+
+    // Clear search
+    html.find('.dcc-sm-search-clear').click(ev => {
+      ev.preventDefault();
+      this.rawSearchQuery = '';
+      this.searchQuery = '';
+      this._savedFocus = { selector: '.dcc-sm-search', selectionStart: 0, selectionEnd: 0 };
       this.render(false);
     });
 

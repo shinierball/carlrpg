@@ -133,6 +133,101 @@ export class DCCActor extends Actor {
   }
 
   /** @override */
+  async _preUpdate(changes, options, user) {
+    if (typeof super._preUpdate === 'function') {
+      await super._preUpdate(changes, options, user);
+    }
+    this._preventDuplicateExternalBuffs(changes);
+  }
+
+  /**
+   * Enforces that the same buff cannot be assigned to different external buff slots.
+   * If a slot is updated to a buff that is already assigned elsewhere on this actor,
+   * the other slot is cleared.
+   * @param {object} changes
+   */
+  _preventDuplicateExternalBuffs(changes) {
+    if (!changes || typeof changes !== 'object') return;
+
+    const slots = ['buff1', 'buff2', 'buff3'];
+    const incoming = {};
+
+    // Check dot notation
+    for (const s of slots) {
+      const key = `system.attributes.externalBuffs.${s}`;
+      if (key in changes) {
+        incoming[s] = changes[key];
+      }
+    }
+
+    // Check nested notation
+    const nestedBuffs = changes.system?.attributes?.externalBuffs;
+    if (nestedBuffs && typeof nestedBuffs === 'object') {
+      for (const s of slots) {
+        if (s in nestedBuffs) {
+          incoming[s] = nestedBuffs[s];
+        }
+      }
+    }
+
+    if (Object.keys(incoming).length === 0) return;
+
+    const resolveBuff = (val) => {
+      if (!val) return null;
+      const strVal = String(val).trim().toLowerCase();
+      const item = (this.items?.get ? this.items.get(val) : null) ||
+        (Array.isArray(this.items) ? this.items.find(i => String(i.id).toLowerCase() === strVal || String(i.name).trim().toLowerCase() === strVal) : null);
+      return {
+        id: (item?.id ? String(item.id).toLowerCase() : strVal),
+        name: (item?.name ? String(item.name).trim().toLowerCase() : strVal)
+      };
+    };
+
+    const isSameBuff = (b1, b2) => {
+      if (!b1 || !b2) return false;
+      return b1.id === b2.id || b1.name === b2.name || b1.id === b2.name || b1.name === b2.id;
+    };
+
+    for (const [targetSlot, targetVal] of Object.entries(incoming)) {
+      if (!targetVal) continue;
+      const targetBuff = resolveBuff(targetVal);
+      if (!targetBuff) continue;
+
+      for (const otherSlot of slots) {
+        if (otherSlot === targetSlot) continue;
+
+        let otherVal = null;
+        if (otherSlot in incoming) {
+          otherVal = incoming[otherSlot];
+        } else {
+          otherVal = this.system?.attributes?.externalBuffs?.[otherSlot];
+        }
+
+        if (otherVal) {
+          const otherBuff = resolveBuff(otherVal);
+          if (isSameBuff(targetBuff, otherBuff)) {
+            changes[`system.attributes.externalBuffs.${otherSlot}`] = '';
+            if (nestedBuffs && typeof nestedBuffs === 'object') {
+              nestedBuffs[otherSlot] = '';
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Compatibility wrapper ensuring _preUpdate is invoked across environments
+   * @override
+   */
+  async update(data, options = {}) {
+    if (typeof this._preUpdate === 'function') {
+      await this._preUpdate(data, options, globalThis.game?.user?.id || 'test-user');
+    }
+    return super.update(data, options);
+  }
+
+  /** @override */
   prepareBaseData() {
     super.prepareBaseData();
     if (typeof this.system?.prepareBaseData === 'function') {
@@ -676,6 +771,95 @@ export class DCCActor extends Actor {
    */
   getCurrentFloor() {
     return DCCActor.getCurrentFloor();
+  }
+
+  /**
+   * Automatic CON Stat Check vs Fatal Debuff Damage
+   * If a Debuff applies damage to a crawler that would drop them to 0% on their Health Bar,
+   * they make a Con Stat Check vs. Difficulty 10 + Floor at the end of the round.
+   * This Stat Check doesn't require an Action but occurs automatically before fatal damage.
+   * On a Success, the Debuff ends, and the crawler avoids the damage.
+   *
+   * @param {Item|object} debuff
+   * @param {number} damageVal
+   * @param {object} [options={}]
+   * @returns {Promise<{ avoided: boolean, roll: Roll, dc: number, success: boolean }|null>}
+   */
+  async checkFatalDebuffProtection(debuff, damageVal, options = {}) {
+    if (this.type !== 'crawler') return null;
+
+    let currentFloor = options.floor;
+    if (currentFloor === undefined || currentFloor === null) {
+      currentFloor = typeof DCCActor.getCurrentFloor === 'function' ? DCCActor.getCurrentFloor() : 1;
+    }
+    currentFloor = Number(currentFloor) || 1;
+
+    const dc = 10 + currentFloor;
+    const conVal = this.system?.abilities?.con?.value ?? 10;
+    const conMod = this.system?.abilities?.con?.mod ?? getDCCStatModifier(conVal);
+    const roll = await new Roll(`1d20 + ${conMod}`, { mod: conMod }).evaluate();
+    const success = roll.total >= dc;
+
+    if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      DCCSessionEngine.recordRoll({
+        actor: this,
+        roll,
+        type: 'stat',
+        name: `CON Check vs Fatal ${debuff?.name || 'Debuff'}`,
+        isUntrained: false,
+        dc
+      }).catch(() => {});
+    }
+
+    if (success) {
+      if (typeof debuff?.delete === 'function') {
+        try { await debuff.delete(); } catch (_) {}
+      }
+      if (typeof this.deleteEmbeddedDocuments === 'function' && debuff?.id) {
+        try { await this.deleteEmbeddedDocuments('Item', [debuff.id]); } catch (_) {}
+      }
+      if (Array.isArray(this.items) && debuff?.id) {
+        this.items = this.items.filter(i => i.id !== debuff.id && i._id !== debuff.id);
+      }
+    }
+
+    const cardContent = `
+      <div class="dcc-chat-card dcc-con-check-card" style="border: 2px solid ${success ? '#27ae60' : '#c0392b'}; border-radius: 4px; padding: 8px; background: #14141c; color: #fff; font-family: 'Oswald', sans-serif;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px;">
+          <span style="font-weight: bold; color: #f1c40f;"><i class="fa-solid fa-heart-pulse"></i> AUTOMATIC CON STAT CHECK</span>
+          <span style="font-size: 11px; background: #333; padding: 1px 6px; border-radius: 3px;">DC ${dc} (10 + Floor ${currentFloor})</span>
+        </div>
+        <div style="font-size: 13px; margin-bottom: 6px;">
+          <strong>${this.name}</strong> faces fatal damage from <strong>${debuff?.name || 'Debuff'}</strong>!
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; background: #222; padding: 6px; border-radius: 3px;">
+          <span style="font-size: 14px; color: #aaa;">CON Roll (1d20 + ${conMod}):</span>
+          <span style="font-size: 18px; font-weight: bold; color: ${success ? '#2ecc71' : '#e74c3c'};">${roll.total}</span>
+          <span style="margin-left: auto; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 3px; background: ${success ? '#27ae60' : '#c0392b'}; color: #fff;">
+            ${success ? 'SUCCESS' : 'FAILED'}
+          </span>
+        </div>
+        <div style="font-size: 12px; color: ${success ? '#2ecc71' : '#e74c3c'}; font-style: italic;">
+          ${success 
+            ? `On a Success, ${debuff?.name || 'the Debuff'} ends, and ${this.name} avoids the damage!` 
+            : `The check failed. Fatal damage is applied.`}
+        </div>
+      </div>
+    `;
+
+    if (typeof ChatMessage !== 'undefined' && typeof ChatMessage.create === 'function') {
+      await ChatMessage.create({
+        speaker: (typeof ChatMessage.getSpeaker === 'function') ? ChatMessage.getSpeaker({ actor: this }) : { alias: this.name },
+        content: cardContent
+      });
+    }
+
+    return {
+      avoided: success,
+      roll,
+      dc,
+      success
+    };
   }
 
   /**

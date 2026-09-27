@@ -577,6 +577,17 @@ Hooks.on('getApplicationHeaderButtons', (app, buttons) => {
   }
 });
 
+// Automatically trigger end-of-round debuff damage and buff healing on combatRound hook
+Hooks.on('combatRound', async (combat, updateData, updateOptions) => {
+  if (globalThis.game?.user && !globalThis.game.user.isGM) return;
+  if (typeof combat?.triggerRoundEndEffects === 'function') {
+    const prevRound = (combat.round || 1) - 1;
+    if (prevRound >= 1) {
+      await combat.triggerRoundEndEffects(prevRound);
+    }
+  }
+});
+
 // Hook into Combat Tracker sidebar to inject CarlRPG Action Tracker & AI Awards, and remove initiative rolling
 Hooks.on('renderCombatTracker', (app, html, data) => {
   const $html = $(html ?? app?.element);

@@ -537,7 +537,388 @@ export class DCCCombat extends BaseCombat {
   }
 
   /**
+   * Helper to parse and evaluate damage or healing effect expressions.
+   * Supports:
+   * - Flat numbers: 5, "4"
+   * - Bars: "1 bar", "2 bars" (1 bar = hpPerBar)
+   * - Floor variable: "1d10+F", "1d8+F" (F replaced with current floor)
+   * - Dice expressions: "1d6", "2d4+2" (evaluated via Foundry Roll or fallback math)
+   * @param {string|number} expr
+   * @param {object} [options={}]
+   * @param {Actor} [options.actor=null]
+   * @param {number} [options.floor=1]
+   * @returns {Promise<number>}
+   */
+  static async evaluateEffectFormula(expr, { actor = null, floor = 1 } = {}) {
+    if (!expr && expr !== 0) return 0;
+    if (typeof expr === 'number') return Math.max(0, Math.floor(expr));
+
+    const str = String(expr).trim();
+    if (!str) return 0;
+
+    // Check for "X bar" or "X bars"
+    const barMatch = str.match(/^(\d+)\s*bars?$/i);
+    if (barMatch) {
+      const bars = parseInt(barMatch[1], 10) || 0;
+      let hpPerBar = 4;
+      if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.getHpPerBar === 'function' && actor) {
+        hpPerBar = DCCCombatMetrics.getHpPerBar(actor);
+      } else if (actor?.system?.attributes?.hp?.hpPerBar) {
+        hpPerBar = Number(actor.system.attributes.hp.hpPerBar) || 4;
+      } else if (actor?.getDCCStatModifier && actor?.system?.abilities?.con?.value !== undefined) {
+        hpPerBar = Math.max(1, actor.getDCCStatModifier(actor.system.abilities.con.value));
+      }
+      return bars * hpPerBar;
+    }
+
+    // Replace F (Floor) variable: e.g. 1d10+F or 1d8+F
+    const fVal = Number(floor) || 1;
+    const sanitized = str.replace(/\bF\b/gi, String(fVal));
+
+    // If pure number:
+    if (!isNaN(Number(sanitized))) {
+      return Math.max(0, Math.floor(Number(sanitized)));
+    }
+
+    // Dice expression (e.g. 1d6, 1d8+1, 2d4):
+    try {
+      if (typeof Roll !== 'undefined') {
+        const r = new Roll(sanitized);
+        if (typeof r.evaluate === 'function') {
+          const evalRes = r.evaluate({ async: false });
+          if (evalRes && typeof evalRes.then === 'function') {
+            const resolved = await evalRes;
+            return Math.max(0, Math.floor(resolved.total || 0));
+          }
+          return Math.max(0, Math.floor(evalRes.total || 0));
+        }
+      }
+    } catch (err) {
+      console.warn('DCC RPG | Could not evaluate effect roll formula:', sanitized, err);
+    }
+
+    // Fallback simple dice parsing (e.g. in test harness if Roll is minimal)
+    const diceMatch = sanitized.match(/^(\d*)d(\d+)(?:\s*([+-])\s*(\d+))?$/i);
+    if (diceMatch) {
+      const count = parseInt(diceMatch[1], 10) || 1;
+      const sides = parseInt(diceMatch[2], 10);
+      const sign = diceMatch[3] === '-' ? -1 : 1;
+      const mod = parseInt(diceMatch[4], 10) || 0;
+      let total = 0;
+      for (let i = 0; i < count; i++) {
+        total += Math.floor(Math.random() * sides) + 1;
+      }
+      total += (sign * mod);
+      return Math.max(0, total);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Post an authentic DCC end-of-round chat card summarizing all debuff damage and buff healing.
+   * @param {Array<object>} results
+   * @param {number} round
+   * @param {Combat} combat
+   */
+  static async postRoundEndEffectsChatCard(results, round, combat) {
+    if (!globalThis.ChatMessage?.create || !results?.length) return;
+
+    const rows = results.map(res => {
+      if (res.type === 'debuff') {
+        if (res.conCheck?.success) {
+          return `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #eafaf1; border-left: 3px solid #27ae60; margin-bottom: 3px; font-size: 11px;">
+              <div>
+                <span style="color: #27ae60; font-weight: bold;"><i class="fa-solid fa-shield-heart"></i> ${res.itemName}</span>
+                <span style="color: #222;"> &rarr; <strong>${res.actorName}</strong></span>
+                <span style="color: #27ae60; font-size: 10px;"> (CON Check ${res.conCheck.total} vs DC ${res.conCheck.dc}: SUCCESS)</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="color: #27ae60; font-weight: bold; font-size: 11px;">DAMAGE AVOIDED (${res.itemName} Ended!)</span>
+                <span style="color: #888; font-size: 10px;"> (${res.hpAfter} HP)</span>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #fff5f5; border-left: 3px solid #c0392b; margin-bottom: 3px; font-size: 11px;">
+            <div>
+              <span style="color: #c0392b; font-weight: bold;"><i class="fa-solid fa-skull"></i> ${res.itemName}</span>
+              <span style="color: #666; font-size: 10px;"> (${res.damageType || 'Physical'})</span>
+              <span style="color: #222;"> &rarr; <strong>${res.actorName}</strong></span>
+              ${res.conCheck && !res.conCheck.success ? `<span style="color: #c0392b; font-size: 10px;"> (CON Check ${res.conCheck.total} vs DC ${res.conCheck.dc}: FAILED)</span>` : ''}
+            </div>
+            <div style="text-align: right;">
+              <span style="color: #c0392b; font-weight: bold; font-size: 12px;">-${res.actualDamage} HP</span>
+              <span style="color: #888; font-size: 10px;"> (${res.hpAfter} HP)</span>
+            </div>
+          </div>
+        `;
+      } else {
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; background: #f4fbf7; border-left: 3px solid #27ae60; margin-bottom: 3px; font-size: 11px;">
+            <div>
+              <span style="color: #27ae60; font-weight: bold;"><i class="fa-solid fa-sparkles"></i> ${res.itemName}</span>
+              <span style="color: #222;"> &rarr; <strong>${res.actorName}</strong></span>
+            </div>
+            <div style="text-align: right;">
+              <span style="color: #27ae60; font-weight: bold; font-size: 12px;">+${res.actualHealed} HP</span>
+              <span style="color: #888; font-size: 10px;"> (${res.hpAfter}/${res.maxHp} HP)</span>
+            </div>
+          </div>
+        `;
+      }
+    }).join('');
+
+    const content = `
+      <div class="dcc-chat-card dcc-round-end-card" style="border: 2px solid #2c3e50; border-radius: 4px; overflow: hidden; font-family: 'Oswald', sans-serif;">
+        <div style="background: #2c3e50; color: #fff; padding: 6px 10px; font-weight: bold; font-size: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-hourglass-end"></i> End of Round ${round} Effects</span>
+          <span style="font-size: 10px; opacity: 0.85;">${results.length} Triggered</span>
+        </div>
+        <div style="padding: 6px 8px; background: #ffffff;">
+          ${rows}
+        </div>
+      </div>
+    `;
+
+    return globalThis.ChatMessage.create({
+      content,
+      speaker: { alias: 'Combat Tracker' }
+    });
+  }
+
+  /**
+   * Automatically trigger all debuffs that cause damage and all buffs that cause healing
+   * across all combatants at the end of a combat round.
+   * @param {number} [round=this.round]
+   * @returns {Promise<Array<object>>} List of applied effects
+   */
+  async triggerRoundEndEffects(round = this.round) {
+    const r = Number(round) || 1;
+    this._triggeredRoundEndEffects = this._triggeredRoundEndEffects || new Set();
+    const roundKey = `${this.id || 'active'}-round-${r}`;
+    if (this._triggeredRoundEndEffects.has(roundKey)) {
+      return [];
+    }
+    this._triggeredRoundEndEffects.add(roundKey);
+
+    let currentFloor = 1;
+    if (typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function') {
+      currentFloor = DCCActor.getCurrentFloor();
+    } else if (globalThis.CONFIG?.DCC?.getCurrentFloor) {
+      currentFloor = globalThis.CONFIG.DCC.getCurrentFloor();
+    } else if (globalThis.game?.settings?.get) {
+      currentFloor = Number(globalThis.game.settings.get('carl-rpg', 'currentFloor')) || 1;
+    }
+
+    const results = [];
+    const combatantsList = Array.from(this.combatants || []);
+
+    for (const c of combatantsList) {
+      const actor = c.actor || (globalThis.game?.actors?.get ? globalThis.game.actors.get(c.actorId) : null);
+      if (!actor) continue;
+
+      // 1. Trigger Debuffs that cause damage
+      const debuffs = (actor.items || []).filter(i => i.type === 'debuff');
+      for (const debuff of debuffs) {
+        const dmgExpr = debuff.system?.damagePerRound;
+        if (!dmgExpr || (typeof dmgExpr === 'string' && !dmgExpr.trim())) continue;
+
+        const damageVal = await DCCCombat.evaluateEffectFormula(dmgExpr, { actor, floor: currentFloor });
+        if (damageVal > 0) {
+          const damageType = debuff.system?.damageType || 'Physical';
+          const hpBefore = Number(actor.system?.attributes?.hp?.value ?? 0);
+          const tempHp = Number(actor.system?.attributes?.hp?.temp ?? 0);
+
+          // Calculate penetrating damage and whether it would drop crawler to 0% on Health Bar
+          let adjustedDamage = damageVal;
+          if (typeof actor.getDamageReduction === 'function') {
+            const red = actor.getDamageReduction(damageType);
+            if (red.isImmune) {
+              adjustedDamage = 0;
+            } else {
+              if (red.percent > 0) {
+                const reduction = red.rounding === 'up'
+                  ? Math.ceil(adjustedDamage * red.percent)
+                  : Math.floor(adjustedDamage * red.percent);
+                adjustedDamage = Math.max(0, adjustedDamage - reduction);
+              }
+              if (red.flat > 0) {
+                adjustedDamage = Math.max(0, adjustedDamage - red.flat);
+              }
+            }
+          } else if (typeof actor.hasImmunity === 'function' && actor.hasImmunity(damageType)) {
+            adjustedDamage = 0;
+          } else if (typeof actor.hasResistance === 'function' && actor.hasResistance(damageType)) {
+            adjustedDamage = Math.floor(adjustedDamage / 2);
+          }
+
+          const damageAfterTemp = Math.max(0, adjustedDamage - tempHp);
+          let hpPerBar = 4;
+          if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.getHpPerBar === 'function') {
+            hpPerBar = DCCCombatMetrics.getHpPerBar(actor);
+          } else if (actor.system?.attributes?.hp?.hpPerBar) {
+            hpPerBar = Number(actor.system.attributes.hp.hpPerBar) || 4;
+          } else if (actor.getDCCStatModifier && actor.system?.abilities?.con?.value !== undefined) {
+            hpPerBar = Math.max(1, actor.getDCCStatModifier(actor.system.abilities.con.value));
+          }
+
+          const barsRemoved = Math.floor(damageAfterTemp / hpPerBar);
+          const damageToHp = barsRemoved * hpPerBar;
+          const wouldDropToZero = (hpBefore - damageToHp) <= 0;
+
+          let conCheckRes = null;
+          if (actor.type === 'crawler' && wouldDropToZero && damageToHp > 0 && typeof actor.checkFatalDebuffProtection === 'function') {
+            conCheckRes = await actor.checkFatalDebuffProtection(debuff, damageVal, { floor: currentFloor });
+            if (conCheckRes?.avoided) {
+              results.push({
+                type: 'debuff',
+                combatantId: c.id,
+                combatantName: c.name,
+                actorId: actor.id,
+                actorName: actor.name,
+                itemName: debuff.name,
+                itemId: debuff.id,
+                damageType,
+                formula: dmgExpr,
+                rolledValue: damageVal,
+                actualDamage: 0,
+                avoidedDamage: damageVal,
+                hpBefore,
+                hpAfter: hpBefore,
+                conCheck: {
+                  total: conCheckRes.roll?.total,
+                  dc: conCheckRes.dc,
+                  success: true
+                },
+                debuffEnded: true,
+                round: r
+              });
+              continue;
+            }
+          }
+
+          let applyRes = null;
+          if (typeof actor.applyDamage === 'function') {
+            applyRes = await actor.applyDamage(damageVal, {
+              damageType,
+              attackName: debuff.name || 'Debuff Damage',
+              attackType: 'Condition',
+              ignoreDR: true,
+              combat: this
+            });
+          } else if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.applyDamageToTarget === 'function') {
+            applyRes = await DCCCombatMetrics.applyDamageToTarget({
+              targetActor: actor,
+              rawDamage: damageVal,
+              damageType,
+              attackerActor: null,
+              attackName: debuff.name || 'Debuff Damage',
+              attackType: 'Condition',
+              ignoreDR: true,
+              combat: this
+            });
+          }
+
+          const hpAfter = Number(actor.system?.attributes?.hp?.value ?? 0);
+          const actualDamage = applyRes?.actualDamage ?? Math.max(0, hpBefore - hpAfter);
+
+          results.push({
+            type: 'debuff',
+            combatantId: c.id,
+            combatantName: c.name,
+            actorId: actor.id,
+            actorName: actor.name,
+            itemName: debuff.name,
+            itemId: debuff.id,
+            damageType,
+            formula: dmgExpr,
+            rolledValue: damageVal,
+            actualDamage,
+            hpBefore,
+            hpAfter,
+            round: r
+          });
+        }
+      }
+
+      // 2. Trigger Buffs that cause healing
+      const allBuffs = [];
+      const seenBuffIds = new Set();
+      for (const item of (actor.items || [])) {
+        if (item.type === 'buff') {
+          allBuffs.push(item);
+          seenBuffIds.add(item.id);
+        }
+      }
+      if (typeof actor.getActiveBuffs === 'function') {
+        const activeExternal = actor.getActiveBuffs() || [];
+        for (const ext of activeExternal) {
+          if (ext && !seenBuffIds.has(ext.id)) {
+            allBuffs.push(ext);
+            seenBuffIds.add(ext.id);
+          }
+        }
+      }
+
+      for (const buff of allBuffs) {
+        const healExpr = buff.system?.healingPerRound ||
+          ((buff.system?.buffType === 'heal' || buff.system?.buffType === 'healing' || buff.system?.buffType === 'regeneration') ? buff.system?.value : null);
+        if (!healExpr || (typeof healExpr === 'string' && !healExpr.trim())) continue;
+
+        const healVal = await DCCCombat.evaluateEffectFormula(healExpr, { actor, floor: currentFloor });
+        if (healVal > 0) {
+          let hpPerBar = 4;
+          if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.getHpPerBar === 'function') {
+            hpPerBar = DCCCombatMetrics.getHpPerBar(actor);
+          } else if (actor.system?.attributes?.hp?.hpPerBar) {
+            hpPerBar = Number(actor.system.attributes.hp.hpPerBar) || 4;
+          } else if (actor.getDCCStatModifier && actor.system?.abilities?.con?.value !== undefined) {
+            hpPerBar = Math.max(1, actor.getDCCStatModifier(actor.system.abilities.con.value));
+          }
+
+          const hpBefore = Number(actor.system?.attributes?.hp?.value ?? actor.system?.attributes?.hp?.max ?? 0);
+          const maxHp = Number(actor.system?.attributes?.hp?.max) || (10 * hpPerBar);
+          const newHp = Math.min(maxHp, hpBefore + healVal);
+          const actualHealed = Math.max(0, newHp - hpBefore);
+
+          if (actualHealed > 0 || healVal > 0) {
+            await actor.update({ 'system.attributes.hp.value': newHp });
+          }
+
+          results.push({
+            type: 'buff',
+            combatantId: c.id,
+            combatantName: c.name,
+            actorId: actor.id,
+            actorName: actor.name,
+            itemName: buff.name,
+            itemId: buff.id,
+            formula: healExpr,
+            rolledValue: healVal,
+            actualHealed,
+            hpBefore,
+            hpAfter: newHp,
+            maxHp,
+            round: r
+          });
+        }
+      }
+    }
+
+    // 3. Post Chat Card if any effects triggered
+    if (results.length > 0) {
+      await DCCCombat.postRoundEndEffectsChatCard(results, r, this);
+    }
+
+    return results;
+  }
+
+  /**
    * Advance to the next round of combat.
+   * - Triggers all debuffs that cause damage and all buffs that cause healing at the end of the round.
    * - Snapshots outgoing round action states into roundHistory.
    * - Resets actions for all combatants.
    * - Surprise round automatically expires after the ambush round.
@@ -545,6 +926,9 @@ export class DCCCombat extends BaseCombat {
    */
   async nextRound() {
     const currentRound = this.round || 1;
+    if (currentRound >= 1) {
+      await this.triggerRoundEndEffects(currentRound);
+    }
     await this.snapshotRoundActions(currentRound);
     await this.resetRoundActions();
 
@@ -553,7 +937,9 @@ export class DCCCombat extends BaseCombat {
       await this.setFlag('carl-rpg', 'isSurpriseRound', false);
     }
 
-    await super.nextRound();
+    if (typeof super.nextRound === 'function') {
+      await super.nextRound();
+    }
     await this.assignPhaseInitiative();
     return this;
   }

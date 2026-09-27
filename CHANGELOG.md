@@ -1,3 +1,120 @@
+## 2.0.46
+
+### Buff Slot Deduplication & Automatic Fatal Debuff CON Stat Check
+
+- **Strict Buff Slot Deduplication**:
+  - A buff can no longer be assigned to multiple external buff slots simultaneously.
+  - Implemented `_preventDuplicateExternalBuffs(changes)` on `DCCActor` (`src/documents/actor.mjs`). Whenever an external buff slot is updated to a buff already assigned in another slot, the previous slot is automatically cleared.
+  - In `DCCCrawlerSheet._prepareContext` (`src/sheets/crawler-sheet.mjs`), dropdown options for external buff slots now disable buffs that are already assigned to other slots, appending `(Assigned in Slot X)` in the option label.
+  - Quick-assign buttons (`1`, `2`, `3`) on Tab 4 smoothly reassign the buff to the targeted slot while clearing any prior slot.
+- **Automatic CON Stat Check Before Fatal Debuff Damage**:
+  - Implemented automatic survival checks for crawlers facing lethal end-of-round debuff damage.
+  - If a debuff's round-end damage would drop a crawler to 0% on their Health Bar, an automatic **CON Stat Check vs. Difficulty 10 + Floor** (`1d20 + CON Mod`) executes immediately before fatal damage is applied. This check does not consume an action.
+  - **On Success**: The debuff immediately ends (removed from the crawler), the crawler completely avoids the damage (preserving their health bars), and an automatic chat notification is generated.
+  - **On Failure**: The fatal damage is applied normally, dropping the crawler.
+  - Added `actor.checkFatalDebuffProtection(debuff, damageVal, options)` to `DCCActor` and integrated it into `DCCCombat.prototype.triggerRoundEndEffects`.
+- **Verification**:
+  - Extended `tests/buff-slot-assignment.test.mjs` with test cases verifying deduplication across slots, disabled select options, automatic CON Stat Check trigger at 10 + Floor DC, avoided damage and debuff deletion on success, and damage application on failure.
+  - All 564 tests pass across 91 suites with 0 failures (`node --test tests/*.test.mjs`).
+
+## 2.0.45
+
+### UI Contrast: High-Contrast Search Bar Font & Placeholder Styling
+
+- **High-Contrast Font Color for Search Bars**:
+  - Resolved poor font readability on white search bar backgrounds across applications.
+  - In `styles/dcc.css`, explicitly configured `.dcc-sm-search` (Skill Library & Manager), `.spell-search-input` (Spell Library & Compendium), `.condition-search-input` (Buff & Condition Library), and `.dcc-picker-search` (Conditions Compendium Browser) with high-contrast text color (`#111111`, `#000000` on focus) against the white background (`#ffffff`).
+  - Added explicit contrast styling for input placeholders (`::placeholder { color: #555555; opacity: 1; }`) ensuring placeholder prompt text is clearly legible without blending into the white field background.
+  - Increased contrast on search icons (`.dcc-sm-search-icon` to `#333333`) and clear buttons (`.dcc-sm-search-clear`, `.spell-search-clear`, `.condition-search-clear` to `#555555` with red hover `#c0392b`).
+- **Verification**:
+  - Expanded `tests/search-box-focus.test.mjs` with automated assertions verifying high-contrast colors, placeholder styling, and template attributes across all search managers.
+  - All 563 tests pass across 91 suites with 0 failures (`node --test tests/*.test.mjs`).
+
+## 2.0.44
+
+### Character Sheet: Green Slot Number Indicators for Assigned Buffs & Active Effects
+
+- **Green Slot Number Assignment Indicator in Character Buffs & Active Effects**:
+  - In Tab 4 (Conditions & Effects) under the `CHARACTER BUFFS & ACTIVE EFFECTS` table, quick-assignment buttons for slots `1`, `2`, and `3` now display as vibrant green (`.is-assigned`, `#27ae60`) whenever that buff or active effect is assigned to the respective slot.
+  - On Page 1 (Core) in the `EXTERNAL BUFFS (MAX 3)` / `Active Effects` panel, the slot number label (`.dcc-buff-num`) is highlighted in vivid green when that buff slot is active (`.dcc-buff-slot-entry.is-active`).
+- **Toggle Slot Assignment**:
+  - Clicking an already assigned slot button in the Buffs & Active Effects table unassigns the buff from that slot (toggles off), clearing the slot and removing the green indicator.
+- **Context & State Preparation**:
+  - `DCCCrawlerSheet._prepareContext` dynamically checks each buff against actor external buff slots (`buff1`, `buff2`, `buff3`) by ID or resolved name, decorating each buff with `isSlot1`, `isSlot2`, `isSlot3`, and `isAssignedToAnySlot` boolean flags.
+- **Verification**:
+  - Added test suite `tests/buff-slot-assignment.test.mjs` validating context matching, template class application, CSS green styling, and toggle assignment/unassignment.
+  - All 561 tests pass across 90 suites with 0 failures (`node --test tests/*.test.mjs`).
+
+## 2.0.43
+
+### UI & Search Subsystem: Focus & Cursor Retention Across Re-Renders
+
+- **Application Focus & Cursor Preservation**:
+  - Implemented `_saveFocusState()` and `_restoreFocusState()` in `DCCBaseApplication` (`src/apps/base-application.mjs`) and `DCCCrawlerSheet` (`src/sheets/crawler-sheet.mjs`).
+  - Automatically captures the focused input/textarea selector, cursor positions (`selectionStart`, `selectionEnd`), and value prior to re-render, and restores focus and exact cursor placement immediately upon DOM replacement and listener activation.
+- **Search Boxes No Longer Lose Focus When Typing**:
+  - Resolved focus loss in `DCCSkillManager` (`.dcc-sm-search`), `DCCSpellManager` (`.spell-search-input`), and `DCCBuffDebuffManager` (`.condition-search-input`) where typing individual characters triggered a re-render and dropped focus to the window.
+  - Users can now type continuously without interruption or having to re-click the search input.
+- **Space & Case Preservation During Live Filtering**:
+  - Saved raw user input strings in `rawSearchQuery` to prevent trailing spaces from being swallowed or capitalization altered while typing in search boxes, while preserving trimmed, lowercase matching for filter lookups.
+- **UI Ergonomics & Quick-Clear Enhancements**:
+  - Added dedicated clear-search button (`.dcc-sm-search-clear`) to `skill-manager.hbs` and adjusted input padding in `styles/dcc.css` to accommodate the clear icon.
+  - Added `autofocus` attribute to spell and condition search inputs so dialogs are ready for immediate keyboard typing upon opening.
+- **Verification**:
+  - Created automated test suite `tests/search-box-focus.test.mjs` verifying selector capture, cursor retention, raw space preservation, mid-string typing placement, and clear refocusing.
+  - All 554 tests pass with 0 failures across 90 test suites (`node --test tests/*.test.mjs`).
+
+## 2.0.42
+
+### Combat Subsystem: Automated End-of-Round Debuff Damage & Buff Healing
+
+- **End-of-Round Automated Effects Trigger**:
+  - `DCCCombat.prototype.nextRound()` and the Foundry `combatRound` hook automatically evaluate and trigger all active debuffs causing damage and all active buffs causing healing across combatants at the end of each round.
+  - Implemented `DCCCombat.prototype.triggerRoundEndEffects(round)` with deduplication guards to ensure effects execute exactly once per completed combat round.
+  - Generates an authentic Dungeon AI combat recap chat card summarizing all applied damage (with health bar losses and remaining HP) and healing across combatants.
+- **Debuff Damage Per Round (`damagePerRound`)**:
+  - Extended the `debuff` schema (`template.json`) and item sheet (`templates/items/parts/debuff.hbs`) with a dedicated `system.damagePerRound` input field.
+  - Supports versatile expressions: flat values (`5`), dice expressions (`1d6`, `2d4`), health bar counts (`1 bar`), and floor-scaling variables (`1d10+F`, `1d8+F`) referencing the current dungeon floor.
+  - Updated canonical debuffs (`Burned`: `1d10+F` Fire, `Poisoned`: `1d8+F` Poison, `Blood Trail`: `1d6+F` Bleed, `Drowning`: `1d6+F` Suffocation).
+  - Damage resolution leverages `DCCCombatMetrics.applyDamageToTarget` with `ignoreDR: true` for internal DoTs while strictly honoring elemental resistances and immunities, as well as CarlRPG 10-bar health rules (excess damage within a bar does not spill over, only full bars removed).
+- **Buff Healing Per Round (`healingPerRound`)**:
+  - Extended the `buff` schema (`template.json`) and item sheet (`templates/items/parts/buff.hbs`) with `system.healingPerRound` and added `Healing / Regeneration` (`heal`) to `system.buffType`.
+  - Automatically restores health to the bearer at round end, respecting bar increments and strictly capping at `maxHp`.
+- **Crawler Sheet Visual Indicators**:
+  - Updated `crawler-sheet.mjs` item summary generation so debuff chips display active DoTs (e.g. `1d8+F Poison DoT/rnd`) and buff chips display active regeneration (e.g. `+1d4 HP/rnd`).
+- **Verification**:
+  - Created automated test suite `tests/combat-round-effects.test.mjs` verifying schema support, formula evaluation, debuff damage triggering, buff healing capping at max HP, multi-combatant resolution, and round deduplication.
+  - All 542 unit tests pass with 0 failures across 85 test suites (`node --test tests/*.test.mjs`).
+
+## 2.0.41
+
+### Skills & Spells Tab: Intuitive Deletion & Actions Column Polish
+
+- **Skills List Deletion & Actions Column**:
+  - Renamed the 9th column in the Skills table (`templates/actors/parts/page3-skills.hbs`) from `Roll` to `Actions`, and expanded its width to 14% with rebalanced column proportions to avoid horizontal overflow.
+  - Added explicit, prominent `.item-delete` trash button with `data-item-id="{{skill.id}}"`, `data-tooltip="Delete Skill"`, `title="Delete Skill"`, and high-contrast red styling (`#c0392b`).
+  - Added a descriptive `GEAR` badge with tooltip for gear-granted skills explaining they are derived from equipped items and can be removed by unequipping the corresponding item in Inventory.
+- **Spells List Deletion & Actions Column**:
+  - Rebalanced the column widths in the Spells table (`templates/actors/parts/spells.hbs`) to allocate a dedicated 18% width for the `Actions` column, preventing button wrapping or clipping.
+  - Wrapped spell actions inside `.item-actions` and enhanced the `.item-delete` button with direct `data-item-id="{{spell.id}}"`, `data-tooltip="Delete Spell"`, and `title="Delete Spell"`.
+- **Sheet Controller & Stylesheet Enhancements**:
+  - Updated `crawler-sheet.mjs` `.item-delete` and `.item-edit` click listeners to support direct `data-item-id` attribute resolution alongside jQuery data cache and ancestor traversal, with automatic sheet re-render (`this.render(false)`).
+  - Added unified `.item-actions`, `.item-delete`, and `.item-edit` styling rules in `styles/dcc.css` with hover scaling and color transitions.
+- **Verification**:
+  - Added unit tests in `tests/item-sorting-deletion.test.mjs` validating template Action headers, delete buttons, tooltips, and functional actor item deletion with reference cleanup across skills and spells.
+  - All 534 tests pass with 0 failures across 84 test suites.
+
+## 2.0.40
+
+### UI & Styling: Unified Attack Equip / Stow Icon
+
+- **Consistent Equip / Stow Action Icon**:
+  - Updated the equip / stow action button icon in the character sheet's Page 1 Attacks table from `fa-crosshairs` to `fa-shield-halved` (`<i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>`).
+  - Standardized the icon across both the active attacks row and the stowed attacks ready button to match the equipped gear toggle icon in Tab 2 (Equipment & Inventory).
+- **Verification**:
+  - Added unit test assertion in `tests/attack-equipment-integration.test.mjs` verifying the icon matches `fa-shield-halved`.
+  - All 531 tests pass with 0 failures across 84 test suites.
+
 ## 2.0.39
 
 ### Test Suite Audit & Cleanup: Removal of Obsolete & Negative Regression Assertions

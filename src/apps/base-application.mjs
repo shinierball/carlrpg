@@ -128,6 +128,104 @@ export class DCCBaseApplication extends ParentClass {
   }
 
   /**
+   * Save focus state and cursor selection for input/textarea elements.
+   * Can be passed an explicit element or defaults to document.activeElement inside this.element.
+   *
+   * @param {HTMLElement} [element=null]
+   * @returns {object|null}
+   */
+  _saveFocusState(element = null) {
+    try {
+      const active = element || (typeof document !== 'undefined' ? document.activeElement : null);
+      if (!active) return null;
+
+      const root = this.element?.[0] || (this.element instanceof (globalThis.HTMLElement || Object) ? this.element : null);
+      if (!element && root && typeof root.contains === 'function' && !root.contains(active)) {
+        return null;
+      }
+
+      let selector = '';
+      if (active.id) {
+        selector = `#${active.id}`;
+      } else if (typeof active.getAttribute === 'function' && active.getAttribute('name')) {
+        selector = `[name="${active.getAttribute('name')}"]`;
+      } else if (active.className && typeof active.className === 'string') {
+        const classes = active.className.split(/\s+/).filter(c => c && !c.includes(':') && !c.startsWith('focus') && !c.startsWith('hover'));
+        if (classes.length) {
+          selector = `${(active.tagName || 'input').toLowerCase()}.${classes.join('.')}`;
+        }
+      }
+      if (!selector && active.tagName) {
+        selector = active.tagName.toLowerCase();
+      }
+
+      const hasSelection = typeof active.selectionStart === 'number';
+      this._savedFocus = {
+        selector,
+        selectionStart: hasSelection ? active.selectionStart : null,
+        selectionEnd: hasSelection ? active.selectionEnd : null,
+        selectionDirection: hasSelection ? active.selectionDirection : 'none',
+        value: active.value
+      };
+      return this._savedFocus;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  /**
+   * Restore focus and cursor selection range to the saved element.
+   *
+   * @param {jQuery|HTMLElement} [html=null]
+   */
+  _restoreFocusState(html = null) {
+    if (!this._savedFocus) return;
+    const saved = this._savedFocus;
+
+    const applyFocus = () => {
+      try {
+        const root = (html && html[0]) ? html[0] : (html instanceof (globalThis.HTMLElement || Object) ? html : (this.element?.[0] || this.element));
+        if (!root) return;
+
+        let target = null;
+        if (saved.selector) {
+          target = root.querySelector?.(saved.selector) || (typeof $ !== 'undefined' ? $(root).find(saved.selector)[0] : null);
+        }
+        if (!target && saved.value !== undefined) {
+          target = root.querySelector?.('input[type="text"], input[type="search"], textarea');
+        }
+
+        if (target && typeof target.focus === 'function') {
+          target.focus();
+          if (typeof target.setSelectionRange === 'function' && typeof saved.selectionStart === 'number') {
+            const valLen = target.value?.length ?? 0;
+            const start = Math.min(saved.selectionStart, valLen);
+            const end = Math.min(saved.selectionEnd ?? start, valLen);
+            target.setSelectionRange(start, end, saved.selectionDirection || 'none');
+          }
+        }
+      } catch (err) {
+        // Silently ignore in mock or test environments
+      }
+    };
+
+    applyFocus();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        applyFocus();
+        this._savedFocus = null;
+      });
+    } else if (typeof setTimeout === 'function') {
+      setTimeout(() => {
+        applyFocus();
+        this._savedFocus = null;
+      }, 0);
+    } else {
+      this._savedFocus = null;
+    }
+  }
+
+  /**
    * Application V2 render callback
    */
   _onRender(context, options) {
@@ -144,13 +242,15 @@ export class DCCBaseApplication extends ParentClass {
     if (typeof this.activateListeners === 'function') {
       this.activateListeners($html);
     }
+    this._restoreFocusState($html);
   }
 
   /**
    * Application V1 listener registration hook
    */
   activateListeners(html) {
-    // Implemented by subclasses
+    // Implemented by subclasses; restores focus if an element had focus before render
+    this._restoreFocusState(html);
   }
 
   /**
@@ -171,10 +271,15 @@ export class DCCBaseApplication extends ParentClass {
    * Render hook supporting both V1 render(force, options) and V2 render(options)
    */
   async render(options = {}, deprecatedOptions = {}) {
-    const opts = (typeof options === 'boolean') ? { force: options } : options;
-    if (typeof super.render === 'function') {
-      return await super.render(opts, deprecatedOptions);
+    if (!this._savedFocus) {
+      this._saveFocusState();
     }
-    return this;
+    const opts = (typeof options === 'boolean') ? { force: options } : options;
+    let res = this;
+    if (typeof super.render === 'function') {
+      res = await super.render(opts, deprecatedOptions);
+    }
+    this._restoreFocusState();
+    return res;
   }
 }

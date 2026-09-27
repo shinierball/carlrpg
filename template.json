@@ -244,6 +244,7 @@
       "buffType": "stat",
       "stat": "str",
       "value": 2,
+      "healingPerRound": "",
       "damageMultiplier": 1,
       "damageType": "",
       "statModifiers": [],
@@ -254,6 +255,7 @@
     "debuff": {
       "severity": "Minor",
       "damageType": "",
+      "damagePerRound": "",
       "reductionPercent": 0,
       "rounding": "up",
       "statModifiers": [],

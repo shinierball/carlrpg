@@ -4,11 +4,16 @@
     <select name="system.buffType" class="dcc-field-input">
       <option value="stat" {{#if (eq system.buffType "stat")}}selected{{/if}}>Stat Bonus</option>
       <option value="tempHp" {{#if (eq system.buffType "tempHp")}}selected{{/if}}>Temp Health</option>
+      <option value="heal" {{#if (eq system.buffType "heal")}}selected{{/if}}>Healing / Regeneration</option>
       <option value="damageMultiplier" {{#if (eq system.buffType "damageMultiplier")}}selected{{/if}}>Damage Multiplier</option>
       <option value="resistance" {{#if (eq system.buffType "resistance")}}selected{{/if}}>Damage Resistance</option>
       <option value="immunity" {{#if (eq system.buffType "immunity")}}selected{{/if}}>Damage Immunity</option>
       <option value="custom" {{#if (eq system.buffType "custom")}}selected{{/if}}>Custom</option>
     </select>
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Healing Per Round</span>
+    <input class="dcc-field-input" type="text" name="system.healingPerRound" value="{{system.healingPerRound}}" placeholder="1d4 / 1 bar" title="Health restored to bearer at end of each combat round" />
   </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label">Value / Multiplier</span>

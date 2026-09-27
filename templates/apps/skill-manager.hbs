@@ -27,6 +27,9 @@
       <div class="dcc-sm-search-wrapper">
         <i class="fa-solid fa-magnifying-glass dcc-sm-search-icon"></i>
         <input type="text" class="dcc-sm-search" placeholder="Search skills by name, stat, category, or mechanics..." value="{{searchQuery}}" autofocus />
+        {{#if searchQuery}}
+          <a class="dcc-sm-search-clear" style="position: absolute; right: 10px; color: #555; cursor: pointer;" title="Clear search"><i class="fa-solid fa-xmark"></i></a>
+        {{/if}}
       </div>
 
       {{#if isActorPicker}}

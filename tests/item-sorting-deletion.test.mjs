@@ -230,4 +230,136 @@ test('DCC RPG Item Sorting & Removal Subsystem', async (t) => {
     assert.equal(crawler.system.hotlist.slot2, 'item-to-keep', 'Hotlist slot2 should remain intact');
     assert.equal(crawler.system.attributes.externalBuffs.slot1, '', 'External buff slot1 should be cleared');
   });
+
+  await t.test('5. page3-skills.hbs provides an explicit Actions header and .item-delete button with tooltip', async () => {
+    const fs = await import('node:fs');
+    const skillsHbs = fs.readFileSync('templates/actors/parts/page3-skills.hbs', 'utf8');
+
+    // Header must say Actions (not just Roll)
+    assert.match(skillsHbs, /<th[^>]*>\s*Actions\s*<\/th>/i, 'Skills table header must include an Actions column');
+
+    // Must contain .item-delete with data-tooltip, title, and data-item-id
+    assert.match(skillsHbs, /class="item-delete"/, 'Skills table must include .item-delete class');
+    assert.match(skillsHbs, /data-tooltip="Delete Skill"/, 'Skills delete button must have Delete Skill tooltip');
+    assert.match(skillsHbs, /data-item-id="{{skill\.id}}"/, 'Skills delete button must bind skill id');
+    assert.match(skillsHbs, /<i class="fa-solid fa-trash"><\/i>/, 'Skills delete button must show trash icon');
+  });
+
+  await t.test('6. spells.hbs provides an explicit Actions header and .item-delete button with tooltip', async () => {
+    const fs = await import('node:fs');
+    const spellsHbs = fs.readFileSync('templates/actors/parts/spells.hbs', 'utf8');
+
+    // Header must say Actions
+    assert.match(spellsHbs, /<th[^>]*>\s*Actions\s*<\/th>/i, 'Spells table header must include an Actions column');
+
+    // Must contain .item-delete with data-tooltip, title, and data-item-id
+    assert.match(spellsHbs, /class="item-delete"/, 'Spells table must include .item-delete class');
+    assert.match(spellsHbs, /data-tooltip="Delete Spell"/, 'Spells delete button must have Delete Spell tooltip');
+    assert.match(spellsHbs, /data-item-id="{{spell\.id}}"/, 'Spells delete button must bind spell id');
+    assert.match(spellsHbs, /<i class="fa-solid fa-trash"><\/i>/, 'Spells delete button must show trash icon');
+  });
+
+  await t.test('7. .item-delete handler successfully removes skill and spell from actor and cleans up references', async () => {
+    const crawler = new DCCActor({
+      name: 'Carl',
+      type: 'crawler',
+      system: {
+        hotlist: {
+          slot1: 'skill-kick',
+          slot2: 'spell-fireball',
+          slot3: 'item-shield'
+        },
+        attributes: {
+          externalBuffs: {
+            slot1: '',
+            slot2: ''
+          }
+        }
+      }
+    });
+
+    let renderedSheet = false;
+    let skillDeleted = false;
+    let spellDeleted = false;
+
+    const skillItem = new DCCItem({
+      id: 'skill-kick',
+      name: 'Power Kick',
+      type: 'skill',
+      system: { rank: 2 }
+    }, crawler);
+    skillItem.delete = async () => {
+      skillDeleted = true;
+      const idx = crawler.items.indexOf(skillItem);
+      if (idx !== -1) crawler.items.splice(idx, 1);
+    };
+
+    const spellItem = new DCCItem({
+      id: 'spell-fireball',
+      name: 'Fireball',
+      type: 'spell',
+      system: { rank: 3, manaCost: 5 }
+    }, crawler);
+    spellItem.delete = async () => {
+      spellDeleted = true;
+      const idx = crawler.items.indexOf(spellItem);
+      if (idx !== -1) crawler.items.splice(idx, 1);
+    };
+
+    crawler.items.push(skillItem, spellItem);
+
+    crawler.update = async (data) => {
+      for (const [k, v] of Object.entries(data)) {
+        if (k.startsWith('system.hotlist.')) {
+          const s = k.replace('system.hotlist.', '');
+          crawler.system.hotlist[s] = v;
+        }
+      }
+      return crawler;
+    };
+
+    const sheet = new DCCCrawlerSheet(crawler);
+    sheet.render = () => { renderedSheet = true; };
+
+    const clickHandlers = {};
+    const mockHtml = {
+      find: (sel) => ({
+        click: (fn) => { clickHandlers[sel] = fn; },
+        change: () => {},
+        contextmenu: () => {},
+        on: () => {}
+      })
+    };
+    sheet.activateListeners(mockHtml);
+
+    // 1. Delete skill
+    await clickHandlers['.item-delete']({
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      currentTarget: {
+        dataset: { itemId: 'skill-kick' },
+        closest: (sel) => (sel === '[data-item-id]' ? { dataset: { itemId: 'skill-kick' } } : null)
+      }
+    });
+
+    assert.equal(skillDeleted, true, 'Skill must be deleted');
+    assert.equal(crawler.system.hotlist.slot1, '', 'Hotlist slot1 with deleted skill must be cleared');
+    assert.equal(renderedSheet, true, 'Sheet should be re-rendered on item delete');
+
+    // 2. Delete spell
+    renderedSheet = false;
+    await clickHandlers['.item-delete']({
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      currentTarget: {
+        dataset: { itemId: 'spell-fireball' },
+        closest: (sel) => (sel === '[data-item-id]' ? { dataset: { itemId: 'spell-fireball' } } : null)
+      }
+    });
+
+    assert.equal(spellDeleted, true, 'Spell must be deleted');
+    assert.equal(crawler.system.hotlist.slot2, '', 'Hotlist slot2 with deleted spell must be cleared');
+    assert.equal(crawler.system.hotlist.slot3, 'item-shield', 'Unrelated hotlist slot3 must be preserved');
+    assert.equal(renderedSheet, true, 'Sheet should be re-rendered on item delete');
+  });
 });

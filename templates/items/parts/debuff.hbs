@@ -7,9 +7,13 @@
     </select>
   </div>
   <div class="dcc-field-group small">
-    <span class="dcc-field-label">Primary Damage Reduced</span>
+    <span class="dcc-field-label">Damage Per Round</span>
+    <input class="dcc-field-input" type="text" name="system.damagePerRound" value="{{system.damagePerRound}}" placeholder="1d6+F / 1 bar" title="Damage inflicted to bearer at end of each combat round" />
+  </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Damage Type</span>
     <select name="system.damageType" class="dcc-field-input">
-      <option value="">None / Specific</option>
+      <option value="">None / Physical</option>
       {{#each damageTypes as |dt|}}
         <option value="{{dt}}" {{#if (eq ../system.damageType dt)}}selected{{/if}}>{{dt}}</option>
       {{/each}}

@@ -118,6 +118,9 @@ export class MockActor {
     }
   }
   async update(data) {
+    if (typeof this._preUpdate === 'function') {
+      await this._preUpdate(data, {}, globalThis.game?.user?.id || 'test-user');
+    }
     this.updateSource(data);
     return this;
   }

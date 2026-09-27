@@ -497,6 +497,7 @@ export const DCC_DEBUFFS = [
     system: {
       severity: "Minor",
       damageType: "Fire",
+      damagePerRound: "1d10+F",
       reductionPercent: 0,
       rounding: "up",
       statModifiers: [],
@@ -515,6 +516,7 @@ export const DCC_DEBUFFS = [
     system: {
       severity: "Minor",
       damageType: "Electric",
+      damagePerRound: "",
       reductionPercent: 0,
       rounding: "up",
       statModifiers: [],
@@ -533,6 +535,7 @@ export const DCC_DEBUFFS = [
     system: {
       severity: "Minor",
       damageType: "Poison",
+      damagePerRound: "1d8+F",
       reductionPercent: 0,
       rounding: "up",
       statModifiers: [],
@@ -805,7 +808,8 @@ export const DCC_DEBUFFS = [
     description: "You take 1d6+F at the end of each round. Stackable.",
     system: {
       severity: "Minor",
-      damageType: "",
+      damageType: "Piercing",
+      damagePerRound: "1d6+F",
       reductionPercent: 0,
       rounding: "up",
       statModifiers: [],
@@ -823,7 +827,8 @@ export const DCC_DEBUFFS = [
     description: "You take 1d6+F damage at the end of each round.",
     system: {
       severity: "Major",
-      damageType: "",
+      damageType: "Physical",
+      damagePerRound: "1d6+F",
       reductionPercent: 0,
       rounding: "up",
       statModifiers: [],

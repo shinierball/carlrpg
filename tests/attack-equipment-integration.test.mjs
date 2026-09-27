@@ -1,6 +1,7 @@
 import './setup.mjs';
 import { describe, it, before, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
@@ -212,6 +213,13 @@ describe('DCC RPG - Attack & Weapon Equipment Integration', () => {
       preventDefault: () => {}
     });
     assert.equal(sheet._showStowedAttacks, true, '_showStowedAttacks must toggle to true');
+
+    // Verify equip/stow icon matches page4-inventory.hbs (fa-shield-halved)
+    const page1Content = fs.readFileSync('templates/actors/parts/page1-core.hbs', 'utf8');
+    assert.ok(
+      page1Content.includes('fa-shield-halved'),
+      'page1-core.hbs must use fa-shield-halved for attack-toggle-equipped matching inventory sheet'
+    );
   });
 
   it('6. Rolling attack hit and damage on an equipped weapon gear item functions completely', async () => {

@@ -194,8 +194,8 @@ export class DCCSpellManager extends DCCBaseApplication {
       }
 
       // Search Query Filter
-      if (this.searchQuery) {
-        const q = this.searchQuery;
+      const q = (this.searchQuery || '').toLowerCase().trim();
+      if (q) {
         const nameMatch = s.name.toLowerCase().includes(q);
         const descMatch = (s.system.description || '').toLowerCase().includes(q);
         const dmgMatch = (s.system.damageType || '').toLowerCase().includes(q) || (s.system.baseDamage || '').toLowerCase().includes(q);
@@ -218,7 +218,7 @@ export class DCCSpellManager extends DCCBaseApplication {
       activeSpellType: this.activeSpellType,
       activeStat: this.activeStat,
       activeDamageType: this.activeDamageType,
-      searchQuery: this.searchQuery,
+      searchQuery: this.rawSearchQuery !== undefined ? this.rawSearchQuery : this.searchQuery,
       damageTypes,
       isActorPicker: Boolean(this.actor),
       actor: this.actor,
@@ -260,16 +260,23 @@ export class DCCSpellManager extends DCCBaseApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
-    // Search query input with instant filtering
+    // Search query input with instant filtering and focus preservation
     html.find('.spell-search-input').on('input', ev => {
-      this.searchQuery = (ev.currentTarget.value || '').toLowerCase().trim();
+      this._saveFocusState(ev.currentTarget);
+      const val = ev.currentTarget?.value !== undefined
+        ? ev.currentTarget.value
+        : (typeof $(ev.currentTarget).val === 'function' ? $(ev.currentTarget).val() : '');
+      this.rawSearchQuery = val;
+      this.searchQuery = String(val).toLowerCase().trim();
       this.render(false);
     });
 
     // Clear search
     html.find('.spell-search-clear').click(ev => {
       ev.preventDefault();
+      this.rawSearchQuery = '';
       this.searchQuery = '';
+      this._savedFocus = { selector: '.spell-search-input', selectionStart: 0, selectionEnd: 0 };
       this.render(false);
     });
 

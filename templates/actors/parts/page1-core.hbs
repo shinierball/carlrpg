@@ -428,7 +428,7 @@
                     {{#if group.items.length}}
                       <optgroup label="{{group.label}}">
                         {{#each group.items as |opt|}}
-                          <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+                          <option value="{{opt.id}}" {{#if opt.selected}}selected{{/if}} {{#if opt.disabled}}disabled{{/if}}>{{opt.label}}{{#if opt.disabled}} (Assigned in Slot {{opt.assignedSlot}}){{/if}}</option>
                         {{/each}}
                       </optgroup>
                     {{/if}}
@@ -473,8 +473,8 @@
           <tr data-item-id="{{attack.id}}" draggable="true">
             <td>
               <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" class="attack-toggle-equipped" data-tooltip="Equipped / Readied (Click to unequip / stow)" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 13px;">
-                  <i class="fa-solid fa-crosshairs" style="color: #c0392b;"></i>
+                <button type="button" class="attack-toggle-equipped" data-tooltip="Equipped / Readied (Click to unequip / stow)" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 14px;">
+                  <i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>
                 </button>
                 <div>
                   <a class="roll-attack-hit" data-tooltip="Roll To Hit" style="font-weight: bold; cursor: pointer;">{{attack.name}}</a>
@@ -538,7 +538,7 @@
                 </td>
                 <td style="width: 30%; text-align: right;">
                   <button type="button" class="dcc-btn attack-toggle-equipped" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 2px; cursor: pointer;">
-                    <i class="fa-solid fa-crosshairs"></i> Ready / Equip
+                    <i class="fa-solid fa-shield-halved"></i> Ready / Equip
                   </button>
                 </td>
               </tr>

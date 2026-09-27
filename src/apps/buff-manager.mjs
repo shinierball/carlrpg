@@ -175,8 +175,8 @@ export class DCCBuffDebuffManager extends DCCBaseApplication {
       if (this.activeTab === 'stat' && c.system?.buffType !== 'stat' && (!Array.isArray(c.system?.statModifiers) || !c.system.statModifiers.length)) return false;
       if (this.activeTab === 'defense' && !['resistance', 'immunity', 'tempHp', 'temp_hp'].includes(c.system?.buffType)) return false;
 
-      if (this.searchQuery) {
-        const q = this.searchQuery;
+      const q = (this.searchQuery || '').toLowerCase().trim();
+      if (q) {
         const nameMatch = c.name.toLowerCase().includes(q);
         const descMatch = (c.system?.description || '').toLowerCase().includes(q);
         const summMatch = (c.summary || '').toLowerCase().includes(q);
@@ -189,7 +189,7 @@ export class DCCBuffDebuffManager extends DCCBaseApplication {
       conditions: filtered,
       counts,
       activeTab: this.activeTab,
-      searchQuery: this.searchQuery,
+      searchQuery: this.rawSearchQuery !== undefined ? this.rawSearchQuery : this.searchQuery,
       targetSlot: this.targetSlot,
       actor: this.actor,
       isActorPicker: Boolean(this.actor)
@@ -257,14 +257,22 @@ export class DCCBuffDebuffManager extends DCCBaseApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
+    // Search input with focus and cursor preservation
     html.find('.condition-search-input').on('input', ev => {
-      this.searchQuery = (ev.currentTarget.value || '').toLowerCase().trim();
+      this._saveFocusState(ev.currentTarget);
+      const val = ev.currentTarget?.value !== undefined
+        ? ev.currentTarget.value
+        : (typeof $(ev.currentTarget).val === 'function' ? $(ev.currentTarget).val() : '');
+      this.rawSearchQuery = val;
+      this.searchQuery = String(val).toLowerCase().trim();
       this.render(false);
     });
 
     html.find('.condition-search-clear').click(ev => {
       ev.preventDefault();
+      this.rawSearchQuery = '';
       this.searchQuery = '';
+      this._savedFocus = { selector: '.condition-search-input', selectionStart: 0, selectionEnd: 0 };
       this.render(false);
     });
 

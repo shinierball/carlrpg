@@ -345,12 +345,28 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       else if (item.type === 'deity') context.deities.push(item);
       else if (item.type === 'sponsor') context.sponsors.push(item);
       else if (item.type === 'loot') context.loot.push(item);
-      else if (item.type === 'buff') context.buffs.push(item);
+      else if (item.type === 'buff') {
+        const sys = item.system || {};
+        const parts = [];
+        if (sys.healingPerRound) {
+          parts.push(`+${sys.healingPerRound} HP/rnd`);
+        } else if ((sys.buffType === 'heal' || sys.buffType === 'healing' || sys.buffType === 'regeneration') && sys.value) {
+          parts.push(`+${sys.value} HP/rnd`);
+        }
+        if (sys.buffType === 'stat' && sys.stat) {
+          parts.push(`+${sys.value || 0} ${(sys.stat || '').toUpperCase()}`);
+        }
+        item.summary = parts.join(' • ') || sys.description || '';
+        context.buffs.push(item);
+      }
       else if (item.type === 'debuff') {
         const sys = item.system || {};
         const sev = (sys.severity || 'Minor').toLowerCase();
         item.severityClass = sev === 'major' ? 'is-major' : 'is-minor';
         const parts = [];
+        if (sys.damagePerRound) {
+          parts.push(`${sys.damagePerRound} ${sys.damageType || ''} DoT/rnd`.trim());
+        }
         if (Array.isArray(sys.statModifiers) && sys.statModifiers.length > 0) {
           parts.push(sys.statModifiers.map(m => `${m.value > 0 ? '+' : ''}${m.value} ${(m.stat || '').toUpperCase()}`).join(', '));
         } else if (sys.stat) {
@@ -1045,12 +1061,48 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
       isKnownOption = Boolean(selectedOptionId);
 
+      // Collect buffs assigned to other slots to prevent assigning the same buff to multiple slots
+      const otherAssigned = [];
+      for (let j = 1; j <= 3; j++) {
+        if (j !== i) {
+          const otherVal = rawExternalBuffs[`buff${j}`];
+          if (otherVal) {
+            const otherStr = String(otherVal).trim().toLowerCase();
+            const otherItem = (this.actor?.items?.get ? this.actor.items.get(otherVal) : null) ||
+              (Array.isArray(this.actor?.items) ? this.actor.items.find(it => String(it.id).toLowerCase() === otherStr || String(it.name).trim().toLowerCase() === otherStr) : null);
+            otherAssigned.push({
+              slotNum: j,
+              id: otherItem?.id ? String(otherItem.id).toLowerCase() : otherStr,
+              name: otherItem?.name ? String(otherItem.name).trim().toLowerCase() : otherStr
+            });
+          }
+        }
+      }
+
       const groups = rawGroups.map(g => ({
         label: g.label,
-        items: g.options.map(o => ({
-          ...o,
-          selected: Boolean(selectedOptionId && o.id === selectedOptionId)
-        }))
+        items: g.options.map(o => {
+          const isSelected = Boolean(selectedOptionId && o.id === selectedOptionId);
+          let disabled = false;
+          let assignedSlot = null;
+
+          if (!isSelected) {
+            const oId = String(o.id || '').toLowerCase();
+            const oName = String(o.name || '').trim().toLowerCase();
+            const inOther = otherAssigned.find(oa => oa.id === oId || oa.name === oName || oa.id === oName || oa.name === oId);
+            if (inOther) {
+              disabled = true;
+              assignedSlot = inOther.slotNum;
+            }
+          }
+
+          return {
+            ...o,
+            selected: isSelected,
+            disabled,
+            assignedSlot
+          };
+        })
       }));
 
       context.externalBuffSlots.push({
@@ -1067,6 +1119,30 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       });
     }
 
+    // Mark slot assignment flags on each buff in context.buffs for Tab 4 slot buttons
+    const slot1 = context.externalBuffSlots?.[0];
+    const slot2 = context.externalBuffSlots?.[1];
+    const slot3 = context.externalBuffSlots?.[2];
+
+    const isMatch = (item, slot) => {
+      if (!slot || slot.isEmpty) return false;
+      const itemId = String(item.id || item._id || '').toLowerCase();
+      const itemName = String(item.name || '').toLowerCase().trim();
+      const valStr = String(slot.value || '').toLowerCase().trim();
+      const slotName = String(slot.name || '').toLowerCase().trim();
+      return (valStr && (valStr === itemId || valStr === itemName)) ||
+             (slotName && slotName === itemName);
+    };
+
+    if (Array.isArray(context.buffs)) {
+      for (const b of context.buffs) {
+        b.isSlot1 = isMatch(b, slot1);
+        b.isSlot2 = isMatch(b, slot2);
+        b.isSlot3 = isMatch(b, slot3);
+        b.isAssignedToAnySlot = b.isSlot1 || b.isSlot2 || b.isSlot3;
+      }
+    }
+
     return context;
   }
 
@@ -1076,6 +1152,111 @@ export class DCCCrawlerSheet extends BaseActorSheet {
    */
   async getData(options) {
     return this._prepareContext(options);
+  }
+
+  /**
+   * Save focus state and cursor selection for inputs inside the sheet.
+   */
+  _saveFocusState(element = null) {
+    try {
+      const active = element || (typeof document !== 'undefined' ? document.activeElement : null);
+      if (!active) return null;
+
+      const root = this.element?.[0] || (this.element instanceof (globalThis.HTMLElement || Object) ? this.element : null);
+      if (!element && root && typeof root.contains === 'function' && !root.contains(active)) {
+        return null;
+      }
+
+      let selector = '';
+      if (active.id) {
+        selector = `#${active.id}`;
+      } else if (typeof active.getAttribute === 'function' && active.getAttribute('name')) {
+        selector = `[name="${active.getAttribute('name')}"]`;
+      } else if (active.className && typeof active.className === 'string') {
+        const classes = active.className.split(/\s+/).filter(c => c && !c.includes(':') && !c.startsWith('focus') && !c.startsWith('hover'));
+        if (classes.length) {
+          selector = `${(active.tagName || 'input').toLowerCase()}.${classes.join('.')}`;
+        }
+      }
+      if (!selector && active.tagName) {
+        selector = active.tagName.toLowerCase();
+      }
+
+      const hasSelection = typeof active.selectionStart === 'number';
+      this._savedFocus = {
+        selector,
+        selectionStart: hasSelection ? active.selectionStart : null,
+        selectionEnd: hasSelection ? active.selectionEnd : null,
+        selectionDirection: hasSelection ? active.selectionDirection : 'none',
+        value: active.value
+      };
+      return this._savedFocus;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  /**
+   * Restore focus and cursor selection range to the saved element.
+   */
+  _restoreFocusState(html = null) {
+    if (!this._savedFocus) return;
+    const saved = this._savedFocus;
+
+    const applyFocus = () => {
+      try {
+        const root = (html && html[0]) ? html[0] : (html instanceof (globalThis.HTMLElement || Object) ? html : (this.element?.[0] || this.element));
+        if (!root) return;
+
+        let target = null;
+        if (saved.selector) {
+          target = root.querySelector?.(saved.selector) || (typeof $ !== 'undefined' ? $(root).find(saved.selector)[0] : null);
+        }
+        if (!target && saved.value !== undefined) {
+          target = root.querySelector?.('input[type="text"], input[type="search"], textarea');
+        }
+
+        if (target && typeof target.focus === 'function') {
+          target.focus();
+          if (typeof target.setSelectionRange === 'function' && typeof saved.selectionStart === 'number') {
+            const valLen = target.value?.length ?? 0;
+            const start = Math.min(saved.selectionStart, valLen);
+            const end = Math.min(saved.selectionEnd ?? start, valLen);
+            target.setSelectionRange(start, end, saved.selectionDirection || 'none');
+          }
+        }
+      } catch (err) {
+        // Silently ignore in mock or headless runs
+      }
+    };
+
+    applyFocus();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        applyFocus();
+        this._savedFocus = null;
+      });
+    } else if (typeof setTimeout === 'function') {
+      setTimeout(() => {
+        applyFocus();
+        this._savedFocus = null;
+      }, 0);
+    } else {
+      this._savedFocus = null;
+    }
+  }
+
+  /**
+   * Render hook supporting focus preservation
+   * @override
+   */
+  render(force, options = {}) {
+    if (!this._savedFocus) {
+      this._saveFocusState();
+    }
+    const res = super.render(force, options);
+    this._restoreFocusState();
+    return res;
   }
 
   /**
@@ -1089,6 +1270,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     if (this.element) {
       const $el = globalThis.$ ? globalThis.$(this.element) : this.element;
       this.activateListeners($el);
+      this._restoreFocusState($el);
     }
   }
 
@@ -1097,6 +1279,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     if (typeof super.activateListeners === 'function') {
       super.activateListeners(html);
     }
+    this._restoreFocusState(html);
 
     if (!this.isEditable) return;
 
@@ -1326,9 +1509,17 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     // Item Edit
     html.find('.item-edit').click(ev => {
-      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
-      item?.sheet.render(true);
+      ev.preventDefault();
+      const el = $(ev.currentTarget);
+      const itemId = el.data('itemId') ||
+        el.attr('data-item-id') ||
+        el.closest('[data-item-id]').data('itemId') ||
+        el.closest('[data-item-id]').attr('data-item-id') ||
+        ev.currentTarget.dataset?.itemId ||
+        ev.currentTarget.closest?.('[data-item-id]')?.dataset?.itemId;
+      const item = this.actor.items.get?.(itemId) ||
+        (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === itemId || i._id === itemId) : this.actor.items.find?.(i => i.id === itemId || i._id === itemId));
+      item?.sheet?.render(true);
     });
 
     // Item Delete
@@ -1336,9 +1527,14 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       ev.preventDefault();
       ev.stopPropagation();
       const el = $(ev.currentTarget);
-      const itemId = el.data('itemId') || el.closest('[data-item-id]').data('itemId') || ev.currentTarget.dataset?.itemId || ev.currentTarget.closest?.('[data-item-id]')?.dataset?.itemId;
+      const itemId = el.data('itemId') ||
+        el.attr('data-item-id') ||
+        el.closest('[data-item-id]').data('itemId') ||
+        el.closest('[data-item-id]').attr('data-item-id') ||
+        ev.currentTarget.dataset?.itemId ||
+        ev.currentTarget.closest?.('[data-item-id]')?.dataset?.itemId;
       const item = this.actor.items.get?.(itemId) ||
-        (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === itemId) : this.actor.items.find?.(i => i.id === itemId));
+        (Array.isArray(this.actor.items) ? this.actor.items.find(i => i.id === itemId || i._id === itemId) : this.actor.items.find?.(i => i.id === itemId || i._id === itemId));
       if (item) {
         // Clean up any references in hotlist or external buffs if this item was assigned
         const updates = {};
@@ -1358,6 +1554,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
           await this.actor.update(updates);
         }
         await item.delete();
+        this.render(false);
       }
     });
 
@@ -1408,18 +1605,28 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
-    // Assign Buff to External Buff Slot (from Conditions tab)
+    // Assign or Toggle Buff to External Buff Slot (from Conditions tab)
     html.find('.buff-assign-slot-btn').click(async ev => {
       ev.preventDefault();
       ev.stopPropagation();
       const itemId = $(ev.currentTarget).data('itemId');
       const slot = $(ev.currentTarget).data('slot');
       if (itemId && slot) {
-        await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: itemId });
+        const currentVal = this.actor.system?.attributes?.externalBuffs?.[slot] || '';
         const item = this.actor.items.get?.(itemId) ||
           (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
         const slotNum = slot.replace('buff', '');
-        ui.notifications?.info?.(`Assigned ${item?.name || 'Buff'} to External Buff Slot ${slotNum}`);
+
+        const isCurrentlyAssigned = currentVal === itemId ||
+          (item?.name && String(currentVal).toLowerCase().trim() === item.name.toLowerCase().trim());
+
+        if (isCurrentlyAssigned) {
+          await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: '' });
+          ui.notifications?.info?.(`Removed ${item?.name || 'Buff'} from External Buff Slot ${slotNum}`);
+        } else {
+          await this.actor.update({ [`system.attributes.externalBuffs.${slot}`]: itemId });
+          ui.notifications?.info?.(`Assigned ${item?.name || 'Buff'} to External Buff Slot ${slotNum}`);
+        }
       }
     });
 

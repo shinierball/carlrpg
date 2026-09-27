@@ -1437,9 +1437,10 @@ export class DCCActor extends Actor {
         toHitStat = statMatch ? statMatch[1].toLowerCase() : (sys.stat || 'str').toLowerCase();
         rank = Number(attackItem.modifiedRank ?? sys.modifiedRank ?? attackItem.effectiveRank ?? sys.rank) || 0;
       } else {
-        toHitStat = (sys.toHitStat || 'dex').toLowerCase();
         const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
         const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
+        const primaryPart = Array.isArray(sys.damageParts) ? sys.damageParts[0] : Object.values(sys.damageParts || {})[0];
+        toHitStat = (sys.toHitStat || matchingSkill?.system?.stat || primaryPart?.stat || (attackItem.type === 'gear' ? 'str' : 'dex')).toLowerCase();
         rank = matchingSkill ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0) : (Number(sys.toHitRank ?? sys.rank) || 0);
       }
 

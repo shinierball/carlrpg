@@ -7,6 +7,7 @@ export class AttackDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      equipped: new fields.BooleanField({ initial: true }),
       toHitStat: new fields.StringField({ initial: 'dex' }),
       toHitRank: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       toHitMod: new fields.NumberField({ integer: true, initial: 0 }),

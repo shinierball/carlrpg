@@ -1,4 +1,10 @@
 <div class="dcc-field-row" style="margin-bottom: 8px;">
+  <div class="dcc-field-group small" style="text-align: center; max-width: 70px;">
+    <span class="dcc-field-label">Equipped</span>
+    <label style="display: flex; align-items: center; justify-content: center; height: 28px; cursor: pointer;">
+      <input type="checkbox" name="system.equipped" {{#if (ne system.equipped false)}}checked{{/if}} style="width: 18px; height: 18px; cursor: pointer;" />
+    </label>
+  </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label">To-Hit Rank</span>
     <input class="dcc-field-input" type="number" name="system.toHitRank" value="{{system.toHitRank}}" />

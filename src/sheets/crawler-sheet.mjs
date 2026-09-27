@@ -56,6 +56,82 @@ export function formatGearBonuses(gearItem) {
 }
 
 /**
+ * Determines whether a gear item functions as an attack / weapon.
+ * Recognized if:
+ * 1. Explicitly marked as weapon (system.isWeapon === true)
+ * 2. Slot is 'hands' or 'holding'
+ * 3. Defines weapon damageParts
+ * @param {object} item 
+ * @returns {boolean}
+ */
+export function isWeaponGear(item) {
+  if (!item || item.type !== 'gear') return false;
+  const sys = item.system || {};
+  if (sys.isWeapon === true) return true;
+  const slot = (sys.slot || '').toLowerCase();
+  const rawParts = sys.damageParts;
+  const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
+  const hasDamageParts = parts.length > 0 && parts.some(p => p && (p.dice || p.value || p.stat));
+  if (hasDamageParts) return true;
+  if (slot === 'hands' || slot === 'holding') return true;
+  return false;
+}
+
+/**
+ * Prepares consistent display properties for attack table rows
+ * (supporting both native attack items and equipped weapon gear).
+ * @param {object} item 
+ * @param {object} actor 
+ * @returns {object}
+ */
+export function prepareAttackDisplay(item, actor) {
+  const sys = item.system || {};
+  const isGear = item.type === 'gear';
+  const skills = actor?.items ? (actor.items.filter ? actor.items.filter(i => i.type === 'skill') : Array.from(actor.items.values?.() || actor.items).filter(i => i.type === 'skill')) : [];
+  const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === item.name?.toLowerCase().trim());
+
+  // To-Hit resolution
+  let toHitStat = sys.toHitStat;
+  if (!toHitStat) {
+    if (matchingSkill?.system?.stat) {
+      toHitStat = matchingSkill.system.stat;
+    } else if (isGear && Array.isArray(sys.damageParts) && sys.damageParts[0]?.stat) {
+      toHitStat = sys.damageParts[0].stat;
+    } else {
+      toHitStat = isGear ? 'str' : 'dex';
+    }
+  }
+  const toHitRank = matchingSkill
+    ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0)
+    : (Number(sys.toHitRank ?? sys.rank) || 0);
+
+  item.displayToHitStat = toHitStat.toUpperCase();
+  item.displayToHitRank = toHitRank;
+  item.displayToHit = `${item.displayToHitStat} (${toHitRank})`;
+
+  // Damage formula display
+  const rawParts = sys.damageParts;
+  const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
+  if (parts.length > 0 && parts[0]) {
+    const p = parts[0];
+    const statStr = p.stat ? ` + ${p.stat.toUpperCase()}` : '';
+    const typeStr = p.type ? ` (${p.type})` : '';
+    const extra = parts.length > 1 ? ` (+${parts.length - 1} parts)` : '';
+    item.displayDamage = `${p.dice || '1d6'}${statStr}${typeStr}${extra}`;
+  } else {
+    const dice = sys.damageDice || '1d6';
+    const stat = sys.damageStat ? ` + ${sys.damageStat.toUpperCase()}` : '';
+    const type = sys.damageType ? ` (${sys.damageType})` : '';
+    item.displayDamage = `${dice}${stat}${type}`;
+  }
+
+  item.displayEffects = sys.effects || sys.notes || '';
+  item.isWeaponGear = isGear;
+  item.isAttackEquipped = sys.equipped !== false;
+  return item;
+}
+
+/**
  * Dungeon Crawler Carl Character Sheet Controller
  * Extends ActorSheet (FormApplication V1) for native Foundry V12/V13 stability,
  * while maintaining Application V2 structure (_prepareContext, DEFAULT_OPTIONS, PARTS).
@@ -203,6 +279,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     // Categorize embedded items
     context.attacks = [];
+    context.stowedAttacks = [];
     context.skills = [];
     context.spells = [];
     context.gear = [];
@@ -229,12 +306,30 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     };
 
     for (const item of this.actor.items) {
-      if (item.type === 'attack') context.attacks.push(item);
+      if (item.type === 'attack') {
+        prepareAttackDisplay(item, this.actor);
+        const isEquipped = item.system?.equipped !== false;
+        if (isEquipped) {
+          context.attacks.push(item);
+        } else {
+          context.stowedAttacks.push(item);
+        }
+      }
       else if (item.type === 'skill') context.skills.push(item);
       else if (item.type === 'spell') context.spells.push(item);
       else if (item.type === 'gear') {
         item.bonusesSummary = formatGearBonuses(item);
         context.gear.push(item);
+
+        const isWeapon = isWeaponGear(item);
+        if (isWeapon) {
+          prepareAttackDisplay(item, this.actor);
+          if (item.system?.equipped) {
+            context.attacks.push(item);
+          } else {
+            context.stowedAttacks.push(item);
+          }
+        }
 
         if (item.system?.equipped) {
           const slot = (item.system.slot || 'torso').toLowerCase();
@@ -525,6 +620,9 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.buffs.sort(sortItems);
     context.debuffs.sort(sortItems);
     context.attacks.sort(sortItems);
+    context.stowedAttacks.sort(sortItems);
+    context.stowedAttacksCount = context.stowedAttacks.length;
+    context.showStowedAttacks = Boolean(this._showStowedAttacks);
 
     // Prepare Hotlist Slots (1-10)
     const hotlistData = context.system.hotlist || {};
@@ -1179,6 +1277,24 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
       if (item) this.actor.rollSpellAttack(item);
+    });
+
+    // Toggle Attack / Weapon Equipped State
+    html.find('.attack-toggle-equipped').click(async ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
+      const item = this.actor.items?.get ? this.actor.items.get(itemId) : (this.actor.items || []).find(i => i.id === itemId);
+      if (item) {
+        const isCurrentlyEquipped = item.system?.equipped !== false;
+        await item.update({ 'system.equipped': !isCurrentlyEquipped });
+      }
+    });
+
+    // Toggle Stowed Attacks View
+    html.find('.toggle-stowed-attacks-view').click(ev => {
+      ev.preventDefault();
+      this._showStowedAttacks = !this._showStowedAttacks;
+      this.render(false);
     });
 
     // Toggle Gear Equipped

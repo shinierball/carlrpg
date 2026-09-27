@@ -168,6 +168,7 @@
       "checked": false
     },
     "attack": {
+      "equipped": true,
       "toHitStat": "dex",
       "toHitRank": 1,
       "damageDice": "1d6",
@@ -201,6 +202,7 @@
       "slot": "torso",
       "quantity": 1,
       "equipped": false,
+      "isWeapon": false,
       "drBonus": 0,
       "evadeBonus": 0,
       "abilityModifiers": {

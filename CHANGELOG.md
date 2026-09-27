@@ -1,3 +1,21 @@
+## 2.0.38
+
+### Attack & Weapon Equipment Integration: Hybrid Weapon Classification & Stowed Drawer
+
+- **Hybrid Weapon & Attack Recognition**:
+  - Equipping physical weapon gear (items in the `hands` / `holding` slots, items marked with `system.isWeapon: true`, or gear defining `damageParts`) automatically adds the weapon to the Page 1 Attacks table with calculated hit bonuses and damage.
+  - Unequipping weapon gear removes it from the active Attacks table and places it into the expandable **Stowed Attacks & Weapons** drawer.
+  - Dedicated attack items (`type: "attack"`) now support an `equipped` state (`system.equipped: boolean`, default `true`). Unequipping an attack moves it to the Stowed Attacks drawer.
+- **Interactive Sheet Toggles & Stowed Drawer**:
+  - Each attack row on Page 1 features a 1-click equipped toggle button (`.attack-toggle-equipped`).
+  - Added an expandable Stowed drawer toggled via the `Stowed (N)` button in the Attacks table header (`.toggle-stowed-attacks-view`).
+  - The drawer lists all stowed attacks and weapons with their damage and range, including a 1-click `[ Ready / Equip ]` button that immediately readies them back into the active Attacks table.
+- **Left Action HUD & PDF Export Integration**:
+  - The token Left Action HUD (`DCCCrawlerActionHUD`) automatically includes equipped weapon gear alongside equipped attacks, filtering out any stowed items.
+  - PDF character sheet export respects equipped state, ensuring only active, equipped attacks occupy the exported attack slots.
+- **Automated Verification**:
+  - Added comprehensive test suite `tests/attack-equipment-integration.test.mjs` (7 test scenarios) verifying schemas, classification, sheet context preparation, click listeners, roll resolution, and HUD filtering.
+
 ## 2.0.37
 
 ### Scratch-off Ticket Outcome Enhancements: Conditional Random Table, Auto-Weights & Validation

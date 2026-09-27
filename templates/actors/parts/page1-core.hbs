@@ -449,7 +449,14 @@
   <div class="dcc-attacks-section">
     <div class="dcc-banner-header">
       <span>ATTACKS</span>
-      <a class="item-create" data-type="attack" data-tooltip="Add Attack" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Attack</a>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        {{#if stowedAttacksCount}}
+          <a class="toggle-stowed-attacks-view" style="color: #fff; cursor: pointer; font-size: 11px; text-decoration: none;" data-tooltip="Toggle Stowed / Unequipped Attacks">
+            <i class="fa-solid {{#if showStowedAttacks}}fa-eye-slash{{else}}fa-box-archive{{/if}}"></i> Stowed ({{stowedAttacksCount}})
+          </a>
+        {{/if}}
+        <a class="item-create" data-type="attack" data-tooltip="Add Attack" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Attack</a>
+      </div>
     </div>
     <table class="dcc-attacks-table">
       <thead>
@@ -465,20 +472,30 @@
         {{#each attacks as |attack|}}
           <tr data-item-id="{{attack.id}}" draggable="true">
             <td>
-              <a class="roll-attack-hit" data-tooltip="Roll To Hit" style="font-weight: bold; cursor: pointer;">{{attack.name}}</a>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="attack-toggle-equipped" data-tooltip="Equipped / Readied (Click to unequip / stow)" style="background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 13px;">
+                  <i class="fa-solid fa-crosshairs" style="color: #c0392b;"></i>
+                </button>
+                <div>
+                  <a class="roll-attack-hit" data-tooltip="Roll To Hit" style="font-weight: bold; cursor: pointer;">{{attack.name}}</a>
+                  {{#if attack.isWeaponGear}}
+                    <span class="dcc-stat-sublabel" style="display: inline-block; margin-left: 2px; font-size: 9px; text-transform: uppercase;">[WEAPON]</span>
+                  {{/if}}
+                </div>
+              </div>
             </td>
             <td>
               <button type="button" class="dcc-attack-roll-btn roll-attack-hit">
-                {{upper attack.system.toHitStat}} ({{attack.system.toHitRank}})
+                {{#if attack.displayToHit}}{{attack.displayToHit}}{{else}}{{upper attack.system.toHitStat}} ({{attack.system.toHitRank}}){{/if}}
               </button>
             </td>
             <td>
               <button type="button" class="dcc-attack-roll-btn roll-attack-dmg">
-                {{attack.system.damageDice}} + {{upper attack.system.damageStat}}
+                {{#if attack.displayDamage}}{{attack.displayDamage}}{{else}}{{attack.system.damageDice}} + {{upper attack.system.damageStat}}{{/if}}
               </button>
             </td>
             <td>
-              <span style="font-size: 11px;">{{attack.system.effects}}</span>
+              <span style="font-size: 11px;">{{#if attack.displayEffects}}{{attack.displayEffects}}{{else}}{{attack.system.effects}}{{/if}}</span>
             </td>
             <td>
               <a class="item-edit" data-tooltip="Edit Attack" style="margin-right: 4px;"><i class="fa-solid fa-edit"></i></a>
@@ -488,12 +505,48 @@
         {{else}}
           <tr>
             <td colspan="5" style="text-align: center; color: #777; padding: 10px;">
-              No attacks configured. Click <strong>Add Attack</strong> above or drop an Attack item.
+              No attacks or weapons equipped. Equip a weapon in <strong>Inventory</strong>, click <strong>Add Attack</strong> above, or expand Stowed Attacks.
             </td>
           </tr>
         {{/each}}
       </tbody>
     </table>
+
+    {{#if showStowedAttacks}}
+      <div class="dcc-stat-block" style="margin-top: 6px; border: 1px dashed #c0392b; background: #fffaf9; padding: 6px;">
+        <div style="font-size: 11px; font-weight: bold; color: #c0392b; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-box-archive"></i> STOWED / UNEQUIPPED ATTACKS &amp; WEAPONS</span>
+          <span style="font-size: 10px; color: #666; font-weight: normal;">Click to ready in combat</span>
+        </div>
+        <table class="dcc-attacks-table" style="margin: 0; font-size: 11px;">
+          <tbody>
+            {{#each stowedAttacks as |stowed|}}
+              <tr data-item-id="{{stowed.id}}">
+                <td style="width: 35%;">
+                  <button type="button" class="attack-toggle-equipped" data-tooltip="Equip / Ready Attack" style="background: none; border: none; cursor: pointer; padding: 2px 4px;">
+                    <i class="fa-regular fa-circle" style="color: #999;"></i>
+                  </button>
+                  <span style="font-weight: bold;">{{stowed.name}}</span>
+                  {{#if stowed.isWeaponGear}}
+                    <span class="dcc-stat-sublabel" style="font-size: 9px; text-transform: uppercase;">[{{stowed.system.slot}}]</span>
+                  {{/if}}
+                </td>
+                <td style="width: 35%;">
+                  <span style="font-size: 10px; color: #666;">
+                    {{#if stowed.displayDamage}}{{stowed.displayDamage}}{{else}}{{stowed.system.damageDice}}{{/if}}
+                  </span>
+                </td>
+                <td style="width: 30%; text-align: right;">
+                  <button type="button" class="dcc-btn attack-toggle-equipped" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 2px; cursor: pointer;">
+                    <i class="fa-solid fa-crosshairs"></i> Ready / Equip
+                  </button>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{/if}}
   </div>
 
   {{#if spells.length}}

@@ -29,7 +29,13 @@ export class MockActor {
       this.system = structuredClone(data.system || {});
     }
     this.isOwner = data.isOwner ?? true;
-    this.items = (data.items || []).map(i => i instanceof MockItem ? i : new MockItem(i, this));
+    const itemsList = (data.items || []).map(i => i instanceof MockItem ? i : new MockItem(i, this));
+    if (!itemsList.get) {
+      itemsList.get = function(id) {
+        return this.find(i => i.id === id || i._id === id);
+      };
+    }
+    this.items = itemsList;
     this.sheet = {
       render: () => this
     };

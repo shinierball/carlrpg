@@ -15,6 +15,7 @@ export class GearDataModel extends BaseItemDataModel {
       slot: new fields.StringField({ initial: 'torso' }),
       quantity: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       equipped: new fields.BooleanField({ initial: false }),
+      isWeapon: new fields.BooleanField({ initial: false }),
       drBonus: new fields.NumberField({ integer: true, initial: 0 }),
       evadeBonus: new fields.NumberField({ integer: true, initial: 0 }),
       abilityModifiers: new fields.SchemaField({

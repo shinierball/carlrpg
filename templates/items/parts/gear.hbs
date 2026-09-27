@@ -19,6 +19,12 @@
       <input type="checkbox" name="system.equipped" {{#if system.equipped}}checked{{/if}} style="width: 18px; height: 18px; cursor: pointer;" />
     </label>
   </div>
+  <div class="dcc-field-group small" style="text-align: center;">
+    <span class="dcc-field-label">Is Weapon</span>
+    <label style="display: flex; align-items: center; justify-content: center; height: 28px; cursor: pointer;">
+      <input type="checkbox" name="system.isWeapon" {{#if (or system.isWeapon (eq system.slot "hands"))}}checked{{/if}} style="width: 18px; height: 18px; cursor: pointer;" />
+    </label>
+  </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label">Damage Resist (DR)</span>
     <input class="dcc-field-input" type="number" name="system.drBonus" value="{{system.drBonus}}" placeholder="0" title="DR bonus or penalty (+/-)" />

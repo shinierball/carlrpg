@@ -6,6 +6,8 @@
  *    positioned directly below the scene list (#navigation / #scene-list).
  */
 
+import { isWeaponGear } from '../sheets/crawler-sheet.mjs';
+
 /**
  * Checks if a skill is passive (no active roll or attack).
  * @param {object} skill
@@ -554,12 +556,24 @@ export class DCCCrawlerActionHUD {
     const skills = [];
 
     for (const item of allItems) {
-      if (item.type === 'attack') {
-        const dmgDice = item.system?.damageDice || '';
-        const dmgStat = (item.system?.damageStat || '').toUpperCase();
-        let formula = dmgDice;
-        if (dmgStat) formula = `${formula} + ${dmgStat}`;
-        if (item.system?.damageType) formula = `${formula} (${item.system.damageType})`;
+      const isAttack = item.type === 'attack' && item.system?.equipped !== false;
+      const isWeapon = item.type === 'gear' && item.system?.equipped && isWeaponGear(item);
+      if (isAttack || isWeapon) {
+        let formula = '';
+        const rawParts = item.system?.damageParts;
+        const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
+        if (parts.length > 0 && parts[0]) {
+          const p = parts[0];
+          const statStr = p.stat ? ` + ${p.stat.toUpperCase()}` : '';
+          const typeStr = p.type ? ` (${p.type})` : '';
+          formula = `${p.dice || '1d6'}${statStr}${typeStr}`;
+        } else {
+          const dmgDice = item.system?.damageDice || '1d6';
+          const dmgStat = (item.system?.damageStat || '').toUpperCase();
+          formula = dmgDice;
+          if (dmgStat) formula = `${formula} + ${dmgStat}`;
+          if (item.system?.damageType) formula = `${formula} (${item.system.damageType})`;
+        }
 
         attacks.push({
           id: item.id,

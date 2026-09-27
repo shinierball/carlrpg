@@ -21,6 +21,17 @@ export class DCCItem extends Item {
       }
       this.system.damageParts = Array.isArray(parts) ? parts : [];
     }
+    if (this.type === 'attack' && this.system) {
+      if (this.system.equipped === undefined) {
+        this.system.equipped = true;
+      }
+    }
+    if (this.type === 'gear' && this.system) {
+      if (this.system.isWeapon === undefined) {
+        const slot = (this.system.slot || '').toLowerCase();
+        this.system.isWeapon = slot === 'hands' || slot === 'holding';
+      }
+    }
     if (this.type === 'skill' && this.system) {
       let mods = this.system.damageModifiers;
       if (mods && !Array.isArray(mods) && typeof mods === 'object') {
@@ -87,6 +98,17 @@ export class DCCItem extends Item {
         parts = Object.values(parts);
       }
       this.system.damageParts = Array.isArray(parts) ? parts : [];
+    }
+    if (this.type === 'attack' && this.system) {
+      if (this.system.equipped === undefined) {
+        this.system.equipped = true;
+      }
+    }
+    if (this.type === 'gear' && this.system) {
+      if (this.system.isWeapon === undefined) {
+        const slot = (this.system.slot || '').toLowerCase();
+        this.system.isWeapon = slot === 'hands' || slot === 'holding';
+      }
     }
     if (this.type === 'skill' && this.system) {
       const baseRank = Number(this.system.rank) || 0;

@@ -2,6 +2,7 @@ import { PDFDocument as importedPDFDocument } from '../../lib/pdf-lib.mjs';
 import { DCC_BUFFS } from '../data/buffs.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { DCC_SKILLS } from '../data/skills.mjs';
+import { isWeaponGear } from '../sheets/crawler-sheet.mjs';
 
 function getPDFDocument() {
   return globalThis.PDFLib?.PDFDocument || importedPDFDocument;
@@ -244,7 +245,7 @@ export async function exportCrawlerToPdf(actor, options = {}) {
 
   // Extract embedded items
   const items = Array.from(actor.items || []);
-  const attacks = items.filter(i => i.type === 'attack');
+  const attacks = items.filter(i => (i.type === 'attack' && i.system?.equipped !== false) || (i.type === 'gear' && i.system?.equipped && isWeaponGear(i)));
   const skills = items.filter(i => i.type === 'skill');
   const spells = items.filter(i => i.type === 'spell');
   const gear = items.filter(i => i.type === 'gear');

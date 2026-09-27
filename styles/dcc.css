@@ -265,6 +265,80 @@
   color: #555;
 }
 
+.dcc-rest-buttons-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.dcc-rest-label {
+  font-size: 10px;
+  color: #777;
+  text-transform: uppercase;
+  margin-right: 2px;
+  font-weight: bold;
+}
+
+.dcc-rest-btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid #333;
+  color: #ffffff;
+  line-height: 16px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.dcc-rest-btn:hover {
+  transform: translateY(-1px);
+}
+
+.dcc-rest-btn[data-rest-type="1hour"] {
+  background: #34495e;
+  border-color: #4a6278;
+}
+
+.dcc-rest-btn[data-rest-type="1hour"]:hover {
+  background: #4a6278;
+  box-shadow: 0 0 6px rgba(74, 98, 120, 0.6);
+}
+
+.dcc-rest-btn[data-rest-type="short"] {
+  background: #2980b9;
+  border-color: #3498db;
+}
+
+.dcc-rest-btn[data-rest-type="short"]:hover {
+  background: #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.6);
+}
+
+.dcc-rest-btn[data-rest-type="long"] {
+  background: #27ae60;
+  border-color: #2ecc71;
+}
+
+.dcc-rest-btn[data-rest-type="long"]:hover {
+  background: #2ecc71;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+}
+
+.dcc-rest-btn[data-rest-type="fullDay"] {
+  background: #8e44ad;
+  border-color: #9b59b6;
+}
+
+.dcc-rest-btn[data-rest-type="fullDay"]:hover {
+  background: #9b59b6;
+  box-shadow: 0 0 6px rgba(155, 89, 182, 0.6);
+}
+
 .dcc-health-bar-wrapper {
   position: relative;
   width: 100%;

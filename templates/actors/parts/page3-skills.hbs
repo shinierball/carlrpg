@@ -4,6 +4,9 @@
     <div class="dcc-banner-header">
       <span>SKILLS</span>
       <div style="display: flex; gap: 12px; align-items: center;">
+        <a class="open-grind-app" data-tooltip="Start a Grinding & Downtime Session" style="color: #e67e22; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-dumbbell"></i> Grind
+        </a>
         <a class="open-skill-picker" data-tooltip="Choose from official DCC Skill Library" style="color: #f1c40f; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
           <i class="fa-solid fa-book-bookmark"></i> Select Skill
         </a>
@@ -16,20 +19,28 @@
     <table class="dcc-attacks-table dcc-skills-table">
       <thead>
         <tr>
-          <th style="width: 21%;">Skill Name</th>
+          <th style="width: 5%; text-align: center;" title="Checked when used in play. Required for grinding advancement.">Used</th>
+          <th style="width: 19%;">Skill Name</th>
           <th style="width: 6%; text-align: center;" title="Base Trained Rank">Base</th>
-          <th style="width: 13%; text-align: center;" title="Bonuses from equipped gear, generic weapon groups, and boons">Item / Group / Boon</th>
+          <th style="width: 12%; text-align: center;" title="Bonuses from equipped gear, generic weapon groups, and boons">Item / Group / Boon</th>
           <th style="width: 7%; text-align: center;" title="Calculated rank after boons, items, and weapon group bonuses">Mod Rank</th>
-          <th style="width: 10%;">Stat & Mod</th>
-          <th style="width: 8%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
-          <th style="width: 10%;">Check Type</th>
+          <th style="width: 9%;">Stat & Mod</th>
+          <th style="width: 7%; text-align: center;" title="Total Skill Check Bonus (Modified Rank + Stat Mod)">Total</th>
+          <th style="width: 9%;">Check Type</th>
           <th style="width: 11%;">Notes & Upgrades</th>
-          <th style="width: 14%; text-align: center;">Actions</th>
+          <th style="width: 15%; text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>
         {{#each skills as |skill|}}
           <tr data-item-id="{{skill.id}}" draggable="true" style="{{#if skill.isGranted}}background: #fdf5e6;{{/if}}">
+            <td style="text-align: center;">
+              {{#if skill.isGranted}}
+                <span style="color: #bbb; font-size: 11px;">—</span>
+              {{else}}
+                <input class="dcc-field-input item-inline-edit" type="checkbox" data-field="system.checked" {{#if skill.isChecked}}checked{{/if}} title="Marked as used during play. Required for grinding advancement." style="cursor: pointer; accent-color: #27ae60; width: 14px; height: 14px; margin: 0 auto; display: block;" />
+              {{/if}}
+            </td>
             <td>
               <div style="display: flex; align-items: center; gap: 6px;">
                 <img src="{{skill.img}}" style="width: 20px; height: 20px; border: 1px solid #333; border-radius: 3px; object-fit: contain; background: #222;" />
@@ -131,6 +142,11 @@
                     <i class="fa-solid fa-burst"></i>
                   </button>
                 {{/if}}
+                {{#if skill.isChecked}}
+                  <button type="button" class="dcc-attack-roll-btn grind-skill-btn" data-item-id="{{skill.id}}" data-tooltip="Grind this skill: Rank {{skill.baseRank}} requires {{skill.requiredGrindHours}} hrs (Target: d20 &ge; {{skill.advancementTarget}})" style="font-size: 10px; padding: 2px 6px; background: #e67e22; color: #fff;">
+                    <i class="fa-solid fa-dumbbell"></i>
+                  </button>
+                {{/if}}
                 {{#if skill.isGranted}}
                   <span class="dcc-stat-sublabel" style="font-size: 9px; color: #888;" title="Granted by gear ({{skill.itemSources}}). Unequip gear to remove.">GEAR</span>
                 {{else}}
@@ -142,7 +158,7 @@
           </tr>
         {{else}}
           <tr>
-            <td colspan="9" style="text-align: center; color: #777; padding: 18px;">
+            <td colspan="10" style="text-align: center; color: #777; padding: 18px;">
               No skills added yet. Click <strong style="color: #f1c40f;">Select Skill</strong> above to pick from the official DCC Skill Library, or drag & drop from the Compendium.
             </td>
           </tr>

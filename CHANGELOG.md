@@ -1,3 +1,51 @@
+## 2.0.53
+
+### Resting Subsystem & Page 1 Health Bar Integration
+
+- **Rest Action Buttons by Health Total (Page 1)**:
+  - Moved the Safe Room Rest from Page 3 into a dedicated, high-visibility resting group (`.dcc-rest-buttons-group`) directly beside the Health total on Page 1 Core.
+  - Added 4 interactive rest buttons with tooltips, confirmation dialogs, and color-coded Oswald pill styling:
+    - **1h Non-Combat Rest** (`.dcc-rest-btn[data-rest-type="1hour"]`): Recovers 1 Health Bar slot (+CON Mod HP, capped at max HP) and +5 Mana.
+    - **2h Short Rest** (`.dcc-rest-btn[data-rest-type="short"]`): Recovers 5 Health Bar slots (+5 × CON Mod HP, capped at max HP) and half Mana regeneration rounded down (`floor(Max Mana / 2)`). Clears short rest conditions (such as *Minor Injury*).
+    - **8h Safe Room Long Rest** (`.dcc-rest-btn[data-rest-type="long"]`): Fully restores all 10 Health Bars to 100%, refilled Mana reserves to maximum, and clears all stacked *Fatigued* debuffs and long rest conditions.
+    - **30h Full Day Rest** (`.dcc-rest-btn[data-rest-type="fullDay"]`): Complete 30-hour canonical Dungeon Day rest. Restores full Health and Mana, clears fatigue, and recovers from all Injuries (*Minor Injury*, *Major Injury*, *Long-Term Minor Injury*, *Long-Term Major Injury*, broken limbs).
+- **Actor Document Unified Rest Engine**:
+  - Implemented `actor.rest(restType, options)` handling all 4 rest durations with automated Health and Mana capping, condition removals, and rich LitRPG chat cards.
+  - Retained `actor.restSafeRoom(options)` as backward-compatible wrapper delegating to `this.rest('long', options)`.
+- **Character Sheet Context**:
+  - Attached `context.hpPerBar` and `context.fiveHpBars` in `DCCCrawlerSheet.getData()`.
+- **Verification**:
+  - Added comprehensive automated unit tests in `tests/grinding.test.mjs` validating all 4 rest types, slot calculations, mana scaling, condition removals, and sheet data binding.
+  - 100% test suite passing with 0 failures across 99 suites (612 tests passed).
+
+## 2.0.52
+
+### Grinding, Skill Advancement & Downtime System
+
+- **Comprehensive Grinding Mechanics**:
+  - Implemented the official Renegade Game Studios CarlRPG grinding rules:
+    - 5-Hour safe daily grinding limit with 0 exhaustion checks.
+    - Extended grinding (> 5 hours) requires an Unopposed Endurance Check ($1d20 + \text{Modified Rank} + \text{CON Mod}$ vs $10 + \text{Floor Number} + \text{Hours Past Safe Limit}$).
+    - Failing the Endurance check inflicts the canonical stackable **Fatigued Debuff** (`-1 penalty on all Checks and Move halved. Stackable. Until the end of a long rest.`).
+    - Full synergy with Endurance skill perks: Rank 5 (ignore Major Failures), Rank 10 (roll with Advantage if not already Fatigued), Rank 15 (convert Critical Failures to Standard Failures).
+    - Guide bonuses (e.g. Huey / Bob) increase the daily safe grinding threshold to 6 hours at no penalty.
+- **Skill Advancement Cycle**:
+  - Use-Marking: Any skill rolled via `actor.rollSkill(skill)` or `actor.rollAttack(attack)` is automatically marked as **Checked** (`system.checked: true`).
+  - Investment Requirement: Allocating grinding hours equal to the skill's current rank ($\text{Hours} = \text{Current Rank}$).
+  - Advancement Check: Rolling $1d20 \ge \text{Current Rank}$ permanently increases the skill rank by +1 and clears the `checked` flag; failures retain current rank for future practice.
+- **Dedicated Interactive Application (`DCCGrindApp`)**:
+  - Modal app featuring duration slider/inputs, guide insight toggles, dynamic excess hours/fatigue warnings, focus skill selection with required hours and targets, and complication rollers.
+  - Automatically posts immersive LitRPG chat cards recording hours spent, Floor Collapse Clock advancement (+X hrs), Endurance check details, and skill promotions.
+- **1d20 Grinding Complications Table**:
+  - Integrated 9 discrete complication tiers: Bugaboo Scout Ambush, Janitor Mob Infestation (Pack Rats / Brindle Grubs), Labyrinthine Dead End / Trap, Equipment Wear, Rival Crawlers, Clean Grind, Scavenged Junk, Wandering Merchant/Guide, and AI-Approved Carnage (Loot Box Award).
+- **Safe Room 8-Hour Long Rest (`actor.restSafeRoom()`)**:
+  - Fully heals all 10 CON-mod health bars to 100%, refilled Mana reserves, and deletes all stacked `Fatigued` debuffs.
+- **Character Sheet Integration**:
+  - Page 3 (Skills) features a **Used** checkbox column, a quick **Grind** button for checked skills, and header action buttons for **Grind Hub** and **Safe Room Rest**.
+- **Verification**:
+  - Created automated test suite in `tests/grinding.test.mjs` (19 tests) verifying progression formulas, safe limits, guide bonuses, endurance rolls, fatigue applications, skill advancements, auto-use checking, Safe Room rests, and app data binding.
+  - 100% test suite passing with 0 failures across 99 suites (607 tests passed).
+
 ## 2.0.51
 
 ### Optional Damage Effects Subsystem for Attacks & Hand-to-Hand Skills

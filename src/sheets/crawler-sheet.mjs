@@ -2,8 +2,10 @@ import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCCAchievementManagerApp } from '../apps/achievement-manager.mjs';
+import { DCCGrindApp } from '../apps/grind-app.mjs';
 import { DCC_ACHIEVEMENT_TIERS } from '../data/achievements.mjs';
 import { DCC_WEAPON_GROUP_MAP, DAMAGE_EFFECT_AI_FAVOR } from '../documents/actor.mjs';
+import { getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
 
@@ -282,6 +284,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       });
     }
 
+    // Health bar slot amounts for resting calculations
+    context.hpPerBar = getHpPerBar(actor);
+    context.fiveHpBars = 5 * context.hpPerBar;
+
     // Prepare creature size options
     const currentSize = context.system.attributes?.size ?? 'Medium';
     const currentSizeInfo = getSizeInfo(currentSize);
@@ -550,6 +556,9 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       skill.totalSkillStr = totalSkill >= 0 ? `+${totalSkill}` : `${totalSkill}`;
       skill.itemSources = gearData ? gearData.sources.join(', ') : '';
       skill.typeSources = typeSources;
+      skill.isChecked = Boolean(skill.system?.checked);
+      skill.requiredGrindHours = Math.max(1, baseRank);
+      skill.advancementTarget = baseRank;
 
       if (skill.system) {
         skill.system.itemBonus = itemBonus;
@@ -1444,6 +1453,32 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
+    // Open Grinding & Downtime Hub
+    html.find('.open-grind-app').click(ev => {
+      ev.preventDefault();
+      this._openGrindApp();
+    });
+
+    // Quick Grind specific skill button
+    html.find('.grind-skill-btn').click(ev => {
+      ev.preventDefault();
+      const itemId = $(ev.currentTarget).data('itemId') || ev.currentTarget.dataset?.itemId;
+      this._openGrindApp(itemId);
+    });
+
+    // Rest Action Buttons on Page 1 (1h, 2h short, 8h long, 30h full day)
+    html.find('.dcc-rest-btn').click(async ev => {
+      ev.preventDefault();
+      const restType = $(ev.currentTarget).data('restType') || ev.currentTarget.dataset?.restType || 'long';
+      await this._onRest(restType);
+    });
+
+    // Safe Room 8-Hour Long Rest (Legacy or external button compatibility)
+    html.find('.rest-safe-room').click(async ev => {
+      ev.preventDefault();
+      await this._onRest('long');
+    });
+
     // Open Skill Library Picker
     html.find('.open-skill-picker').click(ev => {
       ev.preventDefault();
@@ -1845,7 +1880,14 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const field = input.data('field');
       const item = this.actor.items.get(itemId);
       if (item && field) {
-        const val = input.attr('type') === 'number' ? Number(input.val()) : input.val();
+        let val;
+        if (input.attr('type') === 'checkbox') {
+          val = input.is(':checked');
+        } else if (input.attr('type') === 'number') {
+          val = Number(input.val());
+        } else {
+          val = input.val();
+        }
         await item.update({ [field]: val });
       }
     });
@@ -2058,6 +2100,55 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         await item.roll();
       }
     });
+  }
+
+  /**
+   * Open interactive Grinding & Downtime Hub
+   * @param {string|null} selectedSkillId
+   */
+  _openGrindApp(selectedSkillId = null) {
+    new DCCGrindApp({ actor: this.actor, selectedSkillId }).render(true);
+  }
+
+  /**
+   * Take a rest with user confirmation prompt
+   * @param {string} [restType='long'] '1hour' | 'short' | 'long' | 'fullDay'
+   */
+  async _onRest(restType = 'long') {
+    const labels = {
+      '1hour': '1-Hour Non-Combat Rest',
+      'short': '2-Hour Short Rest',
+      'long': '8-Hour Safe Room Long Rest',
+      'fullDay': '30-Hour Full Day Rest'
+    };
+    const descriptions = {
+      '1hour': 'Recovers 1 Health Bar slot and 5 Mana.',
+      'short': 'Recovers 5 Health Bar slots and half Mana regeneration (round down). Clears short rest conditions.',
+      'long': 'Fully restores all 10 Health Bars, refills all Mana, and clears all stacked Fatigued debuffs.',
+      'fullDay': 'Complete 30-hour biological rest. Fully restores Health and Mana, clears fatigue, and recovers from all Injuries.'
+    };
+    const label = labels[restType] || 'Rest';
+    const desc = descriptions[restType] || '';
+
+    const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog;
+    if (DialogClass && typeof DialogClass.confirm === 'function') {
+      const proceed = await DialogClass.confirm({
+        title: label,
+        content: `<p>Take a <strong>${label}</strong>?</p><p style="color: #666; font-size: 13px;">${desc}</p>`
+      });
+      if (proceed) {
+        await this.actor.rest(restType);
+      }
+    } else {
+      await this.actor.rest(restType);
+    }
+  }
+
+  /**
+   * Take an 8-Hour Long Rest in a Safe Room
+   */
+  async _onSafeRoomRest() {
+    return this._onRest('long');
   }
 
   /**

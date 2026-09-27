@@ -12,6 +12,7 @@ import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
+import { DCCGrindApp } from './apps/grind-app.mjs';
 import {
   initCrawlerTokenHUD,
   getCrawlerTokenHUD,
@@ -322,7 +323,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/crawler-creator.hbs',
     'systems/carl-rpg/templates/apps/achievement-manager.hbs',
     'systems/carl-rpg/templates/apps/crawler-hotbar-hud.hbs',
-    'systems/carl-rpg/templates/apps/crawler-action-hud.hbs'
+    'systems/carl-rpg/templates/apps/crawler-action-hud.hbs',
+    'systems/carl-rpg/templates/apps/grind-app.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -338,7 +340,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
           app.render(false);
         }
       }
@@ -357,6 +359,9 @@ Hooks.once('init', async function() {
     setupInitialHotbar,
     openAchievementManager(options = {}) {
       return new DCCAchievementManagerApp(options).render(true);
+    },
+    openGrindApp(options = {}) {
+      return new DCCGrindApp(options).render(true);
     },
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);

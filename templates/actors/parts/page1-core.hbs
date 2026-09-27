@@ -131,6 +131,24 @@
       {{/if}}
       <span class="dcc-field-label" style="margin-left: 10px; margin-right: 4px;">Temp:</span>
       <input class="dcc-hp-input" name="system.attributes.hp.temp" type="number" value="{{system.attributes.hp.temp}}" placeholder="0" style="border: 1px solid #000; width: 44px;" />
+
+      {{#unless isMob}}
+      <div class="dcc-rest-buttons-group">
+        <span class="dcc-rest-label" title="Rest to recover Health and Mana"><i class="fa-solid fa-bed"></i> Rest:</span>
+        <button type="button" class="dcc-rest-btn" data-rest-type="1hour" data-tooltip="1-Hour Non-Combat Rest: Recovers 1 Health Bar slot (+{{hpPerBar}} HP) and 5 Mana." title="1-Hour Non-Combat Rest: +1 HB slot (+{{hpPerBar}} HP) and +5 Mana">
+          1h
+        </button>
+        <button type="button" class="dcc-rest-btn" data-rest-type="short" data-tooltip="2-Hour Short Rest: Recovers 5 Health Bar slots (+{{fiveHpBars}} HP) and half Mana (round down)." title="2-Hour Short Rest: +5 HB slots (+{{fiveHpBars}} HP) and half Mana">
+          2h Short
+        </button>
+        <button type="button" class="dcc-rest-btn" data-rest-type="long" data-tooltip="8-Hour Safe Room Long Rest: Fully restores all 10 Health Bars and Mana. Clears all stacked Fatigued debuffs." title="8-Hour Safe Room Long Rest: Full HP/Mana and clears fatigue">
+          8h Safe Room
+        </button>
+        <button type="button" class="dcc-rest-btn" data-rest-type="fullDay" data-tooltip="30-Hour Full Day Rest: Complete regeneration. Restores Health, Mana, clears fatigue, and recovers from all Injuries." title="30-Hour Full Day Rest: Full HP/Mana, clear fatigue, and heal all injuries">
+          30h Full Day
+        </button>
+      </div>
+      {{/unless}}
     </div>
 
     <div class="dcc-health-bar-wrapper" style="--hp-val: {{system.attributes.hp.value}}; --hp-max: {{system.attributes.hp.max}}; --hp-pct: {{system.attributes.hp.pct}}; --hp-segments: {{healthSegments.length}};" data-tooltip="HP: {{system.attributes.hp.value}} / {{system.attributes.hp.max}}">

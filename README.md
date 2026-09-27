@@ -122,6 +122,12 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
     - Clicking the roll icon on Page 3 (Skills) for any attack skill rolls **To Hit vs Target Evade** identically to attacks in the hotlist and attacks section. Non-combat utility skills roll standard skill checks.
     - Inline `.roll-skill-dmg` burst buttons allow rolling damage directly from the skills table.
     - Embedded `[ 💥 Roll Attack Damage ]` buttons on chat cards allow players to click directly from chat to roll multi-typed damage and apply damage to targeted tokens with one click.
+- **Grinding & Skill Advancement Mechanics**:
+  - Full support for the official CarlRPG downtime grinding system (see [docs/grinding-mechanics.md](docs/grinding-mechanics.md)).
+  - **5-Hour Safe Daily Limit**: Crawlers can safely grind up to 5 hours per in-game day without fatigue checks; grinding beyond 5 hours requires an **Endurance Check** (CON) per hour or inflicts the stackable **Fatigued Debuff** (−1 Checks, halved Move speed).
+  - **Floor Clock Cost**: Grinding directly consumes time against the active Floor Collapse timer.
+  - **Skill Progression**: Mark actively used skills (`checked`), invest grinding hours equal to current rank ($\text{Hours} = \text{Current Rank}$), and roll $\mathbf{d20 \ge \text{Current Rank}}$ to advance.
+  - **Grinding Complications Table**: 1d20 random GM event table covering mob ambushes, Janitor Mob corpse swarms, environmental hazards, rival crawlers, and AI-awarded Loot Boxes.
 - **Multi-Modifier Buffs & Debuffs**:
   - Create buffs with multiple stat bonuses (e.g. +2 STR, +2 DEX) and multiple damage/defense modifiers (damage multipliers, bonus typed damage, resistances, immunities, and Temp HP).
   - Create debuffs with multiple stat penalties (-2 STR, -4 CON) and multi-typed incoming damage reductions.

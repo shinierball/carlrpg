@@ -140,6 +140,26 @@ export class MockActor {
     }
     return [];
   }
+  async deleteEmbeddedDocuments(embeddedType, ids = []) {
+    if (embeddedType === 'Item') {
+      const idSet = new Set(ids);
+      const deleted = [];
+      this.items = this.items.filter(item => {
+        if (idSet.has(item.id) || idSet.has(item._id)) {
+          deleted.push(item);
+          return false;
+        }
+        return true;
+      });
+      if (!this.items.get) {
+        this.items.get = function(id) {
+          return this.find(i => i.id === id || i._id === id);
+        };
+      }
+      return deleted;
+    }
+    return [];
+  }
   static async createDocuments(dataArray = [], context = {}) {
     const ActorClass = CONFIG.Actor?.documentClass || MockActor;
     const created = dataArray.map(d => new ActorClass(d));

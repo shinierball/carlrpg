@@ -1,0 +1,153 @@
+<div class="dcc-app dcc-grind-app-content" style="padding: 12px; font-family: 'Oswald', sans-serif; background: #141418; color: #fff;">
+  {{!-- HEADER --}}
+  <div style="background: linear-gradient(90deg, #c0392b, #8e44ad); padding: 8px 14px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-dumbbell" style="font-size: 18px; color: #f1c40f;"></i>
+      <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Grinding & Downtime Hub</span>
+    </div>
+    <div style="font-size: 12px; color: #f1c40f; text-transform: uppercase;">
+      {{actor.name}} • Floor {{floorNumber}}
+    </div>
+  </div>
+
+  {{!-- SESSION SETUP --}}
+  <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+      
+      {{!-- Hours Selector --}}
+      <div style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 12px; text-transform: uppercase; color: #aaa; margin-bottom: 4px;">
+          Grinding Duration: <strong style="color: #fff; font-size: 15px;">{{hours}} Hours</strong>
+        </label>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="range" class="grind-hours-input" min="1" max="12" step="1" value="{{hours}}" style="flex: 1; accent-color: #c0392b; cursor: pointer;" />
+          <input type="number" class="grind-hours-input" min="1" max="24" value="{{hours}}" style="width: 50px; background: #111; color: #fff; border: 1px solid #555; text-align: center; border-radius: 3px; font-weight: bold;" />
+        </div>
+      </div>
+
+      {{!-- Floor --}}
+      <div style="width: 100px;">
+        <label style="display: block; font-size: 12px; text-transform: uppercase; color: #aaa; margin-bottom: 4px;">
+          Floor
+        </label>
+        <input type="number" class="grind-floor-input" min="1" max="18" value="{{floorNumber}}" style="width: 100%; background: #111; color: #fff; border: 1px solid #555; text-align: center; border-radius: 3px; font-weight: bold; padding: 4px;" />
+      </div>
+
+      {{!-- Guide Bonus --}}
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 12px; text-transform: uppercase; color: #aaa;">Guide Insight</label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #ddd; background: #262633; padding: 5px 8px; border-radius: 4px; border: 1px solid #444;">
+          <input type="checkbox" class="guide-bonus-toggle" {{#if hasGuideBonus}}checked{{/if}} />
+          <span>+1 Safe Hour (Huey/Bob)</span>
+        </label>
+      </div>
+
+    </div>
+
+    {{!-- Threshold & Fatigue Warning Status --}}
+    <div style="margin-top: 10px; padding: 8px 10px; border-radius: 4px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; {{#if (gt excessHours 0)}}background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b;{{else}}background: rgba(39, 174, 96, 0.15); border: 1px solid #27ae60;{{/if}}">
+      <div>
+        <i class="fa-solid {{#if (gt excessHours 0)}}fa-triangle-exclamation{{else}}fa-shield-halved{{/if}}" style="color: {{#if (gt excessHours 0)}}#e74c3c{{else}}#2ecc71{{/if}}; margin-right: 6px;"></i>
+        <span>Safe Limit: <strong>{{safeThreshold}} Hours</strong></span>
+        {{#if (gt excessHours 0)}}
+          <span style="color: #e74c3c; margin-left: 8px;">
+            (<strong>{{excessHours}} Excess Hours</strong> requires {{excessHours}} Endurance check{{#if (gt excessHours 1)}}s{{/if}}!)
+          </span>
+        {{else}}
+          <span style="color: #2ecc71; margin-left: 8px;">(No exhaustion checks required)</span>
+        {{/if}}
+      </div>
+      <div style="font-size: 11px; color: #bbb;">
+        Endurance Mod: <strong style="color: #f1c40f;">{{enduranceBonusStr}}</strong> (Rank {{enduranceRank}} + CON {{conMod}})
+      </div>
+    </div>
+  </div>
+
+  {{!-- SKILL SELECTION FOR ADVANCEMENT --}}
+  <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
+      <span style="font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #f1c40f;">
+        <i class="fa-solid fa-graduation-cap"></i> Select Skill to Advance (Hours = Current Rank)
+      </span>
+      <span style="font-size: 11px; color: #888;">
+        Marked <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 1px 4px; font-size: 9px;">CHECKED</span> skills used this session
+      </span>
+    </div>
+
+    {{#if skills.length}}
+      <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+        {{#each skills as |sk|}}
+          <div class="grind-skill-option" data-skill-id="{{sk.id}}" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; {{#if sk.isSelected}}background: #2c2538; border: 1.5px solid #f1c40f; box-shadow: 0 0 6px rgba(241,196,15,0.3);{{else}}background: #181820; border: 1px solid #2a2a35;{{/if}}">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+              <input type="radio" name="grind-skill-choice" value="{{sk.id}}" {{#if sk.isSelected}}checked{{/if}} style="cursor: pointer; accent-color: #f1c40f;" />
+              <img src="{{sk.img}}" style="width: 22px; height: 22px; border-radius: 3px; border: 1px solid #444; object-fit: contain; background: #111;" />
+              <div>
+                <span style="font-weight: bold; font-size: 13px; color: #fff;">{{sk.name}}</span>
+                <span style="font-size: 11px; color: #888; margin-left: 4px;">({{sk.stat}})</span>
+              </div>
+              {{#if sk.checked}}
+                <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 2px;" title="Used during play! Eligible for progression.">CHECKED</span>
+              {{/if}}
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="text-align: right; font-size: 11px;">
+                <span style="color: #aaa;">Current:</span>
+                <strong style="color: #fff; font-size: 12px;">Rank {{sk.baseRank}}</strong>
+              </div>
+
+              <div style="text-align: right; font-size: 11px;">
+                <span style="color: #aaa;">Requires:</span>
+                <strong style="color: #f1c40f;">{{sk.requiredHours}} hrs</strong>
+              </div>
+
+              <div style="text-align: right; font-size: 11px; min-width: 80px;">
+                <span style="color: #aaa;">Target:</span>
+                <strong style="color: #fff;">d20 &ge; {{sk.target}}</strong>
+              </div>
+
+              <div>
+                {{#if sk.canAdvance}}
+                  <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: bold;">
+                    READY
+                  </span>
+                {{else}}
+                  <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 3px;">
+                    NEEDS {{sk.requiredHours}} HRS
+                  </span>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div style="text-align: center; color: #777; padding: 16px;">
+        No skills found on this character. Add skills from the Skill Library first.
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- COMPLICATIONS & REST OPTIONS --}}
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 8px 12px;">
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: #ddd;">
+      <input type="checkbox" class="complication-toggle" {{#if rollComplication}}checked{{/if}} style="accent-color: #c0392b;" />
+      <span><i class="fa-solid fa-dice-d20" style="color: #f1c40f;"></i> Roll on <strong>1d20 Grinding Complications Table</strong></span>
+    </label>
+
+    <div style="font-size: 11px; color: #888;">
+      Advances Floor Clock: <strong style="color: #e67e22;">+{{hours}} Hours</strong>
+    </div>
+  </div>
+
+  {{!-- ACTION BUTTONS --}}
+  <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+    <button type="button" class="safe-room-rest-btn" style="background: #27ae60; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Oswald', sans-serif;">
+      <i class="fa-solid fa-bed"></i> Safe Room Rest (8 hrs)
+    </button>
+
+    <button type="button" class="execute-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1px solid #e74c3c; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-family: 'Oswald', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
+      <i class="fa-solid fa-play"></i> Execute Grind ({{hours}} hrs)
+    </button>
+  </div>
+</div>

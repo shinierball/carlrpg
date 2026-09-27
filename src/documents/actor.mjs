@@ -2,6 +2,13 @@ import { DCCCombatMetrics, getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCCSessionEngine } from '../apps/session-manager.mjs';
 import { getSizeInfo } from '../data/sizes.mjs';
 import { getRankDamageDie, parseUpgrades, getEvadeTargetDifficulty } from '../data/rank-dice.mjs';
+import {
+  DCC_GRINDING_COMPLICATIONS,
+  getGrindingComplication,
+  getRequiredGrindingHours,
+  getAdvancementTarget,
+  getEnduranceDC
+} from '../data/grinding.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -2112,12 +2119,18 @@ export class DCCActor extends Actor {
         const statMatch = checkType.match(/,\s*([a-zA-Z]+)/);
         toHitStat = statMatch ? statMatch[1].toLowerCase() : (sys.stat || 'str').toLowerCase();
         rank = Number(attackItem.modifiedRank ?? sys.modifiedRank ?? attackItem.effectiveRank ?? sys.rank) || 0;
+        if (typeof attackItem.update === 'function' && !attackItem.system?.checked) {
+          attackItem.update({ 'system.checked': true }).catch(() => {});
+        }
       } else {
         const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
         const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
         const primaryPart = Array.isArray(sys.damageParts) ? sys.damageParts[0] : Object.values(sys.damageParts || {})[0];
         toHitStat = (sys.toHitStat || matchingSkill?.system?.stat || primaryPart?.stat || (attackItem.type === 'gear' ? 'str' : 'dex')).toLowerCase();
         rank = matchingSkill ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0) : (Number(sys.toHitRank ?? sys.rank) || 0);
+        if (matchingSkill && typeof matchingSkill.update === 'function' && !matchingSkill.system?.checked) {
+          matchingSkill.update({ 'system.checked': true }).catch(() => {});
+        }
       }
 
       const statMod = this.system.abilities?.[toHitStat]?.mod ?? 0;
@@ -2722,6 +2735,11 @@ export class DCCActor extends Actor {
     // Record skill usage in active combat if applicable
     if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.recordSkillUsage === 'function') {
       DCCCombatMetrics.recordSkillUsage({ actor: this, skillName: skillItem.name }).catch(() => {});
+    }
+
+    // Mark skill as checked/used in play for grinding advancement
+    if (skillItem && typeof skillItem.update === 'function' && !skillItem.system?.checked) {
+      skillItem.update({ 'system.checked': true }).catch(() => {});
     }
 
     const sys = skillItem.system || {};
@@ -3744,5 +3762,496 @@ export class DCCActor extends Actor {
         }
       }
     });
+  }
+
+  /**
+   * Apply the canonical stackable Fatigued debuff to this actor.
+   * "You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest."
+   * @returns {Promise<Item>}
+   */
+  async applyFatiguedDebuff() {
+    const debuffData = {
+      name: 'Fatigued',
+      type: 'debuff',
+      img: 'icons/conditions/fatigued.webp',
+      system: {
+        severity: 'Minor',
+        damageType: '',
+        reductionPercent: 0,
+        rounding: 'up',
+        statModifiers: [],
+        damageModifiers: [],
+        duration: 'Until the end of a long rest.',
+        description: 'You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest.'
+      }
+    };
+    const created = await this.createEmbeddedDocuments('Item', [debuffData]);
+    return created[0] || null;
+  }
+
+  /**
+   * Perform resting for this crawler.
+   * Supports all official CarlRPG rest durations:
+   * - '1hour': 1 hour of non-combat rest -> 1 Health Bar slot (+hpPerBar HP) & 5 Mana recovered.
+   * - 'short': 2 hour short rest -> 5 Health Bar slots (+5*hpPerBar HP) & half Mana regeneration (round down). Clears short rest conditions.
+   * - 'long': 8 hour Safe Room rest -> Full Health (all 10 bars), full Mana, and removes all stacked Fatigued debuffs.
+   * - 'fullDay': 30 hour full day rest -> Full Health, full Mana, removes fatigue, and recovers from all Injuries (Minor, Major, Long-Term).
+   * @param {string} [restType='long'] '1hour' | 'short' | 'long' | 'fullDay'
+   * @param {object} [options={}]
+   * @returns {Promise<object>}
+   */
+  async rest(restType = 'long', options = {}) {
+    const normType = String(restType || 'long').toLowerCase().trim();
+    const maxHP = Number(this.system.attributes?.hp?.max) || 40;
+    const currentHP = Number(this.system.attributes?.hp?.value) || 0;
+    const maxMana = Number(this.system.attributes?.mana?.max) || 10;
+    const currentMana = Number(this.system.attributes?.mana?.value) || 0;
+    const hpPerBar = getHpPerBar(this);
+
+    let newHP = currentHP;
+    let newMana = currentMana;
+    let title = '';
+    let icon = '';
+    let color = '';
+    let hours = 0;
+    let hpDesc = '';
+    let manaDesc = '';
+    const clearedConditions = [];
+
+    const allDebuffs = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff')) : [];
+
+    if (normType === '1hour' || normType === '1h' || normType === 'hour') {
+      hours = 1;
+      title = '1-HOUR NON-COMBAT REST';
+      icon = 'fa-solid fa-hourglass-start';
+      color = '#34495e';
+
+      const healAmount = hpPerBar;
+      newHP = Math.min(maxHP, currentHP + healAmount);
+      const manaAmount = 5;
+      newMana = Math.min(maxMana, currentMana + manaAmount);
+
+      hpDesc = `Regained 1 Health Bar slot (+${Math.max(0, newHP - currentHP)} HP)`;
+      manaDesc = `Recovered +${Math.max(0, newMana - currentMana)} Mana`;
+
+    } else if (normType === 'short' || normType === '2hour' || normType === '2h') {
+      hours = 2;
+      title = '2-HOUR SHORT REST';
+      icon = 'fa-solid fa-mug-hot';
+      color = '#2980b9';
+
+      const healAmount = 5 * hpPerBar;
+      newHP = Math.min(maxHP, currentHP + healAmount);
+      const manaGain = Math.floor(maxMana / 2);
+      newMana = Math.min(maxMana, currentMana + manaGain);
+
+      hpDesc = `Regained 5 Health Bar slots (+${Math.max(0, newHP - currentHP)} HP)`;
+      manaDesc = `Recovered half Mana rounded down (+${Math.max(0, newMana - currentMana)} Mana)`;
+
+      // Clear conditions with short rest duration (e.g. Minor Injury)
+      for (const debuff of allDebuffs) {
+        const dur = (debuff.system?.duration || '').toLowerCase();
+        if (dur.includes('short rest')) {
+          clearedConditions.push(debuff);
+        }
+      }
+
+    } else if (normType === 'long' || normType === '8hour' || normType === '8h' || normType === 'safe' || normType === 'saferoom') {
+      hours = 8;
+      title = '8-HOUR SAFE ROOM LONG REST';
+      icon = 'fa-solid fa-bed';
+      color = '#27ae60';
+
+      newHP = maxHP;
+      newMana = maxMana;
+
+      hpDesc = `All 10 Health Bars restored to 100% (+${Math.max(0, newHP - currentHP)} HP)`;
+      manaDesc = `Mana fully refilled to maximum (+${Math.max(0, newMana - currentMana)} Mana)`;
+
+      // Clear all Fatigued debuffs and conditions lasting until end of long rest / short rest
+      for (const debuff of allDebuffs) {
+        const dName = debuff.name.toLowerCase().trim();
+        const dur = (debuff.system?.duration || '').toLowerCase();
+        if (dName === 'fatigued' || dur.includes('long rest') || dur.includes('short rest')) {
+          clearedConditions.push(debuff);
+        }
+      }
+
+    } else if (normType === 'fullday' || normType === 'day' || normType === '30hour' || normType === '30h') {
+      hours = 30;
+      title = '30-HOUR FULL DAY REST';
+      icon = 'fa-solid fa-sun';
+      color = '#8e44ad';
+
+      newHP = maxHP;
+      newMana = maxMana;
+
+      hpDesc = `All 10 Health Bars restored to 100% (+${Math.max(0, newHP - currentHP)} HP)`;
+      manaDesc = `Mana fully refilled to maximum (+${Math.max(0, newMana - currentMana)} Mana)`;
+
+      // Recover from injuries! Clears Fatigued and all injury debuffs: Minor Injury, Major Injury, Long-Term Minor/Major Injury, broken limbs, etc.
+      for (const debuff of allDebuffs) {
+        const dName = debuff.name.toLowerCase().trim();
+        const dur = (debuff.system?.duration || '').toLowerCase();
+        const isInjury = dName.includes('injury') || dName.includes('wound') || dName.includes('broken');
+        if (dName === 'fatigued' || isInjury || dur.includes('full day') || dur.includes('day') || dur.includes('long rest') || dur.includes('short rest')) {
+          clearedConditions.push(debuff);
+        }
+      }
+    } else {
+      // Default to long rest
+      return this.rest('long', options);
+    }
+
+    const hpRestored = Math.max(0, newHP - currentHP);
+    const manaRestored = Math.max(0, newMana - currentMana);
+    const hpPct = maxHP > 0 ? Math.round((newHP / maxHP) * 100) : 100;
+
+    await this.update({
+      'system.attributes.hp.value': newHP,
+      'system.attributes.hp.temp': 0,
+      'system.attributes.hp.pct': hpPct,
+      'system.attributes.mana.value': newMana
+    });
+
+    let conditionsClearedCount = 0;
+    if (clearedConditions.length > 0 && typeof this.deleteEmbeddedDocuments === 'function') {
+      const ids = [...new Set(clearedConditions.map(i => i.id || i._id))];
+      await this.deleteEmbeddedDocuments('Item', ids);
+      conditionsClearedCount = ids.length;
+    }
+
+    const fatigueCleared = clearedConditions.filter(c => c.name?.toLowerCase().trim() === 'fatigued').length;
+
+    if (!options.silent) {
+      const conditionLines = clearedConditions.map(c => `<li>Cleared: <strong>${c.name}</strong></li>`).join('');
+      const card = `
+        <div class="dcc-chat-card dcc-rest-card" style="border: 2px solid ${color}; background: #141418; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif;">
+          <div style="background: ${color}; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; padding: 5px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 8px;">
+            <i class="${icon}"></i> ${title} COMPLETE
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; border-bottom: 1px solid #333; padding-bottom: 6px;">
+            <span>Crawler: <strong style="color: #fff;">${this.name}</strong></span>
+            <span>Duration: <strong style="color: #f1c40f;">${hours} Hours</strong></span>
+          </div>
+          <ul style="margin: 8px 0 0 0; padding-left: 18px; font-size: 12px; color: #ddd; line-height: 1.6;">
+            <li><strong>Health:</strong> ${hpDesc} &rarr; <strong>${newHP} / ${maxHP} HP</strong></li>
+            <li><strong>Mana:</strong> ${manaDesc} &rarr; <strong>${newMana} / ${maxMana} MP</strong></li>
+            ${conditionLines ? conditionLines : (hours >= 8 ? '<li><strong>Conditions:</strong> No lingering fatigue or rest conditions.</li>' : '')}
+          </ul>
+        </div>
+      `;
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: card,
+        flags: {
+          'carl-rpg': {
+            isRest: true,
+            restType: normType,
+            hours,
+            hpRestored,
+            manaRestored,
+            conditionsCleared: conditionsClearedCount
+          }
+        }
+      });
+    }
+
+    return {
+      restType: normType,
+      hours,
+      hpRestored,
+      manaRestored,
+      newHP,
+      newMana,
+      conditionsCleared: conditionsClearedCount,
+      fatigueCleared
+    };
+  }
+
+  /**
+   * Perform an 8-Hour Long Rest in a certified Safe Room.
+   * Alias for this.rest('long', options).
+   * @param {object} [options={}]
+   * @returns {Promise<object>}
+   */
+  async restSafeRoom(options = {}) {
+    return this.rest('long', options);
+  }
+
+  /**
+   * Execute a Grinding & Downtime session for this crawler.
+   * Implements official Renegade CarlRPG rules:
+   * - 5-Hour Safe Limit (or 6 if guide bonus active)
+   * - Hours > Safe require an Endurance check per excess hour
+   * - Failing check inflicts stackable Fatigued Debuff
+   * - Skill Advancement: requires grinding hours equal to current rank (Hours = Current Rank)
+   * - Advancement Check: 1d20 >= Current Rank
+   * - 1d20 Grinding Complications Table
+   * @param {object} options
+   * @param {number} [options.hours=5] Total hours to grind
+   * @param {boolean} [options.hasGuideBonus=false] Whether guide insight (Huey/Bob) grants +1 safe hour
+   * @param {string|null} [options.skillId=null] ID of skill selected for advancement
+   * @param {number|null} [options.floor=null] Dungeon floor number (defaults to parsed details.floor or 1)
+   * @param {boolean} [options.rollComplication=true] Whether to roll on the Grinding Complications Table
+   * @returns {Promise<object>}
+   */
+  async grindSession(options = {}) {
+    const hours = Math.max(1, Number(options.hours) || 5);
+    const hasGuideBonus = Boolean(options.hasGuideBonus);
+    const safeThreshold = hasGuideBonus ? 6 : 5;
+    const excessHours = Math.max(0, hours - safeThreshold);
+
+    // Floor number resolution
+    let floorNumber = 1;
+    if (options.floor !== undefined && options.floor !== null) {
+      floorNumber = Math.max(1, Number(options.floor) || 1);
+    } else {
+      const rawFloor = String(this.system.details?.floor || '1');
+      const match = rawFloor.match(/\d+/);
+      floorNumber = match ? Math.max(1, parseInt(match[0], 10)) : 1;
+    }
+
+    // 1. Fatigue & Endurance Checks for Excess Hours
+    const enduranceChecks = [];
+    let fatigueGained = 0;
+
+    if (excessHours > 0) {
+      // Find Endurance skill on actor
+      const allItems = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+      const enduranceSkill = allItems.find(i => i.name.toLowerCase().trim() === 'endurance');
+      const endSys = enduranceSkill?.system || {};
+      const endRank = Number(enduranceSkill?.modifiedRank ?? endSys.modifiedRank ?? enduranceSkill?.effectiveRank ?? endSys.rank) || 0;
+      const conMod = this.system.abilities?.con?.mod ?? 0;
+
+      // Check current fatigue count for Rank 10 advantage perk
+      const currentFatigueItems = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'debuff' && i.name.toLowerCase() === 'fatigued') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff' && i.name.toLowerCase() === 'fatigued')) : [];
+      const initialFatigueCount = currentFatigueItems.length;
+
+      for (let i = 1; i <= excessHours; i++) {
+        const hourPast = i;
+        const dc = getEnduranceDC(floorNumber, hourPast);
+
+        // Determine roll formula
+        let formula;
+        let flavor;
+        if (endRank <= 0) {
+          // Untrained: Disadvantage
+          formula = `2d20kl + ${conMod}`;
+          flavor = `Untrained Endurance Check (2d20kl + ${conMod})`;
+        } else if (endRank >= 10 && (initialFatigueCount + fatigueGained === 0)) {
+          // Rank 10 Perk: Advantage if not already Fatigued
+          formula = `2d20kh + ${endRank} + ${conMod}`;
+          flavor = `Rank 10 Advantage Endurance Check (2d20kh + Rank ${endRank} + CON ${conMod})`;
+        } else {
+          formula = `1d20 + ${endRank} + ${conMod}`;
+          flavor = `Endurance Check (1d20 + Rank ${endRank} + CON ${conMod})`;
+        }
+
+        const roll = await new Roll(formula).evaluate();
+        const total = roll.total;
+        let passed = total >= dc;
+
+        if (!passed) {
+          await this.applyFatiguedDebuff();
+          fatigueGained++;
+        }
+
+        enduranceChecks.push({
+          hour: safeThreshold + i,
+          dc,
+          formula,
+          rollTotal: total,
+          passed
+        });
+      }
+    }
+
+    // 2. Skill Advancement Check
+    let skillAdvancement = null;
+    if (options.skillId) {
+      const skillItem = this.items?.get ? this.items.get(options.skillId) : this.items?.find?.(i => i.id === options.skillId || i._id === options.skillId);
+      if (skillItem) {
+        const currentRank = Number(skillItem.system?.rank) || 0;
+        const reqHours = getRequiredGrindingHours(currentRank);
+        const target = getAdvancementTarget(currentRank);
+
+        if (hours >= reqHours) {
+          const advRoll = await new Roll('1d20').evaluate();
+          const rollResult = advRoll.total;
+          const passed = rollResult >= target;
+
+          if (passed) {
+            const newRank = currentRank + 1;
+            await skillItem.update({
+              'system.rank': newRank,
+              'system.checked': false
+            });
+            skillAdvancement = {
+              skillName: skillItem.name,
+              previousRank: currentRank,
+              newRank,
+              requiredHours: reqHours,
+              target,
+              roll: rollResult,
+              passed: true
+            };
+          } else {
+            await skillItem.update({
+              'system.checked': false
+            });
+            skillAdvancement = {
+              skillName: skillItem.name,
+              previousRank: currentRank,
+              newRank: currentRank,
+              requiredHours: reqHours,
+              target,
+              roll: rollResult,
+              passed: false
+            };
+          }
+        } else {
+          // Insufficient hours allocated
+          skillAdvancement = {
+            skillName: skillItem.name,
+            previousRank: currentRank,
+            newRank: currentRank,
+            requiredHours: reqHours,
+            target,
+            roll: null,
+            passed: false,
+            insufficientHours: true
+          };
+        }
+      }
+    }
+
+    // 3. Grinding Complication
+    let complication = null;
+    if (options.rollComplication !== false) {
+      const compRoll = await new Roll('1d20').evaluate();
+      const compData = getGrindingComplication(compRoll.total);
+      complication = {
+        roll: compRoll.total,
+        ...compData
+      };
+    }
+
+    // 4. Generate LitRPG Chat Card
+    if (!options.silent) {
+      let checksHtml = '';
+      if (enduranceChecks.length > 0) {
+        checksHtml = `
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 4px; padding: 6px 10px; margin-top: 8px;">
+            <div style="font-weight: bold; color: #e67e22; font-size: 11px; text-transform: uppercase;">
+              <i class="fa-solid fa-person-running"></i> Endurance Checks (${enduranceChecks.length} Hours Over Safe Limit):
+            </div>
+            ${enduranceChecks.map(c => `
+              <div style="font-size: 11px; margin-top: 2px; color: ${c.passed ? '#2ecc71' : '#e74c3c'};">
+                • Hour ${c.hour} (DC ${c.dc}): Rolled <strong>${c.rollTotal}</strong> — ${c.passed ? 'PASSED (Fatigue avoided)' : 'FAILED (Gained Fatigued Debuff)'}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      let advHtml = '';
+      if (skillAdvancement) {
+        if (skillAdvancement.insufficientHours) {
+          advHtml = `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 4px; padding: 6px 10px; margin-top: 8px;">
+              <div style="font-weight: bold; color: #f1c40f; font-size: 11px; text-transform: uppercase;">
+                <i class="fa-solid fa-graduation-cap"></i> Skill Training: ${skillAdvancement.skillName}
+              </div>
+              <div style="font-size: 11px; color: #ccc; margin-top: 2px;">
+                Invested ${hours} hrs, but Rank ${skillAdvancement.previousRank} requires <strong>${skillAdvancement.requiredHours} hrs</strong> to test advancement. Practice logged!
+              </div>
+            </div>
+          `;
+        } else if (skillAdvancement.passed) {
+          advHtml = `
+            <div style="background: rgba(39, 174, 96, 0.2); border: 1px solid #27ae60; border-radius: 4px; padding: 6px 10px; margin-top: 8px;">
+              <div style="font-weight: bold; color: #2ecc71; font-size: 12px; text-transform: uppercase;">
+                <i class="fa-solid fa-circle-check"></i> SKILL ADVANCEMENT: ${skillAdvancement.skillName}!
+              </div>
+              <div style="font-size: 11px; color: #eee; margin-top: 2px;">
+                Advancement Roll: <strong>${skillAdvancement.roll}</strong> (Target: &ge; ${skillAdvancement.target}).
+                <br/><strong style="color: #f1c40f;">Rank ${skillAdvancement.previousRank} &rarr; Rank ${skillAdvancement.newRank}</strong>!
+              </div>
+            </div>
+          `;
+        } else {
+          advHtml = `
+            <div style="background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; border-radius: 4px; padding: 6px 10px; margin-top: 8px;">
+              <div style="font-weight: bold; color: #e74c3c; font-size: 11px; text-transform: uppercase;">
+                <i class="fa-solid fa-circle-xmark"></i> SKILL ADVANCEMENT FAILED: ${skillAdvancement.skillName}
+              </div>
+              <div style="font-size: 11px; color: #ccc; margin-top: 2px;">
+                Advancement Roll: <strong>${skillAdvancement.roll}</strong> (Needed &ge; ${skillAdvancement.target}).
+                Remains at Rank ${skillAdvancement.previousRank}. Practice logged.
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      let compHtml = '';
+      if (complication) {
+        compHtml = `
+          <div style="background: rgba(0,0,0,0.4); border-left: 3px solid ${complication.color}; border-radius: 2px; padding: 6px 10px; margin-top: 8px;">
+            <div style="font-weight: bold; color: ${complication.color}; font-size: 11px; text-transform: uppercase;">
+              <i class="${complication.icon}"></i> Grinding Event (d20: ${complication.roll}): ${complication.title}
+            </div>
+            <div style="font-size: 11px; color: #bbb; margin-top: 2px; line-height: 1.3;">
+              ${complication.description}
+            </div>
+          </div>
+        `;
+      }
+
+      const card = `
+        <div class="dcc-chat-card dcc-grind-card" style="border: 2px solid #e67e22; background: #141418; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif;">
+          <div style="background: #e67e22; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; padding: 5px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 8px;">
+            <i class="fa-solid fa-dumbbell"></i> GRINDING SESSION: ${hours} HOURS
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; border-bottom: 1px solid #333; padding-bottom: 6px;">
+            <span>Crawler: <strong style="color: #fff;">${this.name}</strong></span>
+            <span>Floor: <strong style="color: #f1c40f;">${floorNumber}</strong></span>
+            <span>Safe Limit: <strong style="color: #2ecc71;">${safeThreshold} hrs${hasGuideBonus ? ' (+1 Guide)' : ''}</strong></span>
+          </div>
+          <div style="margin-top: 6px; font-size: 12px; color: #ddd;">
+            <i class="fa-solid fa-hourglass-half" style="color: #e67e22;"></i> <strong>Floor Collapse Clock</strong> advanced by <strong>+${hours} Hours</strong>.
+          </div>
+          ${checksHtml}
+          ${advHtml}
+          ${compHtml}
+        </div>
+      `;
+
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: card,
+        flags: {
+          'carl-rpg': {
+            isGrindSession: true,
+            hours,
+            fatigueGained,
+            skillAdvancement,
+            complication
+          }
+        }
+      });
+    }
+
+    return {
+      hours,
+      floorNumber,
+      safeThreshold,
+      excessHours,
+      enduranceChecks,
+      fatigueGained,
+      skillAdvancement,
+      complication
+    };
   }
 }

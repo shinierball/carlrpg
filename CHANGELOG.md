@@ -1,3 +1,58 @@
+## 2.0.49
+
+### Attacks Section Scroll Navigation on Stowed Attacks Toggle
+
+- **Preserve Attack Section Visibility**:
+  - Fixed an issue where clicking the `Stowed (N)` button (`.toggle-stowed-attacks-view`) to show or hide stowed attacks re-rendered the sheet and lost the attacks section below the fold.
+  - Implemented `_scrollToAttacksSection` in `DCCCrawlerSheet` to automatically locate and smoothly scroll the sheet container (`.sheet-body`) back to the attacks section (`.dcc-attacks-section` / `[data-section="attacks"]`).
+  - Added `scrollY: ['.sheet-body']` to `defaultOptions` and hooked into `render`, `activateListeners`, and `_restoreScrollPositions` to prevent stale scroll positions from overriding the view when stowed attacks are shown or hidden.
+- **Verification**:
+  - Added unit test cases 8 and 9 to `tests/attack-equipment-integration.test.mjs` verifying flag handling, stale scroll position cache cleanup, immediate scrolling to target offsets, and scroll restoration safety.
+  - 100% test suite passing with 0 failures across 91 suites.
+
+## 2.0.48
+
+### Public Notoriety: Boss Stars & Crawler Skulls System
+
+- **Color-Coded Star Tiers by Boss Level**:
+  - Implemented the official CarlRPG Boss Level hierarchy and color-coded star tiers:
+    - **Bronze Star**: Neighborhood Boss (`#cd7f32`, warm bronze sheen)
+    - **Silver Star**: Borough Boss (`#dcdde1`, polished steel silver)
+    - **Gold Star**: City Boss (`#f1c40f`, radiant gold halo)
+    - **Platinum Star**: Country Boss (`#00d2d3`, icy platinum cyan shimmer)
+    - **Legendary Star**: Floor Boss (`#e67e22`, molten fiery flame pulse)
+    - **Celestial Star**: Dungeon Boss (`#9b59b6`, cosmic violet prismatic aura)
+  - Created `DCC_BOSS_TIERS` and `getBossTierFromClassification` in `src/documents/actor.mjs` for canonical classification mapping and normalization.
+- **Crawler Skulls for PvP Kills**:
+  - Crawlers receive visible bone-white skulls with dark crimson glow (`#ecf0f1` / `#c0392b`) next to their name for each fellow crawler they slay in the dungeon.
+- **Public Visibility Across Foundry VTT**:
+  - **Crawler Sheet Core Header**: Displays interactive badge strip (`{{{trophyBadges.html}}}`) beside Crawler Name on Page 1 Core.
+  - **Trophy Room (Tab 6)**: Added full Public Notoriety Manager on Tab 6 with all 6 Star Tiers, Crawler Skulls, live increment/decrement adjustments, chronological kill logs, and 1-click **Record Boss Kill** and **Record Crawler Kill** dialogs.
+  - **Combat Tracker**: Enhanced `DCCCombatTracker` and `templates/apps/combat-tracker.hbs` to render badge strips alongside crawler combatant names.
+  - **Chat Message Headers**: Enhanced `onRenderChatMessage` in `src/dcc.mjs` to dynamically attach the crawler's star and skull badge strip to `.message-sender` headers on all attack rolls, spells, checks, and chat messages.
+  - **Token Nameplates**: Formatted plain text unicode representations (`★` and `💀`) via `actor.getBadgeSummary().text`.
+- **Automated Combat Lethal Damage Tracking**:
+  - Wired `DCCCombatMetrics.applyDamageToTarget` (`src/apps/combat-metrics.mjs`) to detect lethal blows.
+  - If a crawler deals lethal damage to a Boss Mob, `attackerActor.recordBossKill` is automatically triggered with the appropriate tier, updating counts and broadcasting a Dungeon AI announcement card.
+  - If a crawler deals lethal damage to another crawler, `attackerActor.recordCrawlerKill` is triggered, updating skull counts and broadcasting a Dungeon AI announcement card.
+- **Verification**:
+  - Created automated test suite in `tests/boss-stars-and-skulls.test.mjs` testing tier hierarchy, classification mapping, `getBadgeSummary` formatting with multiple stars and skulls, manual and automated kill recording/deletion, combat metrics lethal blows, combat tracker enrichment, crawler sheet context, and chat message sender badge rendering.
+  - Full test suite passes with 0 failures (`node --test tests/*.test.mjs`).
+
+## 2.0.47
+
+### Fixed Health Bar Color Gradient Across Total Health Bars
+
+- **Fixed Health Bar Color Gradient Anchoring**:
+  - Resolved an issue where the health bar gradient compressed and shifted according to remaining health bars rather than total health bars, causing crawlers with only 1 remaining health bar to incorrectly show green at the end of their bar.
+  - Sized `.dcc-health-fill-overlay` to `width: 100%` and `background-size: 100% 100%`, permanently anchoring the continuous linear gradient (`#d32f2f` red -> `#e65100` red-orange -> `#f57c00` orange -> `#fbc02d` yellow -> `#43a047` light green -> `#2e7d32` green) across the entire 100% width of the character's total health bar.
+  - Implemented dynamic right-inset masking via `clip-path: inset(0 calc(100% - var(--hp-fill, 100%)) 0 0)` (with `@supports not` container-query `background-size: 100cqw 100%` fallback) so health unmasks left-to-right without compressing or shifting the underlying gradient.
+  - Crawlers with 10 of 10 health bars (100% HP) fully unmask into the green, while crawlers with 1 of 10 health bars (10% HP) remain firmly and accurately in the red.
+  - Added dynamic `grid-template-columns: repeat(var(--hp-segments, 10), 1fr)` and `repeat({{healthSegments.length}}, 1fr)` to `.dcc-health-segments`, ensuring mobs with variable health bar counts (e.g., 2 or 4 bars) properly divide and label their segments.
+- **Verification**:
+  - Expanded `tests/health.test.mjs` with comprehensive unit tests verifying gradient stylesheet architecture, `clip-path` inset calculations, total-bar mapping across 10/10 (green), 1/10 (red), 5/10 (yellow), and 0 (empty) states, and dynamic Handlebars template variables.
+  - All 566 tests pass across 91 suites with 0 failures (`node --test tests/*.test.mjs`).
+
 ## 2.0.46
 
 ### Buff Slot Deduplication & Automatic Fatal Debuff CON Stat Check

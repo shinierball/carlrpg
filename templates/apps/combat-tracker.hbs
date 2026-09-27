@@ -108,6 +108,9 @@
                     <div class="dcc-combatant-details flexcol">
                       <div class="dcc-combatant-name-row flexrow">
                         <span class="token-name dcc-combatant-name" title="{{turn.name}}">{{turn.name}}</span>
+                        {{#if turn.trophyBadges.hasBadges}}
+                          {{{turn.trophyBadges.html}}}
+                        {{/if}}
                         <span class="dcc-type-badge {{#if turn.isMob}}badge-mob{{else}}badge-crawler{{/if}}">
                           {{turn.actorTypeLabel}}
                         </span>

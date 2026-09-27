@@ -40,6 +40,7 @@ Characters can wage combat using either dedicated `attack` items or physical `ge
 - **Expandable Stowed Drawer**:
   - The Attacks table header displays a dynamic counter: `Stowed (N)` button (`.toggle-stowed-attacks-view`).
   - Clicking `Stowed (N)` expands or collapses the stowed drawer.
+  - **Attack Section Navigation**: Toggling stowed attacks view (showing or hiding) automatically scrolls and navigates the sheet container (`.sheet-body`) back into view at the Attacks section (`.dcc-attacks-section` / `[data-section="attacks"]`), preventing the attacks section from becoming lost below the fold upon re-render.
   - The drawer lists all currently unequipped attacks and stowed weapon gear with their damage formulas, range, and type badges.
   - Each stowed item has a 1-click `[ Ready / Equip ]` button that immediately equips it and returns it to the active Attacks table.
 

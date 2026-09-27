@@ -1243,6 +1243,41 @@ export function onRenderChatMessage(message, html, data) {
       $(btn).click(debuffClickHandler);
     }
   }
+
+  // 8. Enhance chat card or message sender with Crawler Trophy Badges (Boss Stars & Skulls)
+  try {
+    const speakerActorId = message?.speaker?.actor || message?.flags?.['carl-rpg']?.actorId;
+    const speakerActor = (speakerActorId && typeof game !== 'undefined' && game.actors)
+      ? (typeof game.actors.get === 'function' ? game.actors.get(speakerActorId) : (Array.isArray(game.actors) ? game.actors.find(a => a.id === speakerActorId) : null))
+      : null;
+    if (speakerActor && typeof speakerActor.getBadgeSummary === 'function') {
+      const badges = speakerActor.getBadgeSummary();
+      if (badges.hasBadges) {
+        const senderElems = query('.message-sender, .message-header .sender');
+        for (const senderEl of senderElems) {
+          if (senderEl && !senderEl.querySelector?.('.dcc-badge-strip') && !senderEl.dataset?.dccBadges) {
+            if (senderEl.dataset) senderEl.dataset.dccBadges = 'true';
+            const badgeSpan = (typeof document !== 'undefined' && typeof document.createElement === 'function')
+              ? document.createElement('span')
+              : { className: 'dcc-sender-badges', innerHTML: ' ' + badges.html };
+            if (badgeSpan) {
+              badgeSpan.className = 'dcc-sender-badges';
+              badgeSpan.innerHTML = ' ' + badges.html;
+              if (typeof senderEl.appendChild === 'function') {
+                senderEl.appendChild(badgeSpan);
+              } else if (typeof $ !== 'undefined') {
+                $(senderEl).append(` <span class="dcc-sender-badges">${badges.html}</span>`);
+              }
+            } else if (typeof $ !== 'undefined') {
+              $(senderEl).append(` <span class="dcc-sender-badges">${badges.html}</span>`);
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // Graceful fallback
+  }
 }
 
 /**

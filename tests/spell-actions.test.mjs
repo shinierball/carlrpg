@@ -50,7 +50,7 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
 
     // 2. Spell with Charisma stat
     const bangBro = new DCCItem({
-      name: 'Bang Bro',
+      name: 'Bad Faith',
       type: 'spell',
       system: {
         rank: 1,
@@ -68,9 +68,9 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(bbData.formula, '1d8 + 1 + 4');
     assert.equal(bbData.damageType, 'Necrotic');
 
-    // 3. Flat damage bonus without dice (Bad Faith)
+    // 3. Flat damage bonus without dice (Bang Bro)
     const badFaith = new DCCItem({
-      name: 'Bad Faith',
+      name: 'Bang Bro',
       type: 'spell',
       system: {
         rank: 1,

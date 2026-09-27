@@ -283,4 +283,95 @@ describe('DCC RPG - Attack & Weapon Equipment Integration', () => {
     assert.equal(data.attacks.some(a => a.name === 'Bite'), false, 'Stowed attack Bite must NOT be present');
     assert.equal(data.attacks.some(a => a.name === 'Dagger'), false, 'Stowed weapon Dagger must NOT be present');
   });
+
+  it('8. Toggling stowed attacks view triggers navigation back to attacks section', async () => {
+    const sheet = new DCCCrawlerSheet(crawler);
+    let scrollToAttacksCalled = 0;
+    sheet._scrollToAttacksSection = () => {
+      scrollToAttacksCalled++;
+      sheet._scrollToAttacks = false;
+    };
+
+    const clickListeners = {};
+    const mockHtml = {
+      find: (sel) => ({
+        click: (fn) => { clickListeners[sel] = fn; },
+        change: () => {},
+        on: () => {}
+      })
+    };
+
+    sheet.activateListeners(mockHtml);
+    assert.ok(clickListeners['.toggle-stowed-attacks-view']);
+
+    // Set scrollPositions with a stale position
+    sheet._scrollPositions = { '.sheet-body': 450 };
+
+    // Toggle to SHOW stowed attacks
+    assert.equal(sheet._showStowedAttacks ?? false, false);
+    clickListeners['.toggle-stowed-attacks-view']({
+      preventDefault: () => {}
+    });
+
+    assert.equal(sheet._showStowedAttacks, true, '_showStowedAttacks must be true');
+    assert.equal(sheet._scrollPositions['.sheet-body'], undefined, 'Stale scroll position for .sheet-body must be deleted');
+    assert.equal(scrollToAttacksCalled, 1, '_scrollToAttacksSection must have been called when shown');
+
+    // If _restoreScrollPositions is called by Foundry, it safely handles it
+    sheet._restoreScrollPositions(mockHtml);
+    assert.equal(scrollToAttacksCalled, 1, '_scrollToAttacksSection not redundantly re-called');
+
+    // Toggle to HIDE stowed attacks
+    sheet._scrollPositions = { '.sheet-body': 1200 };
+    clickListeners['.toggle-stowed-attacks-view']({
+      preventDefault: () => {}
+    });
+
+    assert.equal(sheet._showStowedAttacks, false, '_showStowedAttacks must toggle back to false');
+    assert.equal(sheet._scrollPositions['.sheet-body'], undefined, 'Stale scroll position must be deleted when hiding');
+    assert.equal(scrollToAttacksCalled, 2, '_scrollToAttacksSection must be called again when hidden');
+  });
+
+  it('9. _scrollToAttacksSection locates .dcc-attacks-section and scrolls container', () => {
+    const sheet = new DCCCrawlerSheet(crawler);
+    sheet._scrollPositions = {};
+
+    let scrollIntoViewCalled = false;
+    let containerScrollToArgs = null;
+
+    const mockTarget = {
+      offsetTop: 620,
+      getBoundingClientRect: () => ({ top: 620, height: 200 }),
+      scrollIntoView: (opts) => {
+        scrollIntoViewCalled = true;
+      }
+    };
+
+    const mockContainer = {
+      scrollTop: 0,
+      getBoundingClientRect: () => ({ top: 100, height: 500 }),
+      scrollTo: (opts) => {
+        containerScrollToArgs = opts;
+        mockContainer.scrollTop = opts.top;
+      }
+    };
+
+    const mockHtml = {
+      querySelector: (sel) => {
+        if (sel.includes('attacks')) return mockTarget;
+        if (sel === '.sheet-body') return mockContainer;
+        return null;
+      },
+      querySelectorAll: () => []
+    };
+
+    sheet._scrollToAttacksSection(mockHtml);
+
+    assert.ok(containerScrollToArgs, 'container.scrollTo must have been called');
+    assert.equal(containerScrollToArgs.top, (620 - 100) - 6, 'Calculates correct offset for target relative to container');
+    assert.equal(containerScrollToArgs.behavior, 'smooth');
+    assert.equal(scrollIntoViewCalled, true, 'scrollIntoView must also be called on target');
+    assert.equal(sheet._scrollPositions['.sheet-body'], 514, 'Updates _scrollPositions with target offset');
+  });
 });
+

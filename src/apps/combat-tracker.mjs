@@ -98,6 +98,7 @@ export class DCCCombatTracker extends BaseCombatTracker {
       const canAttack = isMob ? !actions.hasAttacked : true;
       const currentFavor = Number(actor?.system?.attributes?.aiFavor) || 0;
       const canSpendAIFavor = !isMob && !actions.bonusActionGranted && currentFavor >= 1;
+      const trophyBadges = typeof actor?.getBadgeSummary === 'function' ? actor.getBadgeSummary() : null;
 
       const enrichedTurn = {
         ...turn,
@@ -112,7 +113,8 @@ export class DCCCombatTracker extends BaseCombatTracker {
         canAttack,
         currentFavor,
         canSpendAIFavor,
-        actorTypeLabel: isMob ? 'MOB' : (actor?.type?.toUpperCase() || 'CRAWLER')
+        actorTypeLabel: isMob ? 'MOB' : (actor?.type?.toUpperCase() || 'CRAWLER'),
+        trophyBadges
       };
 
       if (isMob) {

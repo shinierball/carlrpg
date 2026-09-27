@@ -151,6 +151,10 @@ When a crawler is created through the Induction Terminal or generated directly, 
 ### Starting Health:
 $$\text{Max HP} = 10 \times \text{getDCCStatModifier}(\text{CON})$$
 - Current health (`hp.value`) and maximum health (`hp.max`) are initialized to the exact same value ($100\%$ full health).
+- **Health Bar Gradient Display**:
+  - The crawler sheet displays 10 individual health bar slots (each holding 1 CON Mod worth of HP).
+  - The color gradient is permanently anchored to the total 100% width of the health bar from `#d32f2f` (red at 0%–10%) to `#2e7d32` (green at 90%–100%).
+  - The gradient never shifts with remaining health: 10 of 10 health bars reaches full green, while 1 of 10 health bars remains in the red.
 - **Stat Modifier Scaling**:
   - CON 2: Modifier $+1 \implies \mathbf{10\text{ HP}}$
   - CON 3–5: Modifier $+2 \implies \mathbf{20\text{ HP}}$

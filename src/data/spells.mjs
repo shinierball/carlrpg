@@ -62,33 +62,6 @@ export const DCC_SPELLS = [
     _id: "dccspl0000000003",
     name: "Bad Faith",
     type: "spell",
-    img: "icons/svg/sword.svg",
-    system: {
-      rank: 1,
-      stat: "int",
-      manaCost: 5,
-      range: "5 feet",
-      duration: "5 min + 1 min/Rank",
-      cooldown: "15 minutes",
-      spellType: "Passive",
-      damageType: "Fire & Electric",
-      baseDamage: "+2 mixed Fire and Electric",
-      aiFavor: 0,
-      favored: "",
-      limitations: "",
-      quote: "When you want more zing in your zinger.",
-      description: "Place a hot and crackling temporary enchantment on a weapon you are holding. Your weapon deals +2 mixed Fire and Electric damage.",
-      upgrades: {
-        rank5: "+1d6 Fire and Electric damage.",
-        rank10: "+1d6 Fire and Electric damage, and on an Amazing Success, the target of the weapon attack gains the Burned Debuff.",
-        rank15: "+1d6 Fire and Electric damage, and on an Amazing Success, the target of the weapon attack also gains the Shocked Debuff."
-      }
-    }
-  },
-  {
-    _id: "dccspl0000000004",
-    name: "Bang Bro",
-    type: "spell",
     img: "icons/svg/skull.svg",
     system: {
       rank: 1,
@@ -109,6 +82,33 @@ export const DCC_SPELLS = [
         rank5: "+1d8 base damage, +5ft Splash.",
         rank10: "+1d8 base damage, and end all Buffs on the victims for the duration of the combat.",
         rank15: "+1d8 base damage, +5ft Splash."
+      }
+    }
+  },
+  {
+    _id: "dccspl0000000004",
+    name: "Bang Bro",
+    type: "spell",
+    img: "icons/svg/sword.svg",
+    system: {
+      rank: 1,
+      stat: "int",
+      manaCost: 5,
+      range: "5 feet",
+      duration: "5 min + 1 min/Rank",
+      cooldown: "15 minutes",
+      spellType: "Passive",
+      damageType: "Fire & Electric",
+      baseDamage: "+2 mixed Fire and Electric",
+      aiFavor: 0,
+      favored: "",
+      limitations: "",
+      quote: "When you want more zing in your zinger.",
+      description: "Place a hot and crackling temporary enchantment on a weapon you are holding. Your weapon deals +2 mixed Fire and Electric damage.",
+      upgrades: {
+        rank5: "+1d6 Fire and Electric damage.",
+        rank10: "+1d6 Fire and Electric damage, and on an Amazing Success, the target of the weapon attack gains the Burned Debuff.",
+        rank15: "+1d6 Fire and Electric damage, and on an Amazing Success, the target of the weapon attack also gains the Shocked Debuff."
       }
     }
   },

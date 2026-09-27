@@ -200,6 +200,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       height: 900,
       tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'page1' }],
       dragDrop: [{ dragSelector: '[data-item-id]', dropSelector: null }],
+      scrollY: ['.sheet-body'],
       submitOnChange: true,
       submitOnClose: true,
       closeOnSubmit: false
@@ -422,6 +423,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       totalFavor: totalAchievementFavor,
       totalXP: totalAchievementXP
     };
+
+    // Prepare Boss Stars & Crawler Skulls (Trophies & Public Notoriety Badges)
+    context.trophyBadges = typeof this.actor?.getBadgeSummary === 'function' ? this.actor.getBadgeSummary() : null;
+    const trophies = this.actor?.system?.trophies || {};
+    context.trophyTiers = [
+      { id: 'bronze', label: 'Bronze Star', bossLevel: 'Neighborhood Boss', count: trophies.bosses?.bronze || 0, color: '#cd7f32', class: 'star-bronze' },
+      { id: 'silver', label: 'Silver Star', bossLevel: 'Borough Boss', count: trophies.bosses?.silver || 0, color: '#dcdde1', class: 'star-silver' },
+      { id: 'gold', label: 'Gold Star', bossLevel: 'City Boss', count: trophies.bosses?.gold || 0, color: '#f1c40f', class: 'star-gold' },
+      { id: 'platinum', label: 'Platinum Star', bossLevel: 'Country Boss', count: trophies.bosses?.platinum || 0, color: '#00d2d3', class: 'star-platinum' },
+      { id: 'legendary', label: 'Legendary Star', bossLevel: 'Floor Boss', count: trophies.bosses?.legendary || 0, color: '#e67e22', class: 'star-legendary' },
+      { id: 'celestial', label: 'Celestial Star', bossLevel: 'Dungeon Boss', count: trophies.bosses?.celestial || 0, color: '#9b59b6', class: 'star-celestial' }
+    ];
+    context.crawlerKillCount = trophies.crawlers?.count || 0;
+    context.bossLog = Array.isArray(trophies.bossLog) ? trophies.bossLog : [];
+    context.crawlerLog = Array.isArray(trophies.crawlerLog) ? trophies.crawlerLog : [];
 
     // Tally gear skill bonuses from equipped gear
     const gearSkillBonuses = new Map();
@@ -1247,7 +1263,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
   }
 
   /**
-   * Render hook supporting focus preservation
+   * Render hook supporting focus preservation and attack section navigation
    * @override
    */
   render(force, options = {}) {
@@ -1256,6 +1272,9 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     }
     const res = super.render(force, options);
     this._restoreFocusState();
+    if (this._scrollToAttacks) {
+      this._scrollToAttacksSection();
+    }
     return res;
   }
 
@@ -1271,6 +1290,87 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const $el = globalThis.$ ? globalThis.$(this.element) : this.element;
       this.activateListeners($el);
       this._restoreFocusState($el);
+      if (this._scrollToAttacks) {
+        this._scrollToAttacks = false;
+        this._scrollToAttacksSection($el);
+      }
+    }
+  }
+
+  /**
+   * Restore scroll positions hook (FormApplication V1)
+   * Prevents stale scroll positions from overriding attack section navigation.
+   * @override
+   */
+  _restoreScrollPositions(html) {
+    if (this._scrollToAttacks) {
+      this._scrollToAttacks = false;
+      this._scrollToAttacksSection(html);
+      return;
+    }
+    if (typeof super._restoreScrollPositions === 'function') {
+      super._restoreScrollPositions(html);
+    }
+  }
+
+  /**
+   * Scrolls the sheet body to bring the attacks section into view.
+   * @param {HTMLElement|JQuery} [html]
+   */
+  _scrollToAttacksSection(html = null) {
+    this._scrollToAttacks = false;
+    const isElement = (obj) => obj && (
+      (typeof HTMLElement !== 'undefined' && obj instanceof HTMLElement) ||
+      (typeof obj.querySelector === 'function' && typeof obj.querySelectorAll === 'function')
+    );
+    const root = (html && html[0]) || (isElement(html) ? html : null) || this.element?.[0] || (isElement(this.element) ? this.element : null);
+    if (!root) return;
+
+    const findEl = (sel) => {
+      if (typeof root.querySelector === 'function') return root.querySelector(sel);
+      if (globalThis.$ && typeof globalThis.$(root).find === 'function') return globalThis.$(root).find(sel)[0];
+      return null;
+    };
+
+    const target = findEl('[data-section="attacks"]') ||
+                   findEl('#attacks-section') ||
+                   findEl('.dcc-attacks-section:not(.mob-spells-section)') ||
+                   findEl('.dcc-attacks-section');
+    if (!target) return;
+
+    const container = findEl('.sheet-body') || (typeof target.closest === 'function' ? target.closest('.sheet-body') : null);
+
+    const performScroll = () => {
+      let scrolled = false;
+      if (container && typeof container.scrollTo === 'function' && typeof container.getBoundingClientRect === 'function' && typeof target.getBoundingClientRect === 'function') {
+        const cRect = container.getBoundingClientRect();
+        const tRect = target.getBoundingClientRect();
+        if (cRect && tRect && (cRect.height > 0 || cRect.top !== 0 || tRect.top !== 0)) {
+          const offset = (tRect.top - cRect.top) + (container.scrollTop || 0);
+          container.scrollTo({ top: Math.max(0, offset - 6), behavior: 'smooth' });
+          scrolled = true;
+        }
+      }
+      if (!scrolled && container && typeof container.scrollTop === 'number' && typeof target.offsetTop === 'number') {
+        container.scrollTop = target.offsetTop;
+        scrolled = true;
+      }
+      if (typeof target.scrollIntoView === 'function') {
+        try {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (_err) {
+          target.scrollIntoView(true);
+        }
+      }
+      if (container && this._scrollPositions) {
+        this._scrollPositions['.sheet-body'] = container.scrollTop;
+      }
+    };
+
+    performScroll();
+
+    if (typeof setTimeout === 'function') {
+      setTimeout(performScroll, 25);
     }
   }
 
@@ -1280,6 +1380,11 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       super.activateListeners(html);
     }
     this._restoreFocusState(html);
+
+    if (this._scrollToAttacks) {
+      this._scrollToAttacks = false;
+      this._scrollToAttacksSection(html);
+    }
 
     if (!this.isEditable) return;
 
@@ -1387,6 +1492,149 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.dcc-achievement-filter-tier').change(filterAchievements);
     html.find('.dcc-achievement-search').on('input', filterAchievements);
 
+    // Adjust Trophy Counts (+ / - buttons)
+    html.find('.dcc-trophy-tier-adjust').click(async ev => {
+      ev.preventDefault();
+      const tier = $(ev.currentTarget).data('tier');
+      const delta = Number($(ev.currentTarget).data('delta')) || 0;
+      if (!tier || !delta) return;
+
+      const trophies = structuredClone(this.actor.system?.trophies || {
+        bosses: { bronze: 0, silver: 0, gold: 0, platinum: 0, legendary: 0, celestial: 0 },
+        bossLog: [],
+        crawlers: { count: 0 },
+        crawlerLog: []
+      });
+
+      if (tier === 'crawlers') {
+        if (!trophies.crawlers) trophies.crawlers = { count: 0 };
+        trophies.crawlers.count = Math.max(0, (Number(trophies.crawlers.count) || 0) + delta);
+      } else {
+        if (!trophies.bosses) trophies.bosses = { bronze: 0, silver: 0, gold: 0, platinum: 0, legendary: 0, celestial: 0 };
+        trophies.bosses[tier] = Math.max(0, (Number(trophies.bosses[tier]) || 0) + delta);
+      }
+      await this.actor.update({ 'system.trophies': trophies });
+    });
+
+    // Delete Logged Boss Kill
+    html.find('.dcc-delete-boss-kill').click(async ev => {
+      ev.preventDefault();
+      const killId = $(ev.currentTarget).data('killId');
+      if (killId && typeof this.actor.removeBossKill === 'function') {
+        await this.actor.removeBossKill(killId);
+      }
+    });
+
+    // Delete Logged Crawler Kill
+    html.find('.dcc-delete-crawler-kill').click(async ev => {
+      ev.preventDefault();
+      const killId = $(ev.currentTarget).data('killId');
+      if (killId && typeof this.actor.removeCrawlerKill === 'function') {
+        await this.actor.removeCrawlerKill(killId);
+      }
+    });
+
+    // Record Boss Kill Dialog
+    html.find('.dcc-record-boss-kill-btn').click(async ev => {
+      ev.preventDefault();
+      const DialogClass = globalThis.Dialog || (typeof foundry !== 'undefined' ? foundry.applications?.api?.DialogV2 : null);
+      if (DialogClass) {
+        new DialogClass({
+          title: 'Record Boss Kill',
+          content: `
+            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 6px;">
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Boss Name:</label>
+                <input type="text" id="boss-kill-name" placeholder="e.g. Goblin King, Juicer" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Boss Level / Star Tier:</label>
+                <select id="boss-kill-tier" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;">
+                  <option value="bronze">Bronze Star - Neighborhood Boss</option>
+                  <option value="silver">Silver Star - Borough Boss</option>
+                  <option value="gold" selected>Gold Star - City Boss</option>
+                  <option value="platinum">Platinum Star - Country Boss</option>
+                  <option value="legendary">Legendary Star - Floor Boss</option>
+                  <option value="celestial">Celestial Star - Dungeon Boss</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Floor:</label>
+                <input type="text" id="boss-kill-floor" value="${this.actor.system?.details?.floor || '1st Floor'}" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
+              </div>
+            </div>
+          `,
+          buttons: {
+            confirm: {
+              icon: '<i class="fa-solid fa-star" style="color: #f1c40f;"></i>',
+              label: 'Record Kill & Award Star',
+              callback: async (dlgHtml) => {
+                const $h = typeof dlgHtml.find === 'function' ? dlgHtml : $(dlgHtml);
+                const name = $h.find('#boss-kill-name').val()?.trim() || 'Unnamed Boss';
+                const tier = $h.find('#boss-kill-tier').val() || 'bronze';
+                const floor = $h.find('#boss-kill-floor').val()?.trim() || '1st Floor';
+                if (typeof this.actor.recordBossKill === 'function') {
+                  await this.actor.recordBossKill({ name, tier, floor });
+                }
+              }
+            },
+            cancel: {
+              icon: '<i class="fa-solid fa-xmark"></i>',
+              label: 'Cancel'
+            }
+          },
+          default: 'confirm'
+        }).render(true);
+      }
+    });
+
+    // Record Crawler Kill Dialog
+    html.find('.dcc-record-crawler-kill-btn').click(async ev => {
+      ev.preventDefault();
+      const DialogClass = globalThis.Dialog || (typeof foundry !== 'undefined' ? foundry.applications?.api?.DialogV2 : null);
+      if (DialogClass) {
+        new DialogClass({
+          title: 'Record Crawler Kill (PvP)',
+          content: `
+            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 6px;">
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Slain Crawler Name:</label>
+                <input type="text" id="crawler-kill-name" placeholder="e.g. Frank, Meatball" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Crawler Number (Optional):</label>
+                <input type="text" id="crawler-kill-number" placeholder="e.g. #4091" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Floor:</label>
+                <input type="text" id="crawler-kill-floor" value="${this.actor.system?.details?.floor || '1st Floor'}" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
+              </div>
+            </div>
+          `,
+          buttons: {
+            confirm: {
+              icon: '<i class="fa-solid fa-skull" style="color: #e74c3c;"></i>',
+              label: 'Record Kill & Claim Skull',
+              callback: async (dlgHtml) => {
+                const $h = typeof dlgHtml.find === 'function' ? dlgHtml : $(dlgHtml);
+                const name = $h.find('#crawler-kill-name').val()?.trim() || 'Rival Crawler';
+                const crawlerNumber = $h.find('#crawler-kill-number').val()?.trim() || '';
+                const floor = $h.find('#crawler-kill-floor').val()?.trim() || '1st Floor';
+                if (typeof this.actor.recordCrawlerKill === 'function') {
+                  await this.actor.recordCrawlerKill({ name, crawlerNumber, floor });
+                }
+              }
+            },
+            cancel: {
+              icon: '<i class="fa-solid fa-xmark"></i>',
+              label: 'Cancel'
+            }
+          },
+          default: 'confirm'
+        }).render(true);
+      }
+    });
+
     // Roll Stat Check
     html.find('.roll-stat').click(ev => {
       const stat = $(ev.currentTarget).data('stat');
@@ -1477,6 +1725,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.toggle-stowed-attacks-view').click(ev => {
       ev.preventDefault();
       this._showStowedAttacks = !this._showStowedAttacks;
+      this._scrollToAttacks = true;
+      if (this._scrollPositions) {
+        delete this._scrollPositions['.sheet-body'];
+      }
       this.render(false);
     });
 

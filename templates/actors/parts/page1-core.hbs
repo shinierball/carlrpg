@@ -56,7 +56,12 @@
       {{else}}
       <div class="dcc-field-row">
         <div class="dcc-field-group flex-2">
-          <span class="dcc-field-label">Name</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="dcc-field-label">Name</span>
+            {{#if trophyBadges.hasBadges}}
+              {{{trophyBadges.html}}}
+            {{/if}}
+          </div>
           <input class="dcc-field-input" name="name" type="text" value="{{actor.name}}" placeholder="Crawler Name" />
         </div>
         <div class="dcc-field-group flex-1">
@@ -128,9 +133,9 @@
       <input class="dcc-hp-input" name="system.attributes.hp.temp" type="number" value="{{system.attributes.hp.temp}}" placeholder="0" style="border: 1px solid #000; width: 44px;" />
     </div>
 
-    <div class="dcc-health-bar-wrapper" style="--hp-val: {{system.attributes.hp.value}}; --hp-max: {{system.attributes.hp.max}};" data-tooltip="HP: {{system.attributes.hp.value}} / {{system.attributes.hp.max}}">
+    <div class="dcc-health-bar-wrapper" style="--hp-val: {{system.attributes.hp.value}}; --hp-max: {{system.attributes.hp.max}}; --hp-pct: {{system.attributes.hp.pct}}; --hp-segments: {{healthSegments.length}};" data-tooltip="HP: {{system.attributes.hp.value}} / {{system.attributes.hp.max}}">
       <div class="dcc-health-fill-overlay"></div>
-      <div class="dcc-health-segments">
+      <div class="dcc-health-segments" style="grid-template-columns: repeat({{healthSegments.length}}, 1fr);">
         {{#each healthSegments}}
         <div class="dcc-hp-seg">{{this.label}}</div>
         {{/each}}
@@ -446,7 +451,7 @@
   </div>
 
   {{!-- ATTACKS SECTION (BOTTOM) --}}
-  <div class="dcc-attacks-section">
+  <div class="dcc-attacks-section" data-section="attacks" id="attacks-section">
     <div class="dcc-banner-header">
       <span>ATTACKS</span>
       <div style="display: flex; align-items: center; gap: 8px;">

@@ -61,6 +61,21 @@ export class CrawlerDataModel extends BaseActorDataModel {
         slot8: new fields.StringField({ initial: '' }),
         slot9: new fields.StringField({ initial: '' }),
         slot10: new fields.StringField({ initial: '' })
+      }),
+      trophies: new fields.SchemaField({
+        bosses: new fields.SchemaField({
+          bronze: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
+          silver: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
+          gold: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
+          platinum: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
+          legendary: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
+          celestial: new fields.NumberField({ initial: 0, integer: true, min: 0 })
+        }),
+        bossLog: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+        crawlers: new fields.SchemaField({
+          count: new fields.NumberField({ initial: 0, integer: true, min: 0 })
+        }),
+        crawlerLog: new fields.ArrayField(new fields.ObjectField(), { initial: [] })
       })
     };
   }

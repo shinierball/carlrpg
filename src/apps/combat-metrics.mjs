@@ -347,11 +347,48 @@ export class DCCCombatMetrics {
     const actualDamage = tempDamage + damageToHp;
 
     const newHp = Math.max(0, currentHp - damageToHp);
+    const isLethal = currentHp > 0 && newHp === 0;
 
     await targetActor.update({
       'system.attributes.hp.value': newHp,
       'system.attributes.hp.temp': tempRemaining
     });
+
+    // Award boss star or crawler skull on lethal damage
+    if (isLethal && attackerActor && attackerActor.type === 'crawler') {
+      try {
+        if (targetActor.type === 'mob') {
+          const classification = String(targetActor.system?.details?.classification || '').toLowerCase();
+          const targetName = String(targetActor.name || '').toLowerCase();
+          const isBoss = classification.includes('boss') ||
+                         classification.includes('neighborhood') ||
+                         classification.includes('borough') ||
+                         classification.includes('burrough') ||
+                         classification.includes('city') ||
+                         classification.includes('country') ||
+                         classification.includes('floor') ||
+                         classification.includes('dungeon') ||
+                         targetName.includes('boss');
+          if (isBoss && typeof attackerActor.recordBossKill === 'function') {
+            await attackerActor.recordBossKill({
+              name: targetActor.name || 'Unnamed Boss',
+              tier: classification || 'bronze',
+              floor: targetActor.system?.details?.floor || ''
+            });
+          }
+        } else if (targetActor.type === 'crawler' && targetActor.id !== attackerActor.id) {
+          if (typeof attackerActor.recordCrawlerKill === 'function') {
+            await attackerActor.recordCrawlerKill({
+              name: targetActor.name || 'Rival Crawler',
+              crawlerNumber: targetActor.system?.details?.crawlerNumber || '',
+              floor: targetActor.system?.details?.floor || ''
+            });
+          }
+        }
+      } catch (err) {
+        console.error('DCC RPG | Error recording kill trophy:', err);
+      }
+    }
 
     // Record in combat metrics if attacker provided
     let loggedMetrics = null;

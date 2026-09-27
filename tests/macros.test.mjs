@@ -24,8 +24,8 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     assert.equal(macroPack.ownership?.PLAYER, 'OBSERVER', 'Players must have OBSERVER permissions on macro compendium');
   });
 
-  await t.test('2. DCC_MACROS dataset contains the 3 canonical macros with Observer permissions', () => {
-    assert.equal(DCC_MACROS.length, 3, 'Must define exactly 3 canonical system macros');
+  await t.test('2. DCC_MACROS dataset contains canonical macros with Observer permissions', () => {
+    assert.ok(DCC_MACROS.length >= 3, 'Must define canonical system macros');
 
     const creatorMacro = DCC_MACROS.find(m => m.name === 'Character Creator');
     assert.ok(creatorMacro, 'Must include Character Creator macro');
@@ -44,6 +44,12 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     assert.equal(sessionMacro.type, 'script');
     assert.equal(sessionMacro.ownership?.default, 2, 'Must have default: 2 (OBSERVER) for all users');
     assert.equal(sessionMacro.flags?.['carl-rpg']?.macroKey, 'session-manager');
+
+    const grindMacro = DCC_MACROS.find(m => m.name === 'Start Party Grinding & Downtime');
+    assert.ok(grindMacro, 'Must include Start Party Grinding & Downtime macro');
+    assert.equal(grindMacro.type, 'script');
+    assert.equal(grindMacro.ownership?.default, 2, 'Must have default: 2 (OBSERVER) for all users');
+    assert.equal(grindMacro.flags?.['carl-rpg']?.macroKey, 'grind-hub');
   });
 
   await t.test('3. Prebuilt LevelDB pack directory packs/macros exists and contains database files', () => {
@@ -57,11 +63,13 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     let creatorOpened = false;
     let metricsOpened = false;
     let sessionOpened = false;
+    let grindOpened = false;
 
     globalThis.window.carl = {
       openCrawlerCreator: () => { creatorOpened = true; return { rendered: true }; },
       openCombatMetrics: () => { metricsOpened = true; return { rendered: true }; },
-      openSessionManager: () => { sessionOpened = true; return { rendered: true }; }
+      openSessionManager: () => { sessionOpened = true; return { rendered: true }; },
+      openGrindApp: () => { grindOpened = true; return { rendered: true }; }
     };
 
     const creator = new Macro(DCC_MACROS[0]);
@@ -75,6 +83,10 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     const session = new Macro(DCC_MACROS[2]);
     await session.execute();
     assert.equal(sessionOpened, true, 'Session Hub macro command must invoke openSessionManager()');
+
+    const grind = new Macro(DCC_MACROS.find(m => m.name === 'Start Party Grinding & Downtime'));
+    await grind.execute();
+    assert.equal(grindOpened, true, 'Grind macro command must invoke openGrindApp()');
   });
 
   await t.test('5. setupInitialHotbar assigns slots 1, 2, and 3 on first login for users', async () => {

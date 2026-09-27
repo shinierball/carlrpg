@@ -30,16 +30,25 @@ Crawlers who choose to push their limits and grind past the 5-hour safe threshol
     > *"You have a −1 penalty on all Checks and your Move is halved. Stackable. Until the end of a long rest."*
   - Because Fatigued is **stackable**, continuing to grind while exhausted quickly cripples a crawler's combat efficacy.
 
-### C. The Floor Collapse Clock (Time as a Finite Resource)
-- Grinding is never free: every hour spent grinding subtracts directly from the **Time to Floor Collapse** clock.
-- If the party spends 5 hours grinding, the floor clock advances by 5 hours.
+### C. The Global Floor Timer Clock & Non-Bonus Hours Decrementing
+- **Global Floor Timer Setting**: The dungeon tracks a global, world-scoped **Floor Timer Clock** (`carl-rpg.floorTimer`, defaulting to 100 hours remaining on the floor).
+  - Can be manually adjusted or inspected at any time via:
+    - The character sheet Page 1 Core resting bar (`.dcc-floor-clock-widget`).
+    - The dedicated Grinding application (`DCCGrindApp`).
+    - Programmatically via `DCCActor.getFloorTimer()`, `DCCActor.setFloorTimer(val)`, and `DCCActor.decrementFloorTimer(hours)`.
+- **Decrementing by Non-Bonus Hours Accrued**:
+  - Executing a grinding session subtracts strictly **non-bonus hours** from the global Floor Timer Clock.
+  - Bonus hours gained from maps (Neighborhood Map: $+1$ hr; Borough Map: $+2$ hrs) or Complications (Wandering Merchant: $+1$ hr) represent enhanced training efficiency and geographic optimization — they are added to the crawler's accrued training pool without consuming additional floor time!
+  - **Example**: If a crawler grinds for **6 hours** and possesses a **Neighborhood Map** ($+1$ hr bonus):
+    - The crawler accrues **7 grinding hours** into their persistent training pool (`totalEarnedHours = 7`).
+    - The global Floor Timer Clock is decremented by only **6 floor hours** (`nonBonusHours = 6`).
 - Certain enemy abilities (such as *Mind Horror* chatter on Floor 2) or dungeon hazards can drain additional hours from the floor collapse timer if an encounter goes poorly.
 
 ### D. Guide & Map Modifiers
-Certain allies, maps, environmental factors, or quest rewards modify grinding efficiency by expanding the daily safe threshold:
+Certain allies, maps, environmental factors, or quest rewards modify grinding efficiency by expanding the daily safe threshold and adding bonus training hours:
 - **Guide Insight (e.g. Huey / Bob)**: Harmonizing with Huey grants insights that make grinding more efficient for the rest of the day, allowing crawlers to **add 1 safe hour** to their grind at no penalty (raising the threshold by $+1$ hour).
-- **Neighborhood Map**: Having a map of the local neighborhood grants geographic familiarity, allowing crawlers to **add 1 safe hour** to their daily grind (+1 hour to the safe limit).
-- **Borough Map (Burrough Map)**: Having a broader borough/district map provides comprehensive route and landmark awareness, allowing crawlers to **add 2 safe hours** to their daily grind (+2 hours to the safe limit).
+- **Neighborhood Map**: Having a map of the local neighborhood grants geographic familiarity, allowing crawlers to **add 1 safe hour** to their daily grind (+1 hour to safe limit) and grants **+1 bonus grinding hour** to the earned pool without consuming floor hours.
+- **Borough Map (Burrough Map)**: Having a broader borough/district map provides comprehensive route and landmark awareness, allowing crawlers to **add 2 safe hours** to their daily grind (+2 hours to safe limit) and grants **+2 bonus grinding hours** to the earned pool without consuming floor hours.
 - **Stacking**: Guide insights and area maps stack! For example, a crawler party with a Borough Map (+2 hrs) and Huey's guide insight (+1 hr) can safely grind for up to **8 hours per day** without making a single Endurance exhaustion check.
 
 ---
@@ -52,14 +61,24 @@ In CarlRPG, skills advance through active use and dedicated grinding time rather
 - Whenever a crawler actively uses a skill during an encounter, exploration, or roleplay challenge (regardless of whether the roll succeeds or fails), that skill is marked as **Checked** (`system.checked: true`).
 - In the Foundry VTT system, every skill document includes a `checked` boolean flag and a sheet checkbox indicator.
 
-### Step 2: Earning & Banking Grinding Hours
-- **Executing the Grind**: When crawlers execute a grinding session, they earn grinding hours equal to the session duration plus any **bonus hours** gained from Complication events (such as encountering a *Wandering Merchant or Helpful Guide*, which grants $+1$ bonus grinding hour).
-- **Persistent Banking Across Grinds**:
-  - Any grinding hours not allocated immediately remain **banked in the crawler's persistent pool** (`system.details.bankedGrindHours`) from grind to grind and day to day.
-  - Crawlers never lose unspent practice time.
-- **Multi-Skill Grinding**:
-  - In a single grinding session, crawlers can allocate their earned and banked hours across **multiple skills simultaneously**!
-  - For example, with 6 hours available in their pool, a crawler can allocate 2 hours to *Dodge*, 3 hours to *Pugilism*, and 1 hour to *First Aid*.
+### Step 2: Earning & Banking Grinding Hours (Use It or Lose It Pool)
+- **Executing the Party Grind**: When crawlers execute a grinding session, all selected party members earn grinding hours equal to the session duration plus any **bonus hours** gained from maps (+1 Neighborhood Map, +2 Borough Map) or Complication events (+1 Wandering Merchant).
+- **Use It or Lose It (General Pool)**:
+  - Hours sitting unallocated in a crawler's general bank pool (`system.details.bankedGrindHours`) are **reduced to zero at the start of a new grind session** — *use it or lose it*!
+  - Crawlers are expected to spend their earned hours immediately or bank them directly into specific skills before setting out on their next grind.
+- **Skill-Invested Hours Persist Across Grinds**:
+  - Hours allocated directly toward a specific skill (`system.investedHours`) are **never lost**!
+  - They remain securely banked on that skill across multiple days and grind sessions until the crawler attempts an Advancement check.
+- **Multi-Skill Grinding & In-Sheet Allocation**:
+  - In a single grinding session or directly on their character sheet, crawlers can allocate their earned hours across **multiple skills simultaneously**!
+  - Using the inline `[-1]`, `[+1]`, and `[Fill]` buttons on Page 3 (Skills) of their character sheet, crawlers can spend banked hours from their own pool at any time.
+
+### Step 2B. Party-Wide Grinding Hub & Scene Floor Clock HUD
+- **Party Selection Roster**: In the `DCCGrindApp` hub, checkboxes let the party or GM select exactly which crawlers participate in the grind.
+- **Crawler Sub-Tabs**: Switch between party members within the hub to inspect each crawler's skills, banked pool, and test advancement checks individually.
+- **Individual Endurance Checks**: Extended grinding excess hours ($> 5$ hours safe limit) trigger separate Endurance checks ($1d20 + \text{Rank} + \text{CON Mod}$ vs $10 + \text{Floor} + \text{Excess}$) for each crawler. `Fatigued` debuffs are applied *only* to crawlers who fail their individual checks.
+- **Scene Floor Clock HUD (`DCCFloorClockHUD`)**: A persistent floating widget anchored below Foundry's scene navigation displays the real-time hours remaining until floor collapse, with quick GM adjustment controls (`-5h`, `-1h`, `+1h`, `+5h`) and a 1-click `[Grind]` launcher.
+- **Single Floor Clock Decrement**: Floor clock time is decremented once for the party by non-bonus hours accrued (`hours`).
 
 ### Step 3: High-Level Accumulation (Invested Hours on Skills)
 - Each skill tracks its own **Invested Hours** (`system.investedHours`) toward the current rank requirement:

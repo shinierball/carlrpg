@@ -35,6 +35,7 @@ export class CrawlerDataModel extends BaseActorDataModel {
         notes: new fields.HTMLField({ initial: '' }),
         importantKills: new fields.StringField({ initial: '' }),
         clubsSocieties: new fields.StringField({ initial: '' }),
+        bankedGrindHours: new fields.NumberField({ initial: 0, integer: true, min: 0 }),
         personalSpace: new fields.SchemaField({
           tier: new fields.StringField({ initial: '' }),
           size: new fields.StringField({ initial: '' }),

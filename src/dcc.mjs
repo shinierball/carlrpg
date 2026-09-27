@@ -13,6 +13,7 @@ import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
 import { DCCGrindApp } from './apps/grind-app.mjs';
+import { DCCFloorClockHUD } from './apps/floor-clock-hud.mjs';
 import {
   initCrawlerTokenHUD,
   getCrawlerTokenHUD,
@@ -268,10 +269,26 @@ Hooks.once('init', async function() {
     default: 1
   });
 
+  game.settings.register('carl-rpg', 'floorTimer', {
+    name: 'Floor Timer Clock',
+    hint: 'Remaining in-game hours before Floor Collapse.',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 100
+  });
+
   DCCActor.getCurrentFloor = getCurrentFloor;
   DCCActor.setCurrentFloor = setCurrentFloor;
+  DCCActor.getFloorTimer = getFloorTimer;
+  DCCActor.setFloorTimer = setFloorTimer;
+  DCCActor.decrementFloorTimer = decrementFloorTimer;
+
   CONFIG.DCC.getCurrentFloor = getCurrentFloor;
   CONFIG.DCC.setCurrentFloor = setCurrentFloor;
+  CONFIG.DCC.getFloorTimer = getFloorTimer;
+  CONFIG.DCC.setFloorTimer = setFloorTimer;
+  CONFIG.DCC.decrementFloorTimer = decrementFloorTimer;
 
   // Register Handlebars Helpers
   Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -324,7 +341,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/achievement-manager.hbs',
     'systems/carl-rpg/templates/apps/crawler-hotbar-hud.hbs',
     'systems/carl-rpg/templates/apps/crawler-action-hud.hbs',
-    'systems/carl-rpg/templates/apps/grind-app.hbs'
+    'systems/carl-rpg/templates/apps/grind-app.hbs',
+    'systems/carl-rpg/templates/apps/floor-clock-hud.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -543,6 +561,32 @@ function injectActorDirectoryButtons(app, html) {
       headerActions.after(btn);
     } else {
       $html.find('.directory-footer').before(btn);
+    }
+  }
+
+  // 3. Party Grinding & Downtime Hub button
+  if (!$html.find('.dcc-open-grind-hub-btn').length) {
+    const grindBtn = $(`
+      <button type="button" class="dcc-open-grind-hub-btn" style="width: 100%; margin: 2px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" title="Start Party Grinding & Downtime Session">
+        <i class="fa-solid fa-dumbbell" style="color: #f1c40f;"></i> Party Grinding & Downtime Hub
+      </button>
+    `);
+
+    grindBtn.on('click', ev => {
+      ev.preventDefault();
+      new DCCGrindApp().render(true);
+    });
+
+    const sessionBtn = $html.find('.dcc-open-session-manager-btn');
+    if (sessionBtn.length) {
+      sessionBtn.after(grindBtn);
+    } else {
+      const headerActions = $html.find('.header-actions, .action-buttons, header.directory-header .action-buttons');
+      if (headerActions.length) {
+        headerActions.after(grindBtn);
+      } else {
+        $html.find('.directory-footer').before(grindBtn);
+      }
     }
   }
 }
@@ -1323,10 +1367,64 @@ if (typeof globalThis.window !== 'undefined') {
   globalThis.window.carl = globalThis.window.carl || {};
   globalThis.window.carl.getCurrentFloor = getCurrentFloor;
   globalThis.window.carl.setCurrentFloor = setCurrentFloor;
+  globalThis.window.carl.getFloorTimer = getFloorTimer;
+  globalThis.window.carl.setFloorTimer = setFloorTimer;
+  globalThis.window.carl.decrementFloorTimer = decrementFloorTimer;
 }
 if (globalThis.CONFIG?.DCC) {
   globalThis.CONFIG.DCC.getCurrentFloor = getCurrentFloor;
   globalThis.CONFIG.DCC.setCurrentFloor = setCurrentFloor;
+  globalThis.CONFIG.DCC.getFloorTimer = getFloorTimer;
+  globalThis.CONFIG.DCC.setFloorTimer = setFloorTimer;
+  globalThis.CONFIG.DCC.decrementFloorTimer = decrementFloorTimer;
+}
+
+/**
+ * Get current global floor timer clock (hours remaining until floor collapse)
+ * @returns {number}
+ */
+export function getFloorTimer() {
+  try {
+    const val = globalThis.game?.settings?.get?.('carl-rpg', 'floorTimer');
+    const parsed = parseFloat(val);
+    return Number.isFinite(parsed) ? parsed : 100;
+  } catch (_) {
+    return 100;
+  }
+}
+
+/**
+ * Set current global floor timer clock
+ * @param {number|string} hours
+ * @returns {Promise<number>}
+ */
+export async function setFloorTimer(hours) {
+  const parsed = Number(hours);
+  const val = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  if (globalThis.game?.settings?.set) {
+    await globalThis.game.settings.set('carl-rpg', 'floorTimer', val);
+  }
+  if (typeof globalThis.ui !== 'undefined' && globalThis.ui?.windows) {
+    for (const app of Object.values(globalThis.ui.windows)) {
+      if (typeof app.render === 'function') app.render(false);
+    }
+  }
+  if (typeof DCCFloorClockHUD?.get === 'function') {
+    DCCFloorClockHUD.get().render();
+  }
+  return val;
+}
+
+/**
+ * Decrement global floor timer clock by a specified number of hours
+ * @param {number|string} hours
+ * @returns {Promise<number>}
+ */
+export async function decrementFloorTimer(hours) {
+  const dec = Number(hours) || 0;
+  const current = getFloorTimer();
+  const nextVal = Math.max(0, current - dec);
+  return setFloorTimer(nextVal);
 }
 
 /**
@@ -1713,6 +1811,23 @@ Hooks.once('ready', async function() {
 
   // Initialize Crawler Token Action HUDs (Hotbar above macros bar & Actions on left)
   initCrawlerTokenHUD();
+
+  // Initialize Scene Floor Timer Clock HUD
+  if (typeof DCCFloorClockHUD?.get === 'function') {
+    DCCFloorClockHUD.get().render();
+  }
+
+  Hooks.on('renderSceneNavigation', () => {
+    if (typeof DCCFloorClockHUD?.get === 'function') {
+      DCCFloorClockHUD.get().render();
+    }
+  });
+
+  Hooks.on('canvasReady', () => {
+    if (typeof DCCFloorClockHUD?.get === 'function') {
+      DCCFloorClockHUD.get().render();
+    }
+  });
 });
 
 

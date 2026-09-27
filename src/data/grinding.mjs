@@ -146,7 +146,9 @@ export function getSafeGrindingThreshold(options = {}) {
   }
 
   const safeThreshold = base + guideBonus + mapBonus;
-  return { safeThreshold, guideBonus, mapBonus };
+  const hours = Number(options.hours) || 0;
+  const excessHours = Math.max(0, hours - safeThreshold);
+  return { safeThreshold, guideBonus, mapBonus, excessHours };
 }
 
 /**

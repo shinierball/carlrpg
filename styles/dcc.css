@@ -7290,4 +7290,259 @@ select.dcc-box-input.dcc-size-select,
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* =======================================================
+   FLOATING SCENE FLOOR TIMER CLOCK HUD
+   ======================================================= */
+.dcc-start-grind-btn {
+  background: linear-gradient(90deg, #c0392b, #d35400) !important;
+  border: 1px solid #e74c3c !important;
+  color: #ffffff !important;
+  border-radius: 3px !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.15s ease !important;
+}
+
+.dcc-start-grind-btn:hover {
+  background: linear-gradient(90deg, #e74c3c, #e67e22) !important;
+  border-color: #f39c12 !important;
+  box-shadow: 0 0 8px rgba(230, 126, 34, 0.6) !important;
+  transform: translateY(-1px);
+}
+
+#dcc-floor-clock-hud {
+  position: absolute;
+  top: 65px;
+  left: 120px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  font-family: 'Oswald', sans-serif;
+  user-select: none;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.dcc-floor-hud-inner {
+  background: rgba(18, 18, 22, 0.95);
+  border: 1.5px solid #e67e22;
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+}
+
+.dcc-floor-hud-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dcc-floor-hud-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.dcc-floor-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #aaaaaa;
+}
+
+.dcc-hud-floor-badge {
+  background: #c0392b;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 9px;
+}
+
+.dcc-floor-hud-time-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 1px;
+}
+
+.dcc-hud-time-display {
+  font-size: 15px;
+  font-weight: bold;
+  color: #f39c12;
+  letter-spacing: 0.5px;
+}
+
+.dcc-hud-time-display small {
+  font-size: 10px;
+  color: #888888;
+  margin-left: 2px;
+}
+
+.dcc-hud-time-input {
+  width: 48px;
+  background: #111111;
+  color: #f39c12;
+  border: 1px solid #666666;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 13px;
+  padding: 1px 2px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.dcc-hud-adj-btn {
+  background: #262633;
+  border: 1px solid #444455;
+  color: #cccccc;
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 1px 4px;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.dcc-hud-adj-btn:hover {
+  background: #34495e;
+  color: #ffffff;
+  border-color: #5dade2;
+}
+
+.dcc-floor-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  border-left: 1px solid #333333;
+  padding-left: 6px;
+}
+
+.dcc-hud-grind-btn {
+  background: linear-gradient(90deg, #c0392b, #d35400);
+  border: 1px solid #e74c3c;
+  color: #ffffff;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.5px;
+  transition: all 0.15s ease;
+}
+
+.dcc-hud-grind-btn:hover {
+  background: linear-gradient(90deg, #e74c3c, #e67e22);
+}
+
+.dcc-floor-hud-collapse-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.dcc-floor-hud-collapse-btn:hover {
+  color: #ffffff;
+}
+
+.dcc-hud-pill-collapsed {
+  background: rgba(18, 18, 22, 0.95);
+  border: 1.5px solid #e67e22;
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-family: 'Oswald', sans-serif;
+  transition: all 0.15s ease;
+}
+
+.dcc-hud-pill-collapsed:hover {
+  border-color: #f39c12;
+  transform: scale(1.05);
+}
+
+.dcc-hud-collapsed-val {
+  font-weight: bold;
+  color: #f39c12;
+  font-size: 13px;
+}
+
+/* =======================================================
+   IN-SHEET SKILLS GRINDING CONTROLS (PAGE 3)
+   ======================================================= */
+.dcc-sheet-skill-grind-block {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.dcc-sheet-alloc-btn {
+  background: #2c2538;
+  border: 1px solid #f1c40f;
+  color: #f1c40f;
+  border-radius: 2px;
+  font-size: 10px;
+  padding: 1px 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+}
+
+.dcc-sheet-alloc-btn:hover {
+  background: #f1c40f;
+  color: #111;
+}
+
+.dcc-sheet-advance-btn {
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border: 1px solid #2ecc71;
+  color: #ffffff;
+  border-radius: 2px;
+  font-size: 10px;
+  padding: 2px 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 2px rgba(46, 204, 113, 0.4); }
+  50% { box-shadow: 0 0 8px rgba(46, 204, 113, 0.8); }
+  100% { box-shadow: 0 0 2px rgba(46, 204, 113, 0.4); }
+}
+
+
 

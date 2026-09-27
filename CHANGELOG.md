@@ -1,3 +1,85 @@
+## 2.0.60
+
+### Session Tracking Crawler Selection Default & Ubiquitous Start Grind UI
+
+- **Session Tracking Auto-Selection (`DCCGrindApp`)**:
+  - The Grinding & Downtime Hub now automatically defaults its selected crawlers to those currently tracked in the active session (`DCCSessionEngine.getActiveSession().trackedCrawlerIds` or `session.crawlers`), falling back to all crawlers if no session is active.
+  - Keeps party composition seamless and synchronized between session tracking, party progression, and downtime grinding.
+- **Prominent & Ubiquitous "Start Grind" Access Across the System**:
+  - **Character Sheet Page 1 (Core)**: Added high-visibility `.open-grind-app.dcc-start-grind-btn` (`[ 🏋️ Start Grind ]`) directly in the resting & downtime controls strip alongside the Safe Room buttons and floor clock widget.
+  - **Character Sheet Page 3 (Skills)**: Converted the small text link in the skills header into a vibrant, high-contrast `.open-grind-app.dcc-start-grind-btn` (`[ 🏋️ Start Grind ]`).
+  - **Scene Floor Clock HUD (`#dcc-floor-clock-hud`)**:
+    - Embedded `[ 🏋️ Grind ]` button into the compact pill HUD header with event isolation (`stopPropagation`).
+    - Added `[ 🏋️ Start Grind ]` button into the expanded timer banner.
+    - Elevated HUD `z-index: 100` to guarantee visibility above all canvas layers and controls.
+  - **Actors Directory Sidebar**: Injected `[ 🏋️ Party Grinding & Downtime Hub ]` button directly into the Foundry actors directory tab header.
+  - **Grind App Execution Prominence**: Added top-bar quick `[ ▶ Start Grind (Xh) ]` button in the Grinding Hub dialog header, and renamed the bottom action button to clearly state `Start Grind (N Crawlers, X hrs)`.
+  - **System Macro Compendium (`carl-rpg.macros`) & Globals**: Added `Start Party Grinding & Downtime` macro and exposed `window.carl.openGrindApp()`.
+- **Automated Test Suite**:
+  - Added Suite 12 to `tests/grinding.test.mjs` verifying session tracking default resolution and multi-surface Start Grind button presence.
+  - Updated `tests/macros.test.mjs` validating canonical system macros.
+  - 100% test pass rate across 103 suites (641 passing, 0 failures).
+
+## 2.0.59
+
+### Party Grinding Hub, Scene Floor Clock HUD, Individual Crawler Progression & Use-It-Or-Lose-It Pool
+
+- **Floating Scene Floor Clock HUD (`DCCFloorClockHUD`)**:
+  - Implemented persistent on-screen HUD widget anchored below Foundry's scene navigation bar (`#navigation`).
+  - Displays real-time hours remaining until floor collapse with LitRPG stylized theme (`⏳ 94h`).
+  - Supports collapsible pill mode and full banner mode with 1-click GM manual adjustment buttons (`-5h`, `-1h`, `+1h`, `+5h`), manual numeric input, and instant `[Grind]` launcher.
+  - Automatically updates across all connected clients via world setting hooks.
+- **Party-Wide Grinding Hub (`DCCGrindApp`)**:
+  - **Party Roster Selection**: Checkboxes allow the GM/party to select which crawlers participate in a grinding session.
+  - **Crawler Sub-Tabs**: Switch between party members within the hub to view each crawler's skills, banked pool, and test advancement checks.
+  - **Single Decrement for Floor Clock**: Floor clock decrements once for the entire party session by non-bonus hours accrued (`hours`).
+  - **Use-It-Or-Lose-It Pool Rule**: Unspent hours in each crawler's unallocated pool are reset to zero at the start of a new grind (use it or lose it). Hours already invested on specific skills persist across grinds.
+  - **Individual Endurance Checks**: Extended grinding excess hours ($> 5$ hours base) trigger separate Endurance checks ($1d20 + \text{Rank} + \text{CON Mod}$ vs $10 + \text{Floor} + \text{Excess}$) for each crawler. `Fatigued` debuffs are applied *only* to crawlers who fail their individual checks.
+- **In-Sheet Skill Hour Allocation & Individual Advancement (`DCCCrawlerSheet` & `page3-skills.hbs`)**:
+  - Crawlers can now spend banked pool hours directly from their own sheets using inline `[-1]`, `[+1]`, and `[Fill]` buttons next to each skill.
+  - When hours invested meet the required rank threshold, an inline graduation cap advancement button (`Advance (d20 >= Target)`) appears directly on the skill row, allowing crawlers to roll their advancement check individually from their sheet.
+- **Automated Test Suite**:
+  - Added Suite 11 to `tests/grinding.test.mjs` validating party grinding, individual endurance checks, selective fatigue application, use-it-or-lose-it pool reset, and in-sheet allocation.
+  - 100% test pass rate across 103 suites (639 passing, 0 failures).
+
+## 2.0.58
+
+### Fix: DataModel Schema Field Registration & Live Banked Pool Hours Incrementing
+
+- **DataModel Schema Registration (`CrawlerDataModel` & `SkillDataModel`)**:
+  - Registered `bankedGrindHours: new fields.NumberField({ initial: 0, integer: true, min: 0 })` in `CrawlerDataModel.defineSchema()` and `PetDataModel.defineSchema()`.
+  - Registered `investedHours: new fields.NumberField({ integer: true, min: 0, initial: 0 })` in `SkillDataModel.defineSchema()`.
+  - In Foundry VTT v12+, updates to document fields not registered in `defineSchema()` were stripped during data validation, causing `system.details.bankedGrindHours` and `system.investedHours` to reset to 0 in persistent storage.
+- **Immediate In-Memory Document Synchronization**:
+  - `actor.grindSession(...)` and `actor.allocateGrindHours(...)` now synchronize `this.system.details.bankedGrindHours` and `skill.system.investedHours` directly in memory alongside database persistence, preventing race conditions or stale reads before socket confirmation.
+- **Interactive Grinding Hub (`DCCGrindApp`)**:
+  - `getData()` now ensures `context.bankedHours` reflects the live grind session result (`lastGrindResult.bankedHours`) and instant pool adjustments when hours are allocated with `+1`, `-1`, or `Max`.
+- **Character Sheet Display**:
+  - Added live Banked Hours badge (`Pool: X hrs`) to the Page 3 (Skills) banner header, keeping players and GMs informed of their available downtime hours directly on the character sheet.
+- **Automated Test Suite**:
+  - Added Suite 10 to `tests/grinding.test.mjs` verifying schema field presence and live pool incrementing across `actor.grindSession`, `DCCGrindApp`, and `DCCCrawlerSheet`.
+  - 100% test pass rate across 102 suites (634 passing, 0 failures).
+
+## 2.0.57
+
+### Global Floor Timer Clock & Non-Bonus Hours Decrementing
+
+- **Global Floor Timer Setting (`carl-rpg.floorTimer`)**:
+  - Implemented world-scoped setting `floorTimer` defaulting to 100 hours remaining until floor collapse.
+  - Added programmatic access and helpers across `DCCActor.getFloorTimer()`, `DCCActor.setFloorTimer(hours)`, `DCCActor.decrementFloorTimer(hours)`, `CONFIG.DCC`, and `globalThis.window.carl`.
+- **Manual Floor Clock Adjustment in UI**:
+  - **Crawler Sheet (Page 1 Core)**: Added `.dcc-floor-clock-widget` and `.dcc-global-floor-clock-input` directly beside the rest recovery controls, allowing players and GMs to view and manually adjust the active floor timer with instant synchronization.
+  - **Grind Application (`DCCGrindApp`)**: Added header Floor Clock badge and editable input (`.floor-timer-clock-input`), live session impact preview, and alert banner displaying floor hours remaining.
+- **Grinding Floor Clock Cost (Non-Bonus Hours Accrued)**:
+  - Updated `actor.grindSession({ hours, ... })` to decrement the global Floor Timer Clock strictly by **non-bonus hours accrued** (`hours`).
+  - Bonus hours gained from maps (Neighborhood Map: $+1$ hr; Borough Map: $+2$ hrs) or Complication table events (Wandering Merchant: $+1$ hr) are added into the training pool (`totalEarnedHours`) without consuming additional floor hours.
+  - For example, grinding for 6 hours with a Neighborhood Map accrues 7 training hours into the banked pool, but consumes only 6 floor hours on the global clock.
+- **Grinding Chat Card Reporting**:
+  - Session chat cards clearly display the floor timer impact: `Floor Timer Decremented: -X hrs (Remaining: Y hrs)`.
+- **Automated Test Suite**:
+  - Added test suite `9. Global Floor Timer Clock & Non-Bonus Hours Decrementing` to `tests/grinding.test.mjs`.
+  - 100% test pass rate across 101 suites (631 tests passing, 0 failures).
+
 ## 2.0.56
 
 ### Grinding Fatigue & Resting Recovery Verification

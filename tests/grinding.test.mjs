@@ -6,6 +6,10 @@ import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
 import { DCCCrawlerSheet } from '../src/sheets/crawler-sheet.mjs';
 import { DCCGrindApp } from '../src/apps/grind-app.mjs';
+import { DCCSessionEngine } from '../src/apps/session-manager.mjs';
+import { DCCFloorClockHUD } from '../src/apps/floor-clock-hud.mjs';
+import { CrawlerDataModel } from '../src/models/actors/crawler-model.mjs';
+import { SkillDataModel } from '../src/models/items/skill-model.mjs';
 import {
   DCC_GRINDING_COMPLICATIONS,
   getGrindingComplication,
@@ -657,17 +661,22 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       dodge = items[1];
     });
 
-    it('persistently banks unspent grinding hours from grind to grind', async () => {
+    it('resets unspent hours in the pool to zero at start of new grind (use it or lose it)', async () => {
       // Grind session 1: 5 hours, no skill assigned
       const res1 = await crawler.grindSession({ hours: 5, rollComplication: false, silent: true });
       assert.equal(res1.hours, 5);
       assert.equal(res1.bankedHours, 5);
       assert.equal(crawler.system.details.bankedGrindHours, 5);
 
-      // Grind session 2: 5 hours, accumulates to 10
+      // Grind session 2: 5 hours -> unspent 5 hours from session 1 are forfeited (use it or lose it)
       const res2 = await crawler.grindSession({ hours: 5, rollComplication: false, silent: true });
-      assert.equal(res2.bankedHours, 10);
-      assert.equal(crawler.system.details.bankedGrindHours, 10);
+      assert.equal(res2.forfeitedHours, 5, 'Unspent hours from previous grind were forfeited');
+      assert.equal(res2.bankedHours, 5, 'Pool has 5 hours from session 2');
+      assert.equal(crawler.system.details.bankedGrindHours, 5);
+
+      // If resetPool is explicitly false, hours accumulate
+      const res3 = await crawler.grindSession({ hours: 5, resetPool: false, rollComplication: false, silent: true });
+      assert.equal(res3.bankedHours, 10, 'Accumulates to 10 when resetPool is false');
     });
 
     it('advancing high-level skill requires multiple grinds to accumulate hours (Rank 14 -> 15)', async () => {
@@ -823,5 +832,464 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(pug.canAdvance, false);
     });
   });
+
+  describe('9. Global Floor Timer Clock & Non-Bonus Hours Decrementing', () => {
+    let crawler;
+
+    beforeEach(async () => {
+      await DCCActor.setFloorTimer(100);
+
+      crawler = new DCCActor({
+        name: 'Floor Clock Tester',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 10, mod: 4 } },
+          details: { floor: '1st Floor', bankedGrindHours: 0 }
+        }
+      });
+    });
+
+    it('global floor timer clock has getFloorTimer, setFloorTimer, and can be manually set', async () => {
+      assert.equal(typeof DCCActor.getFloorTimer, 'function');
+      assert.equal(typeof DCCActor.setFloorTimer, 'function');
+      assert.equal(typeof DCCActor.decrementFloorTimer, 'function');
+
+      assert.equal(DCCActor.getFloorTimer(), 100);
+
+      await DCCActor.setFloorTimer(150);
+      assert.equal(DCCActor.getFloorTimer(), 150);
+      assert.equal(crawler.getFloorTimer(), 150);
+
+      await crawler.decrementFloorTimer(15);
+      assert.equal(DCCActor.getFloorTimer(), 135);
+
+      // Floor timer cannot go below 0
+      await DCCActor.decrementFloorTimer(200);
+      assert.equal(DCCActor.getFloorTimer(), 0);
+    });
+
+    it('grinding for 6 hours with neighborhood map accrues 7 grinding hours but only decrements floor timer by 6 non-bonus hours', async () => {
+      await DCCActor.setFloorTimer(100);
+
+      const res = await crawler.grindSession({
+        hours: 6,
+        mapType: 'neighborhood',
+        rollComplication: false,
+        silent: true
+      });
+
+      // 6 base hours + 1 neighborhood map bonus hour = 7 accrued grinding hours
+      assert.equal(res.hours, 6, 'Base grinding duration is 6 hours');
+      assert.equal(res.mapBonusHours, 1, 'Neighborhood map grants 1 bonus grinding hour');
+      assert.equal(res.totalEarnedHours, 7, 'Total grinding hours accrued is 7 hours');
+      assert.equal(res.nonBonusHours, 6, 'Non-bonus hours accrued is 6 hours');
+
+      // Floor timer only decrements by the 6 non-bonus hours
+      assert.equal(res.previousFloorTimer, 100, 'Previous floor timer was 100');
+      assert.equal(res.floorTimer, 94, 'Floor timer decremented by exactly 6 non-bonus hours (100 -> 94)');
+      assert.equal(DCCActor.getFloorTimer(), 94, 'Global floor timer state updated to 94');
+
+      // Banked hours received full 7 hours
+      assert.equal(crawler.system.details.bankedGrindHours, 7, 'Banked grind hours pool received all 7 accrued hours');
+    });
+
+    it('grinding with borough map (+2) and complication bonus (+1) accrues 9 grinding hours and uses 6 floor hours', async () => {
+      await DCCActor.setFloorTimer(100);
+
+      // Mock roll 18 for complication bonus (+1 hour)
+      const origRoll = globalThis.Roll;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          this.total = 18; // Wandering Merchant / Helpful Guide
+          return this;
+        }
+      };
+
+      try {
+        const res = await crawler.grindSession({
+          hours: 6,
+          mapType: 'borough',
+          rollComplication: true,
+          silent: true
+        });
+
+        // 6 base hours + 2 borough map bonus + 1 event bonus = 9 accrued grinding hours
+        assert.equal(res.hours, 6);
+        assert.equal(res.mapBonusHours, 2, 'Borough map grants 2 bonus grinding hours');
+        assert.equal(res.complicationBonusHours, 1, 'Complication event grants 1 bonus hour');
+        assert.equal(res.bonusHours, 3, 'Total bonus hours is 3 (2 map + 1 event)');
+        assert.equal(res.totalEarnedHours, 9, 'Total grinding hours accrued is 9 hours');
+        assert.equal(res.nonBonusHours, 6, 'Non-bonus hours is 6 hours');
+
+        // Floor timer only decremented by 6 non-bonus hours
+        assert.equal(res.floorTimer, 94, 'Floor clock decremented by 6 hours (100 -> 94)');
+        assert.equal(DCCActor.getFloorTimer(), 94);
+        assert.equal(crawler.system.details.bankedGrindHours, 9);
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('DCCGrindApp prepares floorTimer and resultingFloorTimer based on duration', async () => {
+      await DCCActor.setFloorTimer(80);
+
+      const app = new DCCGrindApp({ actor: crawler, hours: 6 });
+      const data = await app.getData();
+
+      assert.equal(data.floorTimer, 80);
+      assert.equal(data.resultingFloorTimer, 74, '80 - 6 = 74 hrs remaining');
+    });
+
+    it('DCCCrawlerSheet getData exposes global floorTimer', async () => {
+      await DCCActor.setFloorTimer(65);
+
+      const sheet = new DCCCrawlerSheet(crawler);
+      const data = await sheet.getData();
+
+      assert.equal(data.floorTimer, 65, 'Sheet context exposes live floorTimer');
+    });
+  });
+
+  describe('10. DataModel Schema Persistence & Live Pool Incrementing', () => {
+    let crawler;
+
+    beforeEach(async () => {
+      crawler = new DCCActor({
+        name: 'Schema Bank Tester',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 10, mod: 4 } },
+          details: { floor: '1st Floor', bankedGrindHours: 0 }
+        }
+      });
+    });
+
+    it('CrawlerDataModel.defineSchema includes bankedGrindHours field', () => {
+      const schema = CrawlerDataModel.defineSchema();
+      assert.ok(schema.details, 'schema.details exists');
+      assert.ok(schema.details.fields.bankedGrindHours, 'bankedGrindHours field exists in CrawlerDataModel details');
+      assert.equal(schema.details.fields.bankedGrindHours.initial, 0);
+    });
+
+    it('SkillDataModel.defineSchema includes investedHours field', () => {
+      const schema = SkillDataModel.defineSchema();
+      assert.ok(schema.investedHours, 'investedHours field exists in SkillDataModel');
+      assert.equal(schema.investedHours.initial, 0);
+    });
+
+    it('grinding session increases available pool hours and immediately reflects in DCCGrindApp and sheet', async () => {
+      await crawler.update({ 'system.details.bankedGrindHours': 0 });
+      assert.equal(crawler.system.details.bankedGrindHours, 0);
+
+      // Grind 6 hours with neighborhood map (+1 hr bonus = 7 hours added)
+      const res = await crawler.grindSession({
+        hours: 6,
+        mapType: 'neighborhood',
+        rollComplication: false,
+        silent: true
+      });
+
+      assert.equal(res.totalEarnedHours, 7);
+      assert.equal(res.bankedHours, 7);
+      assert.equal(crawler.system.details.bankedGrindHours, 7, 'Actor system.details.bankedGrindHours updated to 7');
+
+      // Check DCCGrindApp with lastGrindResult
+      const app = new DCCGrindApp({ actor: crawler, hours: 6, mapType: 'neighborhood' });
+      app.lastGrindResult = res;
+      const appData = await app.getData();
+
+      assert.equal(appData.bankedHours, 7, 'DCCGrindApp context.bankedHours is 7, not 0');
+      assert.equal(appData.lastGrindResult.totalEarnedHours, 7);
+      assert.equal(appData.lastGrindResult.bankedHours, 7);
+
+      // Check DCCCrawlerSheet
+      const sheet = new DCCCrawlerSheet(crawler);
+      const sheetData = await sheet.getData();
+      assert.equal(sheetData.bankedGrindHours, 7, 'CrawlerSheet context.bankedGrindHours is 7');
+    });
+  });
+
+  describe('Party-Wide Grinding & Individual Crawler Execution', () => {
+    let carl, donut, katia;
+
+    beforeEach(async () => {
+      await DCCActor.setFloorTimer(100);
+
+      carl = new DCCActor({
+        name: 'Carl',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 16, mod: 4 } },
+          details: { floor: '1st Floor', bankedGrindHours: 3 }
+        }
+      });
+      await carl.createEmbeddedDocuments('Item', [
+        {
+          name: 'Endurance',
+          type: 'skill',
+          system: { rank: 5, stat: 'con', checked: true, investedHours: 0 }
+        },
+        {
+          name: 'Pugilism',
+          type: 'skill',
+          system: { rank: 3, stat: 'str', checked: true, investedHours: 0 }
+        }
+      ]);
+
+      donut = new DCCActor({
+        name: 'Princess Donut',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 8, mod: 3 } },
+          details: { floor: '1st Floor', bankedGrindHours: 4 }
+        }
+      });
+      await donut.createEmbeddedDocuments('Item', [
+        {
+          name: 'Endurance',
+          type: 'skill',
+          system: { rank: 1, stat: 'con', checked: false, investedHours: 0 }
+        },
+        {
+          name: 'Magic Missile',
+          type: 'skill',
+          system: { rank: 2, stat: 'int', checked: true, investedHours: 0 }
+        }
+      ]);
+
+      katia = new DCCActor({
+        name: 'Katia',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 10, mod: 4 } },
+          details: { floor: '1st Floor', bankedGrindHours: 0 }
+        }
+      });
+      await katia.createEmbeddedDocuments('Item', [
+        {
+          name: 'Endurance',
+          type: 'skill',
+          system: { rank: 0, stat: 'con', checked: false, investedHours: 0 }
+        }
+      ]);
+    });
+
+    it('decrements floor timer once for the party by non-bonus hours accrued', async () => {
+      assert.equal(DCCActor.getFloorTimer(), 100);
+
+      const result = await DCCActor.executePartyGrindSession([carl, donut], {
+        hours: 6, // 6 non-bonus hours
+        mapType: 'neighborhood', // +1 bonus hour
+        rollComplication: false,
+        silent: true
+      });
+
+      // Floor clock decreases by exactly 6 hours, once for the party session
+      assert.equal(result.nonBonusHours, 6);
+      assert.equal(result.newFloorTimer, 94);
+      assert.equal(DCCActor.getFloorTimer(), 94);
+    });
+
+    it('resets unspent hours in pool to zero for each crawler (use it or lose it) while awarding new hours', async () => {
+      // Carl had 3 unspent banked hours, Donut had 4
+      const result = await DCCActor.executePartyGrindSession([carl, donut], {
+        hours: 5,
+        rollComplication: false,
+        silent: true
+      });
+
+      assert.equal(result.crawlerResults.length, 2);
+      const carlRes = result.crawlerResults.find(r => r.id === carl.id);
+      const donutRes = result.crawlerResults.find(r => r.id === donut.id);
+
+      assert.equal(carlRes.forfeitedHours, 3, 'Carl forfeited 3 unspent pool hours');
+      assert.equal(carlRes.totalEarnedHours, 5);
+      assert.equal(carlRes.bankedHours, 5);
+      assert.equal(carl.system.details.bankedGrindHours, 5);
+
+      assert.equal(donutRes.forfeitedHours, 4, 'Donut forfeited 4 unspent pool hours');
+      assert.equal(donutRes.totalEarnedHours, 5);
+      assert.equal(donutRes.bankedHours, 5);
+      assert.equal(donut.system.details.bankedGrindHours, 5);
+    });
+
+    it('runs Endurance checks individually per crawler and applies Fatigued debuff only to failures', async () => {
+      // 7 hours grind (base safe 5). Excess = 2 hours (Hour 6 and Hour 7 checks)
+      // Mock Roll so Carl rolls high (passes) and Donut rolls low (fails)
+      const origRoll = globalThis.Roll;
+      let rollCount = 0;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          rollCount++;
+          // First 2 rolls are for Carl (e.g. 18, 19), next 2 rolls are for Donut (e.g. 2, 3)
+          this.total = (rollCount <= 2) ? 18 : 3;
+          return this;
+        }
+      };
+
+      try {
+        const result = await DCCActor.executePartyGrindSession([carl, donut], {
+          hours: 7,
+          floor: 1,
+          rollComplication: false,
+          silent: true
+        });
+
+        const carlRes = result.crawlerResults.find(r => r.id === carl.id);
+        const donutRes = result.crawlerResults.find(r => r.id === donut.id);
+
+        // Carl passed all checks
+        assert.equal(carlRes.enduranceChecks.length, 2);
+        assert.ok(carlRes.enduranceChecks.every(c => c.passed));
+        assert.equal(carlRes.fatigueGained, 0);
+        const carlDebuffs = carl.items.filter(i => i.type === 'debuff');
+        assert.equal(carlDebuffs.length, 0, 'Carl gained 0 fatigue debuffs');
+
+        // Donut failed checks and gained Fatigued debuff
+        assert.equal(donutRes.enduranceChecks.length, 2);
+        assert.ok(donutRes.enduranceChecks.some(c => !c.passed));
+        assert.ok(donutRes.fatigueGained > 0);
+        const donutDebuffs = donut.items.filter(i => i.type === 'debuff' && /fatigued/i.test(i.name));
+        assert.ok(donutDebuffs.length > 0, 'Donut gained Fatigued debuff on failure');
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('allows crawlers to spend their banked hours individually from their sheet and advance skills', async () => {
+      // Carl earns 6 banked hours
+      await carl.update({ 'system.details.bankedGrindHours': 6 });
+      const pugilism = carl.items.find(i => i.name === 'Pugilism');
+      assert.ok(pugilism);
+      assert.equal(pugilism.system.rank, 3); // Rank 3 requires 3 hours, target d20 >= 3
+
+      // CrawlerSheet getData computes grinding properties
+      const sheet = new DCCCrawlerSheet(carl);
+      let sheetData = await sheet.getData();
+      let pugData = sheetData.skills.find(s => s.id === pugilism.id);
+      assert.equal(pugData.requiredGrindHours, 3);
+      assert.equal(pugData.investedHours, 0);
+      assert.equal(pugData.canAddHour, true);
+      assert.equal(pugData.canAdvance, false);
+
+      // Spend hours from sheet: allocate 3 hours to Pugilism
+      await carl.allocateGrindHours(pugilism.id, 3);
+      assert.equal(carl.system.details.bankedGrindHours, 3, 'Carl pool reduced to 3');
+      assert.equal(pugilism.system.investedHours, 3, 'Pugilism now has 3 invested hours');
+
+      // Now sheet reflects canAdvance: true
+      sheetData = await sheet.getData();
+      pugData = sheetData.skills.find(s => s.id === pugilism.id);
+      assert.equal(pugData.canAdvance, true);
+
+      // Mock Roll to pass advancement (e.g. 15 >= 3)
+      const origRoll = globalThis.Roll;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          this.total = 15;
+          return this;
+        }
+      };
+
+      try {
+        const advResult = await carl.attemptSkillAdvancement(pugilism.id);
+        assert.equal(advResult.passed, true);
+        assert.equal(advResult.previousRank, 3);
+        assert.equal(advResult.newRank, 4);
+        assert.equal(pugilism.system.rank, 4, 'Pugilism advanced to Rank 4');
+        assert.equal(pugilism.system.checked, false, 'Checked flag reset after advancement');
+        assert.equal(pugilism.system.investedHours, 0, 'Invested hours deducted');
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('DCCGrindApp allows selecting party crawlers and switching active crawler tabs', async () => {
+      // Setup world actors
+      globalThis.game.actors = [carl, donut, katia];
+
+      const hub = new DCCGrindApp({ actor: carl });
+      let data = await hub.getData();
+
+      assert.equal(data.crawlers.length, 3, 'Lists all 3 crawlers in party roster');
+      assert.equal(data.selectedCount, 3, 'All crawlers initially selected');
+      assert.equal(data.actor.id, carl.id, 'Carl is active crawler tab');
+
+      // Deselect Katia
+      hub.selectedActorIds.delete(katia.id);
+      data = await hub.getData();
+      assert.equal(data.selectedCount, 2);
+
+      // Switch active tab to Donut
+      hub.activeCrawlerId = donut.id;
+      data = await hub.getData();
+      assert.equal(data.actor.id, donut.id);
+      assert.ok(data.skills.some(s => s.name === 'Magic Missile'));
+    });
+
+    it('defaults selected crawlers in DCCGrindApp to those selected in session tracking', async () => {
+      globalThis.game.actors = [carl, donut, katia];
+
+      // Create an active session that tracks only Carl and Donut (not Katia)
+      await DCCSessionEngine.saveAllSessions([
+        {
+          id: 'session-test-grind',
+          number: 1,
+          title: 'Test Session',
+          status: 'active',
+          trackedCrawlerIds: [carl.id, donut.id],
+          crawlers: {
+            [carl.id]: { id: carl.id, name: carl.name },
+            [donut.id]: { id: donut.id, name: donut.name }
+          },
+          ledger: []
+        }
+      ]);
+      await DCCSessionEngine.setActiveSessionId('session-test-grind');
+
+      // Initialize DCCGrindApp with no explicit crawler selection
+      const hub = new DCCGrindApp();
+      const data = await hub.getData();
+
+      assert.equal(data.crawlers.length, 3, 'All 3 world crawlers listed');
+      assert.equal(data.selectedCount, 2, 'Default selected count matches session tracking (2)');
+
+      const carlItem = data.crawlers.find(c => c.id === carl.id);
+      const donutItem = data.crawlers.find(c => c.id === donut.id);
+      const katiaItem = data.crawlers.find(c => c.id === katia.id);
+
+      assert.equal(carlItem.isSelected, true, 'Carl is selected (tracked in session)');
+      assert.equal(donutItem.isSelected, true, 'Donut is selected (tracked in session)');
+      assert.equal(katiaItem.isSelected, false, 'Katia is NOT selected (not in session tracking)');
+    });
+
+    it('Start Grind button is visible and present across Page 1 Core, Page 3 Skills, and Scene HUD', async () => {
+      // 1. Page 1 Core template includes Start Grind button
+      const fs = await import('fs');
+      const page1Content = fs.readFileSync('templates/actors/parts/page1-core.hbs', 'utf-8');
+      assert.ok(page1Content.includes('open-grind-app'), 'Page 1 Core contains open-grind-app class');
+      assert.ok(page1Content.includes('Start Grind'), 'Page 1 Core has explicit "Start Grind" button');
+
+      // 2. Page 3 Skills template includes Start Grind button
+      const page3Content = fs.readFileSync('templates/actors/parts/page3-skills.hbs', 'utf-8');
+      assert.ok(page3Content.includes('open-grind-app'), 'Page 3 Skills contains open-grind-app class');
+      assert.ok(page3Content.includes('Start Grind'), 'Page 3 Skills has explicit "Start Grind" button');
+
+      // 3. Floor Clock HUD renders Grind button in both expanded and collapsed states
+      const hud = new DCCFloorClockHUD();
+      const expandedHTML = hud._getFallbackHTML({ isCollapsed: false, floorTimer: 100, currentFloor: 1, isGM: true });
+      assert.ok(expandedHTML.includes('dcc-hud-grind-btn'), 'Expanded HUD has dcc-hud-grind-btn');
+      assert.ok(expandedHTML.includes('Start Grind'), 'Expanded HUD has "Start Grind" text');
+
+      const collapsedHTML = hud._getFallbackHTML({ isCollapsed: true, floorTimer: 100, currentFloor: 1, isGM: true });
+      assert.ok(collapsedHTML.includes('dcc-hud-grind-btn'), 'Collapsed HUD has dcc-hud-grind-btn');
+      assert.ok(collapsedHTML.includes('Grind'), 'Collapsed HUD has "Grind" button');
+
+      // 4. Grind App template contains explicit Start Grind execute buttons
+      const grindAppContent = fs.readFileSync('templates/apps/grind-app.hbs', 'utf-8');
+      assert.ok(grindAppContent.includes('Start Grind'), 'Grind App contains "Start Grind" button');
+    });
+  });
 });
+
 

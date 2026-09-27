@@ -21,7 +21,8 @@ export class SkillDataModel extends BaseItemDataModel {
       description: new fields.HTMLField({ initial: '' }),
       upgrades: new fields.StringField({ initial: '' }),
       damageModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
-      checked: new fields.BooleanField({ initial: false })
+      checked: new fields.BooleanField({ initial: false }),
+      investedHours: new fields.NumberField({ integer: true, min: 0, initial: 0 })
     };
   }
 

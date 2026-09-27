@@ -124,9 +124,14 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
     - Embedded `[ 💥 Roll Attack Damage ]` buttons on chat cards allow players to click directly from chat to roll multi-typed damage and apply damage to targeted tokens with one click.
 - **Grinding & Skill Advancement Mechanics**:
   - Full support for the official CarlRPG downtime grinding system (see [docs/grinding-mechanics.md](docs/grinding-mechanics.md)).
-  - **5-Hour Safe Daily Limit**: Crawlers can safely grind up to 5 hours per in-game day without fatigue checks; grinding beyond 5 hours requires an **Endurance Check** (CON) per hour or inflicts the stackable **Fatigued Debuff** (−1 Checks, halved Move speed).
-  - **Floor Clock Cost**: Grinding directly consumes time against the active Floor Collapse timer.
-  - **Skill Progression**: Mark actively used skills (`checked`), invest grinding hours equal to current rank ($\text{Hours} = \text{Current Rank}$), and roll $\mathbf{d20 \ge \text{Current Rank}}$ to advance.
+  - **Party Grinding Hub (`DCCGrindApp`)**: Select participating crawlers with party roster checkboxes (automatically defaulted to crawlers tracked in the active session hub), switch between crawler sub-tabs to inspect skills and allocate hours, and execute grinds affecting all participants simultaneously.
+  - **Prominent & Convenient Access**: Open the Grinding Hub anytime from the **Start Grind** button on Page 1 (Core) recovery controls, the **Start Grind** button on Page 3 (Skills) header, the **[ 🏋️ Grind ]** button on the floating Scene Floor Clock HUD, the **Actors Directory Sidebar** (`Party Grinding & Downtime Hub`), or via the system macro (`Start Party Grinding & Downtime`).
+  - **Floating Scene Floor Clock HUD (`DCCFloorClockHUD`)**: High-visibility on-screen HUD widget anchored below scene navigation displaying real-time hours remaining until floor collapse, with quick GM adjustment buttons (`-5h`, `-1h`, `+1h`, `+5h`) and a 1-click `[Grind]` launcher.
+  - **Use-It-Or-Lose-It Pool Rule**: Unspent hours sitting in a crawler's general bank pool are reset to zero at the start of a new grind session, while hours invested directly on specific skills persist indefinitely across sessions.
+  - **Individual Endurance Checks & Fatigue**: Grinding beyond safe limits triggers individual Endurance checks for each crawler; the stackable **Fatigued Debuff** (−1 Checks, halved Move speed) is applied *only* to crawlers who fail their checks.
+  - **In-Sheet Skill Hour Allocation & Advancement**: Crawlers can spend banked hours directly on Page 3 (Skills) of their character sheet with inline `[-1]`, `[+1]`, and `[Fill]` buttons, and trigger individual advancement rolls ($d20 \ge \text{Rank}$) via inline graduation cap buttons.
+  - **5-Hour Safe Daily Limit**: Crawlers can safely grind up to 5 hours per in-game day without fatigue checks; guide insight (+1 hr) and area maps (+1 Neighborhood Map, +2 Borough Map) extend safe limits and award bonus hours.
+  - **Single Floor Clock Cost**: Grinding decrements the global Floor Timer Clock once for the party by non-bonus hours accrued (`hours`).
   - **Grinding Complications Table**: 1d20 random GM event table covering mob ambushes, Janitor Mob corpse swarms, environmental hazards, rival crawlers, and AI-awarded Loot Boxes.
 - **Multi-Modifier Buffs & Debuffs**:
   - Create buffs with multiple stat bonuses (e.g. +2 STR, +2 DEX) and multiple damage/defense modifiers (damage multipliers, bonus typed damage, resistances, immunities, and Temp HP).

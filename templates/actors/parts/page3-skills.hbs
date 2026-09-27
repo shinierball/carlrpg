@@ -4,9 +4,14 @@
     <div class="dcc-banner-header">
       <span>SKILLS</span>
       <div style="display: flex; gap: 12px; align-items: center;">
-        <a class="open-grind-app" data-tooltip="Start a Grinding & Downtime Session" style="color: #e67e22; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
-          <i class="fa-solid fa-dumbbell"></i> Grind
-        </a>
+        {{#if bankedGrindHours}}
+          <span class="dcc-badge" style="background: #111; color: #f1c40f; border: 1px solid #f1c40f; font-size: 11px; padding: 2px 7px; text-transform: uppercase;" title="Banked Grinding Hours Pool">
+            <i class="fa-solid fa-vault"></i> Pool: <strong>{{bankedGrindHours}} hrs</strong>
+          </span>
+        {{/if}}
+        <button type="button" class="open-grind-app dcc-start-grind-btn" data-tooltip="Start a Grinding & Downtime Session" style="background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1px solid #e74c3c; border-radius: 3px; font-weight: bold; font-size: 11px; padding: 2px 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Oswald', sans-serif; text-transform: uppercase;">
+          <i class="fa-solid fa-dumbbell"></i> Start Grind
+        </button>
         <a class="open-skill-picker" data-tooltip="Choose from official DCC Skill Library" style="color: #f1c40f; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
           <i class="fa-solid fa-book-bookmark"></i> Select Skill
         </a>
@@ -124,6 +129,18 @@
                 <span style="font-size: 11px; font-style: italic; color: #555;">{{skill.system.notes}}</span>
               {{else}}
                 <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
+                {{#if (or skill.investedHours ../bankedGrindHours skill.canAdvance)}}
+                  <div class="dcc-skill-grind-inline" style="display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 10px;">
+                    <span style="color: {{#if skill.canAdvance}}#27ae60{{else}}#f39c12{{/if}}; font-weight: bold;" title="Invested Hours / Required: {{skill.investedHours}} / {{skill.requiredGrindHours}} hrs">
+                      ⏳ {{skill.investedHours}}/{{skill.requiredGrindHours}}h
+                    </span>
+                    {{#if ../bankedGrindHours}}
+                      <button type="button" class="in-sheet-alloc-hour" data-skill-id="{{skill.id}}" data-action="sub" {{#unless skill.canSubHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="padding: 0 4px; font-size: 9px; line-height: 14px; background: #333; color: #fff; border: 1px solid #555; border-radius: 2px; cursor: pointer;" title="Remove 1 hour back to pool">-1</button>
+                      <button type="button" class="in-sheet-alloc-hour" data-skill-id="{{skill.id}}" data-action="add" {{#unless skill.canAddHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="padding: 0 4px; font-size: 9px; line-height: 14px; background: #27ae60; color: #fff; border: 1px solid #2ecc71; border-radius: 2px; cursor: pointer;" title="Allocate 1 hour from pool">+1</button>
+                      <button type="button" class="in-sheet-alloc-hour" data-skill-id="{{skill.id}}" data-action="max" {{#unless skill.canAddHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="padding: 0 4px; font-size: 9px; line-height: 14px; background: #2980b9; color: #fff; border: 1px solid #3498db; border-radius: 2px; cursor: pointer;" title="Fill to required hours">Fill</button>
+                    {{/if}}
+                  </div>
+                {{/if}}
               {{/if}}
             </td>
             <td style="text-align: center; white-space: nowrap;">
@@ -140,6 +157,11 @@
                 {{#if skill.hasDamage}}
                   <button type="button" class="dcc-attack-roll-btn roll-skill-dmg" data-tooltip="Roll Attack Damage: {{skill.damageFormulaWithStat}}" style="font-size: 10px; padding: 2px 6px; background: #c0392b; color: #fff;">
                     <i class="fa-solid fa-burst"></i>
+                  </button>
+                {{/if}}
+                {{#if skill.canAdvance}}
+                  <button type="button" class="dcc-attack-roll-btn in-sheet-advance-btn" data-skill-id="{{skill.id}}" data-tooltip="Test Skill Advancement: Roll 1d20 &ge; {{skill.advancementTarget}}" style="font-size: 10px; padding: 2px 6px; background: #27ae60; color: #fff;">
+                    <i class="fa-solid fa-graduation-cap"></i>
                   </button>
                 {{/if}}
                 {{#if skill.isChecked}}

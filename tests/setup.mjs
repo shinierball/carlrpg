@@ -351,6 +351,7 @@ globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS = globalThis.CONST.DOCUMENT_OWNERSHIP
 
 const _settingsStore = new Map();
 _settingsStore.set('carl-rpg.currentFloor', 1);
+_settingsStore.set('carl-rpg.floorTimer', 100);
 
 if (!globalThis.game) {
   globalThis.game = {
@@ -412,6 +413,22 @@ if (!globalThis.game) {
         const val = Math.max(1, parseInt(f, 10) || 1);
         _settingsStore.set('carl-rpg.currentFloor', val);
         return val;
+      },
+      getFloorTimer: () => {
+        const val = Number(_settingsStore.get('carl-rpg.floorTimer'));
+        return Number.isFinite(val) ? val : 100;
+      },
+      setFloorTimer: async (t) => {
+        const val = Math.max(0, Number(t) || 0);
+        _settingsStore.set('carl-rpg.floorTimer', val);
+        return val;
+      },
+      decrementFloorTimer: async (h) => {
+        const dec = Number(h) || 0;
+        const cur = Number(_settingsStore.get('carl-rpg.floorTimer'));
+        const nextVal = Math.max(0, (Number.isFinite(cur) ? cur : 100) - dec);
+        _settingsStore.set('carl-rpg.floorTimer', nextVal);
+        return nextVal;
       }
     }
   };
@@ -423,6 +440,22 @@ if (!globalThis.game) {
     const val = Math.max(1, parseInt(f, 10) || 1);
     _settingsStore.set('carl-rpg.currentFloor', val);
     return val;
+  };
+  globalThis.game.dcc.getFloorTimer = () => {
+    const val = Number(_settingsStore.get('carl-rpg.floorTimer'));
+    return Number.isFinite(val) ? val : 100;
+  };
+  globalThis.game.dcc.setFloorTimer = async (t) => {
+    const val = Math.max(0, Number(t) || 0);
+    _settingsStore.set('carl-rpg.floorTimer', val);
+    return val;
+  };
+  globalThis.game.dcc.decrementFloorTimer = async (h) => {
+    const dec = Number(h) || 0;
+    const cur = Number(_settingsStore.get('carl-rpg.floorTimer'));
+    const nextVal = Math.max(0, (Number.isFinite(cur) ? cur : 100) - dec);
+    _settingsStore.set('carl-rpg.floorTimer', nextVal);
+    return nextVal;
   };
   if (!globalThis.game.folders) globalThis.game.folders = [];
   if (!globalThis.game.macros) globalThis.game.macros = [];
@@ -1270,6 +1303,22 @@ globalThis.CONFIG.DCC.setCurrentFloor = async (f) => {
   _settingsStore.set('carl-rpg.currentFloor', val);
   return val;
 };
+globalThis.CONFIG.DCC.getFloorTimer = () => {
+  const val = Number(_settingsStore.get('carl-rpg.floorTimer'));
+  return Number.isFinite(val) ? val : 100;
+};
+globalThis.CONFIG.DCC.setFloorTimer = async (t) => {
+  const val = Math.max(0, Number(t) || 0);
+  _settingsStore.set('carl-rpg.floorTimer', val);
+  return val;
+};
+globalThis.CONFIG.DCC.decrementFloorTimer = async (h) => {
+  const dec = Number(h) || 0;
+  const cur = Number(_settingsStore.get('carl-rpg.floorTimer'));
+  const nextVal = Math.max(0, (Number.isFinite(cur) ? cur : 100) - dec);
+  _settingsStore.set('carl-rpg.floorTimer', nextVal);
+  return nextVal;
+};
 globalThis.window = globalThis.window || globalThis;
 globalThis.window.carl = globalThis.window.carl || {};
 globalThis.window.carl.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
@@ -1278,6 +1327,9 @@ globalThis.window.carl.setCurrentFloor = async (f) => {
   _settingsStore.set('carl-rpg.currentFloor', val);
   return val;
 };
+globalThis.window.carl.getFloorTimer = globalThis.CONFIG.DCC.getFloorTimer;
+globalThis.window.carl.setFloorTimer = globalThis.CONFIG.DCC.setFloorTimer;
+globalThis.window.carl.decrementFloorTimer = globalThis.CONFIG.DCC.decrementFloorTimer;
 
 if (!globalThis.window) {
   globalThis.window = globalThis;

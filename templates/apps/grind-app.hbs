@@ -3,36 +3,79 @@
   <div style="background: linear-gradient(90deg, #c0392b, #8e44ad); padding: 8px 14px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
     <div style="display: flex; align-items: center; gap: 8px;">
       <i class="fa-solid fa-dumbbell" style="font-size: 18px; color: #f1c40f;"></i>
-      <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Grinding & Downtime Hub</span>
+      <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Party Grinding & Downtime Hub</span>
     </div>
     <div style="display: flex; align-items: center; gap: 12px;">
       <span class="dcc-badge" style="background: #111; color: #f1c40f; border: 1px solid #f1c40f; padding: 2px 8px; font-size: 11px; text-transform: uppercase;">
-        <i class="fa-solid fa-vault"></i> Pool: <strong>{{bankedHours}} hrs</strong>
+        <i class="fa-solid fa-vault"></i> {{actor.name}} Pool: <strong>{{bankedHours}} hrs</strong>
       </span>
-      <div style="font-size: 12px; color: #f1c40f; text-transform: uppercase;">
-        {{actor.name}} • Floor {{floorNumber}}
+      <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); border: 1px solid #e67e22; border-radius: 4px; padding: 2px 8px;" title="Floor Timer Clock: Hours remaining until Floor Collapse. Can be manually set.">
+        <i class="fa-solid fa-hourglass-half" style="color: #e67e22; font-size: 12px;"></i>
+        <span style="font-size: 11px; text-transform: uppercase; color: #ddd;">Clock:</span>
+        <input type="number" class="floor-timer-clock-input" value="{{floorTimer}}" min="0" style="width: 52px; background: #111; color: #f39c12; border: 1px solid #666; border-radius: 3px; font-weight: bold; text-align: center; font-size: 12px; padding: 1px 2px;" title="Floor Timer Clock (Hours remaining). Editable." />
+        <span style="font-size: 11px; color: #aaa;">hrs</span>
       </div>
+      <div style="font-size: 12px; color: #f1c40f; text-transform: uppercase;">
+        Floor {{floorNumber}}
+      </div>
+      <button type="button" class="execute-grind-btn" style="background: linear-gradient(90deg, #27ae60, #2ecc71); color: #fff; border: 1px solid #2ecc71; border-radius: 3px; font-weight: bold; font-size: 11px; padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Oswald', sans-serif; text-transform: uppercase; box-shadow: 0 1px 4px rgba(0,0,0,0.4);" title="Start Grind: Execute party grind for {{hours}} hours">
+        <i class="fa-solid fa-play"></i> Start Grind ({{hours}}h)
+      </button>
     </div>
   </div>
 
   {{!-- RECENT GRIND RESULT ALERT --}}
   {{#if lastGrindResult}}
-    <div style="background: rgba(39, 174, 96, 0.2); border: 1.5px solid #27ae60; border-radius: 4px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="background: rgba(39, 174, 96, 0.2); border: 1.5px solid #27ae60; border-radius: 4px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: flex-start; justify-content: space-between;">
       <div>
-        <i class="fa-solid fa-circle-check" style="color: #2ecc71; margin-right: 6px;"></i>
-        <strong style="color: #2ecc71;">Grind Executed!</strong>
-        Ground for <strong>{{lastGrindResult.hours}} Hours</strong>
-        {{#if (gt lastGrindResult.bonusHours 0)}}
-          <span style="color: #f1c40f; margin-left: 4px;">(+{{lastGrindResult.bonusHours}} Bonus Hour from {{lastGrindResult.complication.title}}!)</span>
-        {{/if}}
-        &rarr; <strong style="color: #fff;">+{{lastGrindResult.totalEarnedHours}} Hours</strong> added to pool (Total: <strong style="color: #f1c40f;">{{bankedHours}} hrs</strong>).
-        {{#if (gt lastGrindResult.fatigueGained 0)}}
-          <span style="color: #e74c3c; margin-left: 8px;"><i class="fa-solid fa-triangle-exclamation"></i> Gained {{lastGrindResult.fatigueGained}} Fatigue</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-circle-check" style="color: #2ecc71; margin-right: 4px;"></i>
+          <strong style="color: #2ecc71; font-size: 13px;">Grind Executed!</strong>
+          <span>Ground for <strong>{{lastGrindResult.hours}} Hours</strong></span>
+          {{#if (gt lastGrindResult.bonusHours 0)}}
+            <span style="color: #f1c40f; margin-left: 4px;">(+{{lastGrindResult.bonusHours}} Bonus Hr{{#if (gt lastGrindResult.bonusHours 1)}}s{{/if}}{{#if lastGrindResult.mapBonusHours}} [{{lastGrindResult.mapBonusHours}}h Map]{{/if}}{{#if lastGrindResult.eventBonusHours}} [{{lastGrindResult.eventBonusHours}}h Event]{{/if}})</span>
+          {{/if}}
+          <span style="margin-left: 8px; color: #e67e22;"><i class="fa-solid fa-hourglass-half"></i> Floor Clock: -{{lastGrindResult.nonBonusHours}}h ({{lastGrindResult.floorTimer}} hrs left)</span>
+        </div>
+        {{#if lastGrindResult.crawlerResults}}
+          <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px;">
+            {{#each lastGrindResult.crawlerResults as |cr|}}
+              <span class="dcc-badge" style="background: #1e1e28; border: 1px solid #444; color: #ddd; font-size: 11px; padding: 2px 6px;">
+                <strong>{{cr.name}}:</strong> +{{cr.totalEarnedHours}}h (Pool: {{cr.bankedHours}}h)
+                {{#if (gt cr.fatigueGained 0)}}<span style="color: #e74c3c; margin-left: 3px;"><i class="fa-solid fa-triangle-exclamation"></i> +{{cr.fatigueGained}} Fatigue</span>{{/if}}
+                {{#if cr.forfeitedHours}}<span style="color: #888; margin-left: 3px;">({{cr.forfeitedHours}}h forfeited)</span>{{/if}}
+              </span>
+            {{/each}}
+          </div>
         {{/if}}
       </div>
-      <button type="button" class="dismiss-grind-alert-btn" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px;" title="Dismiss">&times;</button>
+      <button type="button" class="dismiss-grind-alert-btn" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 16px;" title="Dismiss">&times;</button>
     </div>
   {{/if}}
+
+  {{!-- PARTY ROSTER SELECTION --}}
+  <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
+      <span style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: #f1c40f; letter-spacing: 0.5px;">
+        <i class="fa-solid fa-users"></i> Participating Party Crawlers ({{selectedCount}} Selected)
+      </span>
+      <span style="font-size: 11px; color: #aaa;">
+        Select crawlers participating in this grind session. Unspent pool hours reset at start (use it or lose it).
+      </span>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      {{#each crawlers as |c|}}
+        <label style="display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; {{#if c.isSelected}}background: #273746; border: 1px solid #3498db;{{else}}background: #16161e; border: 1px solid #2a2a35; opacity: 0.6;{{/if}}">
+          <input type="checkbox" class="crawler-select-checkbox" data-actor-id="{{c.id}}" {{#if c.isSelected}}checked{{/if}} style="accent-color: #3498db; cursor: pointer;" />
+          <img src="{{c.img}}" style="width: 20px; height: 20px; border-radius: 3px; object-fit: cover;" />
+          <span style="font-weight: bold; color: #fff;">{{c.name}}</span>
+          <span class="dcc-badge" style="background: #111; color: #f1c40f; font-size: 10px; padding: 1px 4px; border: 1px solid #555;">
+            <i class="fa-solid fa-vault"></i> {{c.bankedHours}}h
+          </span>
+        </label>
+      {{/each}}
+    </div>
+  </div>
 
   {{!-- SESSION SETUP --}}
   <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
@@ -42,6 +85,7 @@
       <div style="flex: 1; min-width: 200px;">
         <label style="display: block; font-size: 12px; text-transform: uppercase; color: #aaa; margin-bottom: 4px;">
           Grinding Duration: <strong style="color: #fff; font-size: 15px;">{{hours}} Hours</strong>
+          <span style="font-size: 11px; color: #e67e22; margin-left: 6px;">(Floor Clock: {{floorTimer}} &rarr; <strong>{{resultingFloorTimer}} hrs</strong>)</span>
         </label>
         <div style="display: flex; align-items: center; gap: 10px;">
           <input type="range" class="grind-hours-input" min="1" max="12" step="1" value="{{hours}}" style="flex: 1; accent-color: #c0392b; cursor: pointer;" />
@@ -87,31 +131,42 @@
         </span>
         {{#if (gt excessHours 0)}}
           <span style="color: #e74c3c; margin-left: 8px;">
-            (<strong>{{excessHours}} Excess Hours</strong> requires {{excessHours}} Endurance check{{#if (gt excessHours 1)}}s{{/if}}!)
+            (<strong>{{excessHours}} Excess Hours</strong>: each participating crawler rolls their own Endurance checks!)
           </span>
         {{else}}
           <span style="color: #2ecc71; margin-left: 8px;">(No exhaustion checks required)</span>
         {{/if}}
       </div>
       <div style="font-size: 11px; color: #bbb;">
-        Endurance Mod: <strong style="color: #f1c40f;">{{enduranceBonusStr}}</strong> (Rank {{enduranceRank}} + CON {{conMod}})
+        Active ({{actor.name}}) Endurance: <strong style="color: #f1c40f;">{{enduranceBonusStr}}</strong> (Rank {{enduranceRank}} + CON {{conMod}})
       </div>
     </div>
   </div>
 
-  {{!-- SKILL TRAINING & HOUR ALLOCATION --}}
+  {{!-- CRAWLER SUB-TABS (INSPECT & ALLOCATE PER CRAWLER) --}}
+  <div style="display: flex; gap: 4px; margin-bottom: 8px; border-bottom: 2px solid #333; padding-bottom: 2px;">
+    {{#each crawlers as |c|}}
+      <button type="button" class="crawler-tab-btn" data-actor-id="{{c.id}}" style="padding: 6px 12px; border-radius: 4px 4px 0 0; border: 1px solid #444; border-bottom: none; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 12px; display: flex; align-items: center; gap: 6px; {{#if c.isActive}}background: #2c2538; color: #f1c40f; border-color: #f1c40f; font-weight: bold;{{else}}background: #181820; color: #bbb;{{/if}}">
+        <img src="{{c.img}}" style="width: 16px; height: 16px; border-radius: 2px; object-fit: cover;" />
+        <span>{{c.name}}</span>
+        <span class="dcc-badge" style="background: #111; color: #f1c40f; font-size: 10px; padding: 1px 4px; border: 1px solid #555;">{{c.bankedHours}}h</span>
+      </button>
+    {{/each}}
+  </div>
+
+  {{!-- SKILL TRAINING & HOUR ALLOCATION FOR ACTIVE CRAWLER --}}
   <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 6px;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #f1c40f;">
-          <i class="fa-solid fa-graduation-cap"></i> Skill Training & Advancement
+          <i class="fa-solid fa-graduation-cap"></i> {{actor.name}}'s Skills & Advancement
         </span>
         <span class="dcc-badge" style="background: #2980b9; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px;">
           Available Pool: <strong style="color: #f1c40f; font-size: 13px;">{{bankedHours}} hrs</strong>
         </span>
       </div>
       <span style="font-size: 11px; color: #888;">
-        Marked <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 1px 4px; font-size: 9px;">CHECKED</span> skills used in play • Hours persist across sessions
+        Marked <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 1px 4px; font-size: 9px;">CHECKED</span> skills used in play • Hours banked on skills persist across grinds
       </span>
     </div>
 
@@ -196,7 +251,7 @@
     </label>
 
     <div style="font-size: 11px; color: #888;">
-      Advances Floor Clock: <strong style="color: #e67e22;">+{{hours}} Hours</strong>
+      Advances Floor Clock: <strong style="color: #e67e22;">-{{hours}} Hours</strong>
     </div>
   </div>
 
@@ -206,8 +261,8 @@
       <i class="fa-solid fa-bed"></i> Safe Room Rest (8 hrs)
     </button>
 
-    <button type="button" class="execute-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1px solid #e74c3c; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-family: 'Oswald', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
-      <i class="fa-solid fa-play"></i> Execute Grind ({{hours}} hrs)
+    <button type="button" class="execute-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1px solid #e74c3c; padding: 8px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-family: 'Oswald', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.4); text-transform: uppercase;">
+      <i class="fa-solid fa-play"></i> Start Grind ({{selectedCount}} Crawlers, {{hours}} hrs)
     </button>
 
     <button type="button" class="close-grind-hub-btn" style="background: #333; color: #bbb; border: 1px solid #555; padding: 8px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'Oswald', sans-serif;">

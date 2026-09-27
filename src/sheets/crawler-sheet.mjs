@@ -4,10 +4,11 @@ import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCCAchievementManagerApp } from '../apps/achievement-manager.mjs';
 import { DCCGrindApp } from '../apps/grind-app.mjs';
 import { DCC_ACHIEVEMENT_TIERS } from '../data/achievements.mjs';
-import { DCC_WEAPON_GROUP_MAP, DAMAGE_EFFECT_AI_FAVOR } from '../documents/actor.mjs';
+import { DCCActor, DCC_WEAPON_GROUP_MAP, DAMAGE_EFFECT_AI_FAVOR } from '../documents/actor.mjs';
 import { getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
+import { getRequiredGrindingHours, getAdvancementTarget } from '../data/grinding.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -270,7 +271,13 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.isCrawler = actor?.type === 'crawler';
     context.isPet = actor?.type === 'pet';
     context.isNPC = actor?.type === 'npc';
-    context.currentFloor = typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function' ? DCCActor.getCurrentFloor() : 1;
+    context.currentFloor = (typeof DCCActor !== 'undefined' && typeof DCCActor.getCurrentFloor === 'function')
+      ? DCCActor.getCurrentFloor()
+      : (globalThis.CONFIG?.DCC?.getCurrentFloor?.() ?? (Number(globalThis.game?.settings?.get?.('carl-rpg', 'currentFloor')) || 1));
+    context.floorTimer = (typeof DCCActor !== 'undefined' && typeof DCCActor.getFloorTimer === 'function')
+      ? DCCActor.getFloorTimer()
+      : (globalThis.CONFIG?.DCC?.getFloorTimer?.() ?? (Number(globalThis.game?.settings?.get?.('carl-rpg', 'floorTimer')) || 100));
+    context.bankedGrindHours = Number(actor?.system?.details?.bankedGrindHours ?? actor?.system?.bankedGrindHours) || 0;
 
     // Dynamic health segments for health bar visualization
     const numBars = context.isMob
@@ -557,8 +564,24 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       skill.itemSources = gearData ? gearData.sources.join(', ') : '';
       skill.typeSources = typeSources;
       skill.isChecked = Boolean(skill.system?.checked);
-      skill.requiredGrindHours = Math.max(1, baseRank);
-      skill.advancementTarget = baseRank;
+      const reqHours = getRequiredGrindingHours(baseRank);
+      const target = getAdvancementTarget(baseRank);
+      const investedHours = Number(skill.system?.investedHours ?? skill.system?.grindHours) || 0;
+      const neededHours = Math.max(0, reqHours - investedHours);
+      const actorBanked = Number(this.actor.system?.details?.bankedGrindHours ?? this.actor.system?.bankedGrindHours) || 0;
+      const canAdvance = investedHours >= reqHours;
+      const canAddHour = actorBanked > 0 && investedHours < reqHours;
+      const canSubHour = investedHours > 0;
+      const progressPct = Math.min(100, Math.round((investedHours / Math.max(1, reqHours)) * 100));
+
+      skill.requiredGrindHours = reqHours;
+      skill.advancementTarget = target;
+      skill.investedHours = investedHours;
+      skill.neededHours = neededHours;
+      skill.canAdvance = canAdvance;
+      skill.canAddHour = canAddHour;
+      skill.canSubHour = canSubHour;
+      skill.progressPct = progressPct;
 
       if (skill.system) {
         skill.system.itemBonus = itemBonus;
@@ -1466,11 +1489,54 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       this._openGrindApp(itemId);
     });
 
+    // In-Sheet Grind Hour Allocation (+1, -1, max)
+    html.find('.in-sheet-alloc-hour').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const btn = $(ev.currentTarget);
+      const skillId = btn.data('skillId') || btn.closest('[data-item-id]').data('itemId');
+      const action = btn.data('action');
+      if (!skillId) return;
+
+      if (action === 'add') {
+        await this.actor.allocateGrindHours(skillId, 1);
+      } else if (action === 'sub') {
+        await this.actor.allocateGrindHours(skillId, -1);
+      } else if (action === 'max') {
+        const skill = this.actor.items?.get ? this.actor.items.get(skillId) : this.actor.items?.find?.(i => i.id === skillId || i._id === skillId);
+        if (!skill) return;
+        const req = getRequiredGrindingHours(skill.system?.rank || 0);
+        const invested = Number(skill.system?.investedHours ?? skill.system?.grindHours) || 0;
+        const needed = Math.max(0, req - invested);
+        await this.actor.allocateGrindHours(skillId, needed);
+      }
+      this.render(false);
+    });
+
+    // In-Sheet Trigger Skill Advancement Roll
+    html.find('.in-sheet-advance-btn').click(async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const btn = $(ev.currentTarget);
+      const skillId = btn.data('skillId') || btn.closest('[data-item-id]').data('itemId');
+      if (!skillId) return;
+      await this.actor.attemptSkillAdvancement(skillId);
+      this.render(false);
+    });
+
     // Rest Action Buttons on Page 1 (1h, 2h short, 8h long, 30h full day)
     html.find('.dcc-rest-btn').click(async ev => {
       ev.preventDefault();
       const restType = $(ev.currentTarget).data('restType') || ev.currentTarget.dataset?.restType || 'long';
       await this._onRest(restType);
+    });
+
+    // Global Floor Timer Clock Manual Setting
+    html.find('.dcc-global-floor-clock-input').change(async ev => {
+      const val = parseFloat(ev.currentTarget.value);
+      if (Number.isFinite(val) && typeof DCCActor.setFloorTimer === 'function') {
+        await DCCActor.setFloorTimer(val);
+      }
     });
 
     // Safe Room 8-Hour Long Rest (Legacy or external button compatibility)

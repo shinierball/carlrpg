@@ -16,7 +16,8 @@ export class PetDataModel extends BaseActorDataModel {
         level: new fields.NumberField({ initial: 1, integer: true, min: 1 }),
         special: new fields.HTMLField({ initial: '' }),
         attack1: new fields.StringField({ initial: '' }),
-        attack2: new fields.StringField({ initial: '' })
+        attack2: new fields.StringField({ initial: '' }),
+        bankedGrindHours: new fields.NumberField({ initial: 0, integer: true, min: 0 })
       })
     };
   }

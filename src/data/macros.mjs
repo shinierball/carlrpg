@@ -72,5 +72,28 @@ if (typeof window.carl?.openSessionManager === 'function') {
         macroKey: "session-manager"
       }
     }
+  },
+  {
+    _id: "dccmacro00000004",
+    name: "Start Party Grinding & Downtime",
+    type: "script",
+    img: "icons/skills/melee/strike-hammer-orange.webp",
+    scope: "global",
+    command: `// Open DCC RPG Party Grinding & Downtime Hub
+if (typeof window.carl?.openGrindApp === 'function') {
+  window.carl.openGrindApp();
+} else if (typeof game.dcc?.DCCGrindApp !== 'undefined') {
+  new game.dcc.DCCGrindApp().render(true);
+} else {
+  ui.notifications?.warn('DCC Grinding Hub is not available.');
+}`,
+    ownership: {
+      default: 2
+    },
+    flags: {
+      "carl-rpg": {
+        macroKey: "grind-hub"
+      }
+    }
   }
 ];

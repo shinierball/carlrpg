@@ -35,9 +35,12 @@ Crawlers who choose to push their limits and grind past the 5-hour safe threshol
 - If the party spends 5 hours grinding, the floor clock advances by 5 hours.
 - Certain enemy abilities (such as *Mind Horror* chatter on Floor 2) or dungeon hazards can drain additional hours from the floor collapse timer if an encounter goes poorly.
 
-### D. Guide & NPC Modifiers
-Certain allies, environmental factors, or quest rewards can modify grinding efficiency:
-- *Example (Huey, GM Toolkit p. 96)*: Harmonizing with Huey grants insights that make grinding more efficient for the rest of the day, allowing crawlers to **add 1 hour to their grind at no penalty** (raising the safe limit to 6 hours).
+### D. Guide & Map Modifiers
+Certain allies, maps, environmental factors, or quest rewards modify grinding efficiency by expanding the daily safe threshold:
+- **Guide Insight (e.g. Huey / Bob)**: Harmonizing with Huey grants insights that make grinding more efficient for the rest of the day, allowing crawlers to **add 1 safe hour** to their grind at no penalty (raising the threshold by $+1$ hour).
+- **Neighborhood Map**: Having a map of the local neighborhood grants geographic familiarity, allowing crawlers to **add 1 safe hour** to their daily grind (+1 hour to the safe limit).
+- **Borough Map (Burrough Map)**: Having a broader borough/district map provides comprehensive route and landmark awareness, allowing crawlers to **add 2 safe hours** to their daily grind (+2 hours to the safe limit).
+- **Stacking**: Guide insights and area maps stack! For example, a crawler party with a Borough Map (+2 hrs) and Huey's guide insight (+1 hr) can safely grind for up to **8 hours per day** without making a single Endurance exhaustion check.
 
 ---
 
@@ -49,37 +52,50 @@ In CarlRPG, skills advance through active use and dedicated grinding time rather
 - Whenever a crawler actively uses a skill during an encounter, exploration, or roleplay challenge (regardless of whether the roll succeeds or fails), that skill is marked as **Checked** (`system.checked: true`).
 - In the Foundry VTT system, every skill document includes a `checked` boolean flag and a sheet checkbox indicator.
 
-### Step 2: Committing Grinding Hours
-- Crawlers allocate their accrued grinding hours toward their skills.
-- A crawler can only focus on **one skill per grinding block**.
-- **The Hours Requirement**: To attempt to increase a skill's rank, a crawler must commit **a number of grinding hours equal to the skill's current rank**:
+### Step 2: Earning & Banking Grinding Hours
+- **Executing the Grind**: When crawlers execute a grinding session, they earn grinding hours equal to the session duration plus any **bonus hours** gained from Complication events (such as encountering a *Wandering Merchant or Helpful Guide*, which grants $+1$ bonus grinding hour).
+- **Persistent Banking Across Grinds**:
+  - Any grinding hours not allocated immediately remain **banked in the crawler's persistent pool** (`system.details.bankedGrindHours`) from grind to grind and day to day.
+  - Crawlers never lose unspent practice time.
+- **Multi-Skill Grinding**:
+  - In a single grinding session, crawlers can allocate their earned and banked hours across **multiple skills simultaneously**!
+  - For example, with 6 hours available in their pool, a crawler can allocate 2 hours to *Dodge*, 3 hours to *Pugilism*, and 1 hour to *First Aid*.
 
-$$\text{Required Grinding Hours} = \text{Current Skill Rank}$$
+### Step 3: High-Level Accumulation (Invested Hours on Skills)
+- Each skill tracks its own **Invested Hours** (`system.investedHours`) toward the current rank requirement:
+  $$\text{Required Grinding Hours} = \text{Current Skill Rank}$$
+- At higher levels, advancing a skill will naturally require **multiple grind sessions** across several in-game days:
+  - *Advancing from Rank 14 to Rank 15* requires **14 hours**.
+  - **Day 1**: Grind 5 safe hours, allocate 5 hours to *Pugilism* (Invested: 5 / 14 hrs).
+  - **Day 2**: Grind 5 safe hours, allocate 5 hours to *Pugilism* (Invested: 10 / 14 hrs).
+  - **Day 3**: Grind 4 hours, allocate 4 hours to *Pugilism* (Invested: 14 / 14 hrs).
+  - The skill now meets the full requirement and is ready for the Advancement Breakthrough!
 
-| Current Rank | Target Rank | Required Grinding Hours |
-| :---: | :---: | :---: |
-| **Rank 0** (Untrained) | **Rank 1** (Trained) | 1 Hour |
-| **Rank 1** | **Rank 2** | 1 Hour |
-| **Rank 2** | **Rank 3** | 2 Hours |
-| **Rank 3** | **Rank 4** | 3 Hours |
-| **Rank 4** | **Rank 5** | 4 Hours |
-| **Rank 5** | **Rank 6** | 5 Hours |
-| **Rank 9** | **Rank 10** | 9 Hours (Requires multiple days/sessions) |
-| **Rank 14** | **Rank 15** | 14 Hours |
+| Current Rank | Target Rank | Required Grinding Hours | Example Pacing |
+| :---: | :---: | :---: | :--- |
+| **Rank 0** (Untrained) | **Rank 1** (Trained) | 1 Hour | Single session |
+| **Rank 1** | **Rank 2** | 1 Hour | Single session |
+| **Rank 2** | **Rank 3** | 2 Hours | Single session |
+| **Rank 3** | **Rank 4** | 3 Hours | Single session |
+| **Rank 4** | **Rank 5** | 4 Hours | Single session |
+| **Rank 5** | **Rank 6** | 5 Hours | 1 full safe daily grind |
+| **Rank 9** | **Rank 10** | 9 Hours | 2 daily sessions (e.g. 5 hrs + 4 hrs) |
+| **Rank 14** | **Rank 15** | 14 Hours | 3 daily sessions (e.g. 5 hrs + 5 hrs + 4 hrs) |
 
-### Step 3: The Advancement Roll
-Once the required grinding hours have been invested into a marked skill, the crawler rolls **1d20** for advancement:
+### Step 4: The Advancement Roll
+Once a skill has banked sufficient invested hours ($\text{Invested Hours} \ge \text{Current Rank}$), the crawler triggers the **Advancement Roll**:
 
 $$\text{Advancement Success Condition: } \mathbf{d20 \ge \text{Current Skill Rank}}$$
 
 - **Success ($\mathbf{d20 \ge \text{Current Rank}}$)**: The skill permanently increases by **+1 Rank**.
   - All derived values (Modified Rank, Total Skill Bonus, To-Hit bonuses, and Rank Damage Dice) update automatically.
-  - Crossing milestone thresholds (**Rank 5**, **Rank 10**, **Rank 15**) unlocks new passive perks, extra damage dice, and special effects.
-- **Failure ($\mathbf{d20 < \text{Current Rank}}$)**: The skill does not increase. The crawler gained valuable practice, but needs further grinding and higher-stakes application to break through to the next level.
-- **Reset**: The `checked` status is cleared upon rolling.
+  - Milestone perks (**Rank 5**, **Rank 10**, **Rank 15**) unlock automatically.
+  - Consumes the required hours and clears the `checked` flag.
+- **Failure ($\mathbf{d20 < \text{Current Rank}}$)**: The skill does not advance this session. The crawler logged intensive practice, but needs further experience to achieve a breakthrough. The `checked` status is cleared for the next cycle.
 
 > [!TIP]
-> Notice how the math reflects the narrative: moving from Rank 1 to Rank 2 succeeds on a roll of $1 - 20$ (almost automatic), whereas moving from Rank 14 to Rank 15 requires rolling a $14+$ on the d20 (35% chance), accurately representing how mastering elite techniques demands both immense time and intense focus.
+> Notice how the math reflects the narrative: moving from Rank 1 to Rank 2 succeeds on a roll of $1 - 20$ (almost automatic), whereas moving from Rank 14 to Rank 15 requires rolling a $14+$ on the d20 (35% chance) and 14 cumulative hours of dedicated effort, accurately representing how mastering elite techniques demands both immense time and intense focus.
+
 
 ---
 

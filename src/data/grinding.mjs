@@ -73,7 +73,8 @@ export const DCC_GRINDING_COMPLICATIONS = [
     icon: 'fa-solid fa-person-walking-luggage',
     severity: 'success',
     color: '#16a085',
-    description: 'The party encounters a helpful friendly entity (e.g. Bob the Sprite or Huey). Grants advice allowing +1 bonus safe grinding hour or a chance to purchase consumables.'
+    bonusHours: 1,
+    description: 'The party encounters a helpful friendly entity (e.g. Bob the Sprite or Huey). Grants advice allowing +1 bonus grinding hour to allocate to skills or a chance to purchase consumables.'
   },
   {
     range: [20, 20],
@@ -117,6 +118,38 @@ export function getAdvancementTarget(currentRank) {
 }
 
 /**
+ * Calculate the safe grinding threshold in hours based on guide insight and map bonuses.
+ * Base safe limit = 5 hours.
+ * Guide bonus (Huey/Bob) = +1 hour.
+ * Neighborhood map = +1 hour.
+ * Borough / Burrough map = +2 hours.
+ * @param {object} [options={}]
+ * @param {boolean} [options.hasGuideBonus=false]
+ * @param {string} [options.mapType='none'] 'none', 'neighborhood', 'borough', 'burrough'
+ * @param {boolean} [options.hasNeighborhoodMap=false]
+ * @param {boolean} [options.hasBoroughMap=false]
+ * @param {boolean} [options.hasBurroughMap=false]
+ * @param {number} [options.mapBonus=0]
+ * @returns {{ safeThreshold: number, guideBonus: number, mapBonus: number }}
+ */
+export function getSafeGrindingThreshold(options = {}) {
+  const base = 5;
+  const guideBonus = options.hasGuideBonus ? 1 : 0;
+
+  let mapBonus = Number(options.mapBonus) || 0;
+  const mapType = String(options.mapType || '').toLowerCase().trim();
+  if (mapType === 'neighborhood' || options.hasNeighborhoodMap) {
+    mapBonus = Math.max(mapBonus, 1);
+  }
+  if (mapType === 'borough' || mapType === 'burrough' || options.hasBoroughMap || options.hasBurroughMap) {
+    mapBonus = Math.max(mapBonus, 2);
+  }
+
+  const safeThreshold = base + guideBonus + mapBonus;
+  return { safeThreshold, guideBonus, mapBonus };
+}
+
+/**
  * Calculate DC for an extended grinding Endurance check.
  * DC = 10 + Floor Number + Hours Past Safe Limit.
  * @param {number} floor
@@ -128,3 +161,4 @@ export function getEnduranceDC(floor = 1, hoursPastSafe = 1) {
   const h = Math.max(1, Number(hoursPastSafe) || 1);
   return 10 + f + h;
 }
+

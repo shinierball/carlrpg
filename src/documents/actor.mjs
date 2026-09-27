@@ -7,7 +7,8 @@ import {
   getGrindingComplication,
   getRequiredGrindingHours,
   getAdvancementTarget,
-  getEnduranceDC
+  getEnduranceDC,
+  getSafeGrindingThreshold
 } from '../data/grinding.mjs';
 
 /**
@@ -3790,6 +3791,14 @@ export class DCCActor extends Actor {
   }
 
   /**
+   * Alias for applyFatiguedDebuff for backwards compatibility.
+   * @returns {Promise<Item>}
+   */
+  async applyExhaustedDebuff() {
+    return this.applyFatiguedDebuff();
+  }
+
+  /**
    * Perform resting for this crawler.
    * Supports all official CarlRPG rest durations:
    * - '1hour': 1 hour of non-combat rest -> 1 Health Bar slot (+hpPerBar HP) & 5 Mana recovered.
@@ -3965,7 +3974,9 @@ export class DCCActor extends Actor {
       newHP,
       newMana,
       conditionsCleared: conditionsClearedCount,
-      fatigueCleared
+      fatigueCleared,
+      exhaustionCleared: fatigueCleared,
+      clearedConditions
     };
   }
 
@@ -3991,6 +4002,11 @@ export class DCCActor extends Actor {
    * @param {object} options
    * @param {number} [options.hours=5] Total hours to grind
    * @param {boolean} [options.hasGuideBonus=false] Whether guide insight (Huey/Bob) grants +1 safe hour
+   * @param {string} [options.mapType='none'] 'none' | 'neighborhood' (+1 hr) | 'borough' / 'burrough' (+2 hrs)
+   * @param {boolean} [options.hasNeighborhoodMap=false] Whether crawler has a neighborhood map (+1 hr)
+   * @param {boolean} [options.hasBoroughMap=false] Whether crawler has a borough map (+2 hrs)
+   * @param {boolean} [options.hasBurroughMap=false] Alias for hasBoroughMap (+2 hrs)
+   * @param {number} [options.mapBonus=0] Explicit bonus safe hours from maps
    * @param {string|null} [options.skillId=null] ID of skill selected for advancement
    * @param {number|null} [options.floor=null] Dungeon floor number (defaults to parsed details.floor or 1)
    * @param {boolean} [options.rollComplication=true] Whether to roll on the Grinding Complications Table
@@ -3999,8 +4015,9 @@ export class DCCActor extends Actor {
   async grindSession(options = {}) {
     const hours = Math.max(1, Number(options.hours) || 5);
     const hasGuideBonus = Boolean(options.hasGuideBonus);
-    const safeThreshold = hasGuideBonus ? 6 : 5;
+    const { safeThreshold, mapBonus } = getSafeGrindingThreshold(options);
     const excessHours = Math.max(0, hours - safeThreshold);
+    const mapType = options.mapType || (mapBonus === 2 ? 'borough' : mapBonus === 1 ? 'neighborhood' : 'none');
 
     // Floor number resolution
     let floorNumber = 1;
@@ -4067,56 +4084,106 @@ export class DCCActor extends Actor {
       }
     }
 
-    // 2. Skill Advancement Check
+    // 2. Grinding Complication & Bonus Hours
+    let complication = null;
+    let bonusHours = 0;
+    if (options.rollComplication !== false) {
+      const compRoll = await new Roll('1d20').evaluate();
+      const compData = getGrindingComplication(compRoll.total);
+      bonusHours = Number(compData?.bonusHours) || 0;
+      complication = {
+        roll: compRoll.total,
+        ...compData,
+        bonusHours
+      };
+    }
+
+    const totalEarnedHours = hours + bonusHours;
+    let currentBanked = Number(this.system.details?.bankedGrindHours ?? this.system.bankedGrindHours) || 0;
+    let newBanked = currentBanked + totalEarnedHours;
+
+    // 3. Multi-Skill Allocations or Targeted Skill Advancement Check
     let skillAdvancement = null;
+    if (options.allocations && typeof options.allocations === 'object') {
+      // Allocate hours across multiple skills
+      for (const [sId, allocHours] of Object.entries(options.allocations)) {
+        const h = Math.max(0, parseInt(allocHours, 10) || 0);
+        if (h > 0) {
+          const actualAlloc = Math.min(newBanked, h);
+          if (actualAlloc > 0) {
+            newBanked -= actualAlloc;
+            const skItem = this.items?.get ? this.items.get(sId) : this.items?.find?.(i => i.id === sId || i._id === sId);
+            if (skItem && skItem.type === 'skill') {
+              const prevInvested = Number(skItem.system?.investedHours ?? skItem.system?.grindHours) || 0;
+              await skItem.update({ 'system.investedHours': prevInvested + actualAlloc });
+            }
+          }
+        }
+      }
+    }
+
     if (options.skillId) {
       const skillItem = this.items?.get ? this.items.get(options.skillId) : this.items?.find?.(i => i.id === options.skillId || i._id === options.skillId);
       if (skillItem) {
         const currentRank = Number(skillItem.system?.rank) || 0;
         const reqHours = getRequiredGrindingHours(currentRank);
         const target = getAdvancementTarget(currentRank);
+        const currentInvested = Number(skillItem.system?.investedHours ?? skillItem.system?.grindHours) || 0;
 
-        if (hours >= reqHours) {
+        const hoursToInvest = Number(options.allocatedHours ?? hours) || 0;
+        const newInvested = currentInvested + hoursToInvest;
+        newBanked = Math.max(0, newBanked - hoursToInvest);
+
+        if (newInvested >= reqHours) {
           const advRoll = await new Roll('1d20').evaluate();
           const rollResult = advRoll.total;
           const passed = rollResult >= target;
 
           if (passed) {
             const newRank = currentRank + 1;
+            const remainingInvested = Math.max(0, newInvested - reqHours);
             await skillItem.update({
               'system.rank': newRank,
-              'system.checked': false
+              'system.checked': false,
+              'system.investedHours': remainingInvested
             });
             skillAdvancement = {
               skillName: skillItem.name,
               previousRank: currentRank,
               newRank,
               requiredHours: reqHours,
+              investedHours: remainingInvested,
               target,
               roll: rollResult,
               passed: true
             };
           } else {
             await skillItem.update({
-              'system.checked': false
+              'system.checked': false,
+              'system.investedHours': 0
             });
             skillAdvancement = {
               skillName: skillItem.name,
               previousRank: currentRank,
               newRank: currentRank,
               requiredHours: reqHours,
+              investedHours: 0,
               target,
               roll: rollResult,
               passed: false
             };
           }
         } else {
-          // Insufficient hours allocated
+          // Insufficient hours allocated, but save the invested hours persistently on the skill!
+          await skillItem.update({
+            'system.investedHours': newInvested
+          });
           skillAdvancement = {
             skillName: skillItem.name,
             previousRank: currentRank,
             newRank: currentRank,
             requiredHours: reqHours,
+            investedHours: newInvested,
             target,
             roll: null,
             passed: false,
@@ -4126,16 +4193,8 @@ export class DCCActor extends Actor {
       }
     }
 
-    // 3. Grinding Complication
-    let complication = null;
-    if (options.rollComplication !== false) {
-      const compRoll = await new Roll('1d20').evaluate();
-      const compData = getGrindingComplication(compRoll.total);
-      complication = {
-        roll: compRoll.total,
-        ...compData
-      };
-    }
+    // Persist actor's banked grind hours pool
+    await this.update({ 'system.details.bankedGrindHours': newBanked });
 
     // 4. Generate LitRPG Chat Card
     if (!options.silent) {
@@ -4217,10 +4276,13 @@ export class DCCActor extends Actor {
           <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; border-bottom: 1px solid #333; padding-bottom: 6px;">
             <span>Crawler: <strong style="color: #fff;">${this.name}</strong></span>
             <span>Floor: <strong style="color: #f1c40f;">${floorNumber}</strong></span>
-            <span>Safe Limit: <strong style="color: #2ecc71;">${safeThreshold} hrs${hasGuideBonus ? ' (+1 Guide)' : ''}</strong></span>
+            <span>Safe Limit: <strong style="color: #2ecc71;">${safeThreshold} hrs${hasGuideBonus ? ' (+1 Guide)' : ''}${mapBonus === 1 ? ' (+1 Neighborhood Map)' : mapBonus === 2 ? ' (+2 Borough Map)' : mapBonus > 0 ? ` (+${mapBonus} Map)` : ''}</strong></span>
           </div>
           <div style="margin-top: 6px; font-size: 12px; color: #ddd;">
             <i class="fa-solid fa-hourglass-half" style="color: #e67e22;"></i> <strong>Floor Collapse Clock</strong> advanced by <strong>+${hours} Hours</strong>.
+          </div>
+          <div style="margin-top: 4px; font-size: 12px; color: #f1c40f;">
+            <i class="fa-solid fa-vault"></i> <strong>Banked Grind Hours:</strong> +${totalEarnedHours} hrs added (Total Pool: <strong>${newBanked} hrs</strong>)${bonusHours > 0 ? ` <em>(+${bonusHours} bonus hr from event)</em>` : ''}.
           </div>
           ${checksHtml}
           ${advHtml}
@@ -4235,7 +4297,14 @@ export class DCCActor extends Actor {
           'carl-rpg': {
             isGrindSession: true,
             hours,
+            bonusHours,
+            totalEarnedHours,
+            bankedHours: newBanked,
+            hasGuideBonus,
+            mapType,
+            mapBonus,
             fatigueGained,
+            exhaustedGained: fatigueGained,
             skillAdvancement,
             complication
           }
@@ -4245,13 +4314,183 @@ export class DCCActor extends Actor {
 
     return {
       hours,
+      bonusHours,
+      totalEarnedHours,
+      bankedHours: newBanked,
       floorNumber,
       safeThreshold,
       excessHours,
+      hasGuideBonus,
+      mapType,
+      mapBonus,
       enduranceChecks,
       fatigueGained,
+      exhaustedGained: fatigueGained,
       skillAdvancement,
       complication
     };
+  }
+
+  /**
+   * Allocate banked hours from the actor pool into a specific skill (or remove hours back to pool if negative).
+   * @param {string} skillId
+   * @param {number} hours
+   * @returns {Promise<object>}
+   */
+  async allocateGrindHours(skillId, hours) {
+    const delta = parseInt(hours, 10) || 0;
+    if (delta === 0) return null;
+    const skill = this.items?.get ? this.items.get(skillId) : this.items?.find?.(i => i.id === skillId || i._id === skillId);
+    if (!skill || skill.type !== 'skill') return null;
+
+    const currentBank = Number(this.system.details?.bankedGrindHours ?? this.system.bankedGrindHours) || 0;
+    const currentInvested = Number(skill.system?.investedHours ?? skill.system?.grindHours) || 0;
+    const reqHours = getRequiredGrindingHours(skill.system?.rank || 0);
+
+    let actualDelta = delta;
+    if (actualDelta > 0) {
+      actualDelta = Math.min(actualDelta, currentBank);
+      actualDelta = Math.min(actualDelta, Math.max(0, reqHours - currentInvested));
+    } else {
+      actualDelta = -Math.min(Math.abs(actualDelta), currentInvested);
+    }
+
+    if (actualDelta === 0) return { currentBank, currentInvested };
+
+    const newBank = Math.max(0, currentBank - actualDelta);
+    const newInvested = Math.max(0, currentInvested + actualDelta);
+
+    await this.update({ 'system.details.bankedGrindHours': newBank });
+    await skill.update({ 'system.investedHours': newInvested });
+
+    return {
+      skillId,
+      newBank,
+      newInvested,
+      reqHours,
+      canAdvance: newInvested >= reqHours
+    };
+  }
+
+  /**
+   * Attempt skill advancement once sufficient hours are banked on the skill.
+   * Success if 1d20 >= Current Rank.
+   * @param {string} skillId
+   * @param {object} [options={}]
+   * @returns {Promise<object>}
+   */
+  async attemptSkillAdvancement(skillId, options = {}) {
+    const skillItem = this.items?.get ? this.items.get(skillId) : this.items?.find?.(i => i.id === skillId || i._id === skillId);
+    if (!skillItem || skillItem.type !== 'skill') return null;
+
+    const currentRank = Number(skillItem.system?.rank) || 0;
+    const reqHours = getRequiredGrindingHours(currentRank);
+    const target = getAdvancementTarget(currentRank);
+    const currentInvested = Number(skillItem.system?.investedHours ?? skillItem.system?.grindHours) || 0;
+
+    if (currentInvested < reqHours && !options.force) {
+      return {
+        skillName: skillItem.name,
+        previousRank: currentRank,
+        newRank: currentRank,
+        requiredHours: reqHours,
+        investedHours: currentInvested,
+        target,
+        roll: null,
+        passed: false,
+        insufficientHours: true
+      };
+    }
+
+    const advRoll = await new Roll('1d20').evaluate();
+    const rollResult = advRoll.total;
+    const passed = rollResult >= target;
+
+    let skillAdvancement;
+    if (passed) {
+      const newRank = currentRank + 1;
+      const remainingInvested = Math.max(0, currentInvested - reqHours);
+      await skillItem.update({
+        'system.rank': newRank,
+        'system.checked': false,
+        'system.investedHours': remainingInvested
+      });
+      skillAdvancement = {
+        skillName: skillItem.name,
+        previousRank: currentRank,
+        newRank,
+        requiredHours: reqHours,
+        investedHours: remainingInvested,
+        target,
+        roll: rollResult,
+        passed: true
+      };
+    } else {
+      await skillItem.update({
+        'system.checked': false,
+        'system.investedHours': 0
+      });
+      skillAdvancement = {
+        skillName: skillItem.name,
+        previousRank: currentRank,
+        newRank: currentRank,
+        requiredHours: reqHours,
+        investedHours: 0,
+        target,
+        roll: rollResult,
+        passed: false
+      };
+    }
+
+    if (!options.silent) {
+      let cardContent = '';
+      if (passed) {
+        cardContent = `
+          <div class="dcc-chat-card dcc-advancement-card" style="border: 2px solid #27ae60; background: #141418; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif;">
+            <div style="background: #27ae60; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; padding: 5px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 8px;">
+              <i class="fa-solid fa-graduation-cap"></i> SKILL ADVANCEMENT: ${skillItem.name}!
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; border-bottom: 1px solid #333; padding-bottom: 6px;">
+              <span>Crawler: <strong style="color: #fff;">${this.name}</strong></span>
+              <span>Target: <strong style="color: #f1c40f;">d20 &ge; ${target}</strong></span>
+              <span>Roll: <strong style="color: #2ecc71;">${rollResult}</strong></span>
+            </div>
+            <div style="margin-top: 8px; font-size: 13px; color: #fff; text-align: center;">
+              Advancement Breakthrough! <strong style="color: #f1c40f;">Rank ${currentRank} &rarr; Rank ${skillAdvancement.newRank}</strong>
+            </div>
+          </div>
+        `;
+      } else {
+        cardContent = `
+          <div class="dcc-chat-card dcc-advancement-card" style="border: 2px solid #c0392b; background: #141418; color: #fff; border-radius: 6px; padding: 12px; font-family: 'Oswald', sans-serif;">
+            <div style="background: #c0392b; color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1.5px; padding: 5px 8px; border-radius: 3px; font-weight: bold; text-align: center; margin-bottom: 8px;">
+              <i class="fa-solid fa-circle-xmark"></i> ADVANCEMENT ATTEMPT FAILED: ${skillItem.name}
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; border-bottom: 1px solid #333; padding-bottom: 6px;">
+              <span>Crawler: <strong style="color: #fff;">${this.name}</strong></span>
+              <span>Target: <strong style="color: #f1c40f;">d20 &ge; ${target}</strong></span>
+              <span>Roll: <strong style="color: #e74c3c;">${rollResult}</strong></span>
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; color: #ccc; text-align: center;">
+              Remains at <strong style="color: #fff;">Rank ${currentRank}</strong>. Dedicated practice logged; grind again next session!
+            </div>
+          </div>
+        `;
+      }
+
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: cardContent,
+        flags: {
+          'carl-rpg': {
+            isSkillAdvancement: true,
+            skillId,
+            skillAdvancement
+          }
+        }
+      });
+    }
+
+    return skillAdvancement;
   }
 }

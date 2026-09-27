@@ -5,10 +5,34 @@
       <i class="fa-solid fa-dumbbell" style="font-size: 18px; color: #f1c40f;"></i>
       <span style="font-size: 16px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Grinding & Downtime Hub</span>
     </div>
-    <div style="font-size: 12px; color: #f1c40f; text-transform: uppercase;">
-      {{actor.name}} • Floor {{floorNumber}}
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="dcc-badge" style="background: #111; color: #f1c40f; border: 1px solid #f1c40f; padding: 2px 8px; font-size: 11px; text-transform: uppercase;">
+        <i class="fa-solid fa-vault"></i> Pool: <strong>{{bankedHours}} hrs</strong>
+      </span>
+      <div style="font-size: 12px; color: #f1c40f; text-transform: uppercase;">
+        {{actor.name}} • Floor {{floorNumber}}
+      </div>
     </div>
   </div>
+
+  {{!-- RECENT GRIND RESULT ALERT --}}
+  {{#if lastGrindResult}}
+    <div style="background: rgba(39, 174, 96, 0.2); border: 1.5px solid #27ae60; border-radius: 4px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <i class="fa-solid fa-circle-check" style="color: #2ecc71; margin-right: 6px;"></i>
+        <strong style="color: #2ecc71;">Grind Executed!</strong>
+        Ground for <strong>{{lastGrindResult.hours}} Hours</strong>
+        {{#if (gt lastGrindResult.bonusHours 0)}}
+          <span style="color: #f1c40f; margin-left: 4px;">(+{{lastGrindResult.bonusHours}} Bonus Hour from {{lastGrindResult.complication.title}}!)</span>
+        {{/if}}
+        &rarr; <strong style="color: #fff;">+{{lastGrindResult.totalEarnedHours}} Hours</strong> added to pool (Total: <strong style="color: #f1c40f;">{{bankedHours}} hrs</strong>).
+        {{#if (gt lastGrindResult.fatigueGained 0)}}
+          <span style="color: #e74c3c; margin-left: 8px;"><i class="fa-solid fa-triangle-exclamation"></i> Gained {{lastGrindResult.fatigueGained}} Fatigue</span>
+        {{/if}}
+      </div>
+      <button type="button" class="dismiss-grind-alert-btn" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px;" title="Dismiss">&times;</button>
+    </div>
+  {{/if}}
 
   {{!-- SESSION SETUP --}}
   <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
@@ -36,10 +60,20 @@
       {{!-- Guide Bonus --}}
       <div style="display: flex; flex-direction: column; gap: 4px;">
         <label style="font-size: 12px; text-transform: uppercase; color: #aaa;">Guide Insight</label>
-        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #ddd; background: #262633; padding: 5px 8px; border-radius: 4px; border: 1px solid #444;">
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #ddd; background: #262633; padding: 5px 8px; border-radius: 4px; border: 1px solid #444; height: 32px; box-sizing: border-box;">
           <input type="checkbox" class="guide-bonus-toggle" {{#if hasGuideBonus}}checked{{/if}} />
-          <span>+1 Safe Hour (Huey/Bob)</span>
+          <span>+1 Safe Hr (Huey/Bob)</span>
         </label>
+      </div>
+
+      {{!-- Area Map Bonus --}}
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 12px; text-transform: uppercase; color: #aaa;">Area Map</label>
+        <select class="grind-map-select" style="background: #262633; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 5px 8px; font-size: 12px; font-family: 'Oswald', sans-serif; cursor: pointer; height: 32px; box-sizing: border-box;">
+          <option value="none" {{#if isMapNone}}selected{{/if}}>No Map (+0 hrs)</option>
+          <option value="neighborhood" {{#if isMapNeighborhood}}selected{{/if}}>Neighborhood Map (+1 Safe Hr)</option>
+          <option value="borough" {{#if isMapBorough}}selected{{/if}}>Borough Map (+2 Safe Hrs)</option>
+        </select>
       </div>
 
     </div>
@@ -48,7 +82,9 @@
     <div style="margin-top: 10px; padding: 8px 10px; border-radius: 4px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; {{#if (gt excessHours 0)}}background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b;{{else}}background: rgba(39, 174, 96, 0.15); border: 1px solid #27ae60;{{/if}}">
       <div>
         <i class="fa-solid {{#if (gt excessHours 0)}}fa-triangle-exclamation{{else}}fa-shield-halved{{/if}}" style="color: {{#if (gt excessHours 0)}}#e74c3c{{else}}#2ecc71{{/if}}; margin-right: 6px;"></i>
-        <span>Safe Limit: <strong>{{safeThreshold}} Hours</strong></span>
+        <span>Safe Limit: <strong>{{safeThreshold}} Hours</strong>
+          <span style="font-size: 11px; opacity: 0.85; margin-left: 4px;">(Base 5h{{#if hasGuideBonus}} + 1h Guide{{/if}}{{#if (gt mapBonus 0)}} + {{mapBonus}}h Map{{/if}})</span>
+        </span>
         {{#if (gt excessHours 0)}}
           <span style="color: #e74c3c; margin-left: 8px;">
             (<strong>{{excessHours}} Excess Hours</strong> requires {{excessHours}} Endurance check{{#if (gt excessHours 1)}}s{{/if}}!)
@@ -63,23 +99,29 @@
     </div>
   </div>
 
-  {{!-- SKILL SELECTION FOR ADVANCEMENT --}}
+  {{!-- SKILL TRAINING & HOUR ALLOCATION --}}
   <div style="background: #1c1c24; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 4px;">
-      <span style="font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #f1c40f;">
-        <i class="fa-solid fa-graduation-cap"></i> Select Skill to Advance (Hours = Current Rank)
-      </span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 6px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #f1c40f;">
+          <i class="fa-solid fa-graduation-cap"></i> Skill Training & Advancement
+        </span>
+        <span class="dcc-badge" style="background: #2980b9; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px;">
+          Available Pool: <strong style="color: #f1c40f; font-size: 13px;">{{bankedHours}} hrs</strong>
+        </span>
+      </div>
       <span style="font-size: 11px; color: #888;">
-        Marked <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 1px 4px; font-size: 9px;">CHECKED</span> skills used this session
+        Marked <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 1px 4px; font-size: 9px;">CHECKED</span> skills used in play • Hours persist across sessions
       </span>
     </div>
 
     {{#if skills.length}}
-      <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+      <div style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
         {{#each skills as |sk|}}
-          <div class="grind-skill-option" data-skill-id="{{sk.id}}" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; {{#if sk.isSelected}}background: #2c2538; border: 1.5px solid #f1c40f; box-shadow: 0 0 6px rgba(241,196,15,0.3);{{else}}background: #181820; border: 1px solid #2a2a35;{{/if}}">
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-              <input type="radio" name="grind-skill-choice" value="{{sk.id}}" {{#if sk.isSelected}}checked{{/if}} style="cursor: pointer; accent-color: #f1c40f;" />
+          <div class="grind-skill-option" data-skill-id="{{sk.id}}" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 4px; transition: all 0.15s ease; {{#if sk.canAdvance}}background: rgba(39, 174, 96, 0.15); border: 1.5px solid #27ae60;{{else if sk.isSelected}}background: #2c2538; border: 1.5px solid #f1c40f;{{else}}background: #181820; border: 1px solid #2a2a35;{{/if}}">
+            
+            {{!-- Skill Info --}}
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 170px;">
               <img src="{{sk.img}}" style="width: 22px; height: 22px; border-radius: 3px; border: 1px solid #444; object-fit: contain; background: #111;" />
               <div>
                 <span style="font-weight: bold; font-size: 13px; color: #fff;">{{sk.name}}</span>
@@ -90,34 +132,52 @@
               {{/if}}
             </div>
 
-            <div style="display: flex; align-items: center; gap: 14px;">
+            {{!-- Rank & Target --}}
+            <div style="display: flex; align-items: center; gap: 12px; margin-right: 10px;">
               <div style="text-align: right; font-size: 11px;">
                 <span style="color: #aaa;">Current:</span>
                 <strong style="color: #fff; font-size: 12px;">Rank {{sk.baseRank}}</strong>
               </div>
 
-              <div style="text-align: right; font-size: 11px;">
-                <span style="color: #aaa;">Requires:</span>
-                <strong style="color: #f1c40f;">{{sk.requiredHours}} hrs</strong>
-              </div>
-
-              <div style="text-align: right; font-size: 11px; min-width: 80px;">
+              <div style="text-align: right; font-size: 11px; min-width: 75px;">
                 <span style="color: #aaa;">Target:</span>
                 <strong style="color: #fff;">d20 &ge; {{sk.target}}</strong>
               </div>
+            </div>
 
-              <div>
-                {{#if sk.canAdvance}}
-                  <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: bold;">
-                    READY
-                  </span>
-                {{else}}
-                  <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 3px;">
-                    NEEDS {{sk.requiredHours}} HRS
-                  </span>
-                {{/if}}
+            {{!-- Banked Progress Bar --}}
+            <div style="display: flex; flex-direction: column; min-width: 120px; gap: 2px; margin-right: 12px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #aaa;">Invested:</span>
+                <strong style="color: {{#if sk.canAdvance}}#2ecc71{{else}}#f1c40f{{/if}};">{{sk.investedHours}} / {{sk.requiredHours}} hrs</strong>
+              </div>
+              <div style="background: #111; height: 5px; border-radius: 3px; overflow: hidden; border: 1px solid #333;">
+                <div style="background: {{#if sk.canAdvance}}#2ecc71{{else}}#f39c12{{/if}}; width: {{sk.progressPct}}%; height: 100%;"></div>
               </div>
             </div>
+
+            {{!-- Allocation Controls --}}
+            <div style="display: flex; align-items: center; gap: 4px; margin-right: 10px;">
+              <button type="button" class="allocate-hours-btn" data-skill-id="{{sk.id}}" data-action="sub" {{#unless sk.canSubHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="background: #333; color: #fff; border: 1px solid #555; border-radius: 3px; width: 24px; height: 24px; padding: 0; font-weight: bold; cursor: pointer;" title="Remove 1 hour back to pool">-1</button>
+
+              <button type="button" class="allocate-hours-btn" data-skill-id="{{sk.id}}" data-action="add" {{#unless sk.canAddHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="background: #27ae60; color: #fff; border: 1px solid #2ecc71; border-radius: 3px; width: 24px; height: 24px; padding: 0; font-weight: bold; cursor: pointer;" title="Allocate 1 hour from pool">+1</button>
+
+              <button type="button" class="allocate-hours-btn" data-skill-id="{{sk.id}}" data-action="max" {{#unless sk.canAddHour}}disabled style="opacity: 0.25; cursor: not-allowed;"{{/unless}} style="background: #2980b9; color: #fff; border: 1px solid #3498db; border-radius: 3px; padding: 2px 6px; font-size: 10px; font-weight: bold; cursor: pointer; height: 24px;" title="Fill to required hours">Fill</button>
+            </div>
+
+            {{!-- Action: Attempt Advancement or Status --}}
+            <div style="min-width: 140px; text-align: right;">
+              {{#if sk.canAdvance}}
+                <button type="button" class="attempt-advancement-btn" data-skill-id="{{sk.id}}" style="background: linear-gradient(90deg, #27ae60, #2ecc71); color: #fff; border: 1px solid #2ecc71; border-radius: 4px; padding: 4px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: 'Oswald', sans-serif; box-shadow: 0 0 8px rgba(46, 204, 113, 0.4); text-transform: uppercase;">
+                  <i class="fa-solid fa-dice-d20"></i> Advance (d20&ge;{{sk.target}})
+                </button>
+              {{else}}
+                <span style="font-size: 10px; color: #888; text-transform: uppercase;">
+                  Needs {{sk.neededHours}} more hrs
+                </span>
+              {{/if}}
+            </div>
+
           </div>
         {{/each}}
       </div>
@@ -148,6 +208,10 @@
 
     <button type="button" class="execute-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); color: #fff; border: 1px solid #e74c3c; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-family: 'Oswald', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">
       <i class="fa-solid fa-play"></i> Execute Grind ({{hours}} hrs)
+    </button>
+
+    <button type="button" class="close-grind-hub-btn" style="background: #333; color: #bbb; border: 1px solid #555; padding: 8px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'Oswald', sans-serif;">
+      Done
     </button>
   </div>
 </div>

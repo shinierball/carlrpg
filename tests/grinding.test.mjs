@@ -111,6 +111,55 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(res.fatigueGained, 0);
     });
 
+    it('neighborhood map option adds 1 safe hour (+1 hr, safe limit 6 hrs)', async () => {
+      const res = await crawler.grindSession({ hours: 6, mapType: 'neighborhood', silent: true });
+
+      assert.equal(res.hours, 6);
+      assert.equal(res.safeThreshold, 6);
+      assert.equal(res.mapBonus, 1);
+      assert.equal(res.mapType, 'neighborhood');
+      assert.equal(res.excessHours, 0);
+      assert.equal(res.enduranceChecks.length, 0);
+      assert.equal(res.fatigueGained, 0);
+    });
+
+    it('borough map option adds 2 safe hours (+2 hrs, safe limit 7 hrs)', async () => {
+      const res = await crawler.grindSession({ hours: 7, mapType: 'borough', silent: true });
+
+      assert.equal(res.hours, 7);
+      assert.equal(res.safeThreshold, 7);
+      assert.equal(res.mapBonus, 2);
+      assert.equal(res.mapType, 'borough');
+      assert.equal(res.excessHours, 0);
+      assert.equal(res.enduranceChecks.length, 0);
+      assert.equal(res.fatigueGained, 0);
+    });
+
+    it('burrough map spelling alias and hasBoroughMap flag also grant +2 safe hours', async () => {
+      const resAlias = await crawler.grindSession({ hours: 7, mapType: 'burrough', silent: true });
+      assert.equal(resAlias.safeThreshold, 7);
+      assert.equal(resAlias.mapBonus, 2);
+
+      const resFlag = await crawler.grindSession({ hours: 7, hasBurroughMap: true, silent: true });
+      assert.equal(resFlag.safeThreshold, 7);
+      assert.equal(resFlag.mapBonus, 2);
+    });
+
+    it('combined guide bonus (+1) and borough map (+2) allows safely grinding 8 hours', async () => {
+      const res = await crawler.grindSession({
+        hours: 8,
+        hasGuideBonus: true,
+        mapType: 'borough',
+        silent: true
+      });
+
+      assert.equal(res.hours, 8);
+      assert.equal(res.safeThreshold, 8); // 5 base + 1 guide + 2 borough map
+      assert.equal(res.excessHours, 0);
+      assert.equal(res.enduranceChecks.length, 0);
+      assert.equal(res.fatigueGained, 0);
+    });
+
     it('extended grinding beyond safe limit executes an Endurance check per excess hour', async () => {
       // 7 hours = 2 hours past 5 safe hours
       const res = await crawler.grindSession({ hours: 7, floor: 1, silent: true });
@@ -145,6 +194,7 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
         assert.equal(debuffs[0].name, 'Fatigued');
         assert.equal(debuffs[0].system.severity, 'Minor');
         assert.match(debuffs[0].system.description, /[−-]1 penalty on all Checks/);
+        assert.ok(debuffs[0].system.duration.toLowerCase().includes('long rest'));
       } finally {
         globalThis.Roll = origRoll;
       }
@@ -392,6 +442,21 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(crawler.items.filter(i => i.name === 'Minor Injury').length, 0, 'Minor Injury cleared on short rest');
     });
 
+    it('1-hour and 2-hour rests do not clear the Fatigued debuff', async () => {
+      await crawler.applyFatiguedDebuff();
+      assert.equal(crawler.items.filter(i => i.type === 'debuff' && i.name.toLowerCase() === 'fatigued').length, 1);
+
+      // 1-hour rest
+      const res1h = await crawler.rest('1hour', { silent: true });
+      assert.equal(res1h.fatigueCleared, 0);
+      assert.equal(crawler.items.filter(i => i.type === 'debuff' && i.name.toLowerCase() === 'fatigued').length, 1);
+
+      // 2-hour short rest
+      const res2h = await crawler.rest('short', { silent: true });
+      assert.equal(res2h.fatigueCleared, 0);
+      assert.equal(crawler.items.filter(i => i.type === 'debuff' && i.name.toLowerCase() === 'fatigued').length, 1);
+    });
+
     it('8-hour safe room long rest fully heals all 10 health bars, restores mana, and clears fatigue', async () => {
       await crawler.applyFatiguedDebuff();
       await crawler.applyFatiguedDebuff();
@@ -452,7 +517,7 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       const items = await crawler.createEmbeddedDocuments('Item', [{
         name: 'Stealth',
         type: 'skill',
-        system: { rank: 2, stat: 'dex', checked: true }
+        system: { rank: 2, stat: 'dex', checked: true, investedHours: 2 }
       }]);
       stealthSkill = items[0];
     });
@@ -484,6 +549,38 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(data.hours, 8);
       assert.equal(data.safeThreshold, 6);
       assert.equal(data.excessHours, 2);
+    });
+
+    it('correctly incorporates neighborhood map (+1 hr) and borough map (+2 hrs) in DCCGrindApp', async () => {
+      const appNeigh = new DCCGrindApp({ actor: crawler, hours: 6, mapType: 'neighborhood' });
+      const dataNeigh = await appNeigh.getData();
+      assert.equal(dataNeigh.safeThreshold, 6);
+      assert.equal(dataNeigh.mapBonus, 1);
+      assert.equal(dataNeigh.isMapNeighborhood, true);
+      assert.equal(dataNeigh.excessHours, 0);
+
+      const appBorough = new DCCGrindApp({ actor: crawler, hours: 8, hasGuideBonus: true, mapType: 'borough' });
+      const dataBorough = await appBorough.getData();
+      assert.equal(dataBorough.safeThreshold, 8); // 5 base + 1 guide + 2 borough
+      assert.equal(dataBorough.mapBonus, 2);
+      assert.equal(dataBorough.isMapBorough, true);
+      assert.equal(dataBorough.excessHours, 0);
+    });
+
+    it('auto-detects neighborhood or burrough map from actor inventory in DCCGrindApp', async () => {
+      // Add a Burrough Map loot item to actor
+      await crawler.createEmbeddedDocuments('Item', [{
+        name: 'Burrough Map: Queens',
+        type: 'loot',
+        system: { quantity: 1 }
+      }]);
+
+      const app = new DCCGrindApp({ actor: crawler, hours: 7 });
+      assert.equal(app.mapType, 'borough');
+      const data = await app.getData();
+      assert.equal(data.safeThreshold, 7);
+      assert.equal(data.mapBonus, 2);
+      assert.equal(data.isMapBorough, true);
     });
   });
 
@@ -528,4 +625,203 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(context.fiveHpBars, 20);
     });
   });
+
+  describe('8. Persistent Banked Hours, Multi-Skill Grinding & Complication Bonus Hours', () => {
+    let crawler;
+    let pugilism;
+    let dodge;
+
+    beforeEach(async () => {
+      crawler = new DCCActor({
+        name: 'Banker Crawler',
+        type: 'crawler',
+        system: {
+          abilities: { con: { value: 10, mod: 4 }, str: { value: 10, mod: 4 } },
+          details: { floor: '1st Floor', bankedGrindHours: 0 }
+        }
+      });
+
+      const items = await crawler.createEmbeddedDocuments('Item', [
+        {
+          name: 'Pugilism',
+          type: 'skill',
+          system: { rank: 14, stat: 'str', checked: true, investedHours: 0 }
+        },
+        {
+          name: 'Dodge',
+          type: 'skill',
+          system: { rank: 2, stat: 'dex', checked: true, investedHours: 0 }
+        }
+      ]);
+      pugilism = items[0];
+      dodge = items[1];
+    });
+
+    it('persistently banks unspent grinding hours from grind to grind', async () => {
+      // Grind session 1: 5 hours, no skill assigned
+      const res1 = await crawler.grindSession({ hours: 5, rollComplication: false, silent: true });
+      assert.equal(res1.hours, 5);
+      assert.equal(res1.bankedHours, 5);
+      assert.equal(crawler.system.details.bankedGrindHours, 5);
+
+      // Grind session 2: 5 hours, accumulates to 10
+      const res2 = await crawler.grindSession({ hours: 5, rollComplication: false, silent: true });
+      assert.equal(res2.bankedHours, 10);
+      assert.equal(crawler.system.details.bankedGrindHours, 10);
+    });
+
+    it('advancing high-level skill requires multiple grinds to accumulate hours (Rank 14 -> 15)', async () => {
+      // Rank 14 requires 14 hours.
+      // Grind 1: 5 hours applied to Pugilism
+      const res1 = await crawler.grindSession({
+        hours: 5,
+        skillId: pugilism.id,
+        rollComplication: false,
+        silent: true
+      });
+      assert.equal(res1.skillAdvancement.insufficientHours, true);
+      assert.equal(res1.skillAdvancement.investedHours, 5);
+      assert.equal(pugilism.system.investedHours, 5);
+      assert.equal(pugilism.system.rank, 14);
+
+      // Grind 2: 5 hours applied to Pugilism (now 10 / 14)
+      const res2 = await crawler.grindSession({
+        hours: 5,
+        skillId: pugilism.id,
+        rollComplication: false,
+        silent: true
+      });
+      assert.equal(res2.skillAdvancement.insufficientHours, true);
+      assert.equal(res2.skillAdvancement.investedHours, 10);
+      assert.equal(pugilism.system.investedHours, 10);
+      assert.equal(pugilism.system.rank, 14);
+
+      // Grind 3: 4 hours applied to Pugilism (now 14 / 14 -> meets requirement!)
+      const origRoll = globalThis.Roll;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          this.total = 16; // Roll 16 >= 14 passes!
+          return this;
+        }
+      };
+
+      try {
+        const res3 = await crawler.grindSession({
+          hours: 4,
+          skillId: pugilism.id,
+          rollComplication: false,
+          silent: true
+        });
+        assert.equal(res3.skillAdvancement.passed, true);
+        assert.equal(res3.skillAdvancement.previousRank, 14);
+        assert.equal(res3.skillAdvancement.newRank, 15);
+        assert.equal(pugilism.system.rank, 15);
+        assert.equal(pugilism.system.checked, false);
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('allows grinding multiple skills at the same time in a single grind session', async () => {
+      // Grind 6 hours and allocate 2 to Dodge (rank 2, needs 2) and 3 to Pugilism (needs 14)
+      const res = await crawler.grindSession({
+        hours: 6,
+        allocations: {
+          [dodge.id]: 2,
+          [pugilism.id]: 3
+        },
+        rollComplication: false,
+        silent: true
+      });
+
+      assert.equal(dodge.system.investedHours, 2, 'Dodge received 2 hours');
+      assert.equal(pugilism.system.investedHours, 3, 'Pugilism received 3 hours');
+      assert.equal(crawler.system.details.bankedGrindHours, 1, '1 unallocated hour remains in pool');
+    });
+
+    it('gaining bonus hour from complication adds extra hour to grind pool', async () => {
+      // Force complication roll 18 (Wandering Merchant / Helpful Guide -> bonusHours: 1)
+      const origRoll = globalThis.Roll;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          this.total = 18;
+          return this;
+        }
+      };
+
+      try {
+        const res = await crawler.grindSession({ hours: 5, silent: true });
+        assert.equal(res.hours, 5);
+        assert.equal(res.bonusHours, 1);
+        assert.equal(res.totalEarnedHours, 6);
+        assert.equal(res.bankedHours, 6, '5 ground hours + 1 bonus hour = 6 hours added to pool');
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('allocateGrindHours transfers hours between actor pool and skill', async () => {
+      // Set actor banked hours to 10
+      await crawler.update({ 'system.details.bankedGrindHours': 10 });
+
+      // Allocate 2 hours to Dodge (Rank 2, needs 2)
+      const alloc1 = await crawler.allocateGrindHours(dodge.id, 2);
+      assert.equal(alloc1.newBank, 8);
+      assert.equal(alloc1.newInvested, 2);
+      assert.equal(alloc1.canAdvance, true);
+      assert.equal(dodge.system.investedHours, 2);
+
+      // Remove 1 hour back to bank
+      const alloc2 = await crawler.allocateGrindHours(dodge.id, -1);
+      assert.equal(alloc2.newBank, 9);
+      assert.equal(alloc2.newInvested, 1);
+      assert.equal(alloc2.canAdvance, false);
+      assert.equal(dodge.system.investedHours, 1);
+    });
+
+    it('attemptSkillAdvancement tests advancement and increments rank when sufficient hours are banked', async () => {
+      // Invest 2 hours into Dodge
+      await dodge.update({ 'system.investedHours': 2 });
+
+      // Mock roll 10 >= 2 (Success)
+      const origRoll = globalThis.Roll;
+      globalThis.Roll = class extends origRoll {
+        async evaluate() {
+          this.total = 10;
+          return this;
+        }
+      };
+
+      try {
+        const adv = await crawler.attemptSkillAdvancement(dodge.id, { silent: true });
+        assert.equal(adv.passed, true);
+        assert.equal(adv.previousRank, 2);
+        assert.equal(adv.newRank, 3);
+        assert.equal(dodge.system.rank, 3);
+        assert.equal(dodge.system.checked, false);
+        assert.equal(dodge.system.investedHours, 0);
+      } finally {
+        globalThis.Roll = origRoll;
+      }
+    });
+
+    it('DCCGrindApp prepares bankedHours and per-skill progress and allocation data', async () => {
+      await crawler.update({ 'system.details.bankedGrindHours': 4 });
+      await pugilism.update({ 'system.investedHours': 6 });
+
+      const app = new DCCGrindApp({ actor: crawler, hours: 5 });
+      const data = await app.getData();
+
+      assert.equal(data.bankedHours, 4);
+      const pug = data.skills.find(s => s.id === pugilism.id);
+      assert.ok(pug);
+      assert.equal(pug.investedHours, 6);
+      assert.equal(pug.requiredHours, 14);
+      assert.equal(pug.neededHours, 8);
+      assert.equal(pug.canAddHour, true);
+      assert.equal(pug.canSubHour, true);
+      assert.equal(pug.canAdvance, false);
+    });
+  });
 });
+

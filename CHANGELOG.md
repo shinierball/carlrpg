@@ -1,4 +1,66 @@
+## 2.0.56
+
+### Grinding Fatigue & Resting Recovery Verification
+
+- **Grinding Endurance Fatigue Mechanics**:
+  - Re-affirmed and strictly unified extended grinding fatigue checks with the canonical **Fatigued** debuff (`type: "debuff"`, `severity: "Minor"`, `icons/conditions/fatigued.webp`).
+  - Failing an Unopposed Endurance Check ($1d20 + \text{Rank} + \text{CON Mod}$) for grinding beyond the daily safe threshold directly applies the stackable **Fatigued** debuff ($-1$ penalty on all Checks, Move speed halved).
+- **Resting Recovery Validation**:
+  - Verified that an **8-Hour Safe Room Long Rest** (`rest('long')`) completely restores all 10 Health Bars, refills all Mana, and removes all stacked **Fatigued** debuffs.
+  - Verified that a **30-Hour Full Day Rest** (`rest('fullDay')`) restores all Health Bars, refills Mana, removes all stacked **Fatigued** debuffs, and cures all injuries (*Minor*, *Major*, and *Long-Term*).
+  - Verified that short rests (2-hour) and non-combat rests (1-hour) restore partial HP and Mana but do not clear lingering fatigue.
+- **Compendium Packaging**:
+  - Maintained canonical compendium dataset integrity in `carl-rpg.buffs` with 32 canonical buffs and 30 canonical debuffs (62 total documents).
+- **Automated Test Suite**:
+  - Expanded `tests/grinding.test.mjs` with comprehensive assertions covering Endurance check failures, debuff stacking, short rest retention, 8-hour long rest removal, and 30-hour full day rest recovery.
+  - 100% test pass rate across 100 suites with 628 automated unit tests.
+
+## 2.0.55
+
+### Persistent Banked Hours, Multi-Skill Grinding & Complication Bonus Hours
+
+- **Persistent Banked Hours Across Grinds**:
+  - Unspent grinding hours are persistently saved in the crawler's banked hours pool (`system.details.bankedGrindHours`), carrying over from session to session.
+  - Skills track **Invested Hours** persistently (`system.investedHours`), allowing higher-level skills (e.g. Rank 14 &rarr; 15 requiring 14 hours) to accumulate hours across multiple grinding days without loss.
+- **Simultaneous Multi-Skill Grinding**:
+  - Crawlers can now divide and allocate their earned and banked hours across **multiple skills simultaneously** within a single session.
+  - Dedicated per-skill allocation controls (`-1`, `+1`, `Fill / Max`) let players distribute hours with a single click.
+- **Grinding Complication Bonus Hours**:
+  - Encountering helpful events on the 1d20 Complications table (e.g. roll 18–19 *Wandering Merchant / Helpful Guide*) grants **+1 Bonus Hour** added directly to the crawler's available pool.
+- **Interactive Grinding Hub (`DCCGrindApp`) Streamlining**:
+  - Executing a grind no longer abruptly closes the app; it immediately deposits earned and bonus hours into the visible pool, renders an event notification banner, and allows players to allocate hours and trigger advancements immediately.
+  - Individual skill progress bars display current investment vs requirement (e.g. `10 / 14 hrs`).
+  - Glowing **Advance (d20 &ge; Target)** action buttons appear as soon as a skill banks sufficient hours.
+- **Actor Document Methods**:
+  - Implemented `actor.allocateGrindHours(skillId, hours)` for safe two-way transfers between the actor pool and skill items.
+  - Implemented `actor.attemptSkillAdvancement(skillId)` for rolling advancement checks, upgrading rank, clearing checked status, and generating celebratory chat cards.
+- **Verification**:
+  - Added dedicated automated unit tests in `tests/grinding.test.mjs` verifying multi-session accumulation, multi-skill allocation, complication bonus hours, and pool transfers.
+  - 100% test suite passing with 0 failures across 100 suites (627 tests passed).
+
+## 2.0.54
+
+
+### Grinding System — Neighborhood & Borough Map Safe Hour Bonuses
+
+- **Area Map Modifiers for Grinding**:
+  - Implemented the option to add **+1 Safe Hour** for having a **Neighborhood Map**.
+  - Implemented the option to add **+2 Safe Hours** for having a **Borough Map** (including spelling alias *Burrough Map*).
+  - Stacking: Area maps stack with Guide Insight (e.g. Huey / Bob), enabling crawlers with both to safely grind for up to 8 hours daily with 0 exhaustion checks.
+- **Interactive Grinding Hub (`DCCGrindApp`)**:
+  - Added dedicated **Area Map** dropdown in the session setup: `[No Map (+0 hrs), Neighborhood Map (+1 Safe Hr), Borough Map (+2 Safe Hrs)]`.
+  - Added smart **Inventory Auto-Detection**: automatically inspects the actor's inventory items on initialization and defaults to the highest available map held by the crawler.
+  - Dynamically updates the Safe Limit status badge with breakdown tags (`Base 5h + 1h Guide + 2h Map`).
+- **Actor Engine (`actor.grindSession`) & Grinding Data**:
+  - Added `getSafeGrindingThreshold()` helper in `src/data/grinding.mjs`.
+  - Updated `actor.grindSession(options)` to accept `mapType`, `mapBonus`, `hasNeighborhoodMap`, and `hasBoroughMap` / `hasBurroughMap`.
+  - Embeds map modifier badges in the generated LitRPG chat cards and system flags.
+- **Verification**:
+  - Added automated unit tests in `tests/grinding.test.mjs` verifying safe thresholds, excess hour calculations, inventory auto-detection, and chat reporting across all combinations.
+  - 100% test suite passing with 0 failures across 99 suites (620 tests passed).
+
 ## 2.0.53
+
 
 ### Resting Subsystem & Page 1 Health Bar Integration
 

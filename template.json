@@ -52,6 +52,7 @@
         "notes": "",
         "importantKills": "",
         "clubsSocieties": "",
+        "bankedGrindHours": 0,
         "personalSpace": {
           "tier": "",
           "size": "",
@@ -180,7 +181,8 @@
       "notes": "",
       "upgrades": "",
       "damageModifiers": [],
-      "checked": false
+      "checked": false,
+      "investedHours": 0
     },
     "attack": {
       "equipped": true,

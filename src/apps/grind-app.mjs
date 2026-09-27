@@ -16,7 +16,8 @@ import {
   DCC_GRINDING_COMPLICATIONS,
   getRequiredGrindingHours,
   getAdvancementTarget,
-  getEnduranceDC
+  getEnduranceDC,
+  getSafeGrindingThreshold
 } from '../data/grinding.mjs';
 
 const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog
@@ -31,6 +32,17 @@ export class DCCGrindApp extends DCCBaseApplication {
     this.hasGuideBonus = Boolean(options.hasGuideBonus);
     this.rollComplication = options.rollComplication !== false;
 
+    // Map selection: explicit option or auto-detect from actor inventory
+    if (options.mapType) {
+      this.mapType = String(options.mapType).toLowerCase().trim();
+    } else if (options.hasBoroughMap || options.hasBurroughMap || options.mapBonus === 2) {
+      this.mapType = 'borough';
+    } else if (options.hasNeighborhoodMap || options.mapBonus === 1) {
+      this.mapType = 'neighborhood';
+    } else {
+      this.mapType = this._detectMapFromActor();
+    }
+
     // Default floor number from actor
     if (this.actor?.system?.details?.floor) {
       const match = String(this.actor.system.details.floor).match(/\d+/);
@@ -38,6 +50,26 @@ export class DCCGrindApp extends DCCBaseApplication {
     } else {
       this.floorNumber = 1;
     }
+  }
+
+  /**
+   * Check actor items for Neighborhood Map (+1 hr) or Borough Map (+2 hrs)
+   * @returns {string} 'none' | 'neighborhood' | 'borough'
+   */
+  _detectMapFromActor() {
+    if (!this.actor?.items) return 'none';
+    const items = this.actor.items.filter ? this.actor.items.filter(i => true) : Array.from(this.actor.items.values?.() || this.actor.items);
+    let found = 'none';
+    for (const item of items) {
+      const name = (item.name || '').toLowerCase();
+      if (name.includes('burrough map') || name.includes('borough map')) {
+        return 'borough';
+      }
+      if (name.includes('neighborhood map')) {
+        found = 'neighborhood';
+      }
+    }
+    return found;
   }
 
   /** @override */
@@ -62,10 +94,23 @@ export class DCCGrindApp extends DCCBaseApplication {
     context.floorNumber = this.floorNumber;
     context.rollComplication = this.rollComplication;
 
-    const safeThreshold = this.hasGuideBonus ? 6 : 5;
+    const { safeThreshold, mapBonus } = getSafeGrindingThreshold({
+      hasGuideBonus: this.hasGuideBonus,
+      mapType: this.mapType
+    });
     const excessHours = Math.max(0, this.hours - safeThreshold);
+    context.mapType = this.mapType;
+    context.mapBonus = mapBonus;
     context.safeThreshold = safeThreshold;
     context.excessHours = excessHours;
+    context.isMapNone = this.mapType === 'none';
+    context.isMapNeighborhood = this.mapType === 'neighborhood';
+    context.isMapBorough = this.mapType === 'borough' || this.mapType === 'burrough';
+
+    // Banked hours in pool
+    const bankedHours = Number(this.actor?.system?.details?.bankedGrindHours ?? this.actor?.system?.bankedGrindHours) || 0;
+    context.bankedHours = bankedHours;
+    context.lastGrindResult = this.lastGrindResult || null;
 
     // Get actor's endurance skill and rank
     const allSkills = this.actor?.items ? (this.actor.items.filter ? this.actor.items.filter(i => i.type === 'skill') : Array.from(this.actor.items.values?.() || this.actor.items).filter(i => i.type === 'skill')) : [];
@@ -83,8 +128,13 @@ export class DCCGrindApp extends DCCBaseApplication {
       const isChecked = Boolean(skill.system?.checked);
       const reqHours = getRequiredGrindingHours(baseRank);
       const target = getAdvancementTarget(baseRank);
+      const investedHours = Number(skill.system?.investedHours ?? skill.system?.grindHours) || 0;
+      const neededHours = Math.max(0, reqHours - investedHours);
       const isSelected = skill.id === this.selectedSkillId;
-      const canAdvance = this.hours >= reqHours;
+      const canAdvance = investedHours >= reqHours;
+      const canAddHour = bankedHours > 0 && investedHours < reqHours;
+      const canSubHour = investedHours > 0;
+      const progressPct = Math.min(100, Math.round((investedHours / Math.max(1, reqHours)) * 100));
 
       return {
         id: skill.id,
@@ -95,6 +145,11 @@ export class DCCGrindApp extends DCCBaseApplication {
         stat: (skill.system?.stat || 'str').toUpperCase(),
         checked: isChecked,
         requiredHours: reqHours,
+        investedHours,
+        neededHours,
+        canAddHour,
+        canSubHour,
+        progressPct,
         target,
         isSelected,
         canAdvance
@@ -150,6 +205,12 @@ export class DCCGrindApp extends DCCBaseApplication {
       this.render(false);
     });
 
+    // Map selection change
+    html.find('.grind-map-select').on('change', ev => {
+      this.mapType = ev.currentTarget.value;
+      this.render(false);
+    });
+
     // Complication toggle
     html.find('.complication-toggle').on('change', ev => {
       this.rollComplication = ev.currentTarget.checked;
@@ -165,18 +226,66 @@ export class DCCGrindApp extends DCCBaseApplication {
       }
     });
 
+    // Hour allocation buttons (+1, -1, Max)
+    html.find('.allocate-hours-btn').on('click', async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const btn = $(ev.currentTarget);
+      const skillId = btn.data('skillId') || btn.closest('[data-skill-id]').data('skillId');
+      const action = btn.data('action');
+      if (!this.actor || !skillId) return;
+
+      if (action === 'add') {
+        await this.actor.allocateGrindHours(skillId, 1);
+      } else if (action === 'sub') {
+        await this.actor.allocateGrindHours(skillId, -1);
+      } else if (action === 'max') {
+        const skill = this.actor.items?.get ? this.actor.items.get(skillId) : this.actor.items?.find?.(i => i.id === skillId || i._id === skillId);
+        const req = getRequiredGrindingHours(skill?.system?.rank || 0);
+        const invested = Number(skill?.system?.investedHours ?? skill?.system?.grindHours) || 0;
+        const needed = Math.max(0, req - invested);
+        await this.actor.allocateGrindHours(skillId, needed);
+      }
+      this.render(false);
+    });
+
+    // Attempt Skill Advancement
+    html.find('.attempt-advancement-btn').on('click', async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const btn = $(ev.currentTarget);
+      const skillId = btn.data('skillId') || btn.closest('[data-skill-id]').data('skillId');
+      if (!this.actor || !skillId) return;
+
+      await this.actor.attemptSkillAdvancement(skillId);
+      this.render(false);
+    });
+
+    // Dismiss last grind result alert
+    html.find('.dismiss-grind-alert-btn').on('click', ev => {
+      ev.preventDefault();
+      this.lastGrindResult = null;
+      this.render(false);
+    });
+
     // Execute Grind Session
     html.find('.execute-grind-btn').on('click', async ev => {
       ev.preventDefault();
       if (!this.actor) return;
-      await this.actor.grindSession({
+      const { mapBonus } = getSafeGrindingThreshold({ mapType: this.mapType });
+      const result = await this.actor.grindSession({
         hours: this.hours,
         hasGuideBonus: this.hasGuideBonus,
-        skillId: this.selectedSkillId,
+        mapType: this.mapType,
+        mapBonus,
+        hasNeighborhoodMap: this.mapType === 'neighborhood',
+        hasBoroughMap: this.mapType === 'borough' || this.mapType === 'burrough',
+        hasBurroughMap: this.mapType === 'borough' || this.mapType === 'burrough',
         floor: this.floorNumber,
         rollComplication: this.rollComplication
       });
-      this.close();
+      this.lastGrindResult = result;
+      this.render(false);
     });
 
     // Safe Room Rest button
@@ -197,5 +306,12 @@ export class DCCGrindApp extends DCCBaseApplication {
         this.close();
       }
     });
+
+    // Close Button
+    html.find('.close-grind-hub-btn').on('click', ev => {
+      ev.preventDefault();
+      this.close();
+    });
   }
 }
+

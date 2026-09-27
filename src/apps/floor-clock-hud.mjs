@@ -8,13 +8,12 @@
  */
 
 import { DCCActor } from '../documents/actor.mjs';
-import { DCCGrindApp } from './grind-app.mjs';
 
 export class DCCFloorClockHUD {
   static instance = null;
 
   constructor() {
-    this.isCollapsed = false;
+    this.isCollapsed = true;
     this.element = null;
   }
 
@@ -154,13 +153,6 @@ export class DCCFloorClockHUD {
         }
       }
     });
-
-    // Open Grind Hub
-    root.find('.dcc-hud-grind-btn').click(ev => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      new DCCGrindApp().render(true);
-    });
   }
 
   /**
@@ -174,9 +166,6 @@ export class DCCFloorClockHUD {
             <button type="button" class="dcc-floor-hud-toggle-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Oswald', sans-serif; font-size: 13px; padding: 0;" title="Floor Collapse Clock: ${context.floorTimer}h remaining. Click to expand.">
               <i class="fa-solid fa-hourglass-half" style="color: #e67e22;"></i>
               <span style="font-weight: bold; color: #f39c12;">${context.floorTimer}h</span>
-            </button>
-            <button type="button" class="dcc-hud-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); border: 1px solid #e74c3c; color: #fff; border-radius: 3px; font-size: 10px; font-weight: bold; padding: 2px 7px; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase;" title="Open Party Grinding & Downtime Hub">
-              <i class="fa-solid fa-dumbbell"></i> Grind
             </button>
           </div>
         </div>
@@ -203,9 +192,6 @@ export class DCCFloorClockHUD {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 4px; margin-left: 4px; border-left: 1px solid #333; padding-left: 6px;">
-          <button type="button" class="dcc-hud-grind-btn" style="background: linear-gradient(90deg, #c0392b, #d35400); border: 1px solid #e74c3c; color: #fff; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; padding: 3px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open Party Grinding Hub">
-            <i class="fa-solid fa-dumbbell"></i> Start Grind
-          </button>
           <button type="button" class="dcc-floor-hud-collapse-btn" style="background: none; border: none; color: #888; cursor: pointer; font-size: 11px;" title="Minimize">
             <i class="fa-solid fa-chevron-up"></i>
           </button>

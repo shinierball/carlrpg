@@ -152,14 +152,6 @@
         <button type="button" class="open-grind-app dcc-start-grind-btn" data-tooltip="Start Grind: Open Party Grinding & Downtime Hub (train skills, earn hours, advance ranks)" title="Start Grinding & Downtime Session">
           <i class="fa-solid fa-dumbbell"></i> Start Grind
         </button>
-
-        {{!-- Global Floor Timer Clock --}}
-        <div class="dcc-floor-clock-widget" style="display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; border-left: 1px solid #444; padding-left: 8px;" title="Global Floor Timer Clock: Hours remaining until Floor Collapse. Grinding decrements by non-bonus hours accrued. Editable.">
-          <i class="fa-solid fa-hourglass-half" style="color: #e67e22; font-size: 11px;"></i>
-          <span style="font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: bold;">Clock:</span>
-          <input type="number" class="dcc-global-floor-clock-input" value="{{floorTimer}}" min="0" style="width: 46px; background: #111; color: #f39c12; border: 1px solid #666; border-radius: 3px; font-weight: bold; text-align: center; font-size: 11px; padding: 1px 2px;" title="Floor Timer Clock (Hours Remaining). Change to manually set." />
-          <span style="font-size: 10px; color: #888;">hrs</span>
-        </div>
       </div>
       {{/unless}}
     </div>

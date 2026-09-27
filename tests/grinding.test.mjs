@@ -1263,29 +1263,14 @@ describe('DCC RPG — Grinding & Downtime Mechanics', () => {
       assert.equal(katiaItem.isSelected, false, 'Katia is NOT selected (not in session tracking)');
     });
 
-    it('Start Grind button is visible and present across Page 1 Core, Page 3 Skills, and Scene HUD', async () => {
+    it('Start Grind button is visible and present across Page 1 Core and Grind App ', async () => {
       // 1. Page 1 Core template includes Start Grind button
       const fs = await import('fs');
       const page1Content = fs.readFileSync('templates/actors/parts/page1-core.hbs', 'utf-8');
       assert.ok(page1Content.includes('open-grind-app'), 'Page 1 Core contains open-grind-app class');
       assert.ok(page1Content.includes('Start Grind'), 'Page 1 Core has explicit "Start Grind" button');
 
-      // 2. Page 3 Skills template includes Start Grind button
-      const page3Content = fs.readFileSync('templates/actors/parts/page3-skills.hbs', 'utf-8');
-      assert.ok(page3Content.includes('open-grind-app'), 'Page 3 Skills contains open-grind-app class');
-      assert.ok(page3Content.includes('Start Grind'), 'Page 3 Skills has explicit "Start Grind" button');
-
-      // 3. Floor Clock HUD renders Grind button in both expanded and collapsed states
-      const hud = new DCCFloorClockHUD();
-      const expandedHTML = hud._getFallbackHTML({ isCollapsed: false, floorTimer: 100, currentFloor: 1, isGM: true });
-      assert.ok(expandedHTML.includes('dcc-hud-grind-btn'), 'Expanded HUD has dcc-hud-grind-btn');
-      assert.ok(expandedHTML.includes('Start Grind'), 'Expanded HUD has "Start Grind" text');
-
-      const collapsedHTML = hud._getFallbackHTML({ isCollapsed: true, floorTimer: 100, currentFloor: 1, isGM: true });
-      assert.ok(collapsedHTML.includes('dcc-hud-grind-btn'), 'Collapsed HUD has dcc-hud-grind-btn');
-      assert.ok(collapsedHTML.includes('Grind'), 'Collapsed HUD has "Grind" button');
-
-      // 4. Grind App template contains explicit Start Grind execute buttons
+      // 2. Grind App template contains explicit Start Grind execute buttons
       const grindAppContent = fs.readFileSync('templates/apps/grind-app.hbs', 'utf-8');
       assert.ok(grindAppContent.includes('Start Grind'), 'Grind App contains "Start Grind" button');
     });

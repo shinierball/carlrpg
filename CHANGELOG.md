@@ -1,3 +1,15 @@
+## 2.0.34
+
+### Equipment & Inventory Tab Full-Width Stacked Layout
+
+- **Stacked Layout for Tab 2 (Equipment & Inventory)**:
+  - Moved the **Inventory & Backpack** table directly below the **Equipped Gear Slots** section, replacing the previous side-by-side fixed-width split columns.
+  - Both sections now span the full width (100%) of the character sheet window, eliminating tight horizontal constraints and table crowding.
+  - Formatted the Equipped Gear Slots with a clean responsive grid (`.dcc-gear-slots-grid`) that cleanly renders gear slots across two columns with the 10 Accessories spanning the full width across the bottom.
+  - Backpack item table now utilizes the entire sheet width for item names, bonus summaries, quantities, and item notes.
+- **Automated Verification**:
+  - Updated `tests/character-sheet-modern-tabs.test.mjs` to verify DOM order (Equipped Gear Slots preceding Inventory & Backpack), removal of legacy fixed-width column constraints, and presence of full-width container and grid CSS classes.
+
 ## 2.0.33
 
 ### West Marches Named Party Selection & Creation in PPSM

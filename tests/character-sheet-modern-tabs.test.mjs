@@ -31,7 +31,7 @@ test('DCC RPG Character Sheet 5-Tab Modern Layout (Option A)', async (t) => {
     assert.ok(dccMjs.includes("'systems/carl-rpg/templates/actors/parts/story-extras.hbs'"), 'dcc.mjs must preload story-extras.hbs');
   });
 
-  await t.test('2. Tab 2 (page4-inventory.hbs) merges gear slots with inventory and completely removes buffs & debuffs', () => {
+  await t.test('2. Tab 2 (page4-inventory.hbs) stacks Equipped Gear on top and Inventory below, both filling 100% width', () => {
     const invContent = fs.readFileSync('templates/actors/parts/page4-inventory.hbs', 'utf8');
 
     // Gear slots must be present
@@ -49,6 +49,23 @@ test('DCC RPG Character Sheet 5-Tab Modern Layout (Option A)', async (t) => {
     assert.ok(invContent.includes('data-type="gear"'), 'Must include Add Gear button');
     assert.ok(invContent.includes('data-type="loot"'), 'Must include Add Item button');
     assert.ok(invContent.includes('gear-toggle-equipped'), 'Must include gear equip toggle button');
+
+    // Vertical stacking verification: Equipped Gear Slots comes before Inventory & Backpack
+    const gearIdx = invContent.indexOf('EQUIPPED GEAR SLOTS');
+    const invIdx = invContent.indexOf('INVENTORY &amp; BACKPACK') !== -1
+      ? invContent.indexOf('INVENTORY &amp; BACKPACK')
+      : invContent.indexOf('INVENTORY & BACKPACK');
+    assert.ok(gearIdx !== -1 && invIdx !== -1 && gearIdx < invIdx, 'Inventory & Backpack must appear below Equipped Gear Slots');
+
+    // Full-width verification: 340px side-by-side constraint removed and full width assigned
+    assert.equal(invContent.includes('340px'), false, 'Old 340px column width constraint must be removed');
+    assert.ok(invContent.includes('dcc-equipped-gear-block'), 'Must include dcc-equipped-gear-block');
+    assert.ok(invContent.includes('dcc-inventory-backpack-block'), 'Must include dcc-inventory-backpack-block');
+
+    // Stylesheet verification
+    const dccCss = fs.readFileSync('styles/dcc.css', 'utf8');
+    assert.ok(dccCss.includes('.dcc-equipment-inventory-container .dcc-stat-block'), 'CSS must define full width for stat blocks in equipment-inventory container');
+    assert.ok(dccCss.includes('.dcc-equipment-inventory-container .dcc-gear-slots-grid'), 'CSS must define responsive grid for gear slots');
 
     // Buffs and Debuffs must NOT be present in inventory tab
     assert.equal(invContent.includes('CHARACTER BUFFS'), false, 'Inventory tab must not contain Buffs table');

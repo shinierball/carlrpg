@@ -6327,7 +6327,23 @@ select.dcc-box-input.dcc-size-select,
 .dcc-equipment-inventory-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
+}
+
+.dcc-equipment-inventory-container .dcc-stat-block {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dcc-equipment-inventory-container .dcc-gear-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 8px 14px;
+}
+
+.dcc-equipment-inventory-container .dcc-gear-row.dcc-gear-row-full {
+  grid-column: 1 / -1;
 }
 
 .dcc-conditions-container {

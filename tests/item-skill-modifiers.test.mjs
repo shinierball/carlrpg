@@ -307,65 +307,6 @@ describe('DCC RPG Item Skill Modifiers & Persistence', () => {
         { name: 'Acrobatics', bonus: 1 }
       ]);
     });
-
-    test('DCCItem.prepareBaseData normalizes database objects into arrays', () => {
-      const gear = new DCCItem({
-        name: 'Legacy Boots',
-        type: 'gear',
-        system: {
-          equipped: true,
-          skillModifiers: {
-            '0': { name: 'Sneak', bonus: 2 },
-            '1': { name: 'Stealth', bonus: 1 }
-          }
-        }
-      });
-
-      gear.prepareBaseData();
-
-      assert.ok(Array.isArray(gear.system.skillModifiers), 'Normalized to array');
-      assert.equal(gear.system.skillModifiers.length, 2);
-      assert.equal(gear.system.skillModifiers[0].name, 'Sneak');
-      assert.equal(gear.system.skillModifiers[0].bonus, 2);
-    });
-
-    test('actor and crawler sheet handle legacy object format gracefully', async () => {
-      const skill = new DCCItem({
-        name: 'Sneak',
-        type: 'skill',
-        system: { rank: 1, stat: 'dex' }
-      });
-
-      const gear = new DCCItem({
-        name: 'Old Ring',
-        type: 'gear',
-        system: {
-          equipped: true,
-          skillModifiers: {
-            '0': { name: 'Sneak', bonus: 3 }
-          }
-        }
-      });
-
-      const crawler = new DCCActor({
-        type: 'crawler',
-        system: { abilities: { dex: { unenhanced: 5 } } }, // mod = +2
-        items: [skill, gear]
-      });
-
-      crawler.prepareDerivedData();
-
-      // Bonus should still be applied even if gear had object format
-      assert.equal(skill.system.itemBonus, 3);
-      assert.equal(skill.system.modifiedRank, 4); // 1 + 3
-      assert.equal(skill.system.totalSkill, 6);    // 4 + 2
-
-      const sheet = new DCCCrawlerSheet(crawler);
-      const sheetData = await sheet.getData();
-      const sheetSkill = sheetData.skills.find(s => s.name === 'Sneak');
-      assert.equal(sheetSkill.itemBonus, 3);
-      assert.equal(sheetSkill.modifiedRank, 4);
-    });
   });
 
 

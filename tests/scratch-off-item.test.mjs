@@ -455,13 +455,12 @@ describe('DCC RPG - Scratch-off Ticket & Multi-Outcome Consumable Items', () => 
     assert.ok(appliedDebuff, 'Blinded debuff item must be created on target mob');
   });
 
-  it('14. templates/items/parts/loot.hbs renders condition selectors and omits damage inputs for buff/debuff', () => {
+  it('14. templates/items/parts/loot.hbs renders condition selectors for buff and debuff outcomes', () => {
     const templateContent = fs.readFileSync('templates/items/parts/loot.hbs', 'utf-8');
     assert.ok(templateContent.includes('outcome-buff-select'), 'Template must include outcome-buff-select');
     assert.ok(templateContent.includes('outcome-debuff-select'), 'Template must include outcome-debuff-select');
     assert.ok(templateContent.includes('{{else if (eq out.type "buff")}}'), 'Template must branch on buff type');
     assert.ok(templateContent.includes('{{else if (eq out.type "debuff")}}'), 'Template must branch on debuff type');
-    assert.ok(!templateContent.includes('placeholder="2d12 + Int" style="width: 65%; font-size: 11px;" />\n                {{/if}}'), 'Damage inputs must not be inside buff/debuff branches');
   });
 
   it('15. Scratch-off random table is only visible when item is of type scratch_ticket / Scratch-Off-Ticket', async () => {

@@ -1,3 +1,15 @@
+## 2.0.39
+
+### Test Suite Audit & Cleanup: Removal of Obsolete & Negative Regression Assertions
+
+- **Removed Obsolete Tests & Negative Assertions**:
+  - `tests/character-sheet-modern-tabs.test.mjs`: Removed assertions that verified the absence of the old 340px column width constraint and the absence of buffs/debuffs tables in `page4-inventory.hbs`.
+  - `tests/scratch-off-item.test.mjs`: Removed negative template string assertion checking for an obsolete damage placeholder.
+  - `tests/typed-damage.test.mjs`: Removed obsolete suite testing attacks without `damageParts` (legacy pre-multi-typed single dice damage format).
+  - `tests/item-skill-modifiers.test.mjs`: Removed legacy tests verifying outdated object-formatted `skillModifiers` data structures.
+- **Verification**:
+  - All 531 remaining unit tests pass with 0 failures across 84 test suites (`node --test tests/*.test.mjs`).
+
 ## 2.0.38
 
 ### Attack & Weapon Equipment Integration: Hybrid Weapon Classification & Stowed Drawer

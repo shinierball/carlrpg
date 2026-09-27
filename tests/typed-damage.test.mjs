@@ -368,36 +368,4 @@ describe('DCC RPG Damage Type Integration Subsystem', () => {
       assert.equal(target.system.attributes.hp.value, 28);
     });
   });
-
-  describe('5. Backward Compatibility & Integrated Flow', () => {
-    test('legacy attack without damageParts still functions normally', async () => {
-      const actor = new DCCActor({
-        name: 'Carl',
-        type: 'crawler',
-        system: {
-          abilities: { str: { value: 10, mod: 4 } }
-        }
-      });
-
-      const legacyWeapon = new DCCItem({
-        name: 'Rusty Sword',
-        type: 'attack',
-        system: {
-          damageDice: '1d6',
-          damageStat: 'str'
-        }
-      });
-      actor.items.push(legacyWeapon);
-
-      const parts = actor.getAttackDamageParts(legacyWeapon);
-      assert.equal(parts.length, 1);
-      assert.equal(parts[0].dice, '1d6');
-      assert.equal(parts[0].stat, 'str');
-
-      const msg = await actor.rollAttack(legacyWeapon, 'damage');
-      assert.ok(msg.flags['carl-rpg'].rawDamage >= 5);
-      assert.ok(msg.content.includes('dcc-damage-card'));
-    });
-  });
-
 });

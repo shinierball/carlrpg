@@ -3,7 +3,7 @@ import { DCCSpellManager } from '../apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCCAchievementManagerApp } from '../apps/achievement-manager.mjs';
 import { DCC_ACHIEVEMENT_TIERS } from '../data/achievements.mjs';
-import { DCC_WEAPON_GROUP_MAP } from '../documents/actor.mjs';
+import { DCC_WEAPON_GROUP_MAP, DAMAGE_EFFECT_AI_FAVOR } from '../documents/actor.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
 
@@ -128,6 +128,21 @@ export function prepareAttackDisplay(item, actor) {
   item.displayEffects = sys.effects || sys.notes || '';
   item.isWeaponGear = isGear;
   item.isAttackEquipped = sys.equipped !== false;
+
+  if (typeof actor?.getValidDamageEffects === 'function') {
+    const validEffects = actor.getValidDamageEffects(item);
+    item.validDamageEffects = validEffects;
+    item.hasOptionalEffects = validEffects.length > 0;
+    const normName = (item.name || '').toLowerCase().trim();
+    item.favorBonus = DAMAGE_EFFECT_AI_FAVOR[normName] || 0;
+    item.selectedEffect = sys.selectedEffect || 'none';
+  } else {
+    item.validDamageEffects = [];
+    item.hasOptionalEffects = false;
+    item.selectedEffect = sys.selectedEffect || 'none';
+    item.favorBonus = 0;
+  }
+
   return item;
 }
 
@@ -1650,13 +1665,13 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.roll-attack-hit').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
-      if (item) this.actor.rollAttack(item, 'hit');
+      if (item) this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
     });
 
     html.find('.roll-attack-dmg').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId);
-      if (item) this.actor.rollAttack(item, 'damage');
+      if (item) this.actor.rollAttack(item, 'damage', { showDialog: !ev.shiftKey });
     });
 
     // Roll Skill (owned or gear-granted)
@@ -1676,7 +1691,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       );
 
       if (isAttack) {
-        this.actor.rollAttack(item, 'hit');
+        this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
       } else {
         this.actor.rollSkill(item);
       }
@@ -1686,7 +1701,19 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.roll-skill-dmg, .roll-skill-damage').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
-      if (item) this.actor.rollSkillDamage(item);
+      if (item) this.actor.rollSkillDamage(item, { showDialog: !ev.shiftKey });
+    });
+
+    // Change selected optional damage effect on sheet
+    html.find('.attack-damage-effect-select').change(async ev => {
+      ev.preventDefault();
+      const select = ev.currentTarget;
+      const itemId = $(select).data('itemId') || $(select).closest('[data-item-id]').data('itemId');
+      const val = $(select).val();
+      const item = this.actor.items.get(itemId);
+      if (item) {
+        await item.update({ 'system.selectedEffect': val });
+      }
     });
 
     // Roll / Cast Spell

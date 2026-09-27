@@ -4,6 +4,11 @@
 
 The CarlRPG system features a robust **External Buffs & Conditions** framework on Tab 1 (Core & Combat) and Tab 4 (Conditions & Effects) of character sheets, backed by the **Condition & Buff Manager** (`DCCBuffDebuffManager`). Crawlers and mobs can have up to 3 active external buffs applied at any given time, dynamically modifying core ability scores, providing temporary health, damage resistances, immunities, or combat multipliers. Character buffs on Tab 4 also feature 1-click quick-assignment buttons (`[1]`, `[2]`, `[3]`) to directly slot any owned buff into External Buff slots 1, 2, or 3.
 
+### Compendium Packaging & Auto-Population
+The canonical Buffs and Debuffs compendium (`carl-rpg.buffs`) includes **32 canonical buffs** and **30 canonical debuffs** (62 items total).
+- **Auto-Population on World Startup**: If the compendium is ever empty upon launching a world (e.g., first install or clean database), the system automatically self-heals during the `ready` hook by creating all 62 canonical documents in the pack.
+- **SSTable LevelDB Compaction**: Compendium builds (`scripts/build-packs.mjs`) execute LevelDB range compaction (`compactRange`) to guarantee that all records are written to persistent `.ldb` data tables.
+
 ---
 
 ## Active External Buff Slots (Page 1 Core)

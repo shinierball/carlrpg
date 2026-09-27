@@ -190,7 +190,9 @@
       "damageStat": "str",
       "damageType": "",
       "damageParts": [],
-      "effects": ""
+      "effects": "",
+      "optionalEffects": [],
+      "selectedEffect": ""
     },
     "spell": {
       "rank": 1,

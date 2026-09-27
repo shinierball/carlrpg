@@ -82,6 +82,7 @@ async function buildSkills() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built skills compendium at ${packDir}`);
 }
@@ -148,6 +149,7 @@ async function buildSpells() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built spells compendium at ${packDir}`);
 }
@@ -173,12 +175,15 @@ async function buildBuffs() {
       type: "buff",
       img: buff.img,
       system: {
-        buffType: buff.system.buffType || "stat",
-        stat: buff.system.stat || "",
-        value: buff.system.value ?? 0,
-        damageType: buff.system.damageType || "",
-        duration: buff.system.duration || "1 Hour",
-        description: buff.system.description || ""
+        buffType: buff.system?.buffType || "stat",
+        stat: buff.system?.stat || "",
+        value: buff.system?.value ?? 0,
+        damageMultiplier: buff.system?.damageMultiplier ?? 1,
+        damageType: buff.system?.damageType || "",
+        statModifiers: buff.system?.statModifiers || [],
+        damageModifiers: buff.system?.damageModifiers || [],
+        duration: buff.system?.duration || "1 Hour",
+        description: buff.system?.description || ""
       },
       effects: [],
       folder: null,
@@ -237,6 +242,7 @@ async function buildBuffs() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built buffs & debuffs compendium at ${packDir}`);
 }
@@ -283,6 +289,7 @@ async function buildMacros() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built macros compendium at ${packDir}`);
 }
@@ -429,6 +436,7 @@ async function buildMobs() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built mobs compendium at ${packDir}`);
 }
@@ -475,6 +483,7 @@ async function buildItems() {
   }
 
   await batch.write();
+  await db.compactRange('', '\uffff');
   await db.close();
   console.log(`Successfully built items compendium at ${packDir}`);
 }

@@ -140,6 +140,17 @@ export class MockActor {
     }
     return [];
   }
+  static async createDocuments(dataArray = [], context = {}) {
+    const ActorClass = CONFIG.Actor?.documentClass || MockActor;
+    const created = dataArray.map(d => new ActorClass(d));
+    if (context.pack && globalThis.game?.packs?.get(context.pack)) {
+      const pack = globalThis.game.packs.get(context.pack);
+      if (pack.documents) {
+        pack.documents.push(...created);
+      }
+    }
+    return created;
+  }
 }
 
 export class MockItem {
@@ -237,6 +248,18 @@ export class MockItem {
       globalThis.game.items.push(item);
     }
     return item;
+  }
+
+  static async createDocuments(dataArray = [], context = {}) {
+    const ItemClass = CONFIG.Item?.documentClass || MockItem;
+    const created = dataArray.map(d => new ItemClass(d));
+    if (context.pack && globalThis.game?.packs?.get(context.pack)) {
+      const pack = globalThis.game.packs.get(context.pack);
+      if (pack.documents) {
+        pack.documents.push(...created);
+      }
+    }
+    return created;
   }
 }
 
@@ -450,6 +473,7 @@ if (!globalThis.Dialog) {
     constructor(data, options = {}) {
       this.data = data;
       this.options = options;
+      globalThis._lastCreatedDialog = this;
     }
     render() {
       if (globalThis.ui?.windows) {
@@ -466,8 +490,43 @@ if (!globalThis.Dialog) {
     async triggerButton(buttonKey, html = null) {
       const btn = this.data?.buttons?.[buttonKey];
       if (btn && typeof btn.callback === 'function') {
-        return btn.callback(html || { find: () => ({ val: () => '', is: () => false }) });
+        if (!html) {
+          const match = this.data?.content?.match(/<input[^>]+name="damageEffect"[^>]+value="([^"]+)"[^>]+checked/i);
+          const checkedVal = match ? match[1] : 'none';
+          html = {
+            find: (sel) => ({
+              val: () => checkedVal,
+              value: checkedVal,
+              is: () => false
+            })
+          };
+        }
+        return btn.callback(html);
       }
+    }
+    static async wait(data, options = {}) {
+      return new Promise((resolve) => {
+        const buttons = {};
+        for (const [key, btn] of Object.entries(data.buttons || {})) {
+          const origCb = btn.callback;
+          buttons[key] = {
+            ...btn,
+            callback: (html) => {
+              const res = origCb ? origCb(html) : key;
+              resolve(res);
+            }
+          };
+        }
+        const dlg = new this({
+          ...data,
+          buttons,
+          close: (html) => {
+            if (data.close) data.close(html);
+            resolve(null);
+          }
+        }, options);
+        dlg.render();
+      });
     }
   };
 }

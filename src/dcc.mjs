@@ -969,16 +969,18 @@ export function onRenderChatMessage(message, html, data) {
       const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
       const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
       const itemId = btn.dataset?.itemId || btn.dataset?.skillId || $btn?.data('item-id') || $btn?.data('skill-id');
+      const damageEffect = btn.dataset?.damageEffect || $btn?.data('damage-effect') || null;
       const actor = (typeof game !== 'undefined' && game.actors?.get) ? game.actors.get(actorId) : null;
       if (!actor) return;
       const item = (typeof actor.items?.get === 'function')
         ? actor.items.get(itemId)
         : (Array.isArray(actor.items) ? actor.items.find(it => it.id === itemId) : actor.items?.find?.(it => it.id === itemId));
       if (item) {
+        const rollOpts = damageEffect ? { damageEffect } : {};
         if (typeof actor.rollSkillDamage === 'function' && item.type === 'skill') {
-          await actor.rollSkillDamage(item);
+          await actor.rollSkillDamage(item, rollOpts);
         } else if (typeof actor.rollAttack === 'function') {
-          await actor.rollAttack(item, 'damage');
+          await actor.rollAttack(item, 'damage', rollOpts);
         }
       }
     };
@@ -1549,6 +1551,84 @@ Hooks.once('ready', async function() {
         }
       } catch (err) {
         console.warn('DCC RPG | Could not inspect/populate items compendium:', err);
+      }
+    }
+
+    const buffsPack = game.packs.get('carl-rpg.buffs');
+    if (buffsPack) {
+      try {
+        const index = await buffsPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty buffs & debuffs compendium...');
+          const buffDocs = DCC_BUFFS.map(b => ({
+            _id: b._id,
+            name: b.name,
+            type: 'buff',
+            img: b.img || 'icons/svg/aura.svg',
+            system: b.system
+          }));
+          const debuffDocs = DCC_DEBUFFS.map(d => ({
+            _id: d._id,
+            name: d.name,
+            type: 'debuff',
+            img: d.img || 'icons/svg/skull.svg',
+            system: d.system
+          }));
+          const docs = [...buffDocs, ...debuffDocs];
+          const wasLocked = Boolean(buffsPack.locked);
+          if (wasLocked) {
+            if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: false });
+            else buffsPack.locked = false;
+          }
+          await Item.createDocuments(docs, { pack: buffsPack.collection || 'carl-rpg.buffs' });
+          if (wasLocked) {
+            if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: true });
+            else buffsPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} buffs & debuffs into carl-rpg.buffs.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate buffs compendium:', err);
+      }
+    }
+
+    const mobsPack = game.packs.get('carl-rpg.mobs');
+    if (mobsPack && typeof Actor !== 'undefined') {
+      try {
+        const index = await mobsPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty mobs compendium...');
+          const docs = DCC_MOBS.map(m => ({
+            _id: m._id,
+            name: m.name,
+            type: 'mob',
+            img: m.img || 'icons/svg/skull.svg',
+            system: m.system,
+            items: m.items || [],
+            prototypeToken: {
+              name: m.name,
+              actorLink: false,
+              disposition: -1,
+              displayName: 20,
+              displayBars: 40,
+              bar1: { attribute: 'attributes.hp' },
+              texture: { src: m.img || 'icons/svg/skull.svg' }
+            }
+          }));
+          const wasLocked = Boolean(mobsPack.locked);
+          if (wasLocked) {
+            if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: false });
+            else mobsPack.locked = false;
+          }
+          await Actor.createDocuments(docs, { pack: mobsPack.collection || 'carl-rpg.mobs' });
+          if (wasLocked) {
+            if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: true });
+            else mobsPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} mobs into carl-rpg.mobs.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate mobs compendium:', err);
       }
     }
 

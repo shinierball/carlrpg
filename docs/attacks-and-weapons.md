@@ -46,6 +46,32 @@ Characters can wage combat using either dedicated `attack` items or physical `ge
 
 ---
 
+## Optional Damage Effects Subsystem
+
+### 1. Interactive Choice Before Rolling
+Whenever an attack or skill supports optional damage effects, the system prompts the crawler with an interactive dialog (`promptDamageEffectDialog`) before rolling:
+- **No Damage Effect**: Standard attack without consuming an effect. Grants **+AI Favor** on a hit for canonical hand-to-hand styles.
+- **Valid Damage Effects**: Displays effect names, descriptions, and current rank badges (if owned by the crawler).
+- **Aborting**: Clicking Cancel cleanly aborts the roll without rolling dice or sending a chat message.
+
+### 2. Canonical Hand-to-Hand Skills
+- **Pugilism**: Dirty Fighting, Iron Punch, Powerful Strike (+2 AI Favor on hit if "No Damage Effect" selected).
+- **Noggin Knocker**: Skullcracker, Powerful Strike (+1 AI Favor on hit if "No Damage Effect" selected).
+- **Wrasslin**: Choke Out, Dirty Fighting, Toss (+1 AI Favor on hit if "No Damage Effect" selected).
+- **Foot Soldier**: Powerful Strike, Smush (+1 AI Favor on hit if "No Damage Effect" selected).
+
+### 3. Custom Optional Effects on Any Attack Item
+Any attack item can define comma-separated or array optional damage effects (`system.optionalEffects`).
+The attack item sheet provides 4 quick-preset buttons (`[+ Pugilism]`, `[+ Noggin Knocker]`, `[+ Wrasslin]`, `[+ Foot Soldier]`) and an input field.
+
+### 4. Page 1 Attacks Table Quick Selector
+The Effects column in the active attacks table displays a dropdown selector (`.attack-damage-effect-select`) for any attack with optional effects, allowing crawlers to pre-select their active stance directly on the character sheet.
+
+### 5. Chat Card Continuity
+When rolling to hit, the chosen effect (or No Effect bonus) is recorded on the chat card and passed into the "Roll Attack Damage" button via `data-damage-effect`. Rolling damage from the card automatically applies the chosen effect without re-prompting.
+
+---
+
 ## Token HUD & PDF Export Integration
 
 - **Crawler Left Action HUD (`DCCCrawlerActionHUD`)**:

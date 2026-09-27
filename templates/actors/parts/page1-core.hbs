@@ -500,7 +500,19 @@
               </button>
             </td>
             <td>
-              <span style="font-size: 11px;">{{#if attack.displayEffects}}{{attack.displayEffects}}{{else}}{{attack.system.effects}}{{/if}}</span>
+              {{#if attack.hasOptionalEffects}}
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <select class="attack-damage-effect-select" data-item-id="{{attack.id}}" style="font-size: 10px; height: 20px; padding: 0 4px; max-width: 140px; border: 1px solid #c0392b; border-radius: 3px; background: #fff; cursor: pointer;">
+                    <option value="none" {{#if (eq attack.selectedEffect 'none')}}selected{{/if}}>None{{#if attack.favorBonus}} (+{{attack.favorBonus}} Favor){{/if}}</option>
+                    {{#each attack.validDamageEffects as |eff|}}
+                      <option value="{{eff}}" {{#if (eq ../attack.selectedEffect eff)}}selected{{/if}}>{{eff}}</option>
+                    {{/each}}
+                  </select>
+                  {{#if attack.displayEffects}}<span style="font-size: 10px; color: #555;">{{attack.displayEffects}}</span>{{/if}}
+                </div>
+              {{else}}
+                <span style="font-size: 11px;">{{#if attack.displayEffects}}{{attack.displayEffects}}{{else}}{{attack.system.effects}}{{/if}}</span>
+              {{/if}}
             </td>
             <td>
               <a class="item-edit" data-tooltip="Edit Attack" style="margin-right: 4px;"><i class="fa-solid fa-edit"></i></a>

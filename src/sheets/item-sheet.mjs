@@ -303,6 +303,17 @@ export class DCCItemSheet extends BaseItemSheet {
     // Retrieve available compendium skills for datalist & interactive picking
     context.availableSkills = await this.getCompendiumSkills();
 
+    if (context.item.type === 'attack') {
+      const optEff = context.system.optionalEffects;
+      if (Array.isArray(optEff)) {
+        context.optionalEffectsDisplay = optEff.map(e => (typeof e === 'string' ? e : e?.name || '')).filter(Boolean).join(', ');
+      } else if (typeof optEff === 'string') {
+        context.optionalEffectsDisplay = optEff;
+      } else {
+        context.optionalEffectsDisplay = '';
+      }
+    }
+
     if (context.item.type === 'skill') {
       const base = Number(context.system.rank) || 0;
       const boons = Number(context.system.boonBonus) || 0;
@@ -570,6 +581,15 @@ export class DCCItemSheet extends BaseItemSheet {
       formData['system.outcomes'] = expanded.system.outcomes;
     }
 
+    if (this.item.type === 'attack') {
+      if (typeof formData['system.optionalEffects'] === 'string') {
+        formData['system.optionalEffects'] = formData['system.optionalEffects']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+    }
+
     const result = (typeof super._updateObject === 'function')
       ? await super._updateObject(event, formData)
       : await this.item.update(formData);
@@ -808,6 +828,32 @@ export class DCCItemSheet extends BaseItemSheet {
         current.splice(idx, 1);
         await this.item.update({ 'system.damageParts': current });
       }
+    });
+
+    // Add preset effects to attack
+    html.find('.add-preset-effects').click(async ev => {
+      ev.preventDefault();
+      const preset = $(ev.currentTarget).data('preset');
+      const presetMap = {
+        pugilism: 'Dirty Fighting, Iron Punch, Powerful Strike',
+        noggin: 'Skullcracker, Powerful Strike',
+        wrasslin: 'Choke Out, Dirty Fighting, Toss',
+        foot: 'Powerful Strike, Smush'
+      };
+      const toAdd = presetMap[preset] || '';
+      if (!toAdd) return;
+
+      const currentRaw = this.item.system?.optionalEffects || [];
+      let currentArr = [];
+      if (Array.isArray(currentRaw)) {
+        currentArr = currentRaw.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean);
+      } else if (typeof currentRaw === 'string' && currentRaw.trim()) {
+        currentArr = currentRaw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      const newItems = toAdd.split(',').map(s => s.trim()).filter(Boolean);
+      const combined = [...new Set([...currentArr, ...newItems])];
+      await this.item.update({ 'system.optionalEffects': combined });
+      this.render(false);
     });
 
     // Add Skill Damage Modifier (for skills)

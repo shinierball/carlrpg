@@ -1,3 +1,46 @@
+## 2.0.51
+
+### Optional Damage Effects Subsystem for Attacks & Hand-to-Hand Skills
+
+- **Interactive Damage Effect Selection Before Rolling**:
+  - Attack rolls (`rollAttack` to-hit and direct damage rolls) now offer the user a choice of valid damage effects before rolling whenever the attack or skill supports them.
+  - Implemented `promptDamageEffectDialog(attackItem, options)` displaying an interactive dialog with radio choices, descriptions, rank badges (if owned), and AI Favor notes.
+  - Users can select **"No Damage Effect"** or any valid damage effect, or click Cancel to abort the roll.
+- **Canonical Hand-to-Hand Skills Support**:
+  - **Pugilism**: Choose from *Dirty Fighting*, *Iron Punch*, or *Powerful Strike*. Choosing "No Damage Effect" grants **+2 AI Favor** on hit.
+  - **Noggin Knocker**: Choose from *Skullcracker* or *Powerful Strike*. Choosing "No Damage Effect" grants **+1 AI Favor** on hit.
+  - **Wrasslin**: Choose from *Choke Out*, *Dirty Fighting*, or *Toss*. Choosing "No Damage Effect" grants **+1 AI Favor** on hit.
+  - **Foot Soldier**: Choose from *Powerful Strike* or *Smush*. Choosing "No Damage Effect" grants **+1 AI Favor** on hit.
+- **Custom User-Defined Optional Damage Effects on Any Attack**:
+  - Added `system.optionalEffects` and `system.selectedEffect` to the `attack` item schema in `template.json`.
+  - Attack item sheet (`attack.hbs` and `item-sheet.mjs`) provides an input field for optional damage effects and 4 quick preset buttons: `[+ Pugilism]`, `[+ Noggin Knocker]`, `[+ Wrasslin]`, `[+ Foot Soldier]`.
+  - Discovers custom effects defined on attack items or linked skills, allowing any weapon or attack to have optional damage effects.
+- **Character Sheet Quick-Select Dropdown**:
+  - The attacks table on Page 1 now includes a dropdown selector (`.attack-damage-effect-select`) in the Effects column for any attack with optional effects, allowing crawlers to view and pre-select their active effect directly on the character sheet.
+- **Chat Card Continuity & Damage Calculation**:
+  - Hit roll chat cards embed `data-damage-effect="${chosenEffect}"` into the "Roll Attack Damage" button so clicking it carries the chosen effect into the damage roll without re-prompting.
+  - Chat card banners, flavor text, and flags record the active `damageEffect` and `aiFavorBonus`.
+  - Accurately computes effect formulas: Iron Punch (+1d2 base damage and Rank die at R5+), Powerful Strike (multiplies base dice by rank), Skullcracker (+1d4 base damage, rank die at R10+), Toss (+1d8 Bludgeoning + Str mod), Smush/Choke Out (2x multiplier).
+- **Verification**:
+  - Created automated test suite in `tests/attack-damage-effects.test.mjs` validating canonical effect discovery, custom effects, dialog prompting, cancellation, damage calculation, chat button continuity, and sheet display.
+  - 100% test suite passing with 0 failures across 92 suites (588 tests passed).
+
+## 2.0.50
+
+### Buffs & Debuffs Compendium Population & Build Fix
+
+- **Compendium Auto-Population & Self-Healing**:
+  - Resolved an issue where the `carl-rpg.buffs` compendium displayed as empty in Foundry VTT.
+  - Added self-healing auto-population for `carl-rpg.buffs` (and `carl-rpg.mobs`) in the `ready` hook in `src/dcc.mjs`. If the compendium is empty on world start, the system automatically unlocks, imports all 32 canonical buffs and 30 canonical debuffs (`DCC_BUFFS` and `DCC_DEBUFFS`), and restores pack lock status.
+- **LevelDB Compaction & Schema Completeness**:
+  - Enhanced `scripts/build-packs.mjs` to call `await db.compactRange('', '\uffff');` prior to closing LevelDB instances, ensuring small packs (like buffs and debuffs) flush the write-ahead log directly into SSTable `.ldb` data tables without relying on lazy compaction.
+  - Enriched `buildBuffs()` in `scripts/build-packs.mjs` with full schema mappings (`damageMultiplier`, `statModifiers`, `damageModifiers`, `system` defaults).
+  - Rebuilt all system compendium packs (`packs/buffs`, `packs/mobs`, `packs/skills`, `packs/spells`, `packs/macros`, `packs/items`).
+- **Verification**:
+  - Added compendium population and disk structure verification tests in `tests/buffs.test.mjs`.
+  - Added `MockActor.createDocuments` and `MockItem.createDocuments` to `tests/setup.mjs`.
+  - 100% test suite passing with 0 failures across 91 suites (581 passed).
+
 ## 2.0.49
 
 ### Attacks Section Scroll Navigation on Stowed Attacks Toggle

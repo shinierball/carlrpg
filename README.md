@@ -107,7 +107,16 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
     - **Ranks 10–13**: +1d10.
     - **Ranks 14–15+**: +1d12.
   - Automatically factors into Spell Attack Damage, Weapon Attack Damage, and Attack Skill Damage formulas alongside governing ability modifiers and rank upgrades.
-  - **Hand-to-Hand Damage Effects & Combinations**: Unarmed Combat ($1d4 + \text{Str}$) cannot combine with Hand-to-Hand damage effects, whereas Pugilism ($1d2 + \text{Str}$, DEX to hit) combines with Iron Punch (adding $+1d2$ base damage, scaling to $+2d2$ at R5, $+3d2$ at R10, $+4d2$ at R15, and adding a secondary Iron Punch rank damage die at Rank 5+ for $4d2 + 2d4 + \text{Str}$).
+  - **Optional Damage Effects & Hand-to-Hand Skill Combinations**:
+    - **Interactive Pre-Roll Effect Selection**: When attacking with any attack or skill that defines or links to optional effects, an interactive dialog automatically prompts the user before rolling to select **"No Damage Effect"** or any valid damage effect. The dialog displays current rank badges, effect descriptions, and AI Favor notes.
+    - **Pugilism**: Choose from *Dirty Fighting* (applies Woozy), *Iron Punch* (adds $+1d2$ base damage, milestone dice, and secondary rank die at R5+), or *Powerful Strike* (multiplies base dice by rank). Selecting "No Damage Effect" grants **+2 AI Favor** on hit.
+    - **Noggin Knocker**: Choose from *Skullcracker* (+1d4 base damage, rank die at R10+) or *Powerful Strike*. Selecting "No Damage Effect" grants **+1 AI Favor** on hit.
+    - **Wrasslin**: Choose from *Choke Out* (2x damage at <=10% HP), *Dirty Fighting*, or *Toss* (+1d8 Bludgeoning + Str mod). Selecting "No Damage Effect" grants **+1 AI Favor** on hit.
+    - **Foot Soldier**: Choose from *Powerful Strike* or *Smush* (2x damage at <=20% HP). Selecting "No Damage Effect" grants **+1 AI Favor** on hit.
+    - **Custom Optional Effects on Any Attack**: Configure custom comma-separated effects (`system.optionalEffects`) on any attack item with quick-preset buttons (`[+ Pugilism]`, `[+ Noggin Knocker]`, `[+ Wrasslin]`, `[+ Foot Soldier]`).
+    - **Character Sheet Quick Select**: An active effect dropdown (`.attack-damage-effect-select`) in the attacks table allows crawlers to view or change active effects directly on Page 1.
+    - **Roll Card Continuity**: The hit roll card carries the selected effect forward onto the "Roll Attack Damage" button, automatically applying the effect in the damage roll without duplicate prompts.
+    - **Unarmed Combat Restriction**: Unarmed Combat ($1d4 + \text{Str}$) cannot combine with Hand-to-Hand damage effects.
   - **Fire Fingers Rank 15 Passive**: Automatically adds $+1d12\text{ Fire}$ damage to Pugilism, Unarmed Combat, and Slice Attack.
   - **Attack Skill Rolling & Interactive Damage Execution**:
     - Clicking the roll icon on Page 3 (Skills) for any attack skill rolls **To Hit vs Target Evade** identically to attacks in the hotlist and attacks section. Non-combat utility skills roll standard skill checks.

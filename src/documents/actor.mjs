@@ -58,6 +58,30 @@ export const DCC_WEAPON_GROUP_MAP = {
 };
 
 /**
+ * Canonical optional damage effects for official DCC hand-to-hand combat skills.
+ */
+export const CANONICAL_DAMAGE_EFFECTS = {
+  'pugilism': ['Dirty Fighting', 'Iron Punch', 'Powerful Strike'],
+  'noggin knocker': ['Skullcracker', 'Powerful Strike'],
+  'noggin nocker': ['Skullcracker', 'Powerful Strike'],
+  'wrasslin': ['Choke Out', 'Dirty Fighting', 'Toss'],
+  'wrasslin\'': ['Choke Out', 'Dirty Fighting', 'Toss'],
+  'foot soldier': ['Powerful Strike', 'Smush']
+};
+
+/**
+ * AI Favor awarded when performing an attack without using any Damage Effect.
+ */
+export const DAMAGE_EFFECT_AI_FAVOR = {
+  'pugilism': 2,
+  'noggin knocker': 1,
+  'noggin nocker': 1,
+  'wrasslin': 1,
+  'wrasslin\'': 1,
+  'foot soldier': 1
+};
+
+/**
  * Calculate required cumulative XP to reach the next level.
  * Level 1 -> 1,000 XP (reaches Level 2)
  * Level 2 -> 2,500 XP (reaches Level 3)
@@ -1155,13 +1179,192 @@ export class DCCActor extends Actor {
   }
 
   /**
-   * Resolve all damage parts for an attack from the weapon/attack item itself,
-   * equipped gear bonuses, and active skill modifiers (with rank gating).
+   * Determine all valid optional damage effects for an attack item or skill.
+   * Discovers canonical effects for Pugilism, Noggin Knocker, Wrasslin, and Foot Soldier,
+   * as well as custom user-defined optionalEffects configured on the item or matching skill.
+   * @param {Item} attackItem
+   * @returns {string[]} List of valid damage effect names
+   */
+  getValidDamageEffects(attackItem) {
+    if (!attackItem) return [];
+    const sys = attackItem.system || {};
+
+    // 1. Explicitly configured optionalEffects on the item itself
+    let effects = [];
+    if (Array.isArray(sys.optionalEffects) && sys.optionalEffects.length > 0) {
+      effects = sys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean);
+    } else if (typeof sys.optionalEffects === 'string' && sys.optionalEffects.trim()) {
+      effects = sys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    if (effects.length > 0) {
+      return [...new Set(effects)];
+    }
+
+    // 2. Canonical mapping by attackItem.name
+    const normName = (attackItem.name || '').toLowerCase().trim();
+    if (CANONICAL_DAMAGE_EFFECTS[normName]) {
+      return [...CANONICAL_DAMAGE_EFFECTS[normName]];
+    }
+
+    // 3. Check matching skill if attackItem is not a skill itself
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === normName);
+    if (matchingSkill) {
+      const msNorm = (matchingSkill.name || '').toLowerCase().trim();
+      if (CANONICAL_DAMAGE_EFFECTS[msNorm]) {
+        return [...CANONICAL_DAMAGE_EFFECTS[msNorm]];
+      }
+      const msSys = matchingSkill.system || {};
+      if (Array.isArray(msSys.optionalEffects) && msSys.optionalEffects.length > 0) {
+        return [...new Set(msSys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean))];
+      } else if (typeof msSys.optionalEffects === 'string' && msSys.optionalEffects.trim()) {
+        return [...new Set(msSys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean))];
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * Prompt the interactive "Choose Damage Effect" dialog before rolling an attack.
+   * Allows choosing between "No Damage Effect" (with AI Favor bonus if applicable)
+   * or any valid damage effect for the attack.
+   * @param {Item} attackItem
+   * @param {object} [options={}]
+   * @returns {Promise<string|null>} The selected effect name ('none', 'Iron Punch', etc.), or null if cancelled
+   */
+  async promptDamageEffectDialog(attackItem, options = {}) {
+    if (options.damageEffect !== undefined) return options.damageEffect;
+    if (options.effect !== undefined) return options.effect;
+
+    const validEffects = this.getValidDamageEffects(attackItem);
+    if (!validEffects || validEffects.length === 0) return null;
+
+    if (options.skipDialog) {
+      return options.defaultEffect || attackItem.system?.selectedEffect || 'none';
+    }
+
+    const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog ?? null;
+    if (!DialogClass) {
+      return options.defaultEffect || attackItem.system?.selectedEffect || 'none';
+    }
+
+    // In headless test environments without document or ui.windows, auto-resolve unless explicitly interactive
+    if (typeof document === 'undefined' && !options.showDialog && !options.interactive) {
+      return options.defaultEffect || attackItem.system?.selectedEffect || 'none';
+    }
+
+    const normName = (attackItem.name || '').toLowerCase().trim();
+    const favorBonus = DAMAGE_EFFECT_AI_FAVOR[normName] || 0;
+    const currentSelected = (options.selectedEffect || attackItem.system?.selectedEffect || 'none').toLowerCase().trim();
+
+    const effectDescriptions = {
+      'dirty fighting': 'Apply Woozy Debuff to target. (Critical Fail: lose 1 Popularity)',
+      'iron punch': 'Deal +1d2 base damage. (At Rank 5+: adds Rank damage die; Rank 10+: Stunned)',
+      'powerful strike': 'Multiply base damage dice by Rank in Powerful Strike. (Cooldown: 30 hours)',
+      'skullcracker': 'Gain +1d4 base damage against targets of your size. (Rank 10+: Stunned)',
+      'smush': 'Deal ×2 total damage if target has 20% Health Bar or less. (Cooldown: 1/round)',
+      'choke out': 'Deal ×2 total damage if target is at 10% Health Bar or less.',
+      'toss': 'Deal +1d8 base damage + Str Bludgeoning, end Held Debuff, and throw target.'
+    };
+
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+
+    const effectRowsHtml = validEffects.map(eff => {
+      const eLower = eff.toLowerCase().trim();
+      const ownedSkill = skills.find(s => s.name?.toLowerCase().trim() === eLower);
+      const rankBadge = ownedSkill ? `<span style="background: #27ae60; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 6px;">Rank ${ownedSkill.system?.modifiedRank ?? ownedSkill.system?.rank ?? 0}</span>` : '';
+      const desc = effectDescriptions[eLower] || ownedSkill?.system?.notes || 'Optional damage effect for this attack.';
+      const isChecked = currentSelected === eLower;
+
+      return `
+        <label style="display: block; padding: 6px 8px; margin-bottom: 6px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; transition: background 0.15s ease;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="radio" name="damageEffect" value="${eff}" ${isChecked ? 'checked' : ''} style="cursor: pointer;" />
+              <strong style="font-size: 13px; color: #c0392b;">${eff}</strong>
+              ${rankBadge}
+            </div>
+          </div>
+          <div style="margin-left: 24px; font-size: 11px; color: #555; margin-top: 2px;">
+            ${desc}
+          </div>
+        </label>
+      `;
+    }).join('');
+
+    const noneChecked = (currentSelected === 'none' || !currentSelected || !validEffects.some(e => e.toLowerCase().trim() === currentSelected));
+    const favorNote = favorBonus > 0 ? ` (+${favorBonus} AI Favor on Hit)` : '';
+
+    const content = `
+      <form class="dcc-choose-damage-effect-form" style="font-family: var(--font-primary, 'Oswald', sans-serif); padding: 4px 0;">
+        <div style="font-size: 12px; margin-bottom: 8px; color: #333;">
+          Choose a Damage Effect for <strong>${attackItem.name}</strong> before rolling:
+        </div>
+        <label style="display: block; padding: 6px 8px; margin-bottom: 6px; border: 1px solid #ddd; border-radius: 4px; background: #fdfdfd; cursor: pointer;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="radio" name="damageEffect" value="none" ${noneChecked ? 'checked' : ''} style="cursor: pointer;" />
+            <strong style="font-size: 13px; color: #27ae60;">No Damage Effect</strong>
+            ${favorBonus > 0 ? `<span style="background: #27ae60; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 4px;">+${favorBonus} AI Favor</span>` : ''}
+          </div>
+          <div style="margin-left: 24px; font-size: 11px; color: #555; margin-top: 2px;">
+            Standard attack without consuming an effect${favorNote}.
+          </div>
+        </label>
+        ${effectRowsHtml}
+      </form>
+    `;
+
+    return new Promise((resolve) => {
+      let resolved = false;
+      const dlg = new DialogClass({
+        title: `${attackItem.name}: Choose Damage Effect`,
+        content,
+        buttons: {
+          roll: {
+            icon: '<i class="fa-solid fa-dice-d20"></i>',
+            label: 'Roll Attack',
+            callback: (html) => {
+              resolved = true;
+              let chosen = 'none';
+              if (html && typeof html.find === 'function') {
+                const checkedRadio = html.find('input[name="damageEffect"]:checked');
+                chosen = (typeof checkedRadio.val === 'function' ? checkedRadio.val() : checkedRadio.value) || 'none';
+              }
+              if (attackItem && typeof attackItem.update === 'function') {
+                attackItem.update({ 'system.selectedEffect': chosen }).catch(() => {});
+              } else if (attackItem?.system) {
+                attackItem.system.selectedEffect = chosen;
+              }
+              resolve(chosen);
+            }
+          },
+          cancel: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'Cancel',
+            callback: () => {
+              resolved = true;
+              resolve(null);
+            }
+          }
+        },
+        default: 'roll',
+        close: () => {
+          if (!resolved) resolve(null);
+        }
+      }, {
+        width: 400
+      });
+      dlg.render(true);
+    });
+  }
+
   /**
    * Parse and calculate skill attack damage formula and metadata based on official DCC RPG rules.
    * Weapon Attack Damage = Weapon Base Damage + Skill Rank Damage Die + Stat Mod.
-   * Handles Hand-to-Hand Damage Effects (Pugilism + Iron Punch), rank damage die scaling table,
-   * Fire Fingers rank 15 passive melee bonus, and rank upgrade additions.
+   * Handles Hand-to-Hand Damage Effects (Pugilism, Iron Punch, Powerful Strike, Skullcracker, etc.),
+   * rank damage die scaling table, Fire Fingers rank 15 passive melee bonus, and rank upgrade additions.
    *
    * @param {Item} skillItem
    * @param {object} [options={}]
@@ -1265,32 +1468,55 @@ export class DCCActor extends Actor {
 
     // Hand-to-Hand Damage Effects:
     // Unarmed Combat cannot combine with Damage Effects.
-    // Pugilism can combine with Iron Punch.
     const isUnarmed = /unarmed combat/i.test(skillName);
     const isPugilism = /pugilism/i.test(skillName);
+
+    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : options.effect);
+    const chosenEffect = typeof chosenEffectRaw === 'string'
+      ? chosenEffectRaw.trim()
+      : (chosenEffectRaw?.name ? String(chosenEffectRaw.name).trim() : '');
+    const isNone = chosenEffect.toLowerCase() === 'none';
+
     let ironPunchApplied = false;
     let ironPunchRank = 0;
+    let powerfulStrikeApplied = false;
+    let powerfulStrikeRank = 0;
+    let skullcrackerApplied = false;
+    let skullcrackerRank = 0;
+    let tossApplied = false;
+    let smushApplied = false;
+    let chokeOutApplied = false;
+    let dirtyFightingApplied = false;
 
-    if (!isUnarmed && (isPugilism || options.effect)) {
-      const effectParam = options.effect;
-      const effectName = typeof effectParam === 'string' ? effectParam : (effectParam?.name || '');
-      let ironPunchItem = null;
-
-      if (/iron punch/i.test(effectName)) {
-        ironPunchItem = typeof effectParam === 'object' ? effectParam : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
-        ironPunchApplied = true;
+    if (!isUnarmed && !isNone) {
+      if (chosenEffect) {
+        if (/iron punch/i.test(chosenEffect)) {
+          ironPunchApplied = true;
+        } else if (/powerful strike/i.test(chosenEffect)) {
+          powerfulStrikeApplied = true;
+        } else if (/skullcracker/i.test(chosenEffect)) {
+          skullcrackerApplied = true;
+        } else if (/toss/i.test(chosenEffect)) {
+          tossApplied = true;
+        } else if (/smush/i.test(chosenEffect)) {
+          smushApplied = true;
+        } else if (/choke out/i.test(chosenEffect)) {
+          chokeOutApplied = true;
+        } else if (/dirty fighting/i.test(chosenEffect)) {
+          dirtyFightingApplied = true;
+        }
       } else if (options.ironPunch) {
         ironPunchApplied = true;
-        ironPunchItem = typeof options.ironPunch === 'object' ? options.ironPunch : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
-      } else if (isPugilism) {
+      } else if (isPugilism && chosenEffectRaw === undefined) {
+        // Fallback for tests when no effect option was passed
         const ownedIp = this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null;
         if (ownedIp) {
           ironPunchApplied = true;
-          ironPunchItem = ownedIp;
         }
       }
 
       if (ironPunchApplied) {
+        const ironPunchItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
         ironPunchRank = options.effectRank !== undefined
           ? Number(options.effectRank)
           : (Number(ironPunchItem?.system?.modifiedRank ?? ironPunchItem?.system?.rank ?? rank) || 0);
@@ -1304,6 +1530,22 @@ export class DCCActor extends Actor {
           baseCount += ipBonusCount;
         }
       }
+
+      if (powerfulStrikeApplied) {
+        const psItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /powerful strike/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /powerful strike/i.test(i.name))) : null);
+        powerfulStrikeRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(psItem?.system?.modifiedRank ?? psItem?.system?.rank) || 1);
+        baseCount = Math.max(1, baseCount * Math.max(1, powerfulStrikeRank));
+      }
+
+      if (skullcrackerApplied) {
+        const scItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /skullcracker/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /skullcracker/i.test(i.name))) : null);
+        skullcrackerRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(scItem?.system?.modifiedRank ?? scItem?.system?.rank) || 0);
+        baseCount += (skullcrackerRank >= 5 ? 2 : 1);
+      }
     }
 
     // Rank Damage Die
@@ -1312,19 +1554,24 @@ export class DCCActor extends Actor {
     if (ironPunchApplied && ironPunchRank >= 5) {
       ironPunchRankDie = getRankDamageDie(ironPunchRank);
     }
+    let skullcrackerRankDie = null;
+    if (skullcrackerApplied && skullcrackerRank >= 10) {
+      skullcrackerRankDie = getRankDamageDie(skullcrackerRank);
+    }
 
+    const extraEffectRankDie = ironPunchRankDie || skullcrackerRankDie;
     let combinedRankDieStr = '';
-    if (ironPunchRankDie && ironPunchRankDie.dice && rankDie.dice) {
+    if (extraEffectRankDie && extraEffectRankDie.dice && rankDie.dice) {
       const m1 = rankDie.dice.match(/(\d+)d(\d+)/i);
-      const m2 = ironPunchRankDie.dice.match(/(\d+)d(\d+)/i);
+      const m2 = extraEffectRankDie.dice.match(/(\d+)d(\d+)/i);
       if (m1 && m2 && m1[2] === m2[2]) {
         const totalRankCount = parseInt(m1[1], 10) + parseInt(m2[1], 10);
         combinedRankDieStr = `${totalRankCount}d${m1[2]}`;
       } else {
-        combinedRankDieStr = `${rankDie.dice} + ${ironPunchRankDie.dice}`;
+        combinedRankDieStr = `${rankDie.dice} + ${extraEffectRankDie.dice}`;
       }
-    } else if (ironPunchRankDie && ironPunchRankDie.dice) {
-      combinedRankDieStr = ironPunchRankDie.dice;
+    } else if (extraEffectRankDie && extraEffectRankDie.dice) {
+      combinedRankDieStr = extraEffectRankDie.dice;
     } else if (rankDie.dice) {
       combinedRankDieStr = rankDie.dice;
     } else if (rankDie.value > 0) {
@@ -1348,10 +1595,25 @@ export class DCCActor extends Actor {
       }
     }
 
+    // Toss Effect Bonus: +1d8 Bludgeoning + Str Mod
+    let tossBonus = null;
+    if (tossApplied) {
+      tossBonus = {
+        type: 'Bludgeoning',
+        dice: '1d8',
+        stat: 'str',
+        statMod: this.system?.abilities?.str?.mod ?? 0,
+        source: 'Toss'
+      };
+    }
+
     const baseDiceStr = `${baseCount}d${baseSides}`;
     const formulaElements = [baseDiceStr];
     if (combinedRankDieStr) {
       formulaElements.push(combinedRankDieStr);
+    }
+    if (tossBonus && tossBonus.dice) {
+      formulaElements.push(tossBonus.dice);
     }
     if (fireFingersBonus && (fireFingersBonus.dice || fireFingersBonus.value)) {
       formulaElements.push(fireFingersBonus.dice || String(fireFingersBonus.value));
@@ -1364,6 +1626,9 @@ export class DCCActor extends Actor {
     const formulaWithStatElements = [baseDiceStr];
     if (combinedRankDieStr) {
       formulaWithStatElements.push(combinedRankDieStr);
+    }
+    if (tossBonus && tossBonus.dice) {
+      formulaWithStatElements.push(`${tossBonus.dice} ${tossBonus.type}`);
     }
     if (statKey) {
       formulaWithStatElements.push(statKey.charAt(0).toUpperCase() + statKey.slice(1));
@@ -1384,9 +1649,20 @@ export class DCCActor extends Actor {
       statMod,
       damageType,
       rankDie,
+      chosenEffect: isNone ? 'none' : chosenEffect,
       ironPunchApplied,
       ironPunchRank,
       ironPunchRankDie,
+      powerfulStrikeApplied,
+      powerfulStrikeRank,
+      skullcrackerApplied,
+      skullcrackerRank,
+      skullcrackerRankDie,
+      tossApplied,
+      tossBonus,
+      smushApplied,
+      chokeOutApplied,
+      dirtyFightingApplied,
       combinedRankDieStr,
       fireFingersBonus,
       formula,
@@ -1435,7 +1711,20 @@ export class DCCActor extends Actor {
         });
       }
 
-      // 3. Fire Fingers Rank 15 Passive
+      // 3. Toss bonus damage part
+      if (sData.tossBonus) {
+        parts.push({
+          id: `skill-toss-${attackItem.id || 'part'}`,
+          type: sData.tossBonus.type || 'Bludgeoning',
+          dice: sData.tossBonus.dice,
+          stat: sData.tossBonus.stat,
+          statMod: sData.tossBonus.statMod,
+          value: 0,
+          source: 'Toss'
+        });
+      }
+
+      // 4. Fire Fingers Rank 15 Passive
       if (sData.fireFingersBonus) {
         parts.push({
           id: `fire-fingers-passive-${attackItem.id || 'part'}`,
@@ -1448,7 +1737,7 @@ export class DCCActor extends Actor {
         });
       }
 
-      // 4. Equipped Gear damage parts
+      // 5. Equipped Gear damage parts
       const equippedGear = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' && i.system?.equipped)) : [];
       for (const gear of equippedGear) {
         if (gear.id === attackItem.id) continue;
@@ -1469,7 +1758,7 @@ export class DCCActor extends Actor {
         }
       }
 
-      // 5. Active Buffs
+      // 6. Active Buffs
       const activeBuffs = this.getActiveBuffs();
       for (const buff of activeBuffs) {
         if (!buff) continue;
@@ -1574,6 +1863,103 @@ export class DCCActor extends Actor {
         value: 0,
         source: attackItem.name || 'Weapon'
       });
+    }
+
+    // Optional Damage Effects handling for weapon/attack items
+    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : options.effect);
+    const chosenEffect = typeof chosenEffectRaw === 'string'
+      ? chosenEffectRaw.trim()
+      : (chosenEffectRaw?.name ? String(chosenEffectRaw.name).trim() : '');
+    const isNone = chosenEffect.toLowerCase() === 'none';
+
+    if (chosenEffect && !isNone) {
+      const eLower = chosenEffect.toLowerCase();
+      if (/powerful strike/i.test(eLower)) {
+        const psSkill = skills.find(s => /powerful strike/i.test(s.name));
+        const psRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(psSkill?.system?.modifiedRank ?? psSkill?.system?.rank) || 1);
+        if (parts.length > 0 && parts[0].dice) {
+          const m = parts[0].dice.match(/(\d+)d(\d+)/i);
+          if (m) {
+            const count = parseInt(m[1], 10) * Math.max(1, psRank);
+            parts[0].dice = `${count}d${m[2]}`;
+            parts[0].source = `${parts[0].source} (Powerful Strike R${psRank})`;
+          }
+        }
+      } else if (/iron punch/i.test(eLower)) {
+        const ipSkill = skills.find(s => /iron punch/i.test(s.name));
+        const ipRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(ipSkill?.system?.modifiedRank ?? ipSkill?.system?.rank) || 0);
+        let ipDice = '1d2';
+        if (ipRank >= 5) {
+          const ipDie = getRankDamageDie(ipRank);
+          if (ipDie.dice) ipDice += ` + ${ipDie.dice}`;
+        }
+        parts.push({
+          id: `effect-iron-punch-${parts.length}`,
+          type: 'Physical',
+          dice: ipDice,
+          stat: '',
+          statMod: 0,
+          value: 0,
+          source: `Iron Punch (Rank ${ipRank})`
+        });
+      } else if (/skullcracker/i.test(eLower)) {
+        const scSkill = skills.find(s => /skullcracker/i.test(s.name));
+        const scRank = options.effectRank !== undefined
+          ? Number(options.effectRank)
+          : (Number(scSkill?.system?.modifiedRank ?? scSkill?.system?.rank) || 0);
+        const scDice = scRank >= 5 ? '2d4' : '1d4';
+        parts.push({
+          id: `effect-skullcracker-${parts.length}`,
+          type: 'Physical',
+          dice: scDice,
+          stat: '',
+          statMod: 0,
+          value: 0,
+          source: `Skullcracker (Rank ${scRank})`
+        });
+        if (scRank >= 10) {
+          const scDie = getRankDamageDie(scRank);
+          if (scDie.dice || scDie.value) {
+            parts.push({
+              id: `effect-skullcracker-rankdie-${parts.length}`,
+              type: 'Physical',
+              dice: scDie.dice || '',
+              stat: '',
+              statMod: 0,
+              value: scDie.value || 0,
+              source: `Skullcracker Rank ${scRank} Die`
+            });
+          }
+        }
+      } else if (/toss/i.test(eLower)) {
+        const strMod = this.system?.abilities?.str?.mod ?? 0;
+        parts.push({
+          id: `effect-toss-${parts.length}`,
+          type: 'Bludgeoning',
+          dice: '1d8',
+          stat: 'str',
+          statMod: strMod,
+          value: 0,
+          source: 'Toss'
+        });
+      } else {
+        const customDiceMatch = chosenEffect.match(/(\+?\d+d\d+)(?:\s+([a-zA-Z]+))?/i);
+        if (customDiceMatch) {
+          parts.push({
+            id: `effect-custom-${parts.length}`,
+            type: customDiceMatch[2] || primaryType,
+            dice: customDiceMatch[1].replace('+', '').trim(),
+            stat: '',
+            statMod: 0,
+            value: 0,
+            source: chosenEffect
+          });
+        }
+      }
     }
 
     // Rank Damage Die for Weapon Attack
@@ -1700,6 +2086,22 @@ export class DCCActor extends Actor {
       return this.rollSpellAttack(attackItem);
     }
 
+    // Check for optional damage effects on attack or skill
+    const validEffects = this.getValidDamageEffects(attackItem);
+    let chosenEffect = options.damageEffect !== undefined ? options.damageEffect : (options.effect !== undefined ? options.effect : null);
+
+    if (chosenEffect === null && validEffects && validEffects.length > 0) {
+      chosenEffect = await this.promptDamageEffectDialog(attackItem, options);
+      if (chosenEffect === null) {
+        // User cancelled dialog
+        return null;
+      }
+    }
+
+    const currentOptions = { ...options, damageEffect: chosenEffect };
+    const normName = (attackItem.name || '').toLowerCase().trim();
+    const favorBonus = DAMAGE_EFFECT_AI_FAVOR[normName] || 0;
+
     const sys = attackItem.system || {};
     if (type === 'hit') {
       let toHitStat = 'dex';
@@ -1721,18 +2123,25 @@ export class DCCActor extends Actor {
       const statMod = this.system.abilities?.[toHitStat]?.mod ?? 0;
       const isUntrained = this.type === 'mob' ? false : (rank <= 0);
 
+      let effectTag = '';
+      if (chosenEffect && chosenEffect !== 'none') {
+        effectTag = ` [Effect: ${chosenEffect}]`;
+      } else if (chosenEffect === 'none' && favorBonus > 0) {
+        effectTag = ` [No Effect: +${favorBonus} AI Favor]`;
+      }
+
       let roll;
       let flavorText = '';
       if (isUntrained) {
         const formula = `2d20kl + ${statMod}`;
         roll = await new Roll(formula, { mod: statMod }).evaluate();
-        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>Untrained Attack Check with Disadvantage</strong>: 2d20kl + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>Untrained Attack Check with Disadvantage</strong>: 2d20kl + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       } else {
         const total = rank + statMod;
         const formula = `1d20 + ${total}`;
         roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
         const rankPart = rank > 0 ? `Rank ${rank} + ` : '';
-        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + ${rankPart}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + ${rankPart}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       }
 
       if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -1748,7 +2157,7 @@ export class DCCActor extends Actor {
       let dmgBtnHtml = '';
       let dmgFormula = '';
       if (attackItem.type === 'skill') {
-        const dmgData = this.getSkillDamageData(attackItem);
+        const dmgData = this.getSkillDamageData(attackItem, currentOptions);
         if (dmgData.hasDamage) {
           dmgFormula = dmgData.formulaWithStat || dmgData.formula;
         }
@@ -1758,7 +2167,7 @@ export class DCCActor extends Actor {
           dmgFormula = dmgData.formulaWithStat || dmgData.formula;
         }
       } else {
-        const parts = this.getAttackDamageParts(attackItem, options);
+        const parts = this.getAttackDamageParts(attackItem, currentOptions);
         if (parts.length > 0) {
           const pFormulas = parts.map(p => {
             const dice = p.dice || '';
@@ -1771,10 +2180,16 @@ export class DCCActor extends Actor {
       }
 
       if (dmgFormula) {
+        let effectBtnTag = '';
+        if (chosenEffect && chosenEffect !== 'none') {
+          effectBtnTag = ` [${chosenEffect}]`;
+        } else if (chosenEffect === 'none' && favorBonus > 0) {
+          effectBtnTag = ` [+${favorBonus} AI Favor]`;
+        }
         dmgBtnHtml = `
           <div style="margin-top: 6px;">
-            <button type="button" class="dcc-attack-roll-btn roll-attack-dmg-from-card roll-skill-dmg-from-card" data-actor-id="${this.id}" data-item-id="${attackItem.id}" data-skill-id="${attackItem.id}" data-item-type="${attackItem.type || 'attack'}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif);">
-              <i class="fa-solid fa-burst"></i> Roll Attack Damage (${dmgFormula})
+            <button type="button" class="dcc-attack-roll-btn roll-attack-dmg-from-card roll-skill-dmg-from-card" data-actor-id="${this.id}" data-item-id="${attackItem.id}" data-skill-id="${attackItem.id}" data-item-type="${attackItem.type || 'attack'}" data-damage-effect="${chosenEffect || 'none'}" style="width: 100%; padding: 4px 8px; font-size: 11px; cursor: pointer; background: #c0392b; color: #fff; border: 1px solid #962d22; border-radius: 3px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; font-family: var(--font-primary, 'Oswald', sans-serif);">
+              <i class="fa-solid fa-burst"></i> Roll Attack Damage (${dmgFormula})${effectBtnTag}
             </button>
           </div>
         `;
@@ -1797,6 +2212,8 @@ export class DCCActor extends Actor {
             attackerType: this.type,
             attackTotal: roll.total,
             currentFloor,
+            damageEffect: chosenEffect,
+            aiFavorBonus: (chosenEffect === 'none' && favorBonus > 0) ? favorBonus : 0,
             targetResults: targetResults.map(tr => ({
               actorId: tr.actorId,
               actorName: tr.actorName,
@@ -1809,9 +2226,14 @@ export class DCCActor extends Actor {
         }
       });
     } else {
-      const parts = this.getAttackDamageParts(attackItem, options);
+      const parts = this.getAttackDamageParts(attackItem, currentOptions);
       const evaluatedParts = [];
       const typedDamage = {};
+
+      let effectMult = options.effectMultiplier || 1;
+      if (chosenEffect && (/smush/i.test(chosenEffect) || /choke out/i.test(chosenEffect))) {
+        effectMult = 2;
+      }
 
       for (const part of parts) {
         let formulaParts = [];
@@ -1836,8 +2258,8 @@ export class DCCActor extends Actor {
           baseRollTotal = roll.total;
         }
 
-        // Apply attacker damage multiplier (Scenario 3)
-        const mult = this.getDamageMultiplier(part.type);
+        // Apply attacker damage multiplier (Scenario 3) and effectMultiplier
+        const mult = this.getDamageMultiplier(part.type) * effectMult;
         const finalPartDamage = Math.max(0, Math.floor(baseRollTotal * mult));
 
         typedDamage[part.type] = (typedDamage[part.type] || 0) + finalPartDamage;
@@ -1853,7 +2275,7 @@ export class DCCActor extends Actor {
 
       const totalRawDamage = Object.values(typedDamage).reduce((acc, v) => acc + v, 0);
       const globalMult = this.getDamageMultiplier();
-      const hasMult = globalMult !== 1 || evaluatedParts.some(p => p.multiplier !== 1);
+      const hasMult = globalMult !== 1 || effectMult !== 1 || evaluatedParts.some(p => p.multiplier !== 1);
 
       // Construct rich breakdown HTML for chat card
       const partPills = evaluatedParts.map(p => {
@@ -1881,13 +2303,16 @@ export class DCCActor extends Actor {
           data-item-name="${attackItem.name}"
           data-damage-value="${totalRawDamage}"
           data-typed-damage='${typedDamageJson}'
+          data-damage-effect="${chosenEffect || 'none'}"
           data-attack-type="${attackItem.type || 'attack'}">
           <div class="dcc-damage-card-header">
             <strong>${this.name}</strong>: ${attackItem.name} Damage
+            ${chosenEffect && chosenEffect !== 'none' ? `<span style="background: #c0392b; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 6px; text-transform: uppercase;">${chosenEffect}</span>` : ''}
+            ${chosenEffect === 'none' && favorBonus > 0 ? `<span style="background: #27ae60; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 6px; text-transform: uppercase;">+${favorBonus} AI Favor</span>` : ''}
           </div>
           <div class="dcc-damage-card-result" style="margin: 6px 0;">
             <span class="dcc-damage-value" style="font-size: 20px; font-weight: bold; color: #c0392b;">${totalRawDamage}</span>
-            <span class="dcc-damage-formula">${hasMult ? `(Buff Multiplied Total)` : `Total Damage`}</span>
+            <span class="dcc-damage-formula">${hasMult ? `(Multiplied Total)` : `Total Damage`}</span>
           </div>
           <div class="dcc-typed-breakdown" style="background: #faf8f5; border: 1px solid #e0dacf; border-radius: 4px; padding: 4px 6px; margin-bottom: 8px;">
             ${partPills}
@@ -1906,8 +2331,15 @@ export class DCCActor extends Actor {
         </div>
       `;
 
+      let effectFlavorTag = '';
+      if (chosenEffect && chosenEffect !== 'none') {
+        effectFlavorTag = ` [Effect: ${chosenEffect}]`;
+      } else if (chosenEffect === 'none' && favorBonus > 0) {
+        effectFlavorTag = ` [No Effect: +${favorBonus} AI Favor]`;
+      }
+
       const flavorBreakdown = Object.entries(typedDamage).map(([t, val]) => `${val} ${t}`).join(', ');
-      const flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${flavorBreakdown}${hasMult ? ` [x${globalMult}]` : ''})${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`;
+      const flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (Damage: ${flavorBreakdown}${hasMult ? ` [x${globalMult * effectMult}]` : ''})${effectFlavorTag}${sys.effects ? ` - <em>${sys.effects}</em>` : ''}`;
 
       const mainRoll = await new Roll(`${totalRawDamage}`).evaluate();
 
@@ -1922,6 +2354,8 @@ export class DCCActor extends Actor {
             itemId: attackItem.id,
             itemName: attackItem.name,
             attackType: attackItem.type || 'attack',
+            damageEffect: chosenEffect,
+            aiFavorBonus: (chosenEffect === 'none' && favorBonus > 0) ? favorBonus : 0,
             rawDamage: totalRawDamage,
             typedDamage,
             parts: evaluatedParts

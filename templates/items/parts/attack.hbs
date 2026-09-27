@@ -105,7 +105,27 @@
   </div>
 </div>
 
-<div class="dcc-field-group">
+<div class="dcc-field-group" style="margin-bottom: 8px;">
   <span class="dcc-field-label">Effects</span>
   <input class="dcc-field-input" type="text" name="system.effects" value="{{system.effects}}" placeholder="Knockdown, Fire, Piercing..." />
+</div>
+
+{{!-- OPTIONAL DAMAGE EFFECTS --}}
+<div class="dcc-stat-block" style="margin-top: 8px; margin-bottom: 8px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span>OPTIONAL DAMAGE EFFECTS</span>
+    <div style="display: flex; gap: 4px; font-size: 9px;">
+      <span style="color: #eee;">Presets:</span>
+      <a class="add-preset-effects" data-preset="pugilism" style="color: #f1c40f; cursor: pointer;" title="Dirty Fighting, Iron Punch, Powerful Strike">[+ Pugilism]</a>
+      <a class="add-preset-effects" data-preset="noggin" style="color: #f1c40f; cursor: pointer;" title="Skullcracker, Powerful Strike">[+ Noggin Knocker]</a>
+      <a class="add-preset-effects" data-preset="wrasslin" style="color: #f1c40f; cursor: pointer;" title="Choke Out, Dirty Fighting, Toss">[+ Wrasslin]</a>
+      <a class="add-preset-effects" data-preset="foot" style="color: #f1c40f; cursor: pointer;" title="Powerful Strike, Smush">[+ Foot Soldier]</a>
+    </div>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    <div style="margin-bottom: 4px; font-size: 11px; color: #555;">
+      Define comma-separated optional effects that can be selected before rolling this attack (e.g. <code>Dirty Fighting, Iron Punch, Powerful Strike</code>).
+    </div>
+    <input class="dcc-field-input" type="text" name="system.optionalEffects" value="{{optionalEffectsDisplay}}" placeholder="Dirty Fighting, Iron Punch, Powerful Strike" style="width: 100%; font-size: 11px;" />
+  </div>
 </div>

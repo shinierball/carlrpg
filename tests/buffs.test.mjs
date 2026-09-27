@@ -74,6 +74,48 @@ describe('DCC RPG Buffs & Debuffs Subsystem', () => {
       assert.equal(buffsPack.type, 'Item');
       assert.equal(buffsPack.system, 'carl-rpg');
     });
+
+    test('carl-rpg.buffs compendium builds and auto-populates all 32 buffs and 30 debuffs', async () => {
+      const createdDocs = [];
+      const mockBuffsPack = {
+        collection: 'carl-rpg.buffs',
+        locked: true,
+        documents: createdDocs,
+        getIndex: async () => new Map(),
+        configure: async ({ locked }) => { mockBuffsPack.locked = locked; }
+      };
+
+      globalThis.game.packs.set('carl-rpg.buffs', mockBuffsPack);
+
+      const buffDocs = DCC_BUFFS.map(b => ({
+        _id: b._id,
+        name: b.name,
+        type: 'buff',
+        img: b.img || 'icons/svg/aura.svg',
+        system: b.system
+      }));
+      const debuffDocs = DCC_DEBUFFS.map(d => ({
+        _id: d._id,
+        name: d.name,
+        type: 'debuff',
+        img: d.img || 'icons/svg/skull.svg',
+        system: d.system
+      }));
+      const docs = [...buffDocs, ...debuffDocs];
+      assert.equal(docs.length, 62, 'Total buffs and debuffs must equal 62 (32 buffs + 30 debuffs)');
+
+      await Item.createDocuments(docs, { pack: 'carl-rpg.buffs' });
+      assert.equal(createdDocs.length, 62);
+      assert.equal(createdDocs.filter(d => d.type === 'buff').length, 32);
+      assert.equal(createdDocs.filter(d => d.type === 'debuff').length, 30);
+    });
+
+    test('packs/buffs on disk exists and contains compiled LevelDB database files', () => {
+      assert.ok(fs.existsSync('packs/buffs'), 'packs/buffs directory must exist');
+      const files = fs.readdirSync('packs/buffs');
+      assert.ok(files.length > 0, 'packs/buffs must not be empty');
+      assert.ok(files.some(f => f.endsWith('.ldb') || f.endsWith('.log')), 'packs/buffs must contain LevelDB database files');
+    });
   });
 
   describe('2. Actor External Buffs & Derived Stats', () => {

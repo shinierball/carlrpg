@@ -1,4 +1,5 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
+import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller
@@ -139,6 +140,82 @@ export class DCCItemSheet extends BaseItemSheet {
   }
 
   /**
+   * Retrieve all canonical buffs from CONFIG.DCC.buffs, compendiums, and world items.
+   * @returns {Promise<Array<object>>}
+   */
+  async getAvailableBuffs() {
+    const map = new Map();
+    const baseBuffs = CONFIG.DCC?.buffs || DCC_BUFFS || [];
+    for (const b of baseBuffs) {
+      const key = (b.name || '').toLowerCase().trim();
+      if (key && !map.has(key)) {
+        map.set(key, {
+          id: b._id || b.id || b.name,
+          name: b.name,
+          type: 'buff',
+          img: b.img || 'icons/svg/aura.svg',
+          system: b.system || {}
+        });
+      }
+    }
+    if (typeof game !== 'undefined' && game.items) {
+      for (const item of game.items) {
+        if (item.type === 'buff') {
+          const key = item.name.toLowerCase().trim();
+          if (key && !map.has(key)) {
+            map.set(key, {
+              id: item.id,
+              name: item.name,
+              type: 'buff',
+              img: item.img || 'icons/svg/aura.svg',
+              system: item.system || {}
+            });
+          }
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Retrieve all canonical debuffs from CONFIG.DCC.debuffs, compendiums, and world items.
+   * @returns {Promise<Array<object>>}
+   */
+  async getAvailableDebuffs() {
+    const map = new Map();
+    const baseDebuffs = CONFIG.DCC?.debuffs || DCC_DEBUFFS || [];
+    for (const d of baseDebuffs) {
+      const key = (d.name || '').toLowerCase().trim();
+      if (key && !map.has(key)) {
+        map.set(key, {
+          id: d._id || d.id || d.name,
+          name: d.name,
+          type: 'debuff',
+          img: d.img || 'icons/svg/skull.svg',
+          system: d.system || {}
+        });
+      }
+    }
+    if (typeof game !== 'undefined' && game.items) {
+      for (const item of game.items) {
+        if (item.type === 'debuff') {
+          const key = item.name.toLowerCase().trim();
+          if (key && !map.has(key)) {
+            map.set(key, {
+              id: item.id,
+              name: item.name,
+              type: 'debuff',
+              img: item.img || 'icons/svg/skull.svg',
+              system: item.system || {}
+            });
+          }
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
    * Helper to normalize skillModifiers to an array regardless of whether it's an Array or Object.
    * @param {Array|object} raw
    * @returns {Array<{name: string, bonus: number}>}
@@ -254,6 +331,56 @@ export class DCCItemSheet extends BaseItemSheet {
       'Holy', 'Ice', 'Necrotic', 'Piercing', 'Poison',
       'Psychic', 'Slashing', 'Sonic'
     ];
+
+    if (context.item.type === 'loot') {
+      context.availableBuffs = await this.getAvailableBuffs();
+      context.availableDebuffs = await this.getAvailableDebuffs();
+
+      const lootType = String(context.system?.lootType || '').toLowerCase().trim();
+      context.isScratchTicket = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
+
+      let outcomes = context.system.outcomes;
+      if (outcomes && !Array.isArray(outcomes) && typeof outcomes === 'object') {
+        outcomes = Object.values(outcomes);
+      }
+      let totalWeight = 0;
+      if (Array.isArray(outcomes)) {
+        for (const out of outcomes) {
+          if (!out) continue;
+          // Ensure weight is strictly numeric integer
+          let w = out.weight;
+          if (typeof w === 'string') {
+            const digits = w.trim().replace(/[^0-9]/g, '');
+            w = digits === '' ? 0 : parseInt(digits, 10);
+          } else if (typeof w === 'number') {
+            w = Number.isFinite(w) ? Math.floor(w) : 0;
+          } else {
+            w = 0;
+          }
+          out.weight = Math.max(0, w);
+          totalWeight += out.weight;
+
+          if (out.type === 'buff' || out.type === 'debuff') {
+            out.damage = '';
+            out.damageType = '';
+          }
+          out.buffOptions = context.availableBuffs.map(b => ({
+            id: b.id,
+            name: b.name,
+            selected: Boolean((out.buffId && (out.buffId === b.id || out.buffId === b.name)) || (out.name && out.name.toLowerCase() === b.name.toLowerCase()))
+          }));
+          out.debuffOptions = context.availableDebuffs.map(d => ({
+            id: d.id,
+            name: d.name,
+            selected: Boolean((out.debuffId && (out.debuffId === d.id || out.debuffId === d.name)) || (out.name && out.name.toLowerCase() === d.name.toLowerCase()))
+          }));
+        }
+        context.system.outcomes = outcomes;
+      }
+      context.outcomesTotalWeight = totalWeight;
+      context.isWeightValid = totalWeight === 100;
+      context.weightWarning = outcomes?.length > 0 && totalWeight !== 100;
+    }
 
     return context;
   }
@@ -397,6 +524,52 @@ export class DCCItemSheet extends BaseItemSheet {
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
     }
 
+    if (this.item.type === 'loot') {
+      let outcomes = expanded.system?.outcomes;
+      if (outcomes !== undefined) {
+        outcomes = Array.isArray(outcomes) ? outcomes : Object.values(outcomes);
+        let totalWeight = 0;
+        for (const out of outcomes) {
+          if (!out) continue;
+          // Ensure weights are strictly numeric integer
+          let w = out.weight;
+          if (typeof w === 'string') {
+            const digits = w.trim().replace(/[^0-9]/g, '');
+            w = digits === '' ? 0 : parseInt(digits, 10);
+          } else if (typeof w === 'number') {
+            w = Number.isFinite(w) ? Math.floor(w) : 0;
+          } else {
+            w = 0;
+          }
+          out.weight = Math.max(0, w);
+          totalWeight += out.weight;
+
+          if (out.type === 'buff' || out.type === 'debuff') {
+            out.damage = '';
+            out.damageType = '';
+          }
+        }
+        expanded.system.outcomes = outcomes;
+
+        const lootType = String(expanded.system?.lootType || this.item.system?.lootType || '').toLowerCase().trim();
+        const isScratch = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
+        if (isScratch && outcomes.length > 0 && totalWeight !== 100) {
+          if (typeof ui !== 'undefined' && ui?.notifications?.warn) {
+            ui.notifications.warn(`Warning: Total weight of scratch-off ticket outcomes is ${totalWeight}% (must equal 100%).`);
+          }
+        }
+      } else {
+        expanded.system = expanded.system || {};
+        expanded.system.outcomes = [];
+      }
+      for (const key of Object.keys(formData)) {
+        if (key.startsWith('system.outcomes')) {
+          delete formData[key];
+        }
+      }
+      formData['system.outcomes'] = expanded.system.outcomes;
+    }
+
     const result = (typeof super._updateObject === 'function')
       ? await super._updateObject(event, formData)
       : await this.item.update(formData);
@@ -454,6 +627,158 @@ export class DCCItemSheet extends BaseItemSheet {
         if (this.item.actor?.sheet?.rendered) {
           this.item.actor.render(false);
         }
+      }
+    });
+
+    // Change Loot Type (show/hide scratch-off table reactively)
+    html.find('.loot-type-select').change(async ev => {
+      ev.preventDefault();
+      const newType = $(ev.currentTarget).val();
+      await this.item.update({ 'system.lootType': newType });
+      this.render(false);
+    });
+
+    // Add Loot Outcome (Scratch-off) with auto-calculated weights summing to 100%
+    html.find('.add-loot-outcome').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      current.push({
+        name: `Outcome ${current.length + 1}`,
+        weight: 0,
+        type: 'spell',
+        targetType: 'closest_mob',
+        damage: '2d12 + Int',
+        damageType: 'Fire',
+        healBars: 0,
+        description: ''
+      });
+      // Auto-calculate the weight of outcomes as outcomes are added
+      const count = current.length;
+      if (count > 0) {
+        const base = Math.floor(100 / count);
+        const remainder = 100 % count;
+        for (let i = 0; i < count; i++) {
+          current[i].weight = base + (i < remainder ? 1 : 0);
+        }
+      }
+      await this.item.update({ 'system.outcomes': current });
+      this.render(false);
+    });
+
+    // Delete Loot Outcome and auto-rebalance remaining weights
+    html.find('.delete-loot-outcome').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
+        const count = current.length;
+        if (count > 0) {
+          const base = Math.floor(100 / count);
+          const remainder = 100 % count;
+          for (let i = 0; i < count; i++) {
+            current[i].weight = base + (i < remainder ? 1 : 0);
+          }
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Auto-balance weights to 100%
+    html.find('.rebalance-weights-btn').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      const count = current.length;
+      if (count > 0) {
+        const base = Math.floor(100 / count);
+        const remainder = 100 % count;
+        for (let i = 0; i < count; i++) {
+          current[i].weight = base + (i < remainder ? 1 : 0);
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Disallow non-numeric characters in outcome weights
+    html.find('.outcome-weight-input').on('input change', function() {
+      const clean = this.value.replace(/[^0-9]/g, '');
+      if (this.value !== clean) {
+        this.value = clean;
+      }
+    });
+
+    // Change Outcome Type
+    html.find('.outcome-type-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const newType = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        current[idx] = { ...current[idx], type: newType };
+        if (newType === 'buff' || newType === 'debuff') {
+          current[idx].damage = '';
+          current[idx].damageType = '';
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Select Existing Buff for Outcome
+    html.find('.outcome-buff-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const buffId = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        const buffs = await this.getAvailableBuffs();
+        const matched = buffs.find(b => b.id === buffId || b.name === buffId);
+        if (matched) {
+          current[idx] = {
+            ...current[idx],
+            buffId: matched.id,
+            name: matched.name,
+            description: matched.system?.description || current[idx].description || '',
+            damage: '',
+            damageType: ''
+          };
+        } else {
+          current[idx].buffId = buffId;
+          current[idx].damage = '';
+          current[idx].damageType = '';
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Select Existing Debuff for Outcome
+    html.find('.outcome-debuff-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const debuffId = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        const debuffs = await this.getAvailableDebuffs();
+        const matched = debuffs.find(d => d.id === debuffId || d.name === debuffId);
+        if (matched) {
+          current[idx] = {
+            ...current[idx],
+            debuffId: matched.id,
+            name: matched.name,
+            description: matched.system?.description || current[idx].description || '',
+            damage: '',
+            damageType: ''
+          };
+        } else {
+          current[idx].debuffId = debuffId;
+          current[idx].damage = '';
+          current[idx].damageType = '';
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
       }
     });
 

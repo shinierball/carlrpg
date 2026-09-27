@@ -1,10 +1,145 @@
 <div class="dcc-field-row" style="margin-bottom: 8px;">
   <div class="dcc-field-group small">
-    <span class="dcc-field-label">Quantity</span>
-    <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
+    <span class="dcc-field-label">Quantity (Uses)</span>
+    <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" min="0" />
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Usage Limit / Cooldown</span>
+    <input class="dcc-field-input" type="text" name="system.cooldown" value="{{system.cooldown}}" placeholder="None, Once per scene, 1/Round" />
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Loot Type</span>
+    <select class="dcc-field-input loot-type-select" name="system.lootType">
+      <option value="consumable" {{#if (eq system.lootType "consumable")}}selected{{/if}}>Consumable</option>
+      <option value="scratch_ticket" {{#if (or (eq system.lootType "scratch_ticket") (eq system.lootType "Scratch-Off-Ticket"))}}selected{{/if}}>Scratch-off Ticket / Lottery</option>
+      <option value="treasure" {{#if (eq system.lootType "treasure")}}selected{{/if}}>Treasure / Valuables</option>
+      <option value="crafting" {{#if (eq system.lootType "crafting")}}selected{{/if}}>Crafting Material</option>
+      <option value="quest" {{#if (eq system.lootType "quest")}}selected{{/if}}>Quest Item</option>
+    </select>
   </div>
 </div>
+
+{{#if (or isScratchTicket (eq system.lootType "scratch_ticket") (eq system.lootType "Scratch-Off-Ticket"))}}
+{{!-- Scratch-off / Multi-Outcome Table Builder --}}
+<div class="dcc-stat-block" style="margin-top: 10px; margin-bottom: 10px; border: 1px solid #d4af37; background: #fffcf5;">
+  <div class="dcc-banner-header" style="background: linear-gradient(90deg, #8e44ad, #d4af37); display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; color: #fff;">
+    <span style="font-size: 13px; font-weight: bold; text-transform: uppercase;">
+      <i class="fa-solid fa-ticket"></i> Scratch-off Outcomes / Random Table
+      {{#if system.outcomes.length}}
+        {{#if (eq outcomesTotalWeight 100)}}
+          <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 10px; margin-left: 6px;"><i class="fa-solid fa-check"></i> 100%</span>
+        {{else}}
+          <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 10px; margin-left: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> {{outcomesTotalWeight}}%</span>
+        {{/if}}
+      {{/if}}
+    </span>
+    <a class="add-loot-outcome" style="color: #fff; cursor: pointer; font-size: 11px; text-decoration: none;">
+      <i class="fa-solid fa-plus"></i> Add Outcome
+    </a>
+  </div>
+  <div style="padding: 8px;">
+    {{#if system.outcomes.length}}
+      {{#if (ne outcomesTotalWeight 100)}}
+        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #e67e22; color: #d35400; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+          <span>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <strong>Warning:</strong> Total outcome weight is <strong>{{outcomesTotalWeight}}%</strong> (summation must equal 100%).
+          </span>
+          <a class="rebalance-weights-btn" style="color: #d35400; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: normal;">
+            <i class="fa-solid fa-scale-balanced"></i> Auto-balance to 100%
+          </a>
+        </div>
+      {{/if}}
+      <table class="dcc-table" style="width: 100%; font-size: 12px; margin-bottom: 0;">
+        <thead>
+          <tr style="background: #eee;">
+            <th style="width: 25%;">Outcome Name</th>
+            <th style="width: 12%;">Weight ({{outcomesTotalWeight}}%)</th>
+            <th style="width: 15%;">Type</th>
+            <th style="width: 16%;">Target</th>
+            <th style="width: 24%;">Details / Selection</th>
+            <th style="width: 8%; text-align: center;">Act</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.outcomes as |out idx|}}
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td>
+                <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.name" value="{{out.name}}" placeholder="Outcome Name" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <input class="dcc-field-input outcome-weight-input" type="number" name="system.outcomes.{{idx}}.weight" value="{{out.weight}}" min="0" max="100" data-index="{{idx}}" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <select class="dcc-field-input outcome-type-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.type" style="width: 100%; font-size: 11px;">
+                  <option value="spell" {{#if (eq out.type "spell")}}selected{{/if}}>Spell / Atk</option>
+                  <option value="heal" {{#if (eq out.type "heal")}}selected{{/if}}>Healing</option>
+                  <option value="buff" {{#if (eq out.type "buff")}}selected{{/if}}>Buff</option>
+                  <option value="debuff" {{#if (eq out.type "debuff")}}selected{{/if}}>Debuff</option>
+                  <option value="custom" {{#if (eq out.type "custom")}}selected{{/if}}>Custom</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.outcomes.{{idx}}.targetType" style="width: 100%; font-size: 11px;">
+                  <option value="closest_mob" {{#if (eq out.targetType "closest_mob")}}selected{{/if}}>Closest Mob</option>
+                  <option value="self" {{#if (eq out.targetType "self")}}selected{{/if}}>Self</option>
+                  <option value="target" {{#if (eq out.targetType "target")}}selected{{/if}}>Targeted Token</option>
+                </select>
+              </td>
+              <td>
+                {{#if (eq out.type "heal")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.healBars" value="{{out.healBars}}" placeholder="Bars" style="width: 50px; font-size: 11px;" />
+                    <span style="font-size: 10px;">Bars</span>
+                  </div>
+                {{else if (eq out.type "buff")}}
+                  <select class="dcc-field-input outcome-buff-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.buffId" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Existing Buff --</option>
+                    {{#each out.buffOptions as |bOpt|}}
+                      <option value="{{bOpt.id}}" {{#if bOpt.selected}}selected{{/if}}>{{bOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if (eq out.type "debuff")}}
+                  <select class="dcc-field-input outcome-debuff-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.debuffId" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Existing Debuff --</option>
+                    {{#each out.debuffOptions as |dOpt|}}
+                      <option value="{{dOpt.id}}" {{#if dOpt.selected}}selected{{/if}}>{{dOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else}}
+                  <div style="display: flex; gap: 4px;">
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.damage" value="{{out.damage}}" placeholder="2d12 + Int" style="width: 65%; font-size: 11px;" />
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.damageType" value="{{out.damageType}}" placeholder="Fire" style="width: 35%; font-size: 11px;" />
+                  </div>
+                {{/if}}
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-loot-outcome" data-index="{{idx}}" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6" style="padding-bottom: 6px; padding-top: 2px;">
+                <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.description" value="{{out.description}}" placeholder="Flavor & rules description..." style="width: 100%; font-size: 11px;" />
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; color: #777; font-size: 12px; padding: 6px;">
+        No random outcomes configured. Click <strong>Add Outcome</strong> above to add ticket outcomes.
+      </div>
+    {{/if}}
+  </div>
+</div>
+{{/if}}
+
+
 <div class="dcc-field-group">
   <span class="dcc-field-label">Notes</span>
-  <textarea class="dcc-field-input" name="system.notes" style="height: 140px;">{{system.notes}}</textarea>
+  <textarea class="dcc-field-input" name="system.notes" style="height: 70px;">{{system.notes}}</textarea>
+</div>
+<div class="dcc-field-group" style="margin-top: 8px;">
+  <span class="dcc-field-label">Description</span>
+  <textarea class="dcc-field-input" name="system.description" style="height: 90px;">{{system.description}}</textarea>
 </div>

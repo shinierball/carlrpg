@@ -1,3 +1,81 @@
+## 2.0.37
+
+### Scratch-off Ticket Outcome Enhancements: Conditional Random Table, Auto-Weights & Validation
+
+- **Conditional Random Table Display**:
+  - The Scratch-off Outcomes / Random Table builder is now strictly gated to only display when the item's Loot Type is set to `scratch_ticket` (`Scratch-off Ticket / Lottery`).
+  - Standard consumable, treasure, quest, and crafting items keep their sheets clean and uncluttered without the scratch-off table.
+  - Selecting "Scratch-off Ticket / Lottery" in `.loot-type-select` reactively reveals the table immediately.
+- **Auto-Calculated Outcome Weights**:
+  - When outcomes are added via `[ Add Outcome ]`, weights are automatically calculated and distributed evenly to sum to exactly **100%** (e.g., 1 outcome = 100%, 2 outcomes = 50%/50%, 3 outcomes = 34%/33%/33%, 4 outcomes = 25% each).
+  - Deleting an outcome via `[ Delete ]` automatically re-balances remaining outcomes to sum to 100%.
+  - Added a 1-click `[ Auto-balance to 100% ]` action button in the warning banner to instantly rebalance weights whenever needed.
+- **Manual Overwrite & Summation Warning**:
+  - Users can freely overwrite any calculated weight with custom values.
+  - If the sum of all outcome weights does not equal 100%, the sheet renders an orange warning banner (`Total outcome weight is X% (summation must equal 100%)`) with the auto-balance shortcut, and `_updateObject` triggers a warning notification via `ui.notifications.warn`.
+- **Strictly Numeric Weights Enforcement**:
+  - Outcome weights cannot be set to non-numeric values.
+  - The weight input enforces `type="number"` and `.outcome-weight-input` strips non-numeric characters in real time.
+  - `prepareData()`, `prepareBaseData()`, `prepareDerivedData()`, and `_updateObject()` sanitize all weights to valid non-negative integers.
+- **Automated Verification**:
+  - Added unit test cases 15 through 18 in `tests/scratch-off-item.test.mjs`, validating:
+    - Random table conditional visibility for `scratch_ticket` and exclusion for standard loot types.
+    - Automatic even weight distribution on outcome addition, deletion, and auto-balance.
+    - Manual overwrite preservation, UI warning banners, and `ui.notifications.warn` alerts when sum $\neq$ 100%.
+    - Strict sanitization of non-numeric weights across document data preparation and sheet submission.
+
+## 2.0.36
+
+### Loot & Consumable Outcome Enhancements: Buff & Debuff Selection Without DMG
+
+- **Buff & Debuff Selection in Outcome Table**:
+  - When configuring a `loot` item's random outcome table with a `buff` outcome, the sheet renders an interactive dropdown allowing the user to choose from all existing canonical buffs (and world items). Selecting an existing buff populates the outcome name and description.
+  - When configuring a `debuff` outcome, the sheet renders an interactive dropdown allowing the user to choose from all existing canonical debuffs (and world items). Selecting an existing debuff populates the outcome name and description.
+- **Strict Omission of DMG Component for Buff and Debuff**:
+  - Buff and Debuff outcomes strictly have **NO damage component**.
+  - In `templates/items/parts/loot.hbs`, damage formula and damage type inputs are completely hidden and omitted when the outcome type is `buff` or `debuff`.
+  - In `DCCItemSheet._prepareContext` and `_updateObject`, `damage` and `damageType` fields are sanitized and cleared to empty strings whenever outcome type is `buff` or `debuff`.
+  - In `DCCItem.prototype.useLoot()`, buff and debuff outcomes bypass all damage evaluation, ensure `evaluatedDmg = 0`, exclude the `.dcc-damage-card` class, and omit all damage text or damage apply buttons from generated chat cards.
+- **1-Click Apply Buff & Apply Debuff Chat Actions**:
+  - Buff outcome cards render a 1-click `[ Apply Buff ]` action button (`.dcc-apply-buff-btn`) that applies the selected buff to the target crawler (assigning to an open external buff slot or adding an embedded buff item).
+  - Debuff outcome cards render a 1-click `[ Apply Debuff ]` action button (`.dcc-apply-debuff-btn`) that inflicts the debuff condition as an embedded item directly onto target actor(s).
+  - Added click listeners in `onRenderChatMessage` in `src/dcc.mjs` with smart target fallback prioritizing card `targetId` over arbitrary canvas selections.
+- **Automated Verification**:
+  - Added unit test cases 9 through 14 to `tests/scratch-off-item.test.mjs`, verifying:
+    - Buff outcome has 0 damage, no damage card class, and renders apply buff button.
+    - Debuff outcome has 0 damage, no damage card class, and renders apply debuff button.
+    - `DCCItemSheet._prepareContext` populates available conditions and strips residual damage.
+    - `DCCItemSheet._updateObject` sanitizes buff/debuff form data by clearing damage and damageType.
+    - `onRenderChatMessage` click handlers successfully apply buffs and debuffs to target actors.
+    - Template renders condition selectors and omits damage inputs for buff and debuff types.
+
+## 2.0.35
+
+### Consumable Items, Scratch-off Lottery Tickets & Items Compendium
+
+- **Multi-Outcome Consumable & Scratch-off System (`LootDataModel`)**:
+  - Enhanced `loot` item data model and schema in `template.json` and `src/models/items/loot-model.mjs` with `cooldown`, `lootType`, and `outcomes` array.
+  - Added support for $N$-uses consumables (`system.quantity`) that automatically decrement on use and remove upon consuming the final charge.
+  - Implemented scene-restricted cooldown enforcement (`system.cooldown: "Once per scene"`): prevents multiple uses within the same scene via item flag tracking (`carl-rpg.lastUsedScene`), automatically refreshing when moving to a new dungeon chamber.
+  - Implemented weighted random outcome tables (`system.outcomes`): rolls across configured outcomes (e.g. 50% / 50%) on use.
+  - Added canvas token target proximity detection (`targetType: "closest_mob"`): locates the closest alive hostile mob/NPC on the scene and calculates distance from the caster.
+  - Evaluates DCC spell damage with crawler Int modifiers (`2d12 + Int Mod` Fire) and DCC rules reminders (Disadvantage to hit, Burned Debuff on $\ge 1$ Health Bar loss).
+  - Evaluates DCC Health Bar healing (`healBars * hpPerBar`, where 1 Health Bar = CON modifier) for targets.
+- **Interactive Chat Cards & Chat Action Listeners**:
+  - Generates rich DCC-styled lottery scratch-off reveal cards in chat with outcome badges, quote/flavor descriptions, and mechanics breakdowns.
+  - Added `.dcc-apply-healing-btn` chat listener in `src/dcc.mjs` to apply Health Bar healing directly to recipients, capped at maximum HP.
+  - Enhanced `.dcc-apply-damage-btn` chat listener with automatic fallback targeting to target IDs identified by scratch-off cards.
+- **Item Sheet Scratch-off Builder**:
+  - Redesigned `templates/items/parts/loot.hbs` with quantity, cooldown, loot type dropdown, and an interactive outcome builder table with 1-click **Add Outcome** and **Delete Outcome** controls.
+  - Handled array serialization cleanly in `DCCItemSheet._updateObject`.
+- **Items & Loot Compendium Pack (`carl-rpg.items`)**:
+  - Created `src/data/items.mjs` with `DCC_ITEMS` canonical dataset.
+  - Registered `carl-rpg.items` compendium pack in `system.json`.
+  - Added auto-population hook on startup in `src/dcc.mjs` and compendium compilation in `scripts/build-packs.mjs`.
+  - Preloaded canonical items: **Normal Mana Potion** and **Scratch-off Ticket - Fireball or Custard** (6 uses, 1/scene, 50% Rank 5 Fireball vs 50% Custard Heal 5 Bars).
+- **Automated Verification**:
+  - Created `tests/scratch-off-item.test.mjs` verifying data model schemas, scene cooldown restrictions, quantity decrements, closest mob target detection, Fireball damage and Custard healing formulas, and canonical compendium items.
+
 ## 2.0.34
 
 ### Equipment & Inventory Tab Full-Width Stacked Layout

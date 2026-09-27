@@ -232,6 +232,9 @@
     },
     "loot": {
       "quantity": 1,
+      "cooldown": "None",
+      "lootType": "consumable",
+      "outcomes": [],
       "notes": "",
       "description": ""
     },

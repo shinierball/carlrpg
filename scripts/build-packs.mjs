@@ -6,6 +6,7 @@ import { DCC_SPELLS } from '../src/data/spells.mjs';
 import { DCC_BUFFS, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
 import { DCC_MOBS } from '../src/data/mobs.mjs';
+import { DCC_ITEMS } from '../src/data/items.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -432,8 +433,56 @@ async function buildMobs() {
   console.log(`Successfully built mobs compendium at ${packDir}`);
 }
 
+// 6. Build Items Pack
+async function buildItems() {
+  const packDir = path.resolve(__dirname, '../packs/items');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building items compendium with ${DCC_ITEMS.length} items...`);
+  const batch = db.batch();
+
+  for (const item of DCC_ITEMS) {
+    const doc = {
+      _id: item._id,
+      name: item.name,
+      type: item.type,
+      img: item.img,
+      system: item.system || {},
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion,
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${item._id}`, doc);
+  }
+
+  await batch.write();
+  await db.close();
+  console.log(`Successfully built items compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
 await buildBuffs();
 await buildMacros();
 await buildMobs();
+await buildItems();
+

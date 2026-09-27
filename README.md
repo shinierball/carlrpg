@@ -64,6 +64,14 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 - **Crawler Token Selection Action HUDs**:
   - **Dynamic Token Hotbar HUD**: Automatically appears directly above Foundry's macro bar (`#hotbar`) whenever a crawler token is selected on the canvas. Features all 10 character sheet hotlist slots with complete interactivity (Hit & Damage for attacks, Cast & Damage for spells, Equip/Unequip toggling for gear, Use for consumables/loot, Roll & Damage for skills, drag-and-drop item assignment, and slot clearing).
   - **Left Action Panel (Attacks & Active Skills)**: Automatically appears on the left of the screen directly below the scene list (`#navigation` / `#scene-list`). Displays all character attacks with one-click Hit & Damage buttons, plus all active non-passive skills with Check/Hit & Damage buttons (passive skills are automatically filtered out). Fully reactive to actor updates, item changes, and canvas selection changes.
+- **Consumables, Scratch-off Lottery Tickets & Items Compendium (`carl-rpg.items`)**:
+  - Full support for multi-use consumable items (`system.quantity`) that decrement on use and remove upon consuming the final charge.
+  - Scene-restricted usage limits (`system.cooldown: "Once per scene"`): prevents multiple uses in the same chamber or encounter, automatically refreshing upon entering a new scene.
+    - Weighted random outcome tables (`system.outcomes`) for World Dungeon lottery tickets (e.g. 50% Level 5 Fireball vs 50% Healing Blob of Custard), gated to only render for scratch ticket loot types.
+  - Automatic weight calculation and distribution summing to 100% as outcomes are added/removed, with manual overwrite support, non-numeric validation, and summation warning banners.
+  - Smart canvas proximity targeting (`targetType: "closest_mob"`): detects the nearest hostile mob token on the canvas, calculates distance, and aims chaotic magic at the foe.
+  - Interactive chat cards featuring lottery reveal graphics, 1-click **Apply Damage** (with DR deductions), 1-click **Apply Healing** (restoring CON mod Health Bars, capped at max HP), and 1-click **Apply Buff / Apply Debuff** (with strictly NO damage component).
+  - Preloaded system items compendium (`carl-rpg.items`) with canonical **Normal Mana Potion** and **Scratch-off Ticket - Fireball or Custard**.
 - **Pure DCC Mechanics**: Automated modifier calculations, Evade checks, DR totals, and dice rolls.
 - **Damage Type Integration & Multi-Typed Attacks**:
   - Full support for 13 canonical CarlRPG damage types across weapons, attacks, spells, skills, buffs, and debuffs.

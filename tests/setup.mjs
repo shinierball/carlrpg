@@ -148,9 +148,19 @@ export class MockItem {
     }
     this.actor = actor;
     this.sort = Number(data.sort) || 0;
+    this.flags = structuredClone(data.flags || {});
   }
   get isEmbedded() {
     return this.actor !== null;
+  }
+  getFlag(scope, key) {
+    return this.flags?.[scope]?.[key];
+  }
+  async setFlag(scope, key, val) {
+    this.flags = this.flags || {};
+    this.flags[scope] = this.flags[scope] || {};
+    this.flags[scope][key] = val;
+    return this;
   }
   toObject() {
     const sys = (typeof this.system?.toObject === 'function')

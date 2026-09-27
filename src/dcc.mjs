@@ -7,7 +7,7 @@ import { DCCSkillManager } from './apps/skill-manager.mjs';
 import { DCCSpellManager } from './apps/spell-manager.mjs';
 import { DCCBuffDebuffManager } from './apps/buff-manager.mjs';
 import { DCCCombatTracker } from './apps/combat-tracker.mjs';
-import { DCCCombatMetrics, DCCCombatMetricsApp } from './apps/combat-metrics.mjs';
+import { DCCCombatMetrics, DCCCombatMetricsApp, getHpPerBar } from './apps/combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
@@ -27,6 +27,7 @@ import { DCC_STANDARD_ARRAY, DCC_SPECIES_DATA, DCC_BACKGROUND_MATRICES } from '.
 import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 import { DCC_MACROS } from './data/macros.mjs';
 import { DCC_MOBS } from './data/mobs.mjs';
+import { DCC_ITEMS } from './data/items.mjs';
 import {
   DCC_BACKGROUND_TABLES,
   getBackgroundTable,
@@ -835,6 +836,13 @@ export function onRenderChatMessage(message, html, data) {
       if (!targetTokens.length && canvas?.tokens) {
         targetTokens = canvas.tokens.controlled.filter(t => t.actor && t.actor.id !== attackerId);
       }
+      if (!targetTokens.length) {
+        const fallbackTargetId = btn.dataset?.targetId || card.dataset?.targetId || $btn?.data('target-id') || $card?.data('target-id');
+        if (fallbackTargetId && canvas?.tokens?.placeables) {
+          const found = canvas.tokens.placeables.find(t => t.actor?.id === fallbackTargetId || t.id === fallbackTargetId);
+          if (found) targetTokens = [found];
+        }
+      }
 
       if (!targetTokens.length) {
         ui.notifications?.warn('DCC RPG | No targets selected! Please target or select at least one token on the canvas.');
@@ -1016,6 +1024,212 @@ export function onRenderChatMessage(message, html, data) {
       btn.addEventListener('click', evadeClickHandler);
     } else if (typeof $ !== 'undefined') {
       $(btn).click(evadeClickHandler);
+    }
+  }
+
+  // 5. Handle click on "Apply Healing" from chat card (e.g. Custard Scratch-off outcome, healing consumables)
+  const applyHealingButtons = query('.dcc-apply-healing-btn');
+  for (const btn of applyHealingButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const healClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const bars = Number(btn.dataset?.bars ?? $btn?.data('bars')) || 0;
+      const flatHealing = Number(btn.dataset?.healing ?? $btn?.data('healing')) || 0;
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No healing target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      const results = [];
+      for (const targetActor of targetActors) {
+        const hpPerBar = getHpPerBar(targetActor);
+        const healAmt = bars > 0 ? (bars * hpPerBar) : flatHealing;
+        const currentHp = Number(targetActor.system?.attributes?.hp?.value ?? targetActor.system?.attributes?.hp?.max ?? 0);
+        const maxHp = Number(targetActor.system?.attributes?.hp?.max) || (10 * hpPerBar);
+        const newHp = Math.min(maxHp, currentHp + healAmt);
+        const actualHealed = Math.max(0, newHp - currentHp);
+
+        await targetActor.update({ 'system.attributes.hp.value': newHp });
+        results.push({ name: targetActor.name, actualHealed, newHp, maxHp });
+      }
+
+      const summary = results.map(r => `${r.name}: +${r.actualHealed} HP (${r.newHp}/${r.maxHp})`).join(', ');
+      ui.notifications?.info(`DCC RPG | Healing applied: ${summary}`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', healClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(healClickHandler);
+    }
+  }
+
+  // 6. Handle click on "Apply Buff" from chat card (e.g. Scratch-off buff outcome, consumables)
+  const applyBuffButtons = query('.dcc-apply-buff-btn');
+  for (const btn of applyBuffButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const buffClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const buffId = btn.dataset?.buffId || $btn?.data('buff-id');
+      const buffName = btn.dataset?.buffName || $btn?.data('buff-name') || 'Buff';
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      const allBuffs = CONFIG.DCC?.buffs || DCC_BUFFS || [];
+      const match = allBuffs.find(b => b._id === buffId || b.id === buffId || b.name?.toLowerCase() === buffName.toLowerCase());
+
+      const buffData = match ? {
+        name: match.name,
+        type: 'buff',
+        img: match.img || 'icons/svg/aura.svg',
+        system: structuredClone(match.system || {})
+      } : {
+        name: buffName,
+        type: 'buff',
+        img: 'icons/svg/aura.svg',
+        system: { description: '' }
+      };
+
+      for (const targetActor of targetActors) {
+        const rawExternal = targetActor.system?.attributes?.externalBuffs || {};
+        let emptySlot = null;
+        for (const slot of ['buff1', 'buff2', 'buff3']) {
+          if (!rawExternal[slot]) {
+            emptySlot = slot;
+            break;
+          }
+        }
+
+        if (emptySlot && targetActor.type === 'crawler') {
+          await targetActor.update({ [`system.attributes.externalBuffs.${emptySlot}`]: buffData.name });
+        } else if (typeof targetActor.createEmbeddedDocuments === 'function') {
+          await targetActor.createEmbeddedDocuments('Item', [buffData]);
+        } else if (Array.isArray(targetActor.items)) {
+          targetActor.items.push(new (CONFIG.Item?.documentClass || DCCItem)(buffData, targetActor));
+        }
+      }
+
+      ui.notifications?.info(`DCC RPG | Buff "${buffData.name}" applied to ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', buffClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(buffClickHandler);
+    }
+  }
+
+  // 7. Handle click on "Apply Debuff" from chat card (e.g. Scratch-off debuff outcome, consumables)
+  const applyDebuffButtons = query('.dcc-apply-debuff-btn');
+  for (const btn of applyDebuffButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const debuffClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const debuffId = btn.dataset?.debuffId || $btn?.data('debuff-id');
+      const debuffName = btn.dataset?.debuffName || $btn?.data('debuff-name') || 'Debuff';
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      const allDebuffs = CONFIG.DCC?.debuffs || DCC_DEBUFFS || [];
+      const match = allDebuffs.find(d => d._id === debuffId || d.id === debuffId || d.name?.toLowerCase() === debuffName.toLowerCase());
+
+      const debuffData = match ? {
+        name: match.name,
+        type: 'debuff',
+        img: match.img || 'icons/svg/skull.svg',
+        system: structuredClone(match.system || {})
+      } : {
+        name: debuffName,
+        type: 'debuff',
+        img: 'icons/svg/skull.svg',
+        system: { description: '' }
+      };
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.createEmbeddedDocuments === 'function') {
+          await targetActor.createEmbeddedDocuments('Item', [debuffData]);
+        } else if (Array.isArray(targetActor.items)) {
+          targetActor.items.push(new (CONFIG.Item?.documentClass || DCCItem)(debuffData, targetActor));
+        }
+      }
+
+      ui.notifications?.info(`DCC RPG | Debuff "${debuffData.name}" inflicted on ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', debuffClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(debuffClickHandler);
     }
   }
 }
@@ -1260,6 +1474,35 @@ Hooks.once('ready', async function() {
         }
       } catch (err) {
         console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
+      }
+    }
+
+    const itemsPack = game.packs.get('carl-rpg.items');
+    if (itemsPack) {
+      try {
+        const index = await itemsPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty items compendium...');
+          const docs = DCC_ITEMS.map(i => ({
+            name: i.name,
+            type: i.type,
+            img: i.img,
+            system: i.system
+          }));
+          const wasLocked = Boolean(itemsPack.locked);
+          if (wasLocked) {
+            if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: false });
+            else itemsPack.locked = false;
+          }
+          await Item.createDocuments(docs, { pack: itemsPack.collection || 'carl-rpg.items' });
+          if (wasLocked) {
+            if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: true });
+            else itemsPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} items into carl-rpg.items.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate items compendium:', err);
       }
     }
 

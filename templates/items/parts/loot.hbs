@@ -12,12 +12,47 @@
     <select class="dcc-field-input loot-type-select" name="system.lootType">
       <option value="consumable" {{#if (eq system.lootType "consumable")}}selected{{/if}}>Consumable</option>
       <option value="scratch_ticket" {{#if (or (eq system.lootType "scratch_ticket") (eq system.lootType "Scratch-Off-Ticket"))}}selected{{/if}}>Scratch-off Ticket / Lottery</option>
+      <option value="wand" {{#if (eq system.lootType "wand")}}selected{{/if}}>Wand / Charged</option>
+      <option value="scroll" {{#if (eq system.lootType "scroll")}}selected{{/if}}>Scroll (Spell Single-Use)</option>
       <option value="treasure" {{#if (eq system.lootType "treasure")}}selected{{/if}}>Treasure / Valuables</option>
       <option value="crafting" {{#if (eq system.lootType "crafting")}}selected{{/if}}>Crafting Material</option>
       <option value="quest" {{#if (eq system.lootType "quest")}}selected{{/if}}>Quest Item</option>
     </select>
   </div>
+  {{#if (or (eq system.lootType "consumable") (eq system.lootType "wand"))}}
+    <div class="dcc-field-group">
+      <span class="dcc-field-label">Execution Mode</span>
+      <select class="dcc-field-input execution-mode-select" name="system.executionMode">
+        <option value="all" {{#if (or (eq system.executionMode "all") (not system.executionMode))}}selected{{/if}}>All Effects (Guaranteed Combo)</option>
+        <option value="random" {{#if (eq system.executionMode "random")}}selected{{/if}}>Weighted Random Outcome</option>
+      </select>
+    </div>
+  {{/if}}
+  {{#if (eq system.lootType "wand")}}
+    <div class="dcc-field-group small">
+      <span class="dcc-field-label">Charges</span>
+      <div style="display: flex; gap: 4px; align-items: center;">
+        <input class="dcc-field-input" type="number" name="system.charges.value" value="{{system.charges.value}}" min="0" style="text-align: center; width: 45px;" />
+        <span>/</span>
+        <input class="dcc-field-input" type="number" name="system.charges.max" value="{{system.charges.max}}" min="0" style="text-align: center; width: 45px;" />
+      </div>
+    </div>
+  {{/if}}
 </div>
+
+{{#if (eq system.lootType "scroll")}}
+<div class="dcc-stat-block" style="margin-top: 8px; margin-bottom: 8px; border: 1px solid #2980b9; padding: 6px 8px; background: #f0f7fb;">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="font-weight: bold; font-size: 12px; color: #2980b9;"><i class="fa-solid fa-scroll"></i> Inscribed Spell:</span>
+    <select class="dcc-field-input outcome-spell-select" data-index="0" name="system.spellId" style="flex: 1; font-size: 11px;">
+      <option value="">-- Choose Spell to Inscribe --</option>
+      {{#each availableSpells as |sp|}}
+        <option value="{{sp.id}}" {{#if (or (eq ../system.spellId sp.id) (eq ../system.spellName sp.name))}}selected{{/if}}>{{sp.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+</div>
+{{/if}}
 
 {{#if (or isScratchTicket (eq system.lootType "scratch_ticket") (eq system.lootType "Scratch-Off-Ticket"))}}
 {{!-- Scratch-off / Multi-Outcome Table Builder --}}
@@ -72,10 +107,16 @@
               </td>
               <td>
                 <select class="dcc-field-input outcome-type-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.type" style="width: 100%; font-size: 11px;">
-                  <option value="spell" {{#if (eq out.type "spell")}}selected{{/if}}>Spell / Atk</option>
-                  <option value="heal" {{#if (eq out.type "heal")}}selected{{/if}}>Healing</option>
+                  <option value="spell" {{#if (eq out.type "spell")}}selected{{/if}}>Spell / Damage</option>
+                  <option value="heal" {{#if (eq out.type "heal")}}selected{{/if}}>Heal Bars</option>
+                  <option value="heal_over_time" {{#if (eq out.type "heal_over_time")}}selected{{/if}}>Heal over Time (HoT)</option>
+                  <option value="mend_injury" {{#if (eq out.type "mend_injury")}}selected{{/if}}>Mend Injury</option>
+                  <option value="cure_debuff" {{#if (eq out.type "cure_debuff")}}selected{{/if}}>Cure Debuff</option>
                   <option value="buff" {{#if (eq out.type "buff")}}selected{{/if}}>Buff</option>
                   <option value="debuff" {{#if (eq out.type "debuff")}}selected{{/if}}>Debuff</option>
+                  <option value="skill_rank" {{#if (eq out.type "skill_rank")}}selected{{/if}}>Skill Rank (+)</option>
+                  <option value="stat_permanent" {{#if (eq out.type "stat_permanent")}}selected{{/if}}>Stat Boost (+)</option>
+                  <option value="roll_table" {{#if (eq out.type "roll_table")}}selected{{/if}}>Roll Table</option>
                   <option value="custom" {{#if (eq out.type "custom")}}selected{{/if}}>Custom</option>
                 </select>
               </td>
@@ -92,6 +133,37 @@
                     <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.healBars" value="{{out.healBars}}" placeholder="Bars" style="width: 50px; font-size: 11px;" />
                     <span style="font-size: 10px;">Bars</span>
                   </div>
+                {{else if (eq out.type "heal_over_time")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.healBars" value="{{out.healBars}}" placeholder="Bars" style="width: 40px; font-size: 11px;" />
+                    <span style="font-size: 10px;">b/rnd</span>
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.rounds" value="{{out.rounds}}" placeholder="3" style="width: 40px; font-size: 11px;" />
+                    <span style="font-size: 10px;">rnds</span>
+                  </div>
+                {{else if (eq out.type "mend_injury")}}
+                  <select class="dcc-field-input" name="system.outcomes.{{idx}}.injurySeverity" style="width: 100%; font-size: 11px;">
+                    <option value="minor" {{#if (eq out.injurySeverity "minor")}}selected{{/if}}>Minor Injury</option>
+                    <option value="major" {{#if (eq out.injurySeverity "major")}}selected{{/if}}>Major Injury</option>
+                    <option value="all" {{#if (eq out.injurySeverity "all")}}selected{{/if}}>All Injuries</option>
+                  </select>
+                {{else if (eq out.type "cure_debuff")}}
+                  <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.cureFilter" value="{{out.cureFilter}}" placeholder="All, Burned, Poisoned..." style="width: 100%; font-size: 11px;" />
+                {{else if (eq out.type "skill_rank")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.skillName" value="{{out.skillName}}" placeholder="Skill Name" style="width: 70%; font-size: 11px;" />
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.rankBonus" value="{{out.rankBonus}}" placeholder="+1" style="width: 30%; font-size: 11px;" />
+                  </div>
+                {{else if (eq out.type "stat_permanent")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <select class="dcc-field-input" name="system.outcomes.{{idx}}.stat" style="width: 50%; font-size: 11px;">
+                      <option value="str" {{#if (eq out.stat "str")}}selected{{/if}}>STR</option>
+                      <option value="dex" {{#if (eq out.stat "dex")}}selected{{/if}}>DEX</option>
+                      <option value="con" {{#if (eq out.stat "con")}}selected{{/if}}>CON</option>
+                      <option value="int" {{#if (eq out.stat "int")}}selected{{/if}}>INT</option>
+                      <option value="cha" {{#if (eq out.stat "cha")}}selected{{/if}}>CHA</option>
+                    </select>
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.value" value="{{out.value}}" placeholder="+1" style="width: 50%; font-size: 11px;" />
+                  </div>
                 {{else if (eq out.type "buff")}}
                   <select class="dcc-field-input outcome-buff-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.buffId" style="width: 100%; font-size: 11px;">
                     <option value="">-- Choose Existing Buff --</option>
@@ -104,6 +176,13 @@
                     <option value="">-- Choose Existing Debuff --</option>
                     {{#each out.debuffOptions as |dOpt|}}
                       <option value="{{dOpt.id}}" {{#if dOpt.selected}}selected{{/if}}>{{dOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if (eq out.type "roll_table")}}
+                  <select class="dcc-field-input outcome-table-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.tableUuid" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Roll Table --</option>
+                    {{#each out.tableOptions as |tOpt|}}
+                      <option value="{{tOpt.uuid}}" {{#if tOpt.selected}}selected{{/if}}>{{tOpt.name}}</option>
                     {{/each}}
                   </select>
                 {{else}}
@@ -134,6 +213,173 @@
 </div>
 {{/if}}
 
+{{#if (and (ne system.lootType "scratch_ticket") (ne system.lootType "Scratch-Off-Ticket") (not isScratchTicket) (or (eq system.lootType "consumable") (eq system.lootType "wand") (eq system.lootType "scroll")))}}
+{{!-- Consumable / Wand / Scroll Multi-Effect Builder --}}
+<div class="dcc-stat-block" style="margin-top: 10px; margin-bottom: 10px; border: 1px solid #27ae60; background: #fdfefe;">
+  <div class="dcc-banner-header" style="background: linear-gradient(90deg, #27ae60, #2980b9); display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; color: #fff;">
+    <span style="font-size: 13px; font-weight: bold; text-transform: uppercase;">
+      <i class="fa-solid fa-flask-vial"></i> Effects & Outcomes Builder
+      {{#if (eq system.executionMode "random")}}
+        <span class="dcc-badge" style="background: #e67e22; color: #fff; font-size: 10px; margin-left: 6px;">WEIGHTED RANDOM ({{outcomesTotalWeight}}%)</span>
+      {{else}}
+        <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 10px; margin-left: 6px;">GUARANTEED COMBO (ALL RESOLVE)</span>
+      {{/if}}
+    </span>
+    <a class="add-loot-outcome" style="color: #fff; cursor: pointer; font-size: 11px; text-decoration: none;">
+      <i class="fa-solid fa-plus"></i> Add Effect
+    </a>
+  </div>
+  <div style="padding: 8px;">
+    {{#if system.outcomes.length}}
+      {{#if (and (eq system.executionMode "random") (ne outcomesTotalWeight 100))}}
+        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #e67e22; color: #d35400; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+          <span>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <strong>Warning:</strong> Total outcome weight is <strong>{{outcomesTotalWeight}}%</strong> (summation must equal 100% for random mode).
+          </span>
+          <a class="rebalance-weights-btn" style="color: #d35400; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: normal;">
+            <i class="fa-solid fa-scale-balanced"></i> Auto-balance to 100%
+          </a>
+        </div>
+      {{/if}}
+      <table class="dcc-table" style="width: 100%; font-size: 12px; margin-bottom: 0;">
+        <thead>
+          <tr style="background: #eee;">
+            <th style="width: 25%;">Effect / Outcome Name</th>
+            {{#if (eq system.executionMode "random")}}
+              <th style="width: 12%;">Weight</th>
+            {{/if}}
+            <th style="width: 18%;">Effect Type</th>
+            <th style="width: 16%;">Target</th>
+            <th style="width: 25%;">Details / Values</th>
+            <th style="width: 8%; text-align: center;">Act</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.outcomes as |out idx|}}
+            <tr style="border-bottom: 1px solid #ddd;">
+              <td>
+                <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.name" value="{{out.name}}" placeholder="Effect Name" style="width: 100%; font-size: 11px;" />
+              </td>
+              {{#if (eq ../system.executionMode "random")}}
+                <td>
+                  <input class="dcc-field-input outcome-weight-input" type="number" name="system.outcomes.{{idx}}.weight" value="{{out.weight}}" min="0" max="100" data-index="{{idx}}" style="width: 100%; font-size: 11px;" />
+                </td>
+              {{/if}}
+              <td>
+                <select class="dcc-field-input outcome-type-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.type" style="width: 100%; font-size: 11px;">
+                  <option value="heal" {{#if (eq out.type "heal")}}selected{{/if}}>Heal Bars (Fixed)</option>
+                  <option value="heal_over_time" {{#if (eq out.type "heal_over_time")}}selected{{/if}}>Heal over Time (HoT)</option>
+                  <option value="mend_injury" {{#if (eq out.type "mend_injury")}}selected{{/if}}>Mend Injury</option>
+                  <option value="cure_debuff" {{#if (eq out.type "cure_debuff")}}selected{{/if}}>Cure Debuff(s)</option>
+                  <option value="buff" {{#if (eq out.type "buff")}}selected{{/if}}>Grant Buff</option>
+                  <option value="debuff" {{#if (eq out.type "debuff")}}selected{{/if}}>Inflict Debuff</option>
+                  <option value="skill_rank" {{#if (eq out.type "skill_rank")}}selected{{/if}}>Raise Skill (+)</option>
+                  <option value="stat_permanent" {{#if (eq out.type "stat_permanent")}}selected{{/if}}>Permanent Stat (+)</option>
+                  <option value="spell" {{#if (eq out.type "spell")}}selected{{/if}}>Cast Spell / Damage</option>
+                  <option value="roll_table" {{#if (eq out.type "roll_table")}}selected{{/if}}>Roll Table</option>
+                  <option value="custom" {{#if (eq out.type "custom")}}selected{{/if}}>Custom</option>
+                </select>
+              </td>
+              <td>
+                <select class="dcc-field-input" name="system.outcomes.{{idx}}.targetType" style="width: 100%; font-size: 11px;">
+                  <option value="self" {{#if (or (eq out.targetType "self") (not out.targetType))}}selected{{/if}}>Self</option>
+                  <option value="closest_mob" {{#if (eq out.targetType "closest_mob")}}selected{{/if}}>Closest Mob</option>
+                  <option value="target" {{#if (eq out.targetType "target")}}selected{{/if}}>Targeted Token</option>
+                </select>
+              </td>
+              <td>
+                {{#if (eq out.type "heal")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.healBars" value="{{out.healBars}}" placeholder="Bars" style="width: 50px; font-size: 11px;" />
+                    <span style="font-size: 10px;">Bars</span>
+                  </div>
+                {{else if (eq out.type "heal_over_time")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.healBars" value="{{out.healBars}}" placeholder="Bars" style="width: 40px; font-size: 11px;" />
+                    <span style="font-size: 10px;">b/rnd</span>
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.rounds" value="{{out.rounds}}" placeholder="3" style="width: 40px; font-size: 11px;" />
+                    <span style="font-size: 10px;">rnds</span>
+                  </div>
+                {{else if (eq out.type "mend_injury")}}
+                  <select class="dcc-field-input" name="system.outcomes.{{idx}}.injurySeverity" style="width: 100%; font-size: 11px;">
+                    <option value="minor" {{#if (eq out.injurySeverity "minor")}}selected{{/if}}>Minor Injury</option>
+                    <option value="major" {{#if (eq out.injurySeverity "major")}}selected{{/if}}>Major Injury</option>
+                    <option value="all" {{#if (eq out.injurySeverity "all")}}selected{{/if}}>All Injuries</option>
+                  </select>
+                {{else if (eq out.type "cure_debuff")}}
+                  <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.cureFilter" value="{{out.cureFilter}}" placeholder="All, Burned, Poisoned..." style="width: 100%; font-size: 11px;" />
+                {{else if (eq out.type "skill_rank")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.skillName" value="{{out.skillName}}" placeholder="Skill Name" style="width: 70%; font-size: 11px;" />
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.rankBonus" value="{{out.rankBonus}}" placeholder="+1" style="width: 30%; font-size: 11px;" />
+                  </div>
+                {{else if (eq out.type "stat_permanent")}}
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    <select class="dcc-field-input" name="system.outcomes.{{idx}}.stat" style="width: 50%; font-size: 11px;">
+                      <option value="str" {{#if (eq out.stat "str")}}selected{{/if}}>STR</option>
+                      <option value="dex" {{#if (eq out.stat "dex")}}selected{{/if}}>DEX</option>
+                      <option value="con" {{#if (eq out.stat "con")}}selected{{/if}}>CON</option>
+                      <option value="int" {{#if (eq out.stat "int")}}selected{{/if}}>INT</option>
+                      <option value="cha" {{#if (eq out.stat "cha")}}selected{{/if}}>CHA</option>
+                    </select>
+                    <input class="dcc-field-input" type="number" name="system.outcomes.{{idx}}.value" value="{{out.value}}" placeholder="+1" style="width: 50%; font-size: 11px;" />
+                  </div>
+                {{else if (eq out.type "buff")}}
+                  <select class="dcc-field-input outcome-buff-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.buffId" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Existing Buff --</option>
+                    {{#each out.buffOptions as |bOpt|}}
+                      <option value="{{bOpt.id}}" {{#if bOpt.selected}}selected{{/if}}>{{bOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if (eq out.type "debuff")}}
+                  <select class="dcc-field-input outcome-debuff-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.debuffId" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Existing Debuff --</option>
+                    {{#each out.debuffOptions as |dOpt|}}
+                      <option value="{{dOpt.id}}" {{#if dOpt.selected}}selected{{/if}}>{{dOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if (eq out.type "spell")}}
+                  <select class="dcc-field-input outcome-spell-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.spellId" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Spell --</option>
+                    {{#each out.spellOptions as |sOpt|}}
+                      <option value="{{sOpt.id}}" {{#if sOpt.selected}}selected{{/if}}>{{sOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else if (eq out.type "roll_table")}}
+                  <select class="dcc-field-input outcome-table-select" data-index="{{idx}}" name="system.outcomes.{{idx}}.tableUuid" style="width: 100%; font-size: 11px;">
+                    <option value="">-- Choose Roll Table --</option>
+                    {{#each out.tableOptions as |tOpt|}}
+                      <option value="{{tOpt.uuid}}" {{#if tOpt.selected}}selected{{/if}}>{{tOpt.name}}</option>
+                    {{/each}}
+                  </select>
+                {{else}}
+                  <div style="display: flex; gap: 4px;">
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.damage" value="{{out.damage}}" placeholder="2d12 + Int" style="width: 65%; font-size: 11px;" />
+                    <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.damageType" value="{{out.damageType}}" placeholder="Fire" style="width: 35%; font-size: 11px;" />
+                  </div>
+                {{/if}}
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-loot-outcome" data-index="{{idx}}" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="{{#if (eq ../system.executionMode "random")}}6{{else}}5{{/if}}" style="padding-bottom: 6px; padding-top: 2px;">
+                <input class="dcc-field-input" type="text" name="system.outcomes.{{idx}}.description" value="{{out.description}}" placeholder="Flavor & rules description..." style="width: 100%; font-size: 11px;" />
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; color: #777; font-size: 12px; padding: 6px;">
+        No effects configured. Click <strong>Add Effect</strong> above to attach multi-effect outcomes to this item.
+      </div>
+    {{/if}}
+  </div>
+</div>
+{{/if}}
 
 <div class="dcc-field-group">
   <span class="dcc-field-label">Notes</span>

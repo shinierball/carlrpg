@@ -27,6 +27,14 @@ export class GearDataModel extends BaseItemDataModel {
       }),
       skillModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       damageParts: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+      hasActivatedAbility: new fields.BooleanField({ initial: false }),
+      executionMode: new fields.StringField({ initial: 'all' }),
+      cooldown: new fields.StringField({ initial: 'None' }),
+      charges: new fields.SchemaField({
+        value: new fields.NumberField({ integer: true, initial: 0 }),
+        max: new fields.NumberField({ integer: true, initial: 0 })
+      }),
+      outcomes: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       notes: new fields.HTMLField({ initial: '' }),
       description: new fields.HTMLField({ initial: '' })
     };

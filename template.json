@@ -233,6 +233,14 @@
       },
       "skillModifiers": [],
       "damageParts": [],
+      "hasActivatedAbility": false,
+      "executionMode": "all",
+      "cooldown": "None",
+      "charges": {
+        "value": 0,
+        "max": 0
+      },
+      "outcomes": [],
       "notes": ""
     },
     "race": {
@@ -255,6 +263,15 @@
       "quantity": 1,
       "cooldown": "None",
       "lootType": "consumable",
+      "executionMode": "",
+      "charges": {
+        "value": 0,
+        "max": 0
+      },
+      "spellId": "",
+      "spellName": "",
+      "tableUuid": "",
+      "tableName": "",
       "outcomes": [],
       "notes": "",
       "description": ""

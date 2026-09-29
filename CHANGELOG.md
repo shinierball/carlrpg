@@ -1,3 +1,37 @@
+## 2.2.0
+
+### Item Outcome Builder 2.0, Multi-Effect Consumables, Wands, Scrolls & Activated Gear
+
+- **Unified Outcome Builder 2.0 Engine**:
+  - Implemented multi-effect outcome support across `loot` (consumables, potions, elixirs, lottery tickets, wands, scrolls) and `gear` (weapons, armor, accessories).
+  - **Execution Modes**:
+    - `All Effects (Guaranteed Combo)`: All defined effects resolve simultaneously upon consumption or activation. Perfect for complex restorative elixirs, troll blood tonics, and charged combat items.
+    - `Weighted Random Outcome`: Generates a single random outcome based on percentage weights summing to 100% (with automatic rebalancing, non-numeric validation, and manual overwrite warnings).
+    - `Roll Table`: Directly draws from any designated Foundry VTT RollTable.
+- **Rich Effect Types**:
+  - **Fixed Health Bar Healing (`heal`)**: Restores $X$ Health Bars immediately ($X \times \text{CON Mod}$ HP), capped at maximum HP.
+  - **Heal over Time (`heal_over_time`)**: Applies a HoT condition restoring $X$ bars/round for $Y$ combat rounds, dynamically evaluated and ticked by `DCCCombat` round processing.
+  - **Mend Injury (`mend_injury`)**: Mends injuries by severity (`minor`, `major`, or `all`), safely removing matching debuff items from the character.
+  - **Cure Debuff (`cure_debuff`)**: Cures debuffs matching a specific filter (e.g. `Burned`, `Poisoned`) or clears all active debuffs.
+  - **Grant Buff (`buff`)**: Applies canonical or custom buffs directly to crawler external buff slots or embedded item collections.
+  - **Inflict Debuff (`debuff`)**: Applies temporary or permanent negative conditions to target tokens.
+  - **Raise Skill Rank (`skill_rank`)**: Permanently increases an actor's skill rank by $+N$ and recalculates modified ranks.
+  - **Permanent Stat Boost (`stat_permanent`)**: Permanently increases an unenhanced ability score (STR, INT, CON, DEX, CHA) by $+N$, updating derived DCC stat modifiers and max HP.
+  - **Cast Spell / Damage (`spell`)**: Evaluates damage formulas (e.g. `2d12 + Int Mod` Fire) with disadvantage rules and condition triggers.
+  - **Roll Table Resolution (`roll_table`)**: Draws from specified RollTables.
+- **Wands with Charges Pool & Spell Scrolls**:
+  - **Wands & Charged Items**: Configurable charges pool (`charges.value` / `charges.max`) that decrements on each use and persists in inventory when depleted.
+  - **Spell Scrolls**: Single-use items allowing casting of inscribed spells with **zero mana required** from the caster.
+- **Activated Gear with On-Use Abilities**:
+  - Gear items can enable `system.hasActivatedAbility: true` with usage limits / cooldowns (e.g. `"Once per scene"`) and an attached outcomes builder.
+  - Activated directly from character inventory via a dedicated `[ ⚡ ]` action button, hotlist, or token HUD.
+  - Gear is never deleted when uses or charges reach zero.
+- **Interactive Chat Cards**:
+  - Multi-effect summary cards with 1-click action buttons: `[ Apply Damage ]`, `[ Apply Healing ]`, `[ Apply Regeneration ]`, `[ Mend Injury ]`, `[ Cure Debuff ]`, `[ Grant Skill Rank ]`, `[ Grant Stat Boost ]`, `[ Apply Buff / Debuff ]`, and `[ Draw from Table ]`.
+- **Automated Unit Testing & Verification**:
+  - Added `tests/item-effects-builder.test.mjs` verifying models, actor helpers, guaranteed combos, wands with charges, free cast scrolls, activated gear, item sheet context, and chat card click bindings.
+  - 100% test pass rate across 112 suites (655 passing, 0 failures).
+
 ## 2.0.60
 
 ### Session Tracking Crawler Selection Default & Ubiquitous Start Grind UI

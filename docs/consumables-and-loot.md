@@ -1,74 +1,98 @@
-# Dungeon Crawler Carl RPG — Consumables, Loot & Scratch-off System
+# Dungeon Crawler Carl RPG — Consumables, Loot & Outcome Builder 2.0 System
 
 ## Overview
 
-The **Loot & Consumable System** in CarlRPG provides complete support for consumable inventory items, potion resources, scene-restricted items, and multi-outcome random tables (such as World Dungeon lottery scratch-off tickets).
+The **Loot, Consumable & Gear Outcome System** in CarlRPG provides a unified effects engine for consumable items (potions, elixirs), spell scrolls, wands with charges, lottery scratch-off tickets, and activated gear pieces.
 
-Consumable items can be triggered from:
-1. **Crawler Character Sheet** (Page 4: Inventory tab -> `.item-use`)
+Items can be triggered and activated from:
+1. **Crawler Character Sheet** (Page 4: Inventory tab -> `.item-use` button on consumables or activated gear)
 2. **Combat Hotlist** (Slots 1–10 -> `.roll-hotlist-use`)
-3. **Crawler Token Action HUD** (Hotbar & Token action overlay -> `[ Use ]`)
+3. **Crawler Token Action HUD** (Token action overlay -> `[ Use ]`)
 
 ---
 
 ## Key Features & Mechanics
 
-### 1. $N$ Uses & Charges (`system.quantity`)
-- `system.quantity` tracks remaining uses.
-- Using an item via `item.useLoot()` decrements `system.quantity` by 1.
-- Consuming the final use (quantity drops to 0 or 1 on last use) automatically deletes the item from the character's inventory, keeping the sheet tidy.
+### 1. Execution Modes (`system.executionMode`)
+- **All Effects (Guaranteed Combo)** (`executionMode: "all"`):
+  - Every defined effect in the outcomes list resolves simultaneously upon item use.
+  - Ideal for restorative elixirs, multi-benefit potions (e.g. heal 2 bars, mend minor injury, cure debuffs, and apply Troll Blood HoT), and activated gear abilities.
+  - Chat card lists all applied effects in an organized multi-effect summary card with 1-click apply/re-apply buttons.
+- **Weighted Random Outcome** (`executionMode: "random"`):
+  - Single outcome randomly rolled based on integer weights summing to 100%.
+  - Used for World Dungeon lottery tickets (e.g., Scratch-Off Tickets).
+  - Displays a weight warning banner if weights do not sum to 100% and provides a 1-click `[ Auto-balance to 100% ]` helper.
+- **Roll Table** (`executionMode: "table"`):
+  - Draws directly from a designated Foundry VTT RollTable (`system.tableUuid` / `system.tableName`).
 
-### 2. Scene Cooldown Enforcement (`system.cooldown`)
-- Configurable per item (e.g., `"Once per scene"`, `"None"`, `"1/Round"`).
-- When set to `"Once per scene"`:
-  - The system checks `item.getFlag('carl-rpg', 'lastUsedScene')` against `canvas.scene.id`.
-  - If the item has already been used in the current scene, further uses are rejected with a warning notification: *"Item can only be used once per scene and was already used in this scene!"*.
-  - When the crawler moves to a new scene / dungeon chamber, the cooldown automatically refreshes.
+---
 
-### 3. Multi-Outcome & Scratch-off Random Tables (`system.outcomes`)
-- **Conditional Random Table Display**:
-  - The Scratch-off Outcomes / Random Table builder is **only displayed when the item's Loot Type is set to `scratch_ticket` (`Scratch-off Ticket / Lottery`)**.
-  - Standard consumable, treasure, quest, or crafting items keep their sheets clean and uncluttered without the scratch-off table builder.
-  - Dynamically updates upon changing the Loot Type dropdown.
-- **Auto-Calculated Outcome Weights**:
-  - When outcomes are added via `[ Add Outcome ]`, weights are automatically calculated and distributed evenly to sum to exactly **100%** (e.g. 1 outcome = 100%, 2 outcomes = 50%/50%, 3 outcomes = 34%/33%/33%, 4 outcomes = 25% each).
-  - Removing an outcome via `[ Delete ]` automatically re-balances remaining outcomes to sum to 100%.
-  - Includes a 1-click `[ Auto-balance to 100% ]` action in the UI to redistribute weights at any time.
-- **Manual Overwrite & Summation Warning**:
-  - Users are free to overwrite any outcome's weight to create custom probability distributions.
-  - If the sum of all outcome weights does not equal 100%, the sheet displays a prominent orange warning banner (`Total outcome weight is X% (summation must equal 100%)`) with a quick auto-balance button, and emits a notification warning upon saving.
-- **Strictly Numeric Weights**:
-  - Non-numeric input is strictly disallowed. The input field enforces `type="number"` and sanitizes non-numeric characters in real time, during data preparation, and on form submission.
-- **Outcome Types & Mechanics**:
-  - **Spell / Attack**: Evaluates damage with actor stat modifiers (e.g. `2d12 + Int Mod` Fire), applies DCC Disadvantage rules, and flags Debuffs (such as the Burned Debuff if 1+ Health Bar is lost).
-  - **Healing**: Heals a specified number of **Health Bars** (`healBars * hpPerBar`, where 1 Health Bar = CON modifier).
-  - **Buff**: Allows selecting from existing canonical buffs (e.g. *Strength Buff*, *Damage Resistance*). **Buff outcomes strictly have NO damage component** — damage and damage types are omitted from the sheet UI, stripped from data, and excluded from chat cards. Generates a 1-click `[ Apply Buff ]` action button.
-  - **Debuff**: Allows selecting from existing canonical debuffs (e.g. *Blinded*, *Burned*, *Shocked*). **Debuff outcomes strictly have NO damage component** — damage and damage types are omitted from the sheet UI, stripped from data, and excluded from chat cards. Generates a 1-click `[ Apply Debuff ]` action button.
-- **Target Detection**:
-  - `targetType: "closest_mob"`: Calculates grid/Euclidean distance from the crawler's token to all alive mob tokens on the canvas scene and targets the closest foe.
-  - `targetType: "self"`: Targets the user.
-  - `targetType: "target"`: Targets the player's selected canvas token.
+### 2. Supported Effect & Outcome Types
 
-### 4. Interactive Chat Cards
-- **Scratch-off Reveal Theme**: Rich DCC-themed cards displaying remaining scratches, revealed outcome banner, target details, and mechanics text.
-- **1-Click Action Buttons**:
-  - `[ Apply Damage ]`: Applies evaluated damage directly to the target token deducting DR via `DCCCombatMetrics`.
-  - `[ Apply Healing ]`: Applies evaluated Health Bar healing directly to the recipient, capped at maximum HP.
-  - `[ Apply Buff ]`: Applies the buff condition directly to the target crawler (assigning to an open external buff slot or embedded buff document).
-  - `[ Apply Debuff ]`: Inflicts the debuff condition as an embedded item directly onto target actor(s).
+| Outcome Type | Description | Target Options | Mechanics & Resolution |
+| :--- | :--- | :--- | :--- |
+| **Heal Bars (Fixed)** | Restores $X$ Health Bars immediately. | Self, Closest Mob, Targeted Token | Calculates $X \times \text{CON Mod}$ HP restored; capped at max HP. |
+| **Heal over Time (HoT)** | Restores $X$ Health Bars per round for $Y$ rounds. | Self, Closest Mob, Targeted Token | Creates embedded buff item with `buffType: "heal"`, `healingPerRound: "$X$ bars"`, automatically ticked during `DCCCombat` rounds. |
+| **Mend Injury** | Removes Minor, Major, or All injuries. | Self, Targeted Token | Mends injury debuffs matching severity (`minor`, `major`, or `all`). |
+| **Cure Debuff(s)** | Removes specific or all active debuffs. | Self, Targeted Token | Cures debuffs matching filter (e.g., `all`, `Burned`, `Poisoned`, `Bleeding`). |
+| **Grant Buff** | Bestows a temporary or structured buff. | Self, Closest Mob, Targeted Token | Selectable from canonical DCC buffs or custom. Placed into external buff slot or embedded buff. |
+| **Inflict Debuff** | Inflicts a debuff condition on target(s). | Self, Closest Mob, Targeted Token | Selectable from canonical DCC debuffs or custom. Embedded onto recipient. |
+| **Raise Skill Rank (+)** | Permanently increments a skill's rank by $+N$. | Self, Targeted Token | Permanently updates `system.rank` and recomputes effective/modified skill rank. |
+| **Permanent Stat Boost (+)** | Permanently increments an unenhanced ability score by $+N$. | Self, Targeted Token | Permanently updates `system.abilities.<stat>.unenhanced` and recalculates DCC stat modifier and max HP. |
+| **Cast Spell / Damage** | Unleashes spell attack or damage packet. | Self, Closest Mob, Targeted Token | Evaluates dice formula (e.g., `2d12 + Int Mod`), damage type, and disadvantage rules. |
+| **Roll Table** | Triggers a draw from a specified RollTable. | Self, Targeted Token | Draws from designated table UUID. |
+| **Custom** | Displays customized flavor and effect descriptions. | Self, Closest Mob, Targeted Token | Outputs rich chat card text. |
+
+---
+
+### 3. Wands with Charges Pool & Spell Scrolls
+
+- **Wands & Charged Items** (`lootType: "wand"`):
+  - Equipped with a charges pool (`system.charges.value` / `system.charges.max`).
+  - Using the wand decrements `charges.value` by 1.
+  - When charges reach 0, the item is **retained** in inventory (not deleted) and alerts the user when attempted to be used while depleted.
+- **Spell Scrolls** (`lootType: "scroll"`):
+  - Single-use items inscribed with a specific spell (`system.spellId` / `system.spellName`).
+  - Casting from a scroll incurs **0 mana cost** to the crawler, allowing casting even with 0 MP remaining.
+  - Consuming the scroll decrements quantity and removes it on final use.
+
+---
+
+### 4. Activated Gear with On-Use Effects
+
+- Pieces of armor, weapons, or accessories can enable `system.hasActivatedAbility: true`.
+- Supports usage limits / cooldowns (e.g. `"Once per scene"`, `"1/Day"`).
+- Supports charges pool (`system.charges`) or uses.
+- Includes the full Outcomes Builder:
+  - Attach multi-effect guaranteed combos or random effects to any piece of gear.
+  - Uses can be triggered directly from the sheet Inventory tab via the red bolt `[ ⚡ ]` action button, hotlist, or token HUD.
+  - Gear is never deleted when uses run out (retains 0 quantity or 0 charges).
+
+---
+
+### 5. Interactive Chat Cards
+
+All consumable and activated gear usages produce rich, themed chat cards with 1-click GM/player interaction buttons:
+- `[ Apply Damage ]`: Applies evaluated damage deducting DR via `DCCCombatMetrics`.
+- `[ Apply Healing ]`: Restores health bars directly, capped at max HP.
+- `[ Apply Regeneration ]`: Applies HoT buff condition with round duration.
+- `[ Mend Injury ]`: Clears minor/major injury debuffs from target.
+- `[ Cure Debuff ]`: Clears debuffs matching the filter.
+- `[ Grant Skill Rank ]`: Increases target's skill rank.
+- `[ Grant Stat Boost ]`: Permanently increases target's unenhanced stat.
+- `[ Apply Buff ]` / `[ Apply Debuff ]`: Instantly applies condition items.
+- `[ Draw from Table ]`: Rolls on the linked roll table.
 
 ---
 
 ## Canonical Compendium Pack (`carl-rpg.items`)
 
-The system ships with a native items compendium pack pre-loaded with:
-
 1. **Normal Mana Potion** (`dccitm0000000001`):
-   - Refills mana completely to maximum (10 MP base).
+   - Refills crawler mana completely to maximum (10 MP base).
    - Quantity: 1.
 2. **Scratch-off Ticket - Fireball or Custard** (`dccitm0000000002`):
    - 6 Scratches total (`quantity: 6`).
    - Limit: `"Once per scene"`.
    - Outcomes (50/50 Chance):
-     - **50% Level 5 Fireball**: `2d12 + Int Mod` Fire damage to the closest mob (moves slowly; attack with Disadvantage). 10ft blast radius. Targets losing 1+ Health Bar gain the Burned Debuff.
-     - **50% Healing Blob of Custard**: Strikes the closest mob with a soothing glob of vanilla custard, healing them for 5 full Health Bars (`5 * hpPerBar`).
+     - **50% Level 5 Fireball**: `2d12 + Int Mod` Fire damage to closest mob. Attack made with Disadvantage. Targets losing 1+ Health Bar gain Burned Debuff.
+     - **50% Healing Blob of Custard**: Strikes closest mob with soothing vanilla custard, healing 5 full Health Bars (`5 * hpPerBar`).

@@ -80,13 +80,15 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 - **Crawler Token Selection Action HUDs**:
   - **Dynamic Token Hotbar HUD**: Automatically appears directly above Foundry's macro bar (`#hotbar`) whenever a crawler token is selected on the canvas. Features all 10 character sheet hotlist slots with complete interactivity (Hit & Damage for attacks, Cast & Damage for spells, Equip/Unequip toggling for gear, Use for consumables/loot, Roll & Damage for skills, drag-and-drop item assignment, and slot clearing).
   - **Left Action Panel (Attacks & Active Skills)**: Automatically appears on the left of the screen directly below the scene list (`#navigation` / `#scene-list`). Displays all character attacks with one-click Hit & Damage buttons, plus all active non-passive skills with Check/Hit & Damage buttons (passive skills are automatically filtered out). Fully reactive to actor updates, item changes, and canvas selection changes.
-- **Consumables, Scratch-off Lottery Tickets & Items Compendium (`carl-rpg.items`)**:
-  - Full support for multi-use consumable items (`system.quantity`) that decrement on use and remove upon consuming the final charge.
+- **Consumables, Outcome Builder 2.0, Wands, Scrolls, Activated Gear & Items Compendium (`carl-rpg.items`)**:
+  - **Outcome Builder 2.0 Engine**: Full support for multi-effect consumable items, elixirs, potions, wands with charges, single-use scrolls, and activated gear with on-use effects.
+  - **Execution Modes**: Select between **All Effects (Guaranteed Combo)** where all defined effects resolve simultaneously, **Weighted Random** (lottery scratch-offs summing to 100%), and **Roll Table** resolution.
+  - **Rich Effect Types**: Supports fixed Health Bar healing, Heal over Time (HoT) ticking per combat round, injury mending (Minor, Major, All), curing debuffs, granting buffs, inflicting debuffs, permanent skill rank upgrades, permanent unenhanced ability score boosts, and casting spells without caster mana cost.
+  - **Wands with Charges Pool & Free Cast Scrolls**: Wands track remaining charges and persist in inventory when depleted; scrolls allow 1-time free casting of inscribed spells with zero MP required.
+  - **Activated Gear with On-Use Abilities**: Armor and accessories can enable activated abilities with usage cooldowns (e.g. `"Once per scene"`) and attached outcomes, triggered directly from character inventory via `[ ⚡ ]`.
   - Scene-restricted usage limits (`system.cooldown: "Once per scene"`): prevents multiple uses in the same chamber or encounter, automatically refreshing upon entering a new scene.
-    - Weighted random outcome tables (`system.outcomes`) for World Dungeon lottery tickets (e.g. 50% Level 5 Fireball vs 50% Healing Blob of Custard), gated to only render for scratch ticket loot types.
-  - Automatic weight calculation and distribution summing to 100% as outcomes are added/removed, with manual overwrite support, non-numeric validation, and summation warning banners.
-  - Smart canvas proximity targeting (`targetType: "closest_mob"`): detects the nearest hostile mob token on the canvas, calculates distance, and aims chaotic magic at the foe.
-  - Interactive chat cards featuring lottery reveal graphics, 1-click **Apply Damage** (with DR deductions), 1-click **Apply Healing** (restoring CON mod Health Bars, capped at max HP), and 1-click **Apply Buff / Apply Debuff** (with strictly NO damage component).
+  - Smart canvas proximity targeting (`targetType: "closest_mob"`): detects nearest hostile mob token on the canvas, calculates distance, and aims chaotic magic at the foe.
+  - Interactive chat cards featuring reveal graphics, 1-click **Apply Damage** (with DR deductions), 1-click **Apply Healing**, 1-click **Apply Regeneration (HoT)**, 1-click **Mend Injury**, 1-click **Cure Debuff**, 1-click **Grant Skill Rank**, 1-click **Grant Stat Boost**, and 1-click **Apply Buff / Debuff**.
   - Preloaded system items compendium (`carl-rpg.items`) with canonical **Normal Mana Potion** and **Scratch-off Ticket - Fireball or Custard**.
 - **Pure DCC Mechanics**: Automated modifier calculations, Evade checks, DR totals, and dice rolls.
 - **Damage Type Integration & Multi-Typed Attacks**:

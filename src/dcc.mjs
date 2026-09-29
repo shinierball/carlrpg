@@ -1295,6 +1295,287 @@ export function onRenderChatMessage(message, html, data) {
     }
   }
 
+  // 7a. Handle click on "Apply HoT (Heal over Time)" from chat card
+  const applyHoTButtons = query('.dcc-apply-hot-btn');
+  for (const btn of applyHoTButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const hotClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const name = btn.dataset?.name || $btn?.data('name') || 'Regeneration';
+      const healBars = Number(btn.dataset?.bars ?? $btn?.data('bars')) || 1;
+      const rounds = Number(btn.dataset?.rounds ?? $btn?.data('rounds')) || 3;
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.applyHoT === 'function') {
+          await targetActor.applyHoT({ name, healBars, rounds });
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Applied ${name} (+${healBars} bars/round, ${rounds} rounds) to ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', hotClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(hotClickHandler);
+    }
+  }
+
+  // 7b. Handle click on "Mend Injury" from chat card
+  const mendInjuryButtons = query('.dcc-mend-injury-btn');
+  for (const btn of mendInjuryButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const mendClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const severity = btn.dataset?.severity || $btn?.data('severity') || 'minor';
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.mendInjury === 'function') {
+          await targetActor.mendInjury(severity);
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Mended ${severity.toUpperCase()} injury for ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', mendClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(mendClickHandler);
+    }
+  }
+
+  // 7c. Handle click on "Cure Debuff" from chat card
+  const cureDebuffButtons = query('.dcc-cure-debuff-btn');
+  for (const btn of cureDebuffButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const cureClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const filter = btn.dataset?.filter || $btn?.data('filter') || 'all';
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.cureDebuffs === 'function') {
+          await targetActor.cureDebuffs(filter);
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Cured debuff (${filter.toUpperCase()}) for ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', cureClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(cureClickHandler);
+    }
+  }
+
+  // 7d. Handle click on "Grant Skill Rank" from chat card
+  const applySkillButtons = query('.dcc-apply-skill-rank-btn');
+  for (const btn of applySkillButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const skillClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const skillName = btn.dataset?.skill || $btn?.data('skill') || 'Skill';
+      const bonus = Number(btn.dataset?.bonus ?? $btn?.data('bonus')) || 1;
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.increaseSkillRank === 'function') {
+          await targetActor.increaseSkillRank(skillName, bonus);
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Increased skill "${skillName}" by +${bonus} for ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', skillClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(skillClickHandler);
+    }
+  }
+
+  // 7e. Handle click on "Grant Stat Boost" from chat card
+  const applyStatButtons = query('.dcc-apply-stat-btn');
+  for (const btn of applyStatButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const statClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const stat = btn.dataset?.stat || $btn?.data('stat') || 'str';
+      const bonus = Number(btn.dataset?.bonus ?? $btn?.data('bonus')) || 1;
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (typeof targetActor.increaseUnenhancedStat === 'function') {
+          await targetActor.increaseUnenhancedStat(stat, bonus);
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Permanently increased ${stat.toUpperCase()} by +${bonus} for ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', statClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(statClickHandler);
+    }
+  }
+
+  // 7f. Handle click on "Draw from Table" from chat card
+  const rollTableButtons = query('.dcc-roll-table-btn');
+  for (const btn of rollTableButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const tableClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const tableId = btn.dataset?.tableId || $btn?.data('table-id');
+      const tableName = btn.dataset?.tableName || $btn?.data('table-name') || 'Roll Table';
+
+      let table = null;
+      if (typeof game !== 'undefined' && game.tables) {
+        table = game.tables.get?.(tableId) || (Array.isArray(game.tables) ? game.tables.find(t => t.id === tableId || t.name === tableName) : null);
+      }
+      if (table && typeof table.draw === 'function') {
+        await table.draw();
+      } else {
+        ui.notifications?.info(`DCC RPG | Drew from table: ${tableName}`);
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', tableClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(tableClickHandler);
+    }
+  }
+
   // 8. Enhance chat card or message sender with Crawler Trophy Badges (Boss Stars & Skulls)
   try {
     const speakerActorId = message?.speaker?.actor || message?.flags?.['carl-rpg']?.actorId;

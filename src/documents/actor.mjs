@@ -3856,6 +3856,235 @@ export class DCCActor extends Actor {
   }
 
   /**
+   * Mend injury debuffs from this actor.
+   * @param {string} [severity='minor'] 'minor' | 'major' | 'long_term' | 'any'
+   * @returns {Promise<Array<object>>} Removed debuffs
+   */
+  async mendInjury(severity = 'minor') {
+    const norm = String(severity || 'minor').toLowerCase().trim();
+    const allDebuffs = this.items
+      ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff'))
+      : [];
+
+    const toRemove = [];
+    for (const debuff of allDebuffs) {
+      const dName = debuff.name.toLowerCase().trim();
+      const dSev = String(debuff.system?.injurySeverity || debuff.system?.severity || '').toLowerCase().trim();
+      const isInjury = Boolean(dSev) || dName.includes('injury') || dName.includes('wound') || dName.includes('broken') || dName.includes('fracture') || dName.includes('sprain') || dName.includes('shatter');
+      if (!isInjury) continue;
+
+      if (norm === 'all' || norm === 'any') {
+        toRemove.push(debuff);
+      } else if (norm === 'minor') {
+        if (dSev === 'minor' || (dName.includes('minor') && !dName.includes('long-term')) || dName.includes('sprain') || (!dSev && !dName.includes('major') && !dName.includes('long-term') && !dName.includes('shatter'))) {
+          toRemove.push(debuff);
+          break;
+        }
+      } else if (norm === 'major') {
+        if (dSev === 'major' || (dName.includes('major') && !dName.includes('long-term')) || dName.includes('shatter') || dName.includes('broken')) {
+          toRemove.push(debuff);
+          break;
+        }
+      } else if (norm.includes('long')) {
+        if (dSev.includes('long') || dName.includes('long-term')) {
+          toRemove.push(debuff);
+          break;
+        }
+      } else if (dSev === norm || dName.includes(norm)) {
+        toRemove.push(debuff);
+        break;
+      }
+    }
+
+    if (toRemove.length > 0) {
+      const ids = toRemove.map(i => i.id || i._id).filter(Boolean);
+      if (typeof this.deleteEmbeddedDocuments === 'function' && ids.length) {
+        await this.deleteEmbeddedDocuments('Item', ids);
+      } else {
+        for (const item of toRemove) {
+          if (typeof item.delete === 'function') {
+            await item.delete();
+          } else if (Array.isArray(this.items)) {
+            const idx = this.items.findIndex(i => (i.id === item.id || i._id === item.id));
+            if (idx !== -1) this.items.splice(idx, 1);
+          }
+        }
+      }
+    }
+    return toRemove;
+  }
+
+  /**
+   * Cure debuffs matching filter ('all', 'poison', 'disease', 'bleed', etc.)
+   * @param {string} [filter='all']
+   * @returns {Promise<Array<object>>} Removed debuffs
+   */
+  async cureDebuffs(filter = 'all') {
+    const norm = String(filter || 'all').toLowerCase().trim();
+    const allDebuffs = this.items
+      ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff'))
+      : [];
+
+    const toRemove = [];
+    for (const debuff of allDebuffs) {
+      const dName = debuff.name.toLowerCase().trim();
+      const dType = String(debuff.system?.damageType || '').toLowerCase().trim();
+      if (norm === 'all') {
+        toRemove.push(debuff);
+      } else if (dName.includes(norm) || dType.includes(norm)) {
+        toRemove.push(debuff);
+      }
+    }
+
+    if (toRemove.length > 0) {
+      const ids = toRemove.map(i => i.id || i._id).filter(Boolean);
+      if (typeof this.deleteEmbeddedDocuments === 'function' && ids.length) {
+        await this.deleteEmbeddedDocuments('Item', ids);
+      } else {
+        for (const item of toRemove) {
+          if (typeof item.delete === 'function') {
+            await item.delete();
+          } else if (Array.isArray(this.items)) {
+            const idx = this.items.findIndex(i => (i.id === item.id || i._id === item.id));
+            if (idx !== -1) this.items.splice(idx, 1);
+          }
+        }
+      }
+    }
+    return toRemove;
+  }
+
+  /**
+   * Apply fixed number of health bars of healing to this actor.
+   * @param {number} [bars=1]
+   * @returns {Promise<object>}
+   */
+  async applyHealingBars(bars = 1) {
+    const hpPerBar = getHpPerBar(this);
+    const healAmt = bars * hpPerBar;
+    const currentHp = Number(this.system?.attributes?.hp?.value ?? this.system?.attributes?.hp?.max ?? 0);
+    const maxHp = Number(this.system?.attributes?.hp?.max) || (10 * hpPerBar);
+    const newHp = Math.min(maxHp, currentHp + healAmt);
+    const actualHealed = Math.max(0, newHp - currentHp);
+    const hpPct = maxHp > 0 ? Math.round((newHp / maxHp) * 100) : 100;
+    await this.update({
+      'system.attributes.hp.value': newHp,
+      'system.attributes.hp.pct': hpPct
+    });
+    return { actualHealed, newHp, maxHp, bars, hpPerBar };
+  }
+
+  /**
+   * Apply a Heal Over Time (HoT) buff to this actor.
+   * @param {object} params
+   * @param {string} [params.name]
+   * @param {number} [params.healBars=1]
+   * @param {number} [params.rounds=3]
+   * @returns {Promise<Item>}
+   */
+  async applyHoT({ name = 'Regeneration', healBars = 1, rounds = 3 } = {}) {
+    const buffData = {
+      name,
+      type: 'buff',
+      img: 'icons/svg/aura.svg',
+      system: {
+        buffType: 'heal',
+        healingPerRound: `${healBars} bar${healBars > 1 ? 's' : ''}`,
+        durationRounds: rounds,
+        duration: `${rounds} Rounds`,
+        description: `Restores ${healBars} Health Bar(s) per combat round for ${rounds} combat rounds.`
+      }
+    };
+    if (typeof this.createEmbeddedDocuments === 'function') {
+      const created = await this.createEmbeddedDocuments('Item', [buffData]);
+      return created[0] || null;
+    } else if (Array.isArray(this.items)) {
+      const DCCItemClass = CONFIG.Item?.documentClass || DCCItem;
+      const item = new DCCItemClass(buffData, this);
+      this.items.push(item);
+      return item;
+    }
+    return null;
+  }
+
+  /**
+   * Permanently increase a skill's rank by a specified amount.
+   * @param {string} skillName
+   * @param {number} [delta=1]
+   * @returns {Promise<object>}
+   */
+  async increaseSkillRank(skillName, delta = 1) {
+    if (!skillName) return null;
+    const cleanName = skillName.trim().toLowerCase();
+    const existing = this.items
+      ? (this.items.find ? this.items.find(i => i.type === 'skill' && i.name.toLowerCase().trim() === cleanName) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && i.name.toLowerCase().trim() === cleanName))
+      : null;
+
+    if (existing) {
+      const oldRank = Number(existing.system?.rank) || 1;
+      const newRank = oldRank + delta;
+      await existing.update({ 'system.rank': newRank });
+      return { skill: existing, oldRank, previousRank: oldRank, newRank, isNew: false };
+    }
+
+    const compSkill = (CONFIG.DCC?.skills || []).find(s => s.name.toLowerCase().trim() === cleanName);
+    const skillData = compSkill ? {
+      name: compSkill.name,
+      type: 'skill',
+      img: compSkill.img || 'icons/svg/book.svg',
+      system: {
+        ...structuredClone(compSkill.system || {}),
+        rank: delta,
+        modifiedRank: delta
+      }
+    } : {
+      name: skillName.trim(),
+      type: 'skill',
+      img: 'icons/svg/book.svg',
+      system: {
+        rank: delta,
+        modifiedRank: delta,
+        stat: 'str',
+        skillType: 'Utility',
+        category: 'Utility'
+      }
+    };
+
+    let createdSkill = null;
+    if (typeof this.createEmbeddedDocuments === 'function') {
+      const created = await this.createEmbeddedDocuments('Item', [skillData]);
+      createdSkill = created[0] || null;
+    } else if (Array.isArray(this.items)) {
+      const DCCItemClass = CONFIG.Item?.documentClass || DCCItem;
+      createdSkill = new DCCItemClass(skillData, this);
+      this.items.push(createdSkill);
+    }
+    return { skill: createdSkill, oldRank: 0, previousRank: 0, newRank: delta, isNew: true };
+  }
+
+  /**
+   * Permanently increase an unenhanced ability score by a specified amount.
+   * @param {string} stat 'str' | 'int' | 'con' | 'dex' | 'cha'
+   * @param {number} [delta=1]
+   * @returns {Promise<object>}
+   */
+  async increaseUnenhancedStat(stat, delta = 1) {
+    const s = String(stat || '').toLowerCase().trim();
+    if (!['str', 'int', 'con', 'dex', 'cha'].includes(s)) return null;
+    const curObj = this.system?.abilities?.[s] || { value: 10, unenhanced: 10 };
+    const curUnenhanced = Number(curObj.unenhanced ?? curObj.value ?? 10);
+    const curVal = Number(curObj.value ?? 10);
+    const newUnenhanced = curUnenhanced + delta;
+    const newVal = curVal + delta;
+
+    await this.update({
+      [`system.abilities.${s}.unenhanced`]: newUnenhanced,
+      [`system.abilities.${s}.value`]: newVal
+    });
+    return { stat: s, oldUnenhanced: curUnenhanced, newUnenhanced, oldValue: curVal, newValue: newVal };
+  }
+
+  /**
    * Perform resting for this crawler.
    * Supports all official CarlRPG rest durations:
    * - '1hour': 1 hour of non-combat rest -> 1 Health Bar slot (+hpPerBar HP) & 5 Mana recovered.

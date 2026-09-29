@@ -216,6 +216,63 @@ export class DCCItemSheet extends BaseItemSheet {
   }
 
   /**
+   * Retrieve all canonical and custom spells from CONFIG.DCC.spells, compendiums, and world items.
+   * @returns {Promise<Array<object>>}
+   */
+  async getAvailableSpells() {
+    const map = new Map();
+    const baseSpells = CONFIG.DCC?.spells || DCC_SPELLS || [];
+    for (const s of baseSpells) {
+      const key = (s.name || '').toLowerCase().trim();
+      if (key && !map.has(key)) {
+        map.set(key, {
+          id: s._id || s.id || s.name,
+          name: s.name,
+          type: 'spell',
+          img: s.img || 'icons/svg/daze.svg',
+          system: s.system || {}
+        });
+      }
+    }
+    if (typeof game !== 'undefined' && game.items) {
+      for (const item of game.items) {
+        if (item.type === 'spell') {
+          const key = item.name.toLowerCase().trim();
+          if (key && !map.has(key)) {
+            map.set(key, {
+              id: item.id,
+              name: item.name,
+              type: 'spell',
+              img: item.img || 'icons/svg/daze.svg',
+              system: item.system || {}
+            });
+          }
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Retrieve all available RollTables from world and compendiums.
+   * @returns {Promise<Array<object>>}
+   */
+  async getAvailableRollTables() {
+    const tables = [];
+    if (typeof game !== 'undefined' && game.tables) {
+      for (const t of game.tables) {
+        tables.push({
+          id: t.id || t._id,
+          uuid: t.uuid || t.id,
+          name: t.name,
+          img: t.img || 'icons/svg/d20-grey.svg'
+        });
+      }
+    }
+    return tables.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
    * Helper to normalize skillModifiers to an array regardless of whether it's an Array or Object.
    * @param {Array|object} raw
    * @returns {Array<{name: string, bonus: number}>}
@@ -343,12 +400,16 @@ export class DCCItemSheet extends BaseItemSheet {
       'Psychic', 'Slashing', 'Sonic'
     ];
 
-    if (context.item.type === 'loot') {
-      context.availableBuffs = await this.getAvailableBuffs();
-      context.availableDebuffs = await this.getAvailableDebuffs();
+    context.availableBuffs = await this.getAvailableBuffs();
+    context.availableDebuffs = await this.getAvailableDebuffs();
+    context.availableSpells = await this.getAvailableSpells();
+    context.availableRollTables = await this.getAvailableRollTables();
 
+    if (context.item.type === 'loot') {
       const lootType = String(context.system?.lootType || '').toLowerCase().trim();
       context.isScratchTicket = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
+      const isRandomMode = context.isScratchTicket || context.system?.executionMode === 'random';
+      context.isRandomMode = isRandomMode;
 
       let outcomes = context.system.outcomes;
       if (outcomes && !Array.isArray(outcomes) && typeof outcomes === 'object') {
@@ -385,12 +446,84 @@ export class DCCItemSheet extends BaseItemSheet {
             name: d.name,
             selected: Boolean((out.debuffId && (out.debuffId === d.id || out.debuffId === d.name)) || (out.name && out.name.toLowerCase() === d.name.toLowerCase()))
           }));
+          out.spellOptions = context.availableSpells.map(s => ({
+            id: s.id,
+            name: s.name,
+            selected: Boolean((out.spellId && out.spellId === s.id) || (out.name && out.name.toLowerCase() === s.name.toLowerCase()))
+          }));
+          out.tableOptions = context.availableRollTables.map(t => ({
+            id: t.id,
+            uuid: t.uuid,
+            name: t.name,
+            selected: Boolean((out.tableUuid && (out.tableUuid === t.uuid || out.tableUuid === t.id)) || (out.name && out.name.toLowerCase() === t.name.toLowerCase()))
+          }));
+          out.skillOptions = (context.availableSkills || []).map(sk => ({
+            name: sk.name,
+            selected: Boolean((out.skillName && out.skillName.toLowerCase() === sk.name.toLowerCase()) || (out.name && out.name.toLowerCase() === sk.name.toLowerCase()))
+          }));
         }
         context.system.outcomes = outcomes;
       }
       context.outcomesTotalWeight = totalWeight;
       context.isWeightValid = totalWeight === 100;
-      context.weightWarning = outcomes?.length > 0 && totalWeight !== 100;
+      context.weightWarning = isRandomMode ? (outcomes?.length > 0 && totalWeight !== 100) : false;
+    }
+
+    if (context.item.type === 'gear') {
+      let outcomes = context.system.outcomes;
+      if (outcomes && !Array.isArray(outcomes) && typeof outcomes === 'object') {
+        outcomes = Object.values(outcomes);
+      }
+      let totalWeight = 0;
+      if (Array.isArray(outcomes)) {
+        for (const out of outcomes) {
+          if (!out) continue;
+          let w = out.weight;
+          if (typeof w === 'string') {
+            const digits = w.trim().replace(/[^0-9]/g, '');
+            w = digits === '' ? 0 : parseInt(digits, 10);
+          } else if (typeof w === 'number') {
+            w = Number.isFinite(w) ? Math.floor(w) : 0;
+          } else {
+            w = 0;
+          }
+          out.weight = Math.max(0, w);
+          totalWeight += out.weight;
+
+          if (out.type === 'buff' || out.type === 'debuff') {
+            out.damage = '';
+            out.damageType = '';
+          }
+          out.buffOptions = context.availableBuffs.map(b => ({
+            id: b.id,
+            name: b.name,
+            selected: Boolean((out.buffId && (out.buffId === b.id || out.buffId === b.name)) || (out.name && out.name.toLowerCase() === b.name.toLowerCase()))
+          }));
+          out.debuffOptions = context.availableDebuffs.map(d => ({
+            id: d.id,
+            name: d.name,
+            selected: Boolean((out.debuffId && (out.debuffId === d.id || out.debuffId === d.name)) || (out.name && out.name.toLowerCase() === d.name.toLowerCase()))
+          }));
+          out.spellOptions = context.availableSpells.map(s => ({
+            id: s.id,
+            name: s.name,
+            selected: Boolean((out.spellId && out.spellId === s.id) || (out.name && out.name.toLowerCase() === s.name.toLowerCase()))
+          }));
+          out.tableOptions = context.availableRollTables.map(t => ({
+            id: t.id,
+            uuid: t.uuid,
+            name: t.name,
+            selected: Boolean((out.tableUuid && (out.tableUuid === t.uuid || out.tableUuid === t.id)) || (out.name && out.name.toLowerCase() === t.name.toLowerCase()))
+          }));
+          out.skillOptions = (context.availableSkills || []).map(sk => ({
+            name: sk.name,
+            selected: Boolean((out.skillName && out.skillName.toLowerCase() === sk.name.toLowerCase()) || (out.name && out.name.toLowerCase() === sk.name.toLowerCase()))
+          }));
+        }
+        context.system.outcomes = outcomes;
+      }
+      context.outcomesTotalWeight = totalWeight;
+      context.isWeightValid = totalWeight === 100;
     }
 
     return context;
@@ -535,7 +668,7 @@ export class DCCItemSheet extends BaseItemSheet {
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
     }
 
-    if (this.item.type === 'loot') {
+    if (this.item.type === 'loot' || this.item.type === 'gear') {
       let outcomes = expanded.system?.outcomes;
       if (outcomes !== undefined) {
         outcomes = Array.isArray(outcomes) ? outcomes : Object.values(outcomes);
@@ -559,12 +692,26 @@ export class DCCItemSheet extends BaseItemSheet {
             out.damage = '';
             out.damageType = '';
           }
+          if (out.type === 'heal' || out.type === 'heal_over_time') {
+            out.healBars = Number(out.healBars) || 1;
+          }
+          if (out.type === 'heal_over_time') {
+            out.rounds = Number(out.rounds) || 3;
+          }
+          if (out.type === 'skill_rank') {
+            out.rankBonus = Number(out.rankBonus ?? out.bonus ?? out.delta) || 1;
+          }
+          if (out.type === 'stat_permanent') {
+            out.value = Number(out.value ?? out.bonus ?? out.delta) || 1;
+          }
         }
         expanded.system.outcomes = outcomes;
 
         const lootType = String(expanded.system?.lootType || this.item.system?.lootType || '').toLowerCase().trim();
         const isScratch = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
-        if (isScratch && outcomes.length > 0 && totalWeight !== 100) {
+        const execMode = String(expanded.system?.executionMode || this.item.system?.executionMode || '').toLowerCase().trim();
+        const isRandom = execMode === 'random' || isScratch;
+        if (isRandom && outcomes.length > 0 && totalWeight !== 100) {
           if (typeof ui !== 'undefined' && ui?.notifications?.warn) {
             ui.notifications.warn(`Warning: Total weight of scratch-off ticket outcomes is ${totalWeight}% (must equal 100%).`);
           }
@@ -797,6 +944,114 @@ export class DCCItemSheet extends BaseItemSheet {
           current[idx].damage = '';
           current[idx].damageType = '';
         }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Select Existing Spell for Outcome
+    html.find('.outcome-spell-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const spellId = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        const spells = await this.getAvailableSpells();
+        const matched = spells.find(s => s.id === spellId || s.name === spellId);
+        if (matched) {
+          current[idx] = {
+            ...current[idx],
+            spellId: matched.id,
+            spellName: matched.name,
+            name: matched.name,
+            description: matched.system?.description || current[idx].description || ''
+          };
+        } else {
+          current[idx].spellId = spellId;
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Select Existing RollTable for Outcome
+    html.find('.outcome-table-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const tableId = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        const tables = await this.getAvailableRollTables();
+        const matched = tables.find(t => t.id === tableId || t.uuid === tableId || t.name === tableId);
+        if (matched) {
+          current[idx] = {
+            ...current[idx],
+            tableUuid: matched.uuid || matched.id,
+            tableName: matched.name,
+            name: matched.name
+          };
+        } else {
+          current[idx].tableUuid = tableId;
+        }
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Select Skill for Outcome
+    html.find('.outcome-skill-select').change(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const skillName = $(ev.currentTarget).val();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        current[idx] = {
+          ...current[idx],
+          skillName: skillName,
+          name: `Skill: ${skillName}`
+        };
+        await this.item.update({ 'system.outcomes': current });
+        this.render(false);
+      }
+    });
+
+    // Change Execution Mode
+    html.find('.execution-mode-select').change(async ev => {
+      ev.preventDefault();
+      const newMode = $(ev.currentTarget).val();
+      await this.item.update({ 'system.executionMode': newMode });
+      this.render(false);
+    });
+
+    // Toggle Gear Activated Ability
+    html.find('.toggle-gear-activated').change(async ev => {
+      const active = $(ev.currentTarget).is(':checked');
+      await this.item.update({ 'system.hasActivatedAbility': active });
+      this.render(false);
+    });
+
+    // Add Gear Outcome
+    html.find('.add-gear-outcome').click(async ev => {
+      ev.preventDefault();
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      current.push({
+        name: `Effect ${current.length + 1}`,
+        weight: 0,
+        type: 'buff',
+        targetType: 'self',
+        description: ''
+      });
+      await this.item.update({ 'system.outcomes': current });
+      this.render(false);
+    });
+
+    // Delete Gear Outcome
+    html.find('.delete-gear-outcome').click(async ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      const current = Array.isArray(this.item.system?.outcomes) ? [...this.item.system.outcomes] : [];
+      if (idx >= 0 && idx < current.length) {
+        current.splice(idx, 1);
         await this.item.update({ 'system.outcomes': current });
         this.render(false);
       }

@@ -364,47 +364,100 @@ export async function resolveSingleOutcome(outcome, actor, originItem, isMultiMo
         </div>
       </div>
     `;
-  } else if (outType === 'spell' || outType === 'damage' || outcome.damage) {
-    const intMod = Number(actor?.system?.abilities?.int?.mod) || 0;
-    let formula = outcome.damage || '2d12 + Int';
-    const parsedFormula = formula
-      .replace(/\bint\b/gi, String(intMod))
-      .replace(/\+\s*\+/g, '+');
-    if (typeof Roll !== 'undefined') {
-      const dRoll = await (new Roll(parsedFormula)).evaluate();
-      evaluatedDmg = dRoll.total;
-    } else {
-      evaluatedDmg = 12 + intMod;
+  } else if (outType === 'spell') {
+    const spellIdOrName = (outcome.spellId || outcome.spellName || outcome.name || '').toLowerCase().trim();
+    const allSpells = CONFIG.DCC?.spells || [];
+    const linkedSpell = allSpells.find(s => (s._id && s._id.toLowerCase() === spellIdOrName) || (s.id && s.id.toLowerCase() === spellIdOrName) || (s.name && s.name.toLowerCase().trim() === spellIdOrName))
+      || (actor?.items ? (actor.items.find ? actor.items.find(i => i.type === 'spell' && ((i._id && i._id.toLowerCase() === spellIdOrName) || (i.id && i.id.toLowerCase() === spellIdOrName) || (i.name && i.name.toLowerCase().trim() === spellIdOrName))) : Array.from(actor.items.values?.() || actor.items).find(i => i.type === 'spell' && ((i._id && i._id.toLowerCase() === spellIdOrName) || (i.id && i.id.toLowerCase() === spellIdOrName) || (i.name && i.name.toLowerCase().trim() === spellIdOrName)))) : null);
+
+    const spellName = linkedSpell?.name || outcome.name || 'Spell Effect';
+    const spellImg = linkedSpell?.img || outcome.img || 'icons/svg/wand.svg';
+    damageType = linkedSpell?.system?.damageType || outcome.damageType || 'Fire';
+
+    const baseDamage = linkedSpell?.system?.baseDamage || outcome.damage;
+    let parsedFormula = '';
+    if (baseDamage) {
+      const intMod = Number(actor?.system?.abilities?.int?.mod) || 0;
+      parsedFormula = baseDamage
+        .replace(/\bint\b/gi, String(intMod))
+        .replace(/\+\s*\+/g, '+');
+      if (typeof Roll !== 'undefined') {
+        const dRoll = await (new Roll(parsedFormula)).evaluate();
+        evaluatedDmg = dRoll.total;
+      } else {
+        evaluatedDmg = 12 + intMod;
+      }
+      isDamageCard = evaluatedDmg > 0;
     }
-    damageType = outcome.damageType || 'Fire';
-    isDamageCard = evaluatedDmg > 0;
+
+    // When an item or consumable with a spell effect is used, cast the spell with 0 mana!
+    if (isMultiMode && actor && typeof actor.rollSpell === 'function') {
+      const spellToCast = linkedSpell || (CONFIG.Item?.documentClass ? new CONFIG.Item.documentClass({
+        name: spellName,
+        type: 'spell',
+        img: spellImg,
+        system: {
+          manaCost: 0,
+          freeCast: true,
+          damageType,
+          baseDamage: baseDamage || '',
+          description: outcome.description || ''
+        }
+      }, actor) : {
+        id: outcome.spellId || 'temp-spell',
+        name: spellName,
+        type: 'spell',
+        img: spellImg,
+        system: {
+          manaCost: 0,
+          freeCast: true,
+          damageType,
+          baseDamage: baseDamage || '',
+          description: outcome.description || ''
+        }
+      });
+
+      await actor.rollSpell(spellToCast, {
+        freeCast: true,
+        originItem,
+        isConsumable: true,
+        isItemEffect: true
+      });
+    }
+
     const debuffNote = outcome.debuff
       ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #c0392b;"><strong>Debuff:</strong> Targets losing 1+ Health Bar gain the <strong>${outcome.debuff} Debuff</strong>.</p>`
       : '';
 
     outcomeHtml = `
-      <div class="dcc-scratch-outcome dcc-outcome-damage" style="background: rgba(192, 57, 43, 0.08); border-left: 4px solid #c0392b; padding: 8px 10px; margin: 8px 0; border-radius: 3px;">
+      <div class="dcc-scratch-outcome dcc-outcome-spell" style="background: rgba(142, 68, 173, 0.08); border-left: 4px solid #8e44ad; padding: 8px 10px; margin: 8px 0; border-radius: 3px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h4 style="margin: 0; color: #c0392b; font-size: 15px; font-weight: bold; text-transform: uppercase;">
-            <i class="fa-solid fa-fire"></i> ${outcome.name || 'Fireball'}
+          <h4 style="margin: 0; color: #8e44ad; font-size: 15px; font-weight: bold; text-transform: uppercase;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> ${spellName}
           </h4>
-          <span class="dcc-badge dcc-badge-spell" style="font-size: 10px;">${damageType}</span>
+          <span class="dcc-badge dcc-badge-spell" style="font-size: 10px; background: #8e44ad; color: #fff;">0 MP (FREE CAST)</span>
         </div>
         <p style="margin: 4px 0; font-size: 12px;">
           <strong>Target:</strong> <span style="color: #111;">${targetName}${distLabel}</span>
         </p>
-        <div style="font-size: 14px; font-weight: bold; color: #c0392b; margin: 4px 0;">
-          Damage: ${evaluatedDmg} <span style="font-size: 11px; font-weight: normal; color: #555;">(${parsedFormula})</span>
+        <div style="font-size: 12px; color: #666; margin: 4px 0;">
+          <i class="fa-solid fa-bolt"></i> <strong>Spell Effect:</strong> Costs <strong>0 Mana</strong> (Item / Consumable Effect)
+          ${evaluatedDmg > 0 ? ` • Damage: <strong>${evaluatedDmg}</strong> (${damageType})` : ''}
         </div>
         ${outcome.description ? `<p style="margin: 4px 0; font-size: 12px; color: #444;">${outcome.description}</p>` : ''}
         ${debuffNote}
-        <div style="margin-top: 8px;">
+        <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;">
+          <button type="button" class="dcc-cast-spell-btn" data-spell-id="${linkedSpell?.id || outcome.spellId || ''}" data-spell-name="${spellName}" data-free-cast="true" data-actor-id="${actor?.id || ''}" style="background: #8e44ad; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Cast Spell (0 Mana)
+          </button>
+          ${evaluatedDmg > 0 ? `
           <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-damage-value="${evaluatedDmg}" data-damage-type="${damageType}" data-target-id="${targetActor?.id || ''}" style="background: #c0392b; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">
             <i class="fa-solid fa-burst"></i> Apply Damage (${evaluatedDmg})
-          </button>
+          </button>` : ''}
         </div>
       </div>
     `;
+  } else if (outType === 'damage' || outcome.damage) {
   } else if (outType === 'roll_table') {
     const tableName = outcome.tableName || outcome.name || 'Roll Table';
     const tableId = outcome.tableId || '';
@@ -675,6 +728,18 @@ export class DCCItem extends Item {
     }
   }
 
+  /**
+   * Gold value of the item.
+   * @type {number}
+   */
+  get goldValue() {
+    return Number(this.system?.value ?? this.system?.goldValue ?? 0);
+  }
+
+  set goldValue(val) {
+    if (this.system) this.system.value = Number(val) || 0;
+  }
+
   async roll(action = 'cast') {
     if (this.type === 'spell') {
       if (this.actor) return this.actor.rollSpell(this, action);
@@ -940,19 +1005,29 @@ export class DCCItem extends Item {
       });
     }
 
-    // 4. Scrolls & Wands (Direct Spell Binding without explicit outcome array)
-    if (lootType === 'scroll' || lootType === 'wand') {
+    // 4. Scrolls, Wands, & Direct Spell Consumables (without explicit outcome array)
+    if (lootType === 'scroll' || lootType === 'wand' || sys.spellId || sys.spellName) {
       const spellIdOrName = (sys.spellId || sys.spellName || '').toLowerCase().trim();
       const allSpells = CONFIG.DCC?.spells || [];
       const match = allSpells.find(s => (s._id && s._id.toLowerCase() === spellIdOrName) || (s.id && s.id.toLowerCase() === spellIdOrName) || (s.name && s.name.toLowerCase().trim() === spellIdOrName))
-        || (actor?.items ? (actor.items.find ? actor.items.find(i => i.type === 'spell' && i.name.toLowerCase().trim() === spellIdOrName) : Array.from(actor.items.values?.() || actor.items).find(i => i.type === 'spell' && i.name.toLowerCase().trim() === spellIdOrName)) : null);
+        || (actor?.items ? (actor.items.find ? actor.items.find(i => i.type === 'spell' && ((i._id && i._id.toLowerCase() === spellIdOrName) || (i.id && i.id.toLowerCase() === spellIdOrName) || (i.name && i.name.toLowerCase().trim() === spellIdOrName))) : Array.from(actor.items.values?.() || actor.items).find(i => i.type === 'spell' && ((i._id && i._id.toLowerCase() === spellIdOrName) || (i.id && i.id.toLowerCase() === spellIdOrName) || (i.name && i.name.toLowerCase().trim() === spellIdOrName)))) : null);
 
       if (match) {
         await consumeItemUse();
         if (actor && typeof actor.rollSpell === 'function') {
-          return actor.rollSpell(match, { freeCast: true });
+          return actor.rollSpell(match, {
+            freeCast: true,
+            originItem: this,
+            isConsumable: true,
+            isItemEffect: true
+          });
         }
-        return DCCItem.rollSpellCard(match);
+        return DCCItem.rollSpellCard(match, {
+          freeCast: true,
+          originItem: this,
+          isConsumable: true,
+          isItemEffect: true
+        });
       }
     }
 
@@ -998,22 +1073,32 @@ export class DCCItem extends Item {
     });
   }
 
-  static async rollSpellCard(spellItem) {
+  static async rollSpellCard(spellItem, options = {}) {
     const sys = spellItem.system || {};
-    const manaCost = sys.manaCost ?? 0;
+    const isFreeCast = Boolean(options.freeCast || options.noMana || options.isConsumable || options.isItemEffect || sys.freeCast);
+    const manaCost = isFreeCast ? 0 : (sys.manaCost ?? 0);
+
+    const manaDisplay = isFreeCast
+      ? `<span style="color: #27ae60; font-weight: bold;"><i class="fa-solid fa-gift"></i> 0 MP (Free Cast)</span>`
+      : (manaCost ? `<span style="color: #2980b9; font-weight: bold;">${manaCost} MP</span>` : '<span style="color: #2980b9; font-weight: bold;">None</span>');
+
+    const sourceBadge = options.originItem || options.isConsumable || options.isItemEffect
+      ? `<div><strong>Source:</strong> <span style="color: #8e44ad; font-weight: bold;"><i class="fa-solid fa-wand-magic-sparkles"></i> ${options.originItem?.name || 'Item / Consumable Effect'}</span></div>`
+      : '';
 
     let content = `
-      <div class="dcc-chat-card dcc-spell-card" style="font-family: var(--font-primary, sans-serif);">
+      <div class="dcc-chat-card dcc-spell-card ${isFreeCast ? 'dcc-free-cast' : ''}" style="font-family: var(--font-primary, sans-serif);">
         <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 4px; margin-bottom: 6px;">
           <img src="${spellItem.img || 'icons/svg/wand.svg'}" style="width: 36px; height: 36px; border: 1px solid #000; border-radius: 4px;" />
           <div>
             <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${spellItem.name}</h3>
-            <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">${sys.spellType || 'Spell'}${sys.damageType ? ` • ${sys.damageType}` : ''}</span>
+            <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">${sys.spellType || 'Spell'}${sys.damageType ? ` • ${sys.damageType}` : ''}${isFreeCast ? ' • FREE CAST' : ''}</span>
           </div>
         </div>
         ${sys.quote ? `<div style="font-style: italic; color: #555; font-size: 12px; margin-bottom: 8px; border-left: 3px solid #d4af37; padding-left: 6px;">“${sys.quote}”</div>` : ''}
         <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 6px; border-radius: 3px;">
-          <div><strong>Mana:</strong> <span style="color: #2980b9; font-weight: bold;">${manaCost ? manaCost : 'None'}</span></div>
+          <div><strong>Mana:</strong> ${manaDisplay}</div>
+          ${sourceBadge}
           <div><strong>Range:</strong> ${sys.range || 'Self'}</div>
           <div><strong>Duration:</strong> ${sys.duration || 'Instantaneous'}</div>
           ${sys.cooldown && sys.cooldown !== 'None' ? `<div><strong>Cooldown:</strong> ${sys.cooldown}</div>` : ''}
@@ -1033,7 +1118,17 @@ export class DCCItem extends Item {
     `;
 
     return ChatMessage.create({
-      content
+      content,
+      flags: {
+        'carl-rpg': {
+          isSpellCast: true,
+          spellSuccess: true,
+          manaCost,
+          freeCast: isFreeCast,
+          originItemName: options.originItem?.name || null,
+          isItemEffect: Boolean(options.isItemEffect || options.isConsumable || options.originItem)
+        }
+      }
     });
   }
 

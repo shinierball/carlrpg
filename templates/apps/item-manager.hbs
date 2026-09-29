@@ -1,0 +1,155 @@
+<div class="dcc-manager-container dcc-item-manager" style="display: flex; flex-direction: column; height: 100%; font-family: 'Oswald', sans-serif;">
+  {{!-- Top Header & Controls --}}
+  <div class="dcc-manager-header" style="background: #111; color: #fff; padding: 10px 14px; border-bottom: 2px solid #c0392b;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-shield-halved" style="color: #e74c3c; font-size: 18px;"></i>
+        <span style="font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">DCC ITEM &amp; EQUIPMENT LIBRARY</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        {{#if actor}}
+          <div style="font-size: 12px; color: #f1c40f;">
+            Crawler: <strong>{{actor.name}}</strong>
+          </div>
+        {{/if}}
+        <button type="button" class="btn-create-custom-gear dcc-btn" style="background: #c0392b; color: #fff; font-size: 11px; padding: 3px 8px; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+          <i class="fa-solid fa-plus"></i> Custom Gear
+        </button>
+        <button type="button" class="btn-create-custom-loot dcc-btn" style="background: #27ae60; color: #fff; font-size: 11px; padding: 3px 8px; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+          <i class="fa-solid fa-plus"></i> Custom Item
+        </button>
+      </div>
+    </div>
+
+    {{!-- Search and Slot Filter Row --}}
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <div style="flex: 2; position: relative; min-width: 220px;">
+        <input type="text" class="item-search-input dcc-field-input" placeholder="Search gear, weapons, potions, wands, scrolls, notes..." value="{{searchQuery}}" style="width: 100%; height: 30px; font-size: 12px; padding-right: 24px; background: #ffffff; color: #111111;" autofocus />
+        {{#if searchQuery}}
+          <a class="item-search-clear" style="position: absolute; right: 8px; top: 6px; color: #555; cursor: pointer;"><i class="fa-solid fa-xmark"></i></a>
+        {{/if}}
+      </div>
+
+      <div style="flex: 1; min-width: 150px;">
+        <select class="item-slot-filter dcc-field-input" style="height: 30px; font-size: 12px; width: 100%;">
+          {{#each slots as |slot|}}
+            <option value="{{slot.key}}" {{#if (eq ../activeSlot slot.key)}}selected{{/if}}>{{slot.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    {{!-- Category Pills --}}
+    <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+      <a class="item-category-pill {{#if (eq activeCategory 'all')}}is-active{{/if}}" data-category="all" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'all')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        All ({{counts.all}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'gear')}}is-active{{/if}}" data-category="gear" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'gear')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        All Gear ({{counts.gear}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'weapons')}}is-active{{/if}}" data-category="weapons" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'weapons')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Weapons ({{counts.weapons}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'armor')}}is-active{{/if}}" data-category="armor" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'armor')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Armor ({{counts.armor}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'accessories')}}is-active{{/if}}" data-category="accessories" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'accessories')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Accessories ({{counts.accessories}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'loot')}}is-active{{/if}}" data-category="loot" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'loot')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        All Items ({{counts.loot}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'consumables')}}is-active{{/if}}" data-category="consumables" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'consumables')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Potions / Consumables ({{counts.consumables}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'scrolls')}}is-active{{/if}}" data-category="scrolls" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'scrolls')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Scrolls ({{counts.scrolls}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'wands')}}is-active{{/if}}" data-category="wands" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'wands')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Wands ({{counts.wands}})
+      </a>
+      <a class="item-category-pill {{#if (eq activeCategory 'lottery')}}is-active{{/if}}" data-category="lottery" style="padding: 2px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; background: {{#if (eq activeCategory 'lottery')}}#c0392b{{else}}#333{{/if}}; color: #fff;">
+        Lottery ({{counts.lottery}})
+      </a>
+    </div>
+  </div>
+
+  {{!-- Item Cards Body --}}
+  <div class="dcc-manager-body" style="flex: 1; overflow-y: auto; padding: 10px; background: #222; display: flex; flex-direction: column; gap: 8px;">
+    {{#if items.length}}
+      {{#each items as |item|}}
+        <div class="dcc-item-card-row dcc-item-card-draggable" data-item-name="{{item.name}}" draggable="true" style="background: #2a2a2a; border: 1px solid #444; border-left: 4px solid {{item.badgeColor}}; border-radius: 4px; padding: 8px 10px; color: #eee; display: flex; flex-direction: column; gap: 4px; cursor: grab;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="{{item.img}}" style="width: 34px; height: 34px; border: 1px solid #000; border-radius: 3px; object-fit: contain; background: #111;" />
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 14px; font-weight: bold; color: #fff;">{{item.name}}</span>
+                  {{#if item.isCompendium}}
+                    <span class="dcc-badge" style="background: #111; color: #f1c40f; border: 1px solid #f1c40f; font-size: 9px; padding: 0 4px;" title="Official DCC Compendium Item">CANONICAL</span>
+                  {{/if}}
+                </div>
+                <div style="display: flex; gap: 4px; align-items: center; margin-top: 2px; flex-wrap: wrap;">
+                  <span class="dcc-badge" style="background: {{item.badgeColor}}; font-size: 9px; padding: 1px 4px; color: #fff;">{{item.badgeLabel}}</span>
+                  {{#if (eq item.type 'gear')}}
+                    <span class="dcc-badge" style="background: #34495e; font-size: 9px; padding: 1px 4px; color: #fff; text-transform: uppercase;">SLOT: {{item.slot}}</span>
+                  {{/if}}
+                  <span class="dcc-badge" style="background: #b78727; font-size: 9px; padding: 1px 4px; color: #fff;">
+                    <i class="fa-solid fa-coins"></i> {{item.displayValue}}
+                  </span>
+                  {{#if item.mechanicsSummary}}
+                    <span class="dcc-badge" style="background: #474747; font-size: 9px; padding: 1px 4px; color: #fff;">{{item.mechanicsSummary}}</span>
+                  {{/if}}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" class="btn-preview-item dcc-btn" data-item-name="{{item.name}}" title="Inspect Item Sheet" style="background: #34495e; color: #fff; font-size: 11px; padding: 4px 8px; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+                <i class="fa-solid fa-eye"></i> Preview
+              </button>
+              {{#if ../actor}}
+                {{#if item.isOwned}}
+                  <span class="dcc-badge" style="background: #27ae60; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 3px;">
+                    <i class="fa-solid fa-check"></i> Owned (x{{item.ownedQty}})
+                  </span>
+                  <button type="button" class="btn-add-item dcc-btn" data-item-name="{{item.name}}" title="Add Another to Inventory" style="background: #2980b9; color: #fff; font-size: 11px; padding: 4px 8px; border: 1px solid #111; border-radius: 3px; font-weight: bold; cursor: pointer;">
+                    <i class="fa-solid fa-plus"></i> Add More
+                  </button>
+                {{else}}
+                  <button type="button" class="btn-add-item dcc-btn" data-item-name="{{item.name}}" style="background: #c0392b; color: #fff; font-size: 11px; padding: 4px 8px; border: 1px solid #111; border-radius: 3px; font-weight: bold; cursor: pointer;">
+                    <i class="fa-solid fa-plus"></i> Add to Inventory
+                  </button>
+                {{/if}}
+              {{/if}}
+            </div>
+          </div>
+
+          {{#if item.descriptionSnippet}}
+            <div style="font-size: 11px; color: #bbb; margin-top: 3px; padding-top: 3px; border-top: 1px dashed #3a3a3a; font-family: sans-serif; line-height: 1.3;">
+              {{item.descriptionSnippet}}
+            </div>
+          {{/if}}
+        </div>
+      {{/each}}
+    {{else}}
+      <div style="text-align: center; color: #999; padding: 40px 10px; font-style: italic;">
+        No items or gear match the current filter criteria.
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- Footer Status Bar --}}
+  <div class="dcc-manager-footer" style="background: #111; color: #888; padding: 6px 14px; border-top: 1px solid #333; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      Showing <strong>{{items.length}}</strong> items. Drag items directly onto character sheets or maps.
+    </div>
+    <div>
+      {{#if canSeeValue}}
+        <span style="color: #f1c40f;"><i class="fa-solid fa-check-circle"></i> Determine Value active (Gold visible)</span>
+      {{else}}
+        <span style="color: #999;"><i class="fa-solid fa-lock"></i> Value hidden (Requires Determine Value Rank 10)</span>
+      {{/if}}
+    </div>
+  </div>
+</div>

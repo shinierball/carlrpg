@@ -1167,8 +1167,8 @@ export const DCC_SKILLS = [
       type: "Utility",
       category: "Passive",
       checkType: "Passive",
-      notes: "Sort HUD Inventory by item value. Advances only by magical means.",
-      upgrades: "Rank 5: Inventory tabbed by item type with usage history.\nRank 10: Determine loot box origin.\nRank 15: Gold value of new items displayed on pickup.",
+      notes: "Sort inventory by item value and appraise items and gear. Advances only by magical means.",
+      upgrades: "Rank 5: Sort inventory and gear by value (without revealing exact value).\nRank 10: View exact gold values of all items and gear.\nRank 15: Gold value of new items displayed on pickup.",
       checked: false,
       damageModifiers: []
     }

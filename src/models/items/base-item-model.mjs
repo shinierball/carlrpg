@@ -18,4 +18,16 @@ export class BaseItemDataModel extends (globalThis.foundry?.abstract?.TypeDataMo
   get actor() {
     return this.parent?.actor || null;
   }
+
+  /**
+   * Gold value of the item.
+   * @type {number}
+   */
+  get goldValue() {
+    return Number(this.value ?? this.parent?.system?.value ?? this.parent?.system?.goldValue ?? 0);
+  }
+
+  set goldValue(val) {
+    this.value = Number(val) || 0;
+  }
 }

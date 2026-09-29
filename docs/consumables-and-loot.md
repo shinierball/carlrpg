@@ -45,11 +45,16 @@ Items can be triggered and activated from:
 
 ---
 
-### 3. Wands with Charges Pool & Spell Scrolls
+### 3. Wands with Charges Pool & Spell Scrolls (0 Mana Spell Effects)
 
+- **0 Mana Cost Rule for Consumables & Items**:
+  - Whenever a consumable item, spell scroll, wand, or activated gear is used and a spell is cast as the effect, the spell **costs 0 mana**.
+  - The cast succeeds regardless of the crawler's current mana pool (even at 0 MP).
+  - The crawler's mana value is never reduced.
+  - The resulting spell chat card clearly reflects `0 MP (Free Cast)` along with an item source badge (`Source: [Item Name]`), and sets `flags['carl-rpg'].freeCast = true` and `manaCost = 0`.
 - **Wands & Charged Items** (`lootType: "wand"`):
   - Equipped with a charges pool (`system.charges.value` / `system.charges.max`).
-  - Using the wand decrements `charges.value` by 1.
+  - Using the wand decrements `charges.value` by 1 and casts the bound spell for **0 mana**.
   - When charges reach 0, the item is **retained** in inventory (not deleted) and alerts the user when attempted to be used while depleted.
 - **Spell Scrolls** (`lootType: "scroll"`):
   - Single-use items inscribed with a specific spell (`system.spellId` / `system.spellName`).
@@ -85,14 +90,53 @@ All consumable and activated gear usages produce rich, themed chat cards with 1-
 
 ---
 
+---
+
+## Item Gold Value & The Determine Value Skill
+
+All items and gear in CarlRPG possess a gold value (`system.value` / `item.goldValue`), representing their appraisal or merchant price.
+
+### Determine Value Progression
+
+1. **Default (Rank 0–4)**:
+   - Crawlers **cannot see** item or gear gold values.
+   - Value displays as `???` on both the inventory sheet and item sheets.
+   - Value-based sorting is locked on the Inventory tab (`🔒 Value (Req. Rank 5)`).
+2. **Rank 5–9**:
+   - Crawlers can **sort** items and gear by value on the character sheet inventory (`Value (High to Low)` or `Value (Low to High)`).
+   - Although items are sorted by value, crawlers **still cannot see** the gold numbers (displayed as `???`).
+3. **Rank 10+**:
+   - Crawlers can **view exact gold values** (e.g., `50 GP`, `150 GP`) on the character sheet inventory and item sheets.
+   - Crawlers can continue to sort their inventory by value.
+
+---
+
 ## Canonical Compendium Pack (`carl-rpg.items`)
 
 1. **Normal Mana Potion** (`dccitm0000000001`):
    - Refills crawler mana completely to maximum (10 MP base).
-   - Quantity: 1.
+   - Quantity: 1 | Value: 10 GP.
 2. **Scratch-off Ticket - Fireball or Custard** (`dccitm0000000002`):
-   - 6 Scratches total (`quantity: 6`).
+   - 6 Scratches total (`quantity: 6`) | Value: 5 GP.
    - Limit: `"Once per scene"`.
    - Outcomes (50/50 Chance):
      - **50% Level 5 Fireball**: `2d12 + Int Mod` Fire damage to closest mob. Attack made with Disadvantage. Targets losing 1+ Health Bar gain Burned Debuff.
      - **50% Healing Blob of Custard**: Strikes closest mob with soothing vanilla custard, healing 5 full Health Bars (`5 * hpPerBar`).
+
+---
+
+## Item & Equipment Library (`DCCItemManager`)
+
+In addition to custom item creation, CarlRPG features a full **Item & Equipment Library** modal (`DCCItemManager`), accessible directly from Page 2 (Equipment & Inventory) of the Crawler character sheet:
+
+- **Equipped Gear Slots**: Click `Select Gear` to open the library pre-filtered to physical equipment (weapons, armor, accessories).
+- **Inventory & Backpack**: Click `Select Item/Gear` to browse all existing items, potions, wands, scrolls, and gear.
+- **Workflow & Features**:
+  - **Category Pills**: Instantly filter between `All`, `All Gear`, `Weapons`, `Armor`, `Accessories`, `All Items`, `Potions / Consumables`, `Scrolls`, `Wands`, and `Lottery`.
+  - **Slot Filter**: Focus on specific body slots (`Head`, `Torso`, `Arms`, `Hands / Weapons`, `Legs`, `Feet`, `Accessories`).
+  - **Search**: Real-time name, mechanics, and description filtering with input focus retention.
+  - **1-Click Add**: Click `[ + Add to Inventory ]` to embed the item directly onto the bound crawler actor, with automatic ownership detection (`[ In Inventory (xN) ]` / `[ + Add More ]`).
+  - **Determine Value Integration**: Shows `???` if the crawler lacks Determine Value Rank 10, or exact gold values if Rank 10+ is achieved.
+  - **Drag and Drop**: Drag item cards directly onto character sheets, token canvases, or hotbars.
+  - **Custom Creation**: Quick-access `[ + Custom Gear ]` and `[ + Custom Item ]` modal buttons for on-the-fly item creation.
+

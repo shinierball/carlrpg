@@ -1,3 +1,72 @@
+## 2.2.3
+
+### DCC Item & Equipment Library (Unified Gear & Item Selection)
+
+- **DCC Item & Equipment Library (`DCCItemManager`)**:
+  - Implemented `DCCItemManager` (`src/apps/item-manager.mjs` and `templates/apps/item-manager.hbs`), providing a centralized, interactive compendium browser for equipment, weapons, armor, accessories, potions, wands, scrolls, and lottery tickets matching the workflow of `DCCSkillManager` and `DCCSpellManager`.
+  - **Category Filtering & Counts**: Added interactive category filter pills (`All`, `All Gear`, `Weapons`, `Armor`, `Accessories`, `All Items`, `Potions / Consumables`, `Scrolls`, `Wands`, `Lottery`) displaying real-time item counts.
+  - **Equipment Slot Filter**: Added slot dropdown filter (`Head`, `Torso`, `Arms`, `Hands / Weapons`, `Legs`, `Feet`, `Accessories`).
+  - **Live Search & Focus Retention**: Search by name, mechanics summary, notes, or tags with persistent focus preservation.
+  - **1-Click Add & Inventory Tracking**: Added `[ + Add to Inventory ]` button to embed items on bound actors, tracking ownership with `[ In Inventory (xN) ]` and `[ + Add More ]` buttons.
+  - **Drag-and-Drop Support**: Enables dragging items directly from the library window onto character sheets, maps, or hotbars.
+- **Dual Selection & Creation Workflow on Character Sheet (Page 2: Equipment & Inventory)**:
+  - Replaced creation-only buttons on Page 2 with dual selection and custom creation controls matching Page 3:
+    - **Equipped Gear Slots**: Added `Select Gear` (`.open-gear-picker`) alongside `Custom Gear` (`.item-create`).
+    - **Inventory & Backpack**: Added `Select Item/Gear` (`.open-item-picker`) alongside `Custom Gear` and `Custom Item`.
+  - Added `_openItemPicker(activeCategory, activeSlot)` method and event listeners to `DCCCrawlerSheet` (`src/sheets/crawler-sheet.mjs`).
+- **Determine Value Skill Appraisal Gating**:
+  - Gated gold values within `DCCItemManager` according to the bound crawler's Determine Value skill rank:
+    - Rank 0–9: Displays masked `???` values and indicates appraisal lock in the footer.
+    - Rank 10+: Displays true evaluated gold prices (`<N> GP`).
+- **Canonical DCC Items Dataset & Configuration**:
+  - Expanded `DCC_ITEMS` (`src/data/items.mjs`) with canonical weapons, armor, accessories, consumables, and wands.
+  - Exposed `CONFIG.DCC.items = DCC_ITEMS` and registered `DCCItemManager` in `game.dcc`, `game.dcc.applications`, and `window.carl.openItemManager`.
+  - Registered `systems/carl-rpg/templates/apps/item-manager.hbs` in `loadTemplates` in `src/dcc.mjs`.
+  - Added responsive dark theme and hover styles in `styles/dcc.css`.
+- **Automated Unit Testing & Verification**:
+  - Added comprehensive test suite `tests/item-manager.test.mjs` verifying unified item loading, category and slot filtering, search query filtering, appraisal value masking, embedded actor item creation, and crawler sheet integration.
+  - 100% test pass rate across 126 test suites (687 passing, 0 failures).
+
+## 2.2.2
+ 
+### Consumable & Item Spell Free Cast (0 Mana Cost Rule)
+ 
+- **0 Mana Cost for Consumable & Item Spell Effects**:
+  - Enforced the rule that whenever a consumable, potion, elixir, spell scroll, wand, or activated gear is used and a spell is cast as the effect, the spell **costs 0 mana** to the caster.
+  - Updated `DCCActor.prototype.rollSpell` to accept `options.freeCast`, `options.isConsumable`, `options.isItemEffect`, and `options.originItem` (or passing options as the second argument).
+  - When `isFreeCast` is active:
+    - Bypasses the insufficient mana failure check, allowing casts to succeed even if the caster has 0 current MP.
+    - Prevents mana deduction from the caster's mana pool (`system.attributes.mana.value`).
+    - Formats the chat card with `0 MP (Free Cast)` and displays the item source badge.
+    - Sets `flags['carl-rpg'].freeCast = true`, `manaCost = 0`, and preserves `baseManaCost` for reference.
+- **Scrolls, Wands & Outcome Builder Spell Resolution**:
+  - Updated `useLoot` to pass `{ freeCast: true, originItem: this, isConsumable: true, isItemEffect: true }` when casting inscribed spells from scrolls, wands, or direct-bound consumables.
+  - Enhanced `resolveSingleOutcome` for `outType === 'spell'` to link with compendium spells (`CONFIG.DCC.spells`) or owned items, automatically triggering a free cast in multi-mode combos and rendering a `[ Cast Spell (0 Mana) ]` action button.
+  - Added click listener in `src/dcc.mjs` for `.dcc-cast-spell-btn` with `data-free-cast="true"`.
+- **Automated Unit Testing & Verification**:
+  - Created `tests/consumable-spell-free-cast.test.mjs` validating 0 mana costs for direct rollSpell with freeCast, scrolls, wands, multi-effect combo elixirs, activated gear, mana preservation, and chat button click handlers.
+  - 100% test pass rate across 121 suites (678 passing, 0 failures).
+
+## 2.2.1
+
+### Item Gold Value Appraisal & Determine Value Skill Integration
+
+- **Item & Gear Gold Values**:
+  - Added a first-class gold value field (`system.value` / `goldValue`) across all `gear` and `loot` items in `template.json`, `GearDataModel`, `LootDataModel`, and `DCCItem`.
+  - Added dedicated Gold Value inputs to both Gear and Loot item sheets (`templates/items/parts/gear.hbs` and `templates/items/parts/loot.hbs`), gated by character appraisal capability.
+  - Added gold values to canonical system compendium items (Normal Mana Potion: 10 GP; Scratch-off Ticket: 5 GP).
+- **Determine Value Skill Mechanics**:
+  - **Rank 0–4 (Default)**: Crawlers cannot discern item gold values. Gold values are masked as `???` on both the character sheet inventory and item sheets. Value sorting is locked (`🔒 Value (Req. Rank 5)`).
+  - **Rank 5–9**: Crawlers unlock the ability to sort their inventory and gear by value (`Value: High to Low` and `Value: Low to High`), while exact numbers remain masked (`???`).
+  - **Rank 10+**: Crawlers unlock exact item appraisal, displaying true gold amounts (`<N> GP`) on both the character sheet inventory and item sheets alongside value sorting.
+- **Actor Document Helpers & Inventory Sorting**:
+  - Added `getSkillRank(skillName)`, `getDetermineValueRank()`, `canDetermineValue()`, `canSeeItemValue()`, `canSortInventoryByValue()`, `sortInventoryByValue()`, and `getInventory()` methods to `DCCActor`.
+  - Enhanced `DCCCrawlerSheet.getData()` to decorate items with `goldValue`, `canSeeValue`, and `displayValue` flags and sort gear and loot by value descending, ascending, name, or default order.
+  - Added interactive inventory sort selector dropdown (`.inventory-sort-select`) in the header of Page 4 (Inventory).
+- **Automated Unit Testing & Verification**:
+  - Added comprehensive unit test suite in `tests/determine-value.test.mjs` validating schema defaults, rank detection, capability checks, masking behavior, inventory sorting, item sheet gating, and template bindings.
+  - 100% test pass rate across 112 suites (666 passing, 0 failures).
+
 ## 2.2.0
 
 ### Item Outcome Builder 2.0, Multi-Effect Consumables, Wands, Scrolls & Activated Gear

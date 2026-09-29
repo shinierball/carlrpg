@@ -5,6 +5,7 @@ import { DCCCrawlerSheet } from './sheets/crawler-sheet.mjs';
 import { DCCItemSheet } from './sheets/item-sheet.mjs';
 import { DCCSkillManager } from './apps/skill-manager.mjs';
 import { DCCSpellManager } from './apps/spell-manager.mjs';
+import { DCCItemManager } from './apps/item-manager.mjs';
 import { DCCBuffDebuffManager } from './apps/buff-manager.mjs';
 import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp, getHpPerBar } from './apps/combat-metrics.mjs';
@@ -70,6 +71,7 @@ Hooks.once('init', async function() {
     DCCItemSheet,
     DCCSkillManager,
     DCCSpellManager,
+    DCCItemManager,
     DCCBuffDebuffManager,
     DCCCombatMetrics,
     DCCCombatTracker,
@@ -94,6 +96,7 @@ Hooks.once('init', async function() {
       DCCItemSheet,
       DCCSkillManager,
       DCCSpellManager,
+      DCCItemManager,
       DCCBuffDebuffManager,
       DCCCrawlerCreatorApp,
       DCCAchievementManagerApp,
@@ -128,6 +131,7 @@ Hooks.once('init', async function() {
   CONFIG.DCC = {
     skills: DCC_SKILLS,
     spells: DCC_SPELLS,
+    items: DCC_ITEMS,
     buffs: DCC_BUFFS,
     macros: DCC_MACROS,
     mobs: DCC_MOBS,
@@ -331,6 +335,7 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/items/parts/traits.hbs',
     'systems/carl-rpg/templates/apps/skill-manager.hbs',
     'systems/carl-rpg/templates/apps/spell-manager.hbs',
+    'systems/carl-rpg/templates/apps/item-manager.hbs',
     'systems/carl-rpg/templates/apps/buff-manager.hbs',
     'systems/carl-rpg/templates/apps/combat-metrics.hbs',
     'systems/carl-rpg/templates/apps/combat-tracker.hbs',
@@ -358,7 +363,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
           app.render(false);
         }
       }
@@ -383,6 +388,12 @@ Hooks.once('init', async function() {
     },
     openSkillManager(options = {}) {
       return new DCCSkillManager(options).render(true);
+    },
+    openSpellManager(options = {}) {
+      return new DCCSpellManager(options).render(true);
+    },
+    openItemManager(options = {}) {
+      return new DCCItemManager(options).render(true);
     },
     openCombatMetrics(options = {}) {
       return new DCCCombatMetricsApp(options).render(true);
@@ -990,9 +1001,9 @@ export function onRenderChatMessage(message, html, data) {
       const spellId = btn.dataset?.spellId || $btn?.data('spell-id');
       const actor = game.actors?.get(actorId) || null;
       if (!actor) return;
-      const spell = (typeof actor.items?.get === 'function')
-        ? actor.items.get(spellId)
-        : (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId) : actor.items?.find?.(it => it.id === spellId));
+      const spell = (typeof actor.items?.get === 'function' ? actor.items.get(spellId) : null)
+        || (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId || it._id === spellId) : actor.items?.find?.(it => it.id === spellId || it._id === spellId))
+        || (CONFIG.DCC?.spells || []).find(s => s._id === spellId || s.id === spellId);
       if (spell && typeof actor.rollSpellDamage === 'function') {
         await actor.rollSpellDamage(spell);
       }
@@ -1573,6 +1584,50 @@ export function onRenderChatMessage(message, html, data) {
       btn.addEventListener('click', tableClickHandler);
     } else if (typeof $ !== 'undefined') {
       $(btn).click(tableClickHandler);
+    }
+  }
+
+  // 7g. Handle click on "Cast Spell (0 Mana)" from item/consumable chat card
+  const castSpellButtons = query('.dcc-cast-spell-btn');
+  for (const btn of castSpellButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const castHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
+      const spellId = btn.dataset?.spellId || $btn?.data('spell-id');
+      const spellName = btn.dataset?.spellName || $btn?.data('spell-name');
+      const isFreeCast = btn.dataset?.freeCast === 'true' || Boolean($btn?.data('free-cast'));
+
+      let actor = (typeof game !== 'undefined' && game.actors?.get) ? game.actors.get(actorId) : null;
+      if (!actor && canvas?.tokens?.controlled?.length) {
+        actor = canvas.tokens.controlled[0]?.actor;
+      }
+      if (!actor) {
+        ui.notifications?.warn?.('DCC RPG | No actor selected to cast this spell effect!');
+        return;
+      }
+
+      const allSpells = CONFIG.DCC?.spells || [];
+      const spell = (typeof actor.items?.get === 'function' ? actor.items.get(spellId) : null)
+        || (Array.isArray(actor.items) ? actor.items.find(it => it.id === spellId || it.name === spellName) : actor.items?.find?.(it => it.id === spellId || it.name === spellName))
+        || allSpells.find(s => s._id === spellId || s.id === spellId || s.name === spellName);
+
+      if (spell && typeof actor.rollSpell === 'function') {
+        await actor.rollSpell(spell, { freeCast: isFreeCast, isItemEffect: true, isConsumable: true });
+      } else if (spell && typeof DCCItem !== 'undefined' && typeof DCCItem.rollSpellCard === 'function') {
+        await DCCItem.rollSpellCard(spell, { freeCast: isFreeCast, isItemEffect: true, isConsumable: true });
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', castHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(castHandler);
     }
   }
 

@@ -37,6 +37,14 @@
     <span class="dcc-field-label">Quantity</span>
     <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
   </div>
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #f39c12;"></i> Gold Value</span>
+    {{#if canSeeItemValue}}
+      <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" />
+    {{else}}
+      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; cursor: not-allowed;" />
+    {{/if}}
+  </div>
 </div>
 
 {{!-- STAT MODIFIERS (FLAT VS %) --}}

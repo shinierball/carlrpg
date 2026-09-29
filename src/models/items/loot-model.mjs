@@ -8,6 +8,7 @@ export class LootDataModel extends BaseItemDataModel {
     const fields = globalThis.foundry.data.fields;
     return {
       quantity: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
+      value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       cooldown: new fields.StringField({ initial: 'None' }),
       lootType: new fields.StringField({ initial: 'consumable' }),
       executionMode: new fields.StringField({ initial: '' }),

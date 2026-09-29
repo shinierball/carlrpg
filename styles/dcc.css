@@ -7544,5 +7544,65 @@ select.dcc-box-input.dcc-size-select,
   100% { box-shadow: 0 0 2px rgba(46, 204, 113, 0.4); }
 }
 
+/* ---------------- GOLD VALUE & DETERMINE VALUE ---------------- */
+.dcc-gold-value {
+  color: #b78727;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dcc-gold-value-hidden {
+  color: #888888;
+  font-style: italic;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.inventory-sort-select {
+  font-family: 'Roboto Condensed', sans-serif;
+  height: 22px;
+  line-height: 20px;
+}
+
+/* ---------------- ITEM & EQUIPMENT LIBRARY (DCCItemManager) ---------------- */
+.dcc-item-manager-window {
+  min-width: 650px;
+  min-height: 500px;
+}
+
+.dcc-item-card-row {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.dcc-item-card-row:hover {
+  background-color: #333333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.item-category-pill {
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.item-category-pill:hover {
+  filter: brightness(1.2);
+}
+
+.item-category-pill.is-active {
+  box-shadow: 0 0 6px rgba(192, 57, 43, 0.7);
+  font-weight: bold;
+}
+
+.dcc-item-card-draggable {
+  cursor: grab;
+}
+
+.dcc-item-card-draggable:active {
+  cursor: grabbing;
+}
+
 
 

@@ -1,5 +1,6 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCCSpellManager } from '../apps/spell-manager.mjs';
+import { DCCItemManager } from '../apps/item-manager.mjs';
 import { DCCBuffDebuffManager } from '../apps/buff-manager.mjs';
 import { DCCAchievementManagerApp } from '../apps/achievement-manager.mjs';
 import { DCCGrindApp } from '../apps/grind-app.mjs';
@@ -694,8 +695,55 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       spell.isAttack = spell.system?.spellType === 'Attack';
     }
     context.spells.sort(sortItems);
-    context.gear.sort(sortItems);
-    context.loot.sort(sortItems);
+
+    // Determine Value skill checks & permissions
+    const determineValueRank = typeof this.actor.getDetermineValueRank === 'function'
+      ? this.actor.getDetermineValueRank()
+      : (typeof this.actor.getSkillRank === 'function' ? this.actor.getSkillRank('Determine Value') : 0);
+    const isGM = Boolean(globalThis.game?.user?.isGM);
+    const canSeeItemValue = determineValueRank >= 10;
+    const canSortByValue = determineValueRank >= 5;
+    const inventorySort = this._inventorySort || (typeof this.actor.getFlag === 'function' ? this.actor.getFlag('carl-rpg', 'inventorySort') : null) || 'default';
+
+    context.isGM = isGM;
+    context.determineValueRank = determineValueRank;
+    context.canSeeItemValue = canSeeItemValue;
+    context.canSortByValue = canSortByValue;
+    context.inventorySort = inventorySort;
+
+    // Decorate gear with gold value display attributes
+    for (const item of context.gear) {
+      const val = Number(item.system?.value ?? item.goldValue ?? 0);
+      item.goldValue = val;
+      item.canSeeValue = canSeeItemValue;
+      item.displayValue = canSeeItemValue ? `${val} GP` : '???';
+    }
+
+    // Decorate loot with gold value display attributes
+    for (const item of context.loot) {
+      const val = Number(item.system?.value ?? item.goldValue ?? 0);
+      item.goldValue = val;
+      item.canSeeValue = canSeeItemValue;
+      item.displayValue = canSeeItemValue ? `${val} GP` : '???';
+    }
+
+    // Sort gear and loot based on selected inventory sort mode
+    if (inventorySort === 'value-desc' && canSortByValue) {
+      const sortByValDesc = (a, b) => ((Number(b.system?.value ?? b.goldValue ?? 0)) - (Number(a.system?.value ?? a.goldValue ?? 0))) || (a.name || '').localeCompare(b.name || '');
+      context.gear.sort(sortByValDesc);
+      context.loot.sort(sortByValDesc);
+    } else if (inventorySort === 'value-asc' && canSortByValue) {
+      const sortByValAsc = (a, b) => ((Number(a.system?.value ?? a.goldValue ?? 0)) - (Number(b.system?.value ?? b.goldValue ?? 0))) || (a.name || '').localeCompare(b.name || '');
+      context.gear.sort(sortByValAsc);
+      context.loot.sort(sortByValAsc);
+    } else if (inventorySort === 'name') {
+      const sortByName = (a, b) => (a.name || '').localeCompare(b.name || '');
+      context.gear.sort(sortByName);
+      context.loot.sort(sortByName);
+    } else {
+      context.gear.sort(sortItems);
+      context.loot.sort(sortItems);
+    }
     context.buffs.sort(sortItems);
     context.debuffs.sort(sortItems);
     context.attacks.sort(sortItems);
@@ -1557,6 +1605,18 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       this._openSpellPicker();
     });
 
+    // Open Gear Library Picker
+    html.find('.open-gear-picker').click(ev => {
+      ev.preventDefault();
+      this._openItemPicker('gear');
+    });
+
+    // Open Items & Equipment Library Picker
+    html.find('.open-item-picker').click(ev => {
+      ev.preventDefault();
+      this._openItemPicker('all');
+    });
+
     // Open Buffs Compendium / Manager
     html.find('.open-buff-picker').click(ev => {
       ev.preventDefault();
@@ -1958,6 +2018,19 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
+    // Inventory Sort Selection
+    html.find('.inventory-sort-select').change(async ev => {
+      ev.preventDefault();
+      const newSort = $(ev.currentTarget).val();
+      this._inventorySort = newSort;
+      if (typeof this.actor.setFlag === 'function') {
+        try {
+          await this.actor.setFlag('carl-rpg', 'inventorySort', newSort);
+        } catch (_err) {}
+      }
+      this.render(false);
+    });
+
     // Hotlist Slot Selection
     html.find('.hotlist-select').change(async ev => {
       ev.preventDefault();
@@ -2229,6 +2302,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
    */
   _openSpellPicker() {
     new DCCSpellManager({ actor: this.actor }).render(true);
+  }
+
+  /**
+   * Open interactive modal to choose gear or items from the DCC Item & Equipment Library
+   * @param {string} [activeCategory='all']
+   * @param {string} [activeSlot='all']
+   */
+  _openItemPicker(activeCategory = 'all', activeSlot = 'all') {
+    new DCCItemManager({ actor: this.actor, activeCategory, activeSlot }).render(true);
   }
 
   /**

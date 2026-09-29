@@ -310,6 +310,17 @@ export class DCCItemSheet extends BaseItemSheet {
       cha: 'Charisma'
     };
 
+    // Determine Value capability check for Item Sheet
+    const actor = item.actor;
+    const determineValueRank = actor
+      ? (typeof actor.getDetermineValueRank === 'function' ? actor.getDetermineValueRank() : (typeof actor.getSkillRank === 'function' ? actor.getSkillRank('Determine Value') : 0))
+      : 10;
+    const isGM = Boolean(globalThis.game?.user?.isGM);
+    context.isGM = isGM;
+    context.canSeeItemValue = !actor || determineValueRank >= 10;
+    context.determineValueRank = determineValueRank;
+    context.goldValue = Number(item.system?.value ?? item.goldValue ?? 0);
+
     // Ensure skillModifiers array exists and handles object fallback
     let skillMods = context.system.skillModifiers;
     if (skillMods && !Array.isArray(skillMods) && typeof skillMods === 'object') {

@@ -5,6 +5,14 @@
   <div class="dcc-stat-block dcc-equipped-gear-block" style="width: 100%; box-sizing: border-box;">
     <div class="dcc-banner-header">
       <span><i class="fa-solid fa-shield-halved"></i> EQUIPPED GEAR SLOTS</span>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a class="open-gear-picker" data-tooltip="Choose from existing DCC Gear &amp; Equipment" style="color: #f1c40f; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-shirt"></i> Select Gear
+        </a>
+        <a class="item-create" data-type="gear" data-tooltip="Create custom gear" style="color: #fff; cursor: pointer; font-size: 13px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-plus"></i> Custom Gear
+        </a>
+      </div>
     </div>
     <div class="dcc-gear-slots-list dcc-gear-slots-grid" style="padding: 8px;">
       <div class="dcc-gear-row">
@@ -95,18 +103,39 @@
   <div class="dcc-stat-block dcc-inventory-backpack-block" style="width: 100%; box-sizing: border-box;">
     <div class="dcc-banner-header">
       <span><i class="fa-solid fa-boxes-stacked"></i> INVENTORY &amp; BACKPACK</span>
-      <div>
-        <a class="item-create" data-type="gear" data-tooltip="Add Gear" style="color: #fff; cursor: pointer; margin-right: 12px;"><i class="fa-solid fa-shield"></i> Add Gear</a>
-        <a class="item-create" data-type="loot" data-tooltip="Add Item" style="color: #fff; cursor: pointer;"><i class="fa-solid fa-plus"></i> Add Item</a>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: #fff; margin: 0; cursor: pointer;">
+          <i class="fa-solid fa-arrow-down-short-wide"></i> Sort:
+          <select class="inventory-sort-select" style="background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #777; border-radius: 3px; font-size: 11px; padding: 1px 4px; cursor: pointer;">
+            <option value="default" {{#if (eq inventorySort "default")}}selected{{/if}}>Manual / Default</option>
+            <option value="name" {{#if (eq inventorySort "name")}}selected{{/if}}>Name (A-Z)</option>
+            {{#if canSortByValue}}
+              <option value="value-desc" {{#if (eq inventorySort "value-desc")}}selected{{/if}}>Value (High to Low)</option>
+              <option value="value-asc" {{#if (eq inventorySort "value-asc")}}selected{{/if}}>Value (Low to High)</option>
+            {{else}}
+              <option value="" disabled title="Requires Determine Value Rank 5">🔒 Value (Req. Rank 5)</option>
+            {{/if}}
+          </select>
+        </label>
+        <a class="open-item-picker" data-tooltip="Choose from existing DCC Items &amp; Gear" style="color: #f1c40f; cursor: pointer; margin-left: 6px; font-size: 12px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-box-open"></i> Select Item/Gear
+        </a>
+        <a class="item-create" data-type="gear" data-tooltip="Create custom gear" style="color: #fff; cursor: pointer; margin-left: 4px; font-size: 12px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-shield"></i> Custom Gear
+        </a>
+        <a class="item-create" data-type="loot" data-tooltip="Create custom item" style="color: #fff; cursor: pointer; margin-left: 4px; font-size: 12px; font-weight: normal; text-transform: none;">
+          <i class="fa-solid fa-plus"></i> Custom Item
+        </a>
       </div>
     </div>
 
     <table class="dcc-attacks-table" style="width: 100%;">
       <thead>
         <tr>
-          <th style="width: 40%;">Item</th>
-          <th style="width: 12%;">Qty</th>
-          <th style="width: 36%;">Notes / Slot</th>
+          <th style="width: 36%;">Item</th>
+          <th style="width: 10%;">Qty</th>
+          <th style="width: 14%; text-align: center;"><i class="fa-solid fa-coins" style="color: #f39c12;"></i> Value</th>
+          <th style="width: 28%;">Notes / Slot</th>
           <th style="width: 12%; text-align: center;">Actions</th>
         </tr>
       </thead>
@@ -140,6 +169,17 @@
             <td>
               <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
             </td>
+            <td style="text-align: center; white-space: nowrap;">
+              {{#if ../canSeeItemValue}}
+                <span class="dcc-gold-value" style="color: #b78727; font-weight: bold; font-size: 11px;">
+                  <i class="fa-solid fa-coins" style="color: #f39c12; font-size: 10px;"></i> {{item.goldValue}} GP
+                </span>
+              {{else}}
+                <span class="dcc-gold-value-hidden" style="color: #888; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
+                  <i class="fa-solid fa-eye-slash" style="font-size: 10px;"></i> ???
+                </span>
+              {{/if}}
+            </td>
             <td>
               <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
             </td>
@@ -162,6 +202,17 @@
             <td>
               <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.quantity" value="{{item.system.quantity}}" style="width: 44px;" />
             </td>
+            <td style="text-align: center; white-space: nowrap;">
+              {{#if ../canSeeItemValue}}
+                <span class="dcc-gold-value" style="color: #b78727; font-weight: bold; font-size: 11px;">
+                  <i class="fa-solid fa-coins" style="color: #f39c12; font-size: 10px;"></i> {{item.goldValue}} GP
+                </span>
+              {{else}}
+                <span class="dcc-gold-value-hidden" style="color: #888; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
+                  <i class="fa-solid fa-eye-slash" style="font-size: 10px;"></i> ???
+                </span>
+              {{/if}}
+            </td>
             <td>
               <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
             </td>
@@ -176,7 +227,7 @@
         {{#unless gear.length}}
           {{#unless loot.length}}
             <tr>
-              <td colspan="4" style="text-align: center; color: #777; padding: 14px;">
+              <td colspan="5" style="text-align: center; color: #777; padding: 14px;">
                 Inventory is empty. Drag and drop items or click <strong>Add Gear</strong> / <strong>Add Item</strong>.
               </td>
             </tr>

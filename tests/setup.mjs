@@ -4,6 +4,7 @@ import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from '../src/data/buffs.mjs'
 import { DCC_SIZES, getSizeInfo } from '../src/data/sizes.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
 import { DCC_MOBS } from '../src/data/mobs.mjs';
+import { DCC_ITEMS } from '../src/data/items.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -233,7 +234,13 @@ export class MockItem {
         if (typeof this.system?.updateSource === 'function') {
           this.system.updateSource({ [subKey]: v });
         } else {
-          this.system[subKey] = v;
+          const path = subKey.split('.');
+          let curr = this.system;
+          for (let i = 0; i < path.length - 1; i++) {
+            if (!curr[path[i]]) curr[path[i]] = {};
+            curr = curr[path[i]];
+          }
+          curr[path[path.length - 1]] = v;
         }
       } else if (k === 'system') {
         if (typeof this.system?.updateSource === 'function') {
@@ -1287,6 +1294,7 @@ if (!globalThis.CONFIG) {
   globalThis.CONFIG.DCC.buffs = DCC_BUFFS;
   globalThis.CONFIG.DCC.macros = DCC_MACROS;
   globalThis.CONFIG.DCC.mobs = DCC_MOBS;
+  globalThis.CONFIG.DCC.items = DCC_ITEMS;
   globalThis.CONFIG.DCC.damageTypes = DCC_DAMAGE_TYPES;
   globalThis.CONFIG.DCC.debuffs = DCC_DEBUFFS;
   globalThis.CONFIG.DCC.sizes = DCC_SIZES;

@@ -3184,24 +3184,41 @@ export class DCCActor extends Actor {
   /**
    * Cast/Roll a DCC Spell, posting a formatted chat card to chat
    * @param {DCCItem} spellItem
-   * @param {'cast'|'damage'|'hit'} [action='cast']
+   * @param {'cast'|'damage'|'hit'|object} [action='cast']
+   * @param {object} [options={}]
    */
-  async rollSpell(spellItem, action = 'cast') {
-    if (action === 'damage') {
+  async rollSpell(spellItem, action = 'cast', options = {}) {
+    let act = action;
+    let opts = options;
+    if (typeof action === 'object' && action !== null) {
+      opts = action;
+      act = action.action || 'cast';
+    }
+    if (act === 'damage') {
       return this.rollSpellDamage(spellItem);
     }
-    if (action === 'hit') {
-      return this.rollSpellAttack(spellItem);
+    if (act === 'hit') {
+      return this.rollSpellAttack(spellItem, opts);
     }
 
     const sys = spellItem.system || {};
-    const manaCost = Math.max(0, Number(sys.manaCost) || 0);
+    const isFreeCast = Boolean(
+      opts.freeCast ||
+      opts.noMana ||
+      opts.manaCost === 0 ||
+      opts.originItem ||
+      opts.isConsumable ||
+      opts.isItemEffect ||
+      sys.freeCast
+    );
+    const baseManaCost = Math.max(0, Number(sys.manaCost) || 0);
+    const manaCost = isFreeCast ? 0 : baseManaCost;
     const rawMana = this.system?.attributes?.mana?.value !== undefined
       ? Number(this.system.attributes.mana.value)
       : (Number(this.system?.attributes?.mana?.max) || 0);
     const currentMana = Number.isFinite(rawMana) ? rawMana : 0;
 
-    // Check existing mana: if insufficient, the spell fails
+    // Check existing mana: if insufficient and not a free cast, the spell fails
     if (manaCost > 0 && currentMana < manaCost) {
       globalThis.ui?.notifications?.warn?.(`DCC RPG | ${this.name} has insufficient Mana to cast ${spellItem.name}! (Needs ${manaCost} MP, has ${currentMana} MP)`);
 
@@ -3229,13 +3246,14 @@ export class DCCActor extends Actor {
             spellFailed: true,
             reason: 'insufficient_mana',
             manaCost,
+            baseManaCost,
             currentMana
           }
         }
       });
     }
 
-    // Subtract mana on successful cast
+    // Subtract mana on successful cast (free casts from consumables/items never subtract mana)
     const updates = {};
     const newMana = Math.max(0, currentMana - manaCost);
     if (this.system?.attributes?.mana && manaCost > 0) {
@@ -3280,26 +3298,35 @@ export class DCCActor extends Actor {
     }
 
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
+      const freeCastSuffix = isFreeCast ? ' [0 MP Free Cast / Item Effect]' : '';
       DCCSessionEngine.recordRoll({
         actor: this,
         roll: { total: 0, formula: manaCost > 0 ? `${manaCost} MP` : '0 MP' },
         type: 'spell',
         name: spellItem.name,
         notes: healInfo
-          ? `Cast Heal (+${healInfo.actualHealed} HP to self, ${healInfo.newHp}/${healInfo.maxHp} HP)`
-          : `Cast ${spellItem.name} (${manaCost} MP)`
+          ? `Cast Heal (+${healInfo.actualHealed} HP to self, ${healInfo.newHp}/${healInfo.maxHp} HP)${freeCastSuffix}`
+          : `Cast ${spellItem.name} (${manaCost} MP)${freeCastSuffix}`
       }).catch(() => {});
     }
 
     const dmgData = this.getSpellDamageData(spellItem);
 
+    const manaDisplay = isFreeCast
+      ? `<span style="color: #27ae60; font-weight: bold;"><i class="fa-solid fa-gift"></i> 0 MP (Free Cast)</span>`
+      : (manaCost > 0 ? `<span style="color: #2980b9; font-weight: bold;">${manaCost} MP</span> <small style="color: #7f8c8d;">(${newMana} MP left)</small>` : '<span style="color: #2980b9; font-weight: bold;">None</span>');
+
+    const sourceBadge = opts.originItem || opts.isConsumable || opts.isItemEffect
+      ? `<div><strong>Source:</strong> <span style="color: #8e44ad; font-weight: bold;"><i class="fa-solid fa-wand-magic-sparkles"></i> ${opts.originItem?.name || 'Item / Consumable Effect'}</span></div>`
+      : '';
+
     let content = `
-      <div class="dcc-chat-card dcc-spell-card" style="font-family: var(--font-primary, sans-serif);">
+      <div class="dcc-chat-card dcc-spell-card ${isFreeCast ? 'dcc-free-cast' : ''}" style="font-family: var(--font-primary, sans-serif);">
         <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 4px; margin-bottom: 6px;">
           <img src="${spellItem.img || 'icons/svg/wand.svg'}" style="width: 36px; height: 36px; border: 1px solid #000; border-radius: 4px;" />
           <div>
             <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${spellItem.name}</h3>
-            <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">${sys.spellType || 'Spell'}${sys.damageType ? ` • ${sys.damageType}` : ''}</span>
+            <span style="font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold;">${sys.spellType || 'Spell'}${sys.damageType ? ` • ${sys.damageType}` : ''}${isFreeCast ? ' • FREE CAST' : ''}</span>
           </div>
         </div>
     `;
@@ -3310,7 +3337,8 @@ export class DCCActor extends Actor {
 
     content += `
       <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 6px; border-radius: 3px;">
-        <div><strong>Mana:</strong> <span style="color: #2980b9; font-weight: bold;">${manaCost ? `${manaCost} MP` : 'None'}</span>${manaCost > 0 ? ` <small style="color: #7f8c8d;">(${newMana} MP left)</small>` : ''}</div>
+        <div><strong>Mana:</strong> ${manaDisplay}</div>
+        ${sourceBadge}
         <div><strong>Range:</strong> ${sys.range || 'Self'}</div>
         <div><strong>Duration:</strong> ${sys.duration || 'Instantaneous'}</div>
         ${sys.cooldown && sys.cooldown !== 'None' ? `<div><strong>Cooldown:</strong> ${sys.cooldown}</div>` : ''}
@@ -3356,7 +3384,7 @@ export class DCCActor extends Actor {
     if (dmgData.hasDamage) {
       content += `
         <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #c0392b;">
-          <button type="button" class="dcc-btn roll-spell-dmg-from-card" data-spell-id="${spellItem.id}" data-actor-id="${this.id}" style="width: 100%; background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-primary, sans-serif); font-size: 12px;">
+          <button type="button" class="dcc-btn roll-spell-dmg-from-card" data-spell-id="${spellItem.id || spellItem._id || ''}" data-actor-id="${this.id}" style="width: 100%; background: #c0392b; color: #fff; border: 1px solid #7f1d1d; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-primary, sans-serif); font-size: 12px;">
             <i class="fa-solid fa-burst"></i> Roll Spell Damage (${dmgData.formula})
           </button>
         </div>
@@ -3373,9 +3401,13 @@ export class DCCActor extends Actor {
           isSpellCast: true,
           spellSuccess: true,
           manaCost,
-          remainingMana: newMana,
+          baseManaCost,
+          freeCast: isFreeCast,
+          remainingMana: isFreeCast ? currentMana : newMana,
           isHeal: Boolean(healInfo),
-          healInfo: healInfo || null
+          healInfo: healInfo || null,
+          originItemName: opts.originItem?.name || null,
+          isItemEffect: Boolean(opts.isItemEffect || opts.isConsumable || opts.originItem)
         }
       }
     });
@@ -5101,5 +5133,94 @@ export class DCCActor extends Actor {
     }
 
     return skillAdvancement;
+  }
+
+  /**
+   * Look up an actor's effective or modified rank for a skill by name (case-insensitive).
+   * @param {string} skillName
+   * @returns {number} The skill rank (0 if not possessed)
+   */
+  getSkillRank(skillName) {
+    if (!skillName) return 0;
+    const norm = skillName.toLowerCase().trim();
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    const skill = skills.find(s => s.name?.toLowerCase().trim() === norm);
+    if (!skill) return 0;
+    return Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
+  }
+
+  /**
+   * Get the actor's effective rank in the "Determine Value" skill.
+   * @returns {number}
+   */
+  getDetermineValueRank() {
+    return this.getSkillRank('Determine Value');
+  }
+
+  /**
+   * Whether the actor has reached Rank 10 in Determine Value to see item/gear gold values.
+   * @returns {boolean}
+   */
+  canDetermineValue() {
+    return this.getDetermineValueRank() >= 10;
+  }
+
+  /**
+   * Alias for canDetermineValue.
+   * @returns {boolean}
+   */
+  canSeeItemValue() {
+    return this.canDetermineValue();
+  }
+
+  /**
+   * Whether the actor has reached Rank 5 in Determine Value to sort inventory items by gold value.
+   * @returns {boolean}
+   */
+  canSortInventoryByValue() {
+    return this.getDetermineValueRank() >= 5;
+  }
+
+  /**
+   * Sort an array of items by gold value.
+   * @param {Array<Item>} items
+   * @param {object} [options={}]
+   * @param {boolean} [options.descending=true]
+   * @returns {Array<Item>}
+   */
+  sortInventoryByValue(items, { descending = true } = {}) {
+    if (!Array.isArray(items)) return [];
+    return [...items].sort((a, b) => {
+      const valA = Number(a.system?.value ?? a.goldValue ?? 0);
+      const valB = Number(b.system?.value ?? b.goldValue ?? 0);
+      const diff = descending ? valB - valA : valA - valB;
+      if (diff !== 0) return diff;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
+  /**
+   * Retrieve inventory items (gear and/or loot) optionally sorted by value or default sort.
+   * @param {object} [options={}]
+   * @param {string} [options.type='all'] 'all' | 'gear' | 'loot'
+   * @param {string} [options.sortBy='default'] 'default' | 'value' | 'name'
+   * @param {boolean} [options.descending=true]
+   * @returns {Array<Item>}
+   */
+  getInventory({ type = 'all', sortBy = 'default', descending = true } = {}) {
+    const all = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' || i.type === 'loot') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' || i.type === 'loot')) : [];
+    let filtered = all;
+    if (type === 'gear') filtered = all.filter(i => i.type === 'gear');
+    else if (type === 'loot') filtered = all.filter(i => i.type === 'loot');
+
+    if (sortBy === 'value' && this.canSortInventoryByValue()) {
+      return this.sortInventoryByValue(filtered, { descending });
+    } else if (sortBy === 'name') {
+      return [...filtered].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else if (sortBy === 'value') {
+      // Cannot sort by value without rank 5; return default order
+      return [...filtered].sort((a, b) => (a.sort || 0) - (b.sort || 0) || (a.name || '').localeCompare(b.name || ''));
+    }
+    return [...filtered].sort((a, b) => (a.sort || 0) - (b.sort || 0) || (a.name || '').localeCompare(b.name || ''));
   }
 }

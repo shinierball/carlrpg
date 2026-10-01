@@ -1,3 +1,25 @@
+## 2.2.8
+
+### Spell Explicit Rank Definitions, Scaling Damage & Ability Parity
+
+- **Spell Data Schema Parity (`template.json` & `SpellDataModel`)**:
+  - Added `damageModifiers` array field to `Item.spell` supporting multi-tiered rank-gated damage bonuses (`minRank`, `formula`, `damageType`).
+  - Added `critMultiplierR5` (default `4`) and `critMultiplierR15` (default `8`) for dynamic spell critical hit multipliers.
+  - Added `fumbleDebuff` for spell mishap backfires on Natural 1 attack rolls.
+  - Added `onHitDebuff` and `onHitDebuffMinRank` for rank-gated condition triggers on target hit.
+  - Added `optionalEffects` and `selectedEffect` for metamagic riders and tactical spell variations.
+- **Spell Sheet Interface (`DCCItemSheet` & `templates/items/parts/spell.hbs`)**:
+  - Added **SPELL CRITICAL MILESTONES & CONDITION TRIGGERS** UI panel with controls for `critMultiplierR5`, `critMultiplierR15`, `fumbleDebuff`, `onHitDebuff`, and `onHitDebuffMinRank`.
+  - Added **SPELL DAMAGE MODIFIERS & SCALING (RANK-GATED)** dynamic table with 1-click `[+ Add]` and `[- Remove]` controls.
+  - Added **OPTIONAL EFFECTS & METAMAGIC RIDERS** controls with comma-separated parsing and active effect selection.
+  - Enhanced **SPELL UPGRADES & ABILITIES** inputs for authentic Rank 5, 10, and 15 cheat sheet descriptions.
+- **Spell Combat & Damage Execution (`DCCActor`)**:
+  - `getSpellDamageData`: Evaluates explicit `damageModifiers` where $\text{rank} \ge \text{minRank}$, seamlessly supporting spells defined entirely through rank modifiers or combined with `baseDamage`.
+  - `rollSpellDamage`: Renders dynamic **[ 💥 Crit (4x) ]** and **[ ⚡ Crit (8x) ]** buttons on chat damage cards based on spell rank, and displays interactive **[ Inflict Debuff ]** buttons when $\text{rank} \ge \text{onHitDebuffMinRank}$.
+  - `rollSpellAttack`: Detects spell disadvantage (`2d20kl`) and warns of Natural 1 Fumble backfires with configured caster debuffs.
+- **Automated Verification**:
+  - Added comprehensive test suite `tests/spell-rank-definitions-and-abilities.test.mjs` validating schema defaults, context preparation, damage modifiers persistence, combat scaling, critical milestones, on-hit debuffs, disadvantage, and fumble backfire warnings. All 732 tests passing with 0 failures.
+
 ## 2.2.7
 
 ### Manual Weapon & Skill Creation Interface & Combat Milestone Mechanics

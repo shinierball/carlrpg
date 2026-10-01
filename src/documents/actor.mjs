@@ -3103,24 +3103,33 @@ export class DCCActor extends Actor {
   getSpellDamageData(spellItem) {
     const sys = spellItem?.system || {};
     const baseDmg = (sys.baseDamage || '').trim();
-    if (!baseDmg || sys.spellType === 'Heal' || /health bar|resistance/i.test(baseDmg)) {
+    if (sys.spellType === 'Heal' || /health bar|resistance/i.test(baseDmg)) {
       return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '', debuffs: [] };
     }
 
-    const diceMatch = baseDmg.match(/(\d+)d(\d+)/i);
-    const flatMatch = !diceMatch ? baseDmg.match(/^[+]?(\d+)/) : null;
+    const rank = Math.max(Number(sys.modifiedRank) || 0, Number(sys.rank) || 0, 1);
+    const rawMods = Array.isArray(sys.damageModifiers) ? sys.damageModifiers : Object.values(sys.damageModifiers || {});
+    const activeMods = rawMods.filter(m => m && (m.dice || m.value) && rank >= (Number(m.minRank) || 0));
 
-    if (!diceMatch && !flatMatch) {
+    const diceMatch = baseDmg ? baseDmg.match(/(\d+)d(\d+)/i) : null;
+    const flatMatch = (!diceMatch && baseDmg) ? baseDmg.match(/^[+]?(\d+)/) : null;
+
+    if (!diceMatch && !flatMatch && activeMods.length === 0) {
       return { hasDamage: false, formula: '', dice: '', statMod: 0, effects: '', debuffs: [] };
     }
 
     let diceStr = '';
     let sides = 0;
     let count = 0;
-    let damageType = sys.damageType || '';
+    let damageType = sys.damageType || (activeMods[0]?.type || activeMods[0]?.damageType || '');
     const debuffs = [];
 
-    const rank = Number(sys.modifiedRank ?? sys.rank) || 1;
+    if (sys.onHitDebuff && rank >= (Number(sys.onHitDebuffMinRank) || 0)) {
+      if (!debuffs.includes(sys.onHitDebuff)) {
+        debuffs.push(sys.onHitDebuff);
+      }
+    }
+
     const rawUpgrades = sys.upgrades || {};
     const upgrades = parseUpgrades(rawUpgrades);
 
@@ -3164,10 +3173,10 @@ export class DCCActor extends Actor {
 
     // Determine governing stat
     let statKey = null;
-    const statMatch = baseDmg.match(/\+\s*(int|cha|con|dex|str)\b/i);
+    const statMatch = baseDmg ? baseDmg.match(/\+\s*(int|cha|con|dex|str)\b/i) : null;
     if (statMatch) {
       statKey = statMatch[1].toLowerCase();
-    } else if (diceMatch && sys.stat && !/per|ft|\//i.test(baseDmg.split(diceMatch[0])[1] || '')) {
+    } else if (sys.stat) {
       if (sys.spellType === 'Attack') statKey = (sys.stat || 'int').toLowerCase();
     }
 
@@ -3175,25 +3184,34 @@ export class DCCActor extends Actor {
 
     // Rank Damage Die scaling table
     const rankDie = getRankDamageDie(rank);
-    let formula = diceStr;
-
-    if (flatMatch) {
-      formula = flatMatch[1];
-      if (sys.spellType !== 'Passive') {
-        if (rankDie.dice) {
-          formula += ` + ${rankDie.dice}`;
-        } else if (rankDie.value) {
-          formula += ` + ${rankDie.value}`;
-        }
-      }
-    } else {
-      if (rankDie.dice) {
-        formula += ` + ${rankDie.dice}`;
-      } else if (rankDie.value) {
-        formula += ` + ${rankDie.value}`;
-      }
+    const formulaComponents = [];
+    if (diceStr) {
+      formulaComponents.push(diceStr);
+    } else if (flatMatch) {
+      formulaComponents.push(flatMatch[1]);
     }
 
+    // Include explicit rank-gated damage modifiers
+    let activeModFlat = 0;
+    for (const m of activeMods) {
+      if (m.dice) {
+        formulaComponents.push(m.dice.trim());
+      }
+      if (m.value) {
+        activeModFlat += Number(m.value) || 0;
+      }
+    }
+    if (activeModFlat > 0) {
+      formulaComponents.push(String(activeModFlat));
+    }
+
+    if (rankDie.dice) {
+      formulaComponents.push(rankDie.dice);
+    } else if (rankDie.value && sys.spellType !== 'Passive') {
+      formulaComponents.push(String(rankDie.value));
+    }
+
+    let formula = formulaComponents.join(' + ') || '1d6';
     if (statKey) {
       formula += statMod >= 0 ? ` + ${statMod}` : ` - ${Math.abs(statMod)}`;
     }
@@ -3205,12 +3223,7 @@ export class DCCActor extends Actor {
     }
 
     // Formulate readable formulaWithStat
-    const formulaWithStatParts = [diceStr || (flatMatch ? flatMatch[1] : '')];
-    if (rankDie.dice) {
-      formulaWithStatParts.push(rankDie.dice);
-    } else if (rankDie.value && sys.spellType !== 'Passive') {
-      formulaWithStatParts.push(String(rankDie.value));
-    }
+    const formulaWithStatParts = [...formulaComponents];
     if (statKey) {
       formulaWithStatParts.push(statKey.charAt(0).toUpperCase() + statKey.slice(1));
     }
@@ -3218,8 +3231,8 @@ export class DCCActor extends Actor {
 
     return {
       hasDamage: true,
-      dice: diceStr,
-      baseDice: diceStr,
+      dice: diceStr || (activeMods.map(m => m.dice).filter(Boolean).join(' + ')),
+      baseDice: diceStr || (activeMods.map(m => m.dice).filter(Boolean).join(' + ')),
       rankDie: rankDie.dice || (rankDie.value ? String(rankDie.value) : ''),
       rankDieObj: rankDie,
       count,
@@ -3242,6 +3255,7 @@ export class DCCActor extends Actor {
    */
   async rollSpellDamage(spellItem) {
     const sys = spellItem.system || {};
+    const rank = Math.max(Number(sys.modifiedRank) || 0, Number(sys.rank) || 0, 1);
     const dmgData = this.getSpellDamageData(spellItem);
     const formula = dmgData.hasDamage && dmgData.formula ? dmgData.formula : (sys.baseDamage || '1d6');
     const roll = await new Roll(formula).evaluate();
@@ -3254,6 +3268,27 @@ export class DCCActor extends Actor {
       effectsList.push(`Inflicts: ${dmgData.debuffs.map(d => `<strong>[${d} Debuff]</strong>`).join(', ')}`);
     }
     const effectsStr = effectsList.join(' | ');
+
+    // Dynamic critical multiplier
+    let critMultiplier = 2;
+    if (sys.critMultiplierR15 && rank >= 15) {
+      critMultiplier = Number(sys.critMultiplierR15);
+    } else if (sys.critMultiplierR5 && rank >= 5) {
+      critMultiplier = Number(sys.critMultiplierR5);
+    }
+
+    // On-hit debuff button
+    let debuffButtonHtml = '';
+    const onHitDebuff = sys.onHitDebuff || (dmgData.debuffs && dmgData.debuffs[0]);
+    if (onHitDebuff && rank >= (Number(sys.onHitDebuffMinRank) || 0)) {
+      debuffButtonHtml = `
+        <div style="margin-top: 6px;">
+          <button type="button" class="dcc-apply-damage-btn" data-inflict-debuff="${onHitDebuff}" style="width: 100%; background: #e74c3c; color: #fff; border: 1px solid #c0392b; border-radius: 3px; padding: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">
+            <i class="fa-solid fa-skull-crossbones"></i> Inflict [${onHitDebuff}]
+          </button>
+        </div>
+      `;
+    }
 
     const cardContent = `
       <div class="dcc-chat-card dcc-damage-card" data-attacker-id="${this.id}" data-item-id="${spellItem.id}" data-item-name="${spellItem.name}" data-damage-value="${roll.total}" data-attack-type="spell">
@@ -3272,8 +3307,9 @@ export class DCCActor extends Actor {
           <div class="dcc-damage-sub-actions">
             <button type="button" class="dcc-apply-damage-btn" data-multiplier="0.5" title="Apply half damage">Half</button>
             <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-ignore-dr="true" title="Apply ignoring DR">Ignore DR</button>
-            <button type="button" class="dcc-apply-damage-btn" data-multiplier="2" title="Apply double (critical) damage">Crit (2x)</button>
+            <button type="button" class="dcc-apply-damage-btn" data-multiplier="${critMultiplier}" title="Apply critical damage">Crit (${critMultiplier}x)</button>
           </div>
+          ${debuffButtonHtml}
         </div>
       </div>
     `;
@@ -3291,6 +3327,7 @@ export class DCCActor extends Actor {
           attackType: 'spell',
           damageType: dmgData.damageType || '',
           rawDamage: roll.total,
+          critMultiplier,
           debuffs: dmgData.debuffs || []
         }
       }
@@ -3305,10 +3342,22 @@ export class DCCActor extends Actor {
     const sys = spellItem.system || {};
     const statKey = (sys.stat || 'int').toLowerCase();
     const statMod = this.system.abilities?.[statKey]?.mod ?? 0;
-    const rank = Number(sys.rank) || 1;
+    const rank = Math.max(Number(sys.modifiedRank) || 0, Number(sys.rank) || 0, 1);
     const total = rank + statMod;
-    const formula = `1d20 + ${total}`;
-    const roll = await new Roll(formula).evaluate();
+
+    const hasDisadvantage = Boolean(options.disadvantage || (sys.limitations && /disadvantage/i.test(sys.limitations)));
+    let roll;
+    let flavorText = '';
+    if (hasDisadvantage) {
+      const formula = `2d20kl + ${total}`;
+      roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (<strong>Disadvantage</strong>: 2d20kl + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+    } else {
+      const formula = `1d20 + ${total}`;
+      roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (Spell Attack / To Hit: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+    }
+
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
       DCCSessionEngine.recordRoll({
         actor: this,
@@ -3321,6 +3370,18 @@ export class DCCActor extends Actor {
 
     const { targetResults, targetResultsHtml, currentFloor } = this._resolveAttackTargets(roll, options);
     const evadeBtnHtml = this._getEvadeButtonHtml(roll, currentFloor);
+
+    // Check for Fumble on Natural 1
+    const isFumble = roll.dice?.[0]?.results ? roll.dice[0].results.some(r => r.result === 1 && (r.active ?? true)) : (roll.terms?.[0]?.results ? roll.terms[0].results.some(r => r.result === 1 && (r.active ?? true)) : roll.total === 1);
+    const fumbleDebuff = sys.fumbleDebuff || '';
+    let fumbleTag = '';
+    if (isFumble && fumbleDebuff) {
+      fumbleTag = `
+        <div class="dcc-fumble-warning" style="margin-top: 6px; padding: 4px 6px; background: #fdf2e9; border: 1px solid #e67e22; border-radius: 3px; color: #d35400; font-size: 11px;">
+          <i class="fa-solid fa-triangle-exclamation"></i> <strong>FUMBLE!</strong> Spell critical miss inflicts <strong>${fumbleDebuff}</strong> on caster!
+        </div>
+      `;
+    }
 
     let dmgBtnHtml = '';
     const dmgData = this.getSpellDamageData(spellItem);
@@ -3336,11 +3397,11 @@ export class DCCActor extends Actor {
     }
 
     const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
-    const content = [rollHtml, targetResultsHtml, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
+    const content = [rollHtml, targetResultsHtml, fumbleTag, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${spellItem.name} (Spell Attack / To Hit: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod})`,
+      flavor: flavorText,
       content,
       flags: {
         'carl-rpg': {

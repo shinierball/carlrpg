@@ -68,18 +68,122 @@
   <textarea class="dcc-field-input" name="system.description" style="height: 90px;">{{system.description}}</textarea>
 </div>
 
+{{!-- SPELL CRITICAL MILESTONES & CONDITION TRIGGERS --}}
+<div class="dcc-stat-block" style="margin-bottom: 8px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px;">
+    <i class="fa-solid fa-crosshairs"></i> SPELL CRITICAL MILESTONES & CONDITION TRIGGERS
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    <div class="dcc-field-row" style="margin-bottom: 6px;">
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-burst" style="color: #c0392b;"></i> Rank 5 Crit Multiplier</span>
+        <input class="dcc-field-input" type="number" name="system.critMultiplierR5" value="{{#if system.critMultiplierR5}}{{system.critMultiplierR5}}{{else}}4{{/if}}" placeholder="4" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-skull" style="color: #c0392b;"></i> Rank 15 Crit Multiplier</span>
+        <input class="dcc-field-input" type="number" name="system.critMultiplierR15" value="{{#if system.critMultiplierR15}}{{system.critMultiplierR15}}{{else}}8{{/if}}" placeholder="8" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-triangle-exclamation" style="color: #e67e22;"></i> Fumble Consequence (Self Debuff)</span>
+        <select class="dcc-field-input" name="system.fumbleDebuff" style="font-size: 11px;">
+          <option value="">-- None --</option>
+          {{#each availableDebuffs as |deb|}}
+            <option value="{{deb.name}}" {{#if (eq ../system.fumbleDebuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="dcc-field-row">
+      <div class="dcc-field-group" style="flex: 2;">
+        <span class="dcc-field-label"><i class="fa-solid fa-droplet" style="color: #c0392b;"></i> On-Hit Debuff Trigger</span>
+        <select class="dcc-field-input" name="system.onHitDebuff" style="font-size: 11px;">
+          <option value="">-- None --</option>
+          {{#each availableDebuffs as |deb|}}
+            <option value="{{deb.name}}" {{#if (eq ../system.onHitDebuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="dcc-field-group" style="flex: 1;">
+        <span class="dcc-field-label">Min Rank to Inflict</span>
+        <input class="dcc-field-input" type="number" name="system.onHitDebuffMinRank" value="{{system.onHitDebuffMinRank}}" placeholder="0" style="font-size: 11px;" />
+      </div>
+    </div>
+  </div>
+</div>
+
+{{!-- SPELL DAMAGE PROGRESSION (RANK GATED) --}}
+<div class="dcc-stat-block" style="margin-bottom: 8px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">
+    <span><i class="fa-solid fa-bolt"></i> SPELL DAMAGE MODIFIERS & SCALING (RANK-GATED)</span>
+    <a class="add-damage-mod" style="color: #fff; font-size: 10px; cursor: pointer;">
+      <i class="fa-solid fa-plus"></i> Add Damage Bonus
+    </a>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.damageModifiers.length}}
+      <table class="dcc-table" style="margin: 0; font-size: 11px;">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Damage Type</th>
+            <th style="width: 20%;">Fixed Bonus</th>
+            <th style="width: 25%;">Dice (Optional)</th>
+            <th style="width: 20%;">Min Rank</th>
+            <th style="width: 5%;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each system.damageModifiers as |mod idx|}}
+            <tr>
+              <td>
+                <select class="dcc-field-input" name="system.damageModifiers.{{idx}}.type" style="font-size: 11px;">
+                  {{#each ../damageTypes as |dt|}}
+                    <option value="{{dt}}" {{#if (eq mod.type dt)}}selected{{/if}}>{{dt}}</option>
+                  {{/each}}
+                </select>
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageModifiers.{{idx}}.value" value="{{mod.value}}" placeholder="0" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <input class="dcc-field-input" type="text" name="system.damageModifiers.{{idx}}.dice" value="{{mod.dice}}" placeholder="1d12" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td>
+                <input class="dcc-stat-input" type="number" name="system.damageModifiers.{{idx}}.minRank" value="{{mod.minRank}}" placeholder="0" style="width: 100%; font-size: 11px;" />
+              </td>
+              <td style="text-align: center;">
+                <a class="delete-damage-mod" data-index="{{idx}}" data-tooltip="Delete" style="color: #c0392b; cursor: pointer;"><i class="fa-solid fa-trash"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="font-style: italic; color: #777; font-size: 11px; text-align: center; padding: 4px;">
+        No explicit rank-gated damage modifiers added. (Uses Base Damage / Formula)
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+{{!-- OPTIONAL EFFECTS & METAMAGIC RIDERS --}}
+<div class="dcc-field-group" style="margin-bottom: 8px;">
+  <span class="dcc-field-label"><i class="fa-solid fa-wand-magic"></i> Selectable Spell Riders / Metamagic (Comma-Separated)</span>
+  <input class="dcc-field-input" type="text" name="system.optionalEffects" value="{{optionalEffectsString}}" placeholder="Overcharge, Concentrated Beam, Wide Dispersion" />
+</div>
+
 <div class="dcc-stat-block" style="background: #fdfbf7; border: 1px solid #d4af37; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
-  <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px;"><i class="fa-solid fa-arrow-up-right-dots"></i> SPELL UPGRADES</div>
+  <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px;"><i class="fa-solid fa-arrow-up-right-dots"></i> SPELL UPGRADES & ABILITIES</div>
   <div class="dcc-field-group" style="margin-bottom: 6px;">
-    <span class="dcc-field-label" style="color: #27ae60; font-weight: bold;">Rank 5</span>
+    <span class="dcc-field-label" style="color: #27ae60; font-weight: bold;">Rank 5 Ability / Perk</span>
     <input class="dcc-field-input" type="text" name="system.upgrades.rank5" value="{{system.upgrades.rank5}}" placeholder="Rank 5 upgrade..." />
   </div>
   <div class="dcc-field-group" style="margin-bottom: 6px;">
-    <span class="dcc-field-label" style="color: #2980b9; font-weight: bold;">Rank 10</span>
+    <span class="dcc-field-label" style="color: #2980b9; font-weight: bold;">Rank 10 Ability / Perk</span>
     <input class="dcc-field-input" type="text" name="system.upgrades.rank10" value="{{system.upgrades.rank10}}" placeholder="Rank 10 upgrade..." />
   </div>
   <div class="dcc-field-group">
-    <span class="dcc-field-label" style="color: #8e44ad; font-weight: bold;">Rank 15</span>
+    <span class="dcc-field-label" style="color: #8e44ad; font-weight: bold;">Rank 15 Ability / Perk</span>
     <input class="dcc-field-input" type="text" name="system.upgrades.rank15" value="{{system.upgrades.rank15}}" placeholder="Rank 15 upgrade..." />
   </div>
 </div>

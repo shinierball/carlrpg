@@ -329,13 +329,15 @@ export class DCCItemSheet extends BaseItemSheet {
     }
     context.system.skillModifiers = Array.isArray(skillMods) ? skillMods : [];
 
-    // Ensure statModifiers and damageModifiers arrays exist for buff and debuff
-    if (context.item.type === 'buff' || context.item.type === 'debuff') {
+    // Ensure statModifiers and damageModifiers arrays exist for buff, debuff, skill, and spell
+    if (['buff', 'debuff', 'skill', 'spell'].includes(context.item.type)) {
       let statMods = context.system.statModifiers;
       if (statMods && !Array.isArray(statMods) && typeof statMods === 'object') {
         statMods = Object.values(statMods);
       }
-      context.system.statModifiers = Array.isArray(statMods) ? statMods : [];
+      if (context.item.type === 'buff' || context.item.type === 'debuff') {
+        context.system.statModifiers = Array.isArray(statMods) ? statMods : [];
+      }
 
       let dmgMods = context.system.damageModifiers;
       if (dmgMods && !Array.isArray(dmgMods) && typeof dmgMods === 'object') {
@@ -401,8 +403,9 @@ export class DCCItemSheet extends BaseItemSheet {
       } else {
         const sys = context.item.system || {};
         const baseDmg = (sys.baseDamage || '').trim();
-        context.hasDamage = Boolean(baseDmg && sys.spellType !== 'Heal' && !/health bar|resistance/i.test(baseDmg));
-        context.damageFormula = sys.baseDamage || '';
+        const hasMods = Array.isArray(sys.damageModifiers) && sys.damageModifiers.length > 0;
+        context.hasDamage = Boolean((baseDmg || hasMods) && sys.spellType !== 'Heal' && !/health bar|resistance/i.test(baseDmg));
+        context.damageFormula = sys.baseDamage || (hasMods ? sys.damageModifiers.map(m => m.dice || m.value).filter(Boolean).join(' + ') : '');
       }
     }
 
@@ -675,9 +678,15 @@ export class DCCItemSheet extends BaseItemSheet {
       }
     }
 
-    if (this.item.type === 'skill') {
+    if (this.item.type === 'skill' || this.item.type === 'spell') {
       if (typeof formData['system.appliesTo'] === 'string') {
         formData['system.appliesTo'] = formData['system.appliesTo']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+      if (typeof formData['system.optionalEffects'] === 'string') {
+        formData['system.optionalEffects'] = formData['system.optionalEffects']
           .split(',')
           .map(s => s.trim())
           .filter(Boolean);

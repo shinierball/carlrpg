@@ -8,6 +8,7 @@
  */
 
 import { DCCActor } from '../documents/actor.mjs';
+import { DCCCrawlerClockHUD } from './crawler-clock-hud.mjs';
 
 export class DCCFloorClockHUD {
   static instance = null;
@@ -114,6 +115,11 @@ export class DCCFloorClockHUD {
 
     this.element.style.top = `${top}px`;
     this.element.style.left = `${left}px`;
+
+    const crawlerHUD = globalThis.CONFIG?.DCC?.crawlerClockHUD || globalThis.carl?.crawlerClockHUD || DCCCrawlerClockHUD;
+    if (typeof crawlerHUD?.get === 'function') {
+      crawlerHUD.get().updatePosition();
+    }
   }
 
   /**

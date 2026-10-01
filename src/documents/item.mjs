@@ -530,6 +530,14 @@ export class DCCItem extends Item {
         this.system.equipped = true;
       }
     }
+    if ((this.type === 'gear' || this.type === 'loot') && this.system) {
+      if ((this.system.value === undefined || this.system.value === 0) && this.system.goldValue !== undefined) {
+        this.system.value = Number(this.system.goldValue) || 0;
+      }
+      if ((this.system.value === undefined || this.system.value === 0) && this._source?.system?.goldValue !== undefined) {
+        this.system.value = Number(this._source.system.goldValue) || 0;
+      }
+    }
     if (this.type === 'gear' && this.system) {
       if (this.system.isWeapon === undefined) {
         const slot = (this.system.slot || '').toLowerCase();
@@ -730,14 +738,24 @@ export class DCCItem extends Item {
 
   /**
    * Gold value of the item.
+   * Safely resolves gold value from system value, legacy goldValue, or data model.
    * @type {number}
    */
   get goldValue() {
-    return Number(this.system?.value ?? this.system?.goldValue ?? 0);
+    if (!this.system) return 0;
+    if (this.system.value !== undefined && this.system.value !== 0) return Number(this.system.value);
+    const sourceVal = this._source?.system?.goldValue ?? this._source?.system?.value;
+    if (sourceVal !== undefined && Number(sourceVal) !== 0) return Number(sourceVal);
+    if (typeof this.system.goldValue === 'number') return this.system.goldValue;
+    return Number(this.system.value ?? 0);
   }
 
   set goldValue(val) {
-    if (this.system) this.system.value = Number(val) || 0;
+    if (this.system) {
+      if ('value' in this.system || this.system.schema?.has?.('value')) {
+        this.system.value = Number(val) || 0;
+      }
+    }
   }
 
   async roll(action = 'cast') {

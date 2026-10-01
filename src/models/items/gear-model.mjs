@@ -17,6 +17,16 @@ export class GearDataModel extends BaseItemDataModel {
       value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       equipped: new fields.BooleanField({ initial: false }),
       isWeapon: new fields.BooleanField({ initial: false }),
+      weaponCategory: new fields.StringField({ initial: '' }),
+      weaponType: new fields.StringField({ initial: '' }),
+      associatedSkills: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      proficiencyMode: new fields.StringField({
+        initial: 'highest',
+        choices: ['highest', 'synergy', 'manual']
+      }),
+      selectedSkill: new fields.StringField({ initial: '' }),
+      optionalEffects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      selectedEffect: new fields.StringField({ initial: '' }),
       drBonus: new fields.NumberField({ integer: true, initial: 0 }),
       evadeBonus: new fields.NumberField({ integer: true, initial: 0 }),
       abilityModifiers: new fields.SchemaField({

@@ -190,6 +190,11 @@ export class MockItem {
     this.actor = actor;
     this.sort = Number(data.sort) || 0;
     this.flags = structuredClone(data.flags || {});
+    this.prepareData();
+  }
+  prepareData() {
+    this.prepareBaseData();
+    this.prepareDerivedData();
   }
   get isEmbedded() {
     return this.actor !== null;
@@ -359,6 +364,7 @@ globalThis.CONST.DOCUMENT_OWNERSHIP_LEVELS = globalThis.CONST.DOCUMENT_OWNERSHIP
 const _settingsStore = new Map();
 _settingsStore.set('carl-rpg.currentFloor', 1);
 _settingsStore.set('carl-rpg.floorTimer', 100);
+_settingsStore.set('carl-rpg.crawlerCount', 13000000);
 
 if (!globalThis.game) {
   globalThis.game = {
@@ -436,6 +442,29 @@ if (!globalThis.game) {
         const nextVal = Math.max(0, (Number.isFinite(cur) ? cur : 100) - dec);
         _settingsStore.set('carl-rpg.floorTimer', nextVal);
         return nextVal;
+      },
+      getCrawlerCount: () => {
+        const val = Number(_settingsStore.get('carl-rpg.crawlerCount'));
+        return Number.isFinite(val) ? val : 13000000;
+      },
+      setCrawlerCount: async (c) => {
+        const val = Math.max(0, parseInt(String(c).replace(/,/g, ''), 10) || 0);
+        _settingsStore.set('carl-rpg.crawlerCount', val);
+        return val;
+      },
+      decrementCrawlerCount: async (amt = 1) => {
+        const dec = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+        const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+        const nextVal = Math.max(0, cur - dec);
+        _settingsStore.set('carl-rpg.crawlerCount', nextVal);
+        return nextVal;
+      },
+      incrementCrawlerCount: async (amt = 1) => {
+        const inc = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+        const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+        const nextVal = Math.max(0, cur + inc);
+        _settingsStore.set('carl-rpg.crawlerCount', nextVal);
+        return nextVal;
       }
     }
   };
@@ -462,6 +491,29 @@ if (!globalThis.game) {
     const cur = Number(_settingsStore.get('carl-rpg.floorTimer'));
     const nextVal = Math.max(0, (Number.isFinite(cur) ? cur : 100) - dec);
     _settingsStore.set('carl-rpg.floorTimer', nextVal);
+    return nextVal;
+  };
+  globalThis.game.dcc.getCrawlerCount = () => {
+    const val = Number(_settingsStore.get('carl-rpg.crawlerCount'));
+    return Number.isFinite(val) ? val : 13000000;
+  };
+  globalThis.game.dcc.setCrawlerCount = async (c) => {
+    const val = Math.max(0, parseInt(String(c).replace(/,/g, ''), 10) || 0);
+    _settingsStore.set('carl-rpg.crawlerCount', val);
+    return val;
+  };
+  globalThis.game.dcc.decrementCrawlerCount = async (amt = 1) => {
+    const dec = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+    const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+    const nextVal = Math.max(0, cur - dec);
+    _settingsStore.set('carl-rpg.crawlerCount', nextVal);
+    return nextVal;
+  };
+  globalThis.game.dcc.incrementCrawlerCount = async (amt = 1) => {
+    const inc = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+    const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+    const nextVal = Math.max(0, cur + inc);
+    _settingsStore.set('carl-rpg.crawlerCount', nextVal);
     return nextVal;
   };
   if (!globalThis.game.folders) globalThis.game.folders = [];
@@ -1327,6 +1379,29 @@ globalThis.CONFIG.DCC.decrementFloorTimer = async (h) => {
   _settingsStore.set('carl-rpg.floorTimer', nextVal);
   return nextVal;
 };
+globalThis.CONFIG.DCC.getCrawlerCount = () => {
+  const val = Number(_settingsStore.get('carl-rpg.crawlerCount'));
+  return Number.isFinite(val) ? val : 13000000;
+};
+globalThis.CONFIG.DCC.setCrawlerCount = async (c) => {
+  const val = Math.max(0, parseInt(String(c).replace(/,/g, ''), 10) || 0);
+  _settingsStore.set('carl-rpg.crawlerCount', val);
+  return val;
+};
+globalThis.CONFIG.DCC.decrementCrawlerCount = async (amt = 1) => {
+  const dec = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+  const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+  const nextVal = Math.max(0, cur - dec);
+  _settingsStore.set('carl-rpg.crawlerCount', nextVal);
+  return nextVal;
+};
+globalThis.CONFIG.DCC.incrementCrawlerCount = async (amt = 1) => {
+  const inc = parseInt(String(amt).replace(/,/g, ''), 10) || 1;
+  const cur = Number(_settingsStore.get('carl-rpg.crawlerCount')) || 13000000;
+  const nextVal = Math.max(0, cur + inc);
+  _settingsStore.set('carl-rpg.crawlerCount', nextVal);
+  return nextVal;
+};
 globalThis.window = globalThis.window || globalThis;
 globalThis.window.carl = globalThis.window.carl || {};
 globalThis.window.carl.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
@@ -1338,6 +1413,10 @@ globalThis.window.carl.setCurrentFloor = async (f) => {
 globalThis.window.carl.getFloorTimer = globalThis.CONFIG.DCC.getFloorTimer;
 globalThis.window.carl.setFloorTimer = globalThis.CONFIG.DCC.setFloorTimer;
 globalThis.window.carl.decrementFloorTimer = globalThis.CONFIG.DCC.decrementFloorTimer;
+globalThis.window.carl.getCrawlerCount = globalThis.CONFIG.DCC.getCrawlerCount;
+globalThis.window.carl.setCrawlerCount = globalThis.CONFIG.DCC.setCrawlerCount;
+globalThis.window.carl.decrementCrawlerCount = globalThis.CONFIG.DCC.decrementCrawlerCount;
+globalThis.window.carl.incrementCrawlerCount = globalThis.CONFIG.DCC.incrementCrawlerCount;
 
 if (!globalThis.window) {
   globalThis.window = globalThis;
@@ -1380,8 +1459,29 @@ if (!globalThis.Hooks) {
 }
 
 if (!globalThis.Handlebars) {
+  const helpers = {
+    eq: (a, b) => a === b,
+    ne: (a, b) => a !== b,
+    and: (...args) => {
+      const last = args[args.length - 1];
+      const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
+      return terms.every(Boolean);
+    },
+    or: (a, b) => Boolean(a || b),
+    not: (a) => !a,
+    gte: (a, b) => Number(a) >= Number(b),
+    numberFormat: (value, options) => {
+      const num = Number(value) || 0;
+      if (options?.hash?.sign && num > 0) return `+${num}`;
+      return String(num);
+    },
+    upper: str => (str ? String(str).toUpperCase() : '')
+  };
   globalThis.Handlebars = {
-    registerHelper: () => {},
+    helpers,
+    registerHelper: (name, fn) => {
+      helpers[name] = fn;
+    },
     partials: {}
   };
 }

@@ -7497,6 +7497,175 @@ select.dcc-box-input.dcc-size-select,
 }
 
 /* =======================================================
+   CRAWLER COUNTDOWN CLOCK HUD (SURVIVING CRAWLERS)
+   ======================================================= */
+#dcc-crawler-clock-hud {
+  position: absolute;
+  top: 65px;
+  left: 260px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  font-family: 'Oswald', sans-serif;
+  user-select: none;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.dcc-crawler-hud-inner {
+  background: rgba(18, 18, 22, 0.95);
+  border: 1.5px solid #c0392b;
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+}
+
+.dcc-crawler-hud-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dcc-crawler-hud-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.dcc-crawler-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #aaaaaa;
+}
+
+.dcc-hud-crawler-badge {
+  background: #c0392b;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+.dcc-crawler-hud-time-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 1px;
+}
+
+.dcc-crawler-hud-time-display {
+  font-size: 15px;
+  font-weight: bold;
+  color: #e74c3c;
+  letter-spacing: 0.5px;
+}
+
+.dcc-crawler-hud-time-display small {
+  font-size: 10px;
+  color: #888888;
+  margin-left: 2px;
+}
+
+.dcc-hud-crawler-input {
+  width: 76px;
+  background: #111111;
+  color: #e74c3c;
+  border: 1px solid #666666;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 12px;
+  padding: 1px 2px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.dcc-hud-crawler-input:focus {
+  border-color: #e74c3c;
+  outline: none;
+  background: #191919;
+}
+
+.dcc-crawler-hud-adj-btn {
+  background: #262633;
+  border: 1px solid #444455;
+  color: #cccccc;
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 1px 4px;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.dcc-crawler-hud-adj-btn:hover {
+  background: #c0392b;
+  color: #ffffff;
+  border-color: #e74c3c;
+}
+
+.dcc-crawler-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  border-left: 1px solid #333333;
+  padding-left: 6px;
+}
+
+.dcc-crawler-hud-collapse-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.dcc-crawler-hud-collapse-btn:hover {
+  color: #ffffff;
+}
+
+.dcc-crawler-hud-pill-collapsed {
+  background: rgba(18, 18, 22, 0.95);
+  border: 1.5px solid #c0392b;
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-family: 'Oswald', sans-serif;
+  transition: all 0.15s ease;
+}
+
+.dcc-crawler-hud-pill-collapsed:hover {
+  border-color: #e74c3c;
+  transform: scale(1.05);
+}
+
+.dcc-crawler-hud-collapsed-val {
+  font-weight: bold;
+  color: #e74c3c;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+/* =======================================================
    IN-SHEET SKILLS GRINDING CONTROLS (PAGE 3)
    ======================================================= */
 .dcc-sheet-skill-grind-block {

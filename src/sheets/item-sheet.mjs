@@ -1,5 +1,6 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
+import { DCC_SPELLS } from '../data/spells.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller

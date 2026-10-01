@@ -59,6 +59,9 @@ describe('DCC RPG - Phase 1: Item System Data Models', () => {
     assert.equal(defaultSkill.typeBonus, 0);
     assert.equal(defaultSkill.totalRank, 1);
     assert.deepEqual(defaultSkill.damageModifiers, []);
+    assert.equal(defaultSkill.isTechnique, false);
+    assert.deepEqual(defaultSkill.appliesTo, []);
+    assert.equal(defaultSkill.techniqueConfig.cooldown, 'None');
 
     // Custom data with stacked bonuses
     const trainedSkill = new SkillDataModel({
@@ -82,10 +85,17 @@ describe('DCC RPG - Phase 1: Item System Data Models', () => {
     assert.equal(attack.damageDice, '1d6');
     assert.equal(attack.damageStat, 'str');
     assert.deepEqual(attack.damageParts, []);
+    assert.equal(attack.weaponCategory, '');
+    assert.equal(attack.weaponType, '');
+    assert.deepEqual(attack.associatedSkills, []);
+    assert.equal(attack.proficiencyMode, 'highest');
 
     const customAttack = new AttackDataModel({
       toHitStat: 'str',
       toHitRank: 3,
+      weaponCategory: 'Power Weapons',
+      weaponType: 'Chainsaw',
+      associatedSkills: ['Chainsaws', 'Power Weapons'],
       damageDice: '2d8',
       damageStat: 'str',
       damageParts: [
@@ -95,6 +105,9 @@ describe('DCC RPG - Phase 1: Item System Data Models', () => {
     });
     assert.equal(customAttack.toHitStat, 'str');
     assert.equal(customAttack.toHitRank, 3);
+    assert.equal(customAttack.weaponCategory, 'Power Weapons');
+    assert.equal(customAttack.weaponType, 'Chainsaw');
+    assert.deepEqual(customAttack.associatedSkills, ['Chainsaws', 'Power Weapons']);
     assert.equal(customAttack.damageParts.length, 2);
     assert.equal(customAttack.damageParts[0].type, 'Fire');
   });
@@ -130,6 +143,10 @@ describe('DCC RPG - Phase 1: Item System Data Models', () => {
     assert.equal(gear.equipped, false);
     assert.equal(gear.drBonus, 0);
     assert.equal(gear.evadeBonus, 0);
+    assert.equal(gear.weaponCategory, '');
+    assert.equal(gear.weaponType, '');
+    assert.deepEqual(gear.associatedSkills, []);
+    assert.equal(gear.proficiencyMode, 'highest');
     assert.equal(gear.abilityModifiers.str.value, 0);
     assert.equal(gear.abilityModifiers.str.type, 'flat');
 

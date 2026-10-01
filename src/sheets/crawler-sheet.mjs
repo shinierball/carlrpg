@@ -278,6 +278,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.floorTimer = (typeof DCCActor !== 'undefined' && typeof DCCActor.getFloorTimer === 'function')
       ? DCCActor.getFloorTimer()
       : (globalThis.CONFIG?.DCC?.getFloorTimer?.() ?? (Number(globalThis.game?.settings?.get?.('carl-rpg', 'floorTimer')) || 100));
+    context.crawlerCount = (typeof DCCActor !== 'undefined' && typeof DCCActor.getCrawlerCount === 'function')
+      ? DCCActor.getCrawlerCount()
+      : (globalThis.CONFIG?.DCC?.getCrawlerCount?.() ?? (Number(globalThis.game?.settings?.get?.('carl-rpg', 'crawlerCount')) || 13000000));
+    context.formattedCrawlerCount = Number(context.crawlerCount).toLocaleString();
     context.bankedGrindHours = Number(actor?.system?.details?.bankedGrindHours ?? actor?.system?.bankedGrindHours) || 0;
 
     // Dynamic health segments for health bar visualization

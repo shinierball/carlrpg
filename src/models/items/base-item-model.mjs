@@ -21,13 +21,29 @@ export class BaseItemDataModel extends (globalThis.foundry?.abstract?.TypeDataMo
 
   /**
    * Gold value of the item.
+   * Safely returns numeric value or defaults to 0 without recursive parent lookups.
    * @type {number}
    */
   get goldValue() {
-    return Number(this.value ?? this.parent?.system?.value ?? this.parent?.system?.goldValue ?? 0);
+    return Number(this.value ?? this._source?.goldValue ?? this._source?.value ?? 0);
   }
 
   set goldValue(val) {
-    this.value = Number(val) || 0;
+    if ('value' in this || this.schema?.has?.('value')) {
+      this.value = Number(val) || 0;
+    }
+  }
+
+  /**
+   * Migrate legacy data fields on load.
+   * Transparently migrates legacy goldValue to value for items.
+   * @param {object} source
+   * @returns {object}
+   */
+  static migrateData(source = {}) {
+    if (source.goldValue !== undefined && (source.value === undefined || source.value === 0)) {
+      source.value = Number(source.goldValue) || 0;
+    }
+    return super.migrateData ? super.migrateData(source) : source;
   }
 }

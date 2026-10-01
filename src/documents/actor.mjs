@@ -953,6 +953,84 @@ export class DCCActor extends Actor {
   }
 
   /**
+   * Get current global crawler count (surviving crawlers in dungeon)
+   * @returns {number}
+   */
+  static getCrawlerCount() {
+    try {
+      const val = globalThis.game?.settings?.get?.('carl-rpg', 'crawlerCount');
+      const parsed = parseInt(String(val).replace(/,/g, ''), 10);
+      return Number.isFinite(parsed) ? parsed : 13000000;
+    } catch (_) {
+      return 13000000;
+    }
+  }
+
+  /**
+   * Set current global crawler count
+   * @param {number|string} count
+   * @returns {Promise<number>}
+   */
+  static async setCrawlerCount(count) {
+    const raw = String(count ?? '').replace(/,/g, '').trim();
+    const parsed = parseInt(raw, 10);
+    const val = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+    if (globalThis.game?.settings?.set) {
+      await globalThis.game.settings.set('carl-rpg', 'crawlerCount', val);
+    }
+    if (typeof globalThis.ui !== 'undefined' && globalThis.ui?.windows) {
+      for (const app of Object.values(globalThis.ui.windows)) {
+        if (typeof app.render === 'function') app.render(false);
+      }
+    }
+    const crawlerHUD = globalThis.CONFIG?.DCC?.crawlerClockHUD || globalThis.carl?.crawlerClockHUD;
+    if (typeof crawlerHUD?.get === 'function') {
+      crawlerHUD.get().render();
+    }
+    return val;
+  }
+
+  /**
+   * Decrement global crawler count by specified amount
+   * @param {number|string} amount
+   * @returns {Promise<number>}
+   */
+  static async decrementCrawlerCount(amount = 1) {
+    const dec = parseInt(String(amount).replace(/,/g, ''), 10) || 1;
+    const cur = DCCActor.getCrawlerCount();
+    const nextVal = Math.max(0, cur - dec);
+    return DCCActor.setCrawlerCount(nextVal);
+  }
+
+  /**
+   * Increment global crawler count by specified amount
+   * @param {number|string} amount
+   * @returns {Promise<number>}
+   */
+  static async incrementCrawlerCount(amount = 1) {
+    const inc = parseInt(String(amount).replace(/,/g, ''), 10) || 1;
+    const cur = DCCActor.getCrawlerCount();
+    const nextVal = Math.max(0, cur + inc);
+    return DCCActor.setCrawlerCount(nextVal);
+  }
+
+  getCrawlerCount() {
+    return DCCActor.getCrawlerCount();
+  }
+
+  setCrawlerCount(count) {
+    return DCCActor.setCrawlerCount(count);
+  }
+
+  decrementCrawlerCount(amount) {
+    return DCCActor.decrementCrawlerCount(amount);
+  }
+
+  incrementCrawlerCount(amount) {
+    return DCCActor.incrementCrawlerCount(amount);
+  }
+
+  /**
    * Automatic CON Stat Check vs Fatal Debuff Damage
    * If a Debuff applies damage to a crawler that would drop them to 0% on their Health Bar,
    * they make a Con Stat Check vs. Difficulty 10 + Floor at the end of the round.

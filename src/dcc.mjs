@@ -15,6 +15,7 @@ import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
 import { DCCGrindApp } from './apps/grind-app.mjs';
 import { DCCFloorClockHUD } from './apps/floor-clock-hud.mjs';
+import { DCCCrawlerClockHUD } from './apps/crawler-clock-hud.mjs';
 import {
   initCrawlerTokenHUD,
   getCrawlerTokenHUD,
@@ -231,6 +232,7 @@ Hooks.once('init', async function() {
   if (ItemsClass) {
     ItemsClass.unregisterSheet('core', BaseItemSheet);
     ItemsClass.registerSheet('carl-rpg', DCCItemSheet, {
+      types: ['skill', 'attack', 'spell', 'gear', 'race', 'class', 'deity', 'sponsor', 'loot', 'buff', 'debuff', 'achievement'],
       makeDefault: true,
       label: 'DCC.ItemSheet'
     });
@@ -282,20 +284,44 @@ Hooks.once('init', async function() {
     default: 100
   });
 
+  game.settings.register('carl-rpg', 'crawlerCount', {
+    name: 'Surviving Crawler Count',
+    hint: 'Total number of surviving crawlers in the dungeon.',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 13000000
+  });
+
   DCCActor.getCurrentFloor = getCurrentFloor;
   DCCActor.setCurrentFloor = setCurrentFloor;
   DCCActor.getFloorTimer = getFloorTimer;
   DCCActor.setFloorTimer = setFloorTimer;
   DCCActor.decrementFloorTimer = decrementFloorTimer;
+  DCCActor.getCrawlerCount = getCrawlerCount;
+  DCCActor.setCrawlerCount = setCrawlerCount;
+  DCCActor.decrementCrawlerCount = decrementCrawlerCount;
+  DCCActor.incrementCrawlerCount = incrementCrawlerCount;
 
   CONFIG.DCC.getCurrentFloor = getCurrentFloor;
   CONFIG.DCC.setCurrentFloor = setCurrentFloor;
   CONFIG.DCC.getFloorTimer = getFloorTimer;
   CONFIG.DCC.setFloorTimer = setFloorTimer;
   CONFIG.DCC.decrementFloorTimer = decrementFloorTimer;
+  CONFIG.DCC.getCrawlerCount = getCrawlerCount;
+  CONFIG.DCC.setCrawlerCount = setCrawlerCount;
+  CONFIG.DCC.decrementCrawlerCount = decrementCrawlerCount;
+  CONFIG.DCC.incrementCrawlerCount = incrementCrawlerCount;
+  CONFIG.DCC.crawlerClockHUD = DCCCrawlerClockHUD;
 
   // Register Handlebars Helpers
   Handlebars.registerHelper('eq', (a, b) => a === b);
+  Handlebars.registerHelper('ne', (a, b) => a !== b);
+  Handlebars.registerHelper('and', (...args) => {
+    const last = args[args.length - 1];
+    const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
+    return terms.every(Boolean);
+  });
   Handlebars.registerHelper('or', (a, b) => Boolean(a || b));
   Handlebars.registerHelper('not', (a) => !a);
   Handlebars.registerHelper('gte', (a, b) => Number(a) >= Number(b));
@@ -347,7 +373,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/crawler-hotbar-hud.hbs',
     'systems/carl-rpg/templates/apps/crawler-action-hud.hbs',
     'systems/carl-rpg/templates/apps/grind-app.hbs',
-    'systems/carl-rpg/templates/apps/floor-clock-hud.hbs'
+    'systems/carl-rpg/templates/apps/floor-clock-hud.hbs',
+    'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -379,6 +406,14 @@ Hooks.once('init', async function() {
     rollBackgroundTable,
     getCurrentFloor,
     setCurrentFloor,
+    getFloorTimer,
+    setFloorTimer,
+    decrementFloorTimer,
+    getCrawlerCount,
+    setCrawlerCount,
+    decrementCrawlerCount,
+    incrementCrawlerCount,
+    crawlerClockHUD: DCCCrawlerClockHUD,
     setupInitialHotbar,
     openAchievementManager(options = {}) {
       return new DCCAchievementManagerApp(options).render(true);
@@ -1764,6 +1799,67 @@ export async function decrementFloorTimer(hours) {
 }
 
 /**
+ * Get current global crawler count (surviving crawlers in dungeon)
+ * @returns {number}
+ */
+export function getCrawlerCount() {
+  try {
+    const val = globalThis.game?.settings?.get?.('carl-rpg', 'crawlerCount');
+    const parsed = parseInt(String(val).replace(/,/g, ''), 10);
+    return Number.isFinite(parsed) ? parsed : 13000000;
+  } catch (_) {
+    return 13000000;
+  }
+}
+
+/**
+ * Set current global crawler count
+ * @param {number|string} count
+ * @returns {Promise<number>}
+ */
+export async function setCrawlerCount(count) {
+  const raw = String(count ?? '').replace(/,/g, '').trim();
+  const parsed = parseInt(raw, 10);
+  const val = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  if (globalThis.game?.settings?.set) {
+    await globalThis.game.settings.set('carl-rpg', 'crawlerCount', val);
+  }
+  if (typeof globalThis.ui !== 'undefined' && globalThis.ui?.windows) {
+    for (const app of Object.values(globalThis.ui.windows)) {
+      if (typeof app.render === 'function') app.render(false);
+    }
+  }
+  if (typeof DCCCrawlerClockHUD?.get === 'function') {
+    DCCCrawlerClockHUD.get().render();
+  }
+  return val;
+}
+
+/**
+ * Decrement global crawler count by specified amount
+ * @param {number|string} amount
+ * @returns {Promise<number>}
+ */
+export async function decrementCrawlerCount(amount = 1) {
+  const dec = parseInt(String(amount).replace(/,/g, ''), 10) || 1;
+  const current = getCrawlerCount();
+  const nextVal = Math.max(0, current - dec);
+  return setCrawlerCount(nextVal);
+}
+
+/**
+ * Increment global crawler count by specified amount
+ * @param {number|string} amount
+ * @returns {Promise<number>}
+ */
+export async function incrementCrawlerCount(amount = 1) {
+  const inc = parseInt(String(amount).replace(/,/g, ''), 10) || 1;
+  const current = getCrawlerCount();
+  const nextVal = Math.max(0, current + inc);
+  return setCrawlerCount(nextVal);
+}
+
+/**
  * Detect whether the current Foundry environment is Version 13 or newer.
  * Safely evaluates across module evaluation (when `game` may not be initialized yet)
  * and runtime hooks.
@@ -2153,15 +2249,26 @@ Hooks.once('ready', async function() {
     DCCFloorClockHUD.get().render();
   }
 
+  // Initialize Scene Crawler Countdown Clock HUD
+  if (typeof DCCCrawlerClockHUD?.get === 'function') {
+    DCCCrawlerClockHUD.get().render();
+  }
+
   Hooks.on('renderSceneNavigation', () => {
     if (typeof DCCFloorClockHUD?.get === 'function') {
       DCCFloorClockHUD.get().render();
+    }
+    if (typeof DCCCrawlerClockHUD?.get === 'function') {
+      DCCCrawlerClockHUD.get().render();
     }
   });
 
   Hooks.on('canvasReady', () => {
     if (typeof DCCFloorClockHUD?.get === 'function') {
       DCCFloorClockHUD.get().render();
+    }
+    if (typeof DCCCrawlerClockHUD?.get === 'function') {
+      DCCCrawlerClockHUD.get().render();
     }
   });
 });

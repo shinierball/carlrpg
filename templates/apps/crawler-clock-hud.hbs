@@ -1,0 +1,42 @@
+<div id="dcc-crawler-clock-hud" class="dcc-crawler-clock-hud {{#if isCollapsed}}collapsed{{/if}}" data-tooltip="Surviving Crawler Countdown Clock">
+  {{#if isCollapsed}}
+    <div class="dcc-crawler-hud-pill-collapsed" style="display: flex; align-items: center; gap: 6px; padding: 3px 8px;">
+      <button type="button" class="dcc-crawler-hud-toggle-btn" title="Crawler Countdown Clock: {{formattedCrawlerCount}} Remaining Crawlers. Click to expand." style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Oswald', sans-serif; font-size: 13px; padding: 0;">
+        <i class="fa-solid fa-users" style="color: #e74c3c;"></i>
+        <span class="dcc-crawler-hud-collapsed-val" style="font-weight: bold; color: #e74c3c;">{{formattedCrawlerCount}}</span>
+      </button>
+    </div>
+  {{else}}
+    <div class="dcc-crawler-hud-inner">
+      <div class="dcc-crawler-hud-icon-wrap" title="Surviving Crawler Countdown Clock">
+        <i class="fa-solid fa-users" style="color: #e74c3c; font-size: 15px;"></i>
+      </div>
+      <div class="dcc-crawler-hud-body">
+        <div class="dcc-crawler-hud-title">
+          <span class="dcc-hud-crawler-badge">SURVIVING</span>
+          <span class="dcc-hud-label">Crawler Count</span>
+        </div>
+        <div class="dcc-crawler-hud-time-row">
+          {{#if isGM}}
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="-10000" title="Subtract 10,000 Crawlers">-10k</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="-1000" title="Subtract 1,000 Crawlers">-1k</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="-100" title="Subtract 100 Crawlers">-100</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="-1" title="Subtract 1 Crawler">-1</button>
+            <input type="text" class="dcc-hud-crawler-input" value="{{formattedCrawlerCount}}" title="Edit Crawler Count. Press Enter to save." />
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="1" title="Add 1 Crawler">+1</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="100" title="Add 100 Crawlers">+100</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="1000" title="Add 1,000 Crawlers">+1k</button>
+            <button type="button" class="dcc-crawler-hud-adj-btn" data-delta="10000" title="Add 10,000 Crawlers">+10k</button>
+          {{else}}
+            <span class="dcc-crawler-hud-time-display">{{formattedCrawlerCount}} <small>CRAWLERS</small></span>
+          {{/if}}
+        </div>
+      </div>
+      <div class="dcc-crawler-hud-actions">
+        <button type="button" class="dcc-crawler-hud-collapse-btn" title="Minimize Crawler Clock HUD">
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+      </div>
+    </div>
+  {{/if}}
+</div>

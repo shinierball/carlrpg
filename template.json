@@ -182,10 +182,23 @@
       "upgrades": "",
       "damageModifiers": [],
       "checked": false,
-      "investedHours": 0
+      "investedHours": 0,
+      "isTechnique": false,
+      "appliesTo": [],
+      "techniqueConfig": {
+        "damageBonus": "",
+        "damageType": "",
+        "debuffName": "",
+        "cooldown": "None"
+      }
     },
     "attack": {
       "equipped": true,
+      "weaponCategory": "",
+      "weaponType": "",
+      "associatedSkills": [],
+      "proficiencyMode": "highest",
+      "selectedSkill": "",
       "toHitStat": "dex",
       "toHitRank": 1,
       "damageDice": "1d6",
@@ -223,6 +236,13 @@
       "value": 0,
       "equipped": false,
       "isWeapon": false,
+      "weaponCategory": "",
+      "weaponType": "",
+      "associatedSkills": [],
+      "proficiencyMode": "highest",
+      "selectedSkill": "",
+      "optionalEffects": [],
+      "selectedEffect": "",
       "drBonus": 0,
       "evadeBonus": 0,
       "abilityModifiers": {

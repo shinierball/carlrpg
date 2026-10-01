@@ -1,3 +1,64 @@
+## 2.2.6
+
+### Item Sheet Details Opening & Legacy Gold Value Recursion Fix
+
+- **Resolved `Maximum call stack size exceeded` in `BaseItemDataModel.goldValue`**:
+  - Fixed infinite recursion loop in `BaseItemDataModel.prototype.goldValue` where fallback was referencing `this.parent?.system?.goldValue` (calling itself on any item without `value` defined, including skills like *Dirty Fighting*, spells, attacks, lore traits, buffs, and debuffs).
+  - Cleanly resolved `goldValue` to `Number(this.value ?? this._source?.goldValue ?? this._source?.value ?? 0)` with no recursive lookups.
+  - Added `migrateData(source)` in `BaseItemDataModel` to transparently map legacy `goldValue` to `value` on document instantiation and database loading.
+- **Enhanced `DCCItem.prototype.goldValue` & `prepareBaseData`**:
+  - Safe resolution without mutual recursion across plain objects, legacy schemas, and TypeDataModel instances.
+  - Automatically migrates `system.goldValue` to `system.value` for gear and loot items.
+- **Registered Missing Handlebars Helpers & Compendium Imports**:
+  - Registered missing Handlebars helpers `ne` and `and` in `src/dcc.mjs` to prevent sheet render errors in attack and loot templates.
+  - Imported `DCC_SPELLS` in `src/sheets/item-sheet.mjs` to ensure `getAvailableSpells()` does not throw `ReferenceError`.
+  - Explicitly registered supported item types in `ItemsClass.registerSheet`.
+- **Automated Verification**:
+  - Added unit test suite `tests/item-sheet-details-and-migration.test.mjs` verifying all 12 item types, compendium skill *Dirty Fighting*, legacy migration, and helpers.
+
+## 2.2.5
+
+### Weapon Skill Proficiency & Technique Schema
+
+- **Weapon Skill Proficiency Data Model Extensions (`AttackDataModel` & `GearDataModel`)**:
+  - Added `weaponCategory` (`StringField`) to categorize broad weapon families (e.g. `Power Weapons`, `Edge`, `Bashing`, `Reach`, `Ranged`, `Hand to Hand`).
+  - Added `weaponType` (`StringField`) to specify weapon archetypes or specific models (e.g. `Chainsaw`, `Longsword`, `Shotgun`).
+  - Added `associatedSkills` (`ArrayField<StringField>`) for explicit multi-skill proficiency associations.
+  - Added `proficiencyMode` (`StringField`, choices: `highest`, `synergy`, `manual`) supporting specialization precedence and tiered synergy.
+  - Added `selectedSkill` (`StringField`) for optional manual skill lock.
+  - Added `optionalEffects` and `selectedEffect` to both `AttackDataModel` and `GearDataModel` to align with the damage effects subsystem.
+- **Skill Technique Schema Extensions (`SkillDataModel`)**:
+  - Added `isTechnique` (`BooleanField`) to distinguish combat maneuvers and damage effects from standalone to-hit skills.
+  - Added `appliesTo` (`ArrayField<StringField>`) linking maneuvers to qualifying weapon types, categories, or parent skills.
+  - Added `techniqueConfig` (`SchemaField`) defining structured technique payloads (`damageBonus`, `damageType`, `debuffName`, `cooldown`).
+- **Template Schema & Manifest Alignment**:
+  - Updated `template.json` default definitions for `Item.attack`, `Item.gear`, and `Item.skill`.
+  - Bumped version to `2.2.5` in `system.json`.
+  - Added automated test suite `tests/weapon-skill-proficiency-schema.test.mjs` and updated `tests/item-data-models.test.mjs`.
+
+## 2.2.4
+
+### Surviving Crawler Countdown Clock HUD
+
+- **Surviving Crawler Countdown Clock (`DCCCrawlerClockHUD`)**:
+  - Implemented `DCCCrawlerClockHUD` (`src/apps/crawler-clock-hud.mjs` and `templates/apps/crawler-clock-hud.hbs`), a floating scene widget anchored below scene navigation and docked immediately to the right of the Floor Collapse Clock (`#dcc-floor-clock-hud`).
+  - Tracks total surviving crawlers remaining in the World Dungeon (default: 13,000,000), reflecting the iconic LitRPG world counter from Dungeon Crawler Carl.
+  - **Dynamic Docking & Alignment**: Dynamically aligns 8px to the right of the Floor Collapse Clock, automatically shifting when the Floor Collapse Clock expands, collapses, or when scene navigation re-renders.
+  - **Collapsed Pill State**: Minimizes to a sleek pill badge displaying the group icon (`fa-solid fa-users`) and formatted count (e.g. `12,850,000`). Clicking the pill toggles between collapsed and expanded modes.
+  - **Expanded Readout & GM Controls**:
+    - **Header**: Shows the `[SURVIVING]` badge and `Crawler Count` title.
+    - **Player View**: Clean, readable LitRPG counter showing remaining crawlers alive in the dungeon (`<N> CRAWLERS`).
+    - **GM Quick Delta Adjustments**: One-click adjustment buttons (`-10k`, `-1k`, `-100`, `-1`, `+1`, `+100`, `+1k`, `+10k`) for handling individual deaths, trap massacres, boss wipes, and floor-wide disasters.
+    - **Direct Numeric Input**: Editable input field supporting both raw numbers and comma-formatted integers (`12,850,000`).
+- **Global Settings & Document API Integration**:
+  - Registered `carl-rpg.crawlerCount` world setting (default 13,000,000).
+  - Added static and instance methods to `DCCActor`: `getCrawlerCount()`, `setCrawlerCount(count)`, `decrementCrawlerCount(amount)`, and `incrementCrawlerCount(amount)`.
+  - Exposed crawler count helpers and class in `CONFIG.DCC`, `window.carl`, and exported from `src/dcc.mjs`.
+  - Included `crawlerCount` and `formattedCrawlerCount` in crawler sheet `getData` context.
+- **Automated Unit Testing & Verification**:
+  - Added test suite `tests/crawler-clock-hud.test.mjs` validating default values, setting/decrementing/incrementing, bounds checking, number/string parsing with commas, singleton options, fallback HTML generation for GM vs player, docked positioning next to the floor clock, event listeners, and crawler sheet integration.
+  - 100% test pass rate across 134 test suites (707 passing, 0 failures).
+
 ## 2.2.3
 
 ### DCC Item & Equipment Library (Unified Gear & Item Selection)

@@ -22,7 +22,15 @@ export class SkillDataModel extends BaseItemDataModel {
       upgrades: new fields.StringField({ initial: '' }),
       damageModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       checked: new fields.BooleanField({ initial: false }),
-      investedHours: new fields.NumberField({ integer: true, min: 0, initial: 0 })
+      investedHours: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+      isTechnique: new fields.BooleanField({ initial: false }),
+      appliesTo: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      techniqueConfig: new fields.SchemaField({
+        damageBonus: new fields.StringField({ initial: '' }),
+        damageType: new fields.StringField({ initial: '' }),
+        debuffName: new fields.StringField({ initial: '' }),
+        cooldown: new fields.StringField({ initial: 'None' })
+      })
     };
   }
 

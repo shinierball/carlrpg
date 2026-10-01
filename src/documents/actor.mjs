@@ -1935,10 +1935,31 @@ export class DCCActor extends Actor {
 
     // Identify skill rank for weapon attack
     const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
-    const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
-    const skillRank = matchingSkill
-      ? Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0
-      : (sys.toHitRank !== undefined ? Number(sys.toHitRank) || 0 : (sys.rank !== undefined ? Number(sys.rank) || 0 : 0));
+    const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+    const matchedSkills = skills.filter(s => {
+      const sName = s.name?.toLowerCase().trim();
+      return sName === attackItem.name?.toLowerCase().trim() ||
+             associated.some(as => as.toLowerCase().trim() === sName);
+    });
+    const matchingSkill = matchedSkills[0] || null;
+
+    let skillRank = 0;
+    if (matchedSkills.length > 0) {
+      const mode = sys.proficiencyMode || 'highest';
+      const ranks = matchedSkills.map(s => Math.max(Number(s.system?.modifiedRank) || 0, Number(s.system?.rank) || 0));
+      if (mode === 'additive') {
+        skillRank = ranks.reduce((sum, r) => sum + r, 0);
+      } else if (mode === 'primary_plus_half') {
+        const sorted = [...ranks].sort((a, b) => b - a);
+        const primary = sorted[0] || 0;
+        const halfSum = sorted.slice(1).reduce((sum, r) => sum + Math.floor(r / 2), 0);
+        skillRank = primary + halfSum;
+      } else { // 'highest'
+        skillRank = Math.max(...ranks);
+      }
+    } else {
+      skillRank = (sys.toHitRank !== undefined ? Number(sys.toHitRank) || 0 : (sys.rank !== undefined ? Number(sys.rank) || 0 : 0));
+    }
 
     // Base damage scaling from matching skill rank upgrades
     let upgradedDice = '';
@@ -1990,11 +2011,11 @@ export class DCCActor extends Actor {
         });
         isFirst = false;
       }
-    } else {
+    } else if (sys.damageDice) {
       // Legacy fallback: damageDice + damageStat + effects/damageType
       const statKey = (sys.damageStat || 'str').toLowerCase();
       const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
-      const dice = (upgradedDice || sys.damageDice || '1d6').trim();
+      const dice = (upgradedDice || sys.damageDice).trim();
       const type = sys.damageType || 'Physical';
       primaryType = type;
       parts.push({
@@ -2003,6 +2024,17 @@ export class DCCActor extends Actor {
         dice,
         stat: statKey,
         statMod,
+        value: 0,
+        source: attackItem.name || 'Weapon'
+      });
+    } else if (skills.length === 0 || !skills.some(s => (s.system?.damageModifiers?.length > 0 || s.system?.damageParts?.length > 0))) {
+      // Default fallback if no weapon parts, no damage dice, and no skills provide damage
+      parts.push({
+        id: 'legacy-base',
+        type: 'Physical',
+        dice: '1d6',
+        stat: 'str',
+        statMod: this.system?.abilities?.str?.mod ?? 0,
         value: 0,
         source: attackItem.name || 'Weapon'
       });
@@ -2164,8 +2196,10 @@ export class DCCActor extends Actor {
 
     // 3. Skills: Rank-gated damage bonuses
     for (const skill of skills) {
-      const rank = Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
-      const rawMods = skill.system?.damageModifiers;
+      const rank = Math.max(Number(skill.system?.modifiedRank) || 0, Number(skill.system?.rank) || 0);
+      const rawMods = (skill.system?.damageModifiers && skill.system.damageModifiers.length > 0)
+        ? skill.system.damageModifiers
+        : (skill.system?.damageParts || []);
       const mods = Array.isArray(rawMods) ? rawMods : Object.values(rawMods || {});
 
       for (const m of mods) {
@@ -2176,7 +2210,7 @@ export class DCCActor extends Actor {
           const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
           parts.push({
             id: m.id || `skill-${skill.id}-${parts.length}`,
-            type: m.type || 'Physical',
+            type: m.type || m.damageType || 'Physical',
             dice: (m.dice || '').trim(),
             stat: statKey,
             statMod,
@@ -2260,12 +2294,38 @@ export class DCCActor extends Actor {
         }
       } else {
         const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
-        const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === attackItem.name?.toLowerCase().trim());
+        const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+        const matchedSkills = skills.filter(s => {
+          const sName = s.name?.toLowerCase().trim();
+          return sName === attackItem.name?.toLowerCase().trim() ||
+                 associated.some(as => as.toLowerCase().trim() === sName);
+        });
+        const matchingSkill = matchedSkills[0] || null;
+
+        if (matchedSkills.length > 0) {
+          const mode = sys.proficiencyMode || 'highest';
+          const ranks = matchedSkills.map(s => Math.max(Number(s.system?.modifiedRank) || 0, Number(s.system?.rank) || 0));
+          if (mode === 'additive') {
+            rank = ranks.reduce((sum, r) => sum + r, 0);
+          } else if (mode === 'primary_plus_half') {
+            const sorted = [...ranks].sort((a, b) => b - a);
+            const primary = sorted[0] || 0;
+            const halfSum = sorted.slice(1).reduce((sum, r) => sum + Math.floor(r / 2), 0);
+            rank = primary + halfSum;
+          } else { // 'highest'
+            rank = Math.max(...ranks);
+          }
+        } else {
+          rank = Number(sys.toHitRank ?? sys.rank) || 0;
+        }
+
         const primaryPart = Array.isArray(sys.damageParts) ? sys.damageParts[0] : Object.values(sys.damageParts || {})[0];
         toHitStat = (sys.toHitStat || matchingSkill?.system?.stat || primaryPart?.stat || (attackItem.type === 'gear' ? 'str' : 'dex')).toLowerCase();
-        rank = matchingSkill ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0) : (Number(sys.toHitRank ?? sys.rank) || 0);
-        if (matchingSkill && typeof matchingSkill.update === 'function' && !matchingSkill.system?.checked) {
-          matchingSkill.update({ 'system.checked': true }).catch(() => {});
+
+        for (const s of matchedSkills) {
+          if (typeof s.update === 'function' && !s.system?.checked) {
+            s.update({ 'system.checked': true }).catch(() => {});
+          }
         }
       }
 
@@ -2279,18 +2339,40 @@ export class DCCActor extends Actor {
         effectTag = ` [No Effect: +${favorBonus} AI Favor]`;
       }
 
+      const isOneHandedPenalty = (sys.wieldMode === 'two_handed_disadv_1h' && (options.hands === 1 || options.wieldMode === 'one_handed' || options.oneHanded));
+      const hasDisadvantage = isUntrained || options.disadvantage || isOneHandedPenalty;
+
       let roll;
       let flavorText = '';
-      if (isUntrained) {
-        const formula = `2d20kl + ${statMod}`;
-        roll = await new Roll(formula, { mod: statMod }).evaluate();
-        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>Untrained Attack Check with Disadvantage</strong>: 2d20kl + ${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
+      if (hasDisadvantage) {
+        const total = isUntrained ? statMod : (rank + statMod);
+        const formula = `2d20kl + ${total}`;
+        roll = await new Roll(formula, { rank: isUntrained ? 0 : rank, mod: statMod }).evaluate();
+        const reason = isOneHandedPenalty ? 'One-Handed Disadvantage' : (isUntrained ? 'Untrained Attack Check with Disadvantage' : 'Disadvantage');
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${reason}</strong>: 2d20kl + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       } else {
         const total = rank + statMod;
         const formula = `1d20 + ${total}`;
         roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
         const rankPart = rank > 0 ? `Rank ${rank} + ` : '';
         flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + ${rankPart}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
+      }
+
+      // Check for Fumble on Natural 1
+      const isFumble = roll.dice?.[0]?.results ? roll.dice[0].results.some(r => r.result === 1 && (r.active ?? true)) : (roll.terms?.[0]?.results ? roll.terms[0].results.some(r => r.result === 1 && (r.active ?? true)) : roll.total === 1);
+      const matchedSkill = this.items.find(i =>
+        i.type === 'skill' &&
+        (i.name.toLowerCase() === attackItem.name.toLowerCase() ||
+         sys.associatedSkills?.some(s => s.toLowerCase() === i.name.toLowerCase()))
+      );
+      const fumbleDebuff = matchedSkill?.system?.fumbleDebuff || attackItem.system?.fumbleDebuff || '';
+      let fumbleTag = '';
+      if (isFumble && fumbleDebuff) {
+        fumbleTag = `
+          <div class="dcc-fumble-warning" style="margin-top: 6px; padding: 4px 6px; background: #fdf2e9; border: 1px solid #e67e22; border-radius: 3px; color: #d35400; font-size: 11px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>FUMBLE!</strong> Critical Miss inflicts <strong>${fumbleDebuff}</strong> on wielder!
+          </div>
+        `;
       }
 
       if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -2348,7 +2430,7 @@ export class DCCActor extends Actor {
       const evadeBtnHtml = this._getEvadeButtonHtml(roll, currentFloor);
 
       const rollHtml = typeof roll.render === 'function' ? await roll.render() : '';
-      const content = [rollHtml, targetResultsHtml, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
+      const content = [rollHtml, fumbleTag, targetResultsHtml, dmgBtnHtml, evadeBtnHtml].filter(Boolean).join('');
 
       return roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -2445,6 +2527,27 @@ export class DCCActor extends Actor {
       }).join('');
 
       const typedDamageJson = JSON.stringify(typedDamage);
+
+      // Resolve custom critical multiplier and on-hit debuff from matching skill
+      let critMultiplier = 2;
+      let onHitDebuffName = '';
+      const matchedSkill = this.items.find(i =>
+        i.type === 'skill' &&
+        (i.name.toLowerCase() === attackItem.name.toLowerCase() ||
+         sys.associatedSkills?.some(s => s.toLowerCase() === i.name.toLowerCase()))
+      );
+      if (matchedSkill) {
+        const skillRank = Math.max(Number(matchedSkill.modifiedRank) || 0, Number(matchedSkill.system?.modifiedRank) || 0, Number(matchedSkill.system?.rank) || 0);
+        if (matchedSkill.system?.critMultiplierR15 && skillRank >= 15) {
+          critMultiplier = Number(matchedSkill.system.critMultiplierR15);
+        } else if (matchedSkill.system?.critMultiplierR5 && skillRank >= 5) {
+          critMultiplier = Number(matchedSkill.system.critMultiplierR5);
+        }
+        if (matchedSkill.system?.onHitDebuff && skillRank >= (Number(matchedSkill.system?.onHitDebuffMinRank) || 0)) {
+          onHitDebuffName = matchedSkill.system.onHitDebuff;
+        }
+      }
+
       const cardContent = `
         <div class="dcc-chat-card dcc-damage-card"
           data-attacker-id="${this.id}"
@@ -2474,7 +2577,8 @@ export class DCCActor extends Actor {
             <div class="dcc-damage-sub-actions">
               <button type="button" class="dcc-apply-damage-btn" data-multiplier="0.5" title="Apply half damage">Half</button>
               <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-ignore-dr="true" title="Apply ignoring DR">Ignore DR</button>
-              <button type="button" class="dcc-apply-damage-btn" data-multiplier="2" title="Apply double (critical) damage">Crit (2x)</button>
+              <button type="button" class="dcc-apply-damage-btn" data-multiplier="${critMultiplier}" title="Apply critical damage (${critMultiplier}x)">Crit (${critMultiplier}x)</button>
+              ${onHitDebuffName ? `<button type="button" class="dcc-apply-condition-btn" data-condition-name="${onHitDebuffName}" data-condition-type="debuff" title="Inflict ${onHitDebuffName} on target(s)" style="background: #8e44ad; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 3px; border: none; cursor: pointer;"><i class="fa-solid fa-droplet"></i> Inflict [${onHitDebuffName}]</button>` : ''}
             </div>
           </div>
         </div>

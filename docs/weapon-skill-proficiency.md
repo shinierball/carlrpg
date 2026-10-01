@@ -49,8 +49,39 @@ When evaluating a weapon, the system matches skills through four layers:
 
 ---
 
-## To-Hit Resolution vs Techniques
+## Manual Item Creation Interface
 
-1. **Trained Check**: If **any** matching proficiency skill has $\text{Rank} \ge 1$, the attack is **Trained** (rolls `1d20 + Rank + Stat Mod`). Untrained disadvantage (`2d20kl`) only occurs when all matching skills are Rank 0 or unowned.
-2. **Highest Precedence**: Under `proficiencyMode: "highest"`, the single highest matching skill rank provides the to-hit bonus.
-3. **Techniques in Conjunction**: Combat maneuvers owned by the crawler (like *Iron Punch* for Pugilism, or *Serrated Tear* for Chainsaws) are populated into the attack's selectable damage effects dialog. The crawler rolls to hit using the primary weapon proficiency and executes the selected technique's damage bonuses upon a successful hit.
+The item sheets (`DCCItemSheet`) for `gear`, `attack`, and `skill` items provide visual, form-driven configuration sections to manually build weapons and scaling combat skills:
+
+### 1. Weapon Item Sheet (`gear` & `attack`)
+Located directly below basic weapon stats in the **WEAPON PROFICIENCY & HANDLING** section:
+- **Weapon Category**: Select from dropdown (`Power Weapons`, `Edge`, `Bashing`, `Reach`, `Ranged`, `Hand to Hand`, `Shield`, `Improvised`).
+- **Weapon Type / Model**: Free-text weapon model (e.g. `Chainsaw`, `Longsword`, `Shotgun`).
+- **Wielding Requirement**: Dropdown selecting handling behavior:
+  - `one_handed`: Standard 1-handed wielding.
+  - `two_handed`: Standard 2-handed wielding.
+  - `two_handed_disadv_1h`: Two-handed weapon that can be wielded in one hand at disadvantage (`2d20kl`).
+- **Associated Skills (Comma-Separated)**: Skills associated with this weapon (e.g. `Chainsaws, Power Weapons, Slashing`). Form submissions automatically parse these into string arrays.
+- **Proficiency Mode**: Dropdown choosing `highest` (default specialization precedence), `additive`, or `primary_plus_half`.
+- **Selectable Damage Effects (Comma-Separated)**: Optional maneuvers or techniques available to this weapon.
+
+### 2. Skill Item Sheet (`skill`)
+Located in the **TECHNIQUES, CONDITIONS & CRITICAL MILESTONES** panel:
+- **Is Combat Technique**: Checkbox toggling maneuver behavior.
+- **Applies To Weapons/Skills**: Comma-separated list of applicable weapons or categories (e.g. `Chainsaws, Power Weapons`).
+- **Rank 5 Critical Multiplier**: Custom crit multiplier when crawler reaches Rank 5 (e.g. `4` for 4x critical damage).
+- **Rank 15 Critical Multiplier**: Custom crit multiplier when crawler reaches Rank 15 (e.g. `8` for 8x critical damage).
+- **Fumble Debuff (Natural 1)**: Status condition automatically flagged on a critical miss (e.g. `Minor Injury`).
+- **On-Hit Debuff**: Status condition automatically unlocked on hit (e.g. `Bleeding`).
+- **On-Hit Debuff Minimum Rank**: Minimum skill rank needed to trigger the on-hit debuff (e.g. `10`).
+
+---
+
+## Combat Execution & Milestone Mechanics
+
+1. **Wielding Disadvantage**: If a weapon with `wieldMode: "two_handed_disadv_1h"` is used one-handed (via dialog or `{ hands: 1 }`), the attack check automatically evaluates with disadvantage (`2d20kl + Stat Mod + Rank vs Evade`). Standard two-handed usage uses `1d20`.
+2. **Fumble Detection (Natural 1)**: Rolling a Natural 1 on an attack check triggers a critical miss fumble warning, highlighting the configured fumble debuff (such as *Minor Injury*) inflicted upon the wielder.
+3. **Rank-Scaled Damage Dice**: Multiple damage modifiers with `minRank` (e.g. 2d4 Slashing at Rank 0, +2d4 at Rank 5, +2d4 at Rank 10, +2d4 at Rank 15) automatically unlock as the crawler's skill rank increases.
+4. **Dynamic Critical Multipliers**: At Rank 5+, the chat damage card's Critical Hit button dynamically scales to the configured tier (e.g. `Crit (4x)`), and at Rank 15+ upgrades to the master tier (e.g. `Crit (8x)`).
+5. **On-Hit Debuff Application**: When the wielder meets or exceeds `onHitDebuffMinRank` (e.g. Rank 10), the chat damage card embeds an interactive **Inflict [Bleeding]** button allowing instant 1-click status application to targets.
+

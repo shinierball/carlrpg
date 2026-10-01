@@ -190,10 +190,16 @@
         "damageType": "",
         "debuffName": "",
         "cooldown": "None"
-      }
+      },
+      "fumbleDebuff": "",
+      "onHitDebuff": "",
+      "onHitDebuffMinRank": 0,
+      "critMultiplierR5": 4,
+      "critMultiplierR15": 8
     },
     "attack": {
       "equipped": true,
+      "wieldMode": "one_handed",
       "weaponCategory": "",
       "weaponType": "",
       "associatedSkills": [],
@@ -236,6 +242,7 @@
       "value": 0,
       "equipped": false,
       "isWeapon": false,
+      "wieldMode": "one_handed",
       "weaponCategory": "",
       "weaponType": "",
       "associatedSkills": [],

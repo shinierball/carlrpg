@@ -412,6 +412,34 @@ export class DCCItemSheet extends BaseItemSheet {
       'Psychic', 'Slashing', 'Sonic'
     ];
 
+    // Weapon proficiency & wielding configuration options
+    context.weaponCategories = [
+      'Power Weapons', 'Edge', 'Bashing', 'Reach', 'Ranged', 'Hand to Hand', 'Utility', 'Exotic'
+    ];
+    context.proficiencyModes = [
+      { id: 'highest', label: 'Highest Precedence (Specialization)' },
+      { id: 'synergy', label: 'Tiered Synergy (+1 per R3+ Secondary)' },
+      { id: 'manual', label: 'Manual Selection' }
+    ];
+    context.wieldModes = [
+      { id: 'one_handed', label: 'One-Handed' },
+      { id: 'two_handed', label: 'Two-Handed' },
+      { id: 'two_handed_disadv_1h', label: 'Two-Handed (Disadvantage if 1-Handed)' }
+    ];
+
+    // Format array fields as editable comma-separated strings
+    context.associatedSkillsString = Array.isArray(context.system?.associatedSkills)
+      ? context.system.associatedSkills.join(', ')
+      : (context.system?.associatedSkills || '');
+
+    context.appliesToString = Array.isArray(context.system?.appliesTo)
+      ? context.system.appliesTo.join(', ')
+      : (context.system?.appliesTo || '');
+
+    context.optionalEffectsString = Array.isArray(context.system?.optionalEffects)
+      ? context.system.optionalEffects.join(', ')
+      : (context.system?.optionalEffects || '');
+
     context.availableBuffs = await this.getAvailableBuffs();
     context.availableDebuffs = await this.getAvailableDebuffs();
     context.availableSpells = await this.getAvailableSpells();
@@ -632,9 +660,28 @@ export class DCCItemSheet extends BaseItemSheet {
         }
       }
       formData['system.damageParts'] = expanded.system.damageParts;
+
+      if (typeof formData['system.associatedSkills'] === 'string') {
+        formData['system.associatedSkills'] = formData['system.associatedSkills']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+      if (typeof formData['system.optionalEffects'] === 'string') {
+        formData['system.optionalEffects'] = formData['system.optionalEffects']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
     }
 
     if (this.item.type === 'skill') {
+      if (typeof formData['system.appliesTo'] === 'string') {
+        formData['system.appliesTo'] = formData['system.appliesTo']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
       let mods = expanded.system?.damageModifiers;
       if (mods !== undefined) {
         expanded.system.damageModifiers = Array.isArray(mods) ? mods : Object.values(mods);

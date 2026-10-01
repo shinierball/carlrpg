@@ -1,3 +1,20 @@
+## 2.2.7
+
+### Manual Weapon & Skill Creation Interface & Combat Milestone Mechanics
+
+- **Interactive Item Sheet Controls (`DCCItemSheet`)**:
+  - Added **WEAPON PROFICIENCY & HANDLING** panel in `templates/items/parts/gear.hbs` and `templates/items/parts/attack.hbs` with controls for `weaponCategory`, `weaponType`, `wieldMode` (`one_handed`, `two_handed`, `two_handed_disadv_1h`), `associatedSkills`, `proficiencyMode`, and `optionalEffects`.
+  - Added **TECHNIQUES, CONDITIONS & CRITICAL MILESTONES** panel in `templates/items/parts/skill.hbs` with inputs for `isTechnique`, `appliesTo`, `techniqueConfig`, `critMultiplierR5` (e.g. 4x), `critMultiplierR15` (e.g. 8x), `fumbleDebuff` (e.g. *Minor Injury* on Natural 1), `onHitDebuff` (e.g. *Bleeding*), and `onHitDebuffMinRank`.
+  - Updated `_prepareContext()` and `_updateObject()` to automatically serialize/deserialize comma-separated lists and pre-populate selectable dropdown choices.
+- **Combat Execution & Milestone Scaling (`DCCActor`)**:
+  - Implemented one-handed disadvantage checks in `rollAttack`: two-handed weapons with `wieldMode: "two_handed_disadv_1h"` automatically roll at disadvantage (`2d20kl`) when wielded in one hand, while standard two-handed attacks roll `1d20`.
+  - Implemented Natural 1 Fumble warning in chat messages displaying configured fumble debuffs on critical misses.
+  - Implemented dynamic critical multiplier cards in `rollAttack` (e.g. `Crit (4x)` at Rank 5+, `Crit (8x)` at Rank 15+).
+  - Implemented interactive **Inflict [Debuff]** button on chat damage cards when attacker meets or exceeds the skill's `onHitDebuffMinRank`.
+  - Integrated weapon-associated skill rank resolution supporting `highest`, `additive`, and `primary_plus_half` modes.
+- **Automated Verification**:
+  - Added test suite `tests/weapon-and-skill-creation-interface.test.mjs` verifying schema defaults, context preparation, string array harvesting, complete Chainsaw skill creation with 4-tier 2d4 scaling, 4x/8x crits, and debuffs, and actor combat execution. All 727 tests passing with 0 failures.
+
 ## 2.2.6
 
 ### Item Sheet Details Opening & Legacy Gold Value Recursion Fix

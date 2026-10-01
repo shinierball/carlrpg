@@ -17,6 +17,10 @@ export class GearDataModel extends BaseItemDataModel {
       value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       equipped: new fields.BooleanField({ initial: false }),
       isWeapon: new fields.BooleanField({ initial: false }),
+      wieldMode: new fields.StringField({
+        initial: 'one_handed',
+        choices: ['one_handed', 'two_handed', 'two_handed_disadv_1h']
+      }),
       weaponCategory: new fields.StringField({ initial: '' }),
       weaponType: new fields.StringField({ initial: '' }),
       associatedSkills: new fields.ArrayField(new fields.StringField(), { initial: [] }),

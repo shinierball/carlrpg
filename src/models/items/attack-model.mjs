@@ -8,6 +8,10 @@ export class AttackDataModel extends BaseItemDataModel {
     const fields = globalThis.foundry.data.fields;
     return {
       equipped: new fields.BooleanField({ initial: true }),
+      wieldMode: new fields.StringField({
+        initial: 'one_handed',
+        choices: ['one_handed', 'two_handed', 'two_handed_disadv_1h']
+      }),
       weaponCategory: new fields.StringField({ initial: '' }),
       weaponType: new fields.StringField({ initial: '' }),
       associatedSkills: new fields.ArrayField(new fields.StringField(), { initial: [] }),

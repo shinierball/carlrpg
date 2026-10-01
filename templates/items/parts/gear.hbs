@@ -47,6 +47,63 @@
   </div>
 </div>
 
+{{!-- WEAPON PROFICIENCY & HANDLING --}}
+{{#if (or system.isWeapon (eq system.slot "hands"))}}
+<div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #c0392b;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #c0392b;">
+    <span><i class="fa-solid fa-crosshairs"></i> WEAPON PROFICIENCY & HANDLING</span>
+    <span style="font-size: 10px; color: #fff; font-weight: normal;">CarlRPG Hybrid Weapon System</span>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    <div class="dcc-field-row" style="margin-bottom: 6px;">
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Weapon Category</span>
+        <select name="system.weaponCategory" class="dcc-field-input" style="font-size: 11px;">
+          <option value="">-- None / Generic --</option>
+          {{#each weaponCategories as |cat|}}
+            <option value="{{cat}}" {{#if (eq ../system.weaponCategory cat)}}selected{{/if}}>{{cat}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Weapon Type / Model</span>
+        <input class="dcc-field-input" type="text" name="system.weaponType" value="{{system.weaponType}}" placeholder="e.g. Chainsaw, Longsword, Shotgun" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Wielding Requirement</span>
+        <select name="system.wieldMode" class="dcc-field-input" style="font-size: 11px;">
+          {{#each wieldModes as |wm|}}
+            <option value="{{wm.id}}" {{#if (eq ../system.wieldMode wm.id)}}selected{{/if}}>{{wm.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="dcc-field-row" style="margin-bottom: 6px;">
+      <div class="dcc-field-group" style="flex: 2;">
+        <span class="dcc-field-label">Associated Skills (Comma-Separated)</span>
+        <input class="dcc-field-input" type="text" name="system.associatedSkills" value="{{associatedSkillsString}}" placeholder="e.g. Chainsaws, Power Weapons, Slashing" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group" style="flex: 1;">
+        <span class="dcc-field-label">Proficiency Mode</span>
+        <select name="system.proficiencyMode" class="dcc-field-input" style="font-size: 11px;">
+          {{#each proficiencyModes as |pm|}}
+            <option value="{{pm.id}}" {{#if (eq ../system.proficiencyMode pm.id)}}selected{{/if}}>{{pm.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="dcc-field-row">
+      <div class="dcc-field-group">
+        <span class="dcc-field-label">Optional Effects / Combat Techniques (Comma-Separated)</span>
+        <input class="dcc-field-input" type="text" name="system.optionalEffects" value="{{optionalEffectsString}}" placeholder="e.g. Serrated Tear, Iron Punch, Dirty Fighting" style="font-size: 11px;" />
+      </div>
+    </div>
+  </div>
+</div>
+{{/if}}
+
 {{!-- STAT MODIFIERS (FLAT VS %) --}}
 <div class="dcc-stat-block" style="margin-bottom: 10px;">
   <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px;">ABILITY MODIFIERS (EQUIPPED ONLY)</div>

@@ -30,7 +30,12 @@ export class SkillDataModel extends BaseItemDataModel {
         damageType: new fields.StringField({ initial: '' }),
         debuffName: new fields.StringField({ initial: '' }),
         cooldown: new fields.StringField({ initial: 'None' })
-      })
+      }),
+      fumbleDebuff: new fields.StringField({ initial: '' }),
+      onHitDebuff: new fields.StringField({ initial: '' }),
+      onHitDebuffMinRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+      critMultiplierR5: new fields.NumberField({ integer: true, min: 1, initial: 4 }),
+      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 8 })
     };
   }
 

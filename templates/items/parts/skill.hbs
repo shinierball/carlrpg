@@ -47,6 +47,76 @@
   </div>
 </div>
 
+{{!-- WEAPON PROFICIENCY, TECHNIQUES & SPECIAL CONDITIONS --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #7f8c8d;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #34495e;">
+    <span><i class="fa-solid fa-wand-magic-sparkles"></i> TECHNIQUES, CONDITIONS & CRITICAL MILESTONES</span>
+    <label style="display: flex; align-items: center; gap: 4px; font-size: 10px; color: #fff; cursor: pointer;">
+      <input type="checkbox" name="system.isTechnique" {{#if system.isTechnique}}checked{{/if}} />
+      <span>Is Combat Technique / Damage Maneuver</span>
+    </label>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{#if system.isTechnique}}
+      <div class="dcc-field-row" style="margin-bottom: 6px;">
+        <div class="dcc-field-group" style="flex: 2;">
+          <span class="dcc-field-label">Applies To (Weapons / Skills / Categories)</span>
+          <input class="dcc-field-input" type="text" name="system.appliesTo" value="{{appliesToString}}" placeholder="e.g. Chainsaw, Power Weapons, Pugilism" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Technique Damage Bonus</span>
+          <input class="dcc-field-input" type="text" name="system.techniqueConfig.damageBonus" value="{{system.techniqueConfig.damageBonus}}" placeholder="e.g. +2d4" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Bonus Damage Type</span>
+          <select class="dcc-field-input" name="system.techniqueConfig.damageType" style="font-size: 11px;">
+            <option value="">-- Match Weapon --</option>
+            {{#each damageTypes as |dt|}}
+              <option value="{{dt}}" {{#if (eq ../system.techniqueConfig.damageType dt)}}selected{{/if}}>{{dt}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+    {{/if}}
+
+    <div class="dcc-field-row" style="margin-bottom: 6px;">
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-burst" style="color: #c0392b;"></i> Rank 5 Crit Multiplier</span>
+        <input class="dcc-field-input" type="number" name="system.critMultiplierR5" value="{{#if system.critMultiplierR5}}{{system.critMultiplierR5}}{{else}}4{{/if}}" placeholder="4" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-skull" style="color: #c0392b;"></i> Rank 15 Crit Multiplier</span>
+        <input class="dcc-field-input" type="number" name="system.critMultiplierR15" value="{{#if system.critMultiplierR15}}{{system.critMultiplierR15}}{{else}}8{{/if}}" placeholder="8" style="font-size: 11px;" />
+      </div>
+      <div class="dcc-field-group">
+        <span class="dcc-field-label"><i class="fa-solid fa-triangle-exclamation" style="color: #e67e22;"></i> Fumble Consequence (Self Debuff)</span>
+        <select class="dcc-field-input" name="system.fumbleDebuff" style="font-size: 11px;">
+          <option value="">-- None --</option>
+          {{#each availableDebuffs as |deb|}}
+            <option value="{{deb.name}}" {{#if (eq ../system.fumbleDebuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="dcc-field-row">
+      <div class="dcc-field-group" style="flex: 2;">
+        <span class="dcc-field-label"><i class="fa-solid fa-droplet" style="color: #c0392b;"></i> On-Hit Debuff Trigger</span>
+        <select class="dcc-field-input" name="system.onHitDebuff" style="font-size: 11px;">
+          <option value="">-- None --</option>
+          {{#each availableDebuffs as |deb|}}
+            <option value="{{deb.name}}" {{#if (eq ../system.onHitDebuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="dcc-field-group" style="flex: 1;">
+        <span class="dcc-field-label">Min Rank to Inflict</span>
+        <input class="dcc-field-input" type="number" name="system.onHitDebuffMinRank" value="{{system.onHitDebuffMinRank}}" placeholder="10" style="font-size: 11px;" />
+      </div>
+    </div>
+  </div>
+</div>
+
 {{!-- SKILL DAMAGE MODIFIERS (RANK GATED) --}}
 <div class="dcc-stat-block" style="margin-bottom: 10px;">
   <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center;">

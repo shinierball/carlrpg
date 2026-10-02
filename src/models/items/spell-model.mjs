@@ -38,7 +38,38 @@ export class SpellDataModel extends BaseItemDataModel {
       upgrades: new fields.SchemaField({
         rank5: new fields.StringField({ initial: '' }),
         rank10: new fields.StringField({ initial: '' }),
-        rank15: new fields.StringField({ initial: '' })
+        rank15: new fields.StringField({ initial: '' }),
+        rank20: new fields.StringField({ initial: '' })
+      }),
+      rankBreaks: new fields.SchemaField({
+        rank5: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank10: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank15: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank20: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        })
       })
     };
   }

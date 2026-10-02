@@ -85,9 +85,13 @@ export function resolveHotlistItem(actor, rawVal) {
  * Universal helper to render a template via renderTemplate or fallback.
  */
 async function renderHUDTemplate(templatePath, data, fallbackFn) {
-  if (typeof globalThis.renderTemplate === 'function') {
+  const renderTemplateFn = globalThis.foundry?.applications?.handlebars?.renderTemplate
+    ?? globalThis.foundry?.utils?.renderTemplate
+    ?? globalThis.renderTemplate;
+
+  if (typeof renderTemplateFn === 'function') {
     try {
-      const res = await globalThis.renderTemplate(templatePath, data);
+      const res = await renderTemplateFn(templatePath, data);
       if (res && typeof res === 'string') return res;
     } catch (_) {}
   }

@@ -194,7 +194,12 @@ export function getBossTierFromClassification(raw) {
   return 'bronze';
 }
 
-export class DCCActor extends Actor {
+const BaseActor = globalThis.foundry?.documents?.Actor
+  ?? globalThis.foundry?.documents?.BaseActor
+  ?? globalThis.Actor
+  ?? class {};
+
+export class DCCActor extends BaseActor {
   /** @override */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
@@ -1609,6 +1614,47 @@ export class DCCActor extends Actor {
       }
     }
 
+    // Rank Breaks configuration parsing (Ranks 5, 10, 15, 20)
+    let extraRankDiceFromBreaks = 0;
+    const rankBreakExtraDamageDice = [];
+    const targetDebuffsFromBreaks = [];
+    const rankBreakBuffs = [];
+    const rankBreakNotes = [];
+
+    if (sys.rankBreaks) {
+      const breaks = [
+        { thresh: 5, data: sys.rankBreaks.rank5, label: 'Rank 5' },
+        { thresh: 10, data: sys.rankBreaks.rank10, label: 'Rank 10' },
+        { thresh: 15, data: sys.rankBreaks.rank15, label: 'Rank 15' },
+        { thresh: 20, data: sys.rankBreaks.rank20, label: 'Rank 20' }
+      ];
+      for (const b of breaks) {
+        if (rank >= b.thresh && b.data) {
+          if (b.data.damageDice) {
+            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
+            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
+            if (dm && parseInt(dm[2], 10) === baseSides) {
+              baseCount += parseInt(dm[1], 10);
+            } else if (cleanDice) {
+              rankBreakExtraDamageDice.push(cleanDice);
+            }
+          }
+          if (b.data.rankDamageDice) {
+            extraRankDiceFromBreaks += Number(b.data.rankDamageDice) || 0;
+          }
+          if (b.data.debuff && !targetDebuffsFromBreaks.includes(b.data.debuff)) {
+            targetDebuffsFromBreaks.push(b.data.debuff);
+          }
+          if (b.data.buffsResistances) {
+            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
+          }
+          if (b.data.notes) {
+            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
+          }
+        }
+      }
+    }
+
     // Hand-to-Hand Damage Effects:
     // Unarmed Combat cannot combine with Damage Effects.
     const isUnarmed = /unarmed combat/i.test(skillName);
@@ -1693,6 +1739,15 @@ export class DCCActor extends Actor {
 
     // Rank Damage Die
     const rankDie = getRankDamageDie(rank);
+    if (extraRankDiceFromBreaks > 0 && rankDie.dice) {
+      const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
+      if (dm) {
+        const total = parseInt(dm[1], 10) + extraRankDiceFromBreaks;
+        rankDie.dice = `${total}d${dm[2]}`;
+      }
+    } else if (extraRankDiceFromBreaks > 0 && rankDie.value > 0) {
+      rankDie.value += extraRankDiceFromBreaks;
+    }
     let ironPunchRankDie = null;
     if (ironPunchApplied && ironPunchRank >= 5) {
       ironPunchRankDie = getRankDamageDie(ironPunchRank);
@@ -1755,6 +1810,9 @@ export class DCCActor extends Actor {
     if (combinedRankDieStr) {
       formulaElements.push(combinedRankDieStr);
     }
+    for (const d of rankBreakExtraDamageDice) {
+      formulaElements.push(d);
+    }
     if (tossBonus && tossBonus.dice) {
       formulaElements.push(tossBonus.dice);
     }
@@ -1769,6 +1827,9 @@ export class DCCActor extends Actor {
     const formulaWithStatElements = [baseDiceStr];
     if (combinedRankDieStr) {
       formulaWithStatElements.push(combinedRankDieStr);
+    }
+    for (const d of rankBreakExtraDamageDice) {
+      formulaWithStatElements.push(d);
     }
     if (tossBonus && tossBonus.dice) {
       formulaWithStatElements.push(`${tossBonus.dice} ${tossBonus.type}`);
@@ -1810,6 +1871,9 @@ export class DCCActor extends Actor {
       fireFingersBonus,
       formula,
       formulaWithStat,
+      targetDebuffs: targetDebuffsFromBreaks,
+      rankBreakBuffs,
+      rankBreakNotes,
       rawNotes
     };
   }
@@ -1961,8 +2025,9 @@ export class DCCActor extends Actor {
       skillRank = (sys.toHitRank !== undefined ? Number(sys.toHitRank) || 0 : (sys.rank !== undefined ? Number(sys.rank) || 0 : 0));
     }
 
-    // Base damage scaling from matching skill rank upgrades
+    // Base damage scaling from matching skill rank upgrades & rank breaks
     let upgradedDice = '';
+    let extraWeaponRankDiceCount = 0;
     if (matchingSkill && skillRank >= 5) {
       const upgrades = parseUpgrades(matchingSkill.system?.upgrades);
       const baseDiceStr = sys.damageDice || sys.damageParts?.[0]?.dice || '';
@@ -1982,6 +2047,32 @@ export class DCCActor extends Actor {
           const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
           if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
         }
+
+        // Rank Breaks scaling
+        const rb = matchingSkill.system?.rankBreaks;
+        if (rb) {
+          const breaks = [
+            { thresh: 5, data: rb.rank5 },
+            { thresh: 10, data: rb.rank10 },
+            { thresh: 15, data: rb.rank15 },
+            { thresh: 20, data: rb.rank20 }
+          ];
+          for (const b of breaks) {
+            if (skillRank >= b.thresh && b.data) {
+              if (b.data.damageDice) {
+                const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
+                const mDice = cleanDice.match(/^(\d+)d(\d+)$/i);
+                if (mDice && parseInt(mDice[2], 10) === sides) {
+                  count += parseInt(mDice[1], 10);
+                }
+              }
+              if (b.data.rankDamageDice) {
+                extraWeaponRankDiceCount += Number(b.data.rankDamageDice) || 0;
+              }
+            }
+          }
+        }
+
         upgradedDice = `${count}d${sides}`;
       }
     }
@@ -2140,6 +2231,15 @@ export class DCCActor extends Actor {
     // Rank Damage Die for Weapon Attack
     if (skillRank > 0) {
       const rankDie = getRankDamageDie(skillRank);
+      if (extraWeaponRankDiceCount > 0 && rankDie.dice) {
+        const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
+        if (dm) {
+          const total = parseInt(dm[1], 10) + extraWeaponRankDiceCount;
+          rankDie.dice = `${total}d${dm[2]}`;
+        }
+      } else if (extraWeaponRankDiceCount > 0 && rankDie.value > 0) {
+        rankDie.value += extraWeaponRankDiceCount;
+      }
       if (rankDie.dice || rankDie.value) {
         parts.push({
           id: `rank-die-${attackItem.id || 'atk'}`,
@@ -2528,9 +2628,9 @@ export class DCCActor extends Actor {
 
       const typedDamageJson = JSON.stringify(typedDamage);
 
-      // Resolve custom critical multiplier and on-hit debuff from matching skill
+      // Resolve custom critical multiplier and on-hit debuffs from matching skill
       let critMultiplier = 2;
-      let onHitDebuffName = '';
+      const onHitDebuffs = [];
       const matchedSkill = this.items.find(i =>
         i.type === 'skill' &&
         (i.name.toLowerCase() === attackItem.name.toLowerCase() ||
@@ -2544,7 +2644,14 @@ export class DCCActor extends Actor {
           critMultiplier = Number(matchedSkill.system.critMultiplierR5);
         }
         if (matchedSkill.system?.onHitDebuff && skillRank >= (Number(matchedSkill.system?.onHitDebuffMinRank) || 0)) {
-          onHitDebuffName = matchedSkill.system.onHitDebuff;
+          onHitDebuffs.push(matchedSkill.system.onHitDebuff);
+        }
+        const rb = matchedSkill.system?.rankBreaks;
+        if (rb) {
+          if (skillRank >= 5 && rb.rank5?.debuff && !onHitDebuffs.includes(rb.rank5.debuff)) onHitDebuffs.push(rb.rank5.debuff);
+          if (skillRank >= 10 && rb.rank10?.debuff && !onHitDebuffs.includes(rb.rank10.debuff)) onHitDebuffs.push(rb.rank10.debuff);
+          if (skillRank >= 15 && rb.rank15?.debuff && !onHitDebuffs.includes(rb.rank15.debuff)) onHitDebuffs.push(rb.rank15.debuff);
+          if (skillRank >= 20 && rb.rank20?.debuff && !onHitDebuffs.includes(rb.rank20.debuff)) onHitDebuffs.push(rb.rank20.debuff);
         }
       }
 
@@ -2578,7 +2685,7 @@ export class DCCActor extends Actor {
               <button type="button" class="dcc-apply-damage-btn" data-multiplier="0.5" title="Apply half damage">Half</button>
               <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-ignore-dr="true" title="Apply ignoring DR">Ignore DR</button>
               <button type="button" class="dcc-apply-damage-btn" data-multiplier="${critMultiplier}" title="Apply critical damage (${critMultiplier}x)">Crit (${critMultiplier}x)</button>
-              ${onHitDebuffName ? `<button type="button" class="dcc-apply-condition-btn" data-condition-name="${onHitDebuffName}" data-condition-type="debuff" title="Inflict ${onHitDebuffName} on target(s)" style="background: #8e44ad; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 3px; border: none; cursor: pointer;"><i class="fa-solid fa-droplet"></i> Inflict [${onHitDebuffName}]</button>` : ''}
+              ${onHitDebuffs.map(deb => `<button type="button" class="dcc-apply-condition-btn" data-condition-name="${deb}" data-condition-type="debuff" title="Inflict ${deb} on target(s)" style="background: #8e44ad; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 3px; border: none; cursor: pointer;"><i class="fa-solid fa-droplet"></i> Inflict [${deb}]</button>`).join(' ')}
             </div>
           </div>
         </div>
@@ -3168,6 +3275,49 @@ export class DCCActor extends Actor {
           debuffs.push('Burned');
         }
       }
+    }
+
+    // Rank Breaks configuration parsing (Ranks 5, 10, 15, 20)
+    let extraSpellRankDice = 0;
+    const rankBreakExtraDice = [];
+    const rankBreakBuffs = [];
+    const rankBreakNotes = [];
+
+    if (sys.rankBreaks) {
+      const breaks = [
+        { thresh: 5, data: sys.rankBreaks.rank5, label: 'Rank 5' },
+        { thresh: 10, data: sys.rankBreaks.rank10, label: 'Rank 10' },
+        { thresh: 15, data: sys.rankBreaks.rank15, label: 'Rank 15' },
+        { thresh: 20, data: sys.rankBreaks.rank20, label: 'Rank 20' }
+      ];
+      for (const b of breaks) {
+        if (rank >= b.thresh && b.data) {
+          if (b.data.damageDice) {
+            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
+            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
+            if (dm && sides && parseInt(dm[2], 10) === sides) {
+              count += parseInt(dm[1], 10);
+            } else if (cleanDice) {
+              rankBreakExtraDice.push(cleanDice);
+            }
+          }
+          if (b.data.rankDamageDice) {
+            extraSpellRankDice += Number(b.data.rankDamageDice) || 0;
+          }
+          if (b.data.debuff && !debuffs.includes(b.data.debuff)) {
+            debuffs.push(b.data.debuff);
+          }
+          if (b.data.buffsResistances) {
+            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
+          }
+          if (b.data.notes) {
+            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
+          }
+        }
+      }
+    }
+
+    if (sides > 0 && count > 0) {
       diceStr = `${count}d${sides}`;
     }
 
@@ -3184,11 +3334,25 @@ export class DCCActor extends Actor {
 
     // Rank Damage Die scaling table
     const rankDie = getRankDamageDie(rank);
+    if (extraSpellRankDice > 0 && rankDie.dice) {
+      const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
+      if (dm) {
+        const total = parseInt(dm[1], 10) + extraSpellRankDice;
+        rankDie.dice = `${total}d${dm[2]}`;
+      }
+    } else if (extraSpellRankDice > 0 && rankDie.value > 0) {
+      rankDie.value += extraSpellRankDice;
+    }
+
     const formulaComponents = [];
     if (diceStr) {
       formulaComponents.push(diceStr);
     } else if (flatMatch) {
       formulaComponents.push(flatMatch[1]);
+    }
+
+    for (const extraD of rankBreakExtraDice) {
+      formulaComponents.push(extraD);
     }
 
     // Include explicit rank-gated damage modifiers
@@ -3277,15 +3441,17 @@ export class DCCActor extends Actor {
       critMultiplier = Number(sys.critMultiplierR5);
     }
 
-    // On-hit debuff button
+    // On-hit debuff buttons
     let debuffButtonHtml = '';
-    const onHitDebuff = sys.onHitDebuff || (dmgData.debuffs && dmgData.debuffs[0]);
-    if (onHitDebuff && rank >= (Number(sys.onHitDebuffMinRank) || 0)) {
+    const allDebuffs = (dmgData.debuffs || []).filter(Boolean);
+    if (allDebuffs.length > 0) {
       debuffButtonHtml = `
-        <div style="margin-top: 6px;">
-          <button type="button" class="dcc-apply-damage-btn" data-inflict-debuff="${onHitDebuff}" style="width: 100%; background: #e74c3c; color: #fff; border: 1px solid #c0392b; border-radius: 3px; padding: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">
-            <i class="fa-solid fa-skull-crossbones"></i> Inflict [${onHitDebuff}]
-          </button>
+        <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+          ${allDebuffs.map(deb => `
+            <button type="button" class="dcc-apply-damage-btn" data-inflict-debuff="${deb}" style="width: 100%; background: #e74c3c; color: #fff; border: 1px solid #c0392b; border-radius: 3px; padding: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">
+              <i class="fa-solid fa-skull-crossbones"></i> Inflict [${deb}]
+            </button>
+          `).join('')}
         </div>
       `;
     }
@@ -3615,11 +3781,33 @@ export class DCCActor extends Actor {
       content += `<div style="font-size: 12px; line-height: 1.4; margin-bottom: 8px;">${sys.description}</div>`;
     }
 
-    if (sys.upgrades?.rank5 || sys.upgrades?.rank10 || sys.upgrades?.rank15) {
-      content += `<div style="border-top: 1px dashed #ccc; padding-top: 4px; font-size: 11px; color: #444;">`;
-      if (sys.upgrades.rank5 && sys.upgrades.rank5 !== 'None') content += `<div><strong style="color: #27ae60;">Rank 5:</strong> ${sys.upgrades.rank5}</div>`;
-      if (sys.upgrades.rank10 && sys.upgrades.rank10 !== 'None') content += `<div><strong style="color: #2980b9;">Rank 10:</strong> ${sys.upgrades.rank10}</div>`;
-      if (sys.upgrades.rank15 && sys.upgrades.rank15 !== 'None') content += `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${sys.upgrades.rank15}</div>`;
+    const formatRankBreak = (rb, legacy) => {
+      const parts = [];
+      if (rb) {
+        if (rb.damageDice) parts.push(`+${rb.damageDice.replace(/^\+/, '')} Dmg`);
+        if (rb.rankDamageDice && Number(rb.rankDamageDice) > 0) parts.push(`+${rb.rankDamageDice} Rank ${Number(rb.rankDamageDice) === 1 ? 'Die' : 'Dice'}`);
+        if (rb.buffsResistances) parts.push(`Buff/Resist: ${rb.buffsResistances}`);
+        if (rb.debuff) parts.push(`Debuff: [${rb.debuff}]`);
+        if (rb.notes) parts.push(rb.notes);
+      }
+      if (parts.length === 0 && legacy && legacy !== 'None') {
+        return legacy;
+      }
+      return parts.join(' | ');
+    };
+
+    const rb5 = formatRankBreak(sys.rankBreaks?.rank5, sys.upgrades?.rank5);
+    const rb10 = formatRankBreak(sys.rankBreaks?.rank10, sys.upgrades?.rank10);
+    const rb15 = formatRankBreak(sys.rankBreaks?.rank15, sys.upgrades?.rank15);
+    const rb20 = formatRankBreak(sys.rankBreaks?.rank20, sys.upgrades?.rank20);
+
+    if (rb5 || rb10 || rb15 || rb20) {
+      content += `<div style="border-top: 1px dashed #ccc; padding-top: 4px; font-size: 11px; color: #444; margin-top: 6px;">`;
+      content += `<div style="font-weight: bold; font-size: 10px; text-transform: uppercase; color: #7f8c8d; margin-bottom: 3px;">Rank Breaks:</div>`;
+      if (rb5) content += `<div><strong style="color: #27ae60;">Rank 5:</strong> ${rb5}</div>`;
+      if (rb10) content += `<div><strong style="color: #2980b9;">Rank 10:</strong> ${rb10}</div>`;
+      if (rb15) content += `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${rb15}</div>`;
+      if (rb20) content += `<div><strong style="color: #d35400;">Rank 20:</strong> ${rb20}</div>`;
       content += `</div>`;
     }
 

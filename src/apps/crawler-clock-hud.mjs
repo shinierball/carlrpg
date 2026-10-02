@@ -58,10 +58,14 @@ export class DCCCrawlerClockHUD {
       formattedCrawlerCount
     };
 
+    const renderTemplateFn = globalThis.foundry?.applications?.handlebars?.renderTemplate
+      ?? globalThis.foundry?.utils?.renderTemplate
+      ?? globalThis.renderTemplate;
+
     let htmlString = '';
-    if (typeof globalThis.renderTemplate === 'function') {
+    if (typeof renderTemplateFn === 'function') {
       try {
-        htmlString = await globalThis.renderTemplate(DCCCrawlerClockHUD.defaultOptions.template, context);
+        htmlString = await renderTemplateFn(DCCCrawlerClockHUD.defaultOptions.template, context);
       } catch (err) {
         htmlString = this._getFallbackHTML(context);
       }

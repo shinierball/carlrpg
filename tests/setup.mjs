@@ -1640,11 +1640,27 @@ globalThis.foundry.appv1 = globalThis.foundry.appv1 || {
   }
 };
 
-globalThis.foundry.documents = globalThis.foundry.documents || {
-  collections: {
-    Actors: globalThis.Actors,
-    Items: globalThis.Items
-  }
+if (!globalThis.TextEditor) {
+  globalThis.TextEditor = class MockTextEditor {
+    static getDragEventData(event) {
+      if (typeof event?.dataTransfer?.getData === 'function') {
+        const raw = event.dataTransfer.getData('text/plain');
+        try { return JSON.parse(raw); } catch (_) { return null; }
+      }
+      return null;
+    }
+  };
+}
+
+globalThis.foundry.documents = globalThis.foundry.documents || {};
+globalThis.foundry.documents.Actor = globalThis.foundry.documents.Actor || MockActor;
+globalThis.foundry.documents.Item = globalThis.foundry.documents.Item || MockItem;
+globalThis.foundry.documents.Macro = globalThis.foundry.documents.Macro || MockMacro;
+globalThis.foundry.documents.RollTable = globalThis.foundry.documents.RollTable || globalThis.RollTable;
+globalThis.foundry.documents.ChatMessage = globalThis.foundry.documents.ChatMessage || globalThis.ChatMessage;
+globalThis.foundry.documents.collections = globalThis.foundry.documents.collections || {
+  Actors: globalThis.Actors,
+  Items: globalThis.Items
 };
 
 globalThis.foundry.applications = globalThis.foundry.applications || {};
@@ -1655,8 +1671,15 @@ globalThis.foundry.applications.sidebar = globalThis.foundry.applications.sideba
     ItemDirectory: globalThis.ItemDirectory
   }
 };
-globalThis.foundry.applications.handlebars = globalThis.foundry.applications.handlebars || {
-  loadTemplates: globalThis.loadTemplates
+globalThis.foundry.applications.handlebars = globalThis.foundry.applications.handlebars || {};
+globalThis.foundry.applications.handlebars.loadTemplates = globalThis.foundry.applications.handlebars.loadTemplates || globalThis.loadTemplates;
+globalThis.foundry.applications.handlebars.renderTemplate = globalThis.foundry.applications.handlebars.renderTemplate || globalThis.renderTemplate;
+
+globalThis.foundry.applications.ux = globalThis.foundry.applications.ux || {
+  TextEditor: {
+    implementation: globalThis.TextEditor,
+    getDragEventData: (ev) => globalThis.TextEditor?.getDragEventData?.(ev)
+  }
 };
 
 if (!globalThis.$) {

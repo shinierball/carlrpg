@@ -172,19 +172,148 @@
   <input class="dcc-field-input" type="text" name="system.optionalEffects" value="{{optionalEffectsString}}" placeholder="Overcharge, Concentrated Beam, Wide Dispersion" />
 </div>
 
-<div class="dcc-stat-block" style="background: #fdfbf7; border: 1px solid #d4af37; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
-  <div class="dcc-banner-header" style="font-size: 11px; margin-bottom: 6px;"><i class="fa-solid fa-arrow-up-right-dots"></i> SPELL UPGRADES & ABILITIES</div>
-  <div class="dcc-field-group" style="margin-bottom: 6px;">
-    <span class="dcc-field-label" style="color: #27ae60; font-weight: bold;">Rank 5 Ability / Perk</span>
-    <input class="dcc-field-input" type="text" name="system.upgrades.rank5" value="{{system.upgrades.rank5}}" placeholder="Rank 5 upgrade..." />
+{{!-- RANK MILESTONES & BREAK CONFIGURATIONS (RANKS 5, 10, 15, 20) --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #7f8c8d;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #2c3e50;">
+    <span><i class="fa-solid fa-layer-group"></i> RANK BREAK CONFIGURATIONS (RANKS 5, 10, 15, 20)</span>
+    <span style="font-size: 9px; opacity: 0.9; color: #fff;">Optional per rank break</span>
   </div>
-  <div class="dcc-field-group" style="margin-bottom: 6px;">
-    <span class="dcc-field-label" style="color: #2980b9; font-weight: bold;">Rank 10 Ability / Perk</span>
-    <input class="dcc-field-input" type="text" name="system.upgrades.rank10" value="{{system.upgrades.rank10}}" placeholder="Rank 10 upgrade..." />
-  </div>
-  <div class="dcc-field-group">
-    <span class="dcc-field-label" style="color: #8e44ad; font-weight: bold;">Rank 15 Ability / Perk</span>
-    <input class="dcc-field-input" type="text" name="system.upgrades.rank15" value="{{system.upgrades.rank15}}" placeholder="Rank 15 upgrade..." />
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    {{!-- Rank 5 --}}
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #27ae60; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #27ae60; margin-bottom: 4px;">
+        <i class="fa-solid fa-medal"></i> Rank 5 Break
+      </div>
+      <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Additional Damage Dice</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank5.damageDice" value="{{system.rankBreaks.rank5.damageDice}}" placeholder="e.g. 1d6" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Add'l Rank Damage Dies</span>
+          <input class="dcc-field-input" type="number" name="system.rankBreaks.rank5.rankDamageDice" value="{{system.rankBreaks.rank5.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">Buffs / Resistances</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank5.buffsResistances" value="{{system.rankBreaks.rank5.buffsResistances}}" placeholder="e.g. Fire Resistance, +2 INT" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">On-Hit Target Debuff</span>
+          <select class="dcc-field-input" name="system.rankBreaks.rank5.debuff" style="font-size: 11px;">
+            <option value="">-- None --</option>
+            {{#each availableDebuffs as |deb|}}
+              <option value="{{deb.name}}" {{#if (eq ../system.rankBreaks.rank5.debuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="dcc-field-group" style="margin-bottom: 0;">
+        <span class="dcc-field-label">Non-Defined Abilities / Milestone Notes</span>
+        <input class="dcc-field-input" type="text" name="system.rankBreaks.rank5.notes" value="{{system.rankBreaks.rank5.notes}}" placeholder="e.g. Doubles radius, allows higher mana spend..." style="font-size: 11px;" />
+      </div>
+    </div>
+
+    {{!-- Rank 10 --}}
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #2980b9; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #2980b9; margin-bottom: 4px;">
+        <i class="fa-solid fa-medal"></i> Rank 10 Break
+      </div>
+      <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Additional Damage Dice</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank10.damageDice" value="{{system.rankBreaks.rank10.damageDice}}" placeholder="e.g. 1d6" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Add'l Rank Damage Dies</span>
+          <input class="dcc-field-input" type="number" name="system.rankBreaks.rank10.rankDamageDice" value="{{system.rankBreaks.rank10.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">Buffs / Resistances</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank10.buffsResistances" value="{{system.rankBreaks.rank10.buffsResistances}}" placeholder="e.g. Electric Resistance" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">On-Hit Target Debuff</span>
+          <select class="dcc-field-input" name="system.rankBreaks.rank10.debuff" style="font-size: 11px;">
+            <option value="">-- None --</option>
+            {{#each availableDebuffs as |deb|}}
+              <option value="{{deb.name}}" {{#if (eq ../system.rankBreaks.rank10.debuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="dcc-field-group" style="margin-bottom: 0;">
+        <span class="dcc-field-label">Non-Defined Abilities / Milestone Notes</span>
+        <input class="dcc-field-input" type="text" name="system.rankBreaks.rank10.notes" value="{{system.rankBreaks.rank10.notes}}" placeholder="e.g. Targets gain Burned debuff, chains to second target..." style="font-size: 11px;" />
+      </div>
+    </div>
+
+    {{!-- Rank 15 --}}
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #8e44ad; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #8e44ad; margin-bottom: 4px;">
+        <i class="fa-solid fa-medal"></i> Rank 15 Break
+      </div>
+      <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Additional Damage Dice</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank15.damageDice" value="{{system.rankBreaks.rank15.damageDice}}" placeholder="e.g. 1d6" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Add'l Rank Damage Dies</span>
+          <input class="dcc-field-input" type="number" name="system.rankBreaks.rank15.rankDamageDice" value="{{system.rankBreaks.rank15.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">Buffs / Resistances</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank15.buffsResistances" value="{{system.rankBreaks.rank15.buffsResistances}}" placeholder="e.g. Fire Immunity" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">On-Hit Target Debuff</span>
+          <select class="dcc-field-input" name="system.rankBreaks.rank15.debuff" style="font-size: 11px;">
+            <option value="">-- None --</option>
+            {{#each availableDebuffs as |deb|}}
+              <option value="{{deb.name}}" {{#if (eq ../system.rankBreaks.rank15.debuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="dcc-field-group" style="margin-bottom: 0;">
+        <span class="dcc-field-label">Non-Defined Abilities / Milestone Notes</span>
+        <input class="dcc-field-input" type="text" name="system.rankBreaks.rank15.notes" value="{{system.rankBreaks.rank15.notes}}" placeholder="e.g. Multiplies base damage dice, converts damage type..." style="font-size: 11px;" />
+      </div>
+    </div>
+
+    {{!-- Rank 20 --}}
+    <div class="dcc-rank-break-card" style="margin-bottom: 0; border: 1px solid #ddd; border-left: 4px solid #d35400; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #d35400; margin-bottom: 4px;">
+        <i class="fa-solid fa-trophy"></i> Rank 20 Break
+      </div>
+      <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Additional Damage Dice</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank20.damageDice" value="{{system.rankBreaks.rank20.damageDice}}" placeholder="e.g. 2d12" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Add'l Rank Damage Dies</span>
+          <input class="dcc-field-input" type="number" name="system.rankBreaks.rank20.rankDamageDice" value="{{system.rankBreaks.rank20.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">Buffs / Resistances</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank20.buffsResistances" value="{{system.rankBreaks.rank20.buffsResistances}}" placeholder="e.g. Prismatic Shield" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1.5;">
+          <span class="dcc-field-label">On-Hit Target Debuff</span>
+          <select class="dcc-field-input" name="system.rankBreaks.rank20.debuff" style="font-size: 11px;">
+            <option value="">-- None --</option>
+            {{#each availableDebuffs as |deb|}}
+              <option value="{{deb.name}}" {{#if (eq ../system.rankBreaks.rank20.debuff deb.name)}}selected{{/if}}>{{deb.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+      <div class="dcc-field-group" style="margin-bottom: 0;">
+        <span class="dcc-field-label">Non-Defined Abilities / Milestone Notes</span>
+        <input class="dcc-field-input" type="text" name="system.rankBreaks.rank20.notes" value="{{system.rankBreaks.rank20.notes}}" placeholder="e.g. Ultimate spell ascension perk..." style="font-size: 11px;" />
+      </div>
+    </div>
   </div>
 </div>
 

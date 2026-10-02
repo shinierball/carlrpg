@@ -113,8 +113,11 @@ export async function rollBackgroundTable(tableKey, { roll: explicitRoll = null 
 
   let rollNumber = explicitRoll;
   if (!rollNumber || rollNumber < 1 || rollNumber > 12) {
-    if (typeof Roll !== 'undefined' && typeof Roll === 'function') {
-      const r = new Roll('1d12');
+    const RollClass = CONFIG.Dice?.rolls?.[0]
+      ?? globalThis.foundry?.dice?.Roll
+      ?? globalThis.Roll;
+    if (typeof RollClass !== 'undefined' && typeof RollClass === 'function') {
+      const r = new RollClass('1d12');
       await r.evaluate();
       rollNumber = Math.min(12, Math.max(1, Math.floor(Number(r.total) || (Math.random() * 12 + 1))));
     } else {
@@ -182,7 +185,11 @@ export function createBackgroundRollTableData(tableKey) {
  * @returns {Promise<Array<RollTable>>}
  */
 export async function ensureBackgroundTables() {
-  if (typeof RollTable === 'undefined' || !globalThis.game?.tables) {
+  const RollTableClass = CONFIG.RollTable?.documentClass
+    ?? globalThis.foundry?.documents?.RollTable
+    ?? globalThis.RollTable;
+
+  if (!RollTableClass || !globalThis.game?.tables) {
     return [];
   }
 
@@ -214,10 +221,10 @@ export async function ensureBackgroundTables() {
         }
       }
       createdOrFound.push(existing);
-    } else if (typeof RollTable.create === 'function') {
+    } else if (typeof RollTableClass.create === 'function') {
       try {
         const tableData = createBackgroundRollTableData(tableKey);
-        const newTable = await RollTable.create(tableData, { renderSheet: false });
+        const newTable = await RollTableClass.create(tableData, { renderSheet: false });
         if (newTable) createdOrFound.push(newTable);
       } catch (err) {
         console.warn(`DCC RPG | Could not create RollTable ${tableDef.name}:`, err);

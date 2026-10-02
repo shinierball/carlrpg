@@ -2002,6 +2002,20 @@ Hooks.once('ready', async function() {
       }
     }
 
+    const ItemDocClass = CONFIG.Item?.documentClass
+      ?? globalThis.foundry?.documents?.Item
+      ?? DCCItem
+      ?? globalThis.Item;
+
+    const ActorDocClass = CONFIG.Actor?.documentClass
+      ?? globalThis.foundry?.documents?.Actor
+      ?? DCCActor
+      ?? globalThis.Actor;
+
+    const MacroDocClass = CONFIG.Macro?.documentClass
+      ?? globalThis.foundry?.documents?.Macro
+      ?? globalThis.Macro;
+
     const pack = game.packs.get('carl-rpg.skills');
     if (pack) {
       try {
@@ -2019,7 +2033,7 @@ Hooks.once('ready', async function() {
             if (typeof pack.configure === 'function') await pack.configure({ locked: false });
             else pack.locked = false;
           }
-          await Item.createDocuments(docs, { pack: pack.collection || 'carl-rpg.skills' });
+          await ItemDocClass.createDocuments(docs, { pack: pack.collection || 'carl-rpg.skills' });
           if (wasLocked) {
             if (typeof pack.configure === 'function') await pack.configure({ locked: true });
             else pack.locked = true;
@@ -2048,7 +2062,7 @@ Hooks.once('ready', async function() {
             if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: false });
             else spellsPack.locked = false;
           }
-          await Item.createDocuments(docs, { pack: spellsPack.collection || 'carl-rpg.spells' });
+          await ItemDocClass.createDocuments(docs, { pack: spellsPack.collection || 'carl-rpg.spells' });
           if (wasLocked) {
             if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: true });
             else spellsPack.locked = true;
@@ -2077,7 +2091,7 @@ Hooks.once('ready', async function() {
             if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: false });
             else itemsPack.locked = false;
           }
-          await Item.createDocuments(docs, { pack: itemsPack.collection || 'carl-rpg.items' });
+          await ItemDocClass.createDocuments(docs, { pack: itemsPack.collection || 'carl-rpg.items' });
           if (wasLocked) {
             if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: true });
             else itemsPack.locked = true;
@@ -2115,7 +2129,7 @@ Hooks.once('ready', async function() {
             if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: false });
             else buffsPack.locked = false;
           }
-          await Item.createDocuments(docs, { pack: buffsPack.collection || 'carl-rpg.buffs' });
+          await ItemDocClass.createDocuments(docs, { pack: buffsPack.collection || 'carl-rpg.buffs' });
           if (wasLocked) {
             if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: true });
             else buffsPack.locked = true;
@@ -2128,7 +2142,7 @@ Hooks.once('ready', async function() {
     }
 
     const mobsPack = game.packs.get('carl-rpg.mobs');
-    if (mobsPack && typeof Actor !== 'undefined') {
+    if (mobsPack && ActorDocClass) {
       try {
         const index = await mobsPack.getIndex();
         if (index.size === 0) {
@@ -2155,7 +2169,7 @@ Hooks.once('ready', async function() {
             if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: false });
             else mobsPack.locked = false;
           }
-          await Actor.createDocuments(docs, { pack: mobsPack.collection || 'carl-rpg.mobs' });
+          await ActorDocClass.createDocuments(docs, { pack: mobsPack.collection || 'carl-rpg.mobs' });
           if (wasLocked) {
             if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: true });
             else mobsPack.locked = true;
@@ -2169,7 +2183,7 @@ Hooks.once('ready', async function() {
 
     // 3. Ensure macros compendium pack is populated if empty
     const macrosPack = game.packs.get('carl-rpg.macros');
-    if (macrosPack && typeof Macro !== 'undefined') {
+    if (macrosPack && MacroDocClass) {
       try {
         const index = await macrosPack.getIndex();
         if (index.size === 0) {
@@ -2189,7 +2203,7 @@ Hooks.once('ready', async function() {
             if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: false });
             else macrosPack.locked = false;
           }
-          await Macro.createDocuments(docs, { pack: macrosPack.collection || 'carl-rpg.macros' });
+          await MacroDocClass.createDocuments(docs, { pack: macrosPack.collection || 'carl-rpg.macros' });
           if (wasLocked) {
             if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: true });
             else macrosPack.locked = true;
@@ -2202,12 +2216,12 @@ Hooks.once('ready', async function() {
     }
 
     // 4. Ensure canonical DCC macros exist in world with Observer ownership (default: 2) so all users can execute them
-    if (game.macros && typeof Macro !== 'undefined') {
+    if (game.macros && MacroDocClass) {
       for (const mData of DCC_MACROS) {
         const existing = game.macros.find ? game.macros.find(m => m.flags?.['carl-rpg']?.macroKey === mData.flags?.['carl-rpg']?.macroKey || m.name === mData.name) : null;
         if (!existing) {
           try {
-            await Macro.create({
+            await MacroDocClass.create({
               name: mData.name,
               type: mData.type,
               img: mData.img,

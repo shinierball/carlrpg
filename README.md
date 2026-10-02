@@ -18,9 +18,17 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
   - Supports 4-layer dynamic skill matching (explicit associations, weapon type model, weapon group taxonomy via `DCC_WEAPON_GROUP_MAP`, and damage type).
   - Employs Specialization Precedence (`proficiencyMode: "highest"`) to resolve d20 attack bonuses without runaway stacking, while considering the crawler trained if any matching skill has Rank $\ge 1$.
   - Extends `SkillDataModel` with `isTechnique`, `appliesTo`, `techniqueConfig`, `critMultiplierR5` (e.g. 4x), `critMultiplierR15` (e.g. 8x), `fumbleDebuff` (e.g. *Minor Injury* on Nat 1), `onHitDebuff` (e.g. *Bleeding*), and `onHitDebuffMinRank`.
-  - Automated combat mechanics: One-handed wielding of heavy weapons triggers disadvantage (`2d20kl`), Natural 1 rolls alert fumbles, Rank 5/15 unlocks dynamic 4x/8x critical hit multipliers, and Rank 10+ embeds 1-click status debuff infliction buttons on chat cards.
+- **4-Tier Rank Break Configurations (Ranks 5, 10, 15, 20) for Skills & Spells**:
+  - Both skills (`SkillDataModel`) and spells (`SpellDataModel`) feature dedicated, color-coded Rank Break Configuration panels for **Rank 5, Rank 10, Rank 15, and Rank 20**.
+  - At each milestone, creators and GMs can configure:
+    - **Additional Damage Dies (`damageDice`)**: Extra base damage dice granted at and above this rank (e.g. `+1d6`, `2d4`), scaling cumulative weapon or spell damage.
+    - **Additional Rank Damage Dies (`rankDamageDice`)**: Integer count of additional rank damage dice granted (e.g. `+1` or `+2` rank dice), multiplying the evaluated rank damage die.
+    - **Buffs or Resistances (`buffsResistances`)**: Descriptive buffs, stat boosts, or damage resistances unlocked at the milestone.
+    - **Target Debuffs (`debuff`)**: A status condition or debuff inflicted on targets upon hit (e.g. *Bleeding*, *Crippled*, *Burned*, *Stunned*), producing 1-click **[ 🩸 Inflict Condition ]** buttons on the chat damage card.
+    - **Non-Defined Ability Notes (`notes`)**: Freeform notes documenting custom narrative or mechanical perks not formally parameterized by dice.
+  - Completely optional: no effects are required to be tied to any rank break, allowing flexible milestone customization.
   - **Tab 2 (Equipment & Inventory)**: Combines Equipped Gear Slots (Head, Torso, Arms, Hands/Holding, Legs, Feet, 10 Accessories) with active bonus badges and notes inputs in a responsive multi-column layout placed directly above the full-width Backpack Items table (Gear & Loot) with drag-and-drop reordering, quantity editing, 1-click equipping, and deletion. Both sections span the full width of the sheet, and all buffs and debuffs have been moved to their own dedicated tab to keep inventory strictly physical.
-  - **Tab 3 (Skills & Spells)**: Unified abilities and magic center combining combat/utility skills and the character spellbook. Full skills table tracking Base Rank, Gear Bonuses, Weapon Group / Type Bonuses, Boon Bonuses, Modified Rank, and Total Skill, with drag-and-drop custom list reordering and 1-click deletion. Spells section includes mana tracking, quotes, ranges, durations, damage, multi-tiered rank-gated damage scaling (`damageModifiers`), critical milestones (Rank 5 4x, Rank 15 8x), on-hit condition/debuff triggers, fumble backfire warnings, optional metamagic riders, and cast roll cards, backed by both the **DCC Skill Library** and **DCC Spell Library**.
+  - **Tab 3 (Skills & Spells)**: Unified abilities and magic center combining combat/utility skills and the character spellbook. Full skills table tracking Base Rank, Gear Bonuses, Weapon Group / Type Bonuses, Boon Bonuses, Modified Rank, and Total Skill, with drag-and-drop custom list reordering and 1-click deletion. Spells section includes mana tracking, quotes, ranges, durations, damage, 4-tier rank break configurations, multi-tiered rank-gated damage scaling (`damageModifiers`), critical milestones (Rank 5 4x, Rank 15 8x), on-hit condition/debuff triggers, fumble backfire warnings, optional metamagic riders, and cast roll cards, backed by both the **DCC Skill Library** and **DCC Spell Library**.
   - **Tab 4 (Conditions & Effects)**: Dedicated status effect center managing character buffs, active effects, debuffs, and negative conditions. Displays severity badges (`Minor`, `Moderate`, `Major`), durations, and 1-click quick-assignment buttons (`[1]`, `[2]`, `[3]`) to assign owned buffs directly to Page 1 External Buff slots 1, 2, or 3 (highlighted in vivid green when assigned, with 1-click toggle to unassign), plus direct launch to the Condition & Buff Library.
   - **Tab 5 (Story & Sponsors)**: Consolidated narrative background (Popularity, Past Traumas, Loose Ends, Regrets, Notes) featuring inline `[ 🎲 Roll 1d12 ]` buttons for Table 11 (Past Traumas), Table 12 (Loose Ends), and Table 13 (Regrets) with chat card results, trophy summary pill, Companions & Personal Space (Pet Companion with special traits & attacks, Mount/Vehicle with DR & speed, Personal Space with defense & amenities, Deity/Patron with boons & sins), and Character Features (Racial Traits, Class Talents, Corporate Sponsors 1–3).
   - **Tab 6 (Achievements & Trophy Room)**: Dedicated Crawler trophy room collecting all achievements, boss stars, and crawler skulls earned over time. Summary trophy pills tally Bronze, Silver, Gold, Platinum, Legendary, and Celestial awards along with total AI Favor gained. Features the **Public Notoriety Manager** displaying all 6 Boss Star tiers, Crawler Skulls, live count adjustments, chronological kill logs, and 1-click kill recording dialogs. Includes live tier filtering, real-time search, color-coded achievement cards with iconic Dungeon AI quotes and reward details, direct **Announce to Chat** broadcasts, custom achievement creation, and 1-click access to the **Achievement Catalog & Manager**.
@@ -209,12 +217,21 @@ New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\FoundryVTT\Data\systems
 
 ---
 
+## 🛡️ Foundry V15 Compatibility & Namespacing
+
+CarlRPG is fully prepared for Foundry Virtual Tabletop Version 15:
+- **Zero Startup Warnings**: All startup routines, HUD widgets (`DCCFloorClockHUD`, `DCCCrawlerClockHUD`, `DCCCrawlerTokenHUD`), and interactive managers prioritize `foundry.applications.handlebars.renderTemplate` and `foundry.applications.handlebars.loadTemplates`.
+- **Namespaced Base Classes**: Core document models (`DCCActor`, `DCCItem`) inherit safely from `foundry.documents.Actor` / `foundry.documents.Item` with fallback to base classes before legacy globals.
+- **Document Creation & Drop Serialization**: Background roll tables, macros, and drag-and-drop actions resolve via `foundry.documents.*` and `foundry.applications.ux.TextEditor`.
+
+---
+
 ## 🧪 Testing & Code Coverage
 
 The CarlRPG system features a headless automated test harness powered by Node.js built-in test runner (`node:test`). Tests run natively without browser dependencies or heavy bundlers.
 
 ### Running Unit Tests
-Execute the full test suite (470+ assertions):
+Execute the full test suite (740+ assertions across 139 test suites):
 ```bash
 node --test tests/*.test.mjs
 ```
@@ -229,3 +246,4 @@ Or directly via Node:
 node --test --experimental-test-coverage --test-coverage-include="src/**" tests/*.test.mjs
 ```
 *Current benchmark: **>90%** overall line coverage, with every individual module in `src/` exceeding the strict 75% coverage threshold.*
+

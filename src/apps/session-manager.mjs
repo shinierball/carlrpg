@@ -2153,10 +2153,14 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
       outcomes
     };
 
+    const renderTemplateFn = globalThis.foundry?.applications?.handlebars?.renderTemplate
+      ?? globalThis.foundry?.utils?.renderTemplate
+      ?? globalThis.renderTemplate;
+
     let contentHtml = '';
-    if (typeof renderTemplate === 'function') {
+    if (typeof renderTemplateFn === 'function') {
       try {
-        contentHtml = await renderTemplate('systems/carl-rpg/templates/apps/add-event-dialog.hbs', dialogData);
+        contentHtml = await renderTemplateFn('systems/carl-rpg/templates/apps/add-event-dialog.hbs', dialogData);
       } catch (_) {
         contentHtml = DCCSessionManagerApp.getAddEventDialogHtml(dialogData);
       }

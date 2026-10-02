@@ -87,10 +87,28 @@ Character and Item sheet controllers have been modernized to use **Application V
 
 ---
 
-## 🚀 Summary of Release 2.0.1
-With Phases 1, 2, and 3 complete, CarlRPG is fully prepared for Foundry Virtual Tabletop V16:
+## 🛡️ Phase 4: Foundry V15 Deprecation & Namespacing Compliance (v2.2.9)
+
+To ensure zero console deprecation warnings on system startup under Foundry V13/V14 and full forward-compatibility with complete global removal in Foundry V15:
+
+1. **Document Class Inheritance**:
+   - `DCCActor` and `DCCItem` resolve safe base classes via `foundry.documents.Actor` / `foundry.documents.Item` (and `BaseActor` / `BaseItem`) before legacy global fallbacks.
+2. **Template Preloading & Rendering**:
+   - `loadTemplates` in `src/dcc.mjs` resolves via `foundry.applications.handlebars.loadTemplates`.
+   - HUDs (`DCCFloorClockHUD`, `DCCCrawlerClockHUD`, `DCCCrawlerTokenHUD`) and apps (`DCCSessionManagerApp`, `DCCItemManager`, `DCCSkillManager`) resolve `renderTemplate` via `foundry.applications.handlebars.renderTemplate`.
+3. **Document Creation on Startup**:
+   - Background tables and macro initialization resolve `CONFIG.RollTable.documentClass ?? foundry.documents.RollTable` and `CONFIG.Macro.documentClass ?? foundry.documents.Macro`.
+4. **Drag & Drop Serialization**:
+   - `DCCItemSheet` resolves `TextEditor` via `foundry.applications.ux.TextEditor.implementation` for drag-event data extraction.
+
+---
+
+## 🚀 Summary of Release 2.2.9
+With Phases 1 through 4 complete, CarlRPG is fully prepared for Foundry Virtual Tabletop V15 and V16:
 - 11 Item Data Models
-- 4 Actor Data Models
-- Application V2 Sheet Architecture
+- 5 Actor Data Models
+- Application V2 Sheet Architecture & forward-compatible mixins
+- 0 Deprecated Global accesses on startup
 - 100% Backward Compatibility with existing worlds, macros, and compendiums
-- 259 Automated Unit Tests passing with 0 failures
+- 741 Automated Unit Tests passing with 0 failures
+

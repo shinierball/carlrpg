@@ -195,7 +195,37 @@
       "onHitDebuff": "",
       "onHitDebuffMinRank": 0,
       "critMultiplierR5": 4,
-      "critMultiplierR15": 8
+      "critMultiplierR15": 8,
+      "rankBreaks": {
+        "rank5": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank10": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank15": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank20": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        }
+      }
     },
     "attack": {
       "equipped": true,
@@ -242,6 +272,36 @@
         "rank5": "",
         "rank10": "",
         "rank15": ""
+      },
+      "rankBreaks": {
+        "rank5": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank10": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank15": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank20": {
+          "damageDice": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        }
       }
     },
     "gear": {

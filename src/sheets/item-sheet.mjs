@@ -448,6 +448,28 @@ export class DCCItemSheet extends BaseItemSheet {
     context.availableSpells = await this.getAvailableSpells();
     context.availableRollTables = await this.getAvailableRollTables();
 
+    // Prepare Rank Breaks configuration for skills and spells (Ranks 5, 10, 15, 20)
+    if (['skill', 'spell'].includes(context.item.type)) {
+      if (!context.system.rankBreaks) context.system.rankBreaks = {};
+      for (const rKey of ['rank5', 'rank10', 'rank15', 'rank20']) {
+        if (!context.system.rankBreaks[rKey]) {
+          context.system.rankBreaks[rKey] = {
+            damageDice: '',
+            rankDamageDice: 0,
+            buffsResistances: '',
+            debuff: '',
+            notes: ''
+          };
+        } else {
+          context.system.rankBreaks[rKey].damageDice = context.system.rankBreaks[rKey].damageDice || '';
+          context.system.rankBreaks[rKey].rankDamageDice = Number(context.system.rankBreaks[rKey].rankDamageDice) || 0;
+          context.system.rankBreaks[rKey].buffsResistances = context.system.rankBreaks[rKey].buffsResistances || '';
+          context.system.rankBreaks[rKey].debuff = context.system.rankBreaks[rKey].debuff || '';
+          context.system.rankBreaks[rKey].notes = context.system.rankBreaks[rKey].notes || (context.system.upgrades?.[rKey] || '');
+        }
+      }
+    }
+
     if (context.item.type === 'loot') {
       const lootType = String(context.system?.lootType || '').toLowerCase().trim();
       context.isScratchTicket = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
@@ -604,9 +626,17 @@ export class DCCItemSheet extends BaseItemSheet {
 
   /** @override */
   async _onDrop(event) {
-    const data = TextEditor.getDragEventData(event);
+    const TextEditorClass = globalThis.foundry?.applications?.ux?.TextEditor?.implementation
+      ?? globalThis.foundry?.applications?.ux?.TextEditor
+      ?? globalThis.TextEditor;
+    const data = TextEditorClass?.getDragEventData ? TextEditorClass.getDragEventData(event) : null;
     if (data?.type === 'Item') {
-      const item = await Item.implementation.fromDropData(data);
+      const ItemClass = CONFIG.Item?.documentClass
+        ?? globalThis.foundry?.documents?.Item
+        ?? globalThis.Item;
+      const item = await (ItemClass?.implementation?.fromDropData
+        ? ItemClass.implementation.fromDropData(data)
+        : (ItemClass?.fromDropData ? ItemClass.fromDropData(data) : null));
       if (item && item.type === 'skill') {
         const current = this._normalizeSkillModifiers(this.item.system?.skillModifiers);
         const existing = current.find(m => m.name.toLowerCase() === item.name.toLowerCase().trim());
@@ -704,6 +734,36 @@ export class DCCItemSheet extends BaseItemSheet {
         }
       }
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
+
+      if (expanded.system?.rankBreaks) {
+        const cleanedBreaks = {};
+        for (const rKey of ['rank5', 'rank10', 'rank15', 'rank20']) {
+          const raw = expanded.system.rankBreaks[rKey] || {};
+          cleanedBreaks[rKey] = {
+            damageDice: (raw.damageDice || '').trim(),
+            rankDamageDice: parseInt(raw.rankDamageDice, 10) || 0,
+            buffsResistances: (raw.buffsResistances || '').trim(),
+            debuff: (raw.debuff || '').trim(),
+            notes: (raw.notes || '').trim()
+          };
+        }
+        for (const key of Object.keys(formData)) {
+          if (key.startsWith('system.rankBreaks')) {
+            delete formData[key];
+          }
+        }
+        formData['system.rankBreaks'] = cleanedBreaks;
+
+        // Keep legacy upgrades synchronized
+        if (this.item.type === 'spell' && !formData['system.upgrades']) {
+          formData['system.upgrades'] = {
+            rank5: cleanedBreaks.rank5.notes,
+            rank10: cleanedBreaks.rank10.notes,
+            rank15: cleanedBreaks.rank15.notes,
+            rank20: cleanedBreaks.rank20.notes
+          };
+        }
+      }
     }
 
     if (this.item.type === 'buff' || this.item.type === 'debuff') {

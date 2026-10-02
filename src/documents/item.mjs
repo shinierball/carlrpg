@@ -504,10 +504,15 @@ export async function resolveSingleOutcome(outcome, actor, originItem, isMultiMo
   };
 }
 
+const BaseItem = globalThis.foundry?.documents?.Item
+  ?? globalThis.foundry?.documents?.BaseItem
+  ?? globalThis.Item
+  ?? class {};
+
 /**
  * Dungeon Crawler Carl RPG Item Document
  */
-export class DCCItem extends Item {
+export class DCCItem extends BaseItem {
   /** @override */
   prepareBaseData() {
     if (super.prepareBaseData) super.prepareBaseData();
@@ -694,7 +699,7 @@ export class DCCItem extends Item {
           };
           delete itemData._id;
           delete itemData.id;
-          await Item.create(itemData);
+          await DCCItem.create(itemData);
           console.log(`DCC RPG | Added newly created item "${this.name}" (${this.type}) to Foundry items section.`);
         } catch (err) {
           console.warn(`DCC RPG | Could not add "${this.name}" to Foundry items section:`, err);
@@ -727,7 +732,7 @@ export class DCCItem extends Item {
           };
           delete itemData._id;
           delete itemData.id;
-          await Item.create(itemData);
+          await DCCItem.create(itemData);
           console.log(`DCC RPG | Synced updated item "${this.name}" (${this.type}) to Foundry items section.`);
         } catch (err) {
           console.warn(`DCC RPG | Could not sync "${this.name}" to Foundry items section:`, err);
@@ -1125,13 +1130,40 @@ export class DCCItem extends Item {
         </div>
         ${sys.baseDamage ? `<div style="margin-bottom: 6px; font-weight: bold; color: #c0392b; font-size: 13px;">Base Damage: ${sys.baseDamage}</div>` : ''}
         ${sys.description ? `<div style="font-size: 12px; line-height: 1.4; margin-bottom: 8px;">${sys.description}</div>` : ''}
-        ${sys.upgrades?.rank5 || sys.upgrades?.rank10 || sys.upgrades?.rank15 ? `
-          <div style="border-top: 1px dashed #ccc; padding-top: 4px; font-size: 11px; color: #444;">
-            ${sys.upgrades.rank5 && sys.upgrades.rank5 !== 'None' ? `<div><strong style="color: #27ae60;">Rank 5:</strong> ${sys.upgrades.rank5}</div>` : ''}
-            ${sys.upgrades.rank10 && sys.upgrades.rank10 !== 'None' ? `<div><strong style="color: #2980b9;">Rank 10:</strong> ${sys.upgrades.rank10}</div>` : ''}
-            ${sys.upgrades.rank15 && sys.upgrades.rank15 !== 'None' ? `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${sys.upgrades.rank15}</div>` : ''}
-          </div>
-        ` : ''}
+        ${(() => {
+          const formatRankBreak = (rb, legacy) => {
+            const parts = [];
+            if (rb) {
+              if (rb.damageDice) parts.push(`+${rb.damageDice.replace(/^\+/, '')} Dmg`);
+              if (rb.rankDamageDice && Number(rb.rankDamageDice) > 0) parts.push(`+${rb.rankDamageDice} Rank ${Number(rb.rankDamageDice) === 1 ? 'Die' : 'Dice'}`);
+              if (rb.buffsResistances) parts.push(`Buff/Resist: ${rb.buffsResistances}`);
+              if (rb.debuff) parts.push(`Debuff: [${rb.debuff}]`);
+              if (rb.notes) parts.push(rb.notes);
+            }
+            if (parts.length === 0 && legacy && legacy !== 'None') {
+              return legacy;
+            }
+            return parts.join(' | ');
+          };
+
+          const rb5 = formatRankBreak(sys.rankBreaks?.rank5, sys.upgrades?.rank5);
+          const rb10 = formatRankBreak(sys.rankBreaks?.rank10, sys.upgrades?.rank10);
+          const rb15 = formatRankBreak(sys.rankBreaks?.rank15, sys.upgrades?.rank15);
+          const rb20 = formatRankBreak(sys.rankBreaks?.rank20, sys.upgrades?.rank20);
+
+          if (rb5 || rb10 || rb15 || rb20) {
+            return `
+              <div style="border-top: 1px dashed #ccc; padding-top: 4px; font-size: 11px; color: #444; margin-top: 6px;">
+                <div style="font-weight: bold; font-size: 10px; text-transform: uppercase; color: #7f8c8d; margin-bottom: 3px;">Rank Breaks:</div>
+                ${rb5 ? `<div><strong style="color: #27ae60;">Rank 5:</strong> ${rb5}</div>` : ''}
+                ${rb10 ? `<div><strong style="color: #2980b9;">Rank 10:</strong> ${rb10}</div>` : ''}
+                ${rb15 ? `<div><strong style="color: #8e44ad;">Rank 15:</strong> ${rb15}</div>` : ''}
+                ${rb20 ? `<div><strong style="color: #d35400;">Rank 20:</strong> ${rb20}</div>` : ''}
+              </div>
+            `;
+          }
+          return '';
+        })()}
       </div>
     `;
 

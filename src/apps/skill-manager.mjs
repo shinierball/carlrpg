@@ -288,7 +288,10 @@ export class DCCSkillManager extends DCCBaseApplication {
             }
 
             const folder = await this.getOrCreateSkillsFolder();
-            const created = await Item.create({
+            const ItemClass = CONFIG.Item?.documentClass
+              ?? globalThis.foundry?.documents?.Item
+              ?? globalThis.Item;
+            const created = await ItemClass.create({
               name,
               type: 'skill',
               img: 'icons/svg/book.svg',

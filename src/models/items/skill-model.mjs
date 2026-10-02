@@ -35,7 +35,37 @@ export class SkillDataModel extends BaseItemDataModel {
       onHitDebuff: new fields.StringField({ initial: '' }),
       onHitDebuffMinRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       critMultiplierR5: new fields.NumberField({ integer: true, min: 1, initial: 4 }),
-      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 8 })
+      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 8 }),
+      rankBreaks: new fields.SchemaField({
+        rank5: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank10: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank15: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        }),
+        rank20: new fields.SchemaField({
+          damageDice: new fields.StringField({ initial: '' }),
+          rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
+          buffsResistances: new fields.StringField({ initial: '' }),
+          debuff: new fields.StringField({ initial: '' }),
+          notes: new fields.StringField({ initial: '' })
+        })
+      })
     };
   }
 

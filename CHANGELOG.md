@@ -1,3 +1,56 @@
+## 2.3.0
+
+### 4-Tier Rank Break Configurations (Ranks 5, 10, 15, 20) for Skills & Spells
+
+- **Unified Rank Break Architecture (`template.json`, `SkillDataModel`, `SpellDataModel`)**:
+  - Added `rankBreaks` object schema containing dedicated configurations for `rank5`, `rank10`, `rank15`, and `rank20` across both `skill` and `spell` items.
+  - At each rank milestone, each configuration provides optional controls for:
+    - `damageDice`: Additional base damage dice granted at and above this rank (e.g. `+1d6`, `2d4`).
+    - `rankDamageDice`: Integer count of additional rank damage dice granted (e.g. `+1` or `+2` rank dice).
+    - `buffsResistances`: Descriptive buffs, stat boosts, or damage resistances (e.g. `+2 STR`, `Fire Resistance`, `+1 Cleave`).
+    - `debuff`: Target condition/debuff applied on successful hit (e.g. `Bleeding`, `Crippled`, `Burned`, `Stunned`).
+    - `notes`: Notes for non-defined abilities, narrative effects, or special milestone mechanics.
+  - Non-binding constraint: All rank breaks are completely optional and default to inactive/empty with no required effects.
+- **Item Sheet Visual Interface (`DCCItemSheet`, `templates/items/parts/skill.hbs`, `templates/items/parts/spell.hbs`)**:
+  - Implemented 4-tier visual configuration panels color-coded by milestone:
+    - **Rank 5 Break**: Green theme (`#27ae60` / `#e8f8f0`).
+    - **Rank 10 Break**: Blue theme (`#2980b9` / `#ebf5fb`).
+    - **Rank 15 Break**: Purple theme (`#8e44ad` / `#f5eef8`).
+    - **Rank 20 Break**: Orange theme (`#d35400` / `#fdf2e9`).
+  - Added interactive inputs for additional damage dice, additional rank damage dice count, buffs/resistances, on-hit debuff selection dropdown, and freeform ability notes.
+  - Item sheet controller handles normalization, integer parsing, and fallback initialization across both skills and spells.
+- **Combat & Roll Mechanics Integration (`DCCActor`, `DCCItem`)**:
+  - `getSkillDamageData`: Cumulatively aggregates active rank break damage dice, adds `extraRankDiceFromBreaks` to the evaluated rank die, and collects target debuffs, buffs, and milestone notes.
+  - `getAttackDamageParts`: Automatically scales equipped weapon attacks matching skills with rank break damage dice and extra weapon rank damage dice.
+  - `rollAttack`: Renders 1-click **[ 🩸 Inflict Condition ]** buttons on chat damage cards for each active rank break debuff.
+  - `getSpellDamageData` & `rollSpellDamage`: Evaluates rank breaks for spells, scaling base damage dice or formula components, augmenting spell rank dice, and embedding debuff buttons on damage cards.
+  - `rollSpell` & `DCCItem.rollSpellCard`: Formats active rank break summaries with color-coded badges, damage dice, rank dice, buffs/resistances, debuffs, and notes on cast cards.
+- **Automated Verification**:
+  - Added dedicated test suite `tests/rank-breaks-configuration.test.mjs` verifying schema validation, sheet context preparation and updating, empty rank break tolerance, skill damage scaling, equipped weapon scaling, chat condition buttons, spell damage scaling, and cast card formatting.
+  - Full test suite passing: 755 tests passing across 144 suites with 0 failures.
+
+## 2.2.9
+
+### Foundry V15 Deprecation Cleanup & Global Namespacing Compliance
+
+- **Eliminated Deprecated Global `renderTemplate` Accesses on Startup**:
+  - Migrated `DCCFloorClockHUD` (`src/apps/floor-clock-hud.mjs`) and `DCCCrawlerClockHUD` (`src/apps/crawler-clock-hud.mjs`) to resolve `foundry.applications.handlebars.renderTemplate` before falling back to `globalThis.renderTemplate`.
+  - Updated `DCCCrawlerTokenHUD` (`src/apps/crawler-token-hud.mjs`) and `DCCSessionManagerApp` (`src/apps/session-manager.mjs`) to prioritize `foundry.applications.handlebars.renderTemplate`.
+  - Eliminates startup warning: `"You are accessing the global 'renderTemplate' which is now namespaced under foundry.applications.handlebars.renderTemplate and will be removed in Version 15."`
+- **Document Model Class Namespacing (`DCCActor` & `DCCItem`)**:
+  - Updated `DCCActor` (`src/documents/actor.mjs`) to inherit from `foundry.documents.Actor` / `foundry.documents.BaseActor` instead of bare global `Actor`.
+  - Updated `DCCItem` (`src/documents/item.mjs`) to inherit from `foundry.documents.Item` / `foundry.documents.BaseItem` instead of bare global `Item`.
+  - Eliminates deprecation warnings for global `Actor` and `Item` lookups during document evaluation.
+- **Compendium Population & Macro Initialization Namespacing (`src/dcc.mjs`)**:
+  - Namespaced document class resolution in the `ready` hook for `ItemDocClass`, `ActorDocClass`, and `MacroDocClass`.
+  - Replaced direct `Item.createDocuments`, `Actor.createDocuments`, `Macro.createDocuments`, and `Macro.create` calls with namespaced document classes.
+  - Updated `ensureBackgroundTables()` and `rollBackgroundTable` (`src/data/background-tables.mjs`) to resolve `CONFIG.RollTable.documentClass` / `foundry.documents.RollTable` and `foundry.dice.Roll`.
+- **TextEditor Drag & Drop Resolution (`src/sheets/item-sheet.mjs`)**:
+  - Updated `_onDrop` in `DCCItemSheet` to resolve `foundry.applications.ux.TextEditor.implementation` and `foundry.documents.Item` without accessing deprecated global `TextEditor` or `Item`.
+- **Automated Verification**:
+  - Added dedicated test suite `tests/v15-deprecation-and-namespacing.test.mjs` verifying inheritance hierarchy under namespaced globals and verifying zero deprecated global property accesses for `renderTemplate`, `loadTemplates`, `RollTable`, and `TextEditor`.
+  - Full test suite passing: 741 tests passing across 139 suites with 0 failures.
+
 ## 2.2.8
 
 ### Spell Explicit Rank Definitions, Scaling Damage & Ability Parity

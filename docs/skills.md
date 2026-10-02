@@ -87,3 +87,17 @@ Whenever rolling damage for a weapon attack, attack skill, or attack spell, the 
 - **Untrained Attack Checks**: Ranks $\le 0$ roll with Disadvantage (`2d20kl + Stat Mod` vs Target Evade).
 - **Evade Target Difficulty**: $\text{Target DC} = 10 + \text{Foe DEX Mod} + \text{Floor Number}$.
 - **Skill Non-Stacking Rule**: Skill ranks from different skills do not stack together.
+
+---
+
+## Rank Break Configurations (Ranks 5, 10, 15, 20)
+
+Every skill provides an optional 4-tier **Rank Break Configuration** for **Rank 5, Rank 10, Rank 15, and Rank 20**. There is no requirement for any effect to be tied to a rank break; each field is completely optional and defaults to inactive.
+
+At each milestone, the following options can be independently configured:
+1. **Additional Damage Dies (`damageDice`)**: Extra base damage dice granted at and above this rank (e.g. `+1d6`, `2d4`). When the skill is used directly or paired with an equipped weapon sharing the skill association, matching weapon damage dice scale cumulatively.
+2. **Additional Rank Damage Dies (`rankDamageDice`)**: Integer count of additional rank damage dice granted (e.g. `1` or `2`). These extra rank dice scale the active rank damage die evaluated from the rank die table.
+3. **Buffs or Resistances (`buffsResistances`)**: Descriptive buffs, stat bonuses, or damage resistances unlocked at the milestone (e.g. `+2 STR`, `Fire Resistance`, `+1 Cleave`).
+4. **Target Debuffs (`debuff`)**: A status condition or debuff inflicted on targets upon successful hit (e.g. `Bleeding`, `Crippled`, `Stunned`, `Burned`). Active debuffs generate interactive **[ 🩸 Inflict Condition ]** buttons on the chat damage card for one-click target application.
+5. **Non-Defined Ability Notes (`notes`)**: Freeform notes documenting custom narrative or mechanical perks not formally parameterized by standard dice or conditions (e.g. *Instant decapitation chance on critical hits against humanoids*).
+

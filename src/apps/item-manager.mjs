@@ -426,7 +426,10 @@ export class DCCItemManager extends DCCBaseApplication {
                 created.sheet.render(true);
               }
             } else {
-              await Item.create(itemData);
+              const ItemClass = CONFIG.Item?.documentClass
+                ?? globalThis.foundry?.documents?.Item
+                ?? globalThis.Item;
+              await ItemClass.create(itemData);
               globalThis.ui?.notifications?.info?.(`Created custom item "${name}".`);
               this.render(false);
             }

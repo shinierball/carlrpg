@@ -60,10 +60,14 @@ export class DCCFloorClockHUD {
       currentFloor
     };
 
+    const renderTemplateFn = globalThis.foundry?.applications?.handlebars?.renderTemplate
+      ?? globalThis.foundry?.utils?.renderTemplate
+      ?? globalThis.renderTemplate;
+
     let htmlString = '';
-    if (typeof globalThis.renderTemplate === 'function') {
+    if (typeof renderTemplateFn === 'function') {
       try {
-        htmlString = await globalThis.renderTemplate(DCCFloorClockHUD.defaultOptions.template, context);
+        htmlString = await renderTemplateFn(DCCFloorClockHUD.defaultOptions.template, context);
       } catch (err) {
         htmlString = this._getFallbackHTML(context);
       }

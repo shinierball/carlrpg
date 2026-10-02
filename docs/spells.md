@@ -101,5 +101,9 @@ The Spell Item Sheet (`templates/items/parts/spell.hbs`) provides dedicated, int
 3. **OPTIONAL EFFECTS & METAMAGIC RIDERS**:
    - Comma-separated input for custom metamagic riders (e.g. *Lingering Flame*, *Overcharge*, *Sculpted Blast*).
    - Active effect selector dropdown.
-4. **SPELL UPGRADES & ABILITIES**:
-   - Rich text inputs for Rank 5, Rank 10, and Rank 15 abilities and perks.
+4. **RANK BREAK CONFIGURATIONS (RANKS 5, 10, 15, 20)**:
+   - Dedicated 4-tier configuration panels color-coded by milestone (Green, Blue, Purple, Orange).
+   - Each rank break can configure additional base damage dice (`damageDice`), additional rank damage dies (`rankDamageDice`), buffs/resistances (`buffsResistances`), on-hit debuffs (`debuff`), and freeform ability notes (`notes`).
+   - Completely optional: no effect is required to be tied to any rank break.
+   - Evaluated dynamically in `actor.getSpellDamageData()`, `actor.rollSpellDamage()`, `actor.rollSpell()`, and `DCCItem.rollSpellCard()`.
+

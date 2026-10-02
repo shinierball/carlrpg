@@ -38,11 +38,11 @@
     <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" />
   </div>
   <div class="dcc-field-group small">
-    <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #f39c12;"></i> Gold Value</span>
+    <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #9a6306;"></i> Gold Value</span>
     {{#if canSeeItemValue}}
       <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" />
     {{else}}
-      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; cursor: not-allowed;" />
+      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; color: #333333; cursor: not-allowed;" />
     {{/if}}
   </div>
 </div>
@@ -211,7 +211,7 @@
               <td>
                 <div style="display: flex; align-items: center; gap: 4px;">
                   <input list="dcc-compendium-skills-datalist-{{../item.id}}" class="dcc-field-input" type="text" name="system.skillModifiers.{{idx}}.name" value="{{mod.name}}" placeholder="Select from compendium or type..." style="font-size: 11px; flex: 1;" />
-                  <a class="pick-skill-for-row" data-index="{{idx}}" data-tooltip="Pick from Compendium" style="color: #555; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-book-bookmark"></i></a>
+                  <a class="pick-skill-for-row" data-index="{{idx}}" data-tooltip="Pick from Compendium" style="color: #333333; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-book-bookmark"></i></a>
                 </div>
               </td>
               <td>
@@ -225,7 +225,7 @@
         </tbody>
       </table>
     {{else}}
-      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+      <div style="text-align: center; font-style: italic; color: #333333; font-size: 11px; padding: 6px;">
         No skill or spell modifiers. Click "Add Skill from Compendium" above to grant or boost a skill.
       </div>
     {{/if}}
@@ -286,7 +286,7 @@
         </tbody>
       </table>
     {{else}}
-      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+      <div style="text-align: center; font-style: italic; color: #333333; font-size: 11px; padding: 6px;">
         No bonus weapon damage parts. Click "Add Damage Part" above to add weapon damage (e.g. +2 Necrotic, +4 Sonic).
       </div>
     {{/if}}
@@ -465,7 +465,7 @@
           </tbody>
         </table>
       {{else}}
-        <div style="text-align: center; color: #777; font-size: 11px; padding: 6px;">
+        <div style="text-align: center; color: #333333; font-size: 11px; padding: 6px;">
           Activated ability enabled. Click <strong>Add Effect</strong> to attach on-use effects to this piece of gear.
         </div>
       {{/if}}

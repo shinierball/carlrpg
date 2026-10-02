@@ -133,14 +133,14 @@
         </div>
       {{/each}}
     {{else}}
-      <div style="text-align: center; color: #999; padding: 40px 10px; font-style: italic;">
+      <div style="text-align: center; color: #cccccc; padding: 40px 10px; font-style: italic;">
         No items or gear match the current filter criteria.
       </div>
     {{/if}}
   </div>
 
   {{!-- Footer Status Bar --}}
-  <div class="dcc-manager-footer" style="background: #111; color: #888; padding: 6px 14px; border-top: 1px solid #333; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+  <div class="dcc-manager-footer" style="background: #111; color: #cccccc; padding: 6px 14px; border-top: 1px solid #333; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
     <div>
       Showing <strong>{{items.length}}</strong> items. Drag items directly onto character sheets or maps.
     </div>
@@ -148,7 +148,7 @@
       {{#if canSeeValue}}
         <span style="color: #f1c40f;"><i class="fa-solid fa-check-circle"></i> Determine Value active (Gold visible)</span>
       {{else}}
-        <span style="color: #999;"><i class="fa-solid fa-lock"></i> Value hidden (Requires Determine Value Rank 10)</span>
+        <span style="color: #cccccc;"><i class="fa-solid fa-lock"></i> Value hidden (Requires Determine Value Rank 10)</span>
       {{/if}}
     </div>
   </div>

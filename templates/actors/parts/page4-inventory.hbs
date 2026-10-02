@@ -134,7 +134,7 @@
         <tr>
           <th style="width: 36%;">Item</th>
           <th style="width: 10%;">Qty</th>
-          <th style="width: 14%; text-align: center;"><i class="fa-solid fa-coins" style="color: #f39c12;"></i> Value</th>
+          <th style="width: 14%; text-align: center;"><i class="fa-solid fa-coins" style="color: #9a6306;"></i> Value</th>
           <th style="width: 28%;">Notes / Slot</th>
           <th style="width: 12%; text-align: center;">Actions</th>
         </tr>
@@ -149,7 +149,7 @@
                   {{#if item.system.equipped}}
                     <i class="fa-solid fa-shield-halved" style="color: #c0392b;"></i>
                   {{else}}
-                    <i class="fa-regular fa-circle" style="color: #999;"></i>
+                    <i class="fa-regular fa-circle" style="color: #444444;"></i>
                   {{/if}}
                 </button>
                 <div>
@@ -159,7 +159,7 @@
                     <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 9px; padding: 1px 4px; border-radius: 2px; margin-left: 4px;">EQUIPPED</span>
                   {{/if}}
                   {{#if item.bonusesSummary}}
-                    <div style="font-size: 10px; color: #555; margin-top: 2px;">
+                    <div style="font-size: 10px; color: #222222; margin-top: 2px;">
                       <i class="fa-solid fa-sparkles" style="color: #c0392b;"></i> {{item.bonusesSummary}}
                     </div>
                   {{/if}}
@@ -171,11 +171,11 @@
             </td>
             <td style="text-align: center; white-space: nowrap;">
               {{#if ../canSeeItemValue}}
-                <span class="dcc-gold-value" style="color: #b78727; font-weight: bold; font-size: 11px;">
-                  <i class="fa-solid fa-coins" style="color: #f39c12; font-size: 10px;"></i> {{item.goldValue}} GP
+                <span class="dcc-gold-value" style="color: #7e5109; font-weight: bold; font-size: 11px;">
+                  <i class="fa-solid fa-coins" style="color: #9a6306; font-size: 10px;"></i> {{item.goldValue}} GP
                 </span>
               {{else}}
-                <span class="dcc-gold-value-hidden" style="color: #888; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
+                <span class="dcc-gold-value-hidden" style="color: #333333; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
                   <i class="fa-solid fa-eye-slash" style="font-size: 10px;"></i> ???
                 </span>
               {{/if}}
@@ -204,11 +204,11 @@
             </td>
             <td style="text-align: center; white-space: nowrap;">
               {{#if ../canSeeItemValue}}
-                <span class="dcc-gold-value" style="color: #b78727; font-weight: bold; font-size: 11px;">
-                  <i class="fa-solid fa-coins" style="color: #f39c12; font-size: 10px;"></i> {{item.goldValue}} GP
+                <span class="dcc-gold-value" style="color: #7e5109; font-weight: bold; font-size: 11px;">
+                  <i class="fa-solid fa-coins" style="color: #9a6306; font-size: 10px;"></i> {{item.goldValue}} GP
                 </span>
               {{else}}
-                <span class="dcc-gold-value-hidden" style="color: #888; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
+                <span class="dcc-gold-value-hidden" style="color: #333333; font-style: italic; font-size: 11px;" title="Requires Determine Value Rank 10 to identify gold value">
                   <i class="fa-solid fa-eye-slash" style="font-size: 10px;"></i> ???
                 </span>
               {{/if}}
@@ -217,7 +217,7 @@
               <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{item.system.notes}}" placeholder="Notes..." />
             </td>
             <td style="text-align: center;">
-              <a class="item-use" data-tooltip="Use Item" style="color: #2980b9; cursor: pointer; margin-right: 6px;"><i class="fa-solid fa-flask"></i></a>
+              <a class="item-use" data-tooltip="Use Item" style="color: #1a5276; cursor: pointer; margin-right: 6px;"><i class="fa-solid fa-flask"></i></a>
               <a class="item-edit" data-tooltip="Edit"><i class="fa-solid fa-edit"></i></a>
               <a class="item-delete" data-tooltip="Delete" style="margin-left: 6px;"><i class="fa-solid fa-trash"></i></a>
             </td>
@@ -227,7 +227,7 @@
         {{#unless gear.length}}
           {{#unless loot.length}}
             <tr>
-              <td colspan="5" style="text-align: center; color: #777; padding: 14px;">
+              <td colspan="5" style="text-align: center; color: #333333; padding: 14px;">
                 Inventory is empty. Drag and drop items or click <strong>Add Gear</strong> / <strong>Add Item</strong>.
               </td>
             </tr>

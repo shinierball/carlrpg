@@ -38,7 +38,7 @@
           <tr data-item-id="{{skill.id}}" draggable="true" style="{{#if skill.isGranted}}background: #fdf5e6;{{/if}}">
             <td style="text-align: center;">
               {{#if skill.isGranted}}
-                <span style="color: #bbb; font-size: 11px;">—</span>
+                <span style="color: #444; font-size: 11px;">—</span>
               {{else}}
                 <input class="dcc-field-input item-inline-edit" type="checkbox" data-field="system.checked" {{#if skill.isChecked}}checked{{/if}} title="Marked as used during play. Required for grinding advancement." style="cursor: pointer; accent-color: #27ae60; width: 14px; height: 14px; margin: 0 auto; display: block;" />
               {{/if}}
@@ -61,7 +61,7 @@
             </td>
             <td style="text-align: center;">
               {{#if skill.isGranted}}
-                <span style="font-size: 11px; color: #888;" title="Base Rank 0 (Granted by gear)">0</span>
+                <span style="font-size: 11px; color: #222222;" title="Base Rank 0 (Granted by gear)">0</span>
               {{else}}
                 <input class="dcc-stat-input item-inline-edit" type="number" data-field="system.rank" value="{{skill.baseRank}}" style="width: 32px; text-align: center;" title="Base Trained Rank (Rank 0 = Untrained)" />
               {{/if}}
@@ -84,7 +84,7 @@
                   </span>
                 {{/if}}
                 {{#unless (or skill.itemBonus skill.typeBonus skill.boonBonus)}}
-                  <span style="color: #bbb; font-size: 11px;">—</span>
+                  <span style="color: #444; font-size: 11px;">—</span>
                 {{/unless}}
               </div>
             </td>
@@ -123,12 +123,12 @@
             </td>
             <td>
               {{#if skill.isGranted}}
-                <span style="font-size: 11px; font-style: italic; color: #555;">{{skill.system.notes}}</span>
+                <span style="font-size: 11px; font-style: italic; color: #222222;">{{skill.system.notes}}</span>
               {{else}}
                 <input class="dcc-field-input item-inline-edit" type="text" data-field="system.notes" value="{{skill.system.notes}}" placeholder="Notes..." />
                 {{#if (or skill.investedHours ../bankedGrindHours skill.canAdvance)}}
                   <div class="dcc-skill-grind-inline" style="display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 10px;">
-                    <span style="color: {{#if skill.canAdvance}}#27ae60{{else}}#f39c12{{/if}}; font-weight: bold;" title="Invested Hours / Required: {{skill.investedHours}} / {{skill.requiredGrindHours}} hrs">
+                    <span style="color: {{#if skill.canAdvance}}#196f3d{{else}}#873600{{/if}}; font-weight: bold;" title="Invested Hours / Required: {{skill.investedHours}} / {{skill.requiredGrindHours}} hrs">
                       ⏳ {{skill.investedHours}}/{{skill.requiredGrindHours}}h
                     </span>
                     {{#if ../bankedGrindHours}}
@@ -167,7 +167,7 @@
                   </button>
                 {{/if}}
                 {{#if skill.isGranted}}
-                  <span class="dcc-stat-sublabel" style="font-size: 9px; color: #888;" title="Granted by gear ({{skill.itemSources}}). Unequip gear to remove.">GEAR</span>
+                  <span class="dcc-stat-sublabel" style="font-size: 9px; color: #222222;" title="Granted by gear ({{skill.itemSources}}). Unequip gear to remove.">GEAR</span>
                 {{else}}
                   <a class="item-edit" data-item-id="{{skill.id}}" data-tooltip="Edit Skill" title="Edit Skill"><i class="fa-solid fa-edit"></i></a>
                   <a class="item-delete" data-item-id="{{skill.id}}" data-tooltip="Delete Skill" title="Delete Skill"><i class="fa-solid fa-trash"></i></a>
@@ -177,8 +177,8 @@
           </tr>
         {{else}}
           <tr>
-            <td colspan="10" style="text-align: center; color: #777; padding: 18px;">
-              No skills added yet. Click <strong style="color: #f1c40f;">Select Skill</strong> above to pick from the official DCC Skill Library, or drag & drop from the Compendium.
+            <td colspan="10" style="text-align: center; color: #333333; padding: 18px;">
+              No skills added yet. Click <strong style="color: #c0392b;">Select Skill</strong> above to pick from the official DCC Skill Library, or drag & drop from the Compendium.
             </td>
           </tr>
         {{/each}}

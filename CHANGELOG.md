@@ -1,3 +1,30 @@
+## 2.3.1
+
+### Universal Color Contrast & Human Readability Overhaul
+
+- **High-Contrast Typography & Explicit Input Font Colors (`styles/dcc.css`)**:
+  - Enforced high-contrast placeholder styling across `.dcc-sheet`, `.dcc-item-sheet`, `.dcc-field-input`, `.dcc-stat-input`, and `.dcc-box-input` (`color: #444444 !important; opacity: 1 !important;`).
+  - Added explicit high-contrast input/select/textarea text colors (`#111111`) across all sheet inputs to eliminate washed-out text caused by browser or OS dark-mode style inversions.
+  - Upgraded low-contrast grey and pastel utility classes: `.dcc-rest-label` (`#222222`), `.dcc-hotlist-empty` & `.dcc-hotlist-detail` (`#333333`), `.dcc-damage-formula` (`#333333`), `.dcc-empty-state` (`#333333`), `.dcc-damage-effects` (`#222222`), `.dcc-phase-subtitle` (`#222222`), `.pip-empty` (`#444444; border: 1.5px dashed #888888`), `.dcc-share-pct` (`#1a5276`), `.dcc-xp-award-val` (`#196f3d`), and `.dcc-level-up-tag` (`#873600`).
+- **Item Sheet Readability & WCAG AA Contrast Compliance**:
+  - **Rank Breaks Visual Hierarchy (`templates/items/parts/skill.hbs`, `templates/items/parts/spell.hbs`)**: Upgraded rank milestone colors from pastel tones to deep, accessible values meeting WCAG AA contrast standards ($\ge 4.5:1$): Rank 5 Break (`#196f3d`), Rank 10 Break (`#1a5276`), Rank 15 Break (`#6c3483`), and Rank 20 Break (`#873600`).
+  - **Item Sheets (`attack.hbs`, `gear.hbs`, `loot.hbs`, `achievement.hbs`, `buff.hbs`, `debuff.hbs`)**:
+    - Replaced low-contrast `#777` and `#555` empty states with `#333333` and `#222222`.
+    - Upgraded gold value coin indicators to high-contrast deep gold (`#9a6306` and `#7e5109`).
+    - Upgraded achievement reward badges and XP labels to accessible deep green (`#196f3d`), deep gold (`#7e5109`), and deep navy (`#1a5276`).
+    - Hardened scroll inscribed spell banners with deep blue (`#1a5276`).
+- **Actor Sheet Partial Readability (`page1-core.hbs`, `page3-skills.hbs`, `page4-inventory.hbs`, `spells.hbs`, `conditions.hbs`, `story-extras.hbs`)**:
+  - Replaced unreadable bright yellow `#f1c40f` text on light table rows with DCC Red (`#c0392b`).
+  - Improved stowed weapon circles (`#444444`), attack/spell action links (`#1a5276`), and empty table row notices (`#333333`).
+  - Replaced low-contrast placeholder dashes (`#bbb` -> `#444444`) and gear badges (`#222222`).
+- **Dialogs & Manager Applications (`crawler-sheet.mjs`, `actor.mjs`, `templates/apps/`)**:
+  - Set explicit dark backgrounds (`#141419`) and bold high-contrast labels for Foundry dialog windows (Boss Kill, Crawler Kill, Add Event).
+  - Upgraded damage effect selection dialog radio buttons to `#196f3d` with `#222222` descriptions.
+  - Enhanced empty states and footers across Skill Manager, Spell Manager, Item Manager, Buff Manager, and Achievement Manager to `#cccccc` against dark frames.
+- **Automated Verification**:
+  - Added test suite `tests/color-contrast-and-readability.test.mjs` verifying universal placeholders, input colors, CSS class contrasts, template badge colors, and dialog container styles.
+  - Full test suite passing: 761 tests passing across 145 suites with 0 failures.
+
 ## 2.3.0
 
 ### 4-Tier Rank Break Configurations (Ranks 5, 10, 15, 20) for Skills & Spells

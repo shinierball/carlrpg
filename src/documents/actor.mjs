@@ -1435,7 +1435,7 @@ export class DCCActor extends BaseActor {
               ${rankBadge}
             </div>
           </div>
-          <div style="margin-left: 24px; font-size: 11px; color: #555; margin-top: 2px;">
+          <div style="margin-left: 24px; font-size: 11px; color: #222222; margin-top: 2px;">
             ${desc}
           </div>
         </label>
@@ -1447,16 +1447,16 @@ export class DCCActor extends BaseActor {
 
     const content = `
       <form class="dcc-choose-damage-effect-form" style="font-family: var(--font-primary, 'Oswald', sans-serif); padding: 4px 0;">
-        <div style="font-size: 12px; margin-bottom: 8px; color: #333;">
+        <div style="font-size: 12px; margin-bottom: 8px; color: #111;">
           Choose a Damage Effect for <strong>${attackItem.name}</strong> before rolling:
         </div>
         <label style="display: block; padding: 6px 8px; margin-bottom: 6px; border: 1px solid #ddd; border-radius: 4px; background: #fdfdfd; cursor: pointer;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="radio" name="damageEffect" value="none" ${noneChecked ? 'checked' : ''} style="cursor: pointer;" />
-            <strong style="font-size: 13px; color: #27ae60;">No Damage Effect</strong>
-            ${favorBonus > 0 ? `<span style="background: #27ae60; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 4px;">+${favorBonus} AI Favor</span>` : ''}
+            <strong style="font-size: 13px; color: #196f3d;">No Damage Effect</strong>
+            ${favorBonus > 0 ? `<span style="background: #196f3d; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 4px;">+${favorBonus} AI Favor</span>` : ''}
           </div>
-          <div style="margin-left: 24px; font-size: 11px; color: #555; margin-top: 2px;">
+          <div style="margin-left: 24px; font-size: 11px; color: #222222; margin-top: 2px;">
             Standard attack without consuming an effect${favorNote}.
           </div>
         </label>

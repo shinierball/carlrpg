@@ -4,11 +4,11 @@
     <input class="dcc-field-input" type="number" name="system.quantity" value="{{system.quantity}}" min="0" />
   </div>
   <div class="dcc-field-group small">
-    <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #f39c12;"></i> Gold Value</span>
+    <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #9a6306;"></i> Gold Value</span>
     {{#if canSeeItemValue}}
       <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" />
     {{else}}
-      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; cursor: not-allowed;" />
+      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; color: #333333; cursor: not-allowed;" />
     {{/if}}
   </div>
   <div class="dcc-field-group">
@@ -49,9 +49,9 @@
 </div>
 
 {{#if (eq system.lootType "scroll")}}
-<div class="dcc-stat-block" style="margin-top: 8px; margin-bottom: 8px; border: 1px solid #2980b9; padding: 6px 8px; background: #f0f7fb;">
+<div class="dcc-stat-block" style="margin-top: 8px; margin-bottom: 8px; border: 1px solid #1a5276; padding: 6px 8px; background: #f0f7fb;">
   <div style="display: flex; align-items: center; gap: 8px;">
-    <span style="font-weight: bold; font-size: 12px; color: #2980b9;"><i class="fa-solid fa-scroll"></i> Inscribed Spell:</span>
+    <span style="font-weight: bold; font-size: 12px; color: #1a5276;"><i class="fa-solid fa-scroll"></i> Inscribed Spell:</span>
     <select class="dcc-field-input outcome-spell-select" data-index="0" name="system.spellId" style="flex: 1; font-size: 11px;">
       <option value="">-- Choose Spell to Inscribe --</option>
       {{#each availableSpells as |sp|}}
@@ -83,12 +83,12 @@
   <div style="padding: 8px;">
     {{#if system.outcomes.length}}
       {{#if (ne outcomesTotalWeight 100)}}
-        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #e67e22; color: #d35400; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #d35400; color: #873600; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
           <span>
             <i class="fa-solid fa-triangle-exclamation"></i>
             <strong>Warning:</strong> Total outcome weight is <strong>{{outcomesTotalWeight}}%</strong> (summation must equal 100%).
           </span>
-          <a class="rebalance-weights-btn" style="color: #d35400; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: normal;">
+          <a class="rebalance-weights-btn" style="color: #873600; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: bold;">
             <i class="fa-solid fa-scale-balanced"></i> Auto-balance to 100%
           </a>
         </div>
@@ -213,7 +213,7 @@
         </tbody>
       </table>
     {{else}}
-      <div style="text-align: center; color: #777; font-size: 12px; padding: 6px;">
+      <div style="text-align: center; color: #333333; font-size: 12px; padding: 6px;">
         No random outcomes configured. Click <strong>Add Outcome</strong> above to add ticket outcomes.
       </div>
     {{/if}}
@@ -240,12 +240,12 @@
   <div style="padding: 8px;">
     {{#if system.outcomes.length}}
       {{#if (and (eq system.executionMode "random") (ne outcomesTotalWeight 100))}}
-        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #e67e22; color: #d35400; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
+        <div class="dcc-weight-warning" style="background: #fdf2e9; border: 1px solid #d35400; color: #873600; padding: 6px 10px; border-radius: 3px; margin-bottom: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: space-between;">
           <span>
             <i class="fa-solid fa-triangle-exclamation"></i>
             <strong>Warning:</strong> Total outcome weight is <strong>{{outcomesTotalWeight}}%</strong> (summation must equal 100% for random mode).
           </span>
-          <a class="rebalance-weights-btn" style="color: #d35400; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: normal;">
+          <a class="rebalance-weights-btn" style="color: #873600; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: bold;">
             <i class="fa-solid fa-scale-balanced"></i> Auto-balance to 100%
           </a>
         </div>
@@ -381,7 +381,7 @@
         </tbody>
       </table>
     {{else}}
-      <div style="text-align: center; color: #777; font-size: 12px; padding: 6px;">
+      <div style="text-align: center; color: #333333; font-size: 12px; padding: 6px;">
         No effects configured. Click <strong>Add Effect</strong> above to attach multi-effect outcomes to this item.
       </div>
     {{/if}}

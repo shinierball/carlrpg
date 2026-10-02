@@ -1722,13 +1722,13 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         new DialogClass({
           title: 'Record Boss Kill',
           content: `
-            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 6px;">
+            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #141419; color: #ecf0f1; border-radius: 4px;">
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Boss Name:</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Boss Name:</label>
                 <input type="text" id="boss-kill-name" placeholder="e.g. Goblin King, Juicer" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
               </div>
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Boss Level / Star Tier:</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Boss Level / Star Tier:</label>
                 <select id="boss-kill-tier" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;">
                   <option value="bronze">Bronze Star - Neighborhood Boss</option>
                   <option value="silver">Silver Star - Borough Boss</option>
@@ -1739,7 +1739,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
                 </select>
               </div>
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Floor:</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Floor:</label>
                 <input type="text" id="boss-kill-floor" value="${this.actor.system?.details?.floor || '1st Floor'}" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
               </div>
             </div>
@@ -1776,17 +1776,17 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         new DialogClass({
           title: 'Record Crawler Kill (PvP)',
           content: `
-            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 6px;">
+            <div style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #141419; color: #ecf0f1; border-radius: 4px;">
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Slain Crawler Name:</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Slain Crawler Name:</label>
                 <input type="text" id="crawler-kill-name" placeholder="e.g. Frank, Meatball" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
               </div>
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Crawler Number (Optional):</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Crawler Number (Optional):</label>
                 <input type="text" id="crawler-kill-number" placeholder="e.g. #4091" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
               </div>
               <div>
-                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #888;">Floor:</label>
+                <label style="display: block; font-size: 11px; text-transform: uppercase; color: #ffffff; font-weight: bold;">Floor:</label>
                 <input type="text" id="crawler-kill-floor" value="${this.actor.system?.details?.floor || '1st Floor'}" style="width: 100%; background: #111; color: #fff; border: 1px solid #444;" />
               </div>
             </div>

@@ -102,7 +102,11 @@ The Spell Item Sheet (`templates/items/parts/spell.hbs`) provides dedicated, int
    - Comma-separated input for custom metamagic riders (e.g. *Lingering Flame*, *Overcharge*, *Sculpted Blast*).
    - Active effect selector dropdown.
 4. **RANK BREAK CONFIGURATIONS (RANKS 5, 10, 15, 20)**:
-   - Dedicated 4-tier configuration panels color-coded by milestone (Green, Blue, Purple, Orange).
+   - Dedicated 4-tier configuration panels styled with accessible, high-contrast milestone colors meeting WCAG AA standards:
+     - **Rank 5 Break**: Deep Forest Green (`#196f3d` border and header)
+     - **Rank 10 Break**: Deep Navy Blue (`#1a5276` border and header)
+     - **Rank 15 Break**: Deep Royal Purple (`#6c3483` border and header)
+     - **Rank 20 Break**: Deep Amber Brown (`#873600` border and header)
    - Each rank break can configure additional base damage dice (`damageDice`), additional rank damage dies (`rankDamageDice`), buffs/resistances (`buffsResistances`), on-hit debuffs (`debuff`), and freeform ability notes (`notes`).
    - Completely optional: no effect is required to be tied to any rank break.
    - Evaluated dynamically in `actor.getSpellDamageData()`, `actor.rollSpellDamage()`, `actor.rollSpell()`, and `DCCItem.rollSpellCard()`.

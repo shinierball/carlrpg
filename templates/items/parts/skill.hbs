@@ -89,7 +89,7 @@
         <input class="dcc-field-input" type="number" name="system.critMultiplierR15" value="{{#if system.critMultiplierR15}}{{system.critMultiplierR15}}{{else}}8{{/if}}" placeholder="8" style="font-size: 11px;" />
       </div>
       <div class="dcc-field-group">
-        <span class="dcc-field-label"><i class="fa-solid fa-triangle-exclamation" style="color: #e67e22;"></i> Fumble Consequence (Self Debuff)</span>
+        <span class="dcc-field-label"><i class="fa-solid fa-triangle-exclamation" style="color: #873600;"></i> Fumble Consequence (Self Debuff)</span>
         <select class="dcc-field-input" name="system.fumbleDebuff" style="font-size: 11px;">
           <option value="">-- None --</option>
           {{#each availableDebuffs as |deb|}}
@@ -125,8 +125,8 @@
   </div>
   <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
     {{!-- Rank 5 --}}
-    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #27ae60; background: #fff; padding: 6px; border-radius: 3px;">
-      <div style="font-weight: bold; font-size: 11px; color: #27ae60; margin-bottom: 4px;">
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #196f3d; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #196f3d; margin-bottom: 4px;">
         <i class="fa-solid fa-medal"></i> Rank 5 Break
       </div>
       <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
@@ -159,8 +159,8 @@
     </div>
 
     {{!-- Rank 10 --}}
-    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #2980b9; background: #fff; padding: 6px; border-radius: 3px;">
-      <div style="font-weight: bold; font-size: 11px; color: #2980b9; margin-bottom: 4px;">
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #1a5276; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #1a5276; margin-bottom: 4px;">
         <i class="fa-solid fa-medal"></i> Rank 10 Break
       </div>
       <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
@@ -193,8 +193,8 @@
     </div>
 
     {{!-- Rank 15 --}}
-    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #8e44ad; background: #fff; padding: 6px; border-radius: 3px;">
-      <div style="font-weight: bold; font-size: 11px; color: #8e44ad; margin-bottom: 4px;">
+    <div class="dcc-rank-break-card" style="margin-bottom: 8px; border: 1px solid #ddd; border-left: 4px solid #6c3483; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #6c3483; margin-bottom: 4px;">
         <i class="fa-solid fa-medal"></i> Rank 15 Break
       </div>
       <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
@@ -227,8 +227,8 @@
     </div>
 
     {{!-- Rank 20 --}}
-    <div class="dcc-rank-break-card" style="margin-bottom: 0; border: 1px solid #ddd; border-left: 4px solid #d35400; background: #fff; padding: 6px; border-radius: 3px;">
-      <div style="font-weight: bold; font-size: 11px; color: #d35400; margin-bottom: 4px;">
+    <div class="dcc-rank-break-card" style="margin-bottom: 0; border: 1px solid #ddd; border-left: 4px solid #873600; background: #fff; padding: 6px; border-radius: 3px;">
+      <div style="font-weight: bold; font-size: 11px; color: #873600; margin-bottom: 4px;">
         <i class="fa-solid fa-trophy"></i> Rank 20 Break
       </div>
       <div class="dcc-field-row" style="margin-bottom: 4px; gap: 6px;">
@@ -309,7 +309,7 @@
         </tbody>
       </table>
     {{else}}
-      <div style="text-align: center; font-style: italic; color: #777; font-size: 11px; padding: 6px;">
+      <div style="text-align: center; font-style: italic; color: #333333; font-size: 11px; padding: 6px;">
         No attack damage bonuses. Click "Add Damage Bonus" above to add scaling or typed damage to attacks.
       </div>
     {{/if}}

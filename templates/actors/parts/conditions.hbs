@@ -5,7 +5,7 @@
   <div class="dcc-stat-block" style="margin-bottom: 12px;">
     <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-shield-virus" style="color: #e74c3c;"></i>
+        <i class="fa-solid fa-shield-virus" style="color: #c0392b;"></i>
         <span>ACTIVE CONDITIONS &amp; STATUS EFFECTS</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
@@ -59,7 +59,7 @@
               <span class="dcc-badge dcc-badge-spell" style="text-transform: uppercase; font-size: 9px;">{{item.system.buffType}}</span>
             </td>
             <td>
-              <span style="font-size: 11px; font-weight: bold; color: #27ae60;">
+              <span style="font-size: 11px; font-weight: bold; color: #196f3d;">
                 {{#if item.system.statModifiers.length}}
                   {{#each item.system.statModifiers as |mod|}}+{{mod.value}} {{upper mod.stat}} {{/each}}
                 {{else if (eq item.system.buffType "stat")}}
@@ -94,7 +94,7 @@
           </tr>
         {{else}}
           <tr>
-            <td colspan="5" style="text-align: center; color: #777; padding: 14px; font-style: italic;">
+            <td colspan="5" style="text-align: center; color: #333333; padding: 14px; font-style: italic;">
               No character buffs defined. Click <strong>Browse Buffs</strong> or <strong>Add Buff</strong> to grant bonuses.
             </td>
           </tr>
@@ -151,7 +151,7 @@
           </tr>
         {{else}}
           <tr>
-            <td colspan="5" style="text-align: center; color: #777; padding: 14px; font-style: italic;">
+            <td colspan="5" style="text-align: center; color: #333333; padding: 14px; font-style: italic;">
               No active debuffs or negative conditions affecting this character.
             </td>
           </tr>

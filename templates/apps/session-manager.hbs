@@ -36,6 +36,10 @@
         <i class="fa-solid fa-plus"></i> New Session
       </button>
 
+      <button type="button" class="dcc-btn dcc-btn-secondary dcc-rapid-batch-btn" title="Rapidly import notes/rolls from in-person play">
+        <i class="fa-solid fa-bolt"></i> Rapid Import
+      </button>
+
       {{#if session}}
         {{#if isActiveSession}}
           <button type="button" class="dcc-btn dcc-btn-danger dcc-end-session-btn" data-session-id="{{session.id}}" title="Conclude and Archive this Session">
@@ -299,6 +303,10 @@
           <button type="button" class="dcc-btn dcc-btn-secondary dcc-add-manual-event-btn">
             <i class="fa-solid fa-pen-to-square"></i> + Add Event
           </button>
+
+          <button type="button" class="dcc-btn dcc-btn-primary dcc-rapid-batch-btn" style="background: #c0392b; color: #ffffff; font-weight: bold; border: 1px solid #e74c3c;" title="Rapidly import multiple rolls, voice transcripts, or play notes in batch">
+            <i class="fa-solid fa-bolt"></i> ⚡ Rapid Batch Import
+          </button>
         </div>
 
         {{!-- Table --}}
@@ -331,6 +339,18 @@
                       <strong>{{this.name}}</strong>
                       {{#if this.isUntrained}}
                         <span class="dcc-badge-untrained">[UNTRAINED]</span>
+                      {{/if}}
+                      {{#if this.isKill}}
+                        <span class="dcc-badge-kill" style="background: #800; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-left: 2px;">[KILL]</span>
+                      {{/if}}
+                      {{#if this.damage}}
+                        <span class="dcc-badge-dmg" style="background: #b03a2e; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-left: 2px;">{{this.damage}} DMG</span>
+                      {{/if}}
+                      {{#if this.healing}}
+                        <span class="dcc-badge-heal" style="background: #1e8449; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-left: 2px;">{{this.healing}} HEAL</span>
+                      {{/if}}
+                      {{#if this.mitigation}}
+                        <span class="dcc-badge-mit" style="background: #2874a6; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-left: 2px;">{{this.mitigation}} MIT</span>
                       {{/if}}
                       <span class="dcc-action-type-tag">[{{this.type}}]</span>
                     </td>

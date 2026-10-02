@@ -1,0 +1,208 @@
+<div class="dcc-rapid-import-root" style="font-family: 'Oswald', sans-serif; display: flex; flex-direction: column; gap: 12px; height: 100%; color: #ecf0f1; background: #141419; padding: 12px; box-sizing: border-box;">
+  
+  {{!-- TOP BAR / BANNER --}}
+  <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #c0392b; padding-bottom: 8px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fa-solid fa-bolt" style="color: #e74c3c; font-size: 22px;"></i>
+      <div>
+        <h2 style="margin: 0; font-size: 18px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">
+          Rapid Batch Roll & Event Importer
+        </h2>
+        <div style="font-size: 11px; color: #a0a0b2;">
+          Fast In-Person Play Transcription &bull; Session: <strong style="color: #f1c40f;">{{sessionTitle}}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button type="button" class="dcc-btn dcc-rapid-sample-btn" style="background: #27ae60; color: #ffffff; border: 1px solid #2ecc71; padding: 4px 10px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; cursor: pointer;" title="Load example shorthand notes">
+        <i class="fa-solid fa-file-import"></i> Load Sample Notes
+      </button>
+      <button type="button" class="dcc-btn dcc-rapid-clear-btn" style="background: #2a2a38; color: #ecf0f1; border: 1px solid #444455; padding: 4px 10px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 12px; cursor: pointer;" title="Clear input text and table">
+        <i class="fa-solid fa-trash-can"></i> Clear
+      </button>
+    </div>
+  </header>
+
+  {{!-- INPUT SECTION --}}
+  <section style="display: flex; flex-direction: column; gap: 6px; background: #1a1a24; border: 1px solid #333344; border-radius: 6px; padding: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <label for="dcc-rapid-raw-input" style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: #f1c40f; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-pen-nib"></i> Raw Notes / Voice-to-Text Transcript (1 Event Per Line):
+      </label>
+
+      {{!-- Default Crawler fallback --}}
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 11px; color: #bdc3c7; text-transform: uppercase;">Default Crawler:</span>
+        <select class="dcc-rapid-default-crawler" style="background: #252538; color: #ffffff; border: 1px solid #4a4a60; padding: 2px 6px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 12px;">
+          {{#each crawlers}}
+            <option value="{{this.id}}" {{#if (eq this.id ../defaultActorId)}}selected{{/if}}>{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <textarea id="dcc-rapid-raw-input" class="dcc-rapid-textarea" rows="4" placeholder="Type or paste in-person rolls (e.g. 'Carl Dodge 16 vs 14 blocked 5 dmg', 'Donut Magic Missile 18 vs 12 hit 14 dmg', 'Elle Heal 8 healing on Carl', 'Prepotente Headbutt nat 20 crit 35 dmg killing blow', 'Katia Lockpicking 9 vs 15 untrained fail')..." style="width: 100%; min-height: 90px; max-height: 140px; box-sizing: border-box; background: #0e0e13; color: #f0f0f5; border: 1px solid #44445c; border-radius: 4px; padding: 8px; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.4; resize: vertical;">{{rawText}}</textarea>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+      <div style="font-size: 11px; color: #8e8ea0;">
+        💡 Auto-detects: <em>Actor name, Action, Total vs DC, Crits (Nat 20/Nat 1), Untrained, Damage/Mitigation/Heal, Killing Blows</em>.
+      </div>
+      <button type="button" class="dcc-btn dcc-rapid-parse-btn" style="background: #c0392b; color: #ffffff; border: 1px solid #e74c3c; padding: 5px 14px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Parse Text into Preview
+      </button>
+    </div>
+  </section>
+
+  {{!-- PREVIEW TABLE SECTION --}}
+  <section style="display: flex; flex-direction: column; flex: 1; min-height: 0; background: #1a1a24; border: 1px solid #333344; border-radius: 6px; padding: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: #f1c40f; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-list-check"></i> Event Preview & Inline Editor ({{totalEvents}} parsed)
+      </div>
+      <button type="button" class="dcc-btn dcc-rapid-add-row-btn" style="background: #252538; color: #ecf0f1; border: 1px solid #4a4a60; padding: 2px 8px; border-radius: 3px; font-family: 'Oswald', sans-serif; font-size: 11px; cursor: pointer;">
+        <i class="fa-solid fa-plus"></i> Add Blank Row
+      </button>
+    </div>
+
+    <div class="dcc-rapid-preview-scroll" style="flex: 1; overflow-y: auto; overflow-x: auto; border: 1px solid #2a2a3a; border-radius: 4px; background: #101017;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: #1e1e2d; border-bottom: 1px solid #333344; text-align: left; color: #d0d0df; text-transform: uppercase; font-size: 11px;">
+            <th style="padding: 6px 4px; text-align: center; width: 30px;">#</th>
+            <th style="padding: 6px 8px; width: 130px;">Crawler</th>
+            <th style="padding: 6px 8px; width: 105px;">Type</th>
+            <th style="padding: 6px 8px; width: 140px;">Action / Name</th>
+            <th style="padding: 6px 4px; text-align: center; width: 55px;" title="Roll Total">Roll</th>
+            <th style="padding: 6px 4px; text-align: center; width: 55px;" title="Target DC / AC">DC</th>
+            <th style="padding: 6px 8px; width: 125px;">Outcome</th>
+            <th style="padding: 6px 4px; text-align: center; width: 50px;" title="Damage Dealt">DMG</th>
+            <th style="padding: 6px 4px; text-align: center; width: 50px;" title="Healing Done">HEAL</th>
+            <th style="padding: 6px 4px; text-align: center; width: 50px;" title="Damage Mitigated">MIT</th>
+            <th style="padding: 6px 4px; text-align: center; width: 45px;" title="Killing Blow">Kill</th>
+            <th style="padding: 6px 4px; text-align: center; width: 45px;" title="Untrained Skill">U/T</th>
+            <th style="padding: 6px 8px;">Notes</th>
+            <th style="padding: 6px 4px; width: 30px; text-align: center;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#if hasEvents}}
+            {{#each parsedEvents}}
+              <tr style="border-bottom: 1px solid #222230; background: {{#if (eq (modulo @index 2) 0)}}#13131b{{else}}#171722{{/if}};">
+                <td style="padding: 4px; text-align: center; color: #888899; font-size: 10px;">{{add @index 1}}</td>
+                
+                {{!-- Crawler Select --}}
+                <td style="padding: 4px;">
+                  <select class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="actorId" style="width: 100%; background: #222232; color: #ffffff; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 4px; font-family: 'Oswald', sans-serif; font-size: 11px;">
+                    {{#each ../crawlers}}
+                      <option value="{{this.id}}" {{#if (eq this.id ../actorId)}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                  </select>
+                </td>
+
+                {{!-- Action Type --}}
+                <td style="padding: 4px;">
+                  <select class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="type" style="width: 100%; background: #222232; color: #ffffff; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 4px; font-family: 'Oswald', sans-serif; font-size: 11px;">
+                    {{#each ../typeOptions}}
+                      <option value="{{this.key}}" {{#if (eq this.key ../type)}}selected{{/if}}>{{this.label}}</option>
+                    {{/each}}
+                  </select>
+                </td>
+
+                {{!-- Action Name --}}
+                <td style="padding: 4px;">
+                  <input type="text" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="name" value="{{this.name}}" style="width: 100%; box-sizing: border-box; background: #222232; color: #ffffff; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 5px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Total --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="number" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="total" value="{{this.total}}" style="width: 48px; text-align: center; background: #222232; color: #f1c40f; font-weight: bold; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 2px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Target DC --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="number" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="targetDC" value="{{this.targetDC}}" placeholder="DC" style="width: 48px; text-align: center; background: #222232; color: #bdc3c7; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 2px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Outcome --}}
+                <td style="padding: 4px;">
+                  <select class="dcc-rapid-row-input {{this.outcomeClass}}" data-index="{{this.index}}" data-field="outcome" style="width: 100%; background: #222232; color: #ffffff; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 4px; font-family: 'Oswald', sans-serif; font-size: 11px;">
+                    {{#each ../outcomeOptions}}
+                      <option value="{{this.key}}" {{#if (eq this.key ../outcome)}}selected{{/if}}>{{this.label}}</option>
+                    {{/each}}
+                  </select>
+                </td>
+
+                {{!-- Damage --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="number" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="damage" value="{{this.damage}}" min="0" style="width: 42px; text-align: center; background: #222232; color: #e74c3c; font-weight: bold; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 2px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Healing --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="number" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="healing" value="{{this.healing}}" min="0" style="width: 42px; text-align: center; background: #222232; color: #2ecc71; font-weight: bold; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 2px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Mitigation --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="number" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="mitigation" value="{{this.mitigation}}" min="0" style="width: 42px; text-align: center; background: #222232; color: #3498db; font-weight: bold; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 2px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Kill --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="checkbox" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="isKill" {{#if this.isKill}}checked{{/if}} title="Killing blow" style="cursor: pointer;" />
+                </td>
+
+                {{!-- Untrained --}}
+                <td style="padding: 4px; text-align: center;">
+                  <input type="checkbox" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="isUntrained" {{#if this.isUntrained}}checked{{/if}} title="Untrained attempt" style="cursor: pointer;" />
+                </td>
+
+                {{!-- Notes --}}
+                <td style="padding: 4px;">
+                  <input type="text" class="dcc-rapid-row-input" data-index="{{this.index}}" data-field="notes" value="{{this.notes}}" placeholder="Notes..." style="width: 100%; box-sizing: border-box; background: #222232; color: #dcdce8; border: 1px solid #3c3c52; border-radius: 3px; padding: 2px 5px; font-family: 'Oswald', sans-serif; font-size: 11px;" />
+                </td>
+
+                {{!-- Delete --}}
+                <td style="padding: 4px; text-align: center;">
+                  <button type="button" class="dcc-rapid-delete-row-btn" data-index="{{this.index}}" title="Delete row" style="background: transparent; color: #e74c3c; border: none; cursor: pointer; padding: 2px 4px; font-size: 12px;">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </td>
+              </tr>
+            {{/each}}
+          {{else}}
+            <tr>
+              <td colspan="14" style="text-align: center; padding: 30px; color: #888899;">
+                <i class="fa-solid fa-arrow-up" style="display: block; font-size: 20px; margin-bottom: 8px; color: #555566;"></i>
+                Type or paste notes into the box above, or click <strong>Load Sample Notes</strong> to preview.
+              </td>
+            </tr>
+          {{/if}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {{!-- FOOTER ACTION BAR --}}
+  <footer style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333344; padding-top: 10px;">
+    <div style="font-size: 12px; color: #bdc3c7;">
+      {{#if hasEvents}}
+        Ready to import <strong style="color: #ffffff;">{{totalEvents}}</strong> roll events to <strong>{{sessionTitle}}</strong>.
+      {{else}}
+        No events queued.
+      {{/if}}
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button type="button" class="dcc-btn" onclick="this.closest('.app').querySelector('.close')?.click();" style="background: #2a2a38; color: #ecf0f1; border: 1px solid #444455; padding: 6px 14px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 13px; cursor: pointer;">
+        Cancel
+      </button>
+
+      <button type="button" class="dcc-btn dcc-rapid-commit-btn" {{#unless hasEvents}}disabled style="opacity: 0.5; cursor: not-allowed; background: #c0392b; color: #ffffff; border: 1px solid #e74c3c; padding: 6px 18px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold;"{{else}}style="background: #c0392b; color: #ffffff; border: 1px solid #e74c3c; padding: 6px 18px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 0 8px rgba(192, 57, 43, 0.4);"{{/unless}}>
+        <i class="fa-solid fa-bolt"></i> ⚡ Import All to Session Ledger
+      </button>
+    </div>
+  </footer>
+
+</div>

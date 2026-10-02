@@ -1,3 +1,36 @@
+## 2.4.0
+
+### Rapid Batch Roll & Event Importer (In-Person Play Transcription)
+
+- **Dedicated Rapid Batch Import Interface (`src/apps/rapid-batch-import.mjs`, `templates/apps/rapid-batch-import.hbs`)**:
+  - Purpose-built for physical tabletop play where players roll dice in person and GMs or scribes need to capture rolls and combat results into the active session ledger without navigating character sheets.
+  - Multi-line textarea for pasting notes, bullet points, or speech-to-text transcripts with fallback default crawler selector.
+  - Live interactive preview table with inline editing across all parsed fields (crawler, action name, event type, roll total, target DC, 7-tier outcome, damage, healing, damage mitigation, killing blow, untrained check flag, notes).
+  - Quick "+ Add Blank Row" and single-click row deletion.
+  - Sample notes loader (`Load Sample Notes`) for quick demonstration.
+  - Single-click batch commitment (`⚡ Import All to Session Ledger`) that saves all entries in a single database transaction and refreshes open session tracker windows.
+- **Conversational Shorthand Text Parser (`src/apps/rapid-text-parser.mjs`)**:
+  - `DCCRapidTextParser` class with `parse(text, crawlers, defaultActorId)` and `parseLine(line, crawlers, defaultActorId)`.
+  - Automatically identifies crawler actors (handles multi-word names and nicknames like *Princess Donut the Queen Anne Chonk* -> *Donut*).
+  - Extracts roll totals and target DCs (`16 vs 14`, `16/12`, `total 18 vs DC 14`).
+  - Auto-detects natural critical successes (`nat 20`, `crit`, `natural twenty`) and critical fumbles (`nat 1`, `fumble`, `botch`).
+  - Detects untrained skill checks (`untrained`, `u/t`, `disadv`) and flags them for end-of-session promotion.
+  - Extracts metrics: damage dealt, damage taken (`took X dmg`), healing done (`8 healing`, `healed 12`), damage mitigation (`blocked 5 dmg`, `mitigated 8`), and killing blows (`killing blow`, `boss kill`, `slain`).
+  - Identifies target recipients (`on Carl`, `to Donut`) and preserves them in notes while stripping filler words.
+- **Instant Chat Command Logging (`src/dcc.mjs`)**:
+  - `/rapidlog` or `/batchlog`: Launches the Rapid Batch Import modal from the chat prompt.
+  - `/log <shorthand>` or `/rlog <shorthand>`: Directly parses a single shorthand line from chat (e.g. `/log Carl Dodge 16 vs 14 blocked 5 dmg`) and logs it into the active session ledger with zero clicks, suppressing normal chat broadcasting and updating crawler combat metrics in real time.
+- **Session Engine Batch Processing & Metric Accumulation (`src/apps/session-manager.mjs`)**:
+  - Implemented `DCCSessionEngine.batchCreateEvents(events, sessionId)` to record multiple ledger events in a single transaction.
+  - Refactored `createManualEvent` to delegate to `batchCreateEvents`.
+  - Added `damageMitigated` and `healingDone` tracking to crawler records and session summaries (`totalDamageMitigated`, `totalHealingDone`).
+  - Added killing blow (`isKill`) tracking feeding directly into session XP distribution and crawler kill tallies.
+  - Updated Activity Ledger in `templates/apps/session-manager.hbs` with high-contrast metric badges (`[KILL]`, `X DMG`, `X HEAL`, `X MIT`) and quick-access `[ ⚡ Rapid Batch Import ]` launch buttons in the header and toolbar.
+- **Automated Verification**:
+  - Added `tests/rapid-text-parser.test.mjs` verifying 9 shorthand extraction scenarios (attacks, spells, untrained checks, healing, mitigation, crits, damage taken, favor, multi-line transcripts).
+  - Added `tests/rapid-batch-import.test.mjs` verifying application initialization, live parsing, row insertion, sample loading, batch ledger commitment, metric accumulation, summary updates, and chat command interception.
+  - Full test suite passing: 777 tests passing across 147 suites with 0 failures.
+
 ## 2.3.1
 
 ### Universal Color Contrast & Human Readability Overhaul

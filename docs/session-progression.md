@@ -53,6 +53,13 @@ Every recorded event is editable inline:
   - Open tracker windows update dynamically without requiring page refreshes or filter changes when rolls occur from sheets, damage is applied in/out of combat, or manual events are logged.
 - Quick `[+5] / [-5]` or `[+1] / [-1]` adjustments for damage, favor, and popularity directly on crawler cards.
 
+### 3.1 Rapid Batch Roll & Event Importer (In-Person Play)
+
+For fast in-person physical tabletop sessions where players don't manipulate the app directly:
+- **Batch / Transcript Modal (`[ ⚡ Rapid Batch Import ]`)**: Paste multi-line notes or voice transcripts to parse and preview rolls, target DCs, crits, untrained checks, damage, healing, mitigation, and killing blows before committing in one click.
+- **Instant Chat Commands**: Type `/log <shorthand>` or `/rlog <shorthand>` directly in the Foundry chat (or `/rapidlog` / `/batchlog` to open the modal) to record rolls on the fly without dialogs.
+- Detailed documentation: see [docs/rapid-roll-importer.md](file:///Users/jeremy/Code/CarlRPG/docs/rapid-roll-importer.md).
+
 ---
 
 ## 4. Tracked Roster & Party Grouping Management (West Marches Support)

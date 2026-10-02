@@ -270,6 +270,8 @@ export class DCCSessionEngine {
       party: actor?.system?.details?.party || '',
       damageDealt: 0,
       damageTaken: 0,
+      healingDone: 0,
+      damageMitigated: 0,
       kills: 0,
       aiFavorDelta: 0,
       popularityDelta: 0,
@@ -929,19 +931,22 @@ export class DCCSessionEngine {
    * @param {string|null} [sessionId=null]
    * @returns {Promise<object|null>}
    */
-  static async createManualEvent({
-    actorId,
-    type = 'manual',
-    name = 'Manual Event',
-    isUntrained = false,
-    rollFormula = '1d20',
-    total = 10,
-    d20Result = null,
-    targetDC = null,
-    outcome = 'auto',
-    statDelta = 0,
-    notes = ''
-  } = {}, sessionId = null) {
+  static async createManualEvent(params = {}, sessionId = null) {
+    const entries = await this.batchCreateEvents([params], sessionId);
+    return entries[0] || null;
+  }
+
+  /**
+   * Batch create multiple session ledger events at once (e.g. from Rapid Batch Import)
+   * Updates crawler records, appends all ledger entries, recomputes session summaries,
+   * and saves the session in a single transaction.
+   * @param {Array<object>} events - Array of event parameter objects
+   * @param {string|null} [sessionId=null]
+   * @returns {Promise<Array<object>>} The created ledger entries
+   */
+  static async batchCreateEvents(events = [], sessionId = null) {
+    if (!Array.isArray(events) || events.length === 0) return [];
+
     let sessions = this.getAllSessions();
     const targetSessionId = sessionId || this.getActiveSessionId();
     let session = sessions.find(s => s.id === targetSessionId);
@@ -950,83 +955,130 @@ export class DCCSessionEngine {
       sessions = this.getAllSessions();
       session = sessions.find(s => s.id === active?.id);
     }
-    if (!session) return null;
+    if (!session) return [];
 
-    const actor = this._getActor(actorId) || this.getPartyCrawlers().find(a => a.id === actorId);
-    const cleanActorId = actor?.id || actorId || 'unknown-actor';
-    const actorName = actor?.name || 'Party / Crawler';
-    const actorImg = actor?.img || 'icons/svg/mystery-man.svg';
+    const createdEntries = [];
 
-    if (!session.crawlers[cleanActorId] && actor) {
-      session.crawlers[cleanActorId] = this._createCrawlerRecord(actor);
-    }
-    const crawlerEntry = session.crawlers[cleanActorId];
+    for (const eventData of events) {
+      if (!eventData) continue;
+      const {
+        actorId,
+        type = 'manual',
+        name = 'Manual Event',
+        isUntrained = false,
+        rollFormula = '1d20',
+        total = 10,
+        d20Result = null,
+        targetDC = null,
+        outcome = 'auto',
+        statDelta = 0,
+        damage = 0,
+        healing = 0,
+        mitigation = 0,
+        isKill = false,
+        notes = ''
+      } = eventData;
 
-    const cleanName = (name || 'Manual Event').trim();
-    const numTotal = Number(total) || 0;
-    const numD20 = (d20Result !== null && d20Result !== undefined && d20Result !== '') ? Number(d20Result) : null;
-    const dc = (targetDC !== null && targetDC !== undefined && targetDC !== '') ? Number(targetDC) : null;
-    const delta = Number(statDelta) || 0;
-    const isUntrainedFlag = Boolean(isUntrained || type === 'untrained_skill');
+      const actor = this._getActor(actorId) || this.getPartyCrawlers().find(a => a.id === actorId);
+      const cleanActorId = actor?.id || actorId || 'unknown-actor';
+      const actorName = actor?.name || 'Party / Crawler';
+      const actorImg = actor?.img || 'icons/svg/mystery-man.svg';
 
-    // Determine final outcome
-    let evaluatedOutcome;
-    if (outcome && outcome !== 'auto' && Object.values(DCC_ROLL_OUTCOMES).includes(outcome)) {
-      evaluatedOutcome = outcome;
-    } else {
-      evaluatedOutcome = evaluateRollOutcome({ total: numTotal, d20Result: numD20, targetDC: dc });
-    }
+      if (!session.crawlers[cleanActorId] && actor) {
+        session.crawlers[cleanActorId] = this._createCrawlerRecord(actor);
+      }
+      const crawlerEntry = session.crawlers[cleanActorId];
 
-    // Apply stat deltas & metric accumulators to crawler
-    if (crawlerEntry) {
-      if (type === 'favor') {
-        const amt = delta !== 0 ? delta : numTotal;
-        crawlerEntry.aiFavorDelta = (crawlerEntry.aiFavorDelta || 0) + amt;
-      } else if (type === 'popularity') {
-        const amt = delta !== 0 ? delta : numTotal;
-        crawlerEntry.popularityDelta = (crawlerEntry.popularityDelta || 0) + amt;
-      } else if (type === 'damage_dealt') {
-        const dmg = Math.max(0, delta !== 0 ? delta : numTotal);
-        crawlerEntry.damageDealt = (crawlerEntry.damageDealt || 0) + dmg;
-      } else if (type === 'damage_taken') {
-        const dmg = Math.max(0, delta !== 0 ? delta : numTotal);
-        crawlerEntry.damageTaken = (crawlerEntry.damageTaken || 0) + dmg;
-      } else if (type === 'loot') {
-        crawlerEntry.lootBoxesAwarded.push(cleanName.toLowerCase().includes('gold') ? 'gold' : cleanName.toLowerCase().includes('silver') ? 'silver' : 'bronze');
+      const cleanName = (name || 'Manual Event').trim();
+      const numTotal = Number(total) || 0;
+      const numD20 = (d20Result !== null && d20Result !== undefined && d20Result !== '') ? Number(d20Result) : null;
+      const dc = (targetDC !== null && targetDC !== undefined && targetDC !== '') ? Number(targetDC) : null;
+      const delta = Number(statDelta) || 0;
+      const isUntrainedFlag = Boolean(isUntrained || type === 'untrained_skill');
+      const numDamage = Math.max(0, Number(damage) || 0);
+      const numHealing = Math.max(0, Number(healing) || 0);
+      const numMitigation = Math.max(0, Number(mitigation) || 0);
+      const isKillFlag = Boolean(isKill);
+
+      // Determine final outcome
+      let evaluatedOutcome;
+      if (outcome && outcome !== 'auto' && Object.values(DCC_ROLL_OUTCOMES).includes(outcome)) {
+        evaluatedOutcome = outcome;
+      } else {
+        evaluatedOutcome = evaluateRollOutcome({ total: numTotal, d20Result: numD20, targetDC: dc });
       }
 
-      if (isUntrainedFlag) {
-        crawlerEntry.untrainedAttempted[cleanName] = (crawlerEntry.untrainedAttempted[cleanName] || 0) + 1;
-      } else if (type === 'skill') {
-        crawlerEntry.skillsUsed[cleanName] = (crawlerEntry.skillsUsed[cleanName] || 0) + 1;
-      } else if (type === 'spell') {
-        crawlerEntry.spellsCast[cleanName] = (crawlerEntry.spellsCast[cleanName] || 0) + 1;
+      // Apply stat deltas & metric accumulators to crawler
+      if (crawlerEntry) {
+        if (type === 'favor') {
+          const amt = delta !== 0 ? delta : numTotal;
+          crawlerEntry.aiFavorDelta = (crawlerEntry.aiFavorDelta || 0) + amt;
+        } else if (type === 'popularity') {
+          const amt = delta !== 0 ? delta : numTotal;
+          crawlerEntry.popularityDelta = (crawlerEntry.popularityDelta || 0) + amt;
+        } else if (type === 'damage_dealt') {
+          const dmg = numDamage > 0 ? numDamage : Math.max(0, delta !== 0 ? delta : numTotal);
+          crawlerEntry.damageDealt = (crawlerEntry.damageDealt || 0) + dmg;
+        } else if (type === 'damage_taken') {
+          const dmg = numDamage > 0 ? numDamage : Math.max(0, delta !== 0 ? delta : numTotal);
+          crawlerEntry.damageTaken = (crawlerEntry.damageTaken || 0) + dmg;
+        } else if (type === 'loot') {
+          crawlerEntry.lootBoxesAwarded.push(cleanName.toLowerCase().includes('gold') ? 'gold' : cleanName.toLowerCase().includes('silver') ? 'silver' : 'bronze');
+        }
+
+        // Additional metrics from direct fields or rapid batch
+        if (numDamage > 0 && type !== 'damage_dealt' && type !== 'damage_taken') {
+          crawlerEntry.damageDealt = (crawlerEntry.damageDealt || 0) + numDamage;
+        }
+        if (numHealing > 0) {
+          crawlerEntry.healingDone = (crawlerEntry.healingDone || 0) + numHealing;
+        }
+        if (numMitigation > 0) {
+          crawlerEntry.damageMitigated = (crawlerEntry.damageMitigated || 0) + numMitigation;
+        }
+        if (isKillFlag) {
+          crawlerEntry.kills = (crawlerEntry.kills || 0) + 1;
+        }
+
+        if (isUntrainedFlag) {
+          crawlerEntry.untrainedAttempted[cleanName] = (crawlerEntry.untrainedAttempted[cleanName] || 0) + 1;
+        } else if (type === 'skill') {
+          crawlerEntry.skillsUsed[cleanName] = (crawlerEntry.skillsUsed[cleanName] || 0) + 1;
+        } else if (type === 'spell') {
+          crawlerEntry.spellsCast[cleanName] = (crawlerEntry.spellsCast[cleanName] || 0) + 1;
+        }
       }
+
+      const ledgerEntry = {
+        id: `manual-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: Date.now(),
+        actorId: cleanActorId,
+        actorName,
+        actorImg,
+        type,
+        name: cleanName,
+        isUntrained: isUntrainedFlag,
+        rollFormula: String(rollFormula || numTotal),
+        d20Result: numD20,
+        total: numTotal,
+        targetDC: dc,
+        outcome: evaluatedOutcome,
+        damage: numDamage,
+        healing: numHealing,
+        mitigation: numMitigation,
+        isKill: isKillFlag,
+        notes: (notes || '').trim(),
+        gmEdited: true
+      };
+
+      session.ledger.push(ledgerEntry);
+      createdEntries.push(ledgerEntry);
     }
 
-    const ledgerEntry = {
-      id: `manual-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      timestamp: Date.now(),
-      actorId: cleanActorId,
-      actorName,
-      actorImg,
-      type,
-      name: cleanName,
-      isUntrained: isUntrainedFlag,
-      rollFormula: String(rollFormula || numTotal),
-      d20Result: numD20,
-      total: numTotal,
-      targetDC: dc,
-      outcome: evaluatedOutcome,
-      notes: notes.trim(),
-      gmEdited: true
-    };
-
-    session.ledger.push(ledgerEntry);
     this._recomputeSessionSummaries(session);
     await this.saveAllSessions(sessions);
 
-    return ledgerEntry;
+    return createdEntries;
   }
 
   /**
@@ -1364,6 +1416,8 @@ export class DCCSessionEngine {
     let totalDmg = 0;
     let totalTaken = 0;
     let totalKills = 0;
+    let totalHealing = 0;
+    let totalMitigated = 0;
     let maxDmg = -1;
     let maxTaken = -1;
     let mvpId = session.summary?.mvpActorId || null;
@@ -1377,6 +1431,8 @@ export class DCCSessionEngine {
       totalDmg += (c.damageDealt || 0);
       totalTaken += (c.damageTaken || 0);
       totalKills += (c.kills || 0);
+      totalHealing += (c.healingDone || 0);
+      totalMitigated += (c.damageMitigated || 0);
 
       const untrainedCount = Object.values(c.untrainedAttempted || {}).reduce((a, b) => a + b, 0);
       totalUntrained += untrainedCount;
@@ -1395,6 +1451,8 @@ export class DCCSessionEngine {
     session.summary.totalDamageDealt = totalDmg;
     session.summary.totalDamageTaken = totalTaken;
     session.summary.totalKills = totalKills;
+    session.summary.totalHealingDone = totalHealing;
+    session.summary.totalDamageMitigated = totalMitigated;
     session.summary.totalUntrainedAttempts = totalUntrained;
     session.summary.mvpActorId = mvpId;
     session.summary.chumpActorId = chumpId;
@@ -2439,6 +2497,14 @@ export class DCCSessionManagerApp extends DCCBaseApplication {
     html.find('.dcc-add-manual-event-btn').click(async ev => {
       ev.preventDefault();
       await this.promptAddEventDialog();
+    });
+
+    // Rapid Batch Import Button
+    html.find('.dcc-rapid-batch-btn').click(async ev => {
+      ev.preventDefault();
+      const sId = this.selectedSessionId || DCCSessionEngine.getActiveSessionId();
+      const { DCCRapidBatchImportApp } = await import('./rapid-batch-import.mjs');
+      new DCCRapidBatchImportApp({ sessionId: sId }).render(true);
     });
 
     // Wrap-up: Promote Untrained Skill to Rank 1

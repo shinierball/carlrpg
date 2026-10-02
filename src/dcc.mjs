@@ -11,6 +11,8 @@ import { DCCCombatTracker } from './apps/combat-tracker.mjs';
 import { DCCCombatMetrics, DCCCombatMetricsApp, getHpPerBar } from './apps/combat-metrics.mjs';
 import { DCCCombatArchiveApp } from './apps/combat-archive.mjs';
 import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_CONFIG, evaluateRollOutcome } from './apps/session-manager.mjs';
+import { DCCRapidBatchImportApp } from './apps/rapid-batch-import.mjs';
+import { DCCRapidTextParser } from './apps/rapid-text-parser.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
 import { DCCGrindApp } from './apps/grind-app.mjs';
@@ -79,6 +81,8 @@ Hooks.once('init', async function() {
     DCCCombatArchiveApp,
     DCCSessionEngine,
     DCCSessionManagerApp,
+    DCCRapidBatchImportApp,
+    DCCRapidTextParser,
     DCCCrawlerCreatorApp,
     DCCAchievementManagerApp,
     achievements: DCC_ACHIEVEMENTS,
@@ -104,7 +108,7 @@ Hooks.once('init', async function() {
       DCCCombatArchiveApp,
       DCCSessionEngine,
       DCCSessionManagerApp,
-      DCCCrawlerCreatorApp
+      DCCRapidBatchImportApp
     },
     models: {
       // Items
@@ -374,7 +378,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/crawler-action-hud.hbs',
     'systems/carl-rpg/templates/apps/grind-app.hbs',
     'systems/carl-rpg/templates/apps/floor-clock-hud.hbs',
-    'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs'
+    'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs',
+    'systems/carl-rpg/templates/apps/rapid-batch-import.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -439,6 +444,13 @@ Hooks.once('init', async function() {
     openSessionManager(options = {}) {
       return new DCCSessionManagerApp(options).render(true);
     },
+    openRapidBatchImport(options = {}) {
+      return new DCCRapidBatchImportApp(options).render(true);
+    },
+    rapidBatchImport(options = {}) {
+      return new DCCRapidBatchImportApp(options).render(true);
+    },
+    rapidTextParser: DCCRapidTextParser,
     openCrawlerCreator(options = {}) {
       return new DCCCrawlerCreatorApp(options).render(true);
     },
@@ -1929,6 +1941,38 @@ export function registerChatMessageHook() {
 
 // Register chat message render hook on module evaluation
 registerChatMessageHook();
+
+/**
+ * Quick Chat Command Interceptor for Rapid In-Person Roll Logging
+ * - /rapidlog or /batchlog: Opens the Rapid Batch Import window
+ * - /log <shorthand> or /rlog <shorthand>: Parses a single line and directly logs it to active session
+ */
+Hooks.on('chatMessage', (chatLog, message, chatData) => {
+  const msg = (message || '').trim();
+  if (msg === '/rapidlog' || msg === '/batchlog') {
+    new DCCRapidBatchImportApp().render(true);
+    return false;
+  }
+  if (msg.startsWith('/log ') || msg.startsWith('/rlog ')) {
+    const raw = msg.replace(/^\/(?:log|rlog)\s+/, '').trim();
+    const crawlers = DCCSessionEngine.getPartyCrawlers();
+    const event = DCCRapidTextParser.parseLine(raw, crawlers);
+    if (event) {
+      DCCSessionEngine.batchCreateEvents([event]).then(() => {
+        const actorName = crawlers.find(c => c.id === event.actorId)?.name || 'Crawler';
+        if (typeof ui !== 'undefined' && ui.notifications?.info) {
+          ui.notifications.info(`⚡ DCC RPG | Logged: ${event.name} (${event.total ?? ''}) for ${actorName}`);
+        }
+        DCCSessionEngine._refreshOpenWindows();
+      });
+    } else {
+      if (typeof ui !== 'undefined' && ui.notifications?.warn) {
+        ui.notifications.warn(`DCC RPG | Could not parse roll log: "${raw}"`);
+      }
+    }
+    return false;
+  }
+});
 
 /**
  * Enforce linked actor data for player characters (crawlers) and companion pets,

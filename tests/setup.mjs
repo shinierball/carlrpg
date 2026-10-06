@@ -5,6 +5,8 @@ import { DCC_SIZES, getSizeInfo } from '../src/data/sizes.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
 import { DCC_MOBS } from '../src/data/mobs.mjs';
 import { DCC_ITEMS } from '../src/data/items.mjs';
+import { DCC_RACES } from '../src/data/races.mjs';
+import { DCC_CLASSES } from '../src/data/classes.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -421,6 +423,8 @@ if (!globalThis.game) {
     },
     dcc: {
       mobs: DCC_MOBS,
+      races: DCC_RACES,
+      classes: DCC_CLASSES,
       getCurrentFloor: () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1,
       setCurrentFloor: async (f) => {
         const val = Math.max(1, parseInt(f, 10) || 1);
@@ -471,6 +475,8 @@ if (!globalThis.game) {
 } else {
   globalThis.game.dcc = globalThis.game.dcc || {};
   globalThis.game.dcc.mobs = DCC_MOBS;
+  globalThis.game.dcc.races = DCC_RACES;
+  globalThis.game.dcc.classes = DCC_CLASSES;
   globalThis.game.dcc.getCurrentFloor = () => Number(_settingsStore.get('carl-rpg.currentFloor')) || 1;
   globalThis.game.dcc.setCurrentFloor = async (f) => {
     const val = Math.max(1, parseInt(f, 10) || 1);

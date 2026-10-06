@@ -1,3 +1,47 @@
+## 2.4.2
+
+### Custom Class Creator Studio (Option A: "Terminal Ledger" Accordion Studio)
+
+- **Class Creator Studio Application (`src/apps/class-creator.mjs`, `templates/apps/class-creator.hbs`)**:
+  - Implemented Option A: The "Terminal Ledger" Accordion Studio for building custom CarlRPG classes based on Chapter 3 (Pages 158–164).
+  - Features real-time point tracking with exact cost calculations for positive ability score points (+1 BP), stat penalty refunds (+1 extra BP per $-2$ penalty), skill/spell ranks (+2 BP per rank), passive skill cap tracking (soft flag when passive ranks $> 5$), benefits (Minor 1, Moderate 2, Major 3, Extreme 4, Epic 6), detriments (+1 to +3 extra BP, $+5$ standard cap), and custom freeform perks.
+  - **Soft Limit Non-Enforcement Policy**: High-contrast warning badges alert the user when over budget without locking or preventing saving, exporting, or applying to actors.
+  - **Collapsible Accordion Drawers**: Real-time searching and tier filtering across 40+ canonical benefit and detriment perks.
+  - **Archetype Pill Selectors**: Quick selection across 12 canonical archetypes (*Arcanist*, *Barbarian*, *Bard*, *Cleric*, *Druid*, *Fighter*, *Mage*, *Monk*, *Paladin*, *Rogue*, *Merchant*, *Necromancer*).
+  - **Earth Class Support**: Toggle for Earth-based classes with automated Silver Earth Box (and Earth Hobby Skill Potion) perk injection.
+  - **Built-in Presets**: Quick-load canonical builds including Bob's canonical 32 BP *Dungeon Dad* hybrid class.
+  - **1-Click Application & Export**: Save directly to the World Items directory (`type: 'class'`), export/import formatted JSON configurations, or apply directly to a Crawler Actor with automated stat adjustments and skill item creation.
+- **Reusable Base Point Engine (`src/apps/base-point-builder.mjs`)**:
+  - Engineered `DCCBasePointBuilderApp` as the shared modular point accounting foundation for both the Class Creator Studio (30 BP budget) and the upcoming Race Creator (25 BP budget).
+- **Directory Sidebar Integration (`src/dcc.mjs`, `styles/dcc.css`)**:
+  - Injected `[ 🎓 Class Creator Studio ]` button in the Foundry Items Directory sidebar.
+  - Added global developer shortcut `window.carl.openClassCreator()`.
+  - Registered template `systems/carl-rpg/templates/apps/class-creator.hbs` in `loadTemplates`.
+- **Automated Unit Testing & Verification (`tests/class-creator.test.mjs`)**:
+  - 10 rigorous unit tests validating point accounting, soft-limit non-enforcement, preset loading, JSON serialization, item creation, and actor application.
+  - Full test suite passing with 0 failures (792 tests across 148 suites).
+
+## 2.4.1
+
+### Races & Classes Compendiums and Custom Point Build Architecture
+
+- **Canonical Races Dataset & Compendium (`src/data/races.mjs`, `packs/races`)**:
+  - Implemented all 30 playable species from Chapter 3 (Pages 128–143) of the official DCC RPG Core Rulebook (23 Earth-based and 7 Alien species).
+  - Full attribute profiles including standardized creature size categories (Sizes 1–6), prerequisites, Earth vs. Alien heritage tags, inherent combat perks, and HTML ability summaries.
+  - Registered official compendium pack `carl-rpg.races` in `system.json`.
+- **Canonical Classes Dataset & Compendium (`src/data/classes.mjs`, `packs/classes`)**:
+  - Implemented all 51 official classes from Chapter 3 (Pages 144–160) across 10 archetypes (Arcanist, Barbarian, Bard, Cleric, Druid, Fighter, Mage, Monk, Paladin, Rogue) plus multiclass hybrids.
+  - Included canonical custom class *Dungeon Dad* (Pages 161–162) demonstrating the official Point Build System.
+  - Registered official compendium pack `carl-rpg.classes` in `system.json`.
+- **Compendium Build Automation (`scripts/build-packs.mjs`)**:
+  - Integrated `buildRaces()` and `buildClasses()` into the headless LevelDB compendium compilation pipeline, generating native ClassicLevel pack databases.
+- **Global Runtime Integration (`src/dcc.mjs`, `tests/setup.mjs`)**:
+  - Exposed `game.dcc.races` and `game.dcc.classes` at runtime for character sheet integrations, macro scripts, and builder applications.
+- **Documentation & Test Verification**:
+  - Authored `docs/races-and-classes.md` detailing Earth vs. Alien rules, 30 races, 52 classes, and complete point build costs (Minor, Moderate, Major, Extreme, Epic benefits and Detriments).
+  - Added `tests/races-classes-compendium.test.mjs` verifying dataset integrity, unique IDs, schemas, and ClassicLevel disk bundles.
+  - Full test suite passing: 782 tests across 148 suites with 0 failures.
+
 ## 2.4.0
 
 ### Rapid Batch Roll & Event Importer (In-Person Play Transcription)

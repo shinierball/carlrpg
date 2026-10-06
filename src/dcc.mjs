@@ -14,6 +14,9 @@ import { DCCSessionEngine, DCCSessionManagerApp, DCC_ROLL_OUTCOMES, DCC_OUTCOME_
 import { DCCRapidBatchImportApp } from './apps/rapid-batch-import.mjs';
 import { DCCRapidTextParser } from './apps/rapid-text-parser.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
+import { DCCClassCreatorApp } from './apps/class-creator.mjs';
+import { DCCBasePointBuilderApp } from './apps/base-point-builder.mjs';
+import { DCC_POINT_BUILD_BENEFITS, DCC_POINT_BUILD_DETRIMENTS } from './data/point-build-catalog.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
 import { DCCGrindApp } from './apps/grind-app.mjs';
 import { DCCFloorClockHUD } from './apps/floor-clock-hud.mjs';
@@ -34,6 +37,8 @@ import { DCC_SIZES, getSizeInfo } from './data/sizes.mjs';
 import { DCC_MACROS } from './data/macros.mjs';
 import { DCC_MOBS } from './data/mobs.mjs';
 import { DCC_ITEMS } from './data/items.mjs';
+import { DCC_RACES } from './data/races.mjs';
+import { DCC_CLASSES } from './data/classes.mjs';
 import {
   DCC_BACKGROUND_TABLES,
   getBackgroundTable,
@@ -84,10 +89,18 @@ Hooks.once('init', async function() {
     DCCRapidBatchImportApp,
     DCCRapidTextParser,
     DCCCrawlerCreatorApp,
+    DCCClassCreatorApp,
+    DCCBasePointBuilderApp,
+    pointBuildCatalog: {
+      benefits: DCC_POINT_BUILD_BENEFITS,
+      detriments: DCC_POINT_BUILD_DETRIMENTS
+    },
     DCCAchievementManagerApp,
     achievements: DCC_ACHIEVEMENTS,
     achievementTiers: DCC_ACHIEVEMENT_TIERS,
     mobs: DCC_MOBS,
+    races: DCC_RACES,
+    classes: DCC_CLASSES,
     backgroundTables: DCC_BACKGROUND_TABLES,
     getBackgroundTable,
     rollBackgroundTable,
@@ -104,6 +117,8 @@ Hooks.once('init', async function() {
       DCCItemManager,
       DCCBuffDebuffManager,
       DCCCrawlerCreatorApp,
+      DCCClassCreatorApp,
+      DCCBasePointBuilderApp,
       DCCAchievementManagerApp,
       DCCCombatArchiveApp,
       DCCSessionEngine,
@@ -379,7 +394,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/grind-app.hbs',
     'systems/carl-rpg/templates/apps/floor-clock-hud.hbs',
     'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs',
-    'systems/carl-rpg/templates/apps/rapid-batch-import.hbs'
+    'systems/carl-rpg/templates/apps/rapid-batch-import.hbs',
+    'systems/carl-rpg/templates/apps/class-creator.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -395,7 +411,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
           app.render(false);
         }
       }
@@ -454,6 +470,9 @@ Hooks.once('init', async function() {
     openCrawlerCreator(options = {}) {
       return new DCCCrawlerCreatorApp(options).render(true);
     },
+    openClassCreator(options = {}) {
+      return new DCCClassCreatorApp(options).render(true);
+    },
     tokenHUD: getCrawlerTokenHUD(),
     openHotbarHUD(actor, token) {
       return new DCCCrawlerHotbarHUD(actor, token).render(true);
@@ -463,7 +482,7 @@ Hooks.once('init', async function() {
     },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp) {
           app.render(false);
         }
       }
@@ -539,7 +558,7 @@ function injectItemDirectoryButtons(app, html) {
   if ($html.find('.dcc-open-skill-manager-btn').length) return;
 
   const btn = $(`
-    <button type="button" class="dcc-open-skill-manager-btn" style="width: 100%; margin: 4px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+    <button type="button" class="dcc-open-skill-manager-btn" style="width: 100%; margin: 4px 0 3px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
       <i class="fa-solid fa-book-bookmark"></i> Skill Library & Manager
     </button>
   `);
@@ -549,11 +568,25 @@ function injectItemDirectoryButtons(app, html) {
     new DCCSkillManager().render(true);
   });
 
+  const classBtn = $(`
+    <button type="button" class="dcc-open-class-creator-btn" style="width: 100%; margin: 2px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #2c3e50; color: #f1c40f; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-graduation-cap"></i> Class Creator Studio
+    </button>
+  `);
+
+  classBtn.click(ev => {
+    ev.preventDefault();
+    new DCCClassCreatorApp().render(true);
+  });
+
+  const btnGroup = $('<div class="dcc-item-directory-actions" style="margin-bottom: 4px;"></div>');
+  btnGroup.append(btn).append(classBtn);
+
   const headerActions = $html.find('.header-actions');
   if (headerActions.length) {
-    headerActions.after(btn);
+    headerActions.after(btnGroup);
   } else {
-    $html.find('.directory-footer').before(btn);
+    $html.find('.directory-footer').before(btnGroup);
   }
 }
 

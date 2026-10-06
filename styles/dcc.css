@@ -7811,5 +7811,956 @@ select.dcc-box-input.dcc-size-select,
   cursor: grabbing;
 }
 
+/* =========================================================================
+   CLASS CREATOR STUDIO (Option A: Terminal Ledger Accordion Studio)
+   ========================================================================= */
+
+.dcc-class-creator-app .window-content {
+  padding: 0 !important;
+  background: #141419 !important;
+  color: #eeeeee !important;
+  font-family: 'Oswald', sans-serif;
+  overflow: hidden;
+}
+
+.dcc-class-creator-studio {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  background: #141419;
+  color: #eeeeee;
+  overflow: hidden;
+}
+
+/* Header */
+.dcc-studio-header {
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #22222d 0%, #171720 100%);
+  border-bottom: 2px solid #c0392b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dcc-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-header-title i {
+  color: #e74c3c;
+}
+
+.dcc-header-subtitle {
+  font-size: 11px;
+  color: #888899;
+  font-family: 'Roboto Condensed', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.dcc-header-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcc-preset-label {
+  font-size: 11px;
+  color: #cccccc;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dcc-preset-select {
+  background: #0d0d12 !important;
+  color: #ffffff !important;
+  border: 1px solid #444455 !important;
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+}
+
+/* Studio Layout */
+.dcc-studio-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  height: calc(100% - 58px);
+  overflow: hidden;
+}
+
+/* Left Column: Builder */
+.dcc-studio-builder {
+  padding: 14px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #161620;
+}
+
+.dcc-builder-section {
+  background: #1c1c27;
+  border: 1px solid #2d2d3d;
+  border-radius: 4px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.dcc-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #f1f1f1;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #2a2a3a;
+  padding-bottom: 5px;
+}
+
+.dcc-section-title i {
+  color: #c0392b;
+}
+
+.dcc-section-badge {
+  font-size: 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  background: #2a2a3a;
+  color: #aaaaaa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: auto;
+  font-weight: normal;
+}
+
+/* Forms & Inputs */
+.dcc-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dcc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-form-group.dcc-span-2 {
+  grid-column: span 2;
+}
+
+.dcc-form-group label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #aaaaaa;
+  letter-spacing: 0.5px;
+}
+
+.dcc-label-hint {
+  font-size: 10px;
+  color: #777788;
+  text-transform: none;
+}
+
+.dcc-form-group input[type="text"],
+.dcc-form-group textarea {
+  background: #0d0d12 !important;
+  color: #ffffff !important;
+  border: 1px solid #3d3d4f !important;
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 13px;
+}
+
+.dcc-form-group input[type="text"]:focus,
+.dcc-form-group textarea:focus {
+  border-color: #c0392b !important;
+  outline: none;
+  box-shadow: 0 0 5px rgba(192, 57, 43, 0.4);
+}
+
+/* Archetype Pills */
+.dcc-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dcc-type-pill {
+  background: #111118;
+  border: 1px solid #333344;
+  color: #bbbbbb;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Oswald', sans-serif;
+}
+
+.dcc-type-pill:hover {
+  background: #252535;
+  color: #ffffff;
+}
+
+.dcc-type-pill.selected {
+  background: #c0392b;
+  border-color: #e74c3c;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(192, 57, 43, 0.4);
+}
+
+/* Checkbox Labels */
+.dcc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #dddddd;
+  cursor: pointer;
+}
+
+.dcc-checkbox-label input[type="checkbox"] {
+  accent-color: #c0392b;
+  width: 15px;
+  height: 15px;
+}
+
+/* Ability Score Grid */
+.dcc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.dcc-stat-box {
+  background: #111118;
+  border: 1px solid #2d2d3f;
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-stat-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #d4af37;
+  letter-spacing: 0.5px;
+}
+
+.dcc-stat-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dcc-stat-step-btn {
+  background: #252535;
+  border: 1px solid #444455;
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.dcc-stat-step-btn:hover {
+  background: #c0392b;
+  border-color: #e74c3c;
+}
+
+.dcc-stat-val {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  min-width: 24px;
+}
+
+.dcc-stat-val.positive {
+  color: #2ecc71;
+}
+
+.dcc-stat-val.negative {
+  color: #e74c3c;
+}
+
+.dcc-stat-cost-tag {
+  font-size: 10px;
+  color: #888899;
+  font-family: 'Roboto Condensed', sans-serif;
+}
+
+/* Adders & Lists */
+.dcc-entry-adder-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dcc-entry-adder-row input[type="text"] {
+  flex: 1;
+  background: #0d0d12 !important;
+  color: #ffffff !important;
+  border: 1px solid #333344 !important;
+  border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.dcc-entry-adder-row select {
+  background: #0d0d12 !important;
+  color: #ffffff !important;
+  border: 1px solid #333344 !important;
+  border-radius: 3px;
+  padding: 5px 6px;
+  font-size: 12px;
+}
+
+.dcc-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.dcc-entry-item {
+  display: flex;
+  align-items: center;
+  background: #111118;
+  border: 1px solid #2d2d3d;
+  border-radius: 3px;
+  padding: 4px 8px;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.dcc-entry-item.detriment {
+  border-left: 3px solid #e67e22;
+}
+
+.dcc-entry-name {
+  flex: 1;
+  color: #ffffff;
+}
+
+.dcc-entry-cost {
+  color: #2ecc71;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.dcc-entry-cost.refund {
+  color: #f39c12;
+}
+
+.dcc-tag {
+  font-size: 9px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.dcc-tag.passive {
+  background: #34495e;
+  color: #ecf0f1;
+}
+
+.dcc-btn-icon {
+  background: transparent;
+  border: none;
+  color: #888899;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.dcc-btn-icon:hover {
+  color: #e74c3c;
+}
+
+/* Accordion Catalog */
+.dcc-catalog-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dcc-search-box {
+  display: flex;
+  align-items: center;
+  background: #0d0d12;
+  border: 1px solid #333344;
+  border-radius: 3px;
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+.dcc-search-box i {
+  color: #777788;
+}
+
+.dcc-search-box input {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  width: 100%;
+  font-size: 12px;
+}
+
+.dcc-search-box input:focus {
+  outline: none;
+}
+
+.dcc-filter-pills {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.dcc-filter-pill {
+  background: #111118;
+  border: 1px solid #2d2d3d;
+  color: #888899;
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.dcc-filter-pill:hover,
+.dcc-filter-pill.active {
+  background: #c0392b;
+  color: #ffffff;
+  border-color: #e74c3c;
+}
+
+.dcc-accordion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dcc-accordion-tier {
+  border: 1px solid #2d2d3f;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #111118;
+}
+
+.dcc-accordion-header {
+  padding: 7px 10px;
+  background: #1a1a26;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.dcc-accordion-header:hover {
+  background: #252536;
+}
+
+.dcc-chevron {
+  width: 14px;
+  color: #c0392b;
+  font-size: 11px;
+}
+
+.dcc-tier-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dcc-tier-cost-badge {
+  font-size: 10px;
+  background: #2ecc71;
+  color: #111118;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.dcc-accordion-tier.detriments .dcc-tier-cost-badge {
+  background: #e67e22;
+  color: #111118;
+}
+
+.dcc-tier-count {
+  font-size: 10px;
+  color: #777788;
+}
+
+.dcc-accordion-body {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #0e0e14;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dcc-subtier-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #f39c12;
+  font-weight: bold;
+  padding: 4px 6px 2px 6px;
+  border-bottom: 1px solid #222230;
+}
+
+.dcc-perk-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #14141c;
+  border: 1px solid #252535;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dcc-perk-card:hover {
+  background: #1e1e2c;
+  border-color: #3b3b50;
+}
+
+.dcc-perk-card.selected {
+  background: #201a1c;
+  border-color: #c0392b;
+}
+
+.dcc-perk-card.detriment.selected {
+  background: #221c14;
+  border-color: #e67e22;
+}
+
+.dcc-perk-card input[type="checkbox"] {
+  accent-color: #c0392b;
+  margin-top: 2px;
+}
+
+.dcc-perk-card.detriment input[type="checkbox"] {
+  accent-color: #e67e22;
+}
+
+.dcc-perk-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dcc-perk-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcc-perk-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dcc-perk-category {
+  font-size: 9px;
+  background: #2a2a3c;
+  color: #aaaaaa;
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.dcc-perk-cost {
+  margin-left: auto;
+  font-size: 11px;
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.dcc-perk-cost.refund {
+  color: #f39c12;
+}
+
+.dcc-perk-desc {
+  font-size: 10px;
+  color: #888899;
+  font-family: 'Roboto Condensed', sans-serif;
+  line-height: 1.3;
+}
+
+/* Alert Banner */
+.dcc-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.dcc-alert-banner.warning {
+  background: rgba(230, 126, 34, 0.15);
+  border: 1px solid #e67e22;
+  color: #f39c12;
+}
+
+/* Right Column: Sticky Sidebar Receipt */
+.dcc-studio-sidebar {
+  background: #111118;
+  border-left: 1px solid #2d2d3f;
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.dcc-sticky-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dcc-receipt-header-card {
+  background: #1a1a24;
+  border: 1px solid #333346;
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dcc-gauge-title {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #aaaaaa;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.dcc-gauge-numbers {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.dcc-spent-num {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.dcc-gauge-divider {
+  font-size: 20px;
+  color: #666677;
+}
+
+.dcc-budget-num {
+  font-size: 22px;
+  font-weight: 600;
+  color: #aaaaaa;
+}
+
+.dcc-bp-label {
+  font-size: 12px;
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.dcc-legality-badge {
+  padding: 5px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dcc-legality-badge.legal {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.dcc-legality-badge.overbudget {
+  background: rgba(230, 126, 34, 0.15);
+  border: 1px solid #e67e22;
+  color: #f39c12;
+}
+
+.dcc-soft-hint {
+  font-size: 9px;
+  font-weight: normal;
+  color: #aaaaaa;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: none;
+}
+
+.dcc-budget-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #2d2d3f;
+}
+
+.dcc-breakdown-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dcc-b-lbl {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #777788;
+}
+
+.dcc-b-val {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.dcc-b-val.positive {
+  color: #f39c12;
+}
+
+/* Receipt Items */
+.dcc-receipt-items-card {
+  background: #171722;
+  border: 1px solid #2d2d3f;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.dcc-items-title {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #cccccc;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #2a2a3a;
+  padding-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcc-receipt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dcc-receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.dcc-receipt-row:nth-child(even) {
+  background: #111118;
+}
+
+.dcc-receipt-row.extra-point {
+  color: #f39c12;
+}
+
+.dcc-r-label {
+  color: #dddddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.dcc-r-cost {
+  color: #2ecc71;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.dcc-r-cost.refund {
+  color: #f39c12;
+}
+
+.dcc-receipt-empty {
+  font-size: 11px;
+  font-style: italic;
+  color: #666677;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Target Crawler Card */
+.dcc-target-crawler-card {
+  background: #171722;
+  border: 1px solid #2d2d3f;
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dcc-target-crawler-card label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #aaaaaa;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dcc-target-crawler-select {
+  background: #0d0d12 !important;
+  color: #ffffff !important;
+  border: 1px solid #333344 !important;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+/* Action Buttons */
+.dcc-receipt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dcc-receipt-actions .dcc-btn {
+  width: 100%;
+  padding: 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.dcc-save-class-btn {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.dcc-save-class-btn:hover {
+  background: #e74c3c;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.4);
+}
+
+.dcc-apply-crawler-btn {
+  background: #27ae60;
+  color: #ffffff;
+}
+
+.dcc-apply-crawler-btn:hover {
+  background: #2ecc71;
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4);
+}
+
+.dcc-export-json-btn {
+  background: #34495e;
+  color: #ffffff;
+}
+
+.dcc-export-json-btn:hover {
+  background: #4a6984;
+}
+
+.dcc-btn.dcc-reset-btn {
+  background: #222230;
+  color: #bbbbbb;
+  border: 1px solid #333344;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: 'Oswald', sans-serif;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.dcc-btn.dcc-reset-btn:hover {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.dcc-add-skill-btn,
+.dcc-add-spell-btn,
+.dcc-add-custom-benefit-btn,
+.dcc-add-custom-detriment-btn {
+  background: #c0392b;
+  color: #ffffff;
+  border: 1px solid #000;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dcc-add-skill-btn:hover,
+.dcc-add-spell-btn:hover,
+.dcc-add-custom-benefit-btn:hover,
+.dcc-add-custom-detriment-btn:hover {
+  background: #e74c3c;
+}
+
 
 

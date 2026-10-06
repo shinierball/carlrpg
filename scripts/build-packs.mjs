@@ -7,6 +7,8 @@ import { DCC_BUFFS, DCC_DEBUFFS } from '../src/data/buffs.mjs';
 import { DCC_MACROS } from '../src/data/macros.mjs';
 import { DCC_MOBS } from '../src/data/mobs.mjs';
 import { DCC_ITEMS } from '../src/data/items.mjs';
+import { DCC_RACES } from '../src/data/races.mjs';
+import { DCC_CLASSES } from '../src/data/classes.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -488,10 +490,106 @@ async function buildItems() {
   console.log(`Successfully built items compendium at ${packDir}`);
 }
 
+// 7. Build Races Pack
+async function buildRaces() {
+  const packDir = path.resolve(__dirname, '../packs/races');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building races compendium with ${DCC_RACES.length} items...`);
+  const batch = db.batch();
+
+  for (const race of DCC_RACES) {
+    const doc = {
+      _id: race._id,
+      name: race.name,
+      type: "race",
+      img: race.img,
+      system: race.system || {},
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion,
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${race._id}`, doc);
+  }
+
+  await batch.write();
+  await db.compactRange('', '\uffff');
+  await db.close();
+  console.log(`Successfully built races compendium at ${packDir}`);
+}
+
+// 8. Build Classes Pack
+async function buildClasses() {
+  const packDir = path.resolve(__dirname, '../packs/classes');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building classes compendium with ${DCC_CLASSES.length} items...`);
+  const batch = db.batch();
+
+  for (const cls of DCC_CLASSES) {
+    const doc = {
+      _id: cls._id,
+      name: cls.name,
+      type: "class",
+      img: cls.img,
+      system: cls.system || {},
+      effects: [],
+      folder: null,
+      sort: 0,
+      ownership: {
+        default: 0
+      },
+      flags: {},
+      _stats: {
+        systemId: "carl-rpg",
+        systemVersion,
+        coreVersion: "12.331",
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        lastModifiedBy: "dccRPG0000000001"
+      }
+    };
+
+    batch.put(`!items!${cls._id}`, doc);
+  }
+
+  await batch.write();
+  await db.compactRange('', '\uffff');
+  await db.close();
+  console.log(`Successfully built classes compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
 await buildBuffs();
 await buildMacros();
 await buildMobs();
 await buildItems();
+await buildRaces();
+await buildClasses();
 

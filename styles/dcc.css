@@ -149,6 +149,26 @@
   background-color: rgba(255, 255, 255, 0.7);
 }
 
+select.dcc-field-input {
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+select.dcc-field-input option {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 600;
+  background: #ffffff;
+  color: #111111;
+}
+
+select.dcc-field-input optgroup {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 800;
+  color: #a02010;
+  background: #f0f0f0;
+}
+
 /* Universal High-Contrast Placeholders for Sheet and Form Inputs */
 .dcc-sheet input::placeholder,
 .dcc-sheet textarea::placeholder,
@@ -8276,6 +8296,10 @@ select.dcc-box-input.dcc-size-select,
 }
 
 .dcc-accordion-header {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+  text-align: left;
   padding: 7px 10px;
   background: #1a1a26;
   cursor: pointer;
@@ -8288,6 +8312,11 @@ select.dcc-box-input.dcc-size-select,
 
 .dcc-accordion-header:hover {
   background: #252536;
+}
+
+.dcc-accordion-header:focus-visible {
+  outline: 2px solid #c0392b;
+  outline-offset: -2px;
 }
 
 .dcc-chevron {

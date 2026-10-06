@@ -240,7 +240,7 @@
         <div class="dcc-catalog-controls">
           <div class="dcc-search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" class="dcc-search-input" value="{{searchQuery}}" placeholder="Filter perks (e.g. DR, healing, fly, club, advantage)...">
+            <input type="text" class="dcc-search-input" name="searchQuery" value="{{searchQuery}}" placeholder="Filter perks (e.g. DR, healing, fly, club, advantage)...">
           </div>
           <div class="dcc-filter-pills">
             <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'all')}}active{{/if}}" data-filter="all">All</button>
@@ -256,12 +256,12 @@
         <div class="dcc-accordion-container">
           {{#each benefitTiers}}
             <div class="dcc-accordion-tier {{this.id}}">
-              <div class="dcc-accordion-header" data-tier="{{this.id}}">
+              <button type="button" class="dcc-accordion-header" data-tier="{{this.id}}">
                 <span class="dcc-chevron"><i class="fa-solid {{#if this.isOpen}}fa-chevron-down{{else}}fa-chevron-right{{/if}}"></i></span>
                 <span class="dcc-tier-name">{{this.label}}</span>
                 <span class="dcc-tier-cost-badge">{{this.cost}} BP each</span>
                 <span class="dcc-tier-count">({{this.items.length}} items)</span>
-              </div>
+              </button>
               {{#if this.isOpen}}
                 <div class="dcc-accordion-body">
                   {{#each this.items}}
@@ -292,11 +292,11 @@
         </div>
 
         <div class="dcc-accordion-tier detriments">
-          <div class="dcc-accordion-header" data-tier="detriments">
+          <button type="button" class="dcc-accordion-header" data-tier="detriments">
             <span class="dcc-chevron"><i class="fa-solid {{#if detrimentsOpen}}fa-chevron-down{{else}}fa-chevron-right{{/if}}"></i></span>
             <span class="dcc-tier-name">Official Detriments Catalog</span>
             <span class="dcc-tier-cost-badge">+1 to +3 Extra BP</span>
-          </div>
+          </button>
           {{#if detrimentsOpen}}
             <div class="dcc-accordion-body">
               {{#each detrimentTiers}}

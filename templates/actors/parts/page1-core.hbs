@@ -70,7 +70,19 @@
         </div>
         <div class="dcc-field-group flex-1">
           <span class="dcc-field-label">Race</span>
-          <input class="dcc-field-input" name="system.details.race" type="text" value="{{system.details.race}}" placeholder="Race" />
+          <select class="dcc-field-input dcc-race-selector" title="Select Character Race">
+            <option value="" {{#unless system.details.race}}selected{{/unless}}>-- None / Select Race --</option>
+            {{#if hasCustomRace}}
+              <option value="{{system.details.race}}" selected>{{system.details.race}} (Custom)</option>
+            {{/if}}
+            {{#each raceOptions as |group|}}
+              <optgroup label="{{group.label}}">
+                {{#each group.options as |opt|}}
+                  <option value="{{opt.value}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+                {{/each}}
+              </optgroup>
+            {{/each}}
+          </select>
         </div>
         <div class="dcc-field-group flex-1">
           <span class="dcc-field-label">Gender/Pronouns</span>
@@ -103,7 +115,19 @@
         </div>
         <div class="dcc-field-group">
           <span class="dcc-field-label">Class</span>
-          <input class="dcc-field-input" name="system.details.class" type="text" value="{{system.details.class}}" placeholder="Class" />
+          <select class="dcc-field-input dcc-class-selector" title="Select Character Class">
+            <option value="" {{#unless system.details.class}}selected{{/unless}}>-- None / Select Class --</option>
+            {{#if hasCustomClass}}
+              <option value="{{system.details.class}}" selected>{{system.details.class}} (Custom)</option>
+            {{/if}}
+            {{#each classOptions as |group|}}
+              <optgroup label="{{group.label}}">
+                {{#each group.options as |opt|}}
+                  <option value="{{opt.value}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>
+                {{/each}}
+              </optgroup>
+            {{/each}}
+          </select>
         </div>
         <div class="dcc-field-group">
           <span class="dcc-field-label">Floor</span>

@@ -329,3 +329,53 @@ The **Race Creator Studio** implements an interactive creation terminal for buil
   - Global developer shortcut: `window.carl.openRaceCreator()`.
   - Canonical system macro included in the `carl-rpg.macros` compendium pack as **"Race Creator Studio"** (`macroKey: "race-creator"`).
 
+---
+
+## 8. Focus Retention & Scroll Preservation Subsystem
+
+To provide a seamless, non-disorienting UX while editing builds with dozens of perks, ability scores, and options:
+
+### Architectural Principles
+1. **Zero Viewport Jump on State Changes**:
+   - Every scrollable container (`.dcc-studio-builder`, `.dcc-receipt-list`, `.dcc-studio-sidebar`, `.dcc-studio-layout`, `.window-content`) is indexed via `_saveScrollPositions` before DOM replacement.
+   - Restored scroll positions are reapplied both synchronously and via next-frame callbacks (`requestAnimationFrame`).
+2. **Precision Focus Retention**:
+   - `_saveFocusState` synthesizes unambiguous CSS selectors combining tags, classes, and data attributes (`[data-stat]`, `[data-delta]`, `[data-id]`, `[data-size]`, `[data-heritage]`, `[data-tier]`).
+   - `_restoreFocusState` calls `target.focus({ preventScroll: true })`. The `preventScroll: true` flag prevents the browser from forcibly scrolling the window to the focused element, preventing jarring jumps to the top.
+3. **Cursor & Text Selection Range Preservation**:
+   - Filter inputs, search inputs, and name fields record `selectionStart`, `selectionEnd`, and `selectionDirection`.
+   - On re-render, the cursor stays exactly at the typed position, enabling uninterrupted typing and live filtering.
+4. **Accessible Button Upgrades**:
+   - Accordion drawers use semantic `<button type="button" class="dcc-accordion-header">` elements with `:focus-visible` outline rings for full keyboard accessibility and reliable activeElement capture.
+
+---
+
+## 9. Character Sheet Race & Class Selection & Reversal System
+
+### Interactive Dropdowns on Page 1 (Core)
+The plain text inputs for **Race** and **Class** on Page 1 of the crawler character sheet are upgraded to dynamic `<select>` dropdowns:
+- **Race Dropdown**: Categorized into *Earth Races (Silver Earth Box)*, *Alien Syndicate Races (Galactic Popularity)*, and *Custom / World Races*.
+- **Class Dropdown**: Categorized into 10 Archetypes (*Arcanist*, *Barbarian*, *Bard*, *Cleric*, *Druid*, *Fighter*, *Mage*, *Monk*, *Paladin*, *Rogue*), *Multiclass & Special Classes*, and *Custom / World Classes*.
+- **Custom / Uncataloged Preservations**: If an existing character has a custom race or class string, it is automatically marked with `(Custom)` in the dropdown to preserve campaign lore without data loss.
+
+### Dynamic Application & Automated Reversal Engine (`DCCRaceClassApplier`)
+Selecting a race or class immediately applies its benefits to the crawler. When switching or removing a race or class, previous benefits are cleanly undone:
+
+1. **Ability Stat Synchronization**:
+   - Stat bonuses granted by the previous race or class are subtracted from both `system.abilities.${stat}.value` and `unenhanced` scores; stat penalties are restored.
+   - New stat bonuses/penalties are then applied. Derived DCC stat modifiers and maximum health automatically recompute using official DCC RPG rules (no D&D math).
+
+2. **Non-Item Skill Rank Retention**:
+   - When a class or race granting skill ranks is removed or switched, the system computes `remainingRank = currentRank - grantedRank`.
+   - **Crucial Rule**: If the crawler has non-item ranks higher than the amount being removed (e.g. natural ranks earned through gameplay, grinding, or story advancement), the skill item is **not deleted**; its rank is simply reduced to the remaining non-item ranks.
+   - If no non-item ranks remain (`remainingRank <= 0`), the embedded skill or spell item created by that race/class is cleanly deleted from the character.
+
+3. **Creature Size Scaling**:
+   - Selecting a race updates the crawler's size category (`system.attributes.size`) according to the race's official rating (e.g. Pocket Kuma sets Small, Sasquatch sets Large).
+   - Removing or switching races reverts the character to their base size or applies the new race's size rating.
+
+4. **Embedded Documents & Flag Tracking**:
+   - The engine automatically embeds an official Item document of type `'race'` or `'class'` on the actor and stores clean metadata under actor flags (`appliedRace`, `appliedClass`).
+   - Dragging and dropping Race or Class compendium items onto the character sheet automatically invokes `actor.applyRace()` and `actor.applyClass()`.
+
+

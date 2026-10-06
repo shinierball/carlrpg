@@ -21,6 +21,28 @@ import {
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 
 export class DCCBasePointBuilderApp extends DCCBaseApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      scrollY: [
+        '.dcc-studio-builder',
+        '.dcc-receipt-list',
+        '.dcc-studio-sidebar',
+        '.dcc-studio-layout',
+        '.window-content'
+      ]
+    });
+  }
+
+  static DEFAULT_OPTIONS = {
+    scrollY: [
+      '.dcc-studio-builder',
+      '.dcc-receipt-list',
+      '.dcc-studio-sidebar',
+      '.dcc-studio-layout',
+      '.window-content'
+    ]
+  };
+
   constructor(options = {}) {
     super(options);
 
@@ -804,5 +826,25 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     if (preset.selectedDetriments) this.selectedDetriments = preset.selectedDetriments.map(d => ({ ...d }));
     this.customBenefits = [];
     this.customDetriments = [];
+  }
+
+  /**
+   * Binds global scroll retention and focus capture across all point builder studios.
+   */
+  activateListeners(html) {
+    super.activateListeners(html);
+    const $html = (html && typeof html.find === 'function') ? html : ((typeof $ !== 'undefined') ? $(html) : html);
+    if (!$html || typeof $html.on !== 'function') return;
+
+    // Continuous scroll tracking
+    $html.find('.dcc-studio-builder, .dcc-receipt-list, .dcc-studio-sidebar, .dcc-studio-layout').on('scroll', () => {
+      this._saveScrollPositions($html);
+    });
+
+    // Mousedown & focusin capture for exact target tracking
+    $html.on('mousedown focusin', 'input, select, textarea, button, [tabindex], .dcc-accordion-header, .dcc-type-pill, .dcc-heritage-pill, .dcc-size-pill, .dcc-filter-pill', ev => {
+      this._saveFocusState(ev.currentTarget);
+      this._saveScrollPositions($html);
+    });
   }
 }

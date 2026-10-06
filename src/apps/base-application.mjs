@@ -128,7 +128,7 @@ export class DCCBaseApplication extends ParentClass {
   }
 
   /**
-   * Save focus state and cursor selection for input/textarea elements.
+   * Save focus state and cursor selection for input/textarea/button/interactive elements.
    * Can be passed an explicit element or defaults to document.activeElement inside this.element.
    *
    * @param {HTMLElement} [element=null]
@@ -144,24 +144,84 @@ export class DCCBaseApplication extends ParentClass {
         return null;
       }
 
+      // Ignore non-interactive root body or html
+      const tagName = (active.tagName || '').toLowerCase();
+      if (!tagName || tagName === 'body' || tagName === 'html') {
+        return null;
+      }
+
       let selector = '';
-      if (active.id) {
-        selector = `#${active.id}`;
-      } else if (typeof active.getAttribute === 'function' && active.getAttribute('name')) {
-        selector = `[name="${active.getAttribute('name')}"]`;
-      } else if (active.className && typeof active.className === 'string') {
-        const classes = active.className.split(/\s+/).filter(c => c && !c.includes(':') && !c.startsWith('focus') && !c.startsWith('hover'));
-        if (classes.length) {
-          selector = `${(active.tagName || 'input').toLowerCase()}.${classes.join('.')}`;
+      const dataAttributes = {};
+
+      // Collect data attributes (e.g. data-id, data-stat, data-delta, data-type, data-heritage, data-size, data-tier, data-index, data-filter)
+      if (active.dataset && typeof active.dataset === 'object') {
+        for (const [k, v] of Object.entries(active.dataset)) {
+          const attr = 'data-' + k.replace(/([A-Z])/g, '-$1').toLowerCase();
+          dataAttributes[attr] = String(v);
+        }
+      } else if (active.attributes && active.attributes.length) {
+        for (let i = 0; i < active.attributes.length; i++) {
+          const attr = active.attributes[i];
+          if (attr.name && attr.name.startsWith('data-')) {
+            dataAttributes[attr.name] = String(attr.value);
+          }
         }
       }
-      if (!selector && active.tagName) {
-        selector = active.tagName.toLowerCase();
+
+      if (active.id) {
+        selector = `#${active.id}`;
+      } else {
+        const parts = [tagName];
+
+        // 1. Name attribute
+        const name = typeof active.getAttribute === 'function' ? active.getAttribute('name') : null;
+        if (name) {
+          parts.push(`[name="${name}"]`);
+          if (active.type === 'radio' || active.type === 'checkbox') {
+            if (active.value) parts.push(`[value="${active.value}"]`);
+          }
+        }
+
+        // 2. Data attributes for precise targeting
+        for (const [attrName, attrVal] of Object.entries(dataAttributes)) {
+          parts.push(`[${attrName}="${attrVal}"]`);
+        }
+
+        // 3. Classes (filter out volatile state classes like :hover, focus, selected, open)
+        if (active.className && typeof active.className === 'string') {
+          const classes = active.className.split(/\s+/).filter(c => (
+            c &&
+            !c.includes(':') &&
+            !c.startsWith('focus') &&
+            !c.startsWith('hover') &&
+            c !== 'selected' &&
+            c !== 'open' &&
+            c !== 'active'
+          ));
+          if (classes.length) {
+            parts.splice(1, 0, `.${classes.join('.')}`);
+          }
+        }
+
+        selector = parts.join('');
+      }
+
+      let matchIndex = 0;
+      if (root && selector) {
+        try {
+          const matches = Array.from(root.querySelectorAll ? root.querySelectorAll(selector) : (typeof $ !== 'undefined' ? $(root).find(selector) : []));
+          const idx = matches.indexOf(active);
+          if (idx >= 0) matchIndex = idx;
+        } catch (_) {}
       }
 
       const hasSelection = typeof active.selectionStart === 'number';
       this._savedFocus = {
         selector,
+        matchIndex,
+        tagName,
+        name: typeof active.getAttribute === 'function' ? active.getAttribute('name') : null,
+        data: dataAttributes,
         selectionStart: hasSelection ? active.selectionStart : null,
         selectionEnd: hasSelection ? active.selectionEnd : null,
         selectionDirection: hasSelection ? active.selectionDirection : 'none',
@@ -174,7 +234,7 @@ export class DCCBaseApplication extends ParentClass {
   }
 
   /**
-   * Restore focus and cursor selection range to the saved element.
+   * Restore focus and cursor selection range to the saved element with preventScroll.
    *
    * @param {jQuery|HTMLElement} [html=null]
    */
@@ -189,19 +249,61 @@ export class DCCBaseApplication extends ParentClass {
 
         let target = null;
         if (saved.selector) {
-          target = root.querySelector?.(saved.selector) || (typeof $ !== 'undefined' ? $(root).find(saved.selector)[0] : null);
+          try {
+            if (typeof root.querySelectorAll === 'function') {
+              const matches = root.querySelectorAll(saved.selector);
+              if (matches && matches.length > 0) {
+                target = matches[saved.matchIndex] || matches[0];
+              }
+            }
+            if (!target && typeof root.querySelector === 'function') {
+              target = root.querySelector(saved.selector);
+            }
+            if (!target && typeof $ !== 'undefined') {
+              const $matches = $(root).find(saved.selector);
+              if ($matches.length) target = $matches[saved.matchIndex] || $matches[0];
+            }
+          } catch (_) {}
         }
-        if (!target && saved.value !== undefined) {
-          target = root.querySelector?.('input[type="text"], input[type="search"], textarea');
+
+        // Fallback: match by tagName + data attributes if class changed
+        if (!target && saved.data && Object.keys(saved.data).length > 0) {
+          try {
+            const dataParts = [saved.tagName || ''];
+            for (const [attrName, attrVal] of Object.entries(saved.data)) {
+              dataParts.push(`[${attrName}="${attrVal}"]`);
+            }
+            const dataSelector = dataParts.join('');
+            if (dataSelector && typeof root.querySelector === 'function') {
+              target = root.querySelector(dataSelector);
+            }
+          } catch (_) {}
+        }
+
+        // Fallback: match by name
+        if (!target && saved.name && typeof root.querySelector === 'function') {
+          target = root.querySelector(`[name="${saved.name}"]`);
+        }
+
+        // Fallback: match by text input value
+        if (!target && saved.value !== undefined && typeof root.querySelector === 'function') {
+          target = root.querySelector('input[type="text"], input[type="search"], textarea');
         }
 
         if (target && typeof target.focus === 'function') {
-          target.focus();
+          try {
+            target.focus({ preventScroll: true });
+          } catch (_) {
+            target.focus();
+          }
+
           if (typeof target.setSelectionRange === 'function' && typeof saved.selectionStart === 'number') {
             const valLen = target.value?.length ?? 0;
             const start = Math.min(saved.selectionStart, valLen);
             const end = Math.min(saved.selectionEnd ?? start, valLen);
-            target.setSelectionRange(start, end, saved.selectionDirection || 'none');
+            try {
+              target.setSelectionRange(start, end, saved.selectionDirection || 'none');
+            } catch (_) {}
           }
         }
       } catch (err) {
@@ -226,6 +328,99 @@ export class DCCBaseApplication extends ParentClass {
   }
 
   /**
+   * Save scroll positions of all scrollable containers within the application.
+   *
+   * @param {jQuery|HTMLElement} [html=null]
+   */
+  _saveScrollPositions(html = null) {
+    try {
+      const root = (html && html[0]) ? html[0] : (html instanceof (globalThis.HTMLElement || Object) ? html : (this.element?.[0] || this.element));
+      if (!root) return;
+
+      this._savedScroll = this._savedScroll || new Map();
+
+      // Collect potential scrollable container selectors
+      const scrollSelectors = [
+        '.dcc-studio-builder',
+        '.dcc-receipt-list',
+        '.dcc-studio-sidebar',
+        '.dcc-studio-layout',
+        '.window-content',
+        '.dcc-class-creator-studio',
+        '.dcc-race-creator-studio',
+        '.sheet-body',
+        ...(Array.isArray(this.options?.scrollY) ? this.options.scrollY : []),
+        ...(Array.isArray(this.constructor?.defaultOptions?.scrollY) ? this.constructor.defaultOptions.scrollY : [])
+      ];
+
+      for (const sel of scrollSelectors) {
+        let el = null;
+        if (typeof root.querySelector === 'function') {
+          el = root.querySelector(sel);
+        } else if (typeof $ !== 'undefined') {
+          el = $(root).find(sel)[0];
+        }
+        if (el && typeof el.scrollTop === 'number') {
+          this._savedScroll.set(sel, { top: el.scrollTop, left: el.scrollLeft || 0 });
+        }
+      }
+
+      // Check root element itself
+      if (typeof root.scrollTop === 'number') {
+        this._savedScroll.set(':root', { top: root.scrollTop, left: root.scrollLeft || 0 });
+      }
+    } catch (err) {
+      // Ignore in mock/test environments
+    }
+  }
+
+  /**
+   * Restore saved scroll positions to the application containers.
+   *
+   * @param {jQuery|HTMLElement} [html=null]
+   */
+  _restoreScrollPositions(html = null) {
+    if (!this._savedScroll || this._savedScroll.size === 0) return;
+    const saved = this._savedScroll;
+
+    const applyScroll = () => {
+      try {
+        const root = (html && html[0]) ? html[0] : (html instanceof (globalThis.HTMLElement || Object) ? html : (this.element?.[0] || this.element));
+        if (!root) return;
+
+        for (const [sel, pos] of saved.entries()) {
+          if (sel === ':root') {
+            if (typeof root.scrollTop === 'number') {
+              root.scrollTop = pos.top;
+              if (pos.left) root.scrollLeft = pos.left;
+            }
+            continue;
+          }
+          let el = null;
+          if (typeof root.querySelector === 'function') {
+            el = root.querySelector(sel);
+          } else if (typeof $ !== 'undefined') {
+            el = $(root).find(sel)[0];
+          }
+          if (el && typeof el.scrollTop === 'number') {
+            el.scrollTop = pos.top;
+            if (pos.left) el.scrollLeft = pos.left;
+          }
+        }
+      } catch (err) {
+        // Ignore in mock/test environments
+      }
+    };
+
+    applyScroll();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => applyScroll());
+    } else if (typeof setTimeout === 'function') {
+      setTimeout(() => applyScroll(), 0);
+    }
+  }
+
+  /**
    * Application V2 render callback
    */
   _onRender(context, options) {
@@ -242,6 +437,7 @@ export class DCCBaseApplication extends ParentClass {
     if (typeof this.activateListeners === 'function') {
       this.activateListeners($html);
     }
+    this._restoreScrollPositions($html);
     this._restoreFocusState($html);
   }
 
@@ -249,7 +445,8 @@ export class DCCBaseApplication extends ParentClass {
    * Application V1 listener registration hook
    */
   activateListeners(html) {
-    // Implemented by subclasses; restores focus if an element had focus before render
+    // Implemented by subclasses; restores scroll and focus if an element had focus before render
+    this._restoreScrollPositions(html);
     this._restoreFocusState(html);
   }
 
@@ -274,11 +471,14 @@ export class DCCBaseApplication extends ParentClass {
     if (!this._savedFocus) {
       this._saveFocusState();
     }
+    this._saveScrollPositions();
+
     const opts = (typeof options === 'boolean') ? { force: options } : options;
     let res = this;
     if (typeof super.render === 'function') {
       res = await super.render(opts, deprecatedOptions);
     }
+    this._restoreScrollPositions();
     this._restoreFocusState();
     return res;
   }

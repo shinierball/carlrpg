@@ -63,7 +63,14 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       width: 960,
       height: 840,
       classes: ['dcc-app', 'dcc-race-creator-app'],
-      resizable: true
+      resizable: true,
+      scrollY: [
+        '.dcc-studio-builder',
+        '.dcc-receipt-list',
+        '.dcc-studio-sidebar',
+        '.dcc-studio-layout',
+        '.window-content'
+      ]
     });
   }
 
@@ -81,7 +88,14 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     position: {
       width: 960,
       height: 840
-    }
+    },
+    scrollY: [
+      '.dcc-studio-builder',
+      '.dcc-receipt-list',
+      '.dcc-studio-sidebar',
+      '.dcc-studio-layout',
+      '.window-content'
+    ]
   };
 
   // =========================================================================
@@ -91,7 +105,10 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
   setHeritage(heritage) {
     if (heritage === 'Earth' || heritage === 'Alien') {
       this.heritage = heritage;
-      if (typeof this.render === 'function') this.render(false);
+      if (typeof this.render === 'function') {
+        this._saveScrollPositions();
+        this.render(false);
+      }
     }
   }
 
@@ -99,7 +116,10 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     const num = Number(sizeNum);
     if (!isNaN(num) && num >= 1 && num <= 8) {
       this.size = num;
-      if (typeof this.render === 'function') this.render(false);
+      if (typeof this.render === 'function') {
+        this._saveScrollPositions();
+        this.render(false);
+      }
     }
   }
 
@@ -331,47 +351,66 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
    * Binds interactive UI listeners.
    */
   activateListeners(html) {
-    const $html = $(html);
+    super.activateListeners(html);
+    const $html = (html && typeof html.find === 'function') ? html : (typeof $ !== 'undefined' ? $(html) : html);
+
+    // Helper to safely trigger re-render while preserving scroll and focus
+    const reRenderWithState = (ev, fn) => {
+      if (ev?.currentTarget) this._saveFocusState(ev.currentTarget);
+      this._saveScrollPositions($html);
+      if (typeof fn === 'function') fn();
+      return this.render(false);
+    };
 
     // Heritage Selector Pills
     $html.find('.dcc-heritage-pill').on('click', ev => {
       ev.preventDefault();
       const heritage = $(ev.currentTarget).data('heritage');
-      this.setHeritage(heritage);
+      reRenderWithState(ev, () => {
+        this.heritage = heritage;
+      });
     });
 
     // Size Selector Pills
     $html.find('.dcc-size-pill').on('click', ev => {
       ev.preventDefault();
       const sizeNum = Number($(ev.currentTarget).data('size'));
-      this.setSize(sizeNum);
+      reRenderWithState(ev, () => {
+        if (!isNaN(sizeNum) && sizeNum >= 1 && sizeNum <= 8) {
+          this.size = sizeNum;
+        }
+      });
     });
 
     // Accordion headers
     $html.find('.dcc-accordion-header').on('click', ev => {
       ev.preventDefault();
       const tierId = $(ev.currentTarget).data('tier');
-      this.accordionOpen[tierId] = !this.accordionOpen[tierId];
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.accordionOpen[tierId] = !this.accordionOpen[tierId];
+      });
     });
 
     // Search filter
     $html.find('.dcc-search-input').on('input', ev => {
-      this.searchQuery = ev.currentTarget.value;
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.searchQuery = ev.currentTarget.value;
+      });
     });
 
     // Tier quick-filter pills
     $html.find('.dcc-filter-pill').on('click', ev => {
       ev.preventDefault();
-      this.activeTierFilter = $(ev.currentTarget).data('filter') || 'all';
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.activeTierFilter = $(ev.currentTarget).data('filter') || 'all';
+      });
     });
 
     // Basic Inputs
     $html.find('input[name="name"]').on('change', ev => {
-      this.name = ev.currentTarget.value;
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.name = ev.currentTarget.value;
+      });
     });
     $html.find('textarea[name="description"]').on('change', ev => {
       this.description = ev.currentTarget.value;
@@ -385,8 +424,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       ev.preventDefault();
       const stat = $(ev.currentTarget).data('stat');
       const delta = Number($(ev.currentTarget).data('delta')) || 0;
-      this.stats[stat] = (Number(this.stats[stat]) || 0) + delta;
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.stats[stat] = (Number(this.stats[stat]) || 0) + delta;
+      });
     });
 
     // Add Skill
@@ -401,8 +441,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const isPassive = Boolean(passiveInput.prop('checked'));
 
       if (name) {
-        this.skills.push({ name, rank, isPassive, cost: rank * 2 });
-        this.render(false);
+        reRenderWithState(ev, () => {
+          this.skills.push({ name, rank, isPassive, cost: rank * 2 });
+        });
       }
     });
 
@@ -410,8 +451,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     $html.find('.dcc-remove-skill-btn').on('click', ev => {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
-      this.skills.splice(idx, 1);
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.skills.splice(idx, 1);
+      });
     });
 
     // Add Spell
@@ -426,8 +468,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const isPassive = Boolean(passiveInput.prop('checked'));
 
       if (name) {
-        this.spells.push({ name, rank, isPassive, cost: rank * 2 });
-        this.render(false);
+        reRenderWithState(ev, () => {
+          this.spells.push({ name, rank, isPassive, cost: rank * 2 });
+        });
       }
     });
 
@@ -435,8 +478,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     $html.find('.dcc-remove-spell-btn').on('click', ev => {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
-      this.spells.splice(idx, 1);
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.spells.splice(idx, 1);
+      });
     });
 
     // Benefit Checkbox Toggle
@@ -444,15 +488,16 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const benefitId = $(ev.currentTarget).data('id');
       const isChecked = ev.currentTarget.checked;
 
-      if (isChecked) {
-        const item = DCC_POINT_BUILD_BENEFITS.find(b => b.id === benefitId);
-        if (item && !this.selectedBenefits.some(b => b.id === benefitId)) {
-          this.selectedBenefits.push({ ...item });
+      reRenderWithState(ev, () => {
+        if (isChecked) {
+          const item = DCC_POINT_BUILD_BENEFITS.find(b => b.id === benefitId);
+          if (item && !this.selectedBenefits.some(b => b.id === benefitId)) {
+            this.selectedBenefits.push({ ...item });
+          }
+        } else {
+          this.selectedBenefits = this.selectedBenefits.filter(b => b.id !== benefitId);
         }
-      } else {
-        this.selectedBenefits = this.selectedBenefits.filter(b => b.id !== benefitId);
-      }
-      this.render(false);
+      });
     });
 
     // Detriment Checkbox Toggle
@@ -460,15 +505,16 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const detId = $(ev.currentTarget).data('id');
       const isChecked = ev.currentTarget.checked;
 
-      if (isChecked) {
-        const item = DCC_POINT_BUILD_DETRIMENTS.find(d => d.id === detId);
-        if (item && !this.selectedDetriments.some(d => d.id === detId)) {
-          this.selectedDetriments.push({ ...item });
+      reRenderWithState(ev, () => {
+        if (isChecked) {
+          const item = DCC_POINT_BUILD_DETRIMENTS.find(d => d.id === detId);
+          if (item && !this.selectedDetriments.some(d => d.id === detId)) {
+            this.selectedDetriments.push({ ...item });
+          }
+        } else {
+          this.selectedDetriments = this.selectedDetriments.filter(d => d.id !== detId);
         }
-      } else {
-        this.selectedDetriments = this.selectedDetriments.filter(d => d.id !== detId);
-      }
-      this.render(false);
+      });
     });
 
     // Add Custom Benefit
@@ -477,8 +523,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const name = $html.find('input[name="customBenefitName"]').val().trim();
       const cost = Number($html.find('select[name="customBenefitCost"]').val()) || 1;
       if (name) {
-        this.customBenefits.push({ name, cost });
-        this.render(false);
+        reRenderWithState(ev, () => {
+          this.customBenefits.push({ name, cost });
+        });
       }
     });
 
@@ -486,8 +533,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     $html.find('.dcc-remove-custom-benefit-btn').on('click', ev => {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
-      this.customBenefits.splice(idx, 1);
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.customBenefits.splice(idx, 1);
+      });
     });
 
     // Add Custom Detriment
@@ -496,8 +544,9 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const name = $html.find('input[name="customDetrimentsName"]').val().trim();
       const extraPoints = Number($html.find('select[name="customDetrimentPoints"]').val()) || 1;
       if (name) {
-        this.customDetriments.push({ name, extraPoints });
-        this.render(false);
+        reRenderWithState(ev, () => {
+          this.customDetriments.push({ name, extraPoints });
+        });
       }
     });
 
@@ -505,16 +554,18 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     $html.find('.dcc-remove-custom-detriment-btn').on('click', ev => {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
-      this.customDetriments.splice(idx, 1);
-      this.render(false);
+      reRenderWithState(ev, () => {
+        this.customDetriments.splice(idx, 1);
+      });
     });
 
     // Preset Loader
     $html.find('.dcc-preset-select').on('change', ev => {
       const presetId = ev.currentTarget.value;
       if (presetId) {
-        this.loadPreset(presetId);
-        this.render(false);
+        reRenderWithState(ev, () => {
+          this.loadPreset(presetId);
+        });
       }
     });
 

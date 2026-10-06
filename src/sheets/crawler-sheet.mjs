@@ -10,6 +10,7 @@ import { getHpPerBar } from '../apps/combat-metrics.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
 import { getRequiredGrindingHours, getAdvancementTarget } from '../data/grinding.mjs';
+import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -310,6 +311,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       label: s.label,
       selected: s.size === currentSizeInfo.size
     }));
+
+    // Prepare Race & Class options for Page 1 Core dropdowns
+    const rcContext = DCCRaceClassApplier.getRaceClassContext(actor);
+    context.raceOptions = rcContext.raceOptions;
+    context.classOptions = rcContext.classOptions;
+    context.hasCustomRace = rcContext.hasCustomRace;
+    context.hasCustomClass = rcContext.hasCustomClass;
+    context.currentRace = rcContext.currentRace;
+    context.currentClass = rcContext.currentClass;
 
     // Categorize embedded items
     context.attacks = [];
@@ -1487,6 +1497,28 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     if (!this.isEditable) return;
 
+    // Race Selection Dropdown
+    html.find('.dcc-race-selector').change(async ev => {
+      ev.preventDefault();
+      const raceName = ev.currentTarget.value;
+      if (typeof this.actor?.applyRace === 'function') {
+        await this.actor.applyRace(raceName);
+      } else {
+        await DCCRaceClassApplier.applyRace(this.actor, raceName);
+      }
+    });
+
+    // Class Selection Dropdown
+    html.find('.dcc-class-selector').change(async ev => {
+      ev.preventDefault();
+      const className = ev.currentTarget.value;
+      if (typeof this.actor?.applyClass === 'function') {
+        await this.actor.applyClass(className);
+      } else {
+        await DCCRaceClassApplier.applyClass(this.actor, className);
+      }
+    });
+
     // Save to PDF Export button
     html.find('.dcc-btn-save-pdf, .export-pdf-btn').click(ev => {
       ev.preventDefault();
@@ -2339,11 +2371,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     const item = await Item.fromDropData(data);
     if (!item) return false;
 
-    // If dropping a Race, Class, or Deity, automatically update actor detail string too
+    // If dropping a Race, Class, or Deity, automatically apply/update actor
     if (item.type === 'race') {
-      await this.actor.update({ 'system.details.race': item.name });
+      if (typeof this.actor?.applyRace === 'function') {
+        await this.actor.applyRace(item.name);
+      } else {
+        await DCCRaceClassApplier.applyRace(this.actor, item.name);
+      }
+      return item;
     } else if (item.type === 'class') {
-      await this.actor.update({ 'system.details.class': item.name });
+      if (typeof this.actor?.applyClass === 'function') {
+        await this.actor.applyClass(item.name);
+      } else {
+        await DCCRaceClassApplier.applyClass(this.actor, item.name);
+      }
+      return item;
     } else if (item.type === 'deity') {
       await this.actor.update({ 'system.details.deity': item.name });
     }

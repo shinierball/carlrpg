@@ -10,6 +10,7 @@ import {
   getEnduranceDC,
   getSafeGrindingThreshold
 } from '../data/grinding.mjs';
+import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -5653,5 +5654,39 @@ export class DCCActor extends BaseActor {
       return [...filtered].sort((a, b) => (a.sort || 0) - (b.sort || 0) || (a.name || '').localeCompare(b.name || ''));
     }
     return [...filtered].sort((a, b) => (a.sort || 0) - (b.sort || 0) || (a.name || '').localeCompare(b.name || ''));
+  }
+
+  /**
+   * Apply a race to this character, automatically reverting previous race benefits.
+   * @param {string} raceIdentifier - Race name or ID
+   * @returns {Promise<boolean>}
+   */
+  async applyRace(raceIdentifier) {
+    return DCCRaceClassApplier.applyRace(this, raceIdentifier);
+  }
+
+  /**
+   * Remove any applied race benefits from this character.
+   * @returns {Promise<boolean>}
+   */
+  async removeRace() {
+    return DCCRaceClassApplier.removeRace(this);
+  }
+
+  /**
+   * Apply a class to this character, automatically reverting previous class benefits.
+   * @param {string} classIdentifier - Class name or ID
+   * @returns {Promise<boolean>}
+   */
+  async applyClass(classIdentifier) {
+    return DCCRaceClassApplier.applyClass(this, classIdentifier);
+  }
+
+  /**
+   * Remove any applied class benefits from this character.
+   * @returns {Promise<boolean>}
+   */
+  async removeClass() {
+    return DCCRaceClassApplier.removeClass(this);
   }
 }

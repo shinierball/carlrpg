@@ -39,6 +39,7 @@ export class MockActor {
       };
     }
     this.items = itemsList;
+    this.flags = structuredClone(data.flags || {});
     this.sheet = {
       render: () => this
     };
@@ -162,6 +163,21 @@ export class MockActor {
       return deleted;
     }
     return [];
+  }
+  getFlag(scope, key) {
+    return this.flags?.[scope]?.[key];
+  }
+  async setFlag(scope, key, val) {
+    this.flags = this.flags || {};
+    this.flags[scope] = this.flags[scope] || {};
+    this.flags[scope][key] = val;
+    return this;
+  }
+  async unsetFlag(scope, key) {
+    if (this.flags?.[scope]) {
+      delete this.flags[scope][key];
+    }
+    return this;
   }
   static async createDocuments(dataArray = [], context = {}) {
     const ActorClass = CONFIG.Actor?.documentClass || MockActor;

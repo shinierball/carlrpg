@@ -1,3 +1,50 @@
+## 2.4.6
+
+### Dynamic Race & Class Selection with Non-Item Rank Preservation & Automated Reversal
+
+- **Character Sheet Core Dropdowns (`templates/actors/parts/page1-core.hbs`, `src/sheets/crawler-sheet.mjs`)**:
+  - Replaced static text inputs for Race and Class on Page 1 (Core) with structured `<select>` dropdowns categorized by optgroups.
+  - Race selector groups all 30 canonical playable races into *Earth Races (Silver Earth Box)*, *Alien Syndicate Races (Galactic Popularity)*, and custom world races.
+  - Class selector groups all 52 canonical classes into 10 archetype groups (*Arcanist*, *Barbarian*, *Bard*, *Cleric*, *Druid*, *Fighter*, *Mage*, *Monk*, *Paladin*, *Rogue*), *Multiclass & Special Classes*, and custom world classes.
+  - Custom or uncataloged races and classes display seamlessly with `(Custom)` tags without data loss.
+  - Omitted `name` attributes on select elements to ensure clean FormApplication / ApplicationV2 state handling without `FormDataExtended` array serialization bugs.
+- **Race & Class Application Engine (`src/data/race-class-applier.mjs`, `src/documents/actor.mjs`)**:
+  - Implemented `DCCRaceClassApplier` with full parsing and application for ability score deltas, granted skills, granted spells, creature size changes, and embedded Item documents.
+  - Attached `actor.applyRace(raceId)`, `actor.removeRace()`, `actor.applyClass(classId)`, and `actor.removeClass()` directly to `DCCActor`.
+  - Upgraded sheet drag-and-drop (`_onDropItem`) to automatically execute `applyRace` and `applyClass` when dropping Race or Class compendium items onto the sheet.
+- **Automated Reversal & Non-Item Rank Preservation**:
+  - Cleanly reverts previous race and class benefits when switching or removing:
+    - Reverts ability score modifiers from both `value` and `unenhanced` scores.
+    - Reverts creature size to base size (`Medium`).
+    - Removes embedded Race and Class Item documents.
+    - **Skill Rank Preservation**: Accurately subtracts granted ranks from skills. If a character possesses non-item ranks higher than the amount being removed (e.g. natural ranks from grinding or advancement), the skill item is retained at its remaining rank (`currentRank - grantedRank`). If no non-item ranks remain, the item document is cleanly deleted.
+- **Automated Unit Testing & Verification (`tests/race-class-selection.test.mjs`)**:
+  - Added 9 unit tests covering option group context generation, custom name handling, stat deltas, Dodge skill retention in a Human Fighter to Shapeshifter Mage transition, pure skill deletion, size updates/restorations, and drag-and-drop integration.
+  - 100% test pass rate across the full test suite (825 tests across 156 test suites).
+
+## 2.4.5
+
+### Focus Retention & Scroll Jump Prevention in Class & Race Builders
+
+- **Full Focus Retention Across Value Edits & State Changes (`src/apps/base-application.mjs`)**:
+  - Enhanced `_saveFocusState` to capture all interactive HTML attributes, including `data-*` attributes (`data-stat`, `data-delta`, `data-id`, `data-type`, `data-heritage`, `data-size`, `data-tier`, `data-index`), element tags, names, values, and cursor selection ranges (`selectionStart`, `selectionEnd`, `selectionDirection`).
+  - Synthesizes unique, robust CSS selectors (e.g. `button.dcc-stat-step-btn[data-stat="str"][data-delta="1"]`, `input.dcc-benefit-toggle[data-id="minor_darkvision"]`) with element `matchIndex` fallback to guarantee exact 1-to-1 matching across DOM re-renders.
+  - Refactored `_restoreFocusState` to focus restored elements using `target.focus({ preventScroll: true })`, eliminating browser viewport shifts and ensuring the active element stays focused without disorientation.
+  - Preserves cursor selection ranges and text positions when typing into search boxes, filter inputs, and name fields.
+- **Scroll Preservation Across Re-renders (`src/apps/base-application.mjs`, `src/apps/base-point-builder.mjs`)**:
+  - Implemented persistent scroll position tracking in `_saveScrollPositions` and `_restoreScrollPositions` covering `.dcc-studio-builder`, `.dcc-receipt-list`, `.dcc-studio-sidebar`, `.dcc-studio-layout`, and `.window-content`.
+  - Configured `scrollY` in `defaultOptions` and `DEFAULT_OPTIONS` across `DCCBasePointBuilderApp`, `DCCClassCreatorApp`, and `DCCRaceCreatorApp`.
+  - Added continuous scroll position listeners in `base-point-builder.mjs` to capture user scrolling in real time.
+- **Studio Interactive Routing Refactor (`src/apps/class-creator.mjs`, `src/apps/race-creator.mjs`)**:
+  - Wrapped all interactive studio state mutators (stepper clicks, heritage pills, archetype pills, size pills, catalog toggles, custom perks, search filtering, tier filters, and accordion expanding/collapsing) in `reRenderWithState(ev, fn)` which primes focus and scroll state saving prior to triggering re-renders.
+  - Preserved scroll states in programmatic helper methods (`setArchetype`, `toggleEarthClass`, `setHeritage`, `setSize`).
+- **Template & Stylesheet Accessibility Upgrades (`templates/apps/class-creator.hbs`, `templates/apps/race-creator.hbs`, `styles/dcc.css`)**:
+  - Converted class catalog accordion headers to native `<button type="button" class="dcc-accordion-header">` elements with accessible `:focus-visible` styling (`#c0392b` outline ring).
+  - Explicitly assigned `name="searchQuery"` to search inputs across both studio templates.
+- **Automated Unit Testing & Verification (`tests/builder-focus-scroll.test.mjs`)**:
+  - Added 14 unit tests validating data attribute selector synthesis, `preventScroll: true` invocation, cursor range preservation, scroll position restoration on `.dcc-studio-builder` and `.dcc-receipt-list`, and listener attachments.
+  - Full test suite passing with 0 failures (816 tests across 155 test suites).
+
 ## 2.4.4
 
 ### Class Creator Studio & Race Creator Studio Compendium Macros

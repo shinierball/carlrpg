@@ -25,7 +25,7 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
   });
 
   await t.test('2. DCC_MACROS dataset contains canonical macros with Observer permissions', () => {
-    assert.ok(DCC_MACROS.length >= 3, 'Must define canonical system macros');
+    assert.ok(DCC_MACROS.length >= 6, 'Must define canonical system macros (at least 6)');
 
     const creatorMacro = DCC_MACROS.find(m => m.name === 'Character Creator');
     assert.ok(creatorMacro, 'Must include Character Creator macro');
@@ -50,13 +50,25 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     assert.equal(grindMacro.type, 'script');
     assert.equal(grindMacro.ownership?.default, 2, 'Must have default: 2 (OBSERVER) for all users');
     assert.equal(grindMacro.flags?.['carl-rpg']?.macroKey, 'grind-hub');
+
+    const classMacro = DCC_MACROS.find(m => m.name === 'Class Creator Studio');
+    assert.ok(classMacro, 'Must include Class Creator Studio (Class Builder) macro');
+    assert.equal(classMacro.type, 'script');
+    assert.equal(classMacro.ownership?.default, 2, 'Must have default: 2 (OBSERVER) for all users');
+    assert.equal(classMacro.flags?.['carl-rpg']?.macroKey, 'class-creator');
+
+    const raceMacro = DCC_MACROS.find(m => m.name === 'Race Creator Studio');
+    assert.ok(raceMacro, 'Must include Race Creator Studio (Race Builder) macro');
+    assert.equal(raceMacro.type, 'script');
+    assert.equal(raceMacro.ownership?.default, 2, 'Must have default: 2 (OBSERVER) for all users');
+    assert.equal(raceMacro.flags?.['carl-rpg']?.macroKey, 'race-creator');
   });
 
   await t.test('3. Prebuilt LevelDB pack directory packs/macros exists and contains database files', () => {
     const packDir = path.resolve(__dirname, '../packs/macros');
     assert.ok(fs.existsSync(packDir), 'packs/macros directory must exist');
     const files = fs.readdirSync(packDir);
-    assert.ok(files.length > 0, 'packs/macros must contain LevelDB files');
+    assert.ok(files.some(f => f.endsWith('.ldb') || f.endsWith('.log') || f === 'CURRENT'), 'packs/macros must contain LevelDB database files');
   });
 
   await t.test('4. Macro script commands execute without error and invoke the respective apps', async () => {
@@ -64,12 +76,16 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     let metricsOpened = false;
     let sessionOpened = false;
     let grindOpened = false;
+    let classOpened = false;
+    let raceOpened = false;
 
     globalThis.window.carl = {
       openCrawlerCreator: () => { creatorOpened = true; return { rendered: true }; },
       openCombatMetrics: () => { metricsOpened = true; return { rendered: true }; },
       openSessionManager: () => { sessionOpened = true; return { rendered: true }; },
-      openGrindApp: () => { grindOpened = true; return { rendered: true }; }
+      openGrindApp: () => { grindOpened = true; return { rendered: true }; },
+      openClassCreator: () => { classOpened = true; return { rendered: true }; },
+      openRaceCreator: () => { raceOpened = true; return { rendered: true }; }
     };
 
     const creator = new Macro(DCC_MACROS[0]);
@@ -87,6 +103,30 @@ test('DCC RPG - System Macros & Compendium Integration', async (t) => {
     const grind = new Macro(DCC_MACROS.find(m => m.name === 'Start Party Grinding & Downtime'));
     await grind.execute();
     assert.equal(grindOpened, true, 'Grind macro command must invoke openGrindApp()');
+
+    const classMacro = new Macro(DCC_MACROS.find(m => m.name === 'Class Creator Studio'));
+    await classMacro.execute();
+    assert.equal(classOpened, true, 'Class Creator Studio macro command must invoke openClassCreator()');
+
+    const raceMacro = new Macro(DCC_MACROS.find(m => m.name === 'Race Creator Studio'));
+    await raceMacro.execute();
+    assert.equal(raceOpened, true, 'Race Creator Studio macro command must invoke openRaceCreator()');
+
+    // Test fallback invocation via game.dcc
+    globalThis.window.carl = null;
+    let fallbackClassRendered = false;
+    let fallbackRaceRendered = false;
+    globalThis.game.dcc.DCCClassCreatorApp = class {
+      render(force) { fallbackClassRendered = true; return this; }
+    };
+    globalThis.game.dcc.DCCRaceCreatorApp = class {
+      render(force) { fallbackRaceRendered = true; return this; }
+    };
+
+    await classMacro.execute();
+    assert.equal(fallbackClassRendered, true, 'Class Creator macro fallback invokes DCCClassCreatorApp');
+    await raceMacro.execute();
+    assert.equal(fallbackRaceRendered, true, 'Race Creator macro fallback invokes DCCRaceCreatorApp');
   });
 
   await t.test('5. setupInitialHotbar assigns slots 1, 2, and 3 on first login for users', async () => {

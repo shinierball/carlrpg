@@ -8762,5 +8762,126 @@ select.dcc-box-input.dcc-size-select,
   background: #e74c3c;
 }
 
+/* ========================================================================= */
+/* RACE CREATOR STUDIO STYLES */
+/* ========================================================================= */
+
+.dcc-race-creator-studio {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  background: #141419;
+  color: #eeeeee;
+  overflow: hidden;
+}
+
+.dcc-save-race-btn {
+  background: #8e44ad !important;
+  color: #ffffff !important;
+}
+
+.dcc-save-race-btn:hover {
+  background: #9b59b6 !important;
+  box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4);
+}
+
+/* Heritage Selector */
+.dcc-heritage-pill {
+  flex: 1;
+  background: #171722;
+  color: #aaaaaa;
+  border: 1px solid #333344;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.dcc-heritage-pill:hover {
+  background: #222233;
+  color: #ffffff;
+  border-color: #555566;
+}
+
+.dcc-heritage-pill.selected {
+  background: #1a2a3a;
+  color: #3498db;
+  border-color: #2980b9;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+}
+
+.dcc-heritage-pill[data-heritage="Earth"].selected {
+  background: #1c2b1f;
+  color: #2ecc71;
+  border-color: #27ae60;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.3);
+}
+
+.dcc-heritage-pill[data-heritage="Alien"].selected {
+  background: #2a1c2e;
+  color: #e056fd;
+  border-color: #be2edd;
+  box-shadow: 0 0 6px rgba(224, 86, 253, 0.3);
+}
+
+/* Size Selector Pills */
+.dcc-size-pills-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.dcc-size-pill {
+  background: #171722;
+  border: 1px solid #333344;
+  border-radius: 4px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dcc-size-pill:hover {
+  background: #222233;
+  border-color: #555566;
+}
+
+.dcc-size-pill.selected {
+  background: #2c2518;
+  border-color: #f39c12;
+  box-shadow: 0 0 6px rgba(243, 156, 18, 0.3);
+}
+
+.dcc-size-pill-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.dcc-size-pill-cost {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 10px;
+  color: #888899;
+}
+
+.dcc-size-pill.selected .dcc-size-pill-cost {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+
 
 

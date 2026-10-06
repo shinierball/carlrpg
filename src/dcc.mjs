@@ -15,6 +15,7 @@ import { DCCRapidBatchImportApp } from './apps/rapid-batch-import.mjs';
 import { DCCRapidTextParser } from './apps/rapid-text-parser.mjs';
 import { DCCCrawlerCreatorApp } from './apps/crawler-creator.mjs';
 import { DCCClassCreatorApp } from './apps/class-creator.mjs';
+import { DCCRaceCreatorApp } from './apps/race-creator.mjs';
 import { DCCBasePointBuilderApp } from './apps/base-point-builder.mjs';
 import { DCC_POINT_BUILD_BENEFITS, DCC_POINT_BUILD_DETRIMENTS } from './data/point-build-catalog.mjs';
 import { DCCAchievementManagerApp } from './apps/achievement-manager.mjs';
@@ -90,6 +91,7 @@ Hooks.once('init', async function() {
     DCCRapidTextParser,
     DCCCrawlerCreatorApp,
     DCCClassCreatorApp,
+    DCCRaceCreatorApp,
     DCCBasePointBuilderApp,
     pointBuildCatalog: {
       benefits: DCC_POINT_BUILD_BENEFITS,
@@ -118,6 +120,7 @@ Hooks.once('init', async function() {
       DCCBuffDebuffManager,
       DCCCrawlerCreatorApp,
       DCCClassCreatorApp,
+      DCCRaceCreatorApp,
       DCCBasePointBuilderApp,
       DCCAchievementManagerApp,
       DCCCombatArchiveApp,
@@ -395,7 +398,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/floor-clock-hud.hbs',
     'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs',
     'systems/carl-rpg/templates/apps/rapid-batch-import.hbs',
-    'systems/carl-rpg/templates/apps/class-creator.hbs'
+    'systems/carl-rpg/templates/apps/class-creator.hbs',
+    'systems/carl-rpg/templates/apps/race-creator.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -411,7 +415,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCRaceCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
           app.render(false);
         }
       }
@@ -473,6 +477,9 @@ Hooks.once('init', async function() {
     openClassCreator(options = {}) {
       return new DCCClassCreatorApp(options).render(true);
     },
+    openRaceCreator(options = {}) {
+      return new DCCRaceCreatorApp(options).render(true);
+    },
     tokenHUD: getCrawlerTokenHUD(),
     openHotbarHUD(actor, token) {
       return new DCCCrawlerHotbarHUD(actor, token).render(true);
@@ -482,7 +489,7 @@ Hooks.once('init', async function() {
     },
     reloadSheets() {
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCRaceCreatorApp) {
           app.render(false);
         }
       }
@@ -569,8 +576,8 @@ function injectItemDirectoryButtons(app, html) {
   });
 
   const classBtn = $(`
-    <button type="button" class="dcc-open-class-creator-btn" style="width: 100%; margin: 2px 0 6px 0; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 12px; background: #2c3e50; color: #f1c40f; border: 1.5px solid #000; border-radius: 3px; padding: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
-      <i class="fa-solid fa-graduation-cap"></i> Class Creator Studio
+    <button type="button" class="dcc-open-class-creator-btn" style="flex: 1; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 11px; background: #2c3e50; color: #f1c40f; border: 1.5px solid #000; border-radius: 3px; padding: 5px 2px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-graduation-cap"></i> Class Studio
     </button>
   `);
 
@@ -579,8 +586,22 @@ function injectItemDirectoryButtons(app, html) {
     new DCCClassCreatorApp().render(true);
   });
 
+  const raceBtn = $(`
+    <button type="button" class="dcc-open-race-creator-btn" style="flex: 1; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 11px; background: #4a235a; color: #e056fd; border: 1.5px solid #000; border-radius: 3px; padding: 5px 2px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-dna"></i> Race Studio
+    </button>
+  `);
+
+  raceBtn.click(ev => {
+    ev.preventDefault();
+    new DCCRaceCreatorApp().render(true);
+  });
+
+  const subBtnRow = $('<div style="display: flex; gap: 4px; margin: 2px 0 6px 0;"></div>');
+  subBtnRow.append(classBtn).append(raceBtn);
+
   const btnGroup = $('<div class="dcc-item-directory-actions" style="margin-bottom: 4px;"></div>');
-  btnGroup.append(btn).append(classBtn);
+  btnGroup.append(btn).append(subBtnRow);
 
   const headerActions = $html.find('.header-actions');
   if (headerActions.length) {

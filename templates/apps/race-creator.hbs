@@ -1,0 +1,489 @@
+<form class="dcc-race-creator-studio" autocomplete="off">
+  <!-- Top Studio Header -->
+  <header class="dcc-studio-header">
+    <div class="dcc-header-title-row">
+      <div class="dcc-header-title">
+        <i class="fa-solid fa-dna"></i>
+        <span>RACE CREATOR STUDIO</span>
+      </div>
+      <div class="dcc-header-subtitle">Official DCC RPG Custom Point Build System (Core Rulebook Page 158)</div>
+    </div>
+    
+    <div class="dcc-header-preset-row">
+      <label class="dcc-preset-label"><i class="fa-solid fa-folder-open"></i> Load Template / Preset:</label>
+      <select class="dcc-preset-select">
+        <option value="">-- Choose a Canonical Species or Preset --</option>
+        {{#each presets}}
+          <option value="{{this.id}}">{{this.name}}</option>
+        {{/each}}
+      </select>
+      <button type="button" class="dcc-btn dcc-reset-btn" title="Reset all fields to blank">
+        <i class="fa-solid fa-rotate-left"></i> Reset Blank
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 2-Column Body -->
+  <div class="dcc-studio-layout">
+    <!-- Left Column: Builder & Catalog -->
+    <div class="dcc-studio-builder">
+      <!-- 1. Identity, Heritage & Size -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-id-card"></i> 1. Race Identity, Heritage & Creature Size
+        </div>
+        <div class="dcc-form-grid">
+          <div class="dcc-form-group dcc-span-2">
+            <label>Race Name</label>
+            <input type="text" name="name" value="{{name}}" placeholder="e.g. Cat, Sasquatch, Cyber-Gnome, Tetrakai" required>
+          </div>
+
+          <!-- Heritage Selector -->
+          <div class="dcc-form-group dcc-span-2">
+            <label>Planetary Heritage <span class="dcc-label-hint">(Earth: Silver Earth Box & Earth Classes | Alien: Galactic Popularity)</span></label>
+            <div class="dcc-pills-row">
+              <button type="button" class="dcc-heritage-pill {{#if isEarth}}selected{{/if}}" data-heritage="Earth">
+                <i class="fa-solid fa-earth-americas"></i> Earth Heritage (Silver Earth Box + Earth Classes)
+              </button>
+              <button type="button" class="dcc-heritage-pill {{#if isAlien}}selected{{/if}}" data-heritage="Alien">
+                <i class="fa-solid fa-rocket"></i> Alien Syndicate Heritage (Galactic Popularity Appeal)
+              </button>
+            </div>
+          </div>
+
+          <!-- Creature Size Selector -->
+          <div class="dcc-form-group dcc-span-2">
+            <label>Creature Size Category <span class="dcc-label-hint">(Small/Tiny: 3 BP | Large/Huge: 3 BP | Medium/Petite: 0 BP)</span></label>
+            <div class="dcc-size-pills-row">
+              {{#each sizeOptions}}
+                <button type="button" class="dcc-size-pill {{#if this.isSelected}}selected{{/if}}" data-size="{{this.size}}" title="{{this.description}}">
+                  <span class="dcc-size-pill-name">{{this.label}}</span>
+                  <span class="dcc-size-pill-cost">{{#if (gt this.cost 0)}}+{{this.cost}} BP{{else}}0 BP{{/if}}</span>
+                </button>
+              {{/each}}
+            </div>
+          </div>
+
+          <div class="dcc-form-group dcc-span-2">
+            <label>Prerequisites</label>
+            <input type="text" name="prerequisites" value="{{prerequisites}}" placeholder="e.g. Strength 14+, Cat species only, None">
+          </div>
+
+          <div class="dcc-form-group dcc-span-2">
+            <label>Race Concept & Lore</label>
+            <textarea name="description" rows="2" placeholder="Describe the physical form, cultural background, and visual traits of this race...">{{description}}</textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Ability Score Deltas -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-bolt"></i> 2. Ability Score Adjustments
+          <span class="dcc-section-badge">+1 BP per +1 Stat | -2 Stats = +1 Extra BP</span>
+        </div>
+        <div class="dcc-stats-grid">
+          <!-- STR -->
+          <div class="dcc-stat-box">
+            <div class="dcc-stat-header">STR</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-stat-step-btn" data-stat="str" data-delta="-1">-</button>
+              <span class="dcc-stat-val {{#if (gt stats.str 0)}}positive{{/if}} {{#if (lt stats.str 0)}}negative{{/if}}">
+                {{#if (gt stats.str 0)}}+{{/if}}{{stats.str}}
+              </span>
+              <button type="button" class="dcc-stat-step-btn" data-stat="str" data-delta="1">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt stats.str 0)}}+{{stats.str}} BP{{else if (lt stats.str 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- DEX -->
+          <div class="dcc-stat-box">
+            <div class="dcc-stat-header">DEX</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-stat-step-btn" data-stat="dex" data-delta="-1">-</button>
+              <span class="dcc-stat-val {{#if (gt stats.dex 0)}}positive{{/if}} {{#if (lt stats.dex 0)}}negative{{/if}}">
+                {{#if (gt stats.dex 0)}}+{{/if}}{{stats.dex}}
+              </span>
+              <button type="button" class="dcc-stat-step-btn" data-stat="dex" data-delta="1">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt stats.dex 0)}}+{{stats.dex}} BP{{else if (lt stats.dex 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- CON -->
+          <div class="dcc-stat-box">
+            <div class="dcc-stat-header">CON</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-stat-step-btn" data-stat="con" data-delta="-1">-</button>
+              <span class="dcc-stat-val {{#if (gt stats.con 0)}}positive{{/if}} {{#if (lt stats.con 0)}}negative{{/if}}">
+                {{#if (gt stats.con 0)}}+{{/if}}{{stats.con}}
+              </span>
+              <button type="button" class="dcc-stat-step-btn" data-stat="con" data-delta="1">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt stats.con 0)}}+{{stats.con}} BP{{else if (lt stats.con 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- INT -->
+          <div class="dcc-stat-box">
+            <div class="dcc-stat-header">INT</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-stat-step-btn" data-stat="int" data-delta="-1">-</button>
+              <span class="dcc-stat-val {{#if (gt stats.int 0)}}positive{{/if}} {{#if (lt stats.int 0)}}negative{{/if}}">
+                {{#if (gt stats.int 0)}}+{{/if}}{{stats.int}}
+              </span>
+              <button type="button" class="dcc-stat-step-btn" data-stat="int" data-delta="1">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt stats.int 0)}}+{{stats.int}} BP{{else if (lt stats.int 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- CHA -->
+          <div class="dcc-stat-box">
+            <div class="dcc-stat-header">CHA</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-stat-step-btn" data-stat="cha" data-delta="-1">-</button>
+              <span class="dcc-stat-val {{#if (gt stats.cha 0)}}positive{{/if}} {{#if (lt stats.cha 0)}}negative{{/if}}">
+                {{#if (gt stats.cha 0)}}+{{/if}}{{stats.cha}}
+              </span>
+              <button type="button" class="dcc-stat-step-btn" data-stat="cha" data-delta="1">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt stats.cha 0)}}+{{stats.cha}} BP{{else if (lt stats.cha 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Racial Skills & Spells -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-graduation-cap"></i> 3. Inherent Racial Skills & Spells
+          <span class="dcc-section-badge">+2 BP per Rank | Max 5 Ranks of Passives</span>
+        </div>
+        
+        <!-- Add Skill Form -->
+        <div class="dcc-add-item-row">
+          <input type="text" name="newSkillName" placeholder="Skill Name (e.g. Cat-like Reflexes, Digging, Web)" class="dcc-flex-2">
+          <select name="newSkillRank" class="dcc-rank-select">
+            <option value="1">Rank 1 (2 BP)</option>
+            <option value="2">Rank 2 (4 BP)</option>
+            <option value="3">Rank 3 (6 BP)</option>
+            <option value="4">Rank 4 (8 BP)</option>
+            <option value="5">Rank 5 (10 BP)</option>
+          </select>
+          <label class="dcc-passive-checkbox-label" title="Passive skill points cannot exceed 5 points per standard rules">
+            <input type="checkbox" name="newSkillPassive">
+            <span>Passive</span>
+          </label>
+          <button type="button" class="dcc-btn dcc-add-skill-btn"><i class="fa-solid fa-plus"></i> Add Skill</button>
+        </div>
+
+        <!-- Skills List -->
+        {{#if skills.length}}
+          <div class="dcc-tags-list">
+            {{#each skills}}
+              <div class="dcc-tag-chip {{#if this.isPassive}}passive{{/if}}">
+                <span class="dcc-tag-name">+{{this.rank}} {{this.name}} {{#if this.isPassive}}<em>(Passive)</em>{{/if}}</span>
+                <span class="dcc-tag-cost">{{this.cost}} BP</span>
+                <button type="button" class="dcc-tag-remove dcc-remove-skill-btn" data-index="{{@index}}" title="Remove skill">×</button>
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+
+        <!-- Add Spell Form -->
+        <div class="dcc-add-item-row" style="margin-top: 10px;">
+          <input type="text" name="newSpellName" placeholder="Spell Name (e.g. Web Spell, Light Burst, Stone Meld)" class="dcc-flex-2">
+          <select name="newSpellRank" class="dcc-rank-select">
+            <option value="1">Rank 1 (2 BP)</option>
+            <option value="2">Rank 2 (4 BP)</option>
+            <option value="3">Rank 3 (6 BP)</option>
+          </select>
+          <label class="dcc-passive-checkbox-label">
+            <input type="checkbox" name="newSpellPassive">
+            <span>Passive</span>
+          </label>
+          <button type="button" class="dcc-btn dcc-add-spell-btn"><i class="fa-solid fa-plus"></i> Add Spell</button>
+        </div>
+
+        <!-- Spells List -->
+        {{#if spells.length}}
+          <div class="dcc-tags-list">
+            {{#each spells}}
+              <div class="dcc-tag-chip spell {{#if this.isPassive}}passive{{/if}}">
+                <span class="dcc-tag-name">⚡ +{{this.rank}} {{this.name}} {{#if this.isPassive}}<em>(Passive)</em>{{/if}}</span>
+                <span class="dcc-tag-cost">{{this.cost}} BP</span>
+                <button type="button" class="dcc-tag-remove dcc-remove-spell-btn" data-index="{{@index}}" title="Remove spell">×</button>
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+      </section>
+
+      <!-- 4. Benefit Accordion Drawers -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-award"></i> 4. Benefits Menu (Chapter 3 Catalog)
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="dcc-catalog-filter-bar">
+          <div class="dcc-search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="dcc-search-input" placeholder="Search perks (e.g. darkvision, resistance, climb, armor)..." value="{{searchQuery}}">
+          </div>
+          <div class="dcc-filter-pills">
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'all')}}active{{/if}}" data-filter="all">All</button>
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'minor')}}active{{/if}}" data-filter="minor">Minor (1 BP)</button>
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'moderate')}}active{{/if}}" data-filter="moderate">Moderate (2 BP)</button>
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'major')}}active{{/if}}" data-filter="major">Major (3 BP)</button>
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'extreme')}}active{{/if}}" data-filter="extreme">Extreme (4 BP)</button>
+            <button type="button" class="dcc-filter-pill {{#if (eq activeTierFilter 'epic')}}active{{/if}}" data-filter="epic">Epic (6 BP)</button>
+          </div>
+        </div>
+
+        <!-- Tier Accordions -->
+        <div class="dcc-accordion-container">
+          {{#each benefitTiers}}
+            <div class="dcc-accordion-tier {{this.id}} {{#if this.isOpen}}open{{/if}}">
+              <button type="button" class="dcc-accordion-header" data-tier="{{this.id}}">
+                <span class="dcc-tier-name">
+                  <i class="fa-solid {{#if this.isOpen}}fa-chevron-down{{else}}fa-chevron-right{{/if}}"></i>
+                  {{this.label}} ({{this.cost}} Build Points Each)
+                </span>
+                <span class="dcc-tier-counter">{{this.count}} Available</span>
+              </button>
+              
+              {{#if this.isOpen}}
+                <div class="dcc-accordion-body">
+                  {{#each this.items}}
+                    <label class="dcc-benefit-item {{#if this.isSelected}}selected{{/if}}">
+                      <input type="checkbox" class="dcc-benefit-toggle" data-id="{{this.id}}" {{#if this.isSelected}}checked{{/if}}>
+                      <div class="dcc-benefit-details">
+                        <div class="dcc-benefit-header-line">
+                          <span class="dcc-benefit-title">{{this.name}}</span>
+                          <span class="dcc-benefit-badge {{../id}}">+{{this.cost}} BP</span>
+                        </div>
+                        <div class="dcc-benefit-desc">{{this.description}}</div>
+                      </div>
+                    </label>
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </section>
+
+      <!-- 5. Detriments Accordion Drawer -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-triangle-exclamation"></i> 5. Detriments & Extra Build Points
+          <span class="dcc-section-badge">Refunds +1 to +3 BP | Max +5 Extra BP Standard Cap</span>
+        </div>
+
+        <div class="dcc-accordion-tier detriments {{#if detrimentsOpen}}open{{/if}}">
+          <button type="button" class="dcc-accordion-header" data-tier="detriments">
+            <span class="dcc-tier-name">
+              <i class="fa-solid {{#if detrimentsOpen}}fa-chevron-down{{else}}fa-chevron-right{{/if}}"></i>
+              Detriments Catalog (Drawbacks that grant Extra Build Points)
+            </span>
+            <span class="dcc-tier-counter">Grants Extra BP</span>
+          </button>
+
+          {{#if detrimentsOpen}}
+            <div class="dcc-accordion-body">
+              {{#each detrimentTiers}}
+                <div class="dcc-detriment-tier-subhead">{{this.label}} (+{{this.extraPoints}} Extra BP Each)</div>
+                {{#each this.items}}
+                  <label class="dcc-benefit-item detriment {{#if this.isSelected}}selected{{/if}}">
+                    <input type="checkbox" class="dcc-detriment-toggle" data-id="{{this.id}}" {{#if this.isSelected}}checked{{/if}}>
+                    <div class="dcc-benefit-details">
+                      <div class="dcc-benefit-header-line">
+                        <span class="dcc-benefit-title">{{this.name}}</span>
+                        <span class="dcc-detriment-badge">+{{this.extraPoints}} Extra BP</span>
+                      </div>
+                      <div class="dcc-benefit-desc">{{this.description}}</div>
+                    </div>
+                  </label>
+                {{/each}}
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      </section>
+
+      <!-- 6. Custom Freeform Perks -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 6. Custom Freeform Perks & GM Homebrew
+        </div>
+
+        <div class="dcc-custom-perks-box">
+          <div class="dcc-custom-row">
+            <input type="text" name="customBenefitName" placeholder="Custom Benefit Name (e.g. Tail Stinger, Echolation, Fire Breath)" class="dcc-flex-2">
+            <select name="customBenefitCost" class="dcc-rank-select">
+              <option value="1">Minor (1 BP)</option>
+              <option value="2">Moderate (2 BP)</option>
+              <option value="3">Major (3 BP)</option>
+              <option value="4">Extreme (4 BP)</option>
+              <option value="6">Epic (6 BP)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-custom-benefit-btn"><i class="fa-solid fa-plus"></i> Add Benefit</button>
+          </div>
+
+          {{#if customBenefits.length}}
+            <div class="dcc-tags-list" style="margin-top: 6px;">
+              {{#each customBenefits}}
+                <div class="dcc-tag-chip custom-benefit">
+                  <span>{{this.name}}</span>
+                  <span class="dcc-tag-cost">{{this.cost}} BP</span>
+                  <button type="button" class="dcc-tag-remove dcc-remove-custom-benefit-btn" data-index="{{@index}}">×</button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+
+          <div class="dcc-custom-row" style="margin-top: 8px;">
+            <input type="text" name="customDetrimentsName" placeholder="Custom Detriment Name (e.g. Hydrophobic, Slow Metabolism, Glass Jaw)" class="dcc-flex-2">
+            <select name="customDetrimentPoints" class="dcc-rank-select">
+              <option value="1">Minor (+1 Extra BP)</option>
+              <option value="2">Moderate (+2 Extra BP)</option>
+              <option value="3">Major (+3 Extra BP)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-custom-detriment-btn"><i class="fa-solid fa-plus"></i> Add Detriment</button>
+          </div>
+
+          {{#if customDetriments.length}}
+            <div class="dcc-tags-list" style="margin-top: 6px;">
+              {{#each customDetriments}}
+                <div class="dcc-tag-chip custom-detriment">
+                  <span>{{this.name}}</span>
+                  <span class="dcc-tag-cost">+{{this.extraPoints}} Extra BP</span>
+                  <button type="button" class="dcc-tag-remove dcc-remove-custom-detriment-btn" data-index="{{@index}}">×</button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: Terminal Ledger & Actions -->
+    <div class="dcc-studio-ledger-column">
+      <!-- Live Points Terminal -->
+      <div class="dcc-terminal-card">
+        <div class="dcc-terminal-header">
+          <i class="fa-solid fa-calculator"></i>
+          <span>RACE BUILD POINT LEDGER</span>
+        </div>
+
+        <div class="dcc-terminal-metrics">
+          <div class="dcc-metric-row">
+            <span class="dcc-metric-label">Base Budget:</span>
+            <span class="dcc-metric-value">{{ledger.baseBudget}} BP</span>
+          </div>
+          <div class="dcc-metric-row">
+            <span class="dcc-metric-label">Extra BP (Detriments):</span>
+            <span class="dcc-metric-value green">+{{ledger.extraPoints}} BP</span>
+          </div>
+          <div class="dcc-metric-row subtotal">
+            <span class="dcc-metric-label">Effective Budget:</span>
+            <span class="dcc-metric-value">{{ledger.effectiveBudget}} BP</span>
+          </div>
+          <div class="dcc-metric-row">
+            <span class="dcc-metric-label">Total Points Spent:</span>
+            <span class="dcc-metric-value red">{{ledger.pointsSpent}} BP</span>
+          </div>
+          <div class="dcc-metric-row total {{#if ledger.isOverbudget}}overbudget{{/if}}">
+            <span class="dcc-metric-label">Remaining Balance:</span>
+            <span class="dcc-metric-value {{#if (gte ledger.balance 0)}}green{{else}}red{{/if}}">
+              {{ledger.balance}} BP
+            </span>
+          </div>
+        </div>
+
+        <!-- Soft-Limit Warning Badges -->
+        <div class="dcc-status-badges-row">
+          {{#if ledger.isOverbudget}}
+            <div class="dcc-badge-alert overbudget">
+              <i class="fa-solid fa-triangle-exclamation"></i> OVER BUDGET (-{{ledger.overbudgetAmount}} BP)
+              <span class="dcc-badge-subtext">Soft limit: saving is still allowed per GM discretion</span>
+            </div>
+          {{else}}
+            <div class="dcc-badge-alert legal">
+              <i class="fa-solid fa-circle-check"></i> LEGAL RACE BUILD ({{ledger.balance}} BP Left)
+            </div>
+          {{/if}}
+
+          {{#if ledger.isDetrimentCapped}}
+            <div class="dcc-badge-warning">
+              <i class="fa-solid fa-circle-info"></i> Detriments exceed standard +5 Extra BP cap
+            </div>
+          {{/if}}
+
+          {{#if ledger.isPassiveExceeded}}
+            <div class="dcc-badge-warning">
+              <i class="fa-solid fa-circle-info"></i> Passive skills exceed standard 5-point limit
+            </div>
+          {{/if}}
+        </div>
+
+        <!-- Itemized Receipt Ledger -->
+        <div class="dcc-receipt-section">
+          <div class="dcc-receipt-header">
+            <i class="fa-solid fa-receipt"></i> Itemized Point Receipt
+          </div>
+          <div class="dcc-receipt-list">
+            {{#if ledger.receiptItems.length}}
+              {{#each ledger.receiptItems}}
+                <div class="dcc-receipt-item {{#if this.isExtra}}extra{{/if}}">
+                  <span class="dcc-receipt-label">{{this.label}}</span>
+                  <span class="dcc-receipt-cost {{#if this.isExtra}}green{{else}}red{{/if}}">
+                    {{#if this.isExtra}}+{{this.extraPoints}} Extra{{else}}{{this.cost}} BP{{/if}}
+                  </span>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="dcc-receipt-empty">No attributes or perks selected yet. Spend your 25 points!</div>
+            {{/if}}
+          </div>
+        </div>
+
+        <!-- 1-Click Action Hub -->
+        <div class="dcc-actions-hub">
+          <button type="button" class="dcc-btn dcc-save-race-btn" title="Create a new Race Item in the World Items directory">
+            <i class="fa-solid fa-floppy-disk"></i> Save to Items Directory
+          </button>
+          
+          <div class="dcc-btn-split-row">
+            <button type="button" class="dcc-btn dcc-export-json-btn" title="Export build configuration as JSON">
+              <i class="fa-solid fa-file-export"></i> Export JSON
+            </button>
+          </div>
+
+          <div class="dcc-apply-actor-box">
+            <label class="dcc-apply-label"><i class="fa-solid fa-user-plus"></i> Apply to Active Crawler:</label>
+            <div class="dcc-apply-row">
+              <select class="dcc-target-crawler-select">
+                <option value="">-- Select Crawler --</option>
+                {{#each crawlers}}
+                  <option value="{{this.id}}" {{#if this.isSelected}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+              </select>
+              <button type="button" class="dcc-btn dcc-apply-crawler-btn">
+                <i class="fa-solid fa-bolt"></i> Apply Race
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

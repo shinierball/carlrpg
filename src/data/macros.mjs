@@ -95,5 +95,55 @@ if (typeof window.carl?.openGrindApp === 'function') {
         macroKey: "grind-hub"
       }
     }
+  },
+  {
+    _id: "dccmacro00000005",
+    name: "Class Creator Studio",
+    type: "script",
+    img: "icons/svg/book.svg",
+    scope: "global",
+    command: `// Open DCC RPG Custom Class Creator Studio (Class Builder)
+if (typeof window.carl?.openClassCreator === 'function') {
+  window.carl.openClassCreator();
+} else if (typeof game.dcc?.DCCClassCreatorApp !== 'undefined') {
+  new game.dcc.DCCClassCreatorApp().render(true);
+} else if (typeof CONFIG.DCC?.DCCClassCreatorApp !== 'undefined') {
+  new CONFIG.DCC.DCCClassCreatorApp().render(true);
+} else {
+  ui.notifications?.warn('DCC Class Creator Studio is not available.');
+}`,
+    ownership: {
+      default: 2 // Observer: available to all users to view and execute
+    },
+    flags: {
+      "carl-rpg": {
+        macroKey: "class-creator"
+      }
+    }
+  },
+  {
+    _id: "dccmacro00000006",
+    name: "Race Creator Studio",
+    type: "script",
+    img: "icons/svg/paw.svg",
+    scope: "global",
+    command: `// Open DCC RPG Custom Race Creator Studio (Race Builder)
+if (typeof window.carl?.openRaceCreator === 'function') {
+  window.carl.openRaceCreator();
+} else if (typeof game.dcc?.DCCRaceCreatorApp !== 'undefined') {
+  new game.dcc.DCCRaceCreatorApp().render(true);
+} else if (typeof CONFIG.DCC?.DCCRaceCreatorApp !== 'undefined') {
+  new CONFIG.DCC.DCCRaceCreatorApp().render(true);
+} else {
+  ui.notifications?.warn('DCC Race Creator Studio is not available.');
+}`,
+    ownership: {
+      default: 2 // Observer: available to all users to view and execute
+    },
+    flags: {
+      "carl-rpg": {
+        macroKey: "race-creator"
+      }
+    }
   }
 ];

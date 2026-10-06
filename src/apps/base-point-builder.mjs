@@ -18,6 +18,7 @@ import {
   DCC_POINT_BUILD_DETRIMENTS,
   DCC_CANONICAL_PRESETS
 } from '../data/point-build-catalog.mjs';
+import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 
 export class DCCBasePointBuilderApp extends DCCBaseApplication {
   constructor(options = {}) {
@@ -32,6 +33,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     this.description = options.description || '';
     this.prerequisites = options.prerequisites || '';
     this.notes = options.notes || '';
+    this.heritage = options.heritage || 'Earth';
+    this.size = options.size !== undefined ? Number(options.size) : 4;
 
     // Ability Score Deltas (starts at 0)
     this.stats = {
@@ -263,6 +266,24 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
   // =========================================================================
 
   /**
+   * Calculate point cost for creature size (Races only).
+   * Size 1 (Tiny) or Size 2 (Small): 3 BP (Major Benefit per official catalog).
+   * Size 5 (Large) or Size 6 (Huge): 3 BP (Major Benefit per official catalog).
+   * Size 3 (Petite) or Size 4 (Medium): 0 BP baseline.
+   */
+  calculateSizeCost() {
+    if (this.builderType !== 'race') return 0;
+    const sz = Number(this.size) || 4;
+    if (sz === 1 || sz === 2) return 3;
+    if (sz >= 5) return 3;
+    return 0;
+  }
+
+  getSizeName() {
+    return getSizeInfo(this.size).name;
+  }
+
+  /**
    * Calculate point cost for ability score deltas.
    * Positive points: 1 BP per +1 stat.
    * Negative points: 1 extra BP per -2 penalty (handled under detriments).
@@ -374,11 +395,13 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     const benefitData = this.calculateBenefitPoints();
     const detrimentData = this.calculateDetrimentPoints();
 
+    const sizeCost = this.calculateSizeCost();
     const pointsSpent =
       statData.positiveCost +
       skillData.skillCost +
       skillData.spellCost +
-      benefitData.totalBenefitCost;
+      benefitData.totalBenefitCost +
+      sizeCost;
 
     const extraPoints = detrimentData.totalExtraPoints;
     const effectiveBudget = this.baseBudget + extraPoints;
@@ -472,6 +495,16 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       });
     }
 
+    // Size Cost (for Races)
+    if (sizeCost > 0) {
+      receiptItems.push({
+        type: 'size',
+        label: `Size ${this.size} (${this.getSizeName()})`,
+        cost: sizeCost,
+        isExtra: false
+      });
+    }
+
     return {
       baseBudget: this.baseBudget,
       extraPoints,
@@ -490,6 +523,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       spellCost: skillData.spellCost,
       benefitCost: benefitData.catalogCost,
       customCost: benefitData.customCost,
+      sizeCost,
       detrimentExtraPoints: Math.min(5, detrimentData.catalogExtra + detrimentData.customExtra),
       rawDetrimentPoints: detrimentData.catalogExtra + detrimentData.customExtra,
       receiptItems,
@@ -532,6 +566,10 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       overbudgetAmount: ledger.overbudgetAmount,
       isLegal: ledger.isLegal,
       hasSkillRankCapWarning: ledger.hasSkillRankCapWarning,
+      heritage: this.heritage,
+      size: this.size,
+      sizeName: this.getSizeName(),
+      sizeCost: ledger.sizeCost,
       statCost: ledger.statCost,
       statPenaltyExtra: ledger.statPenaltyExtra,
       skillCost: ledger.skillCost,
@@ -630,6 +668,9 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         description: descHtml,
         abilities: abilitiesHtml,
         prerequisites: this.prerequisites || '',
+        heritage: this.heritage || 'Earth',
+        size: this.builderType === 'race' ? `${this.getSizeName()} (${this.size})` : 'Medium (4)',
+        sizeNumber: this.size,
         statModifiers: { ...this.stats },
         bonuses: {
           stats: { ...this.stats }
@@ -723,6 +764,10 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     // 3. Apply stat modifier deltas
     const currentStats = actor.system?.abilities || {};
     const updates = {};
+    if (this.builderType === 'race') {
+      updates['system.details.race'] = this.name || 'Custom Race';
+      updates['system.attributes.size'] = this.getSizeName();
+    }
     for (const [stat, delta] of Object.entries(this.stats)) {
       if (delta !== 0 && currentStats[stat]) {
         const cur = Number(currentStats[stat].value) || 10;

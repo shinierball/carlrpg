@@ -1,3 +1,40 @@
+## 2.4.4
+
+### Class Creator Studio & Race Creator Studio Compendium Macros
+
+- **Canonical System Macros Added (`src/data/macros.mjs`, `packs/macros`)**:
+  - Added **Class Creator Studio** macro (`_id: "dccmacro00000005"`, `macroKey: "class-creator"`, icon: `icons/svg/book.svg`) with Player Observer permissions (default: 2) to launch `DCCClassCreatorApp` directly from the hotbar or compendium.
+  - Added **Race Creator Studio** macro (`_id: "dccmacro00000006"`, `macroKey: "race-creator"`, icon: `icons/svg/paw.svg`) with Player Observer permissions (default: 2) to launch `DCCRaceCreatorApp` directly from the hotbar or compendium.
+  - Commands feature clean execution chaining through `window.carl`, `game.dcc`, and `CONFIG.DCC` fallbacks with user notifications on failure.
+- **Compendium Database Compilation (`scripts/build-packs.mjs`, `packs/macros`)**:
+  - Rebuilt LevelDB `carl-rpg.macros` compendium pack now containing all 6 canonical macros (*Character Creator*, *Open Combat Metrics*, *Party Progression and Session Hub*, *Start Party Grinding & Downtime*, *Class Creator Studio*, *Race Creator Studio*).
+- **Automated Unit Testing & Verification (`tests/macros.test.mjs`)**:
+  - Enhanced automated test suite checking presence, Player Observer permissions, macroKey flags, database file integrity, and app launch execution for both new macros.
+  - 100% test pass rate across the full test suite (802 tests across 148 test suites).
+
+## 2.4.3
+
+### Custom Race Creator Studio (Option A: "Terminal Ledger" Accordion Studio)
+
+- **Race Creator Studio Application (`src/apps/race-creator.mjs`, `templates/apps/race-creator.hbs`)**:
+  - Implemented Option A: The "Terminal Ledger" Accordion Studio for building custom CarlRPG races, sub-species, and alien lineages based on Chapter 3 (Pages 128–143 & Point Build Rules on Page 158).
+  - Configured with a dedicated **25 Base Build Point (BP)** budget strictly separate from Class Build Points.
+  - **Earth vs. Alien Heritage Selection**:
+    - **Earth Heritage**: Automatically awards a guaranteed *Silver Earth Box* containing an *Earth Hobby Skill Potion* (3 ranks in a hobby skill of choice) and preserves eligibility for Earth Classes.
+    - **Alien Heritage**: Awards the *Galactic Fanbase Popularity* perk (+1 popularity appeal across Syndicate planets) while restricting Earth-specific classes.
+  - **Creature Sizing Engine**: Interactive size selector across all canonical sizes (Size 1 Tiny, Size 2 Small, Size 3 Petite, Size 4 Medium, Size 5 Large, Size 6 Huge). Diminutive sizes (Size 1 & 2) and bulky sizes (Size 5 & 6) automatically account for the Major Benefit cost (3 BP), while standard Medium / Petite sizes cost 0 BP.
+  - **Live Terminal Ledger Point Accounting**: Real-time tracking of stat modifiers (+1 BP per stat bonus, +1 extra BP per $-2$ penalty), skill/spell ranks (+2 BP per rank), passive skill cap warnings ($>5$), catalog benefits, and detriments (with $+5$ extra BP cap warning).
+  - **Soft Limit Non-Enforcement Policy**: Over-budget builds display high-contrast warning badges (`[OVER BUDGET: -X BP]`) without preventing the user from saving, exporting, or applying to actors.
+  - **Canonical Race Presets**: Quick-load canonical race profiles (e.g. *Cat*, *Classic Dwarf*, *High Elf*, *Arachnid*, *Pocket Kuma*, *Bune*) with pre-configured stats, sizes, and perks.
+  - **1-Click Application & Export**: Save directly to the World Items directory (`type: 'race'`), export/import formatted JSON configurations, or apply directly to a Crawler Actor with automated size updates, ability score adjustments, and embedded racial item/skill generation.
+- **Directory Sidebar Integration (`src/dcc.mjs`, `styles/dcc.css`)**:
+  - Injected `[ 🧬 Race Creator Studio ]` button in the Foundry Items Directory sidebar alongside `[ 🎓 Class Creator Studio ]`.
+  - Added global developer shortcut `window.carl.openRaceCreator()`.
+  - Preloaded template `systems/carl-rpg/templates/apps/race-creator.hbs` in `loadTemplates`.
+- **Automated Unit Testing & Verification (`tests/race-creator.test.mjs`)**:
+  - 10 comprehensive unit tests covering initial state, heritage switching, creature size pricing, ability stat accounting, skill/passive caps, detriments capping, soft limits, preset loading (Cat race), JSON serialization, and crawler actor application.
+  - Full test suite passing with 0 failures (802 tests across 148 suites).
+
 ## 2.4.2
 
 ### Custom Class Creator Studio (Option A: "Terminal Ledger" Accordion Studio)

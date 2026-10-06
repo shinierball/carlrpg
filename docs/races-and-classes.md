@@ -296,7 +296,36 @@ The **Class Creator Studio** (Option A: *"Terminal Ledger" Accordion Studio*) pr
   - **Create World Item**: Compiles a valid Foundry Item document of type `'class'` into the World Items Directory.
   - **Apply to Crawler**: Embeds the class item directly onto a selected active crawler, updating ability scores and embedding granted skill/spell items automatically.
   - **JSON Export / Import**: Instant backup and sharing across campaigns.
-- **Sidebar Integration**:
-  - Injected directly into the Foundry Items Directory sidebar via `[ 🎓 Class Creator Studio ]` button.
+- **Sidebar & Macro Integration**:
+  - Injected directly into the Foundry Items Directory sidebar via `[ 🎓 Class Studio ]` button.
   - Global developer shortcut: `window.carl.openClassCreator()`.
+  - Canonical system macro included in the `carl-rpg.macros` compendium pack as **"Class Creator Studio"** (`macroKey: "class-creator"`).
+
+---
+
+## 7. Custom Race Creator Studio (`DCCRaceCreatorApp`)
+
+The **Race Creator Studio** implements an interactive creation terminal for building legal or homebrew playable species based on Chapter 3 (Pages 128–143 & 158–164):
+
+### Architecture & Design
+- **Base Budget**: Exactly **25 Race Build Points** (independent from class build points per official DCC rules).
+- **Heritage Selection (Earth vs. Alien)**:
+  - **Earth Heritage**: Includes natural Earth species, folklore, mythology, and mutations. Automatically awards the **Silver Earth Box** (with guaranteed Earth Hobby Skill Potion) and grants unrestricted access to Earth Classes.
+  - **Alien Syndicate Heritage**: Species hailing from syndicate worlds. Automatically awards the **Galactic Fanbase Popularity** perk (representing planetary fanbases and extra popularity opportunities) and limits class choices to galactic/universal archetypes.
+- **Creature Size Pricing & Integration**:
+  - Standardized sizing from Size 1 to Size 6.
+  - **Size 1 (Tiny) & Size 2 (Small)**: $+3$ Build Points (Major Benefit: evasion and traversal bonuses).
+  - **Size 3 (Petite) & Size 4 (Medium)**: $0$ Build Points (Standard baseline).
+  - **Size 5 (Large) & Size 6 (Huge)**: $+3$ Build Points (Major Benefit: reach, carry capacity, and physical presence).
+- **Soft-Limit Non-Enforcement Policy**:
+  - Displays exact live costs for positive ability scores (+1 BP), stat penalties (+1 Extra BP per $-2$ penalty), racial skills/spells (+2 BP per rank), size costs, benefits, and detriments.
+  - Over-budget builds display a high-contrast warning badge (`[OVER BUDGET]`), but **never block item creation, JSON export, or actor application**.
+- **1-Click Application & Export**:
+  - **Save to Items Directory**: Compiles an official Item document of type `'race'` into the World Items Directory.
+  - **Apply to Crawler**: Updates the target crawler's race (`system.details.race`), size rating (`system.attributes.size`), ability scores, and embeds granted racial skills and spells automatically.
+  - **JSON Export / Import**: Instant backup and sharing across campaigns.
+- **Sidebar & Macro Integration**:
+  - Injected directly into the Foundry Items Directory sidebar via `[ 🧬 Race Studio ]` button.
+  - Global developer shortcut: `window.carl.openRaceCreator()`.
+  - Canonical system macro included in the `carl-rpg.macros` compendium pack as **"Race Creator Studio"** (`macroKey: "race-creator"`).
 

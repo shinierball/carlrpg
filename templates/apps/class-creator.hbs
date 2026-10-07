@@ -391,6 +391,66 @@
           {{/if}}
         </div>
       </section>
+
+      <!-- 7. Unique Permanent Buffs & Debuffs -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-shield-heart"></i> 7. Unique Permanent Buffs & Debuffs
+          <span class="dcc-section-badge">Embedded Status Conditions</span>
+        </div>
+
+        <div class="dcc-custom-adder-box">
+          <!-- Add Custom Buff -->
+          <div class="dcc-entry-adder-row">
+            <input type="text" name="newBuffName" placeholder="Buff Name (e.g. Hearty Cooked Meal, Shield Wall)" style="flex: 2;">
+            <input type="text" name="newBuffDesc" placeholder="Description / Effect" style="flex: 2;">
+            <select name="newBuffTier">
+              <option value="minor">1 BP (Minor)</option>
+              <option value="moderate" selected>2 BP (Moderate)</option>
+              <option value="major">3 BP (Major)</option>
+              <option value="extreme">4 BP (Extreme)</option>
+              <option value="epic">5 BP (Epic)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-buff-btn"><i class="fa-solid fa-plus"></i> Add Buff</button>
+          </div>
+
+          {{#if buffs.length}}
+            <div class="dcc-entry-list">
+              {{#each buffs}}
+                <div class="dcc-entry-item">
+                  <span class="dcc-entry-name"><i class="fa-solid fa-sparkles"></i> {{this.name}}{{#if this.description}} <em>({{this.description}})</em>{{/if}}</span>
+                  <span class="dcc-entry-cost">+{{this.cost}} BP</span>
+                  <button type="button" class="dcc-btn-icon dcc-remove-buff-btn" data-index="{{@index}}" title="Remove"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+
+          <!-- Add Custom Debuff -->
+          <div class="dcc-entry-adder-row" style="margin-top: 10px;">
+            <input type="text" name="newDebuffName" placeholder="Debuff Name (e.g. Necrotic Vulnerability, Blood Lust)" style="flex: 2;">
+            <input type="text" name="newDebuffDesc" placeholder="Description / Drawback" style="flex: 2;">
+            <select name="newDebuffTier">
+              <option value="minor">Minor (+1 BP)</option>
+              <option value="moderate" selected>Moderate (+2 BP)</option>
+              <option value="major">Major (+3 BP)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-debuff-btn"><i class="fa-solid fa-plus"></i> Add Debuff</button>
+          </div>
+
+          {{#if debuffs.length}}
+            <div class="dcc-entry-list">
+              {{#each debuffs}}
+                <div class="dcc-entry-item detriment">
+                  <span class="dcc-entry-name"><i class="fa-solid fa-triangle-exclamation"></i> {{this.name}}{{#if this.description}} <em>({{this.description}})</em>{{/if}}</span>
+                  <span class="dcc-entry-cost refund">+{{this.extraPoints}} Extra BP</span>
+                  <button type="button" class="dcc-btn-icon dcc-remove-debuff-btn" data-index="{{@index}}" title="Remove"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      </section>
     </div>
 
     <!-- Right Column: Sticky Point Ledger & Receipt -->

@@ -389,6 +389,66 @@
           {{/if}}
         </div>
       </section>
+
+      <!-- 7. Unique Permanent Buffs & Debuffs -->
+      <section class="dcc-builder-section">
+        <div class="dcc-section-title">
+          <i class="fa-solid fa-shield-heart"></i> 7. Unique Permanent Buffs & Debuffs
+          <span class="dcc-section-badge">Embedded Status Conditions</span>
+        </div>
+
+        <div class="dcc-custom-perks-box">
+          <!-- Add Buff -->
+          <div class="dcc-custom-row">
+            <input type="text" name="newBuffName" placeholder="Buff Name (e.g. Fire Immunity, Heat Adaptation)" class="dcc-flex-2">
+            <input type="text" name="newBuffDesc" placeholder="Description / Effect" class="dcc-flex-2">
+            <select name="newBuffTier" class="dcc-rank-select">
+              <option value="minor">Minor (1 BP)</option>
+              <option value="moderate" selected>Moderate (2 BP)</option>
+              <option value="major">Major (3 BP)</option>
+              <option value="extreme">Extreme (4 BP)</option>
+              <option value="epic">Epic (5 BP)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-buff-btn"><i class="fa-solid fa-plus"></i> Add Buff</button>
+          </div>
+
+          {{#if buffs.length}}
+            <div class="dcc-tags-list" style="margin-top: 6px;">
+              {{#each buffs}}
+                <div class="dcc-tag-chip custom-benefit">
+                  <span><i class="fa-solid fa-sparkles"></i> {{this.name}}{{#if this.description}} <em>({{this.description}})</em>{{/if}}</span>
+                  <span class="dcc-tag-cost">{{this.cost}} BP</span>
+                  <button type="button" class="dcc-tag-remove dcc-remove-buff-btn" data-index="{{@index}}">×</button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+
+          <!-- Add Debuff -->
+          <div class="dcc-custom-row" style="margin-top: 8px;">
+            <input type="text" name="newDebuffName" placeholder="Debuff Name (e.g. Ice Vulnerability, Inventory Heat Siphon)" class="dcc-flex-2">
+            <input type="text" name="newDebuffDesc" placeholder="Description / Drawback" class="dcc-flex-2">
+            <select name="newDebuffTier" class="dcc-rank-select">
+              <option value="minor">Minor (+1 BP)</option>
+              <option value="moderate" selected>Moderate (+2 BP)</option>
+              <option value="major">Major (+3 BP)</option>
+            </select>
+            <button type="button" class="dcc-btn dcc-add-debuff-btn"><i class="fa-solid fa-plus"></i> Add Debuff</button>
+          </div>
+
+          {{#if debuffs.length}}
+            <div class="dcc-tags-list" style="margin-top: 6px;">
+              {{#each debuffs}}
+                <div class="dcc-tag-chip custom-detriment">
+                  <span><i class="fa-solid fa-triangle-exclamation"></i> {{this.name}}{{#if this.description}} <em>({{this.description}})</em>{{/if}}</span>
+                  <span class="dcc-tag-cost">+{{this.extraPoints}} Extra BP</span>
+                  <button type="button" class="dcc-tag-remove dcc-remove-debuff-btn" data-index="{{@index}}">×</button>
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      </section>
     </div>
 
     <!-- Right Column: Sticky Point Ledger & Receipt -->

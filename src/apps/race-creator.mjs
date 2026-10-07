@@ -621,14 +621,24 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const nameInput = $html.find('input[name="newSkillName"]');
       const rankInput = $html.find('select[name="newSkillRank"]');
       const passiveInput = $html.find('input[name="newSkillPassive"]');
+      const statInput = $html.find('select[name="newSkillStat"]');
+      const checkTypeInput = $html.find('select[name="newSkillCheckType"]');
+      const baseDamageInput = $html.find('input[name="newSkillBaseDamage"]');
+      const canGainRanksInput = $html.find('input[name="newSkillCanGainRanks"]');
+      const cooldownInput = $html.find('input[name="newSkillCooldown"]');
 
       const name = nameInput.val().trim();
       const rank = Number(rankInput.val()) || 1;
       const isPassive = Boolean(passiveInput.prop('checked'));
+      const stat = statInput.val() || 'str';
+      const checkType = checkTypeInput.val() || 'Stat Check';
+      const baseDamage = baseDamageInput.val()?.trim() || '';
+      const canGainRanks = canGainRanksInput.length ? Boolean(canGainRanksInput.prop('checked')) : true;
+      const cooldown = cooldownInput.val()?.trim() || 'None';
 
       if (name) {
         reRenderWithState(ev, () => {
-          this.skills.push({ name, rank, isPassive, cost: rank * 2 });
+          this.addSkill({ name, rank, isPassive, stat, checkType, baseDamage, canGainRanks, cooldown });
         });
       }
     });
@@ -638,7 +648,51 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       ev.preventDefault();
       const idx = Number($(ev.currentTarget).data('index'));
       reRenderWithState(ev, () => {
-        this.skills.splice(idx, 1);
+        this.removeSkill(idx);
+      });
+    });
+
+    // Add Custom Buff
+    $html.find('.dcc-add-buff-btn').on('click', ev => {
+      ev.preventDefault();
+      const name = $html.find('input[name="newBuffName"]').val().trim();
+      const desc = $html.find('input[name="newBuffDesc"]').val()?.trim() || '';
+      const tier = $html.find('select[name="newBuffTier"]').val() || 'moderate';
+      if (name) {
+        reRenderWithState(ev, () => {
+          this.addBuff({ name, description: desc, tier });
+        });
+      }
+    });
+
+    // Remove Custom Buff
+    $html.find('.dcc-remove-buff-btn').on('click', ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      reRenderWithState(ev, () => {
+        this.removeBuff(idx);
+      });
+    });
+
+    // Add Custom Debuff
+    $html.find('.dcc-add-debuff-btn').on('click', ev => {
+      ev.preventDefault();
+      const name = $html.find('input[name="newDebuffName"]').val().trim();
+      const desc = $html.find('input[name="newDebuffDesc"]').val()?.trim() || '';
+      const tier = $html.find('select[name="newDebuffTier"]').val() || 'moderate';
+      if (name) {
+        reRenderWithState(ev, () => {
+          this.addDebuff({ name, description: desc, tier });
+        });
+      }
+    });
+
+    // Remove Custom Debuff
+    $html.find('.dcc-remove-debuff-btn').on('click', ev => {
+      ev.preventDefault();
+      const idx = Number($(ev.currentTarget).data('index'));
+      reRenderWithState(ev, () => {
+        this.removeDebuff(idx);
       });
     });
 

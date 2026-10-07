@@ -588,9 +588,9 @@ export const DCC_RACES = [
       "size": "Medium (4)",
       "prerequisites": "",
       "description": "<p>Accustomed to the darkness and navigating via the stars, Night Elves share the lithe androgynous appearance of their fellow elven kin, but their skin tones cover the spectrum of cool colors from teal to deep purple. Thank Drizzt and Blizzard for making these an Earth staple. Night Elves have longer, wider ears than other elves and an even more acute sense of hearing. Their eyes are accustomed to low light, but they have difficulty seeing in bright light, whether natural or artificial. The high Intelligence and Dexterity of Night Elves make them an ideal choice for Arcanists, Rogues, and Mages.</p>",
-      "abilities": "<ul><li>-3 Intelligence and Dexterity</li><li>+3 Acut e Ears and Hide in Shadows Skills</li><li>Can see total darkness</li><li>Gain Ad vantage when you use the Hide in Shadows Skill at night</li><li>Once per da y, can instruct the shadow of a living thing to use the Taunt Skill at Rank equal to Floor Number (and no Stat Mod) to pull attacks away from you</li><li>Hide in Shadow s and one crafting Skill of your choice can be raised to Rank 20</li></ul>",
+      "abilities": "<ul><li>+3 Intelligence and Dexterity</li><li>+3 Acut e Ears and Hide in Shadows Skills</li><li>Can see total darkness</li><li>Gain Ad vantage when you use the Hide in Shadows Skill at night</li><li>Once per da y, can instruct the shadow of a living thing to use the Taunt Skill at Rank equal to Floor Number (and no Stat Mod) to pull attacks away from you</li><li>Hide in Shadow s and one crafting Skill of your choice can be raised to Rank 20</li></ul>",
       "perks": [
-        "-3 Intelligence and Dexterity",
+        "+3 Intelligence and Dexterity",
         "+3 Acut e Ears and Hide in Shadows Skills",
         "Can see total darkness",
         "Gain Ad vantage when you use the Hide in Shadows Skill at night",
@@ -599,9 +599,9 @@ export const DCC_RACES = [
       ],
       "stats": {
         "str": 0,
-        "dex": -3,
+        "dex": 3,
         "con": 0,
-        "int": -3,
+        "int": 3,
         "cha": 0
       },
       "drBonus": 0,
@@ -688,11 +688,11 @@ export const DCC_RACES = [
         "Once per floor, you can spend an Action to remove any single Debuff you’re suffering from, even Injuries"
       ],
       "stats": {
-        "str": 0,
-        "dex": 0,
-        "con": 0,
-        "int": 0,
-        "cha": 0
+        "str": 2,
+        "dex": 2,
+        "con": 2,
+        "int": 2,
+        "cha": 2
       },
       "drBonus": 0,
       "movement": {
@@ -754,15 +754,69 @@ export const DCC_RACES = [
       "skills": [
         {
           "name": "Endurance",
-          "rank": 1
+          "rank": 1,
+          "stat": "con",
+          "checkType": "Standard",
+          "canGainRanks": true,
+          "category": "Combat"
+        },
+        {
+          "name": "Lava Burst",
+          "rank": 1,
+          "stat": "con",
+          "checkType": "Stat Check",
+          "baseDamage": "1d8+F",
+          "canGainRanks": false,
+          "cooldown": "None",
+          "category": "Combat",
+          "notes": "As an Action, make a Con Stat Check. On success, deal 1d8+F Fire damage, 5ft Burst radius."
+        },
+        {
+          "name": "Volcanic Sprint",
+          "rank": 1,
+          "stat": "dex",
+          "checkType": "Standard",
+          "canGainRanks": false,
+          "cooldown": "1/Day",
+          "category": "Utility",
+          "notes": "Once per day, double your Move for 20 seconds."
         }
       ],
-      "spells": [
+      "buffs": [
         {
-          "name": "two",
-          "rank": 2
+          "name": "Harsh Heat Adaptation & Aquatic Respiration",
+          "tier": "Major",
+          "description": "No Survival Checks needed in harsh heat conditions and can breathe underwater."
+        },
+        {
+          "name": "Fire Immunity",
+          "tier": "Major",
+          "description": "Immune to Fire damage."
+        },
+        {
+          "name": "Burrowing Movement",
+          "tier": "Minor",
+          "description": "Ability to burrow at 20ft speed."
         }
-      ]
+      ],
+      "debuffs": [
+        {
+          "name": "Ice Vulnerability",
+          "tier": "Minor",
+          "description": "Vulnerable to Ice damage."
+        },
+        {
+          "name": "Inventory Heat Siphon",
+          "tier": "Minor",
+          "description": "Lose 1 Health Bar slot each time you access your Inventory (not Hotlist)."
+        },
+        {
+          "name": "Conspicuous Molten Stature",
+          "tier": "Minor",
+          "description": "Disadvantage on Checks to conceal your presence or nature (such as Stealth)."
+        }
+      ],
+      "spells": []
     }
   },
   {
@@ -812,12 +866,7 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": [
-        {
-          "name": "a",
-          "rank": 2
-        }
-      ]
+      "spells": []
     }
   },
   {

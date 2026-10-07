@@ -132,9 +132,9 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     await actor.applyClass('Boring Ol’ Fighter');
     assert.equal(actor.system.details.class, 'Boring Ol’ Fighter');
 
-    // Base stats after Fighter: STR=12, CON=12, DEX=10, INT=10, CHA=10
-    assert.equal(actor.system.abilities.str.value, 12);
-    assert.equal(actor.system.abilities.con.value, 12);
+    // Base stats after Human (+2 all) + Fighter (+2 STR, +2 CON): STR=14, CON=14, DEX=12, INT=12, CHA=12
+    assert.equal(actor.system.abilities.str.value, 14);
+    assert.equal(actor.system.abilities.con.value, 14);
 
     // Dodge is rank 3 from Fighter
     let dodge = actor.items.find(i => i.type === 'skill' && i.name.toLowerCase() === 'dodge');

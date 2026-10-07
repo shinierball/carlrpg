@@ -554,12 +554,7 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": [
-        {
-          "name": "a",
-          "rank": 2
-        }
-      ]
+      "spells": []
     }
   },
   {
@@ -1044,14 +1039,6 @@ export const DCC_CLASSES = [
         {
           "name": "Nature's Breath",
           "rank": 3
-        },
-        {
-          "name": "a",
-          "rank": 3
-        },
-        {
-          "name": "a",
-          "rank": 2
         }
       ]
     }
@@ -1970,11 +1957,7 @@ export const DCC_CLASSES = [
           "rank": 4
         },
         {
-          "name": "Rise",
-          "rank": 4
-        },
-        {
-          "name": "Dead Minion!",
+          "name": "Rise, Dead Minion!",
           "rank": 4
         },
         {
@@ -2919,12 +2902,7 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": [
-        {
-          "name": "a",
-          "rank": 2
-        }
-      ]
+      "spells": []
     }
   }
 ];

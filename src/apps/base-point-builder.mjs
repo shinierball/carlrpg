@@ -77,16 +77,42 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
           name: s.name || '',
           rank: Number(s.rank) || 1,
           isPassive: Boolean(s.isPassive),
+          stat: s.stat || 'str',
+          checkType: s.checkType || 'Stat Check',
+          baseDamage: s.baseDamage || '',
+          canGainRanks: s.canGainRanks !== undefined ? Boolean(s.canGainRanks) : true,
+          cooldown: s.cooldown || 'None',
+          notes: s.notes || '',
           cost: (Number(s.rank) || 1) * 2
         }))
       : [];
 
     this.spells = Array.isArray(options.spells)
-      ? options.spells.map(s => ({
-          name: s.name || '',
-          rank: Number(s.rank) || 1,
-          isPassive: Boolean(s.isPassive),
-          cost: (Number(s.rank) || 1) * 2
+      ? options.spells.map(sp => ({
+          name: sp.name || '',
+          rank: Number(sp.rank) || 1,
+          isPassive: Boolean(sp.isPassive),
+          mpCost: Number(sp.mpCost) || 0,
+          cost: (Number(sp.rank) || 1) * 2
+        }))
+      : [];
+
+    // Custom Buffs & Debuffs
+    this.buffs = Array.isArray(options.buffs)
+      ? options.buffs.map(b => ({
+          name: b.name || '',
+          description: b.description || '',
+          tier: b.tier || 'moderate',
+          cost: Number(b.cost !== undefined ? b.cost : (b.tier === 'minor' ? 1 : b.tier === 'major' ? 3 : b.tier === 'extreme' ? 4 : b.tier === 'epic' ? 5 : 2))
+        }))
+      : [];
+
+    this.debuffs = Array.isArray(options.debuffs)
+      ? options.debuffs.map(d => ({
+          name: d.name || '',
+          description: d.description || '',
+          tier: d.tier || 'moderate',
+          extraPoints: Number(d.extraPoints !== undefined ? d.extraPoints : (d.tier === 'minor' ? 1 : d.tier === 'major' ? 3 : 2))
         }))
       : [];
 
@@ -195,7 +221,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     }
   }
 
-  addSkill({ name, rank = 1, isPassive = false, type = 'active' } = {}) {
+  addSkill({ name, rank = 1, isPassive = false, type = 'active', stat = 'str', checkType = 'Stat Check', baseDamage = '', canGainRanks = true, cooldown = 'None', notes = '' } = {}) {
     const passive = Boolean(isPassive || type === 'passive');
     const r = Math.max(0, Number(rank) || 1);
     this.skills.push({
@@ -203,6 +229,12 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       rank: r,
       isPassive: passive,
       type: passive ? 'passive' : 'active',
+      stat,
+      checkType,
+      baseDamage,
+      canGainRanks: Boolean(canGainRanks),
+      cooldown,
+      notes,
       cost: r * 2
     });
   }
@@ -227,6 +259,40 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
   removeSpell(index) {
     if (index >= 0 && index < this.spells.length) {
       this.spells.splice(index, 1);
+    }
+  }
+
+  addBuff({ name, description = '', tier = 'moderate', cost } = {}) {
+    const tierCostMap = { minor: 1, moderate: 2, major: 3, extreme: 4, epic: 5 };
+    const c = cost !== undefined ? Number(cost) : (tierCostMap[String(tier).toLowerCase()] ?? 2);
+    this.buffs.push({
+      name: name || 'Custom Buff',
+      description,
+      tier,
+      cost: c
+    });
+  }
+
+  removeBuff(index) {
+    if (index >= 0 && index < this.buffs.length) {
+      this.buffs.splice(index, 1);
+    }
+  }
+
+  addDebuff({ name, description = '', tier = 'moderate', extraPoints } = {}) {
+    const tierExtraMap = { minor: 1, moderate: 2, major: 3 };
+    const xp = extraPoints !== undefined ? Number(extraPoints) : (tierExtraMap[String(tier).toLowerCase()] ?? 2);
+    this.debuffs.push({
+      name: name || 'Custom Debuff',
+      description,
+      tier,
+      extraPoints: xp
+    });
+  }
+
+  removeDebuff(index) {
+    if (index >= 0 && index < this.debuffs.length) {
+      this.debuffs.splice(index, 1);
     }
   }
 
@@ -290,6 +356,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     this.drBonus = 0;
     this.skills = [];
     this.spells = [];
+    this.buffs = [];
+    this.debuffs = [];
     this.selectedBenefits = [];
     this.selectedDetriments = [];
     this.customBenefits = [];
@@ -320,6 +388,12 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         name: sk.name,
         rank: Number(sk.rank) || 1,
         isPassive: Boolean(sk.isPassive),
+        stat: sk.stat || 'str',
+        checkType: sk.checkType || 'Stat Check',
+        baseDamage: sk.baseDamage || '',
+        canGainRanks: sk.canGainRanks !== undefined ? Boolean(sk.canGainRanks) : true,
+        cooldown: sk.cooldown || 'None',
+        notes: sk.notes || '',
         cost: (Number(sk.rank) || 1) * 2
       }));
     }
@@ -328,7 +402,24 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         name: sp.name,
         rank: Number(sp.rank) || 1,
         isPassive: Boolean(sp.isPassive),
+        mpCost: Number(sp.mpCost) || 0,
         cost: (Number(sp.rank) || 1) * 2
+      }));
+    }
+    if (Array.isArray(data.system?.buffs || data.buffs)) {
+      this.buffs = (data.system?.buffs || data.buffs).map(b => ({
+        name: b.name,
+        description: b.description || '',
+        tier: b.tier || 'moderate',
+        cost: Number(b.cost !== undefined ? b.cost : 2)
+      }));
+    }
+    if (Array.isArray(data.system?.debuffs || data.debuffs)) {
+      this.debuffs = (data.system?.debuffs || data.debuffs).map(d => ({
+        name: d.name,
+        description: d.description || '',
+        tier: d.tier || 'moderate',
+        extraPoints: Number(d.extraPoints !== undefined ? d.extraPoints : 2)
       }));
     }
     if (Array.isArray(data.selectedBenefits || data.benefits)) {
@@ -349,6 +440,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         this.drBonus = 0;
       }
     }
+    return { success: true };
   }
 
   // =========================================================================
@@ -443,10 +535,16 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       customCost += Number(cb.cost) || 0;
     }
 
+    let buffCost = 0;
+    for (const buf of this.buffs) {
+      buffCost += Number(buf.cost) || 0;
+    }
+
     return {
       catalogCost,
       customCost,
-      totalBenefitCost: catalogCost + customCost
+      buffCost,
+      totalBenefitCost: catalogCost + customCost + buffCost
     };
   }
 
@@ -464,12 +562,18 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       customExtra += Number(cd.extraPoints) || 0;
     }
 
+    let debuffExtra = 0;
+    for (const deb of this.debuffs) {
+      debuffExtra += Number(deb.extraPoints) || 0;
+    }
+
     const { extraPointsFromNegatives } = this.calculateStatPoints();
-    const totalExtra = catalogExtra + customExtra + extraPointsFromNegatives;
+    const totalExtra = catalogExtra + customExtra + debuffExtra + extraPointsFromNegatives;
 
     return {
       catalogExtra,
       customExtra,
+      debuffExtra,
       statExtra: extraPointsFromNegatives,
       totalExtraPoints: totalExtra,
       isDetrimentCapped: totalExtra > 5 // Rule: max +5 extra BP per class/race
@@ -565,6 +669,16 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       });
     }
 
+    // Custom Buffs
+    for (const buf of this.buffs) {
+      receiptItems.push({
+        type: 'buff',
+        label: buf.name + (buf.tier ? ` (${buf.tier})` : ''),
+        cost: buf.cost,
+        isExtra: false
+      });
+    }
+
     // Detriments
     for (const d of this.selectedDetriments) {
       receiptItems.push({
@@ -581,6 +695,16 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         type: 'custom_detriment',
         label: cd.name,
         extraPoints: cd.extraPoints,
+        isExtra: true
+      });
+    }
+
+    // Custom Debuffs
+    for (const deb of this.debuffs) {
+      receiptItems.push({
+        type: 'debuff',
+        label: deb.name + (deb.tier ? ` (${deb.tier})` : ''),
+        extraPoints: deb.extraPoints,
         isExtra: true
       });
     }
@@ -613,9 +737,11 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       spellCost: skillData.spellCost,
       benefitCost: benefitData.catalogCost,
       customCost: benefitData.customCost,
+      buffCost: benefitData.buffCost,
+      debuffExtra: detrimentData.debuffExtra,
       sizeCost,
-      detrimentExtraPoints: Math.min(5, detrimentData.catalogExtra + detrimentData.customExtra),
-      rawDetrimentPoints: detrimentData.catalogExtra + detrimentData.customExtra,
+      detrimentExtraPoints: Math.min(5, detrimentData.catalogExtra + detrimentData.customExtra + detrimentData.debuffExtra),
+      rawDetrimentPoints: detrimentData.catalogExtra + detrimentData.customExtra + detrimentData.debuffExtra,
       receiptItems,
       items: receiptItems,
       passiveSkillRanks: skillData.passiveSkillRanks,
@@ -646,6 +772,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       selectedDetriments: this.selectedDetriments,
       customBenefits: this.customBenefits,
       customDetriments: this.customDetriments,
+      buffs: this.buffs,
+      debuffs: this.debuffs,
       ledger,
       baseBudget: ledger.baseBudget,
       spent: ledger.spent,
@@ -668,6 +796,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       spellCost: ledger.spellCost,
       benefitCost: ledger.benefitCost,
       customCost: ledger.customCost,
+      buffCost: ledger.buffCost,
+      debuffExtra: ledger.debuffExtra,
       detrimentExtraPoints: ledger.detrimentExtraPoints,
       rawDetrimentPoints: ledger.rawDetrimentPoints
     };
@@ -721,12 +851,22 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       list.push(cb.name);
     }
 
+    // Buffs
+    for (const buf of this.buffs) {
+      list.push(buf.name + (buf.description ? `: ${buf.description}` : ''));
+    }
+
     // Detriments
     for (const d of this.selectedDetriments) {
       list.push(d.customText || d.name);
     }
     for (const cd of this.customDetriments) {
       list.push(cd.name);
+    }
+
+    // Debuffs
+    for (const deb of this.debuffs) {
+      list.push(deb.name + (deb.description ? `: ${deb.description}` : ''));
     }
 
     return list;
@@ -782,8 +922,22 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
           stats: { ...this.stats }
         },
         drBonus: this.drBonus,
-        skills: this.skills.map(s => ({ name: s.name, rank: s.rank, isPassive: s.isPassive })),
-        spells: this.spells.map(sp => ({ name: sp.name, rank: sp.rank, isPassive: sp.isPassive })),
+        skills: this.skills.map(s => ({
+          name: s.name,
+          rank: s.rank,
+          isPassive: s.isPassive,
+          stat: s.stat || 'str',
+          checkType: s.checkType || 'Stat Check',
+          baseDamage: s.baseDamage || '',
+          canGainRanks: s.canGainRanks !== undefined ? s.canGainRanks : true,
+          cooldown: s.cooldown || 'None',
+          notes: s.notes || ''
+        })),
+        spells: this.spells.map(sp => ({ name: sp.name, rank: sp.rank, isPassive: sp.isPassive, mpCost: sp.mpCost || 0 })),
+        buffs: this.buffs.map(b => ({ name: b.name, description: b.description || '', tier: b.tier || 'moderate', cost: b.cost })),
+        debuffs: this.debuffs.map(d => ({ name: d.name, description: d.description || '', tier: d.tier || 'moderate', extraPoints: d.extraPoints })),
+        chosenBuffs: this.buffs.map(b => ({ name: b.name, description: b.description || '', tier: b.tier || 'moderate', cost: b.cost })),
+        chosenDebuffs: this.debuffs.map(d => ({ name: d.name, description: d.description || '', tier: d.tier || 'moderate', extraPoints: d.extraPoints })),
         perks: perks.length > 0 ? perks : abilities,
         detriments,
         chosenPerks: this.chosenPerks || (perks.length > 0 ? perks : abilities),
@@ -819,10 +973,14 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     return JSON.stringify({
       ...itemData,
       ledger,
+      skills: this.skills,
+      spells: this.spells,
       selectedBenefits: this.selectedBenefits,
       selectedDetriments: this.selectedDetriments,
       customBenefits: this.customBenefits,
-      customDetriments: this.customDetriments
+      customDetriments: this.customDetriments,
+      buffs: this.buffs,
+      debuffs: this.debuffs
     }, null, 2);
   }
 
@@ -925,7 +1083,13 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
             type: 'skill',
             system: {
               rank: s.rank,
-              isPassive: Boolean(s.isPassive)
+              isPassive: Boolean(s.isPassive),
+              stat: s.stat || 'str',
+              checkType: s.checkType || 'Stat Check',
+              baseDamage: s.baseDamage || '',
+              canGainRanks: s.canGainRanks !== undefined ? s.canGainRanks : true,
+              cooldown: s.cooldown || 'None',
+              notes: s.notes || ''
             },
             flags: {
               'carl-rpg': {
@@ -956,12 +1120,57 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         await actor.createEmbeddedDocuments('Item', skillGrants);
       }
 
-      // 3. Embed condition items (perk buffs & detriment debuffs)
+      // 3. Embed condition items (perk buffs & detriment debuffs, plus custom buffs & debuffs)
       const conditions = DCCRaceClassApplier.parseConditions(itemData, this.builderType, { chosenPerks, chosenDetriments });
       const conditionItemsToCreate = [
         ...(conditions.buffs || []),
         ...(conditions.debuffs || [])
       ];
+
+      for (const b of this.buffs) {
+        if (!conditionItemsToCreate.some(ci => ci.name === b.name)) {
+          conditionItemsToCreate.push({
+            name: b.name,
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${this.builderType === 'race' ? 'Racial' : 'Class'})`,
+              description: b.description ? `<p>${b.description}</p>` : ''
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: this.builderType || 'custom',
+                sourceName: this.name || '',
+                isCustomBuff: true
+              }
+            }
+          });
+        }
+      }
+
+      for (const d of this.debuffs) {
+        if (!conditionItemsToCreate.some(ci => ci.name === d.name)) {
+          conditionItemsToCreate.push({
+            name: d.name,
+            type: 'debuff',
+            img: 'icons/svg/downgrade.svg',
+            system: {
+              severity: d.tier || 'Minor',
+              duration: `Permanent (${this.builderType === 'race' ? 'Racial' : 'Class'})`,
+              description: d.description ? `<p>${d.description}</p>` : ''
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: this.builderType || 'custom',
+                sourceName: this.name || '',
+                isCustomDebuff: true
+              }
+            }
+          });
+        }
+      }
+
       if (conditionItemsToCreate.length > 0) {
         await actor.createEmbeddedDocuments('Item', conditionItemsToCreate);
       }

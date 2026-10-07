@@ -1,3 +1,34 @@
+## 2.4.16
+
+### Wizard-Driven Choices & Custom Abilities in Race and Class Creators
+
+- **Custom Buffs & Debuffs in Point Builder Studios (`src/apps/base-point-builder.mjs`, `src/apps/race-creator.mjs`, `src/apps/class-creator.mjs`)**:
+  - Implemented Section 7 in Race and Class Creator Studios allowing players and GMs to define custom permanent buffs and debuffs with custom name, tier (Minor, Moderate, Major), and description.
+  - Full Point Ledger accounting: buffs cost points based on tier (Minor: 2, Moderate: 3, Major: 4), debuffs refund/add budget points (Minor: +1, Moderate: +2, Major: +3) respecting detriment caps.
+  - Interactive UI with live badge chips, add/remove handlers, and live ledger synchronization.
+  - Export and import JSON serialization preserving custom buffs, debuffs, and advanced skill parameters.
+- **Advanced Action & Reminder Skill Schemas (`template.json`, `src/models/items/skill-model.mjs`, `src/models/items/lore-model.mjs`)**:
+  - Added `canGainRanks`, `cooldown`, and `baseDamage` to `Item.skill` schema and `SkillDataModel`.
+  - Added `buffs`, `debuffs`, `chosenBuffs`, `chosenDebuffs` ArrayFields to `RaceDataModel` and `ClassDataModel`.
+  - Studio builder supports action skills with stat checks and base damage formulas (e.g. `1d8+F` unranked).
+- **Canonical Igneous Race Codification (`src/data/races.mjs`, `src/data/race-class-applier.mjs`)**:
+  - Codified all 7 canonical abilities:
+    1. *Volcanic Sprint*: Reminder skill with 1/Day cooldown.
+    2. *Lava Burst*: Unranked Action skill (`canGainRanks: false`, `checkType: "Stat Check"`, `stat: "con"`, `baseDamage: "1d8+F"`).
+    3. *Harsh Heat Adaptation & Aquatic Respiration*: Permanent environmental racial buff.
+    4. *Immunity & Vulnerability*: Permanent *Fire Immunity* buff and *Ice Vulnerability* debuff.
+    5. *Burrowing Movement*: Permanent buff granting 20ft burrow speed.
+    6. *Inventory Heat Siphon*: Permanent debuff deducting 1 health bar on inventory access.
+    7. *Conspicuous Molten Stature*: Permanent debuff granting disadvantage on stealth/concealment.
+  - Clean lifecycle revocation: all 7 granted items, stat deltas, DR, burrow movement, and size cleanly revert with 0 orphan items when changing races.
+- **Canonical Dataset Sanitization (`src/data/races.mjs`, `src/data/classes.mjs`)**:
+  - Purged bogus spell items (`"two"`, `"a"`) across Igneous, Obsidian Butterfly, Boring Ol' Bard, Boring Ol' Druid, and Black Inquisitor General.
+  - Fixed Necromancer spell name (`Rise, Dead Minion!` preserved at Rank 4, not split into two items).
+  - Fixed Night Elf canonical stat modifiers (`+3` INT and DEX) and Human stat modifiers (`+2` to all stats).
+- **Automated Verification (`tests/race-class-wizard-abilities.test.mjs`)**:
+  - Created test suite validating custom buff/debuff ledger accounting, Igneous 7-ability application and clean revocation, dataset sanitization, and studio builder `applyToActor`.
+  - All 878 tests across 160 suites pass with 0 failures.
+
 ## 2.4.15
 
 ### Dynamic Damage Effects & Techniques Engine

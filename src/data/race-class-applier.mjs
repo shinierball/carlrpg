@@ -252,40 +252,65 @@ export class DCCRaceClassApplier {
     const skills = [];
     const spells = [];
 
+    // Helper to add skill avoiding duplicates
+    const addSkill = (sk) => {
+      if (!sk?.name) return;
+      const cleanName = sk.name.trim();
+      if (['a', 'an', 'one', 'two', 'three'].includes(cleanName.toLowerCase())) return;
+      if (cleanName.includes('(Choice)')) return;
+      if (!skills.some(s => normalizeKey(s.name) === normalizeKey(cleanName))) {
+        skills.push({
+          name: cleanName,
+          rank: Number(sk.rank) || 1,
+          isPassive: Boolean(sk.isPassive),
+          stat: sk.stat || 'str',
+          checkType: sk.checkType || 'Stat Check',
+          baseDamage: sk.baseDamage || '',
+          canGainRanks: sk.canGainRanks !== undefined ? Boolean(sk.canGainRanks) : true,
+          cooldown: sk.cooldown || 'None',
+          notes: sk.notes || ''
+        });
+      }
+    };
+
+    // Helper to add spell avoiding duplicates
+    const addSpell = (sp) => {
+      if (!sp?.name) return;
+      const cleanName = sp.name.trim();
+      if (['a', 'an', 'one', 'two', 'three'].includes(cleanName.toLowerCase())) return;
+      if (cleanName.includes('(Choice)')) return;
+      if (!spells.some(s => normalizeKey(s.name) === normalizeKey(cleanName))) {
+        spells.push({
+          name: cleanName,
+          rank: Number(sp.rank) || 1,
+          isPassive: Boolean(sp.isPassive),
+          mpCost: Number(sp.mpCost) || 0
+        });
+      }
+    };
+
     // Structured skills/spells from Studio Point Builds
     if (Array.isArray(data?.system?.skills) && data.system.skills.length > 0) {
       for (const s of data.system.skills) {
-        if (s.name && s.rank && !s.name.includes('(Choice)')) {
-          skills.push({ name: s.name, rank: Number(s.rank) || 1, isPassive: Boolean(s.isPassive) });
-        }
+        addSkill(s);
       }
     }
     if (Array.isArray(data?.system?.spells) && data.system.spells.length > 0) {
       for (const sp of data.system.spells) {
-        if (sp.name && sp.rank && !sp.name.includes('(Choice)')) {
-          spells.push({ name: sp.name, rank: Number(sp.rank) || 1, mpCost: Number(sp.mpCost) || 0 });
-        }
+        addSpell(sp);
       }
     }
 
     // Include chosenSkills & chosenSpells already attached to the definition
     if (Array.isArray(data?.system?.chosenSkills)) {
       for (const cs of data.system.chosenSkills) {
-        if (cs.name && cs.rank && !skills.some(s => normalizeKey(s.name) === normalizeKey(cs.name))) {
-          skills.push({ name: cs.name, rank: Number(cs.rank) || 1, isPassive: Boolean(cs.isPassive) });
-        }
+        addSkill(cs);
       }
     }
     if (Array.isArray(data?.system?.chosenSpells)) {
       for (const csp of data.system.chosenSpells) {
-        if (csp.name && csp.rank && !spells.some(s => normalizeKey(s.name) === normalizeKey(csp.name))) {
-          spells.push({ name: csp.name, rank: Number(csp.rank) || 1, mpCost: Number(csp.mpCost) || 0 });
-        }
+        addSpell(csp);
       }
-    }
-
-    if (skills.length > 0 || spells.length > 0) {
-      return { skills, spells };
     }
 
     // Text parsing from perks
@@ -297,16 +322,18 @@ export class DCCRaceClassApplier {
       const p = cleanOCRText(raw);
 
       // Skip lines that deal with popularity, not skill grants
-      if (p.includes('popularity')) continue;
+      if (p.includes('popularity') && !p.includes('Performance')) continue;
 
       // Check for Spells: e.g. "+3 Web Spell", "+2 Earworm, Heal Others, and Shield Spells"
       const spellMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-!]+?)\s+Spells?/i);
       if (spellMatch) {
         const rank = parseInt(spellMatch[1], 10);
-        const spellNames = spellMatch[2].split(/(?:,\s*|\s+and\s+)/i).map(s => s.trim()).filter(Boolean);
+        let rawNames = spellMatch[2];
+        rawNames = rawNames.replace(/Rise,\s*Dead Minion!/gi, 'Rise__COMMA__Dead Minion!');
+        const spellNames = rawNames.split(/(?:,\s*|\s+and\s+)/i).map(s => s.replace(/__COMMA__/g, ',').trim()).filter(Boolean);
         for (const sp of spellNames) {
           if (!sp.toLowerCase().includes('choice') && !sp.toLowerCase().includes('cost')) {
-            spells.push({ name: matchKnownSpell(sp), rank });
+            addSpell({ name: matchKnownSpell(sp), rank });
           }
         }
         continue;
@@ -316,7 +343,173 @@ export class DCCRaceClassApplier {
       if (p.includes('Zone of Control and a Reach weapon Skill of your choice')) {
         const rankMatch = p.match(/^\+(\d+)/);
         const rank = rankMatch ? parseInt(rankMatch[1], 10) : 2;
-        skills.push({ name: 'Zone of Control', rank });
+        addSkill({ name: 'Zone of Control', rank });
+        continue;
+      }
+
+      // Action attack skill with stat check (e.g. Igneous Lava Burst):
+      // "As an Action, make a Con Stat Check. On success, deal 1d8+F Fire damage, 5ft Burst radius"
+      if (/As an Action, make a ([A-Za-z]+)\s+Stat Check/i.test(p) && /deal ([^,]+)/i.test(p)) {
+        const statM = p.match(/make a ([A-Za-z]+)\s+Stat Check/i);
+        const dmgM = p.match(/deal ([^,]+)/i);
+        const stat = statM ? statM[1].toLowerCase().slice(0, 3) : 'con';
+        const baseDamage = dmgM ? dmgM[1].trim() : '1d8+F';
+        addSkill({
+          name: 'Lava Burst',
+          rank: 1,
+          isPassive: false,
+          stat,
+          checkType: 'Stat Check',
+          baseDamage,
+          canGainRanks: false,
+          cooldown: 'None',
+          notes: p
+        });
+        continue;
+      }
+
+      // Cooldown movement sprint (e.g. Igneous Volcanic Sprint):
+      // "Once per day, double your Move for 20 seconds"
+      if (/Once per (?:day|floor|rest|scene),\s*double your Move/i.test(p)) {
+        addSkill({
+          name: 'Volcanic Sprint',
+          rank: 1,
+          isPassive: false,
+          stat: 'dex',
+          checkType: 'Action',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per day',
+          notes: p
+        });
+        continue;
+      }
+
+      // Mass weapon incorporation (e.g. Doppelgänger):
+      if (p.includes('incorporate a held weapon into their mass')) {
+        addSkill({
+          name: 'Mass Weapon Incorporation',
+          rank: 1,
+          isPassive: false,
+          stat: 'con',
+          checkType: 'Action',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per scene',
+          notes: p
+        });
+        continue;
+      }
+
+      // Doppelgänger Shape-Changing:
+      if (p.includes('Doppelgänger Shape-Changing') || (p.includes('transform into any shape') && p.includes('comparable mass'))) {
+        addSkill({
+          name: 'Doppelgänger Shape-Changing',
+          rank: 1,
+          isPassive: false,
+          stat: 'cha',
+          checkType: 'Skill Check',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'None',
+          notes: p
+        });
+        continue;
+      }
+
+      // Human Jack-of-All-Trades:
+      if (p.includes('untrained Skill Check on a non-Passive Utility Skill')) {
+        addSkill({
+          name: 'Jack-of-All-Trades',
+          rank: 1,
+          isPassive: false,
+          stat: 'int',
+          checkType: 'Reminder',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per day',
+          notes: p
+        });
+        continue;
+      }
+
+      // Human Favor Shield Reaction:
+      if (p.includes('spend 1 AI Favor to gain DR equal to your Con')) {
+        addSkill({
+          name: 'Favor Shield Reaction',
+          rank: 1,
+          isPassive: false,
+          stat: 'con',
+          checkType: 'Reaction',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'None',
+          notes: p
+        });
+        continue;
+      }
+
+      // Human Purge Affliction:
+      if (p.includes('remove any single Debuff you’re suffering from')) {
+        addSkill({
+          name: 'Purge Affliction',
+          rank: 1,
+          isPassive: false,
+          stat: 'con',
+          checkType: 'Action',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per floor',
+          notes: p
+        });
+        continue;
+      }
+
+      // Corpse Interrogation:
+      if (p.includes('ask the corpse of a dead creature')) {
+        addSkill({
+          name: 'Corpse Interrogation',
+          rank: 1,
+          isPassive: false,
+          stat: 'int',
+          checkType: 'Action',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per rest',
+          notes: p
+        });
+        continue;
+      }
+
+      // Flamboyant Flourish:
+      if (p.includes('make an Unopposed Performance Skill Check') && p.includes('Popularity')) {
+        addSkill({
+          name: 'Flamboyant Flourish',
+          rank: 1,
+          isPassive: false,
+          stat: 'cha',
+          checkType: 'Skill Check',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per combat',
+          notes: p
+        });
+        continue;
+      }
+
+      // Shadow Taunt Decoy:
+      if (p.includes('instruct the shadow of a living thing to use the Taunt Skill')) {
+        addSkill({
+          name: 'Shadow Taunt Decoy',
+          rank: 1,
+          isPassive: false,
+          stat: 'int',
+          checkType: 'Action',
+          baseDamage: '',
+          canGainRanks: false,
+          cooldown: 'Once per day',
+          notes: p
+        });
         continue;
       }
 
@@ -346,7 +539,7 @@ export class DCCRaceClassApplier {
             !sk.toLowerCase().includes('either') &&
             !sk.toLowerCase().includes(' or ')
           ) {
-            skills.push({ name: matchKnownSkill(sk), rank });
+            addSkill({ name: matchKnownSkill(sk), rank });
           }
         }
       }
@@ -537,6 +730,62 @@ export class DCCRaceClassApplier {
     const buffs = [];
     const debuffs = [];
 
+    // 1. Structured buffs from data definition or Studio Point Builder
+    const structuredBuffs = Array.isArray(options.chosenBuffs)
+      ? options.chosenBuffs
+      : (Array.isArray(data?.system?.buffs)
+        ? data.system.buffs
+        : (Array.isArray(data?.buffs) ? data.buffs : []));
+    for (const b of structuredBuffs) {
+      if (b.name && !buffs.some(existing => existing.name === b.name)) {
+        buffs.push({
+          name: b.name,
+          type: 'buff',
+          img: 'icons/svg/aura.svg',
+          system: {
+            buffType: 'special',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: b.description ? `<p>${b.description}</p>` : `<p>Permanent ${type === 'race' ? 'Racial' : 'Class'} Buff: ${b.name}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data?.name || '',
+              isCustomBuff: true
+            }
+          }
+        });
+      }
+    }
+
+    // 2. Structured debuffs from data definition or Studio Point Builder
+    const structuredDebuffs = Array.isArray(options.chosenDebuffs)
+      ? options.chosenDebuffs
+      : (Array.isArray(data?.system?.debuffs)
+        ? data.system.debuffs
+        : (Array.isArray(data?.debuffs) ? data.debuffs : []));
+    for (const d of structuredDebuffs) {
+      if (d.name && !debuffs.some(existing => existing.name === d.name)) {
+        debuffs.push({
+          name: d.name,
+          type: 'debuff',
+          img: 'icons/svg/downgrade.svg',
+          system: {
+            severity: d.tier || 'Minor',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: d.description ? `<p>${d.description}</p>` : `<p>Permanent ${type === 'race' ? 'Racial' : 'Class'} Debuff: ${d.name}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data?.name || '',
+              isCustomDebuff: true
+            }
+          }
+        });
+      }
+    }
+
     const { perks: allPerks, detriments: allDetriments } = this.extractPerksAndDetriments(data);
     const activePerks = options.chosenPerks || data?.system?.chosenPerks || data?.chosenPerks || allPerks;
     const activeDetriments = options.chosenDetriments || data?.system?.chosenDetriments || data?.chosenDetriments || allDetriments;
@@ -553,7 +802,284 @@ export class DCCRaceClassApplier {
       if (/\bSpells?(\b|$)/i.test(p) && /^[+-]?\d+/i.test(p)) continue;
       if (/^Size\s+\d+/i.test(p)) continue;
 
-      // Advantage / Resistance / Immunity -> Custom Buff item
+      // Compound immunity & vulnerability in perk: e.g. "Immunity to Fire damage, and vulnerable to Ice damage"
+      if (/Immunity to ([^,]+)(?:,\s*and|\s+and)\s+vulnerable to ([^.]+)/i.test(p)) {
+        const m = p.match(/Immunity to ([^,]+)(?:,\s*and|\s+and)\s+vulnerable to ([^.]+)/i);
+        const immTarget = m[1].trim();
+        const vulnTarget = m[2].trim();
+        if (!buffs.some(b => b.name.includes(immTarget))) {
+          buffs.push({
+            name: `${immTarget} Immunity`,
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Damage Immunity</strong>: Immune to ${immTarget}.</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        if (!debuffs.some(d => d.name.includes(vulnTarget))) {
+          debuffs.push({
+            name: `${vulnTarget} Vulnerability`,
+            type: 'debuff',
+            img: 'icons/svg/downgrade.svg',
+            system: {
+              severity: 'Minor',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Damage Vulnerability</strong>: Vulnerable to ${vulnTarget}.</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isDetriment: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Harsh Heat & Aquatic Respiration:
+      if (
+        /No Survival Checks needed in harsh heat/i.test(p) ||
+        (p.includes('heat') && p.includes('underwater')) ||
+        p.includes('breathe underwater')
+      ) {
+        if (!buffs.some(b => b.name === 'Harsh Heat Adaptation & Aquatic Respiration')) {
+          buffs.push({
+            name: 'Harsh Heat Adaptation & Aquatic Respiration',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Environmental Adaptation</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Burrowing Movement:
+      if (/Ability to burrow/i.test(p) || (/\bburrow\b/i.test(p) && !/Move/i.test(p))) {
+        if (!buffs.some(b => b.name === 'Burrowing Movement')) {
+          buffs.push({
+            name: 'Burrowing Movement',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Movement Feature</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Darkvision:
+      if (/Can see (?:in )?total darkness/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Darkvision')) {
+          buffs.push({
+            name: 'Darkvision',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Sensory Feature</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Natural Mana Recovery:
+      if (/recover Mana at twice the normal rate/i.test(p) || /Mana recovers at twice/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Natural Mana Recovery')) {
+          buffs.push({
+            name: 'Natural Mana Recovery',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Mana Attunement</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Graceful Evade:
+      if (/Add (?:1d\d+|\d+)\s+to your Evade Checks/i.test(p)) {
+        if (!buffs.some(b => b.name.includes('Graceful Evade'))) {
+          buffs.push({
+            name: 'Graceful Evade (+1d4)',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Defense Feature</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Undead Mob Healing:
+      if (/kill an undead Mob/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Undead Siphon Healing')) {
+          buffs.push({
+            name: 'Undead Siphon Healing',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Life Siphon</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Cooked Meal party buff:
+      if (/consume a meal you cooked/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Hearty Home Cooked Buff')) {
+          buffs.push({
+            name: 'Hearty Home Cooked Buff',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Culinary Boon</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Help & Intervene:
+      if (/Help or Intervene Actions/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Guardian Assistance (+1d4)')) {
+          buffs.push({
+            name: 'Guardian Assistance (+1d4)',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Guardian Feature</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Malleable Mass Lift:
+      if (/maximum weight to lift based on Constitution/i.test(p)) {
+        if (!buffs.some(b => b.name === 'Malleable Mass Lift')) {
+          buffs.push({
+            name: 'Malleable Mass Lift',
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Shifting Mass Feature</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
+            }
+          });
+        }
+        continue;
+      }
+
+      // Advantage on Checks -> Custom Buff item
       if (/\bAdvantage\b/i.test(p) && !/\bDisadvantage\b/i.test(p) && !/Troll-?type enemies have Advantage/i.test(p)) {
         let title = 'Advantage on Checks';
         const pLower = p.toLowerCase();
@@ -576,47 +1102,51 @@ export class DCCRaceClassApplier {
         else if (pLower.includes('elemental creatures')) title = 'Advantage: Elemental Attunement';
         else title = `Advantage: ${p.slice(0, 40)}`;
 
-        buffs.push({
-          name: title,
-          type: 'buff',
-          img: 'icons/svg/aura.svg',
-          system: {
-            buffType: 'special',
-            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
-            description: `<p><strong>Advantage</strong>: ${p}</p>`
-          },
-          flags: {
-            'carl-rpg': {
-              grantedBy: type,
-              sourceName: data?.name || '',
-              isAdvantage: true,
-              isPerk: true,
-              condition: p
+        if (!buffs.some(b => b.name === title)) {
+          buffs.push({
+            name: title,
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Advantage</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isAdvantage: true,
+                isPerk: true,
+                condition: p
+              }
             }
-          }
-        });
+          });
+        }
       } else if (/\b(Immunity|Resistance)\b/i.test(p)) {
         let cleanTitle = p.split(':')[0].trim();
         if (cleanTitle.length > 40) cleanTitle = cleanTitle.slice(0, 37).trim() + '...';
 
-        buffs.push({
-          name: cleanTitle,
-          type: 'buff',
-          img: 'icons/svg/aura.svg',
-          system: {
-            buffType: 'special',
-            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
-            description: `<p><strong>${type === 'race' ? 'Racial Perk' : 'Class Feature'}</strong>: ${p}</p>`
-          },
-          flags: {
-            'carl-rpg': {
-              grantedBy: type,
-              sourceName: data?.name || '',
-              isPerk: true,
-              condition: p
+        if (!buffs.some(b => b.name === cleanTitle)) {
+          buffs.push({
+            name: cleanTitle,
+            type: 'buff',
+            img: 'icons/svg/aura.svg',
+            system: {
+              buffType: 'special',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>${type === 'race' ? 'Racial Perk' : 'Class Feature'}</strong>: ${p}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isPerk: true,
+                condition: p
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
 
@@ -632,6 +1162,31 @@ export class DCCRaceClassApplier {
       if (/\bSpells?(\b|$)/i.test(d) && /^[+-]?\d+/i.test(d)) continue;
       if (/^Size\s+\d+/i.test(d)) continue;
 
+      // Inventory Siphon:
+      if (d.includes('Inventory') && (d.includes('Health Bar') || d.includes('slot'))) {
+        if (!debuffs.some(deb => deb.name === 'Inventory Heat Siphon')) {
+          debuffs.push({
+            name: 'Inventory Heat Siphon',
+            type: 'debuff',
+            img: 'icons/svg/downgrade.svg',
+            system: {
+              severity: 'Minor',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Inventory Siphon</strong>: ${d}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isDetriment: true,
+                condition: d
+              }
+            }
+          });
+        }
+        continue;
+      }
+
       // Disadvantage / Vulnerability -> Custom Debuff item
       if (/\bDisadvantage\b/i.test(d) || /Troll-?type enemies have Advantage/i.test(d)) {
         let title = 'Disadvantage on Checks';
@@ -640,52 +1195,60 @@ export class DCCRaceClassApplier {
         else if (dLower.includes('fatigued')) title = 'Disadvantage: Cold-Blooded Torpor';
         else if (dLower.includes('elves') || dLower.includes('fairies')) title = 'Disadvantage: Ancient Grudge';
         else if (dLower.includes('dwarves') || dLower.includes('rat-kin')) title = 'Disadvantage: Highborn Arrogance';
-        else if (dLower.includes('conceal') || dLower.includes('stealth')) title = 'Disadvantage: Smoldering Presence';
+        else if (dLower.includes('conceal') || dLower.includes('stealth')) {
+          title = dLower.includes('molten') || (data?.name && data.name.toLowerCase().includes('igneous'))
+            ? 'Conspicuous Molten Stature'
+            : 'Disadvantage: Smoldering Presence';
+        }
         else if (dLower.includes('fine manipulation') || dLower.includes('motor coordination')) title = 'Disadvantage: Clawed Clumsiness';
         else if (dLower.includes('wrasslin') || dLower.includes('troll')) title = 'Disadvantage: Troll Bait';
         else title = `Disadvantage: ${d.slice(0, 40)}`;
 
-        debuffs.push({
-          name: title,
-          type: 'debuff',
-          img: 'icons/svg/downgrade.svg',
-          system: {
-            severity: 'Minor',
-            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
-            description: `<p><strong>Disadvantage</strong>: ${d}</p>`
-          },
-          flags: {
-            'carl-rpg': {
-              grantedBy: type,
-              sourceName: data?.name || '',
-              isDisadvantage: true,
-              isDetriment: true,
-              condition: d
+        if (!debuffs.some(deb => deb.name === title)) {
+          debuffs.push({
+            name: title,
+            type: 'debuff',
+            img: 'icons/svg/downgrade.svg',
+            system: {
+              severity: 'Minor',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>Disadvantage</strong>: ${d}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isDisadvantage: true,
+                isDetriment: true,
+                condition: d
+              }
             }
-          }
-        });
+          });
+        }
       } else if (/\b(vulnerab\w*|weakness)\b/i.test(d)) {
         let cleanTitle = d.split(':')[0].trim();
         if (cleanTitle.length > 40) cleanTitle = cleanTitle.slice(0, 37).trim() + '...';
 
-        debuffs.push({
-          name: cleanTitle,
-          type: 'debuff',
-          img: 'icons/svg/downgrade.svg',
-          system: {
-            severity: 'Minor',
-            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
-            description: `<p><strong>${type === 'race' ? 'Racial Detriment' : 'Class Drawback'}</strong>: ${d}</p>`
-          },
-          flags: {
-            'carl-rpg': {
-              grantedBy: type,
-              sourceName: data?.name || '',
-              isDetriment: true,
-              condition: d
+        if (!debuffs.some(deb => deb.name === cleanTitle)) {
+          debuffs.push({
+            name: cleanTitle,
+            type: 'debuff',
+            img: 'icons/svg/downgrade.svg',
+            system: {
+              severity: 'Minor',
+              duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+              description: `<p><strong>${type === 'race' ? 'Racial Detriment' : 'Class Drawback'}</strong>: ${d}</p>`
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: type,
+                sourceName: data?.name || '',
+                isDetriment: true,
+                condition: d
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
 
@@ -705,7 +1268,11 @@ export class DCCRaceClassApplier {
     const { perks, detriments } = this.extractPerksAndDetriments(raceDef);
     const chosenPerks = options.chosenPerks || raceDef.system?.chosenPerks || raceDef.chosenPerks || perks;
     const chosenDetriments = options.chosenDetriments || raceDef.system?.chosenDetriments || raceDef.chosenDetriments || detriments;
-    const conditions = this.parseConditions(raceDef, 'race', { chosenPerks, chosenDetriments });
+    const buffs = raceDef.system?.buffs || raceDef.buffs || [];
+    const debuffs = raceDef.system?.debuffs || raceDef.debuffs || [];
+    const chosenBuffs = options.chosenBuffs || raceDef.system?.chosenBuffs || raceDef.chosenBuffs || buffs;
+    const chosenDebuffs = options.chosenDebuffs || raceDef.system?.chosenDebuffs || raceDef.chosenDebuffs || debuffs;
+    const conditions = this.parseConditions(raceDef, 'race', { chosenPerks, chosenDetriments, chosenBuffs, chosenDebuffs });
     const size = raceDef.system?.size || 'Medium (4)';
     const parsedSize = getSizeInfo(size);
 
@@ -722,6 +1289,10 @@ export class DCCRaceClassApplier {
       detriments,
       chosenPerks,
       chosenDetriments,
+      buffs,
+      debuffs,
+      chosenBuffs,
+      chosenDebuffs,
       drBonus,
       movement,
       conditions
@@ -741,7 +1312,11 @@ export class DCCRaceClassApplier {
     const { perks, detriments } = this.extractPerksAndDetriments(classDef);
     const chosenPerks = options.chosenPerks || classDef.system?.chosenPerks || classDef.chosenPerks || perks;
     const chosenDetriments = options.chosenDetriments || classDef.system?.chosenDetriments || classDef.chosenDetriments || detriments;
-    const conditions = this.parseConditions(classDef, 'class', { chosenPerks, chosenDetriments });
+    const buffs = classDef.system?.buffs || classDef.buffs || [];
+    const debuffs = classDef.system?.debuffs || classDef.debuffs || [];
+    const chosenBuffs = options.chosenBuffs || classDef.system?.chosenBuffs || classDef.chosenBuffs || buffs;
+    const chosenDebuffs = options.chosenDebuffs || classDef.system?.chosenDebuffs || classDef.chosenDebuffs || debuffs;
+    const conditions = this.parseConditions(classDef, 'class', { chosenPerks, chosenDetriments, chosenBuffs, chosenDebuffs });
     const classType = classDef.system?.classType || 'Fighter';
 
     return {
@@ -755,6 +1330,10 @@ export class DCCRaceClassApplier {
       detriments,
       chosenPerks,
       chosenDetriments,
+      buffs,
+      debuffs,
+      chosenBuffs,
+      chosenDebuffs,
       drBonus,
       movement,
       conditions
@@ -1785,7 +2364,12 @@ export class DCCRaceClassApplier {
     await this.removeRace(actor);
 
     // 2. Parse new race bonuses
-    const bonuses = this.parseRaceBonuses(def, { chosenPerks, chosenDetriments });
+    const bonuses = this.parseRaceBonuses(def, {
+      chosenPerks,
+      chosenDetriments,
+      chosenBuffs: options.chosenBuffs,
+      chosenDebuffs: options.chosenDebuffs
+    });
     const updates = {};
     updates['system.details.race'] = def.name;
     const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
@@ -1844,12 +2428,16 @@ export class DCCRaceClassApplier {
             img: skillDoc?.img || 'icons/svg/sword.svg',
             system: {
               rank: s.rank,
-              stat: skillDoc?.system?.stat || 'str',
-              skillType: skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
-              type: skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
-              category: skillDoc?.system?.category || 'Combat',
-              notes: skillDoc?.system?.notes || '',
-              upgrades: skillDoc?.system?.upgrades || '',
+              stat: s.stat || skillDoc?.system?.stat || 'str',
+              skillType: s.skillType || skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
+              type: s.type || skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
+              checkType: s.checkType || skillDoc?.system?.checkType || 'Standard',
+              baseDamage: s.baseDamage || skillDoc?.system?.baseDamage || '',
+              canGainRanks: s.canGainRanks !== undefined ? s.canGainRanks : (skillDoc?.system?.canGainRanks ?? true),
+              cooldown: s.cooldown || skillDoc?.system?.cooldown || 'None',
+              category: s.category || skillDoc?.system?.category || 'Combat',
+              notes: s.notes || skillDoc?.system?.notes || '',
+              upgrades: s.upgrades || skillDoc?.system?.upgrades || '',
               isPassive: Boolean(s.isPassive || skillDoc?.system?.isPassive)
             },
             flags: {
@@ -1914,7 +2502,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 9. Embed Race Item Document with chosenSkills and chosenSpells
+    // 9. Embed Race Item Document with chosenSkills, chosenSpells, buffs, and debuffs
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -1930,8 +2518,12 @@ export class DCCRaceClassApplier {
           stats: bonuses.stats,
           perks: bonuses.perks,
           detriments: bonuses.detriments,
+          buffs: bonuses.buffs || [],
+          debuffs: bonuses.debuffs || [],
           chosenPerks,
           chosenDetriments,
+          chosenBuffs: bonuses.chosenBuffs || [],
+          chosenDebuffs: bonuses.chosenDebuffs || [],
           chosenSkills: resolvedChoices.chosenSkills || [],
           chosenSpells: resolvedChoices.chosenSpells || [],
           skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
@@ -1954,6 +2546,10 @@ export class DCCRaceClassApplier {
         drBonus: bonuses.drBonus,
         movement: bonuses.movement,
         conditionItemIds: createdConditionIds,
+        buffs: bonuses.buffs || [],
+        debuffs: bonuses.debuffs || [],
+        chosenBuffs: bonuses.chosenBuffs || [],
+        chosenDebuffs: bonuses.chosenDebuffs || [],
         skills: appliedSkills,
         spells: appliedSpells,
         chosenSkills: resolvedChoices.chosenSkills || [],
@@ -2199,7 +2795,12 @@ export class DCCRaceClassApplier {
     await this.removeClass(actor);
 
     // 2. Parse new class bonuses
-    const bonuses = this.parseClassBonuses(def, { chosenPerks, chosenDetriments });
+    const bonuses = this.parseClassBonuses(def, {
+      chosenPerks,
+      chosenDetriments,
+      chosenBuffs: options.chosenBuffs,
+      chosenDebuffs: options.chosenDebuffs
+    });
     const updates = {};
     updates['system.details.class'] = def.name;
     const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
@@ -2253,12 +2854,16 @@ export class DCCRaceClassApplier {
             img: skillDoc?.img || 'icons/svg/sword.svg',
             system: {
               rank: s.rank,
-              stat: skillDoc?.system?.stat || 'str',
-              skillType: skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
-              type: skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
-              category: skillDoc?.system?.category || 'Combat',
-              notes: skillDoc?.system?.notes || '',
-              upgrades: skillDoc?.system?.upgrades || '',
+              stat: s.stat || skillDoc?.system?.stat || 'str',
+              skillType: s.skillType || skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
+              type: s.type || skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
+              checkType: s.checkType || skillDoc?.system?.checkType || 'Standard',
+              baseDamage: s.baseDamage || skillDoc?.system?.baseDamage || '',
+              canGainRanks: s.canGainRanks !== undefined ? s.canGainRanks : (skillDoc?.system?.canGainRanks ?? true),
+              cooldown: s.cooldown || skillDoc?.system?.cooldown || 'None',
+              category: s.category || skillDoc?.system?.category || 'Combat',
+              notes: s.notes || skillDoc?.system?.notes || '',
+              upgrades: s.upgrades || skillDoc?.system?.upgrades || '',
               isPassive: Boolean(s.isPassive || skillDoc?.system?.isPassive)
             },
             flags: {
@@ -2323,7 +2928,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 9. Embed Class Item Document with chosenSkills and chosenSpells
+    // 9. Embed Class Item Document with chosenSkills, chosenSpells, buffs, and debuffs
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -2338,8 +2943,12 @@ export class DCCRaceClassApplier {
           stats: bonuses.stats,
           perks: bonuses.perks,
           detriments: bonuses.detriments,
+          buffs: bonuses.buffs || [],
+          debuffs: bonuses.debuffs || [],
           chosenPerks,
           chosenDetriments,
+          chosenBuffs: bonuses.chosenBuffs || [],
+          chosenDebuffs: bonuses.chosenDebuffs || [],
           chosenSkills: resolvedChoices.chosenSkills || [],
           chosenSpells: resolvedChoices.chosenSpells || [],
           skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
@@ -2362,6 +2971,10 @@ export class DCCRaceClassApplier {
         drBonus: bonuses.drBonus,
         movement: bonuses.movement,
         conditionItemIds: createdConditionIds,
+        buffs: bonuses.buffs || [],
+        debuffs: bonuses.debuffs || [],
+        chosenBuffs: bonuses.chosenBuffs || [],
+        chosenDebuffs: bonuses.chosenDebuffs || [],
         skills: appliedSkills,
         spells: appliedSpells,
         chosenSkills: resolvedChoices.chosenSkills || [],

@@ -12,6 +12,13 @@ export class BuffDataModel extends BaseItemDataModel {
       value: new fields.NumberField({ initial: 2 }),
       damageMultiplier: new fields.NumberField({ initial: 1 }),
       damageType: new fields.StringField({ initial: '' }),
+      rollModifierMode: new fields.StringField({ initial: 'none' }),
+      affects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      limbModifiers: new fields.SchemaField({
+        arms: new fields.NumberField({ integer: true, initial: 0 }),
+        legs: new fields.NumberField({ integer: true, initial: 0 }),
+        hands: new fields.NumberField({ integer: true, initial: 0 })
+      }),
       statModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       damageModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       duration: new fields.StringField({ initial: '1 Hour' }),

@@ -1,3 +1,71 @@
+## 2.4.20
+
+### Enforced Number of Hands & Limbs Subsystem
+
+- **Physiology & Limbs Schema (`template.json`, `src/models/actors/base-actor-model.mjs`, `src/documents/actor.mjs`)**:
+  - Registered `limbs: { arms: 2, legs: 2, hands: 2 }` in `Actor.templates.baseStats.attributes` and `BaseActorDataModel.defineSchema()`.
+  - Added derived attributes on `actor.system.attributes.limbs` (and getter `actor.limbs`): `arms`, `legs`, `hands`, `maxArms`, `maxLegs`, `maxHands`, `deltaArms`, `deltaLegs`, `deltaHands`, `usedHands`, `equippedHandItems`, `exceededHands`, and `handsWarning`.
+- **Wielding Hand Tracking (`src/models/actors/base-actor-model.mjs`, `src/models/items/gear-model.mjs`, `src/models/items/attack-model.mjs`)**:
+  - Implemented `calculateItemHandsRequired(item)`: gear and attacks consume hands based on `wieldMode` (`one_handed` = 1, `two_handed` = 2, versatile `two_handed_disadv_1h` = 1 or 2) or explicit `handsRequired`. Non-hand gear (torso armor, helmets, boots) and non-weapon items consume 0 hands.
+- **Buff & Debuff Limb Modifiers (`template.json`, `src/models/items/buff-model.mjs`, `src/models/items/debuff-model.mjs`, `src/documents/actor.mjs`)**:
+  - Registered `limbModifiers: { arms: 0, legs: 0, hands: 0 }` on `Item.buff` and `Item.debuff` schemas with dedicated editing panels in item sheets.
+  - Added `CANONICAL_CONDITION_LIMB_MODIFIERS` for automatic fallback calculations on standard conditions (*Severed Hand*, *Amputated Arm*, *Extra Arms*, *Prosthetic Arm*, etc.).
+- **Visual Warning Banners & UI Indicators (`templates/actors/parts/page1-core.hbs`, `templates/actors/parts/page4-inventory.hbs`, `styles/dcc.css`)**:
+  - Added `.dcc-hands-warning-banner` on Page 1 (Attacks header) and Page 4 (Inventory) that displays dynamically when `usedHands > maxHands`.
+  - Added `Hands: used/max` badge to the Attacks header with red alert coloring when exceeded.
+  - Added Limbs & Physiology quick-adjustment controls on Page 1 and Page 4 with GM-editable inputs and non-GM readonly views.
+- **Security & Permissions (`src/sheets/crawler-sheet.mjs`)**:
+  - Enforced server-side validation in `DCCCrawlerSheet._updateObject`: base limb modifications are restricted to Game Masters, stripping limb fields for non-GM submissions.
+- **Automated Unit Test Verification (`tests/enforced-hands-and-limbs.test.mjs`)**:
+  - 10 comprehensive unit tests validating default crawler anatomy, hand tracking for 1-handed and 2-handed gear, versatile items, quadrupeds (4 legs, 0 hands), centaurs (4 legs, 2 arms, 2 hands), GM 4-hand adjustment, buff/debuff limb modifications, canonical condition fallbacks, and security stripping.
+  - All 918 tests across 162 suites pass with 0 failures.
+
+## 2.4.19
+
+### Unified Item Creation, Canonical Weapon Associations, Default 1x Crits & GM Value Security
+
+- **Unified Global Item Creation Interface (`src/dcc.mjs`, `src/apps/item-manager.mjs`, `src/apps/skill-manager.mjs`, `src/apps/spell-manager.mjs`)**:
+  - Implemented `createAndEditItem(type, initialData)` and `openGlobalItemCreatorDialog()` on `game.dcc`.
+  - Intercepted the Item Directory sidebar "Create Item" button to open the global creation modal, immediately creating the document and launching the full `DCCItemSheet` (Item Builder) editor.
+  - Ensured the exact same interface is used globally for creating and editing Weapons, Gear, Spells, Skills, Classes, Races, Buffs, Debuffs, and Loot.
+- **Data-Driven Weapon & Skill Associations (`src/data/weapon-associations.mjs`, `src/sheets/item-sheet.mjs`, `templates/items/parts/gear.hbs`)**:
+  - Replaced comma-separated text inputs with interactive tag pill badges, dropdown selectors, and auto-suggest actions.
+  - Implemented `CANONICAL_WEAPON_SKILL_MAP` and `CANONICAL_WEAPON_TECHNIQUE_MAP` to provide data-driven suggestions without regular expressions or arbitrary substring matching (GEMINI.md Rule 0).
+  - Dynamically queries skills with `system.appliesTo` metadata, allowing user-created skills and techniques to integrate seamlessly with weapon auto-suggestions.
+  - Added single-click "⚡ Auto-Suggest Skills" and "⚡ Auto-Suggest Techniques" buttons to the item sheet.
+- **Default 1x Critical Hit Multipliers (`template.json`, `src/models/items/skill-model.mjs`, `src/models/items/spell-model.mjs`, `src/models/items/gear-model.mjs`, `src/documents/actor.mjs`)**:
+  - Critical Hit Multipliers now default to 1x across all ranks for items, skills, and spells on creation (`critMultiplier: 1`, `critMultiplierR5: 1`, `critMultiplierR15: 1`).
+  - Added an editable Critical Multiplier field to the weapon sheet for straightforward GM adjustments.
+- **Gold Value Permission Security (`src/sheets/item-sheet.mjs`, `templates/items/parts/gear.hbs`, `templates/items/parts/loot.hbs`)**:
+  - Value fields are restricted to Game Masters: non-GM players see disabled/readonly fields (gated by Determine Value Rank 10 for visibility).
+  - Enforced server-side validation in `DCCItemSheet._updateObject`: non-GM submissions automatically strip `system.value` to prevent unauthorized client tampering.
+- **Automated Unit Test Verification (`tests/item-creation-and-associations.test.mjs`)**:
+  - Added 6 comprehensive test suites covering creation across all 9 item types, data-driven weapon mappings, GM value security, and 1x crit defaults.
+  - All 900 automated unit tests pass across 161 test suites with 0 failures.
+
+## 2.4.18
+
+### Item Idempotence, Crawler Cross-Scene Persistence & Compendium Synchronization
+
+- **Compendium-to-World Sync Engine (`src/data/compendium-sync.mjs`, `src/documents/item.mjs`, `src/dcc.mjs`)**:
+  - Implemented `syncCompendiumItemToWorld` and `registerCompendiumSyncHooks` listening to Foundry VTT's `updateItem` hook and direct document updates.
+  - Modifying any Spell, Gear, Loot, Class, Race, Buff, Debuff, or Skill in a compendium pack automatically propagates updates to all actors and world items across the campaign.
+  - State preservation: `preserveItemActorState` guarantees actor-specific progression (invested spell ranks, skill ranks and training hours, gear equipped status and quantity, and item charges) is safely preserved while mechanical definitions (damage, bonuses, abilities, and descriptions) update in real-time.
+  - Automatic Race and Class bonus refreshing: when a race or class definition changes in a compendium, actors with that race or class have their benefits dynamically refreshed via `actor.applyRace` or `actor.applyClass`.
+- **Crawler Cross-Scene Persistence (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `src/dcc.mjs`)**:
+  - Enforced `actorLink: true` across crawler and pet prototype tokens, `preCreateToken`, `preUpdateToken`, and scene migration on `ready`.
+  - Added synthetic token actor forwarding in `DCCActor.prototype.update`, `createEmbeddedDocuments`, `updateEmbeddedDocuments`, and `deleteEmbeddedDocuments` to ensure edits made to a crawler on any scene persist directly to the world actor, keeping all scenes and tokens synchronized into the future.
+  - Form updates submitted via `DCCCrawlerSheet._updateObject` synchronize directly to the base world actor when opened from a scene token.
+- **Spell & Entity Idempotence (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `src/apps/spell-manager.mjs`)**:
+  - Spells are globally unique on an actor. Adding or dropping an existing spell onto a crawler merges rank (`Math.max(existingRank, incomingRank)`) without creating duplicate spellbook entries.
+  - Non-consumable items (gear, weapons, armor) maintain unique discrete entries per acquisition so each can be equipped, enchanted, or modified independently.
+  - Consumable loot dropped onto character sheets stacks quantity rather than duplicating entries.
+- **Auto-Populating Missing Compendiums (`src/dcc.mjs`)**:
+  - Added auto-population of `carl-rpg.races` and `carl-rpg.classes` compendiums from canonical datasets if empty upon system ready.
+- **Comprehensive Automated Verification (`tests/item-idempotence.test.mjs`)**:
+  - Added dedicated test suite covering all 9 idempotence and cross-scene persistence requirements.
+  - Full suite passes at 893 tests across 161 test suites with 0 failures.
+
 ## 2.4.17
 
 ### Skill Classification & Action Discrimination Engine

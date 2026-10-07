@@ -8992,6 +8992,35 @@ select.dcc-box-input.dcc-size-select,
   font-weight: bold;
 }
 
+/* Hands & Limbs Enforcement Styles */
+.dcc-hands-warning-banner {
+  background: #c0392b;
+  border: 1px solid #962d22;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
 
+.dcc-hands-warning-banner i {
+  color: #f1c40f;
+  font-size: 14px;
+}
 
+.dcc-limbs-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+}
 
+.is-exceeded-input {
+  border-color: #c0392b !important;
+  color: #e74c3c !important;
+  font-weight: bold !important;
+}

@@ -11,6 +11,7 @@ import {
   getSafeGrindingThreshold
 } from '../data/grinding.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
+import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -251,6 +252,9 @@ export function isWeaponGear(item) {
   return false;
 }
 
+import { calculateItemHandsRequired, CANONICAL_CONDITION_LIMB_MODIFIERS } from '../models/actors/base-actor-model.mjs';
+export { calculateItemHandsRequired, CANONICAL_CONDITION_LIMB_MODIFIERS };
+
 /**
  * Calculate required cumulative XP to reach the next level.
  * Level 1 -> 1,000 XP (reaches Level 2)
@@ -362,6 +366,24 @@ const BaseActor = globalThis.foundry?.documents?.Actor
   ?? class {};
 
 export class DCCActor extends BaseActor {
+  /**
+   * Helper getter returning the actor's limbs state.
+   * @type {object}
+   */
+  get limbs() {
+    return this.system?.attributes?.limbs || {
+      arms: 2,
+      legs: 2,
+      hands: 2,
+      maxArms: 2,
+      maxLegs: 2,
+      maxHands: 2,
+      usedHands: 0,
+      exceededHands: false,
+      handsWarning: ''
+    };
+  }
+
   /** @override */
   async _preCreate(data, options, user) {
     await super._preCreate(data, options, user);
@@ -506,14 +528,111 @@ export class DCCActor extends BaseActor {
   }
 
   /**
-   * Compatibility wrapper ensuring _preUpdate is invoked across environments
+   * Compatibility wrapper ensuring _preUpdate is invoked across environments.
+   * Also enforces that any update made to a crawler or pet on a scene persists
+   * to the base world actor, ensuring scene-independent persistence.
    * @override
    */
   async update(data, options = {}) {
     if (typeof this._preUpdate === 'function') {
       await this._preUpdate(data, options, globalThis.game?.user?.id || 'test-user');
     }
-    return super.update(data, options);
+    // If this is a crawler or pet token actor on a scene, persist changes to the base world actor!
+    if (this.isToken && (this.type === 'crawler' || this.type === 'pet')) {
+      const baseActor = this.token?.baseActor || globalThis.game?.actors?.get?.(this.token?.actorId || this.id);
+      if (baseActor && baseActor !== this) {
+        await baseActor.update(data, options);
+      }
+    }
+    return super.update ? super.update(data, options) : this;
+  }
+
+  /**
+   * Enforces spell idempotence (a spell is globally unique on an actor) and
+   * forwards embedded document creations on crawler/pet scene tokens to the base actor.
+   * @override
+   */
+  async createEmbeddedDocuments(embeddedType, dataArray, options = {}) {
+    // Forward embedded creations on scene tokens to the base actor
+    if (this.isToken && (this.type === 'crawler' || this.type === 'pet')) {
+      const baseActor = this.token?.baseActor || globalThis.game?.actors?.get?.(this.token?.actorId || this.id);
+      if (baseActor && baseActor !== this) {
+        return baseActor.createEmbeddedDocuments(embeddedType, dataArray, options);
+      }
+    }
+
+    if (embeddedType === 'Item' && Array.isArray(dataArray)) {
+      const filteredData = [];
+      const existingReturns = [];
+
+      for (const itemData of dataArray) {
+        if (itemData.type === 'spell') {
+          const norm = (itemData.name || '').toLowerCase().trim();
+          const sourceUuid = itemData.flags?.core?.sourceId || itemData.flags?.['carl-rpg']?.sourceUuid || itemData.uuid;
+          const compId = itemData.flags?.['carl-rpg']?.compendiumId || itemData.id || itemData._id;
+
+          const existingItems = Array.isArray(this.items) ? this.items : Array.from(this.items?.values?.() || []);
+          const existingSpell = existingItems.find(i => {
+            if (i.type !== 'spell') return false;
+            const iSource = i.flags?.core?.sourceId || i.flags?.['carl-rpg']?.sourceUuid;
+            const iCompId = i.flags?.['carl-rpg']?.compendiumId;
+            if (sourceUuid && iSource === sourceUuid) return true;
+            if (compId && iCompId === compId) return true;
+            return (i.name || '').toLowerCase().trim() === norm;
+          });
+
+          if (existingSpell) {
+            // Already known: do not duplicate. Keep maximum rank.
+            const incomingRank = Number(itemData.system?.rank) || 1;
+            const currentRank = Number(existingSpell.system?.rank) || 1;
+            if (incomingRank > currentRank) {
+              await existingSpell.update({ 'system.rank': incomingRank });
+            }
+            existingReturns.push(existingSpell);
+            continue;
+          }
+        }
+        filteredData.push(itemData);
+      }
+
+      let created = [];
+      if (filteredData.length > 0) {
+        created = super.createEmbeddedDocuments
+          ? await super.createEmbeddedDocuments(embeddedType, filteredData, options)
+          : [];
+      }
+      return [...existingReturns, ...created];
+    }
+
+    return super.createEmbeddedDocuments ? super.createEmbeddedDocuments(embeddedType, dataArray, options) : [];
+  }
+
+  /**
+   * Forwards embedded updates on crawler/pet scene tokens to the base actor.
+   * @override
+   */
+  async updateEmbeddedDocuments(embeddedType, updates = [], options = {}) {
+    if (this.isToken && (this.type === 'crawler' || this.type === 'pet')) {
+      const baseActor = this.token?.baseActor || globalThis.game?.actors?.get?.(this.token?.actorId || this.id);
+      if (baseActor && baseActor !== this) {
+        await baseActor.updateEmbeddedDocuments(embeddedType, updates, options);
+      }
+    }
+    return super.updateEmbeddedDocuments ? super.updateEmbeddedDocuments(embeddedType, updates, options) : [];
+  }
+
+  /**
+   * Forwards embedded deletions on crawler/pet scene tokens to the base actor.
+   * @override
+   */
+  async deleteEmbeddedDocuments(embeddedType, ids = [], options = {}) {
+    if (this.isToken && (this.type === 'crawler' || this.type === 'pet')) {
+      const baseActor = this.token?.baseActor || globalThis.game?.actors?.get?.(this.token?.actorId || this.id);
+      if (baseActor && baseActor !== this) {
+        await baseActor.deleteEmbeddedDocuments(embeddedType, ids, options);
+      }
+    }
+    return super.deleteEmbeddedDocuments ? super.deleteEmbeddedDocuments(embeddedType, ids, options) : [];
   }
 
   /** @override */
@@ -538,6 +657,16 @@ export class DCCActor extends BaseActor {
           ability.unenhanced = ability.value || 10;
         }
       }
+    }
+
+    // Ensure base limbs exist
+    if (this.system.attributes) {
+      if (!this.system.attributes.limbs) {
+        this.system.attributes.limbs = { arms: 2, legs: 2, hands: 2 };
+      }
+      if (this.system.attributes.limbs.arms === undefined || this.system.attributes.limbs.arms === null) this.system.attributes.limbs.arms = 2;
+      if (this.system.attributes.limbs.legs === undefined || this.system.attributes.limbs.legs === null) this.system.attributes.limbs.legs = 2;
+      if (this.system.attributes.limbs.hands === undefined || this.system.attributes.limbs.hands === null) this.system.attributes.limbs.hands = 2;
     }
   }
 
@@ -608,6 +737,9 @@ export class DCCActor extends BaseActor {
     const resistances = new Set();
     const immunities = new Set();
     let buffTempHp = 0;
+    let deltaArms = 0;
+    let deltaLegs = 0;
+    let deltaHands = 0;
     const damageMultipliers = { all: 1 };
     if (CONFIG.DCC?.damageTypes) {
       for (const dt of CONFIG.DCC.damageTypes) {
@@ -623,6 +755,19 @@ export class DCCActor extends BaseActor {
       const bVal = Number(bSys.value) || 0;
       const bDmg = bSys.damageType || '';
       const bMult = Number(bSys.damageMultiplier) || (bType === 'damagemultiplier' ? bVal : 1);
+
+      // Limb modifiers on buff
+      const bLimb = bSys.limbModifiers || {};
+      if (bLimb.arms) deltaArms += Number(bLimb.arms) || 0;
+      if (bLimb.legs) deltaLegs += Number(bLimb.legs) || 0;
+      if (bLimb.hands) deltaHands += Number(bLimb.hands) || 0;
+      const bNorm = (buff.name || '').toLowerCase().trim();
+      if (!bLimb.arms && !bLimb.legs && !bLimb.hands && CANONICAL_CONDITION_LIMB_MODIFIERS[bNorm]) {
+        const can = CANONICAL_CONDITION_LIMB_MODIFIERS[bNorm];
+        if (can.arms) deltaArms += can.arms;
+        if (can.legs) deltaLegs += can.legs;
+        if (can.hands) deltaHands += can.hands;
+      }
 
       // Support multiple statModifiers on buff
       if (Array.isArray(bSys.statModifiers) && bSys.statModifiers.length > 0) {
@@ -683,6 +828,20 @@ export class DCCActor extends BaseActor {
       : [];
     for (const debuff of debuffItems) {
       const dSys = debuff.system || {};
+
+      // Limb modifiers on debuff
+      const dLimb = dSys.limbModifiers || {};
+      if (dLimb.arms) deltaArms += Number(dLimb.arms) || 0;
+      if (dLimb.legs) deltaLegs += Number(dLimb.legs) || 0;
+      if (dLimb.hands) deltaHands += Number(dLimb.hands) || 0;
+      const dNorm = (debuff.name || '').toLowerCase().trim();
+      if (!dLimb.arms && !dLimb.legs && !dLimb.hands && CANONICAL_CONDITION_LIMB_MODIFIERS[dNorm]) {
+        const can = CANONICAL_CONDITION_LIMB_MODIFIERS[dNorm];
+        if (can.arms) deltaArms += can.arms;
+        if (can.legs) deltaLegs += can.legs;
+        if (can.hands) deltaHands += can.hands;
+      }
+
       if (Array.isArray(dSys.statModifiers) && dSys.statModifiers.length > 0) {
         for (const sm of dSys.statModifiers) {
           const sKey = (sm?.stat || '').toLowerCase();
@@ -806,6 +965,55 @@ export class DCCActor extends BaseActor {
           system.attributes.speed.step = 10;
         }
       }
+
+      // 7. Calculate Limbs (Arms, Legs, Hands) and Wielding Hand Limit
+      const baseArms = Number(system.attributes?.limbs?.arms ?? 2);
+      const baseLegs = Number(system.attributes?.limbs?.legs ?? 2);
+      const baseHands = Number(system.attributes?.limbs?.hands ?? 2);
+
+      const maxArms = Math.max(0, (Number.isFinite(baseArms) ? baseArms : 2) + deltaArms);
+      const maxLegs = Math.max(0, (Number.isFinite(baseLegs) ? baseLegs : 2) + deltaLegs);
+      const maxHands = Math.max(0, (Number.isFinite(baseHands) ? baseHands : 2) + deltaHands);
+
+      let usedHands = 0;
+      const equippedHandItems = [];
+      const allItems = this.items
+        ? (this.items.filter ? this.items : Array.from(this.items.values?.() || this.items))
+        : [];
+
+      for (const item of allItems) {
+        const hands = calculateItemHandsRequired(item);
+        if (hands > 0) {
+          usedHands += hands;
+          equippedHandItems.push({
+            id: item.id || item._id,
+            name: item.name,
+            hands
+          });
+        }
+      }
+
+      const exceededHands = usedHands > maxHands;
+      const handsWarning = exceededHands
+        ? `Hands limit exceeded: Wielding gear in ${usedHands} hands, but only ${maxHands} hands available!`
+        : '';
+
+      if (!system.attributes.limbs) {
+        system.attributes.limbs = { arms: baseArms, legs: baseLegs, hands: baseHands };
+      }
+      system.attributes.limbs.arms = baseArms;
+      system.attributes.limbs.legs = baseLegs;
+      system.attributes.limbs.hands = baseHands;
+      system.attributes.limbs.maxArms = maxArms;
+      system.attributes.limbs.maxLegs = maxLegs;
+      system.attributes.limbs.maxHands = maxHands;
+      system.attributes.limbs.deltaArms = deltaArms;
+      system.attributes.limbs.deltaLegs = deltaLegs;
+      system.attributes.limbs.deltaHands = deltaHands;
+      system.attributes.limbs.usedHands = usedHands;
+      system.attributes.limbs.equippedHandItems = equippedHandItems;
+      system.attributes.limbs.exceededHands = exceededHands;
+      system.attributes.limbs.handsWarning = handsWarning;
 
     // -------------------------------------------------------------------------
     // SKILLS: Calculate Item Bonuses, Boon Bonuses, Modified Rank & Total Skill
@@ -997,13 +1205,20 @@ export class DCCActor extends BaseActor {
    * Roll a stat check
    * @param {string} statKey - str, int, con, dex, cha
    */
-  async rollStat(statKey) {
+  async rollStat(statKey, options = {}) {
     const ability = this.system.abilities?.[statKey];
     if (!ability) return;
 
     const mod = ability.mod ?? 0;
     const statName = statKey.toUpperCase();
-    const formula = `1d20 + ${mod}`;
+
+    const advState = this.getRollAdvantageState({
+      rollType: 'stat',
+      stat: statKey,
+      options
+    });
+
+    const formula = `${advState.formula} + ${mod}`;
     const roll = await new Roll(formula, { mod }).evaluate();
 
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -1016,9 +1231,13 @@ export class DCCActor extends BaseActor {
       }).catch(() => {});
     }
 
+    const flavor = advState.label
+      ? `<strong>${this.name}</strong>: ${statName} Check (<strong>${advState.label}</strong>: ${advState.formula} + ${statName} Mod ${mod >= 0 ? `+${mod}` : mod})`
+      : `<strong>${this.name}</strong>: ${statName} Check`;
+
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${statName} Check`
+      flavor
     });
   }
 
@@ -3099,9 +3318,9 @@ export class DCCActor extends BaseActor {
     const displayDamage = `${baseDice}${rankDieStr}${statStr}${typeStr}${techniqueBonusDice}${extra}`;
 
     const critMult = (skillRank >= 15 && matchingSkill?.system?.critMultiplierR15) ? matchingSkill.system.critMultiplierR15
-      : ((skillRank >= 5 && matchingSkill?.system?.critMultiplierR5) ? matchingSkill.system.critMultiplierR5 : 2);
+      : ((skillRank >= 5 && matchingSkill?.system?.critMultiplierR5) ? matchingSkill.system.critMultiplierR5 : (sys.critMultiplier !== undefined ? Number(sys.critMultiplier) : 2));
     let effects = sys.effects || sys.notes || '';
-    if (critMult > 2) {
+    if (critMult > 1) {
       effects = effects ? `${critMult}x Crit (R${skillRank >= 15 ? 15 : 5}). ${effects}` : `${critMult}x Crit (R${skillRank >= 15 ? 15 : 5})`;
     }
 
@@ -3223,6 +3442,201 @@ export class DCCActor extends BaseActor {
   }
 
   /**
+   * Evaluate Advantage and Disadvantage state for a given roll.
+   * Checks options, active buffs (external + embedded), active debuffs,
+   * canonical conditions, untrained status, and weapon wield penalties.
+   * Cancels out if both advantage and disadvantage are present.
+   *
+   * @param {object} context
+   * @param {string} context.rollType - 'attack' | 'spell' | 'skill' | 'stat'
+   * @param {string} [context.stat] - 'str' | 'dex' | 'con' | 'int' | 'cha'
+   * @param {object} [context.item] - Item document or payload
+   * @param {boolean} [context.isUntrained=false]
+   * @param {boolean} [context.isOneHandedPenalty=false]
+   * @param {object} [context.options={}] - User roll options (options.advantage, options.disadvantage)
+   * @param {Array<string>} [context.tags=[]]
+   * @returns {{ mode: 'advantage'|'disadvantage'|'cancelled'|'normal', formula: string, label: string|null, reasons: Array<string> }}
+   */
+  getRollAdvantageState(context = {}) {
+    const rollType = (context.rollType || '').toLowerCase();
+    const stat = (context.stat || '').toLowerCase();
+    const item = context.item || null;
+    const itemSys = item?.system || {};
+    const options = context.options || {};
+    const tags = Array.isArray(context.tags) ? context.tags.map(t => String(t).toLowerCase()) : [];
+
+    const advantages = [];
+    const disadvantages = [];
+
+    // Helper: test if a list of affected targets matches this roll's context
+    const matchesScope = (affectsList) => {
+      if (!Array.isArray(affectsList) || affectsList.length === 0) return false;
+      const lowerList = affectsList.map(a => String(a).toLowerCase().trim());
+      if (lowerList.includes('all') || lowerList.includes('all_rolls') || lowerList.includes('any')) return true;
+
+      // Match rollType (supports singular and plural e.g. 'attack' and 'attacks')
+      if (rollType) {
+        if (lowerList.includes(rollType)) return true;
+        if (lowerList.includes(`${rollType}s`)) return true;
+        if (rollType.endsWith('s') && lowerList.includes(rollType.slice(0, -1))) return true;
+      }
+
+      // Match stat
+      if (stat && lowerList.includes(stat)) return true;
+
+      // Match item name
+      if (item?.name && lowerList.includes(item.name.toLowerCase().trim())) return true;
+
+      // Match weapon category or type
+      if (itemSys.weaponCategory && lowerList.includes(itemSys.weaponCategory.toLowerCase().trim())) return true;
+      if (itemSys.weaponType && lowerList.includes(itemSys.weaponType.toLowerCase().trim())) return true;
+
+      // Match tags
+      for (const t of tags) {
+        if (lowerList.includes(t)) return true;
+      }
+
+      return false;
+    };
+
+    // 1. Manual Option Overrides
+    if (options.advantage === true) {
+      advantages.push('Advantage (Manual Selection)');
+    }
+    if (options.disadvantage === true) {
+      disadvantages.push('Disadvantage (Manual Selection)');
+    }
+
+    // 2. Untrained penalty
+    if (context.isUntrained === true) {
+      disadvantages.push('Untrained Check');
+    }
+
+    // 3. One-Handed penalty for two-handed weapons
+    if (context.isOneHandedPenalty === true) {
+      disadvantages.push('One-Handed Disadvantage');
+    }
+
+    // 4. Item specific limitations (e.g. spells with "Disadvantage" in limitations)
+    if (itemSys.limitations && typeof itemSys.limitations === 'string' && itemSys.limitations.toLowerCase().includes('disadvantage')) {
+      disadvantages.push(`${item.name} Limitation`);
+    }
+
+    // 5. Active Buffs (External Buff slots + Embedded Buff Items)
+    const activeBuffs = [];
+    if (this.items) {
+      const itemsList = this.items.filter ? this.items.filter(i => i.type === 'buff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'buff');
+      for (const b of itemsList) {
+        if (b.system?.active !== false) activeBuffs.push(b);
+      }
+    }
+    if (typeof this.getActiveBuffs === 'function') {
+      const ext = this.getActiveBuffs();
+      for (const b of ext) {
+        if (!activeBuffs.some(ab => (ab.id && ab.id === b.id) || ab.name.toLowerCase() === b.name.toLowerCase())) {
+          activeBuffs.push(b);
+        }
+      }
+    }
+
+    for (const buff of activeBuffs) {
+      const bSys = buff.system || {};
+      const bName = (buff.name || '').toLowerCase().trim();
+      const canon = CANONICAL_CONDITION_ROLL_MODIFIERS?.[bName];
+
+      const mode = (bSys.rollModifierMode && bSys.rollModifierMode !== 'none')
+        ? bSys.rollModifierMode.toLowerCase()
+        : (canon?.mode || (bSys.buffType === 'roll' ? 'advantage' : 'none'));
+
+      const affects = (Array.isArray(bSys.affects) && bSys.affects.length > 0)
+        ? bSys.affects
+        : (Array.isArray(bSys.advantageTargets) && bSys.advantageTargets.length > 0
+            ? bSys.advantageTargets
+            : (canon?.affects || (mode !== 'none' ? ['all'] : [])));
+
+      if (mode === 'advantage' && matchesScope(affects)) {
+        advantages.push(`Buff: ${buff.name}`);
+      } else if (mode === 'disadvantage' && matchesScope(affects)) {
+        disadvantages.push(`Buff: ${buff.name}`);
+      }
+    }
+
+    // 6. Active Debuffs (Embedded Debuff Items + Actor Condition List)
+    const activeDebuffs = [];
+    if (this.items) {
+      const debuffsList = this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff');
+      for (const d of debuffsList) {
+        if (d.system?.active !== false) activeDebuffs.push(d);
+      }
+    }
+
+    const rawDebuffs = this.system?.attributes?.debuffs;
+    if (rawDebuffs) {
+      const debuffNames = Array.isArray(rawDebuffs)
+        ? rawDebuffs
+        : (typeof rawDebuffs === 'string' ? rawDebuffs.split(',').map(s => s.trim()).filter(Boolean) : []);
+      for (const dName of debuffNames) {
+        if (!activeDebuffs.some(ad => ad.name.toLowerCase() === dName.toLowerCase())) {
+          activeDebuffs.push({ name: dName, system: {} });
+        }
+      }
+    }
+
+    for (const debuff of activeDebuffs) {
+      const dSys = debuff.system || {};
+      const dName = (debuff.name || '').toLowerCase().trim();
+      const canon = CANONICAL_CONDITION_ROLL_MODIFIERS?.[dName];
+
+      const mode = (dSys.rollModifierMode && dSys.rollModifierMode !== 'none')
+        ? dSys.rollModifierMode.toLowerCase()
+        : (canon?.mode || 'disadvantage');
+
+      const affects = (Array.isArray(dSys.affects) && dSys.affects.length > 0)
+        ? dSys.affects
+        : (Array.isArray(dSys.disadvantageTargets) && dSys.disadvantageTargets.length > 0
+            ? dSys.disadvantageTargets
+            : (canon?.affects || (mode !== 'none' ? ['all'] : [])));
+
+      if (mode === 'disadvantage' && matchesScope(affects)) {
+        disadvantages.push(`Debuff: ${debuff.name}`);
+      } else if (mode === 'advantage' && matchesScope(affects)) {
+        advantages.push(`Debuff: ${debuff.name}`);
+      }
+    }
+
+    // 7. Resolve Combination & Cancellation
+    if (advantages.length > 0 && disadvantages.length === 0) {
+      return {
+        mode: 'advantage',
+        formula: '2d20kh',
+        label: `Advantage (${advantages.join(', ')})`,
+        reasons: advantages
+      };
+    } else if (advantages.length === 0 && disadvantages.length > 0) {
+      return {
+        mode: 'disadvantage',
+        formula: '2d20kl',
+        label: `Disadvantage (${disadvantages.join(', ')})`,
+        reasons: disadvantages
+      };
+    } else if (advantages.length > 0 && disadvantages.length > 0) {
+      return {
+        mode: 'cancelled',
+        formula: '1d20',
+        label: `Cancelled (Advantage: ${advantages.join(', ')} vs Disadvantage: ${disadvantages.join(', ')})`,
+        reasons: [...advantages, ...disadvantages]
+      };
+    } else {
+      return {
+        mode: 'normal',
+        formula: '1d20',
+        label: null,
+        reasons: []
+      };
+    }
+  }
+
+  /**
    * Roll Attack: To-Hit and Multi-Typed Damage
    * @param {Item} attackItem
    * @param {'hit'|'damage'} type
@@ -3317,20 +3731,30 @@ export class DCCActor extends BaseActor {
       }
 
       const isOneHandedPenalty = (sys.wieldMode === 'two_handed_disadv_1h' && (options.hands === 1 || options.wieldMode === 'one_handed' || options.oneHanded));
-      const hasDisadvantage = isUntrained || options.disadvantage || isOneHandedPenalty;
 
-      let roll;
+      const advState = this.getRollAdvantageState({
+        rollType: 'attack',
+        stat: toHitStat,
+        item: attackItem,
+        isUntrained,
+        isOneHandedPenalty,
+        options,
+        tags: [sys.weaponCategory, sys.weaponType, sys.slot].filter(Boolean)
+      });
+
+      const total = isUntrained ? statMod : (rank + statMod);
+      const formula = `${advState.formula} + ${total}`;
+      const roll = await new Roll(formula, { rank: isUntrained ? 0 : rank, mod: statMod }).evaluate();
+
       let flavorText = '';
-      if (hasDisadvantage) {
-        const total = isUntrained ? statMod : (rank + statMod);
-        const formula = `2d20kl + ${total}`;
-        roll = await new Roll(formula, { rank: isUntrained ? 0 : rank, mod: statMod }).evaluate();
-        const reason = isOneHandedPenalty ? 'One-Handed Disadvantage' : (isUntrained ? 'Untrained Attack Check with Disadvantage' : 'Disadvantage');
+      if (advState.mode === 'disadvantage') {
+        const reason = isOneHandedPenalty ? 'One-Handed Disadvantage' : (isUntrained ? 'Untrained Attack Check with Disadvantage' : (advState.label || 'Disadvantage'));
         flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${reason}</strong>: 2d20kl + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
+      } else if (advState.mode === 'advantage') {
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${advState.label}</strong>: 2d20kh + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
+      } else if (advState.mode === 'cancelled') {
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${advState.label}</strong>: 1d20 + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       } else {
-        const total = rank + statMod;
-        const formula = `1d20 + ${total}`;
-        roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
         const rankPart = rank > 0 ? `Rank ${rank} + ` : '';
         flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (To Hit: 1d20 + ${rankPart}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       }
@@ -3510,7 +3934,7 @@ export class DCCActor extends BaseActor {
       const typedDamageJson = JSON.stringify(typedDamage);
 
       // Resolve custom critical multiplier and on-hit debuffs from matching skill and active techniques
-      let critMultiplier = 2;
+      let critMultiplier = (attackItem?.system?.critMultiplier !== undefined) ? Number(attackItem.system.critMultiplier) : 2;
       const onHitDebuffs = [];
       const activeTechs = options.techniques || (typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
       for (const t of activeTechs) {
@@ -3652,21 +4076,44 @@ export class DCCActor extends BaseActor {
    */
   getActiveBuffs() {
     const rawBuffs = this.system?.attributes?.externalBuffs;
-    if (!rawBuffs) return [];
-
-    let buffKeys = [];
-    if (Array.isArray(rawBuffs)) {
-      buffKeys = rawBuffs.slice(0, 3);
-    } else if (typeof rawBuffs === 'object') {
-      buffKeys = [rawBuffs.buff1, rawBuffs.buff2, rawBuffs.buff3];
-    }
-
     const resolved = [];
-    for (const key of buffKeys) {
-      if (!key) continue;
-      const buffObj = this.resolveBuff(key);
-      if (buffObj) resolved.push(buffObj);
+
+    if (rawBuffs) {
+      let buffKeys = [];
+      if (Array.isArray(rawBuffs)) {
+        buffKeys = rawBuffs.slice(0, 3);
+      } else if (typeof rawBuffs === 'object') {
+        buffKeys = [rawBuffs.buff1, rawBuffs.buff2, rawBuffs.buff3];
+      }
+
+      for (const key of buffKeys) {
+        if (!key) continue;
+        const buffObj = this.resolveBuff(key);
+        if (buffObj) resolved.push(buffObj);
+      }
     }
+
+    // Also include any embedded buff items explicitly flagged as active
+    if (this.items) {
+      const itemsList = Array.isArray(this.items) ? this.items : Array.from(this.items.values?.() || []);
+      for (const item of itemsList) {
+        if (item.type === 'buff' && item.system?.active) {
+          if (!resolved.some(r => r.id === (item.id || item._id))) {
+            const sysData = (typeof item.system?.toObject === 'function')
+              ? item.system.toObject(false)
+              : structuredClone(item.system || {});
+            resolved.push({
+              id: item.id || item._id,
+              name: item.name,
+              type: item.type,
+              system: sysData,
+              ...sysData
+            });
+          }
+        }
+      }
+    }
+
     return resolved;
   }
 
@@ -3972,7 +4419,7 @@ export class DCCActor extends BaseActor {
    * - Intervene: Roll 1d6.
    * @param {Item} skillItem
    */
-  async rollSkill(skillItem) {
+  async rollSkill(skillItem, options = {}) {
     // Record skill usage in active combat if applicable
     if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.recordSkillUsage === 'function') {
       DCCCombatMetrics.recordSkillUsage({ actor: this, skillName: skillItem.name }).catch(() => {});
@@ -4034,8 +4481,17 @@ export class DCCActor extends BaseActor {
       });
     }
 
-    // Untrained Check (Modified Rank <= 0): Disadvantage (2d20kl + mod)
-    if (modifiedRank <= 0) {
+    const isUntrained = modifiedRank <= 0;
+    const advState = this.getRollAdvantageState({
+      rollType: 'skill',
+      stat: statKey,
+      item: skillItem,
+      isUntrained,
+      options
+    });
+
+    // Untrained Check with Disadvantage (Rank <= 0 and disadvantage applies)
+    if (isUntrained && (advState.mode === 'disadvantage' || advState.mode === 'normal')) {
       const formula = `2d20kl + ${statMod}`;
       const roll = await new Roll(formula, { mod: statMod }).evaluate();
       if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -4053,7 +4509,7 @@ export class DCCActor extends BaseActor {
       });
     }
 
-    // Trained Check (Modified Rank > 0): 1d20 + Total Skill (Modified Rank + Stat Mod)
+    // Trained Check or Non-Disadvantage Untrained Check
     const breakdown = [`Rank ${modifiedRank}`];
     if (itemBonus > 0 || boonBonus > 0 || typeBonus > 0) {
       const parts = [`Base ${baseRank}`];
@@ -4064,16 +4520,29 @@ export class DCCActor extends BaseActor {
     }
     breakdown.push(`${statName} Mod ${statMod >= 0 ? `+${statMod}` : statMod}`);
 
-    const formula = `1d20 + ${totalSkill}`;
-    const roll = await new Roll(formula, { rank: modifiedRank, mod: statMod }).evaluate();
+    const checkValue = isUntrained ? statMod : totalSkill;
+    const formula = `${advState.formula} + ${checkValue}`;
+    const roll = await new Roll(formula, { rank: isUntrained ? 0 : modifiedRank, mod: statMod }).evaluate();
+
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
       DCCSessionEngine.recordRoll({
         actor: this,
         roll,
-        type: 'skill',
+        type: isUntrained ? 'untrained_skill' : 'skill',
         name: skillItem.name,
-        isUntrained: false
+        isUntrained
       }).catch(() => {});
+    }
+
+    let flavorText = '';
+    if (advState.mode === 'disadvantage') {
+      flavorText = `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check [<strong>${advState.label || 'Disadvantage'}</strong>]: ${advState.formula} + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`;
+    } else if (advState.mode === 'advantage') {
+      flavorText = `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check [<strong>${advState.label}</strong>]: ${advState.formula} + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`;
+    } else if (advState.mode === 'cancelled') {
+      flavorText = `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check [<strong>${advState.label}</strong>]: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`;
+    } else {
+      flavorText = `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`;
     }
 
     const dmgData = this.getSkillDamageData(skillItem);
@@ -4091,7 +4560,7 @@ export class DCCActor extends BaseActor {
 
     return roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<strong>${this.name}</strong>: ${skillItem.name} (${statName} Check: 1d20 + ${breakdown.join(' + ')} = <strong>Total ${totalSkill >= 0 ? `+${totalSkill}` : totalSkill}</strong>)`,
+      flavor: flavorText,
       content
     });
   }
@@ -4332,7 +4801,7 @@ export class DCCActor extends BaseActor {
     const effectsStr = effectsList.join(' | ');
 
     // Dynamic critical multiplier
-    let critMultiplier = 2;
+    let critMultiplier = (sys.critMultiplier !== undefined) ? Number(sys.critMultiplier) : 2;
     if (sys.critMultiplierR15 && rank >= 15) {
       critMultiplier = Number(sys.critMultiplierR15);
     } else if (sys.critMultiplierR5 && rank >= 5) {
@@ -4409,13 +4878,28 @@ export class DCCActor extends BaseActor {
     const rank = Math.max(Number(sys.modifiedRank) || 0, Number(sys.rank) || 0, 1);
     const total = rank + statMod;
 
-    const hasDisadvantage = Boolean(options.disadvantage || (sys.limitations && /disadvantage/i.test(sys.limitations)));
+    const advState = this.getRollAdvantageState({
+      rollType: 'spell',
+      stat: statKey,
+      item: spellItem,
+      options,
+      tags: [sys.spellType].filter(Boolean)
+    });
+
     let roll;
     let flavorText = '';
-    if (hasDisadvantage) {
+    if (advState.mode === 'disadvantage') {
       const formula = `2d20kl + ${total}`;
       roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
-      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (<strong>Disadvantage</strong>: 2d20kl + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (<strong>${advState.label || 'Disadvantage'}</strong>: 2d20kl + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+    } else if (advState.mode === 'advantage') {
+      const formula = `2d20kh + ${total}`;
+      roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (<strong>${advState.label}</strong>: 2d20kh + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
+    } else if (advState.mode === 'cancelled') {
+      const formula = `1d20 + ${total}`;
+      roll = await new Roll(formula, { rank, mod: statMod }).evaluate();
+      flavorText = `<strong>${this.name}</strong>: ${spellItem.name} (<strong>${advState.label}</strong>: 1d20 + Rank ${rank} + ${statKey.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)`;
     } else {
       const formula = `1d20 + ${total}`;
       roll = await new Roll(formula, { rank, mod: statMod }).evaluate();

@@ -1,4 +1,5 @@
 import { getHpPerBar } from '../apps/combat-metrics.mjs';
+import { syncCompendiumItemToWorld, isCompendiumDocument } from '../data/compendium-sync.mjs';
 
 /**
  * Target detection helper for item outcomes: closest mob, self, or targeted token.
@@ -709,10 +710,24 @@ export class DCCItem extends BaseItem {
   }
 
   /** @override */
+  async update(data, options = {}) {
+    const res = super.update ? await super.update(data, options) : this;
+    if (isCompendiumDocument(this) || this.pack || options?.pack) {
+      await syncCompendiumItemToWorld(this, { changed: data, options });
+    }
+    return res;
+  }
+
+  /** @override */
   async _onUpdate(changed, options, userId) {
     if (super._onUpdate) await super._onUpdate(changed, options, userId);
 
     if (typeof game !== 'undefined' && game.user && userId !== game.user.id) return;
+
+    // If a compendium item is updated, automatically synchronize it to all world actors & items
+    if (isCompendiumDocument(this) || this.pack || options?.pack) {
+      await syncCompendiumItemToWorld(this, { changed, options });
+    }
 
     // If an embedded item is renamed or modified, ensure the item is known in Foundry's items section
     if (this.isEmbedded && typeof game !== 'undefined' && game.items && (changed.name || changed.system)) {

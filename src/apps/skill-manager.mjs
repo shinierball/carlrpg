@@ -223,101 +223,34 @@ export class DCCSkillManager extends DCCBaseApplication {
   }
 
   /**
-   * Open interactive dialog to define and create a new custom world skill.
+   * Create a new custom world skill using the Unified Item Builder (DCCItemSheet).
    */
   async openCreateSkillDialog() {
-    const content = `
-      <form class="dcc-create-skill-form" style="display: flex; flex-direction: column; gap: 10px; padding: 6px;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;">Skill Name:</label>
-          <input type="text" name="name" required placeholder="e.g. Lockpicking, Trap Sense, Barter" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" autofocus />
-        </div>
+    const folder = await this.getOrCreateSkillsFolder();
+    const ItemClass = CONFIG.Item?.documentClass
+      ?? globalThis.foundry?.documents?.Item
+      ?? globalThis.Item;
+    const created = await ItemClass.create({
+      name: 'New Custom Skill',
+      type: 'skill',
+      img: 'icons/svg/book.svg',
+      folder: folder?.id || null,
+      system: {
+        rank: 0,
+        stat: 'str',
+        category: 'Utility',
+        checkType: 'Stat Check',
+        critMultiplierR5: 1,
+        critMultiplierR15: 1,
+        notes: ''
+      }
+    });
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;">Governing Stat:</label>
-            <select name="stat" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;">
-              <option value="str">Strength (STR)</option>
-              <option value="dex">Dexterity (DEX)</option>
-              <option value="con">Constitution (CON)</option>
-              <option value="int">Intelligence (INT)</option>
-              <option value="cha">Charisma (CHA)</option>
-            </select>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;">Category:</label>
-            <select name="category" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;">
-              <option value="Utility">Exploration & Survival (Utility)</option>
-              <option value="Combat">Combat Maneuvers</option>
-              <option value="Passive">Passive (Static Bonus)</option>
-              <option value="General">General / Custom</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;">Check Type / Mechanics:</label>
-          <input type="text" name="checkType" value="Stat Check" placeholder="Stat Check, Passive, 2d6, etc." style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" />
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold;">Skill Description & Notes:</label>
-          <textarea name="notes" placeholder="Explain what the skill does, check DCs, passive perks, or mechanics..." style="height: 80px; padding: 4px; border: 1.5px solid #000; border-radius: 3px;"></textarea>
-        </div>
-      </form>
-    `;
-
-    new DialogClass({
-      title: 'DCC RPG — Create New Custom Skill',
-      content,
-      buttons: {
-        create: {
-          icon: '<i class="fa-solid fa-plus"></i>',
-          label: 'Create Skill',
-          callback: async (html) => {
-            const form = html.find('.dcc-create-skill-form');
-            const name = form.find('input[name="name"]').val().trim();
-            const stat = form.find('select[name="stat"]').val() || 'str';
-            const category = form.find('select[name="category"]').val() || 'Utility';
-            const checkType = form.find('input[name="checkType"]').val().trim() || 'Stat Check';
-            const notes = form.find('textarea[name="notes"]').val().trim();
-
-            if (!name) {
-              ui.notifications?.warn('Skill name is required.');
-              return;
-            }
-
-            const folder = await this.getOrCreateSkillsFolder();
-            const ItemClass = CONFIG.Item?.documentClass
-              ?? globalThis.foundry?.documents?.Item
-              ?? globalThis.Item;
-            const created = await ItemClass.create({
-              name,
-              type: 'skill',
-              img: 'icons/svg/book.svg',
-              folder: folder?.id || null,
-              system: {
-                rank: 0,
-                stat,
-                category,
-                checkType,
-                notes
-              }
-            });
-
-            ui.notifications?.info(`Created custom skill "${created.name}" in Skills library.`);
-            this.render(false);
-          }
-        },
-        cancel: {
-          icon: '<i class="fa-solid fa-times"></i>',
-          label: 'Cancel'
-        }
-      },
-      default: 'create'
-    }, {
-      width: 480
-    }).render(true);
+    if (created && typeof created.sheet?.render === 'function') {
+      created.sheet.render(true);
+    }
+    this.render(false);
+    return created;
   }
 
   /** @override */

@@ -244,11 +244,19 @@ export class DCCSpellManager extends DCCBaseApplication {
       return;
     }
 
+    const uuid = spellData.uuid || (spellData._id ? `Compendium.carl-rpg.spells.${spellData._id}` : undefined);
     const itemPayload = {
       name: spellData.name,
       type: 'spell',
       img: spellData.img || 'icons/svg/wand.svg',
-      system: structuredClone(spellData.system || {})
+      system: structuredClone(spellData.system || {}),
+      flags: {
+        core: { sourceId: uuid },
+        'carl-rpg': {
+          compendiumId: spellData._id || spellData.id,
+          sourceUuid: uuid
+        }
+      }
     };
 
     await this.actor.createEmbeddedDocuments('Item', [itemPayload]);
@@ -321,6 +329,39 @@ export class DCCSpellManager extends DCCBaseApplication {
           await CONFIG.Item.documentClass.rollSpellCard(match);
         } else {
           globalThis.ui?.notifications?.info(`Spell: ${match.name}`);
+        }
+      }
+    });
+
+    // Create Custom Spell using Unified Item Builder (DCCItemSheet)
+    html.find('.btn-create-custom-spell').click(async ev => {
+      ev.preventDefault();
+      const spellData = {
+        name: 'New Custom Spell',
+        type: 'spell',
+        img: 'icons/svg/wand.svg',
+        system: {
+          spellType: 'Attack',
+          mpCost: 1,
+          rank: 1,
+          critMultiplierR5: 1,
+          critMultiplierR15: 1
+        }
+      };
+
+      if (this.actor) {
+        const created = await this.actor.createEmbeddedDocuments('Item', [spellData]);
+        const spell = created?.[0];
+        if (spell && typeof spell.sheet?.render === 'function') {
+          spell.sheet.render(true);
+        }
+      } else {
+        const ItemClass = CONFIG.Item?.documentClass
+          ?? globalThis.foundry?.documents?.Item
+          ?? globalThis.Item;
+        const created = await ItemClass.create(spellData);
+        if (created && typeof created.sheet?.render === 'function') {
+          created.sheet.render(true);
         }
       }
     });

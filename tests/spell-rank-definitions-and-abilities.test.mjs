@@ -14,8 +14,8 @@ describe('DCC RPG Spell Explicit Rank Definitions & Abilities Subsystem', async 
 
     assert.ok(spellTemplate, 'Item.spell must be defined in template.json');
     assert.ok(Array.isArray(spellTemplate.damageModifiers), 'damageModifiers must be an array in template.json');
-    assert.equal(spellTemplate.critMultiplierR5, 4, 'critMultiplierR5 defaults to 4');
-    assert.equal(spellTemplate.critMultiplierR15, 8, 'critMultiplierR15 defaults to 8');
+    assert.equal(spellTemplate.critMultiplierR5, 1, 'critMultiplierR5 defaults to 1');
+    assert.equal(spellTemplate.critMultiplierR15, 1, 'critMultiplierR15 defaults to 1');
     assert.equal(spellTemplate.fumbleDebuff, '', 'fumbleDebuff defaults to empty string');
     assert.equal(spellTemplate.onHitDebuff, '', 'onHitDebuff defaults to empty string');
     assert.equal(spellTemplate.onHitDebuffMinRank, 0, 'onHitDebuffMinRank defaults to 0');
@@ -26,8 +26,8 @@ describe('DCC RPG Spell Explicit Rank Definitions & Abilities Subsystem', async 
     // Test SpellDataModel instance
     const model = new SpellDataModel();
     assert.ok(Array.isArray(model.damageModifiers), 'SpellDataModel has damageModifiers array');
-    assert.equal(model.critMultiplierR5, 4);
-    assert.equal(model.critMultiplierR15, 8);
+    assert.equal(model.critMultiplierR5, 1);
+    assert.equal(model.critMultiplierR15, 1);
     assert.equal(model.fumbleDebuff, '');
     assert.equal(model.onHitDebuff, '');
     assert.equal(model.onHitDebuffMinRank, 0);

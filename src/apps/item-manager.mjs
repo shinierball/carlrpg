@@ -317,133 +317,45 @@ export class DCCItemManager extends DCCBaseApplication {
    */
   async createCustomItem(type = 'gear') {
     const isGear = type === 'gear';
-    const title = isGear ? 'Create Custom Gear / Equipment' : 'Create Custom Consumable / Item';
     const defaultIcon = isGear ? 'icons/svg/shield.svg' : 'icons/svg/item-bag.svg';
+    const name = isGear ? 'New Custom Gear' : 'New Custom Item';
 
-    const content = `
-      <form class="dcc-create-custom-item-form" style="display: flex; flex-direction: column; gap: 8px; font-family: 'Oswald', sans-serif;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-weight: bold; font-size: 12px;">Item Name:</label>
-          <input type="text" name="name" placeholder="e.g. ${isGear ? 'Obsidian Blade' : 'Super Health Potion'}" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" autofocus />
-        </div>
+    const itemData = {
+      name,
+      type: isGear ? 'gear' : 'loot',
+      img: defaultIcon,
+      system: isGear ? {
+        slot: 'torso',
+        drBonus: 0,
+        isWeapon: false,
+        quantity: 1,
+        equipped: false,
+        critMultiplier: 1
+      } : {
+        lootType: 'consumable',
+        quantity: 1,
+        cooldown: 'None',
+        outcomes: []
+      }
+    };
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          ${isGear ? `
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-weight: bold; font-size: 12px;">Equipment Slot:</label>
-              <select name="slot" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;">
-                <option value="hands">Hands / Weapon</option>
-                <option value="head">Head</option>
-                <option value="torso" selected>Torso</option>
-                <option value="arms">Arms</option>
-                <option value="legs">Legs</option>
-                <option value="feet">Feet</option>
-                <option value="accessory">Accessory</option>
-              </select>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-weight: bold; font-size: 12px;">Damage Resistance (DR):</label>
-              <input type="number" name="drBonus" value="0" min="0" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" />
-            </div>
-          ` : `
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-weight: bold; font-size: 12px;">Item Type:</label>
-              <select name="lootType" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;">
-                <option value="consumable" selected>Consumable (Potion / Elixir)</option>
-                <option value="scroll">Spell Scroll</option>
-                <option value="wand">Wand / Charged Item</option>
-                <option value="scratch_ticket">Lottery Scratch-off Ticket</option>
-                <option value="general">General Loot / Material</option>
-              </select>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-weight: bold; font-size: 12px;">Quantity:</label>
-              <input type="number" name="quantity" value="1" min="1" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" />
-            </div>
-          `}
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-weight: bold; font-size: 12px;">Gold Value (Appraisal Price):</label>
-          <input type="number" name="value" value="10" min="0" style="padding: 4px; border: 1.5px solid #000; border-radius: 3px;" />
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-weight: bold; font-size: 12px;">Description & Notes:</label>
-          <textarea name="notes" placeholder="Flavor text, passive perks, or usage instructions..." style="height: 60px; padding: 4px; border: 1.5px solid #000; border-radius: 3px;"></textarea>
-        </div>
-      </form>
-    `;
-
-    new DialogClass({
-      title: `DCC RPG — ${title}`,
-      content,
-      buttons: {
-        create: {
-          icon: '<i class="fa-solid fa-plus"></i>',
-          label: isGear ? 'Create Gear' : 'Create Item',
-          callback: async (html) => {
-            const form = html.find ? html.find('.dcc-create-custom-item-form') : html;
-            const findInput = (name) => {
-              if (typeof form.find === 'function') return form.find(`[name="${name}"]`).val();
-              const el = form.querySelector ? form.querySelector(`[name="${name}"]`) : null;
-              return el ? el.value : '';
-            };
-
-            const name = String(findInput('name') || '').trim() || (isGear ? 'Custom Gear' : 'Custom Item');
-            const goldVal = Number(findInput('value')) || 0;
-            const notes = String(findInput('notes') || '').trim();
-
-            const sys = {
-              value: goldVal,
-              notes,
-              description: notes
-            };
-
-            if (isGear) {
-              sys.slot = String(findInput('slot') || 'torso').toLowerCase();
-              sys.drBonus = Number(findInput('drBonus')) || 0;
-              sys.isWeapon = sys.slot === 'hands';
-              sys.quantity = 1;
-              sys.equipped = false;
-            } else {
-              sys.lootType = String(findInput('lootType') || 'consumable').toLowerCase();
-              sys.quantity = Number(findInput('quantity')) || 1;
-              sys.cooldown = 'None';
-              sys.outcomes = [];
-            }
-
-            const itemData = {
-              name,
-              type,
-              img: defaultIcon,
-              system: sys
-            };
-
-            if (this.actor) {
-              const created = await this.addItemToActor(itemData);
-              if (created && typeof created.sheet?.render === 'function') {
-                created.sheet.render(true);
-              }
-            } else {
-              const ItemClass = CONFIG.Item?.documentClass
-                ?? globalThis.foundry?.documents?.Item
-                ?? globalThis.Item;
-              await ItemClass.create(itemData);
-              globalThis.ui?.notifications?.info?.(`Created custom item "${name}".`);
-              this.render(false);
-            }
-          }
-        },
-        cancel: {
-          icon: '<i class="fa-solid fa-times"></i>',
-          label: 'Cancel'
-        }
-      },
-      default: 'create'
-    }, {
-      width: 460
-    }).render(true);
+    if (this.actor) {
+      const created = await this.addItemToActor(itemData);
+      if (created && typeof created.sheet?.render === 'function') {
+        created.sheet.render(true);
+      }
+      return created;
+    } else {
+      const ItemClass = CONFIG.Item?.documentClass
+        ?? globalThis.foundry?.documents?.Item
+        ?? globalThis.Item;
+      const created = await ItemClass.create(itemData);
+      if (created && typeof created.sheet?.render === 'function') {
+        created.sheet.render(true);
+      }
+      this.render(false);
+      return created;
+    }
   }
 
   /** @override */
@@ -552,7 +464,14 @@ export class DCCItemManager extends DCCBaseApplication {
         name: itemName,
         type: itemData?.type || 'gear',
         img: itemData?.img || 'icons/svg/item-bag.svg',
-        system: itemData?.system ? structuredClone(itemData.system) : {}
+        system: itemData?.system ? structuredClone(itemData.system) : {},
+        flags: {
+          core: { sourceId: uuid },
+          'carl-rpg': {
+            compendiumId: itemData?._id || itemData?.id,
+            sourceUuid: uuid
+          }
+        }
       }
     };
     event.dataTransfer?.setData('text/plain', JSON.stringify(dragData));

@@ -16,6 +16,7 @@ export class GearDataModel extends BaseItemDataModel {
       quantity: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       equipped: new fields.BooleanField({ initial: false }),
+      handsRequired: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       isWeapon: new fields.BooleanField({ initial: false }),
       wieldMode: new fields.StringField({
         initial: 'one_handed',
@@ -29,6 +30,7 @@ export class GearDataModel extends BaseItemDataModel {
         choices: ['highest', 'synergy', 'manual']
       }),
       selectedSkill: new fields.StringField({ initial: '' }),
+      critMultiplier: new fields.NumberField({ integer: true, min: 1 }),
       optionalEffects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       selectedEffect: new fields.StringField({ initial: '' }),
       drBonus: new fields.NumberField({ integer: true, initial: 0 }),

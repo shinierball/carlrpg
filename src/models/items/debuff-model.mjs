@@ -11,6 +11,13 @@ export class DebuffDataModel extends BaseItemDataModel {
       damageType: new fields.StringField({ initial: '' }),
       reductionPercent: new fields.NumberField({ initial: 0 }),
       rounding: new fields.StringField({ initial: 'up' }),
+      rollModifierMode: new fields.StringField({ initial: 'none' }),
+      affects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      limbModifiers: new fields.SchemaField({
+        arms: new fields.NumberField({ integer: true, initial: 0 }),
+        legs: new fields.NumberField({ integer: true, initial: 0 }),
+        hands: new fields.NumberField({ integer: true, initial: 0 })
+      }),
       statModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       damageModifiers: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       duration: new fields.StringField({ initial: 'Combat' }),

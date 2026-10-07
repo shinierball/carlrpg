@@ -23,8 +23,8 @@ export class SpellDataModel extends BaseItemDataModel {
         minRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
         stat: new fields.StringField({ initial: '' })
       })),
-      critMultiplierR5: new fields.NumberField({ integer: true, min: 2, initial: 4 }),
-      critMultiplierR15: new fields.NumberField({ integer: true, min: 2, initial: 8 }),
+      critMultiplierR5: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
+      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       fumbleDebuff: new fields.StringField({ initial: '' }),
       onHitDebuff: new fields.StringField({ initial: '' }),
       onHitDebuffMinRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),

@@ -231,21 +231,37 @@ export class DCCBuffDebuffManager extends DCCBaseApplication {
         globalThis.ui?.notifications?.info(`Activated "${itemData.name}" in external buff slot on ${this.actor.name}.`);
       } else {
         // Embed item on actor inventory
+        const uuid = itemData.uuid || (itemData._id ? `Compendium.carl-rpg.buffs.${itemData._id}` : undefined);
         await this.actor.createEmbeddedDocuments('Item', [{
           name: itemData.name,
           type: 'buff',
           img: itemData.img,
-          system: structuredClone(itemData.system || {})
+          system: structuredClone(itemData.system || {}),
+          flags: {
+            core: { sourceId: uuid },
+            'carl-rpg': {
+              compendiumId: itemData._id || itemData.id,
+              sourceUuid: uuid
+            }
+          }
         }]);
         globalThis.ui?.notifications?.info(`Added "${itemData.name}" to ${this.actor.name} buffs.`);
       }
     } else if (itemData.type === 'debuff') {
       // Embed debuff item directly on actor
+      const uuid = itemData.uuid || (itemData._id ? `Compendium.carl-rpg.buffs.${itemData._id}` : undefined);
       await this.actor.createEmbeddedDocuments('Item', [{
         name: itemData.name,
         type: 'debuff',
         img: itemData.img,
-        system: structuredClone(itemData.system || {})
+        system: structuredClone(itemData.system || {}),
+        flags: {
+          core: { sourceId: uuid },
+          'carl-rpg': {
+            compendiumId: itemData._id || itemData.id,
+            sourceUuid: uuid
+          }
+        }
       }]);
       globalThis.ui?.notifications?.info(`Inflicted "${itemData.name}" condition on ${this.actor.name}.`);
     }

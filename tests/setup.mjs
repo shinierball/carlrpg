@@ -44,8 +44,21 @@ export class MockActor {
       render: () => this
     };
   }
+  get limbs() {
+    return this.system?.attributes?.limbs || {
+      arms: 2,
+      legs: 2,
+      hands: 2,
+      maxArms: 2,
+      maxLegs: 2,
+      maxHands: 2,
+      usedHands: 0,
+      exceededHands: false,
+      handsWarning: ''
+    };
+  }
   static async create(data = {}) {
-    const ActorClass = CONFIG.Actor?.documentClass || MockActor;
+    const ActorClass = (this && this !== MockActor) ? this : (CONFIG.Actor?.documentClass || MockActor);
     const actor = new ActorClass(data);
     if (globalThis.game?.actors) {
       if (Array.isArray(globalThis.game.actors)) {
@@ -144,6 +157,23 @@ export class MockActor {
     }
     return [];
   }
+  async updateEmbeddedDocuments(embeddedType, updates = [], options = {}) {
+    if (embeddedType === 'Item') {
+      const results = [];
+      for (const u of updates) {
+        const item = this.items.get ? this.items.get(u._id || u.id) : this.items.find(i => i.id === (u._id || u.id) || i._id === (u._id || u.id));
+        if (item) {
+          const updateData = structuredClone(u);
+          delete updateData._id;
+          delete updateData.id;
+          await item.update(updateData, options);
+          results.push(item);
+        }
+      }
+      return results;
+    }
+    return [];
+  }
   async deleteEmbeddedDocuments(embeddedType, ids = []) {
     if (embeddedType === 'Item') {
       const idSet = new Set(ids);
@@ -199,6 +229,9 @@ export class MockItem {
     this.name = data.name || 'Test Item';
     this.type = data.type || 'gear';
     this.img = data.img || 'icons/svg/item-bag.svg';
+    this.pack = data.pack || null;
+    this.uuid = data.uuid || (this.pack ? `Compendium.${this.pack}.${this.id}` : null);
+    this.isCompendium = Boolean(this.pack || data.isCompendium);
     if (globalThis.CONFIG?.Item?.dataModels?.[this.type]) {
       const ModelClass = globalThis.CONFIG.Item.dataModels[this.type];
       this.system = new ModelClass(data.system || {}, { parent: this });
@@ -250,7 +283,7 @@ export class MockItem {
     }
   }
 
-  async update(data) {
+  async update(data, options = {}) {
     for (const [k, v] of Object.entries(data)) {
       if (k.startsWith('system.')) {
         const subKey = k.replace('system.', '');
@@ -276,7 +309,10 @@ export class MockItem {
       }
     }
     if (this._onUpdate) {
-      await this._onUpdate(data, {}, globalThis.game?.user?.id || 'test-user');
+      await this._onUpdate(data, options, globalThis.game?.user?.id || 'test-user');
+    }
+    if (globalThis.Hooks?.callAll) {
+      await globalThis.Hooks.callAll('updateItem', this, data, options, globalThis.game?.user?.id || 'test-user');
     }
     return this;
   }
@@ -292,7 +328,7 @@ export class MockItem {
   }
 
   static async create(data) {
-    const ItemClass = CONFIG.Item?.documentClass || MockItem;
+    const ItemClass = (this && this !== MockItem) ? this : (CONFIG.Item?.documentClass || MockItem);
     const item = new ItemClass(data);
     if (globalThis.game?.items) {
       globalThis.game.items.push(item);
@@ -300,9 +336,35 @@ export class MockItem {
     return item;
   }
 
+  static async fromDropData(data = {}) {
+    if (data.uuid) {
+      if (data.uuid.startsWith('Compendium.')) {
+        const parts = data.uuid.split('.');
+        const packName = `${parts[1]}.${parts[2]}`;
+        const docId = parts[3];
+        const pack = globalThis.game?.packs?.get(packName);
+        if (pack) {
+          const doc = pack.get(docId) || await pack.getDocument(docId);
+          if (doc) return doc;
+        }
+      }
+    }
+    if (data.data) {
+      const ItemClass = CONFIG.Item?.documentClass || MockItem;
+      return new ItemClass(data.data);
+    }
+    return null;
+  }
+
   static async createDocuments(dataArray = [], context = {}) {
     const ItemClass = CONFIG.Item?.documentClass || MockItem;
-    const created = dataArray.map(d => new ItemClass(d));
+    const created = dataArray.map(d => {
+      const item = new ItemClass(d);
+      if (context.pack) {
+        item.pack = context.pack;
+      }
+      return item;
+    });
     if (context.pack && globalThis.game?.packs?.get(context.pack)) {
       const pack = globalThis.game.packs.get(context.pack);
       if (pack.documents) {
@@ -319,6 +381,63 @@ if (!globalThis.Actor) {
 
 if (!globalThis.Item) {
   globalThis.Item = MockItem;
+}
+
+export class MockCompendium {
+  constructor(metadata = {}) {
+    this.metadata = metadata;
+    this.collection = metadata.id || (`${metadata.package || 'carl-rpg'}.${metadata.name || 'items'}`);
+    this.documentName = metadata.type || 'Item';
+    this.documents = [];
+    this.locked = false;
+  }
+  async getIndex() {
+    return new Map(this.documents.map(d => [d.id || d._id, { _id: d.id || d._id, name: d.name, type: d.type, img: d.img }]));
+  }
+  get(id) {
+    return this.documents.find(d => d.id === id || d._id === id);
+  }
+  async getDocument(id) {
+    return this.get(id);
+  }
+  async getDocuments() {
+    return [...this.documents];
+  }
+  async configure(opts) {
+    if ('locked' in opts) this.locked = opts.locked;
+  }
+  async updateDocument(data, options = {}) {
+    const doc = this.get(data._id || data.id);
+    if (doc) {
+      await doc.update(data, { ...options, pack: this.collection });
+    }
+    return doc;
+  }
+}
+
+export class MockScene {
+  constructor(data = {}) {
+    this.id = data.id || data._id || ('scene-' + Math.random().toString(36).substring(2, 9));
+    this._id = this.id;
+    this.name = data.name || 'Test Scene';
+    this.tokens = (data.tokens || []).map(t => ({
+      id: t.id || t._id || ('token-' + Math.random().toString(36).substring(2, 7)),
+      _id: t.id || t._id,
+      name: t.name,
+      actor: t.actor,
+      actorId: t.actorId || t.actor?.id,
+      actorLink: t.actorLink ?? false,
+      updateSource(d) { Object.assign(this, d); }
+    }));
+  }
+  async updateEmbeddedDocuments(type, updates) {
+    if (type === 'Token') {
+      for (const u of updates) {
+        const tok = this.tokens.find(t => t.id === u._id || t._id === u._id);
+        if (tok) Object.assign(tok, u);
+      }
+    }
+  }
 }
 
 export class MockMacro {
@@ -420,6 +539,7 @@ if (!globalThis.game) {
       }
     },
     actors: [],
+    scenes: [],
     items: [],
     macros: [],
     folders: [],
@@ -539,6 +659,7 @@ if (!globalThis.game) {
     return nextVal;
   };
   if (!globalThis.game.folders) globalThis.game.folders = [];
+  if (!globalThis.game.scenes) globalThis.game.scenes = [];
   if (!globalThis.game.macros) globalThis.game.macros = [];
   if (!globalThis.game.user.hotbar) globalThis.game.user.hotbar = {};
   if (!globalThis.game.user.flags) globalThis.game.user.flags = {};

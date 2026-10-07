@@ -17,15 +17,15 @@ test('DCC RPG Weapon and Skill Manual Creation Interface & Mechanics', async (t)
     assert.equal(template.Item.skill.fumbleDebuff, '');
     assert.equal(template.Item.skill.onHitDebuff, '');
     assert.equal(template.Item.skill.onHitDebuffMinRank, 0);
-    assert.equal(template.Item.skill.critMultiplierR5, 4);
-    assert.equal(template.Item.skill.critMultiplierR15, 8);
+    assert.equal(template.Item.skill.critMultiplierR5, 1);
+    assert.equal(template.Item.skill.critMultiplierR15, 1);
 
     const skillModel = new SkillDataModel();
     assert.equal(skillModel.fumbleDebuff, '');
     assert.equal(skillModel.onHitDebuff, '');
     assert.equal(skillModel.onHitDebuffMinRank, 0);
-    assert.equal(skillModel.critMultiplierR5, 4);
-    assert.equal(skillModel.critMultiplierR15, 8);
+    assert.equal(skillModel.critMultiplierR5, 1);
+    assert.equal(skillModel.critMultiplierR15, 1);
 
     // Check Gear template & model
     assert.equal(template.Item.gear.wieldMode, 'one_handed');

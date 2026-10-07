@@ -38,6 +38,7 @@ export const DCC_ITEMS = [
       value: 25,
       equipped: false,
       isWeapon: true,
+      wieldMode: "two_handed",
       cooldown: "None",
       damageParts: [
         { formula: "1d8", type: "Piercing" }
@@ -58,6 +59,7 @@ export const DCC_ITEMS = [
       value: 12,
       equipped: false,
       isWeapon: true,
+      wieldMode: "one_handed",
       cooldown: "None",
       damageParts: [
         { formula: "1d6", type: "Piercing" }
@@ -78,6 +80,7 @@ export const DCC_ITEMS = [
       value: 20,
       equipped: false,
       isWeapon: true,
+      wieldMode: "two_handed",
       cooldown: "None",
       damageParts: [
         { formula: "1d10", type: "Piercing" }
@@ -98,6 +101,7 @@ export const DCC_ITEMS = [
       value: 35,
       equipped: false,
       isWeapon: true,
+      wieldMode: "two_handed",
       cooldown: "None",
       damageParts: [
         { formula: "1d10", type: "Piercing" }

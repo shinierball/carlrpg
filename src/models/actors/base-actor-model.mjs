@@ -1,5 +1,75 @@
 import { getSizeInfo } from '../../data/sizes.mjs';
-import { getDCCStatModifier } from '../../documents/actor.mjs';
+import { getDCCStatModifier, isWeaponGear } from '../../documents/actor.mjs';
+
+/**
+ * Canonical Condition & Status Effect Limb Modifiers
+ * Maps condition keys to default changes in arms, legs, or hands.
+ */
+export const CANONICAL_CONDITION_LIMB_MODIFIERS = {
+  'amputated arm': { arms: -1, hands: -1, legs: 0 },
+  'severed arm': { arms: -1, hands: -1, legs: 0 },
+  'lost arm': { arms: -1, hands: -1, legs: 0 },
+  'amputated leg': { arms: 0, hands: 0, legs: -1 },
+  'severed leg': { arms: 0, hands: 0, legs: -1 },
+  'lost leg': { arms: 0, hands: 0, legs: -1 },
+  'severed hand': { arms: 0, hands: -1, legs: 0 },
+  'amputated hand': { arms: 0, hands: -1, legs: 0 },
+  'lost hand': { arms: 0, hands: -1, legs: 0 },
+  'extra arms': { arms: 2, hands: 2, legs: 0 },
+  'extra arm': { arms: 1, hands: 1, legs: 0 },
+  'prosthetic arm': { arms: 1, hands: 1, legs: 0 },
+  'prosthetic hand': { arms: 0, hands: 1, legs: 0 },
+  'prosthetic leg': { arms: 0, hands: 0, legs: 1 }
+};
+
+/**
+ * Calculate the number of hands required to wield an item.
+ * @param {object} item
+ * @returns {number}
+ */
+export function calculateItemHandsRequired(item) {
+  if (!item) return 0;
+  if (item.type !== 'gear' && item.type !== 'attack') return 0;
+  const sys = item.system || {};
+
+  // Unassigned or unequipped items require 0 hands
+  if (item.type === 'gear' && !sys.equipped) return 0;
+  if (item.type === 'attack' && sys.equipped === false) return 0;
+
+  // Explicit handsRequired override if specified
+  if (sys.handsRequired !== undefined && sys.handsRequired !== null && sys.handsRequired !== '') {
+    const parsed = Number(sys.handsRequired);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  }
+
+  // Natural attacks require 0 hands unless configured
+  if (sys.isNatural === true) return 0;
+
+  if (item.type === 'gear') {
+    const slot = (sys.slot || '').toLowerCase();
+    const isWpn = sys.isWeapon || slot === 'hands' || slot === 'holding' || (typeof isWeaponGear === 'function' && isWeaponGear(item));
+    if (!isWpn) return 0;
+  }
+
+  if (item.type === 'attack') {
+    // If not a weapon or explicitly natural attack without category/type
+    if (!sys.weaponCategory && !sys.weaponType && !sys.wieldMode && !sys.isWeapon) {
+      return 0;
+    }
+  }
+
+  const wieldMode = sys.wieldMode || 'one_handed';
+  if (wieldMode === 'two_handed') {
+    return 2;
+  }
+  if (wieldMode === 'two_handed_disadv_1h') {
+    if (sys.oneHanded || sys.wieldedOneHanded) {
+      return 1;
+    }
+    return 2;
+  }
+  return 1;
+}
 
 /**
  * Base TypeDataModel for DCC RPG Actor types.
@@ -80,6 +150,11 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
         buff1: new fields.StringField({ initial: '' }),
         buff2: new fields.StringField({ initial: '' }),
         buff3: new fields.StringField({ initial: '' })
+      }),
+      limbs: new fields.SchemaField({
+        arms: new fields.NumberField({ integer: true, min: 0, initial: 2 }),
+        legs: new fields.NumberField({ integer: true, min: 0, initial: 2 }),
+        hands: new fields.NumberField({ integer: true, min: 0, initial: 2 })
       })
     });
   }
@@ -93,6 +168,16 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
           ability.unenhanced = ability.value || 10;
         }
       }
+    }
+
+    // Ensure base limbs exist
+    if (this.attributes) {
+      if (!this.attributes.limbs) {
+        this.attributes.limbs = { arms: 2, legs: 2, hands: 2 };
+      }
+      if (this.attributes.limbs.arms === undefined || this.attributes.limbs.arms === null) this.attributes.limbs.arms = 2;
+      if (this.attributes.limbs.legs === undefined || this.attributes.limbs.legs === null) this.attributes.limbs.legs = 2;
+      if (this.attributes.limbs.hands === undefined || this.attributes.limbs.hands === null) this.attributes.limbs.hands = 2;
     }
   }
 
@@ -160,6 +245,9 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
     const resistances = new Set();
     const immunities = new Set();
     let buffTempHp = 0;
+    let deltaArms = 0;
+    let deltaLegs = 0;
+    let deltaHands = 0;
     const damageMultipliers = { all: 1 };
     if (globalThis.CONFIG?.DCC?.damageTypes) {
       for (const dt of globalThis.CONFIG.DCC.damageTypes) {
@@ -175,6 +263,19 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
       const bVal = Number(bSys.value) || 0;
       const bDmg = bSys.damageType || '';
       const bMult = Number(bSys.damageMultiplier) || (bType === 'damagemultiplier' ? bVal : 1);
+
+      // Limb modifiers on buff
+      const bLimb = bSys.limbModifiers || {};
+      if (bLimb.arms) deltaArms += Number(bLimb.arms) || 0;
+      if (bLimb.legs) deltaLegs += Number(bLimb.legs) || 0;
+      if (bLimb.hands) deltaHands += Number(bLimb.hands) || 0;
+      const bNorm = (buff.name || '').toLowerCase().trim();
+      if (!bLimb.arms && !bLimb.legs && !bLimb.hands && CANONICAL_CONDITION_LIMB_MODIFIERS[bNorm]) {
+        const can = CANONICAL_CONDITION_LIMB_MODIFIERS[bNorm];
+        if (can.arms) deltaArms += can.arms;
+        if (can.legs) deltaLegs += can.legs;
+        if (can.hands) deltaHands += can.hands;
+      }
 
       // Support multiple statModifiers on buff
       if (Array.isArray(bSys.statModifiers) && bSys.statModifiers.length > 0) {
@@ -233,6 +334,20 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
     const debuffItems = items.filter(i => i.type === 'debuff');
     for (const debuff of debuffItems) {
       const dSys = debuff.system || {};
+
+      // Limb modifiers on debuff
+      const dLimb = dSys.limbModifiers || {};
+      if (dLimb.arms) deltaArms += Number(dLimb.arms) || 0;
+      if (dLimb.legs) deltaLegs += Number(dLimb.legs) || 0;
+      if (dLimb.hands) deltaHands += Number(dLimb.hands) || 0;
+      const dNorm = (debuff.name || '').toLowerCase().trim();
+      if (!dLimb.arms && !dLimb.legs && !dLimb.hands && CANONICAL_CONDITION_LIMB_MODIFIERS[dNorm]) {
+        const can = CANONICAL_CONDITION_LIMB_MODIFIERS[dNorm];
+        if (can.arms) deltaArms += can.arms;
+        if (can.legs) deltaLegs += can.legs;
+        if (can.hands) deltaHands += can.hands;
+      }
+
       if (Array.isArray(dSys.statModifiers) && dSys.statModifiers.length > 0) {
         for (const sm of dSys.statModifiers) {
           const sKey = (sm?.stat || '').toLowerCase();
@@ -329,6 +444,52 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
           this.attributes.speed.step = 10;
         }
       }
+
+      // 7. Calculate Limbs (Arms, Legs, Hands) and Wielding Hand Limit
+      const baseArms = Number(this.attributes?.limbs?.arms ?? 2);
+      const baseLegs = Number(this.attributes?.limbs?.legs ?? 2);
+      const baseHands = Number(this.attributes?.limbs?.hands ?? 2);
+
+      const maxArms = Math.max(0, (Number.isFinite(baseArms) ? baseArms : 2) + deltaArms);
+      const maxLegs = Math.max(0, (Number.isFinite(baseLegs) ? baseLegs : 2) + deltaLegs);
+      const maxHands = Math.max(0, (Number.isFinite(baseHands) ? baseHands : 2) + deltaHands);
+
+      let usedHands = 0;
+      const equippedHandItems = [];
+
+      for (const item of items) {
+        const hands = calculateItemHandsRequired(item);
+        if (hands > 0) {
+          usedHands += hands;
+          equippedHandItems.push({
+            id: item.id || item._id,
+            name: item.name,
+            hands
+          });
+        }
+      }
+
+      const exceededHands = usedHands > maxHands;
+      const handsWarning = exceededHands
+        ? `Hands limit exceeded: Wielding gear in ${usedHands} hands, but only ${maxHands} hands available!`
+        : '';
+
+      if (!this.attributes.limbs) {
+        this.attributes.limbs = { arms: baseArms, legs: baseLegs, hands: baseHands };
+      }
+      this.attributes.limbs.arms = baseArms;
+      this.attributes.limbs.legs = baseLegs;
+      this.attributes.limbs.hands = baseHands;
+      this.attributes.limbs.maxArms = maxArms;
+      this.attributes.limbs.maxLegs = maxLegs;
+      this.attributes.limbs.maxHands = maxHands;
+      this.attributes.limbs.deltaArms = deltaArms;
+      this.attributes.limbs.deltaLegs = deltaLegs;
+      this.attributes.limbs.deltaHands = deltaHands;
+      this.attributes.limbs.usedHands = usedHands;
+      this.attributes.limbs.equippedHandItems = equippedHandItems;
+      this.attributes.limbs.exceededHands = exceededHands;
+      this.attributes.limbs.handsWarning = handsWarning;
     }
 
     return { equippedGear };

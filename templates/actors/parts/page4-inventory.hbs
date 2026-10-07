@@ -1,6 +1,13 @@
 {{!-- PAGE 4: EQUIPMENT & INVENTORY --}}
 <div class="dcc-page-container dcc-equipment-inventory-container">
   
+  {{#if system.attributes.limbs.exceededHands}}
+    <div class="dcc-hands-warning-banner" role="alert" style="margin-bottom: 8px;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span><strong>WARNING — HANDS LIMIT EXCEEDED:</strong> Wielding gear in <strong>{{system.attributes.limbs.usedHands}}</strong> hands, but only <strong>{{system.attributes.limbs.maxHands}}</strong> hands available!</span>
+    </div>
+  {{/if}}
+
   {{!-- TOP GROUPING: EQUIPPED GEAR SLOTS / TATTOOS / PATCHES (FULL WIDTH) --}}
   <div class="dcc-stat-block dcc-equipped-gear-block" style="width: 100%; box-sizing: border-box;">
     <div class="dcc-banner-header">
@@ -13,6 +20,42 @@
           <i class="fa-solid fa-plus"></i> Custom Gear
         </a>
       </div>
+    </div>
+    <div class="dcc-limbs-bar" style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid #444; padding: 6px 12px; margin-bottom: 4px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-weight: bold; font-size: 11px; color: #fff;"><i class="fa-solid fa-hand"></i> Hands:</span>
+          {{#if isGM}}
+            <input type="number" name="system.attributes.limbs.hands" value="{{system.attributes.limbs.hands}}" min="0" style="width: 44px; text-align: center; height: 20px; font-size: 11px; background: #111; color: #fff; border: 1px solid #777; border-radius: 3px;" title="GM Editable Base Hands" />
+          {{else}}
+            <span style="font-weight: bold; color: #fff; font-size: 11px;">{{system.attributes.limbs.hands}}</span>
+          {{/if}}
+          <span style="font-size: 11px; color: {{#if system.attributes.limbs.exceededHands}}#e74c3c{{else}}#ccc{{/if}};">(Wielding: <strong>{{system.attributes.limbs.usedHands}}</strong> / Max: <strong>{{system.attributes.limbs.maxHands}}</strong>)</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-weight: bold; font-size: 11px; color: #fff;"><i class="fa-solid fa-person-walking"></i> Arms:</span>
+          {{#if isGM}}
+            <input type="number" name="system.attributes.limbs.arms" value="{{system.attributes.limbs.arms}}" min="0" style="width: 44px; text-align: center; height: 20px; font-size: 11px; background: #111; color: #fff; border: 1px solid #777; border-radius: 3px;" title="GM Editable Base Arms" />
+          {{else}}
+            <span style="font-weight: bold; color: #fff; font-size: 11px;">{{system.attributes.limbs.arms}}</span>
+          {{/if}}
+          <span style="font-size: 11px; color: #ccc;">(Max: <strong>{{system.attributes.limbs.maxArms}}</strong>)</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-weight: bold; font-size: 11px; color: #fff;"><i class="fa-solid fa-shoe-prints"></i> Legs:</span>
+          {{#if isGM}}
+            <input type="number" name="system.attributes.limbs.legs" value="{{system.attributes.limbs.legs}}" min="0" style="width: 44px; text-align: center; height: 20px; font-size: 11px; background: #111; color: #fff; border: 1px solid #777; border-radius: 3px;" title="GM Editable Base Legs" />
+          {{else}}
+            <span style="font-weight: bold; color: #fff; font-size: 11px;">{{system.attributes.limbs.legs}}</span>
+          {{/if}}
+          <span style="font-size: 11px; color: #ccc;">(Max: <strong>{{system.attributes.limbs.maxLegs}}</strong>)</span>
+        </div>
+      </div>
+      {{#if isGM}}
+        <span style="font-size: 10px; color: #f1c40f; font-style: italic;"><i class="fa-solid fa-crown"></i> GM Limb Config</span>
+      {{/if}}
     </div>
     <div class="dcc-gear-slots-list dcc-gear-slots-grid" style="padding: 8px;">
       <div class="dcc-gear-row">

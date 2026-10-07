@@ -143,6 +143,56 @@
   </div>
 </div>
 
+{{!-- ROLL MODIFIER (ADVANTAGE / DISADVANTAGE) --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #27ae60;">
+    <span><i class="fa-solid fa-dice-d20"></i> ROLL MODIFIER (ADVANTAGE / DISADVANTAGE)</span>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    <div class="dcc-field-row" style="margin-bottom: 6px; align-items: center; gap: 8px;">
+      <div class="dcc-field-group small">
+        <span class="dcc-field-label">Roll Modifier Mode</span>
+        <select name="system.rollModifierMode" class="dcc-field-input" style="font-size: 11px;">
+          <option value="none" {{#if (eq system.rollModifierMode "none")}}selected{{/if}}>None</option>
+          <option value="advantage" {{#if (eq system.rollModifierMode "advantage")}}selected{{/if}}>Advantage (Roll 2d20kh)</option>
+          <option value="disadvantage" {{#if (eq system.rollModifierMode "disadvantage")}}selected{{/if}}>Disadvantage (Roll 2d20kl)</option>
+        </select>
+      </div>
+      <div class="dcc-field-group" style="flex: 2;">
+        <span class="dcc-field-label">Affected Roll Scopes (comma-separated: all, attacks, spells, skills, str, dex)</span>
+        <input class="dcc-field-input" type="text" name="system.affects" value="{{affectsString}}" placeholder="all, attacks, spells, skills, str, dex, int, con, cha" style="font-size: 11px;" />
+      </div>
+    </div>
+    <div style="font-size: 10px; color: #555; font-style: italic;">
+      Grants Advantage or Disadvantage when rolling matching checks while this Buff is active or assigned to an External Buff slot.
+    </div>
+  </div>
+{{!-- LIMB MODIFIERS (ARMS, LEGS, HANDS) --}}
+<div class="dcc-stat-block" style="margin-bottom: 10px;">
+  <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #2980b9;">
+    <span><i class="fa-solid fa-person-walking"></i> LIMB MODIFIERS (ARMS, LEGS, HANDS)</span>
+  </div>
+  <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
+    <div class="dcc-field-row" style="margin-bottom: 4px; align-items: center; gap: 12px;">
+      <div class="dcc-field-group small">
+        <span class="dcc-field-label">Hands (+/-)</span>
+        <input class="dcc-field-input" type="number" name="system.limbModifiers.hands" value="{{system.limbModifiers.hands}}" placeholder="0" style="font-size: 11px; text-align: center;" />
+      </div>
+      <div class="dcc-field-group small">
+        <span class="dcc-field-label">Arms (+/-)</span>
+        <input class="dcc-field-input" type="number" name="system.limbModifiers.arms" value="{{system.limbModifiers.arms}}" placeholder="0" style="font-size: 11px; text-align: center;" />
+      </div>
+      <div class="dcc-field-group small">
+        <span class="dcc-field-label">Legs (+/-)</span>
+        <input class="dcc-field-input" type="number" name="system.limbModifiers.legs" value="{{system.limbModifiers.legs}}" placeholder="0" style="font-size: 11px; text-align: center;" />
+      </div>
+    </div>
+    <div style="font-size: 10px; color: #555; font-style: italic;">
+      Modifies the actor's available limb and wielding hand count while this Buff is active or assigned to an External Buff slot.
+    </div>
+  </div>
+</div>
+
 <div class="dcc-field-group">
   <span class="dcc-field-label">Description</span>
   <textarea class="dcc-field-input" name="system.description" style="height: 100px;">{{system.description}}</textarea>

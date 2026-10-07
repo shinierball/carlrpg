@@ -65,9 +65,13 @@ import {
   NPCDataModel,
   MobDataModel
 } from './models/index.mjs';
+import { registerCompendiumSyncHooks } from './data/compendium-sync.mjs';
 
 Hooks.once('init', async function() {
   console.log('DCC RPG | Initializing Dungeon Crawler Carl Roleplaying Game System');
+
+  // Register compendium synchronization and token link guard hooks
+  registerCompendiumSyncHooks();
 
   // Ensure chat message hook is registered with canonical version detection
   registerChatMessageHook();
@@ -111,6 +115,8 @@ Hooks.once('init', async function() {
     setCurrentFloor,
     onRenderChatMessage,
     registerChatMessageHook,
+    createAndEditItem,
+    openGlobalItemCreatorDialog,
     applications: {
       DCCCrawlerSheet,
       DCCItemSheet,
@@ -560,10 +566,137 @@ export async function setupInitialHotbar(user = globalThis.game?.user, { force =
   }
 }
 
+/**
+ * Create a new CarlRPG Item in the world with canonical defaults and immediately open DCCItemSheet.
+ * Ensures the exact same interface (Item Builder) is used globally for both creation and editing.
+ * @param {string} type
+ * @param {object} initialData
+ * @returns {Promise<Item>}
+ */
+export async function createAndEditItem(type = 'gear', initialData = {}) {
+  const defaultNames = {
+    gear: 'New Equipment',
+    weapon: 'New Weapon',
+    spell: 'New Spell',
+    skill: 'New Skill',
+    class: 'New Class',
+    race: 'New Race',
+    buff: 'New Buff',
+    debuff: 'New Debuff',
+    loot: 'New Consumable Item'
+  };
+
+  const actualType = type === 'weapon' ? 'gear' : type;
+  const isWeapon = type === 'weapon' || initialData.isWeapon || initialData.system?.isWeapon;
+
+  const itemPayload = {
+    name: initialData.name || defaultNames[type] || 'New Item',
+    type: actualType,
+    img: initialData.img || (actualType === 'gear' ? (isWeapon ? 'icons/svg/sword.svg' : 'icons/svg/shield.svg') :
+          actualType === 'spell' ? 'icons/svg/wand.svg' :
+          actualType === 'skill' ? 'icons/svg/book.svg' :
+          actualType === 'class' ? 'icons/default-icons/class.svg' :
+          actualType === 'race' ? 'icons/default-icons/ancestry.svg' :
+          actualType === 'buff' ? 'icons/svg/aura.svg' :
+          actualType === 'debuff' ? 'icons/svg/hazard.svg' : 'icons/svg/item-bag.svg'),
+    system: {
+      ...(initialData.system || {}),
+      ...(isWeapon ? { isWeapon: true, slot: 'hands', critMultiplier: 1 } : {}),
+      ...(actualType === 'skill' ? { critMultiplierR5: 1, critMultiplierR15: 1 } : {}),
+      ...(actualType === 'spell' ? { critMultiplierR5: 1, critMultiplierR15: 1 } : {})
+    }
+  };
+
+  const ItemClass = CONFIG.Item?.documentClass
+    ?? globalThis.foundry?.documents?.Item
+    ?? globalThis.Item;
+
+  const created = await ItemClass.create(itemPayload);
+  if (created && typeof created.sheet?.render === 'function') {
+    created.sheet.render(true);
+  }
+  return created;
+}
+
+/**
+ * Open modal to choose object type and immediately launch the Unified Item Builder (DCCItemSheet).
+ */
+export function openGlobalItemCreatorDialog() {
+  const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog;
+  const content = `
+    <div style="font-family: 'Oswald', sans-serif; padding: 6px;">
+      <p style="font-size: 13px; margin-bottom: 10px; color: #333;">Select the type of object to create in the Unified Item Builder:</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button type="button" class="dcc-create-type-btn" data-type="weapon" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #c0392b; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-crosshairs"></i> Weapon
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="gear" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #2c3e50; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-shield-halved"></i> Gear / Armor
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="spell" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #8e44ad; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Spell
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="skill" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #27ae60; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-book-bookmark"></i> Skill
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="class" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #34495e; color: #f1c40f; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-graduation-cap"></i> Class
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="race" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #4a235a; color: #e056fd; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-dna"></i> Race
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="buff" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #16a085; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-angles-up"></i> Buff
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="debuff" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #d35400; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-angles-down"></i> Debuff
+        </button>
+        <button type="button" class="dcc-create-type-btn" data-type="loot" style="padding: 8px; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: bold; background: #7f8c8d; color: #fff; border: 1.5px solid #000; border-radius: 3px; cursor: pointer; text-align: left; grid-column: span 2; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-flask"></i> Consumable / Item / Loot
+        </button>
+      </div>
+    </div>
+  `;
+
+  let dlg;
+  dlg = new DialogClass({
+    title: 'DCC RPG — Create New Item / Object',
+    content,
+    buttons: {
+      cancel: {
+        icon: '<i class="fa-solid fa-xmark"></i>',
+        label: 'Cancel'
+      }
+    },
+    default: 'cancel',
+    render: (html) => {
+      const $h = $(html);
+      $h.find('.dcc-create-type-btn').on('click', async (ev) => {
+        ev.preventDefault();
+        const type = $(ev.currentTarget).data('type');
+        if (typeof dlg.close === 'function') dlg.close();
+        await createAndEditItem(type);
+      });
+    }
+  }, {
+    width: 440
+  });
+  dlg.render(true);
+}
+
 // Helper function to inject Skill Library & Manager button into the Items Directory
 function injectItemDirectoryButtons(app, html) {
   const $html = $(html ?? app?.element);
   if (!$html || !$html.length) return;
+
+  // Intercept the right global nav Create Item buttons to use the unified Item Builder
+  const createItemBtns = $html.find('.create-document, .create-entry, [data-action="createEntry"], [data-action="createDocument"]');
+  createItemBtns.off('click.dccItemBuilder').on('click.dccItemBuilder', ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    openGlobalItemCreatorDialog();
+  });
+
   if ($html.find('.dcc-open-skill-manager-btn').length) return;
 
   const btn = $(`
@@ -2278,6 +2411,66 @@ Hooks.once('ready', async function() {
         }
       } catch (err) {
         console.warn('DCC RPG | Could not inspect/populate mobs compendium:', err);
+      }
+    }
+
+    const racesPack = game.packs.get('carl-rpg.races');
+    if (racesPack) {
+      try {
+        const index = await racesPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty races compendium...');
+          const docs = DCC_RACES.map(r => ({
+            _id: r._id,
+            name: r.name,
+            type: 'race',
+            img: r.img || 'icons/svg/mystery-man.svg',
+            system: r.system
+          }));
+          const wasLocked = Boolean(racesPack.locked);
+          if (wasLocked) {
+            if (typeof racesPack.configure === 'function') await racesPack.configure({ locked: false });
+            else racesPack.locked = false;
+          }
+          await ItemDocClass.createDocuments(docs, { pack: racesPack.collection || 'carl-rpg.races' });
+          if (wasLocked) {
+            if (typeof racesPack.configure === 'function') await racesPack.configure({ locked: true });
+            else racesPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} races into carl-rpg.races.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate races compendium:', err);
+      }
+    }
+
+    const classesPack = game.packs.get('carl-rpg.classes');
+    if (classesPack) {
+      try {
+        const index = await classesPack.getIndex();
+        if (index.size === 0) {
+          console.log('DCC RPG | Populating empty classes compendium...');
+          const docs = DCC_CLASSES.map(c => ({
+            _id: c._id,
+            name: c.name,
+            type: 'class',
+            img: c.img || 'icons/svg/sword.svg',
+            system: c.system
+          }));
+          const wasLocked = Boolean(classesPack.locked);
+          if (wasLocked) {
+            if (typeof classesPack.configure === 'function') await classesPack.configure({ locked: false });
+            else classesPack.locked = false;
+          }
+          await ItemDocClass.createDocuments(docs, { pack: classesPack.collection || 'carl-rpg.classes' });
+          if (wasLocked) {
+            if (typeof classesPack.configure === 'function') await classesPack.configure({ locked: true });
+            else classesPack.locked = true;
+          }
+          console.log(`DCC RPG | Successfully imported ${docs.length} classes into carl-rpg.classes.`);
+        }
+      } catch (err) {
+        console.warn('DCC RPG | Could not inspect/populate classes compendium:', err);
       }
     }
 

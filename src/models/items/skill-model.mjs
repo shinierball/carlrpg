@@ -46,8 +46,8 @@ export class SkillDataModel extends BaseItemDataModel {
       fumbleDebuff: new fields.StringField({ initial: '' }),
       onHitDebuff: new fields.StringField({ initial: '' }),
       onHitDebuffMinRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
-      critMultiplierR5: new fields.NumberField({ integer: true, min: 1, initial: 4 }),
-      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 8 }),
+      critMultiplierR5: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
+      critMultiplierR15: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       rankBreaks: new fields.SchemaField({
         rank5: new fields.SchemaField({
           damageDice: new fields.StringField({ initial: '' }),

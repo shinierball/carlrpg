@@ -5,10 +5,14 @@
   </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #9a6306;"></i> Gold Value</span>
-    {{#if canSeeItemValue}}
-      <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" />
+    {{#if isGM}}
+      <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" title="Game Master: Gold Value is editable" style="font-weight: bold; border-color: #f39c12;" />
     {{else}}
-      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; color: #333333; cursor: not-allowed;" />
+      {{#if canSeeItemValue}}
+        <input class="dcc-field-input" type="number" value="{{system.value}}" disabled readonly title="Player: Inspected value (Editable by GM only)" style="background: #f5f5f5; color: #333; cursor: not-allowed;" />
+      {{else}}
+        <input class="dcc-field-input" type="text" value="???" disabled readonly title="Requires Determine Value Rank 10 to inspect gold value (Editable by GM only)" style="text-align: center; font-style: italic; background: #eee; color: #777; cursor: not-allowed;" />
+      {{/if}}
     {{/if}}
   </div>
   <div class="dcc-field-group">

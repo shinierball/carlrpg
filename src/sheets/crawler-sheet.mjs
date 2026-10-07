@@ -1527,6 +1527,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     if (!this.isEditable) return;
 
+    // GM Limb Quick Edit on Page 1 Core
+    html.find('.dcc-limb-quick-edit').on('change', async ev => {
+      if (!globalThis.game?.user?.isGM) return;
+      const field = ev.currentTarget.dataset.field;
+      if (!field) return;
+      const val = Math.max(0, parseInt(ev.currentTarget.value, 10) || 0);
+      await this.actor.update({ [field]: val });
+    });
+
     // Race Selection Dropdown
     html.find('.dcc-race-selector').change(async ev => {
       ev.preventDefault();
@@ -2582,7 +2591,78 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       return this._onSortItem(event, item.toObject ? item.toObject() : item);
     }
 
-    return super._onDropItem ? super._onDropItem(event, data) : this._onDropItemCreate(item.toObject ? item.toObject() : item);
+    // Spell Idempotence: Spells are globally unique on an actor
+    if (item.type === 'spell') {
+      const norm = (item.name || '').toLowerCase().trim();
+      const sourceUuid = data?.uuid || item.uuid || (item.pack ? `Compendium.${item.pack}.${item.id}` : null);
+      const compId = item.id || item._id;
+      const existingItems = Array.isArray(this.actor.items) ? this.actor.items : Array.from(this.actor.items?.values?.() || []);
+      const existingSpell = existingItems.find(i => {
+        if (i.type !== 'spell') return false;
+        const iSource = i.flags?.core?.sourceId || i.flags?.['carl-rpg']?.sourceUuid;
+        const iCompId = i.flags?.['carl-rpg']?.compendiumId;
+        if (sourceUuid && iSource === sourceUuid) return true;
+        if (compId && iCompId === compId) return true;
+        return (i.name || '').toLowerCase().trim() === norm;
+      });
+
+      if (existingSpell) {
+        const incomingRank = Number(item.system?.rank) || 1;
+        const currentRank = Number(existingSpell.system?.rank) || 1;
+        if (incomingRank > currentRank) {
+          await existingSpell.update({ 'system.rank': incomingRank });
+        }
+        if (typeof ui !== 'undefined' && ui.notifications?.info) {
+          ui.notifications.info(`${this.actor.name} already knows "${existingSpell.name}".`);
+        }
+        return existingSpell;
+      }
+    }
+
+    // Consumable Stacking: Loot consumables stack quantity if duplicate dropped
+    if (item.type === 'loot') {
+      const norm = (item.name || '').toLowerCase().trim();
+      const existingItems = Array.isArray(this.actor.items) ? this.actor.items : Array.from(this.actor.items?.values?.() || []);
+      const existingLoot = existingItems.find(i => i.type === 'loot' && (i.name || '').toLowerCase().trim() === norm);
+      if (existingLoot) {
+        const addQty = Number(item.system?.quantity) || 1;
+        const curQty = Number(existingLoot.system?.quantity) || 1;
+        await existingLoot.update({ 'system.quantity': curQty + addQty });
+        if (typeof ui !== 'undefined' && ui.notifications?.info) {
+          ui.notifications.info(`Added ${addQty}x "${item.name}" (total: ${curQty + addQty}).`);
+        }
+        return existingLoot;
+      }
+    }
+
+    const itemObj = item.toObject ? item.toObject() : structuredClone(item);
+    if (data?.uuid || item.uuid) {
+      itemObj.flags = itemObj.flags || {};
+      itemObj.flags.core = itemObj.flags.core || {};
+      itemObj.flags.core.sourceId = data?.uuid || item.uuid;
+      itemObj.flags['carl-rpg'] = itemObj.flags['carl-rpg'] || {};
+      itemObj.flags['carl-rpg'].compendiumId = item.id || item._id;
+      itemObj.flags['carl-rpg'].sourceUuid = data?.uuid || item.uuid;
+    }
+
+    return super._onDropItem ? super._onDropItem(event, data) : this._onDropItemCreate(itemObj);
+  }
+
+  /** @override */
+  async _onDropItemCreate(itemData) {
+    const dataList = Array.isArray(itemData) ? itemData : [itemData];
+    for (const d of dataList) {
+      if (d) {
+        d.flags = d.flags || {};
+        d.flags['carl-rpg'] = d.flags['carl-rpg'] || {};
+        if (d._id && !d.flags['carl-rpg'].compendiumId) {
+          d.flags['carl-rpg'].compendiumId = d._id;
+        }
+      }
+    }
+    return super._onDropItemCreate
+      ? super._onDropItemCreate(dataList)
+      : this.actor.createEmbeddedDocuments('Item', dataList);
   }
 
   /**
@@ -2690,6 +2770,20 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const k = `system.hotlist.slot${i}`;
       if (Array.isArray(formData[k])) {
         formData[k] = formData[k][0] || '';
+      }
+    }
+    // Security / Rule enforcement: Limbs (arms, legs, hands) are adjustable by Game Masters only
+    if (!globalThis.game?.user?.isGM) {
+      delete formData['system.attributes.limbs.arms'];
+      delete formData['system.attributes.limbs.legs'];
+      delete formData['system.attributes.limbs.hands'];
+    }
+
+    // If sheet actor is a token actor for a crawler or pet, update the base world actor as well
+    if (this.actor.isToken && (this.actor.type === 'crawler' || this.actor.type === 'pet')) {
+      const baseActor = this.actor.token?.baseActor || globalThis.game?.actors?.get?.(this.actor.token?.actorId || this.actor.id);
+      if (baseActor && baseActor !== this.actor) {
+        await baseActor.update(formData);
       }
     }
     if (typeof super._updateObject === 'function') {

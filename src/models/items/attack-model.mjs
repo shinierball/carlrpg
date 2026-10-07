@@ -8,6 +8,7 @@ export class AttackDataModel extends BaseItemDataModel {
     const fields = globalThis.foundry.data.fields;
     return {
       equipped: new fields.BooleanField({ initial: true }),
+      handsRequired: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       wieldMode: new fields.StringField({
         initial: 'one_handed',
         choices: ['one_handed', 'two_handed', 'two_handed_disadv_1h']
@@ -29,6 +30,7 @@ export class AttackDataModel extends BaseItemDataModel {
       damageType: new fields.StringField({ initial: '' }),
       damageParts: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       effects: new fields.HTMLField({ initial: '' }),
+      critMultiplier: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       optionalEffects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       selectedEffect: new fields.StringField({ initial: '' })
     };

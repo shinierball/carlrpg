@@ -18,6 +18,39 @@ export const DCC_DAMAGE_TYPES = [
 ];
 
 /**
+ * Canonical Condition & Status Effect Roll Modifiers (Advantage / Disadvantage)
+ * Maps condition keys to default rollModifierMode and affected roll scopes.
+ * Used when a buff/debuff does not explicitly override rollModifierMode.
+ */
+export const CANONICAL_CONDITION_ROLL_MODIFIERS = {
+  // Canonical Debuffs inflicting Disadvantage
+  'stunned': { mode: 'disadvantage', affects: ['all'] },
+  'queasy': { mode: 'disadvantage', affects: ['all'] },
+  'shakey': { mode: 'disadvantage', affects: ['all'] },
+  'staggered': { mode: 'disadvantage', affects: ['attacks'] },
+  'terrified': { mode: 'disadvantage', affects: ['attacks'] },
+  'reduced sight': { mode: 'disadvantage', affects: ['skills', 'attacks'] },
+  'blinded': { mode: 'disadvantage', affects: ['attacks', 'skills', 'dex'] },
+  'woozy': { mode: 'disadvantage', affects: ['attacks', 'spells', 'skills', 'dex'] },
+  'fatigued': { mode: 'disadvantage', affects: ['attacks', 'str', 'dex'] },
+  'exhausted': { mode: 'disadvantage', affects: ['all'] },
+  'frightened': { mode: 'disadvantage', affects: ['attacks', 'skills'] },
+  'prone': { mode: 'disadvantage', affects: ['attacks'] },
+  'disadvantage': { mode: 'disadvantage', affects: ['all'] },
+
+  // Canonical Buffs granting Advantage
+  'advantage': { mode: 'advantage', affects: ['all'] },
+  'blessed': { mode: 'advantage', affects: ['attacks'] },
+  'heroism': { mode: 'advantage', affects: ['attacks'] },
+  'focused': { mode: 'advantage', affects: ['attacks', 'spells'] },
+  'aiming': { mode: 'advantage', affects: ['attacks'] },
+  'true strike': { mode: 'advantage', affects: ['attacks'] },
+  'guidance': { mode: 'advantage', affects: ['skills'] },
+  'stealth': { mode: 'advantage', affects: ['attacks'] },
+  'hidden': { mode: 'advantage', affects: ['attacks'] }
+};
+
+/**
  * Compendium of Generic Buffs (32 items)
  * - 5 Stat Buffs (one for each stat: str, int, con, dex, cha)
  * - 1 Temporary Health Buff

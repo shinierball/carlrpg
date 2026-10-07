@@ -396,6 +396,39 @@
             </div>
           </div>
         </div>
+
+        <div class="dcc-stat-block">
+          <div class="dcc-banner-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>LIMBS &amp; PHYSIOLOGY</span>
+            {{#if isGM}}<span style="font-size: 9px; color: #f1c40f;"><i class="fa-solid fa-crown"></i> GM</span>{{/if}}
+          </div>
+          <div class="dcc-formula-row dcc-centered-row">
+            <div class="dcc-formula-item" title="Hands: {{system.attributes.limbs.usedHands}} used of {{system.attributes.limbs.maxHands}} max">
+              {{#if isGM}}
+                <input class="dcc-box-input small dcc-limb-quick-edit {{#if system.attributes.limbs.exceededHands}}is-exceeded-input{{/if}}" data-field="system.attributes.limbs.hands" type="number" value="{{system.attributes.limbs.hands}}" min="0" />
+              {{else}}
+                <input class="dcc-box-input small {{#if system.attributes.limbs.exceededHands}}is-exceeded-input{{/if}}" type="number" value="{{system.attributes.limbs.hands}}" readonly disabled />
+              {{/if}}
+              <span class="dcc-stat-sublabel">Hands ({{system.attributes.limbs.usedHands}}/{{system.attributes.limbs.maxHands}})</span>
+            </div>
+            <div class="dcc-formula-item" title="Arms: Base {{system.attributes.limbs.arms}} (Max: {{system.attributes.limbs.maxArms}})">
+              {{#if isGM}}
+                <input class="dcc-box-input small dcc-limb-quick-edit" data-field="system.attributes.limbs.arms" type="number" value="{{system.attributes.limbs.arms}}" min="0" />
+              {{else}}
+                <input class="dcc-box-input small" type="number" value="{{system.attributes.limbs.arms}}" readonly disabled />
+              {{/if}}
+              <span class="dcc-stat-sublabel">Arms ({{system.attributes.limbs.maxArms}})</span>
+            </div>
+            <div class="dcc-formula-item" title="Legs: Base {{system.attributes.limbs.legs}} (Max: {{system.attributes.limbs.maxLegs}})">
+              {{#if isGM}}
+                <input class="dcc-box-input small dcc-limb-quick-edit" data-field="system.attributes.limbs.legs" type="number" value="{{system.attributes.limbs.legs}}" min="0" />
+              {{else}}
+                <input class="dcc-box-input small" type="number" value="{{system.attributes.limbs.legs}}" readonly disabled />
+              {{/if}}
+              <span class="dcc-stat-sublabel">Legs ({{system.attributes.limbs.maxLegs}})</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {{#if isMob}}
@@ -508,9 +541,20 @@
   </div>
 
   {{!-- ATTACKS SECTION (BOTTOM) --}}
+  {{#if system.attributes.limbs.exceededHands}}
+    <div class="dcc-hands-warning-banner" role="alert" style="margin-bottom: 6px;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span><strong>WARNING — HANDS LIMIT EXCEEDED:</strong> Wielding gear in <strong>{{system.attributes.limbs.usedHands}}</strong> hands, but only <strong>{{system.attributes.limbs.maxHands}}</strong> hands available!</span>
+    </div>
+  {{/if}}
   <div class="dcc-attacks-section" data-section="attacks" id="attacks-section">
     <div class="dcc-banner-header">
-      <span>ATTACKS</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>ATTACKS</span>
+        <span class="dcc-badge {{#if system.attributes.limbs.exceededHands}}dcc-badge-danger{{else}}dcc-badge-dark{{/if}}" style="font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: normal; background: {{#if system.attributes.limbs.exceededHands}}#c0392b{{else}}rgba(0,0,0,0.3){{/if}}; color: #fff;" title="Equipped Weapons/Gear: {{system.attributes.limbs.usedHands}} / {{system.attributes.limbs.maxHands}} Available Hands">
+          <i class="fa-solid fa-hand"></i> Hands: {{system.attributes.limbs.usedHands}}/{{system.attributes.limbs.maxHands}}
+        </span>
+      </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         {{#if stowedAttacksCount}}
           <a class="toggle-stowed-attacks-view" style="color: #fff; cursor: pointer; font-size: 11px; text-decoration: none;" data-tooltip="Toggle Stowed / Unequipped Attacks">

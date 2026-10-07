@@ -2,6 +2,7 @@ import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
+import { getRecommendedAssociatedSkills, getRecommendedOptionalEffects } from '../data/weapon-associations.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller
@@ -320,6 +321,7 @@ export class DCCItemSheet extends BaseItemSheet {
     const isGM = Boolean(globalThis.game?.user?.isGM);
     context.isGM = isGM;
     context.canSeeItemValue = !actor || determineValueRank >= 10;
+    context.canEditItemValue = isGM;
     context.determineValueRank = determineValueRank;
     context.goldValue = Number(item.system?.value ?? item.goldValue ?? 0);
 
@@ -443,6 +445,52 @@ export class DCCItemSheet extends BaseItemSheet {
     context.optionalEffectsString = Array.isArray(context.system?.optionalEffects)
       ? context.system.optionalEffects.join(', ')
       : (context.system?.optionalEffects || '');
+
+    context.affectsString = Array.isArray(context.system?.affects)
+      ? context.system.affects.join(', ')
+      : (context.system?.affects || '');
+
+    // Data-driven list representations for interactive pill badges
+    context.associatedSkillsList = Array.isArray(context.system?.associatedSkills)
+      ? context.system.associatedSkills.filter(Boolean)
+      : (typeof context.system?.associatedSkills === 'string' && context.system.associatedSkills
+          ? context.system.associatedSkills.split(',').map(s => s.trim()).filter(Boolean)
+          : []);
+
+    context.optionalEffectsList = Array.isArray(context.system?.optionalEffects)
+      ? context.system.optionalEffects.filter(Boolean)
+      : (typeof context.system?.optionalEffects === 'string' && context.system.optionalEffects
+          ? context.system.optionalEffects.split(',').map(s => s.trim()).filter(Boolean)
+          : []);
+
+    const allSkills = await this.getCompendiumSkills();
+    context.availableSkills = allSkills;
+
+    // Filter available techniques and combat effects
+    context.availableTechniques = allSkills.filter(s =>
+      s.system?.isTechnique === true ||
+      s.system?.techniqueConfig?.isDamageEffect === true ||
+      Boolean(s.system?.techniqueConfig?.damageBonus) ||
+      Boolean(s.system?.techniqueConfig?.baseDiceCountMod)
+    );
+    if (!context.availableTechniques.length) {
+      context.availableTechniques = [
+        { name: 'Aiming', system: { isTechnique: true } },
+        { name: 'Power Shot', system: { isTechnique: true } },
+        { name: 'Serrated Tear', system: { isTechnique: true } },
+        { name: 'Powerful Strike', system: { isTechnique: true } },
+        { name: 'Iron Punch', system: { isTechnique: true } },
+        { name: 'Skullcracker', system: { isTechnique: true } },
+        { name: 'Smush', system: { isTechnique: true } },
+        { name: 'Choke Out', system: { isTechnique: true } },
+        { name: 'Toss', system: { isTechnique: true } },
+        { name: 'Dirty Fighting', system: { isTechnique: true } }
+      ];
+    }
+
+    // Auto-suggested recommended skills & techniques for this weapon
+    context.recommendedSkills = getRecommendedAssociatedSkills(this.item, allSkills);
+    context.recommendedEffects = getRecommendedOptionalEffects(this.item, allSkills);
 
     context.availableBuffs = await this.getAvailableBuffs();
     context.availableDebuffs = await this.getAvailableDebuffs();
@@ -699,6 +747,11 @@ export class DCCItemSheet extends BaseItemSheet {
       formData['system.skillModifiers'] = expanded.system.skillModifiers;
     }
 
+    // Security / Rule enforcement: Gold values are editable by Game Masters only
+    if (!globalThis.game?.user?.isGM) {
+      delete formData['system.value'];
+    }
+
     if (this.item.type === 'attack' || this.item.type === 'gear') {
       let parts = expanded.system?.damageParts;
       if (parts !== undefined) {
@@ -815,6 +868,13 @@ export class DCCItemSheet extends BaseItemSheet {
         }
       }
       formData['system.damageModifiers'] = expanded.system.damageModifiers;
+
+      if (typeof formData['system.affects'] === 'string') {
+        formData['system.affects'] = formData['system.affects']
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
     }
 
     if (this.item.type === 'loot' || this.item.type === 'gear') {
@@ -951,6 +1011,139 @@ export class DCCItemSheet extends BaseItemSheet {
       ev.preventDefault();
       const newType = $(ev.currentTarget).val();
       await this.item.update({ 'system.lootType': newType });
+      this.render(false);
+    });
+
+    // Associated Skills: Add from dropdown
+    html.find('.add-associated-skill-select').change(async ev => {
+      ev.preventDefault();
+      const selectedSkill = (ev.currentTarget?.value || '').trim();
+      if (!selectedSkill) return;
+      const current = Array.isArray(this.item.system?.associatedSkills)
+        ? [...this.item.system.associatedSkills]
+        : (typeof this.item.system?.associatedSkills === 'string' && this.item.system.associatedSkills
+            ? this.item.system.associatedSkills.split(',').map(s => s.trim()).filter(Boolean)
+            : []);
+      if (!current.some(s => s.toLowerCase() === selectedSkill.toLowerCase())) {
+        current.push(selectedSkill);
+        await this.item.update({ 'system.associatedSkills': current });
+        this.render(false);
+      }
+    });
+
+    // Associated Skills: Add custom
+    html.find('.btn-add-custom-skill').click(async ev => {
+      ev.preventDefault();
+      const input = html.find('.custom-associated-skill-input');
+      const val = (input.val() || '').trim();
+      if (!val) return;
+      const current = Array.isArray(this.item.system?.associatedSkills)
+        ? [...this.item.system.associatedSkills]
+        : [];
+      if (!current.some(s => s.toLowerCase() === val.toLowerCase())) {
+        current.push(val);
+        input.val('');
+        await this.item.update({ 'system.associatedSkills': current });
+        this.render(false);
+      }
+    });
+
+    // Associated Skills: Remove tag
+    html.find('.remove-associated-skill').click(async ev => {
+      ev.preventDefault();
+      const toRemove = String($(ev.currentTarget).data('skill') || '').trim();
+      const current = Array.isArray(this.item.system?.associatedSkills)
+        ? [...this.item.system.associatedSkills]
+        : [];
+      const updated = current.filter(s => s.toLowerCase() !== toRemove.toLowerCase());
+      await this.item.update({ 'system.associatedSkills': updated });
+      this.render(false);
+    });
+
+    // Associated Skills: Auto-suggest / apply recommended skills
+    html.find('.btn-apply-recommended-skills').click(async ev => {
+      ev.preventDefault();
+      const allSkills = await this.getCompendiumSkills();
+      const rec = getRecommendedAssociatedSkills(this.item, allSkills);
+      if (!rec.length) {
+        globalThis.ui?.notifications?.info('No standard recommended skills found for this weapon type.');
+        return;
+      }
+      const current = Array.isArray(this.item.system?.associatedSkills)
+        ? [...this.item.system.associatedSkills]
+        : [];
+      for (const sk of rec) {
+        if (!current.some(s => s.toLowerCase() === sk.toLowerCase())) {
+          current.push(sk);
+        }
+      }
+      await this.item.update({ 'system.associatedSkills': current });
+      this.render(false);
+    });
+
+    // Optional Effects: Add from dropdown
+    html.find('.add-optional-effect-select').change(async ev => {
+      ev.preventDefault();
+      const selectedEffect = (ev.currentTarget?.value || '').trim();
+      if (!selectedEffect) return;
+      const current = Array.isArray(this.item.system?.optionalEffects)
+        ? [...this.item.system.optionalEffects]
+        : (typeof this.item.system?.optionalEffects === 'string' && this.item.system.optionalEffects
+            ? this.item.system.optionalEffects.split(',').map(s => s.trim()).filter(Boolean)
+            : []);
+      if (!current.some(e => e.toLowerCase() === selectedEffect.toLowerCase())) {
+        current.push(selectedEffect);
+        await this.item.update({ 'system.optionalEffects': current });
+        this.render(false);
+      }
+    });
+
+    // Optional Effects: Add custom
+    html.find('.btn-add-custom-effect').click(async ev => {
+      ev.preventDefault();
+      const input = html.find('.custom-optional-effect-input');
+      const val = (input.val() || '').trim();
+      if (!val) return;
+      const current = Array.isArray(this.item.system?.optionalEffects)
+        ? [...this.item.system.optionalEffects]
+        : [];
+      if (!current.some(e => e.toLowerCase() === val.toLowerCase())) {
+        current.push(val);
+        input.val('');
+        await this.item.update({ 'system.optionalEffects': current });
+        this.render(false);
+      }
+    });
+
+    // Optional Effects: Remove tag
+    html.find('.remove-optional-effect').click(async ev => {
+      ev.preventDefault();
+      const toRemove = String($(ev.currentTarget).data('effect') || '').trim();
+      const current = Array.isArray(this.item.system?.optionalEffects)
+        ? [...this.item.system.optionalEffects]
+        : [];
+      const updated = current.filter(e => e.toLowerCase() !== toRemove.toLowerCase());
+      await this.item.update({ 'system.optionalEffects': updated });
+      this.render(false);
+    });
+
+    // Optional Effects: Auto-suggest / apply recommended effects
+    html.find('.btn-apply-recommended-effects').click(async ev => {
+      ev.preventDefault();
+      const rec = getRecommendedOptionalEffects(this.item);
+      if (!rec.length) {
+        globalThis.ui?.notifications?.info('No standard recommended techniques found for this weapon type.');
+        return;
+      }
+      const current = Array.isArray(this.item.system?.optionalEffects)
+        ? [...this.item.system.optionalEffects]
+        : [];
+      for (const ef of rec) {
+        if (!current.some(e => e.toLowerCase() === ef.toLowerCase())) {
+          current.push(ef);
+        }
+      }
+      await this.item.update({ 'system.optionalEffects': current });
       this.render(false);
     });
 

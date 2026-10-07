@@ -73,6 +73,11 @@
             "buff1": "",
             "buff2": "",
             "buff3": ""
+          },
+          "limbs": {
+            "arms": 2,
+            "legs": 2,
+            "hands": 2
           }
         }
       }
@@ -266,8 +271,8 @@
       "fumbleDebuff": "",
       "onHitDebuff": "",
       "onHitDebuffMinRank": 0,
-      "critMultiplierR5": 4,
-      "critMultiplierR15": 8,
+      "critMultiplierR5": 1,
+      "critMultiplierR15": 1,
       "rankBreaks": {
         "rank5": {
           "damageDice": "",
@@ -306,6 +311,7 @@
     },
     "attack": {
       "equipped": true,
+      "handsRequired": 1,
       "wieldMode": "one_handed",
       "weaponCategory": "",
       "weaponType": "",
@@ -334,8 +340,8 @@
       "damageType": "",
       "baseDamage": "",
       "damageModifiers": [],
-      "critMultiplierR5": 4,
-      "critMultiplierR15": 8,
+      "critMultiplierR5": 1,
+      "critMultiplierR15": 1,
       "fumbleDebuff": "",
       "onHitDebuff": "",
       "onHitDebuffMinRank": 0,
@@ -388,6 +394,7 @@
       "quantity": 1,
       "value": 0,
       "equipped": false,
+      "handsRequired": 1,
       "isWeapon": false,
       "wieldMode": "one_handed",
       "weaponCategory": "",
@@ -542,6 +549,13 @@
       "healingPerRound": "",
       "damageMultiplier": 1,
       "damageType": "",
+      "rollModifierMode": "none",
+      "affects": [],
+      "limbModifiers": {
+        "arms": 0,
+        "legs": 0,
+        "hands": 0
+      },
       "statModifiers": [],
       "damageModifiers": [],
       "duration": "1 Hour",
@@ -554,6 +568,13 @@
       "damagePerRound": "",
       "reductionPercent": 0,
       "rounding": "up",
+      "rollModifierMode": "none",
+      "affects": [],
+      "limbModifiers": {
+        "arms": 0,
+        "legs": 0,
+        "hands": 0
+      },
       "statModifiers": [],
       "damageModifiers": [],
       "duration": "Combat",

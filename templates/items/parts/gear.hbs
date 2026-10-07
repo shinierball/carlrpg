@@ -39,10 +39,14 @@
   </div>
   <div class="dcc-field-group small">
     <span class="dcc-field-label"><i class="fa-solid fa-coins" style="color: #9a6306;"></i> Gold Value</span>
-    {{#if canSeeItemValue}}
-      <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" />
+    {{#if isGM}}
+      <input class="dcc-field-input" type="number" name="system.value" value="{{system.value}}" min="0" placeholder="0" title="Game Master: Gold Value is editable" style="font-weight: bold; border-color: #f39c12;" />
     {{else}}
-      <input class="dcc-field-input" type="text" value="???" disabled title="Requires Determine Value Rank 10 to inspect gold value" style="text-align: center; font-style: italic; background: #eee; color: #333333; cursor: not-allowed;" />
+      {{#if canSeeItemValue}}
+        <input class="dcc-field-input" type="number" value="{{system.value}}" disabled readonly title="Player: Inspected value (Editable by GM only)" style="background: #f5f5f5; color: #333; cursor: not-allowed;" />
+      {{else}}
+        <input class="dcc-field-input" type="text" value="???" disabled readonly title="Requires Determine Value Rank 10 to inspect gold value (Editable by GM only)" style="text-align: center; font-style: italic; background: #eee; color: #777; cursor: not-allowed;" />
+      {{/if}}
     {{/if}}
   </div>
 </div>
@@ -79,12 +83,8 @@
       </div>
     </div>
 
-    <div class="dcc-field-row" style="margin-bottom: 6px;">
+    <div class="dcc-field-row" style="margin-bottom: 8px;">
       <div class="dcc-field-group" style="flex: 2;">
-        <span class="dcc-field-label">Associated Skills (Comma-Separated)</span>
-        <input class="dcc-field-input" type="text" name="system.associatedSkills" value="{{associatedSkillsString}}" placeholder="e.g. Chainsaws, Power Weapons, Slashing" style="font-size: 11px;" />
-      </div>
-      <div class="dcc-field-group" style="flex: 1;">
         <span class="dcc-field-label">Proficiency Mode</span>
         <select name="system.proficiencyMode" class="dcc-field-input" style="font-size: 11px;">
           {{#each proficiencyModes as |pm|}}
@@ -92,13 +92,98 @@
           {{/each}}
         </select>
       </div>
+      <div class="dcc-field-group" style="flex: 1;">
+        <span class="dcc-field-label"><i class="fa-solid fa-burst" style="color: #c0392b;"></i> Crit Multiplier</span>
+        <input class="dcc-field-input" type="number" name="system.critMultiplier" value="{{#if system.critMultiplier}}{{system.critMultiplier}}{{else}}1{{/if}}" placeholder="1" min="1" style="font-size: 11px;" title="Critical Hit Multiplier (defaults to 1x, adjustable by GM)" />
+      </div>
     </div>
 
-    <div class="dcc-field-row">
-      <div class="dcc-field-group">
-        <span class="dcc-field-label">Optional Effects / Combat Techniques (Comma-Separated)</span>
-        <input class="dcc-field-input" type="text" name="system.optionalEffects" value="{{optionalEffectsString}}" placeholder="e.g. Serrated Tear, Iron Punch, Dirty Fighting" style="font-size: 11px;" />
+    {{!-- ASSOCIATED SKILLS DATA-DRIVEN PICKER --}}
+    <div style="margin-bottom: 8px; background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span class="dcc-field-label" style="font-weight: bold; color: #2c3e50;"><i class="fa-solid fa-graduation-cap"></i> Associated Weapon Skills</span>
+        <button type="button" class="btn-apply-recommended-skills dcc-btn" title="Auto-populate recommended skills for this weapon type" style="font-size: 10px; padding: 2px 6px; background: #27ae60; color: #fff; border: 1px solid #1e8449; border-radius: 3px; cursor: pointer;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Suggest Skills
+        </button>
       </div>
+
+      {{!-- Selected skills as removable tags --}}
+      <div class="dcc-associated-skills-pills" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; min-height: 24px; padding: 3px; background: #fafafa; border: 1px dashed #ccc; border-radius: 3px;">
+        {{#if associatedSkillsList.length}}
+          {{#each associatedSkillsList as |sk|}}
+            <span class="dcc-badge" style="background: #2c3e50; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px;">
+              {{sk}}
+              <a class="remove-associated-skill" data-skill="{{sk}}" title="Remove skill" style="color: #e74c3c; cursor: pointer; font-weight: bold; text-decoration: none;">&times;</a>
+            </span>
+          {{/each}}
+        {{else}}
+          <span style="font-size: 10px; color: #888; font-style: italic; align-self: center;">No associated skills selected yet. Select from the dropdown below or click Auto-Suggest.</span>
+        {{/if}}
+      </div>
+
+      {{!-- Add Skill Controls --}}
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <div style="flex: 2;">
+          <select class="add-associated-skill-select dcc-field-input" style="font-size: 11px; width: 100%;">
+            <option value="">+ Select Existing Skill to Associate...</option>
+            {{#each availableSkills as |s|}}
+              <option value="{{s.name}}">{{s.name}} ({{upper s.system.stat}} - {{s.system.category}})</option>
+            {{/each}}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <input class="dcc-field-input custom-associated-skill-input" type="text" placeholder="Or custom name..." style="font-size: 11px; width: 100%;" />
+        </div>
+        <button type="button" class="btn-add-custom-skill dcc-btn" style="font-size: 11px; padding: 3px 6px; background: #34495e; color: #fff; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+          + Add
+        </button>
+      </div>
+
+      <input type="hidden" name="system.associatedSkills" value="{{associatedSkillsString}}" />
+    </div>
+
+    {{!-- OPTIONAL EFFECTS / COMBAT TECHNIQUES DATA-DRIVEN PICKER --}}
+    <div style="margin-bottom: 8px; background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span class="dcc-field-label" style="font-weight: bold; color: #c0392b;"><i class="fa-solid fa-burst"></i> Optional Effects / Combat Techniques</span>
+        <button type="button" class="btn-apply-recommended-effects dcc-btn" title="Auto-populate recommended techniques for this weapon" style="font-size: 10px; padding: 2px 6px; background: #e67e22; color: #fff; border: 1px solid #d35400; border-radius: 3px; cursor: pointer;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Suggest Techniques
+        </button>
+      </div>
+
+      {{!-- Selected techniques as removable tags --}}
+      <div class="dcc-optional-effects-pills" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; min-height: 24px; padding: 3px; background: #fafafa; border: 1px dashed #ccc; border-radius: 3px;">
+        {{#if optionalEffectsList.length}}
+          {{#each optionalEffectsList as |ef|}}
+            <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px;">
+              {{ef}}
+              <a class="remove-optional-effect" data-effect="{{ef}}" title="Remove technique" style="color: #f1c40f; cursor: pointer; font-weight: bold; text-decoration: none;">&times;</a>
+            </span>
+          {{/each}}
+        {{else}}
+          <span style="font-size: 10px; color: #888; font-style: italic; align-self: center;">No optional effects or techniques associated.</span>
+        {{/if}}
+      </div>
+
+      {{!-- Add Technique Controls --}}
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <div style="flex: 2;">
+          <select class="add-optional-effect-select dcc-field-input" style="font-size: 11px; width: 100%;">
+            <option value="">+ Select Existing Technique/Effect...</option>
+            {{#each availableTechniques as |tech|}}
+              <option value="{{tech.name}}">{{tech.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <input class="dcc-field-input custom-optional-effect-input" type="text" placeholder="Or custom name..." style="font-size: 11px; width: 100%;" />
+        </div>
+        <button type="button" class="btn-add-custom-effect dcc-btn" style="font-size: 11px; padding: 3px 6px; background: #962d22; color: #fff; border: 1px solid #111; border-radius: 3px; cursor: pointer;">
+          + Add
+        </button>
+      </div>
+
+      <input type="hidden" name="system.optionalEffects" value="{{optionalEffectsString}}" />
     </div>
   </div>
 </div>

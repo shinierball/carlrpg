@@ -1544,6 +1544,56 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
     });
 
+    // Manage Race Perks & Detriments
+    html.find('.dcc-manage-race-perks-btn').click(async ev => {
+      ev.preventDefault();
+      const raceName = this.actor?.system?.details?.race;
+      if (!raceName) {
+        if (globalThis.ui?.notifications) globalThis.ui.notifications.warn('No race assigned to character.');
+        return;
+      }
+      const embeddedRace = this.actor.items?.find?.(i => i.type === 'race');
+      const def = DCCRaceClassApplier.findRace(raceName) || embeddedRace;
+      if (!def) {
+        if (globalThis.ui?.notifications) globalThis.ui.notifications.warn(`No definition found for race "${raceName}".`);
+        return;
+      }
+      const appliedFlag = this.actor.getFlag?.('carl-rpg', 'appliedRace') || {};
+      const { perks, detriments } = DCCRaceClassApplier.extractPerksAndDetriments(embeddedRace || def);
+      const chosenPerks = embeddedRace?.system?.chosenPerks || appliedFlag.chosenPerks || perks;
+      const chosenDetriments = embeddedRace?.system?.chosenDetriments || appliedFlag.chosenDetriments || detriments;
+
+      const result = await DCCRaceClassApplier.promptPerksDetrimentsDialog(def, { perks, detriments }, { chosenPerks, chosenDetriments });
+      if (result) {
+        await DCCRaceClassApplier.syncPerksAndDetriments(this.actor, 'race', result.chosenPerks, result.chosenDetriments, def);
+      }
+    });
+
+    // Manage Class Perks & Detriments
+    html.find('.dcc-manage-class-perks-btn').click(async ev => {
+      ev.preventDefault();
+      const className = this.actor?.system?.details?.class;
+      if (!className) {
+        if (globalThis.ui?.notifications) globalThis.ui.notifications.warn('No class assigned to character.');
+        return;
+      }
+      const embeddedClass = this.actor.items?.find?.(i => i.type === 'class');
+      const def = DCCRaceClassApplier.findClass(className) || embeddedClass;
+      if (!def) {
+        if (globalThis.ui?.notifications) globalThis.ui.notifications.warn(`No definition found for class "${className}".`);
+        return;
+      }
+      const appliedFlag = this.actor.getFlag?.('carl-rpg', 'appliedClass') || {};
+      const { perks, detriments } = DCCRaceClassApplier.extractPerksAndDetriments(embeddedClass || def);
+      const chosenPerks = embeddedClass?.system?.chosenPerks || appliedFlag.chosenPerks || perks;
+      const chosenDetriments = embeddedClass?.system?.chosenDetriments || appliedFlag.chosenDetriments || detriments;
+
+      const result = await DCCRaceClassApplier.promptPerksDetrimentsDialog(def, { perks, detriments }, { chosenPerks, chosenDetriments });
+      if (result) {
+        await DCCRaceClassApplier.syncPerksAndDetriments(this.actor, 'class', result.chosenPerks, result.chosenDetriments, def);
+      }
+    });
+
     // Save to PDF Export button
     html.find('.dcc-btn-save-pdf, .export-pdf-btn').click(ev => {
       ev.preventDefault();
@@ -2417,18 +2467,19 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     if (!item) return false;
 
     // If dropping a Race, Class, or Deity, automatically apply/update actor
+    const isInteractive = typeof document !== 'undefined';
     if (item.type === 'race') {
       if (typeof this.actor?.applyRace === 'function') {
-        await this.actor.applyRace(item.name, { interactive: true });
+        await this.actor.applyRace(item.name, { interactive: isInteractive });
       } else {
-        await DCCRaceClassApplier.applyRace(this.actor, item.name, { interactive: true });
+        await DCCRaceClassApplier.applyRace(this.actor, item.name, { interactive: isInteractive });
       }
       return item;
     } else if (item.type === 'class') {
       if (typeof this.actor?.applyClass === 'function') {
-        await this.actor.applyClass(item.name, { interactive: true });
+        await this.actor.applyClass(item.name, { interactive: isInteractive });
       } else {
-        await DCCRaceClassApplier.applyClass(this.actor, item.name, { interactive: true });
+        await DCCRaceClassApplier.applyClass(this.actor, item.name, { interactive: isInteractive });
       }
       return item;
     } else if (item.type === 'deity') {

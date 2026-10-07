@@ -27,7 +27,12 @@ export class RaceDataModel extends BaseItemDataModel {
       }),
       skills: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       spells: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+      chosenSkills: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+      chosenSpells: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       perks: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      detriments: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      chosenPerks: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      chosenDetriments: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       abilities: new fields.HTMLField({ initial: '' }),
       description: new fields.HTMLField({ initial: '' })
     };
@@ -61,7 +66,12 @@ export class ClassDataModel extends BaseItemDataModel {
       }),
       skills: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       spells: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+      chosenSkills: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
+      chosenSpells: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       perks: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      detriments: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      chosenPerks: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      chosenDetriments: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       abilities: new fields.HTMLField({ initial: '' }),
       description: new fields.HTMLField({ initial: '' })
     };

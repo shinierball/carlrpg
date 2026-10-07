@@ -465,3 +465,34 @@ When applying a race or class from the Crawler Character Sheet dropdown, drag-an
 3. Players can also enter a custom write-in skill/spell name to honor rule breaking or custom GM content.
 4. If cancelled, the operation cleanly aborts and reverts any dropdown selections without modifying the actor.
 5. Chosen skills/spells are recorded on the embedded Race/Class item under `system.chosenSkills` and `system.chosenSpells`, embedded onto the actor, and tracked in `appliedRace`/`appliedClass` flags for clean reversal when swapping races/classes.
+
+---
+
+## 14. Perks & Detriments Selection & Management System
+
+Every Race and Class definition features distinct perks (benefits, traits, immunities) and detriments (vulnerabilities, restrictions, drawbacks).
+
+### 1. Distinction & Extraction (`extractPerksAndDetriments`)
+- Distinguishes between perks and detriments across canonical definitions, point builders (`selectedBenefits`, `selectedDetriments`), and world items.
+- Automatically splits compound traits (e.g. Igneous's *"Immunity to Fire damage, and vulnerable to Ice damage"*) into distinct perk and detriment entries.
+- Evaluates keyword indicators (`vulnerability`, `disadvantage`, `penalty`, `lose health`, `cannot`, `halved`, `weakness`, `bait`) to classify traits cleanly.
+
+### 2. Interactive Perks & Detriments Modal Dialog (`promptPerksDetrimentsDialog`)
+- When applying a race or class from the Crawler Character Sheet (Page 1 Core dropdowns or item drop) or from the Point Build Studios:
+  1. An interactive dialog prompts the player or GM with checkboxes pre-selected for all active perks and detriments.
+  2. Players can toggle specific features on or off, or provide custom write-in traits.
+  3. On **Apply Features**, the selected perks and detriments are confirmed. On **Cancel**, the operation cleanly aborts without mutating the actor.
+
+### 3. Mechanical Condition Generation & Narrative Tracking
+- **Buff Items**: Perks providing Advantage, Immunity, or Resistance generate permanent `type: 'buff'` items in the actor's inventory.
+- **Debuff Items**: Detriments providing Disadvantage, Vulnerability, or Weakness generate permanent `type: 'debuff'` items in the actor's inventory.
+- **Actor Details**: Narrative trait summaries are written to `system.details.raceAbilities` and `system.details.classAbilities`.
+- **Embedded Document Tracking**: The embedded Race or Class item stores `system.perks`, `system.detriments`, `system.chosenPerks`, and `system.chosenDetriments`.
+
+### 4. Character Sheet Re-Synchronization & Management
+- **Quick Action Buttons**: Both the Page 1 Core header (next to Race and Class selectors) and Tab 5 (Story & Extras) provide `[ ⚙️ Perks & Detriments ]` buttons (`.dcc-manage-race-perks-btn` and `.dcc-manage-class-perks-btn`).
+- **Visual Chips**: Tab 5 displays styled visual chips for `chosenPerks` (green badges) and `chosenDetriments` (red badges) beneath the race or class item row.
+- **On-Demand Reconfiguration**: Clicking the management button re-opens the selection dialog, allowing crawlers to adjust or re-synchronize active perks and detriments at any point in the campaign via `DCCRaceClassApplier.syncPerksAndDetriments()`.
+
+### 5. Clean Lifecycle Reversal
+- When swapping or removing a race (`actor.removeRace()`) or class (`actor.removeClass()`), all condition items granted by that source are deleted, ability narrative strings are cleared, and attributes revert to baseline with zero orphaned data.

@@ -757,6 +757,15 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
 
     const ledger = this.getPointLedger();
 
+    const perks = [
+      ...this.selectedBenefits.map(b => b.customText || b.name),
+      ...this.customBenefits.map(cb => cb.name)
+    ];
+    const detriments = [
+      ...this.selectedDetriments.map(d => d.customText || d.name),
+      ...this.customDetriments.map(cd => cd.name)
+    ];
+
     return {
       name: this.name || (this.builderType === 'race' ? 'Unnamed Custom Race' : 'Custom Class'),
       type: this.builderType,
@@ -775,7 +784,10 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         drBonus: this.drBonus,
         skills: this.skills.map(s => ({ name: s.name, rank: s.rank, isPassive: s.isPassive })),
         spells: this.spells.map(sp => ({ name: sp.name, rank: sp.rank, isPassive: sp.isPassive })),
-        perks: abilities,
+        perks: perks.length > 0 ? perks : abilities,
+        detriments,
+        chosenPerks: this.chosenPerks || (perks.length > 0 ? perks : abilities),
+        chosenDetriments: this.chosenDetriments || detriments,
         buildPoints: ledger.pointsSpent,
         buildLedger: ledger,
         isCustomBuild: true
@@ -864,11 +876,39 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       }
     }
 
-    // Recreate item data with updated skills/spells & chosenSkills/chosenSpells
+    // Perks & Detriments resolution
+    const { perks, detriments } = DCCRaceClassApplier.extractPerksAndDetriments({
+      ...itemData,
+      selectedBenefits: this.selectedBenefits,
+      selectedDetriments: this.selectedDetriments,
+      customBenefits: this.customBenefits,
+      customDetriments: this.customDetriments
+    });
+
+    let chosenPerks = perks;
+    let chosenDetriments = detriments;
+
+    if (perks.length > 0 || detriments.length > 0) {
+      if (options.chosenPerks !== undefined || options.chosenDetriments !== undefined) {
+        chosenPerks = options.chosenPerks || perks;
+        chosenDetriments = options.chosenDetriments || detriments;
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog && !options.skipPerksDialog)) {
+        const perkSelection = await DCCRaceClassApplier.promptPerksDetrimentsDialog(itemData, { perks, detriments }, options);
+        if (perkSelection === null) return null; // Cancelled
+        chosenPerks = perkSelection.chosenPerks;
+        chosenDetriments = perkSelection.chosenDetriments;
+      }
+    }
+
+    // Recreate item data with updated skills/spells & chosen choices/perks/detriments
     itemData = this.createItemData();
     if (!itemData.system) itemData.system = {};
     itemData.system.chosenSkills = resolvedChoices.chosenSkills;
     itemData.system.chosenSpells = resolvedChoices.chosenSpells;
+    itemData.system.perks = perks;
+    itemData.system.detriments = detriments;
+    itemData.system.chosenPerks = chosenPerks;
+    itemData.system.chosenDetriments = chosenDetriments;
 
     // 1. Embed the class/race item
     let createdItem = null;
@@ -915,16 +955,29 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       if (skillGrants.length > 0) {
         await actor.createEmbeddedDocuments('Item', skillGrants);
       }
+
+      // 3. Embed condition items (perk buffs & detriment debuffs)
+      const conditions = DCCRaceClassApplier.parseConditions(itemData, this.builderType, { chosenPerks, chosenDetriments });
+      const conditionItemsToCreate = [
+        ...(conditions.buffs || []),
+        ...(conditions.debuffs || [])
+      ];
+      if (conditionItemsToCreate.length > 0) {
+        await actor.createEmbeddedDocuments('Item', conditionItemsToCreate);
+      }
     }
 
-    // 3. Apply stat modifier deltas
+    // 4. Apply stat modifier deltas and detail strings
     const currentStats = actor.system?.abilities || {};
     const updates = {};
+    const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
     if (this.builderType === 'race') {
       updates['system.details.race'] = this.name || 'Custom Race';
+      if (abilitiesSummary) updates['system.details.raceAbilities'] = abilitiesSummary;
       updates['system.attributes.size'] = this.getSizeName();
     } else {
       updates['system.details.class'] = this.name || 'Custom Class';
+      if (abilitiesSummary) updates['system.details.classAbilities'] = abilitiesSummary;
     }
     for (const [stat, delta] of Object.entries(this.stats)) {
       if (delta !== 0 && currentStats[stat]) {
@@ -933,7 +986,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       }
     }
 
-    // 4. Apply DR bonus if defined
+    // 5. Apply DR bonus if defined
     if (this.drBonus > 0) {
       const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
       updates['system.attributes.dr.buffs'] = curDR + this.drBonus;
@@ -941,6 +994,21 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
 
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
+    }
+
+    // 6. Set actor tracking flag
+    const flagKey = this.builderType === 'race' ? 'appliedRace' : 'appliedClass';
+    if (typeof actor.setFlag === 'function') {
+      await actor.setFlag('carl-rpg', flagKey, {
+        name: itemData.name,
+        stats: { ...this.stats },
+        drBonus: this.drBonus,
+        chosenSkills: resolvedChoices.chosenSkills,
+        chosenSpells: resolvedChoices.chosenSpells,
+        chosenPerks,
+        chosenDetriments,
+        itemId: createdItem?.id
+      });
     }
 
     if (typeof this.render === 'function') {

@@ -79,7 +79,11 @@ export function cleanOCRText(t) {
     .replace(/c\s*an/gi, 'can')
     .replace(/Collec\s*tor/gi, 'Collector')
     .replace(/res\s*t/gi, 'rest')
+    .replace(/per\s+da\s*y/gi, 'per day')
     .replace(/da\s*y/gi, 'day')
+    .replace(/\bt\s*he\b/gi, 'the')
+    .replace(/Ac\s*cess/gi, 'access')
+    .replace(/bur\s*st/gi, 'burst')
     .replace(/Whenev\s*er/gi, 'Whenever')
     .replace(/ag\s*ainst/gi, 'against')
     .replace(/Ether\s*eal/gi, 'Ethereal')
@@ -419,20 +423,137 @@ export class DCCRaceClassApplier {
   }
 
   /**
-   * Parses Advantage (Buffs) and Disadvantage (Debuffs) conditions from perks.
+   * Extracts benefits/perks and detriments from a race or class definition.
+   *
+   * @param {object} def
+   * @returns {{ perks: string[], detriments: string[] }}
    */
-  static parseConditions(data, type = 'race') {
+  static extractPerksAndDetriments(def) {
+    if (!def) return { perks: [], detriments: [] };
+
+    // 1. Explicit arrays if defined on system or root
+    const explicitDetriments = Array.isArray(def.system?.detriments)
+      ? def.system.detriments
+      : (Array.isArray(def.detriments) ? def.detriments : null);
+
+    const explicitPerks = Array.isArray(def.system?.perks)
+      ? def.system.perks
+      : (Array.isArray(def.perks) ? def.perks : null);
+
+    if (explicitDetriments && explicitDetriments.length > 0) {
+      return {
+        perks: (explicitPerks || []).map(p => typeof p === 'string' ? cleanOCRText(p) : (p?.name || String(p))),
+        detriments: explicitDetriments.map(d => typeof d === 'string' ? cleanOCRText(d) : (d?.name || String(d)))
+      };
+    }
+
+    // 2. Builder data (selectedBenefits, customBenefits, selectedDetriments, customDetriments)
+    const bBenefits = def.selectedBenefits || def.system?.selectedBenefits;
+    const bCustomBen = def.customBenefits || def.system?.customBenefits;
+    const bDetriments = def.selectedDetriments || def.system?.selectedDetriments;
+    const bCustomDet = def.customDetriments || def.system?.customDetriments;
+
+    if (bBenefits || bCustomBen || bDetriments || bCustomDet) {
+      const perks = [
+        ...(bBenefits || []).map(b => b.customText || b.name),
+        ...(bCustomBen || []).map(cb => cb.name)
+      ];
+      const detriments = [
+        ...(bDetriments || []).map(d => d.customText || d.name),
+        ...(bCustomDet || []).map(cd => cd.name)
+      ];
+      return { perks, detriments };
+    }
+
+    // 3. Parse from raw perks array (canonical definitions)
+    const perks = [];
+    const detriments = [];
+    const rawList = explicitPerks || [];
+
+    for (const raw of rawList) {
+      const line = cleanOCRText(typeof raw === 'string' ? raw : (raw?.name || ''));
+      if (!line) continue;
+
+      // Skip pure stat modifiers (e.g. +6 Strength, -4 Constitution, Split +6 between...)
+      if (/^[+-]\d+\s+(Strength|Dexterity|Constitution|Intelligence|Charisma)\b/i.test(line)) continue;
+      if (/^Split\s+\+\d+\s+between/i.test(line)) continue;
+      if (/^Flexible\s+\+\d+/i.test(line)) continue;
+      if (/^[+-]\d+\s+to\s+(all\s+)?(abilities|stats)\b/i.test(line)) continue;
+
+      // Skip pure choices (handled by detectChoices)
+      if (/^[+-]\d+\s+in\s+(one|two|\d+|an?)\s+.*?\s+of\s+your\s+choice/i.test(line)) continue;
+      if (line.includes('(Choice)')) continue;
+
+      // Skip pure DR lines
+      if (/^[+-]\d+\s+DR(\s+Buff)?$/i.test(line)) continue;
+
+      // Skip pure skill grants (unless describing conditional advantage/popularity)
+      if (/^[+-]\d+\s+.*?(Skills?|Skill\s+Check)\b/i.test(line) && !line.includes('Advantage') && !line.includes('Disadvantage') && !line.includes('popularity')) {
+        continue;
+      }
+
+      // Skip pure spell grants
+      if (/^[+-]\d+\s+.*?Spell\b/i.test(line) && !line.includes('Advantage') && !line.includes('Disadvantage')) {
+        continue;
+      }
+
+      // Handle compound perk + detriment line (e.g., "Immunity to Fire damage, and vulnerable to Ice damage")
+      if (/Immunity to Fire.*?vulnerable to Ice/i.test(line)) {
+        perks.push('Immunity to Fire damage');
+        detriments.push('Vulnerable to Ice damage');
+        continue;
+      }
+
+      // Handle split day / night mechanics
+      if (/during\s+the\s+day,\s*Strength is halved,\s*but Spells cost half the Mana/i.test(line)) {
+        detriments.push('During the day, Strength is halved');
+        perks.push('During the day, Spells cost half the Mana to cast');
+        continue;
+      }
+      if (/during\s+the\s+night,\s*Strength is doubled,\s*but Spells cost double the Mana/i.test(line)) {
+        perks.push('During the night, Strength is doubled');
+        detriments.push('During the night, Spells cost double the Mana to cast');
+        continue;
+      }
+
+      // Detriment detection
+      const isDetriment = /\b(vulnerab\w*|disadvantage|penalty|cannot|prohibited|lose\s+\d+\s+health|halved|weakness|decrease|bait)\b/i.test(line)
+        || /Troll-?type enemies have Advantage/i.test(line);
+
+      if (isDetriment) {
+        detriments.push(line);
+      } else {
+        perks.push(line);
+      }
+    }
+
+    return { perks, detriments };
+  }
+
+  /**
+   * Parses Advantage (Buffs) and Disadvantage (Debuffs) conditions and general perk/detriment items.
+   */
+  static parseConditions(data, type = 'race', options = {}) {
     const buffs = [];
     const debuffs = [];
 
-    const perks = Array.isArray(data?.system?.perks)
-      ? data.system.perks
-      : (Array.isArray(data?.perks) ? data.perks : []);
+    const { perks: allPerks, detriments: allDetriments } = this.extractPerksAndDetriments(data);
+    const activePerks = options.chosenPerks || data?.system?.chosenPerks || data?.chosenPerks || allPerks;
+    const activeDetriments = options.chosenDetriments || data?.system?.chosenDetriments || data?.chosenDetriments || allDetriments;
 
-    for (const raw of perks) {
+    for (const raw of activePerks) {
       const p = cleanOCRText(raw);
+      if (!p) continue;
 
-      // Advantage -> Custom Buff item
+      // Skip lines that represent stat bonuses, DR, granted skills, granted spells, movement, or size
+      if (/^[+-]?\d+\s+(Strength|Dexterity|Constitution|Intelligence|Charisma)\b/i.test(p)) continue;
+      if (/^[+-]?\d+\s*(Damage Reduction|DR)\b/i.test(p) || /Damage Reduction\s*\(DR\)/i.test(p)) continue;
+      if (/^\+?\d+ft\s+Move/i.test(p)) continue;
+      if (/\bSkills?(\b|$)/i.test(p) && /^[+-]?\d+/i.test(p)) continue;
+      if (/\bSpells?(\b|$)/i.test(p) && /^[+-]?\d+/i.test(p)) continue;
+      if (/^Size\s+\d+/i.test(p)) continue;
+
+      // Advantage / Resistance / Immunity -> Custom Buff item
       if (/\bAdvantage\b/i.test(p) && !/\bDisadvantage\b/i.test(p) && !/Troll-?type enemies have Advantage/i.test(p)) {
         let title = 'Advantage on Checks';
         const pLower = p.toLowerCase();
@@ -467,26 +588,62 @@ export class DCCRaceClassApplier {
           flags: {
             'carl-rpg': {
               grantedBy: type,
-              sourceName: data.name,
+              sourceName: data?.name || '',
               isAdvantage: true,
+              isPerk: true,
+              condition: p
+            }
+          }
+        });
+      } else if (/\b(Immunity|Resistance)\b/i.test(p)) {
+        let cleanTitle = p.split(':')[0].trim();
+        if (cleanTitle.length > 40) cleanTitle = cleanTitle.slice(0, 37).trim() + '...';
+
+        buffs.push({
+          name: cleanTitle,
+          type: 'buff',
+          img: 'icons/svg/aura.svg',
+          system: {
+            buffType: 'special',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: `<p><strong>${type === 'race' ? 'Racial Perk' : 'Class Feature'}</strong>: ${p}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data?.name || '',
+              isPerk: true,
               condition: p
             }
           }
         });
       }
+    }
 
-      // Disadvantage -> Custom Debuff item
-      if (/\bDisadvantage\b/i.test(p) || /Troll-?type enemies have Advantage/i.test(p)) {
+    for (const raw of activeDetriments) {
+      const d = cleanOCRText(raw);
+      if (!d) continue;
+
+      // Skip lines that represent stat bonuses, DR, granted skills, granted spells, movement, or size
+      if (/^[+-]?\d+\s+(Strength|Dexterity|Constitution|Intelligence|Charisma)\b/i.test(d)) continue;
+      if (/^[+-]?\d+\s*(Damage Reduction|DR)\b/i.test(d) || /Damage Reduction\s*\(DR\)/i.test(d)) continue;
+      if (/^\+?\d+ft\s+Move/i.test(d)) continue;
+      if (/\bSkills?(\b|$)/i.test(d) && /^[+-]?\d+/i.test(d)) continue;
+      if (/\bSpells?(\b|$)/i.test(d) && /^[+-]?\d+/i.test(d)) continue;
+      if (/^Size\s+\d+/i.test(d)) continue;
+
+      // Disadvantage / Vulnerability -> Custom Debuff item
+      if (/\bDisadvantage\b/i.test(d) || /Troll-?type enemies have Advantage/i.test(d)) {
         let title = 'Disadvantage on Checks';
-        const pLower = p.toLowerCase();
-        if (pLower.includes('felines')) title = 'Disadvantage: Uncanny Feline Valley';
-        else if (pLower.includes('fatigued')) title = 'Disadvantage: Cold-Blooded Torpor';
-        else if (pLower.includes('elves') || pLower.includes('fairies')) title = 'Disadvantage: Ancient Grudge';
-        else if (pLower.includes('dwarves') || pLower.includes('rat-kin')) title = 'Disadvantage: Highborn Arrogance';
-        else if (pLower.includes('conceal') || pLower.includes('stealth')) title = 'Disadvantage: Smoldering Presence';
-        else if (pLower.includes('fine manipulation') || pLower.includes('motor coordination')) title = 'Disadvantage: Clawed Clumsiness';
-        else if (pLower.includes('wrasslin') || pLower.includes('troll')) title = 'Disadvantage: Troll Bait';
-        else title = `Disadvantage: ${p.slice(0, 40)}`;
+        const dLower = d.toLowerCase();
+        if (dLower.includes('felines')) title = 'Disadvantage: Uncanny Feline Valley';
+        else if (dLower.includes('fatigued')) title = 'Disadvantage: Cold-Blooded Torpor';
+        else if (dLower.includes('elves') || dLower.includes('fairies')) title = 'Disadvantage: Ancient Grudge';
+        else if (dLower.includes('dwarves') || dLower.includes('rat-kin')) title = 'Disadvantage: Highborn Arrogance';
+        else if (dLower.includes('conceal') || dLower.includes('stealth')) title = 'Disadvantage: Smoldering Presence';
+        else if (dLower.includes('fine manipulation') || dLower.includes('motor coordination')) title = 'Disadvantage: Clawed Clumsiness';
+        else if (dLower.includes('wrasslin') || dLower.includes('troll')) title = 'Disadvantage: Troll Bait';
+        else title = `Disadvantage: ${d.slice(0, 40)}`;
 
         debuffs.push({
           name: title,
@@ -495,14 +652,37 @@ export class DCCRaceClassApplier {
           system: {
             severity: 'Minor',
             duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
-            description: `<p><strong>Disadvantage</strong>: ${p}</p>`
+            description: `<p><strong>Disadvantage</strong>: ${d}</p>`
           },
           flags: {
             'carl-rpg': {
               grantedBy: type,
-              sourceName: data.name,
+              sourceName: data?.name || '',
               isDisadvantage: true,
-              condition: p
+              isDetriment: true,
+              condition: d
+            }
+          }
+        });
+      } else if (/\b(vulnerab\w*|weakness)\b/i.test(d)) {
+        let cleanTitle = d.split(':')[0].trim();
+        if (cleanTitle.length > 40) cleanTitle = cleanTitle.slice(0, 37).trim() + '...';
+
+        debuffs.push({
+          name: cleanTitle,
+          type: 'debuff',
+          img: 'icons/svg/downgrade.svg',
+          system: {
+            severity: 'Minor',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: `<p><strong>${type === 'race' ? 'Racial Detriment' : 'Class Drawback'}</strong>: ${d}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data?.name || '',
+              isDetriment: true,
+              condition: d
             }
           }
         });
@@ -515,14 +695,17 @@ export class DCCRaceClassApplier {
   /**
    * Fully decomposes a race definition into applied bonuses.
    */
-  static parseRaceBonuses(raceDef) {
+  static parseRaceBonuses(raceDef, options = {}) {
     if (!raceDef) return null;
     const stats = this.parseStats(raceDef);
     const { skills, spells } = this.parseSkillsAndSpells(raceDef);
     const drBonus = this.parseDR(raceDef);
     const movement = this.parseMovement(raceDef);
-    const conditions = this.parseConditions(raceDef, 'race');
     const choices = this.detectChoices(raceDef);
+    const { perks, detriments } = this.extractPerksAndDetriments(raceDef);
+    const chosenPerks = options.chosenPerks || raceDef.system?.chosenPerks || raceDef.chosenPerks || perks;
+    const chosenDetriments = options.chosenDetriments || raceDef.system?.chosenDetriments || raceDef.chosenDetriments || detriments;
+    const conditions = this.parseConditions(raceDef, 'race', { chosenPerks, chosenDetriments });
     const size = raceDef.system?.size || 'Medium (4)';
     const parsedSize = getSizeInfo(size);
 
@@ -535,6 +718,10 @@ export class DCCRaceClassApplier {
       skills,
       spells,
       choices,
+      perks,
+      detriments,
+      chosenPerks,
+      chosenDetriments,
       drBonus,
       movement,
       conditions
@@ -544,14 +731,17 @@ export class DCCRaceClassApplier {
   /**
    * Fully decomposes a class definition into applied bonuses.
    */
-  static parseClassBonuses(classDef) {
+  static parseClassBonuses(classDef, options = {}) {
     if (!classDef) return null;
     const stats = this.parseStats(classDef);
     const { skills, spells } = this.parseSkillsAndSpells(classDef);
     const choices = this.detectChoices(classDef);
     const drBonus = this.parseDR(classDef);
     const movement = this.parseMovement(classDef);
-    const conditions = this.parseConditions(classDef, 'class');
+    const { perks, detriments } = this.extractPerksAndDetriments(classDef);
+    const chosenPerks = options.chosenPerks || classDef.system?.chosenPerks || classDef.chosenPerks || perks;
+    const chosenDetriments = options.chosenDetriments || classDef.system?.chosenDetriments || classDef.chosenDetriments || detriments;
+    const conditions = this.parseConditions(classDef, 'class', { chosenPerks, chosenDetriments });
     const classType = classDef.system?.classType || 'Fighter';
 
     return {
@@ -561,6 +751,10 @@ export class DCCRaceClassApplier {
       skills,
       spells,
       choices,
+      perks,
+      detriments,
+      chosenPerks,
+      chosenDetriments,
       drBonus,
       movement,
       conditions
@@ -1027,6 +1221,222 @@ export class DCCRaceClassApplier {
     return { chosenSkills, chosenSpells };
   }
 
+  /**
+   * Prompts the user with an interactive modal dialog to select perks and detriments.
+   *
+   * @param {object} def - Race or Class definition
+   * @param {{ perks: string[], detriments: string[] }} features - Extracted perks and detriments
+   * @param {object} options - Optional flags or pre-selections
+   * @returns {Promise<{ chosenPerks: string[], chosenDetriments: string[] }|null>}
+   */
+  static async promptPerksDetrimentsDialog(def, { perks = [], detriments = [] }, options = {}) {
+    if (typeof Dialog === 'undefined') {
+      return {
+        chosenPerks: options.chosenPerks || [...perks],
+        chosenDetriments: options.chosenDetriments || [...detriments]
+      };
+    }
+
+    const preSelectedPerks = options.chosenPerks || options.selectedPerks || perks;
+    const preSelectedDetriments = options.chosenDetriments || options.selectedDetriments || detriments;
+
+    let perksHtml = '';
+    if (perks.length > 0) {
+      perksHtml = `
+        <div class="dcc-dialog-card" style="border: 1px solid #27ae60; background: #fff; border-radius: 4px; padding: 10px; margin-bottom: 12px;">
+          <div style="font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold; color: #27ae60; margin-bottom: 8px; border-bottom: 1px solid #c3e6cb; padding-bottom: 4px;">
+            <i class="fa-solid fa-star"></i> PERKS &amp; BENEFITS
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${perks.map((p) => {
+              const isChecked = preSelectedPerks.includes(p);
+              return `
+                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; background: #f0f9f2; border: 1px solid #d4edda; border-radius: 3px; padding: 6px;">
+                  <input type="checkbox" name="perk" value="${p.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''} style="margin-top: 2px;" />
+                  <span style="color: #155724; font-weight: 500;">${p}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    let detrimentsHtml = '';
+    if (detriments.length > 0) {
+      detrimentsHtml = `
+        <div class="dcc-dialog-card" style="border: 1px solid #c0392b; background: #fff; border-radius: 4px; padding: 10px; margin-bottom: 12px;">
+          <div style="font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: bold; color: #c0392b; margin-bottom: 8px; border-bottom: 1px solid #f5c6cb; padding-bottom: 4px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> DETRIMENTS &amp; DRAWBACKS
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${detriments.map((d) => {
+              const isChecked = preSelectedDetriments.includes(d);
+              return `
+                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; background: #fdf7f7; border: 1px solid #f8d7da; border-radius: 3px; padding: 6px;">
+                  <input type="checkbox" name="detriment" value="${d.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''} style="margin-top: 2px;" />
+                  <span style="color: #721c24; font-weight: 500;">${d}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    const content = `
+      <div class="dcc-perks-wizard-dialog" style="font-family: 'Oswald', sans-serif; padding: 4px;">
+        <p style="font-size: 12px; color: #333; margin-bottom: 10px; line-height: 1.4;">
+          Select active <strong>Perks</strong> and <strong>Detriments</strong> for <strong>${def.name}</strong>.
+        </p>
+        ${perksHtml}
+        ${detrimentsHtml}
+        <div style="border: 1px dashed #ccc; background: #f9f9f9; border-radius: 4px; padding: 8px; margin-bottom: 8px;">
+          <div style="font-size: 11px; font-weight: bold; color: #555; margin-bottom: 4px;">CUSTOM WRITE-IN (OPTIONAL)</div>
+          <input type="text" name="customPerk" placeholder="Add custom perk write-in..." style="width: 100%; margin-bottom: 4px; font-size: 11px; padding: 4px;" />
+          <input type="text" name="customDetriment" placeholder="Add custom detriment write-in..." style="width: 100%; font-size: 11px; padding: 4px;" />
+        </div>
+      </div>
+    `;
+
+    return new Promise(resolve => {
+      let isResolved = false;
+      const dlg = new Dialog({
+        title: `[PERKS & DETRIMENTS] ${def.name}`,
+        content,
+        buttons: {
+          apply: {
+            icon: '<i class="fa-solid fa-check"></i>',
+            label: 'Apply Features',
+            callback: html => {
+              isResolved = true;
+              const chosenPerks = [];
+              const chosenDetriments = [];
+
+              const perkEls = html.find('input[name="perk"]:checked');
+              if (perkEls && perkEls.each) {
+                perkEls.each((i, el) => {
+                  const val = el.value || (typeof el.val === 'function' ? el.val() : '');
+                  if (val) chosenPerks.push(val);
+                });
+              }
+
+              const detEls = html.find('input[name="detriment"]:checked');
+              if (detEls && detEls.each) {
+                detEls.each((i, el) => {
+                  const val = el.value || (typeof el.val === 'function' ? el.val() : '');
+                  if (val) chosenDetriments.push(val);
+                });
+              }
+
+              const customP = html.find('input[name="customPerk"]').val?.()?.trim?.();
+              if (customP) chosenPerks.push(customP);
+
+              const customD = html.find('input[name="customDetriments"], input[name="customDetriment"]').val?.()?.trim?.();
+              if (customD) chosenDetriments.push(customD);
+
+              resolve({ chosenPerks, chosenDetriments });
+            }
+          },
+          cancel: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: 'Cancel',
+            callback: () => {
+              isResolved = true;
+              resolve(null);
+            }
+          }
+        },
+        default: 'apply',
+        close: () => {
+          if (!isResolved) resolve(null);
+        }
+      }, {
+        width: 500,
+        classes: ['dcc-dialog', 'dcc-perks-dialog']
+      });
+
+      dlg.render(true);
+    });
+  }
+
+  /**
+   * Synchronizes perks and detriments on an actor for an active race or class.
+   *
+   * @param {Actor} actor
+   * @param {'race'|'class'} type
+   * @param {Array<string>} chosenPerks
+   * @param {Array<string>} chosenDetriments
+   * @param {object|null} def
+   * @returns {Promise<boolean>}
+   */
+  static async syncPerksAndDetriments(actor, type, chosenPerks, chosenDetriments, def = null) {
+    if (!actor) return false;
+    if (!def) {
+      def = type === 'race'
+        ? this.findRace(actor.system?.details?.race)
+        : this.findClass(actor.system?.details?.class);
+    }
+    if (!def) return false;
+
+    // 1. Delete existing condition items granted by this source
+    const toDelete = [];
+    for (const item of (actor.items || [])) {
+      if (['buff', 'debuff'].includes(item.type) && item.getFlag?.('carl-rpg', 'grantedBy') === type) {
+        toDelete.push(item.id);
+      }
+    }
+    if (toDelete.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
+      await actor.deleteEmbeddedDocuments('Item', toDelete);
+    }
+
+    // 2. Generate new condition items
+    const { buffs, debuffs } = this.parseConditions(def, type, { chosenPerks, chosenDetriments });
+    const newItems = [...buffs, ...debuffs];
+    const createdConditionIds = [];
+    if (newItems.length > 0 && typeof actor.createEmbeddedDocuments === 'function') {
+      const created = await actor.createEmbeddedDocuments('Item', newItems);
+      for (const c of (created || [])) {
+        if (c?.id) createdConditionIds.push(c.id);
+      }
+    }
+
+    // 3. Update embedded race or class document
+    const embeddedDoc = actor.items?.find?.(i => i.type === type);
+    if (embeddedDoc && typeof embeddedDoc.update === 'function') {
+      await embeddedDoc.update({
+        'system.chosenPerks': chosenPerks,
+        'system.chosenDetriments': chosenDetriments
+      });
+    }
+
+    // 4. Update actor flag
+    const flagKey = type === 'race' ? 'appliedRace' : 'appliedClass';
+    const currentFlag = actor.getFlag?.('carl-rpg', flagKey) || {};
+    if (typeof actor.setFlag === 'function') {
+      await actor.setFlag('carl-rpg', flagKey, {
+        ...currentFlag,
+        chosenPerks,
+        chosenDetriments,
+        conditionItemIds: createdConditionIds
+      });
+    }
+
+    // 5. Update narrative details
+    const updates = {};
+    const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
+    if (type === 'race') {
+      updates['system.details.raceAbilities'] = abilitiesSummary;
+    } else {
+      updates['system.details.classAbilities'] = abilitiesSummary;
+    }
+    if (typeof actor.update === 'function') {
+      await actor.update(updates);
+    }
+
+    return true;
+  }
+
   // =========================================================================
   // SELECT OPTION GROUP BUILDERS (FOR TEMPLATES)
   // =========================================================================
@@ -1183,6 +1593,7 @@ export class DCCRaceClassApplier {
 
     const updates = {};
     updates['system.details.race'] = '';
+    updates['system.details.raceAbilities'] = '';
 
     // 2. Revert Ability Stats
     if (applied?.stats) {
@@ -1353,13 +1764,34 @@ export class DCCRaceClassApplier {
       }
     }
 
+    // Perks & Detriments resolution
+    const { perks, detriments } = this.extractPerksAndDetriments(def);
+    let chosenPerks = perks;
+    let chosenDetriments = detriments;
+
+    if (perks.length > 0 || detriments.length > 0) {
+      if (options.chosenPerks !== undefined || options.chosenDetriments !== undefined) {
+        chosenPerks = options.chosenPerks || perks;
+        chosenDetriments = options.chosenDetriments || detriments;
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog && !options.skipPerksDialog)) {
+        const perkSelection = await this.promptPerksDetrimentsDialog(def, { perks, detriments }, options);
+        if (perkSelection === null) return false; // User cancelled
+        chosenPerks = perkSelection.chosenPerks;
+        chosenDetriments = perkSelection.chosenDetriments;
+      }
+    }
+
     // 1. Revert previous race first
     await this.removeRace(actor);
 
     // 2. Parse new race bonuses
-    const bonuses = this.parseRaceBonuses(def);
+    const bonuses = this.parseRaceBonuses(def, { chosenPerks, chosenDetriments });
     const updates = {};
     updates['system.details.race'] = def.name;
+    const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
+    if (abilitiesSummary) {
+      updates['system.details.raceAbilities'] = abilitiesSummary;
+    }
 
     const originalSize = actor.system?.attributes?.size || 'Medium';
     if (bonuses.size) {
@@ -1496,6 +1928,10 @@ export class DCCRaceClassApplier {
           drBonus: bonuses.drBonus,
           movement: bonuses.movement,
           stats: bonuses.stats,
+          perks: bonuses.perks,
+          detriments: bonuses.detriments,
+          chosenPerks,
+          chosenDetriments,
           chosenSkills: resolvedChoices.chosenSkills || [],
           chosenSpells: resolvedChoices.chosenSpells || [],
           skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
@@ -1522,6 +1958,8 @@ export class DCCRaceClassApplier {
         spells: appliedSpells,
         chosenSkills: resolvedChoices.chosenSkills || [],
         chosenSpells: resolvedChoices.chosenSpells || [],
+        chosenPerks,
+        chosenDetriments,
         size: bonuses.size,
         originalSize,
         itemId: embeddedId
@@ -1575,6 +2013,7 @@ export class DCCRaceClassApplier {
 
     const updates = {};
     updates['system.details.class'] = '';
+    updates['system.details.classAbilities'] = '';
 
     // 2. Revert Ability Stats
     if (applied?.stats) {
@@ -1739,13 +2178,34 @@ export class DCCRaceClassApplier {
       }
     }
 
+    // Perks & Detriments resolution
+    const { perks, detriments } = this.extractPerksAndDetriments(def);
+    let chosenPerks = perks;
+    let chosenDetriments = detriments;
+
+    if (perks.length > 0 || detriments.length > 0) {
+      if (options.chosenPerks !== undefined || options.chosenDetriments !== undefined) {
+        chosenPerks = options.chosenPerks || perks;
+        chosenDetriments = options.chosenDetriments || detriments;
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog && !options.skipPerksDialog)) {
+        const perkSelection = await this.promptPerksDetrimentsDialog(def, { perks, detriments }, options);
+        if (perkSelection === null) return false; // User cancelled
+        chosenPerks = perkSelection.chosenPerks;
+        chosenDetriments = perkSelection.chosenDetriments;
+      }
+    }
+
     // 1. Revert previous class first
     await this.removeClass(actor);
 
     // 2. Parse new class bonuses
-    const bonuses = this.parseClassBonuses(def);
+    const bonuses = this.parseClassBonuses(def, { chosenPerks, chosenDetriments });
     const updates = {};
     updates['system.details.class'] = def.name;
+    const abilitiesSummary = [...chosenPerks, ...chosenDetriments].join('; ');
+    if (abilitiesSummary) {
+      updates['system.details.classAbilities'] = abilitiesSummary;
+    }
 
     // 3. Apply Stat Deltas
     for (const [stat, delta] of Object.entries(bonuses.stats)) {
@@ -1876,6 +2336,10 @@ export class DCCRaceClassApplier {
           drBonus: bonuses.drBonus,
           movement: bonuses.movement,
           stats: bonuses.stats,
+          perks: bonuses.perks,
+          detriments: bonuses.detriments,
+          chosenPerks,
+          chosenDetriments,
           chosenSkills: resolvedChoices.chosenSkills || [],
           chosenSpells: resolvedChoices.chosenSpells || [],
           skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
@@ -1902,6 +2366,8 @@ export class DCCRaceClassApplier {
         spells: appliedSpells,
         chosenSkills: resolvedChoices.chosenSkills || [],
         chosenSpells: resolvedChoices.chosenSpells || [],
+        chosenPerks,
+        chosenDetriments,
         itemId: embeddedId
       });
     }

@@ -69,7 +69,12 @@
           <input class="dcc-field-input" name="system.details.party" type="text" value="{{system.details.party}}" placeholder="Party / Team" />
         </div>
         <div class="dcc-field-group flex-1">
-          <span class="dcc-field-label">Race</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="dcc-field-label">Race</span>
+            {{#if system.details.race}}
+              <a class="dcc-manage-race-perks-btn" data-tooltip="Manage Race Perks &amp; Detriments" style="cursor: pointer; font-size: 10px; color: #777;"><i class="fa-solid fa-gear"></i></a>
+            {{/if}}
+          </div>
           <select class="dcc-field-input dcc-race-selector" title="Select Character Race">
             <option value="" {{#unless system.details.race}}selected{{/unless}}>-- None / Select Race --</option>
             {{#if hasCustomRace}}
@@ -114,7 +119,12 @@
           <input class="dcc-field-input" name="system.details.crawlerNumber" type="text" value="{{system.details.crawlerNumber}}" placeholder="#12345" />
         </div>
         <div class="dcc-field-group">
-          <span class="dcc-field-label">Class</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="dcc-field-label">Class</span>
+            {{#if system.details.class}}
+              <a class="dcc-manage-class-perks-btn" data-tooltip="Manage Class Perks &amp; Detriments" style="cursor: pointer; font-size: 10px; color: #777;"><i class="fa-solid fa-gear"></i></a>
+            {{/if}}
+          </div>
           <select class="dcc-field-input dcc-class-selector" title="Select Character Class">
             <option value="" {{#unless system.details.class}}selected{{/unless}}>-- None / Select Class --</option>
             {{#if hasCustomClass}}

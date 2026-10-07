@@ -363,6 +363,9 @@
       "chosenSkills": [],
       "chosenSpells": [],
       "perks": [],
+      "detriments": [],
+      "chosenPerks": [],
+      "chosenDetriments": [],
       "abilities": "",
       "description": ""
     },
@@ -390,6 +393,9 @@
       "chosenSkills": [],
       "chosenSpells": [],
       "perks": [],
+      "detriments": [],
+      "chosenPerks": [],
+      "chosenDetriments": [],
       "abilities": "",
       "description": ""
     },

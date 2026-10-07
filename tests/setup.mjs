@@ -630,6 +630,28 @@ if (!globalThis.Dialog) {
           const checkedVal = match ? match[1] : 'none';
           html = {
             find: (sel) => {
+              if (sel.includes(':checked') || sel.includes('checkbox')) {
+                const nameMatch = sel.match(/name="([^"]+)"/);
+                const name = nameMatch ? nameMatch[1] : null;
+                const regexStr = name
+                  ? `<input[^>]+name="${name}"[^>]+value="([^"]*)"[^>]*checked`
+                  : `<input[^>]+value="([^"]*)"[^>]*checked`;
+                const pattern = new RegExp(regexStr, 'gi');
+                const matches = [];
+                let m;
+                while ((m = pattern.exec(content)) !== null) {
+                  matches.push(m[1]);
+                }
+                const items = matches.map(v => ({ value: v, val: () => v, is: (s) => s === ':checked' }));
+                return {
+                  length: items.length,
+                  ...items,
+                  [Symbol.iterator]: items[Symbol.iterator].bind(items),
+                  each: (fn) => { items.forEach((it, idx) => fn.call(it, idx, it)); },
+                  map: (fn) => items.map((it, idx) => fn.call(it, idx, it)),
+                  val: () => (items[0] ? items[0].val() : '')
+                };
+              }
               const selectMatch = sel.match(/select\[name="([^"]+)"\]/);
               if (selectMatch) {
                 const name = selectMatch[1];

@@ -1,3 +1,30 @@
+## 2.4.13
+
+### Interactive Perks and Detriments for Races and Classes
+
+- **Perks and Detriments Extraction & Codification (`src/data/race-class-applier.mjs`, `template.json`, `src/models/items/lore-model.mjs`)**:
+  - Implemented `extractPerksAndDetriments()` to distinguish benefits/perks from drawbacks/detriments across canonical definitions, point builders, and world items.
+  - Handles compound trait lines (e.g. "Immunity to Fire damage, and vulnerable to Ice damage"), split day/night mechanics, and keyword-based detriment classification.
+  - Added `detriments`, `chosenPerks`, and `chosenDetriments` arrays to both `race` and `class` Item schemas and DataModels.
+- **Interactive Perks & Detriments Modal Dialog (`src/data/race-class-applier.mjs`)**:
+  - Implemented `promptPerksDetrimentsDialog()` rendering an interactive modal with pre-checked checkboxes for perks and detriments plus optional custom write-in inputs.
+  - Cancelling the dialog cleanly aborts race/class application without altering actor state.
+  - Headless/automated calls gracefully fall back to full perk/detriment selection or respect explicit `options.chosenPerks`/`options.chosenDetriments`.
+- **Mechanical Condition Generation & Tracking (`src/data/race-class-applier.mjs`)**:
+  - Refined `parseConditions()` to generate permanent Buff items for Advantage, Immunity, and Resistance traits, and Debuff items for Disadvantage, Vulnerability, and Weakness traits.
+  - Stores chosen traits in `system.details.raceAbilities` and `system.details.classAbilities` on the Actor and attaches them to the embedded `race` or `class` Item document.
+  - All condition items are flagged with `grantedBy: type` and tracked in `appliedRace`/`appliedClass` flags for clean 100% teardown on race/class swap or removal.
+- **Point Builder Integration (`src/apps/base-point-builder.mjs`)**:
+  - Point builders extract selected benefits and detriments into `perks` and `detriments`.
+  - When applying from the builder (`applyToActor()`), prompts the user to confirm/choose perks and detriments and persists them onto the created item and actor.
+- **Character Sheet UI & Re-synchronization (`src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`, `templates/actors/parts/story-extras.hbs`)**:
+  - Added `[ ⚙️ Perks & Detriments ]` action buttons on Page 1 Core next to the Race and Class labels and under Tab 5 (Story & Extras).
+  - Displays styled visual chips for `chosenPerks` (green badges) and `chosenDetriments` (red badges) on the character sheet.
+  - Implemented `syncPerksAndDetriments()` allowing players and GMs to re-configure active perks and detriments from the character sheet at any time.
+- **Automated Unit Testing (`tests/race-class-perks-detriments.test.mjs`)**:
+  - Added 8 unit tests covering perk/detriment extraction, modal dialog prompts (confirm & cancel), selective application, builder application, sheet re-syncing, clean reversal, and sheet listener triggers.
+  - 100% test pass rate across all 862 tests in 159 suites.
+
 ## 2.4.12
 
 ### Wizard-Driven Choices in Race & Class Application

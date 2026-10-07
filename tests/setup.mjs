@@ -625,14 +625,37 @@ if (!globalThis.Dialog) {
       const btn = this.data?.buttons?.[buttonKey];
       if (btn && typeof btn.callback === 'function') {
         if (!html) {
-          const match = this.data?.content?.match(/<input[^>]+name="damageEffect"[^>]+value="([^"]+)"[^>]+checked/i);
+          const content = this.data?.content || '';
+          const match = content.match(/<input[^>]+name="damageEffect"[^>]+value="([^"]+)"[^>]+checked/i);
           const checkedVal = match ? match[1] : 'none';
           html = {
-            find: (sel) => ({
-              val: () => checkedVal,
-              value: checkedVal,
-              is: () => false
-            })
+            find: (sel) => {
+              const selectMatch = sel.match(/select\[name="([^"]+)"\]/);
+              if (selectMatch) {
+                const name = selectMatch[1];
+                const selBlockMatch = content.match(new RegExp(`<select[^>]+name="${name}"[^>]*>([\\s\\S]*?)<\\/select>`, 'i'));
+                if (selBlockMatch) {
+                  const optMatch = selBlockMatch[1].match(/<option[^>]+value="([^"]+)"/i);
+                  const val = optMatch ? optMatch[1] : '';
+                  return { val: () => val, value: val, is: () => false, on: () => {} };
+                }
+              }
+              const inputMatch = sel.match(/input\[name="([^"]+)"\]/);
+              if (inputMatch) {
+                const name = inputMatch[1];
+                const inpValMatch = content.match(new RegExp(`<input[^>]+name="${name}"[^>]+value="([^"]*)"`, 'i'));
+                const val = inpValMatch ? inpValMatch[1] : '';
+                return { val: () => val, value: val, is: () => false, show: () => ({ focus: () => {} }), hide: () => {} };
+              }
+              return {
+                val: () => checkedVal,
+                value: checkedVal,
+                is: () => false,
+                on: () => {},
+                show: () => ({ focus: () => {} }),
+                hide: () => {}
+              };
+            }
           };
         }
         return btn.callback(html);

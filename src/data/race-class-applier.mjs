@@ -49,6 +49,18 @@ export function cleanOCRText(t) {
     .replace(/Smithin\s*g/gi, 'Smithing')
     .replace(/Ta\s*ttoo/gi, 'Tattoo')
     .replace(/cr\s*afting/gi, 'crafting')
+    .replace(/craft\s*ing/gi, 'crafting')
+    .replace(/c\s*hoice/gi, 'choice')
+    .replace(/differ\s*ent/gi, 'different')
+    .replace(/We\s*apon/gi, 'Weapon')
+    .replace(/we\s*apon/gi, 'weapon')
+    .replace(/Edg\s*ed/gi, 'Edged')
+    .replace(/Cont\s*rol/gi, 'Control')
+    .replace(/Cat\s*cher/gi, 'Catcher')
+    .replace(/Acut\s*e/gi, 'Acute')
+    .replace(/Shadow\s*s/gi, 'Shadows')
+    .replace(/Fir\s*st/gi, 'First')
+    .replace(/bre\s*astplate/gi, 'breastplate')
     .replace(/Salv\s*age/gi, 'Salvage')
     .replace(/Intimida\s*te/gi, 'Intimidate')
     .replace(/Att\s*ack/gi, 'Attack')
@@ -81,7 +93,7 @@ export function cleanOCRText(t) {
  * Normalizes a parsed skill name against canonical DCC_SKILLS.
  */
 export function matchKnownSkill(raw) {
-  let clean = String(raw || '').trim().replace(/^and\s+/i, '').replace(/\s+Attack$/i, '').trim();
+  let clean = String(raw || '').trim().replace(/^(?:and|or)\s+/i, '').replace(/\s+Attack$/i, '').trim();
   clean = clean.replace(/\s*\(.*?\)/g, '').trim();
   const norm = normalizeKey(clean);
   const found = DCC_SKILLS.find(s => normalizeKey(s.name) === norm);
@@ -239,12 +251,32 @@ export class DCCRaceClassApplier {
     // Structured skills/spells from Studio Point Builds
     if (Array.isArray(data?.system?.skills) && data.system.skills.length > 0) {
       for (const s of data.system.skills) {
-        if (s.name && s.rank) skills.push({ name: s.name, rank: Number(s.rank) || 1, isPassive: Boolean(s.isPassive) });
+        if (s.name && s.rank && !s.name.includes('(Choice)')) {
+          skills.push({ name: s.name, rank: Number(s.rank) || 1, isPassive: Boolean(s.isPassive) });
+        }
       }
     }
     if (Array.isArray(data?.system?.spells) && data.system.spells.length > 0) {
       for (const sp of data.system.spells) {
-        if (sp.name && sp.rank) spells.push({ name: sp.name, rank: Number(sp.rank) || 1, mpCost: Number(sp.mpCost) || 0 });
+        if (sp.name && sp.rank && !sp.name.includes('(Choice)')) {
+          spells.push({ name: sp.name, rank: Number(sp.rank) || 1, mpCost: Number(sp.mpCost) || 0 });
+        }
+      }
+    }
+
+    // Include chosenSkills & chosenSpells already attached to the definition
+    if (Array.isArray(data?.system?.chosenSkills)) {
+      for (const cs of data.system.chosenSkills) {
+        if (cs.name && cs.rank && !skills.some(s => normalizeKey(s.name) === normalizeKey(cs.name))) {
+          skills.push({ name: cs.name, rank: Number(cs.rank) || 1, isPassive: Boolean(cs.isPassive) });
+        }
+      }
+    }
+    if (Array.isArray(data?.system?.chosenSpells)) {
+      for (const csp of data.system.chosenSpells) {
+        if (csp.name && csp.rank && !spells.some(s => normalizeKey(s.name) === normalizeKey(csp.name))) {
+          spells.push({ name: csp.name, rank: Number(csp.rank) || 1, mpCost: Number(csp.mpCost) || 0 });
+        }
       }
     }
 
@@ -260,6 +292,9 @@ export class DCCRaceClassApplier {
     for (const raw of perks) {
       const p = cleanOCRText(raw);
 
+      // Skip lines that deal with popularity, not skill grants
+      if (p.includes('popularity')) continue;
+
       // Check for Spells: e.g. "+3 Web Spell", "+2 Earworm, Heal Others, and Shield Spells"
       const spellMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-!]+?)\s+Spells?/i);
       if (spellMatch) {
@@ -270,6 +305,24 @@ export class DCCRaceClassApplier {
             spells.push({ name: matchKnownSpell(sp), rank });
           }
         }
+        continue;
+      }
+
+      // Check for compound perk: "+2 Zone of Control and a Reach weapon Skill of your choice"
+      if (p.includes('Zone of Control and a Reach weapon Skill of your choice')) {
+        const rankMatch = p.match(/^\+(\d+)/);
+        const rank = rankMatch ? parseInt(rankMatch[1], 10) : 2;
+        skills.push({ name: 'Zone of Control', rank });
+        continue;
+      }
+
+      // Skip lines that represent skill/spell choices (handled via detectChoices & wizard)
+      if (
+        p.includes('of your choice') ||
+        p.includes('of the following') ||
+        /^\+\d+\s+in\s+either\b/i.test(p) ||
+        /^\+\d+\s+[A-Za-z\s]+?\s+or\s+[A-Za-z\s]+?\s+Skills?$/i.test(p)
+      ) {
         continue;
       }
 
@@ -284,8 +337,10 @@ export class DCCRaceClassApplier {
             !sk.toLowerCase().includes('all ') &&
             !sk.toLowerCase().includes('following') &&
             !sk.toLowerCase().includes('weapon') &&
-            !sk.toLowerCase().includes('differ ent') &&
-            !sk.toLowerCase().includes('craft ing')
+            !sk.toLowerCase().includes('different') &&
+            !sk.toLowerCase().includes('crafting') &&
+            !sk.toLowerCase().includes('either') &&
+            !sk.toLowerCase().includes(' or ')
           ) {
             skills.push({ name: matchKnownSkill(sk), rank });
           }
@@ -467,6 +522,7 @@ export class DCCRaceClassApplier {
     const drBonus = this.parseDR(raceDef);
     const movement = this.parseMovement(raceDef);
     const conditions = this.parseConditions(raceDef, 'race');
+    const choices = this.detectChoices(raceDef);
     const size = raceDef.system?.size || 'Medium (4)';
     const parsedSize = getSizeInfo(size);
 
@@ -478,6 +534,7 @@ export class DCCRaceClassApplier {
       stats,
       skills,
       spells,
+      choices,
       drBonus,
       movement,
       conditions
@@ -491,6 +548,7 @@ export class DCCRaceClassApplier {
     if (!classDef) return null;
     const stats = this.parseStats(classDef);
     const { skills, spells } = this.parseSkillsAndSpells(classDef);
+    const choices = this.detectChoices(classDef);
     const drBonus = this.parseDR(classDef);
     const movement = this.parseMovement(classDef);
     const conditions = this.parseConditions(classDef, 'class');
@@ -502,10 +560,471 @@ export class DCCRaceClassApplier {
       stats,
       skills,
       spells,
+      choices,
       drBonus,
       movement,
       conditions
     };
+  }
+
+  // =========================================================================
+  // CHOICE DETECTION, CATALOGING, & WIZARD PROMPT
+  // =========================================================================
+
+  /**
+   * Detects pending skill or spell choices in a race or class definition.
+   *
+   * @param {object} def - Race or Class definition (canonical, world item, or studio build)
+   * @returns {Array<object>} Array of choice objects { id, label, type, category, rank, options, sourcePerk }
+   */
+  static detectChoices(def) {
+    if (!def) return [];
+    const choices = [];
+    let idx = 0;
+
+    // 1. Structured pre-existing system.choices
+    if (Array.isArray(def.system?.choices) && def.system.choices.length > 0) {
+      return def.system.choices;
+    }
+
+    // 2. Structured items ending with "(Choice)" from Studio / Custom builds
+    const rawSkills = def.system?.skills || def.skills || [];
+    for (const s of rawSkills) {
+      if (typeof s.name === 'string' && s.name.includes('(Choice)')) {
+        const cleanName = s.name.replace(/\(Choice\)/i, '').trim();
+        let cat = 'weapon';
+        if (/craft/i.test(cleanName)) cat = 'crafting';
+        else if (/spell/i.test(cleanName)) cat = 'spell';
+        else if (/edged/i.test(cleanName)) cat = 'edged_weapon';
+        else if (/reach/i.test(cleanName)) cat = 'reach_weapon';
+        else if (/melee/i.test(cleanName)) cat = 'melee_weapon';
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `${cleanName || 'Skill'} Choice (Rank ${s.rank || 1})`,
+          type: /spell/i.test(cleanName) ? 'spell' : 'skill',
+          category: cat,
+          rank: Number(s.rank) || 1,
+          sourcePerk: s.name
+        });
+      }
+    }
+    const rawSpells = def.system?.spells || def.spells || [];
+    for (const sp of rawSpells) {
+      if (typeof sp.name === 'string' && sp.name.includes('(Choice)')) {
+        const cleanName = sp.name.replace(/\(Choice\)/i, '').trim();
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `${cleanName || 'Spell'} Choice (Rank ${sp.rank || 1})`,
+          type: 'spell',
+          category: 'spell',
+          rank: Number(sp.rank) || 1,
+          sourcePerk: sp.name
+        });
+      }
+    }
+
+    // 3. Text parsing from perks
+    const perks = Array.isArray(def.system?.perks)
+      ? def.system.perks
+      : (Array.isArray(def.perks) ? def.perks : []);
+
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+
+      // A. Crafting choice: +3 in two different crafting Skills of your choice, +2 in a crafting Skill of your choice, +1 in a crafting Skill of your choice
+      const craftM = p.match(/^\+(\d+)\s+in\s+(?:(two|three|\d+)\s+different\s+crafting\s+Skills?|a\s+crafting\s+Skill)\s+of\s+your\s+choice/i);
+      if (craftM) {
+        const rank = parseInt(craftM[1], 10);
+        const count = (craftM[2] === 'two' || craftM[2] === '2') ? 2 : (craftM[2] === 'three' || craftM[2] === '3') ? 3 : 1;
+        for (let i = 0; i < count; i++) {
+          choices.push({
+            id: `choice_${idx++}`,
+            label: count > 1 ? `Crafting Skill ${i + 1} (Rank ${rank})` : `Crafting Skill (Rank ${rank})`,
+            type: 'skill',
+            category: 'crafting',
+            rank,
+            sourcePerk: raw
+          });
+        }
+        continue;
+      }
+
+      // B. Spell choice: +2 in two Spells of your choice, +2 in a Spell of your choice, +3 in a Spell of your choice
+      const spellM = p.match(/^\+(\d+)\s+in\s+(?:(two|three|\d+)\s+Spells?|a\s+Spell)\s+of\s+your\s+choice/i);
+      if (spellM) {
+        const rank = parseInt(spellM[1], 10);
+        const count = (spellM[2] === 'two' || spellM[2] === '2') ? 2 : (spellM[2] === 'three' || spellM[2] === '3') ? 3 : 1;
+        for (let i = 0; i < count; i++) {
+          choices.push({
+            id: `choice_${idx++}`,
+            label: count > 1 ? `Spell ${i + 1} (Rank ${rank})` : `Spell (Rank ${rank})`,
+            type: 'spell',
+            category: 'spell',
+            rank,
+            sourcePerk: raw
+          });
+        }
+        continue;
+      }
+
+      // C. Edged weapon choice: +3 in an Edged weapon Skill of your choice
+      const edgedM = p.match(/^\+(\d+)\s+in\s+an\s+Edged\s+weapon\s+Skill\s+of\s+your\s+choice/i);
+      if (edgedM) {
+        const rank = parseInt(edgedM[1], 10);
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `Edged Weapon Skill (Rank ${rank})`,
+          type: 'skill',
+          category: 'edged_weapon',
+          rank,
+          sourcePerk: raw
+        });
+        continue;
+      }
+
+      // D. Melee weapon choice: +3 in one Melee Weapon Skill of your choice
+      const meleeM = p.match(/^\+(\d+)\s+in\s+(?:one|a)\s+Melee\s+Weapon\s+Skill\s+of\s+your\s+choice/i);
+      if (meleeM) {
+        const rank = parseInt(meleeM[1], 10);
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `Melee Weapon Skill (Rank ${rank})`,
+          type: 'skill',
+          category: 'melee_weapon',
+          rank,
+          sourcePerk: raw
+        });
+        continue;
+      }
+
+      // E. Reach weapon choice: +2 Zone of Control and a Reach weapon Skill of your choice
+      const reachM = p.match(/^\+(\d+)\s+Zone of Control\s+and\s+a\s+Reach\s+weapon\s+Skill\s+of\s+your\s+choice/i);
+      if (reachM) {
+        const rank = parseInt(reachM[1], 10);
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `Reach Weapon Skill (Rank ${rank})`,
+          type: 'skill',
+          category: 'reach_weapon',
+          rank,
+          sourcePerk: raw
+        });
+        continue;
+      }
+
+      // F. Generic weapon choice: +3 in a weapon Skill of your choice, +2 in one weapon Skill of your choice, +2 to a Weapon Skill of your choice, +5 in a weapon Skill of your choice
+      const weaponM = p.match(/^\+(\d+)\s+(?:in|to)\s+(?:(two|three|\d+)|one|a)\s+(?:different\s+)?Weapon\s+Skills?\s+of\s+your\s+choice/i);
+      if (weaponM) {
+        const rank = parseInt(weaponM[1], 10);
+        const count = (weaponM[2] === 'two' || weaponM[2] === '2') ? 2 : 1;
+        for (let i = 0; i < count; i++) {
+          choices.push({
+            id: `choice_${idx++}`,
+            label: count > 1 ? `Weapon Skill ${i + 1} (Rank ${rank})` : `Weapon Skill (Rank ${rank})`,
+            type: 'skill',
+            category: 'weapon',
+            rank,
+            sourcePerk: raw
+          });
+        }
+        continue;
+      }
+
+      // G. Multi-choice list: +2 to your choice of two of the following Skills: Aiming, Attack of Opportunity, Catcher, Shield Block, or Zone of Control Skills
+      const listM = p.match(/^\+(\d+)\s+to\s+your\s+choice\s+of\s+(two|three|\d+)\s+of\s+the\s+following\s+Skills?:\s*(.+)$/i);
+      if (listM) {
+        const rank = parseInt(listM[1], 10);
+        const count = (listM[2] === 'two' || listM[2] === '2') ? 2 : (listM[2] === 'three' || listM[2] === '3') ? 3 : 1;
+        const optsRaw = listM[3].replace(/\s+Skills?$/i, '');
+        const options = optsRaw.split(/(?:,\s*or\s+|,\s*|\s+or\s+)/i).map(s => s.trim()).filter(Boolean);
+        for (let i = 0; i < count; i++) {
+          choices.push({
+            id: `choice_${idx++}`,
+            label: `Combat Skill Choice ${i + 1} (Rank ${rank})`,
+            type: 'skill',
+            category: 'options',
+            options,
+            rank,
+            sourcePerk: raw
+          });
+        }
+        continue;
+      }
+
+      // H. Either X or Y: +3 in either Jumping or Light on Your Feet Skills
+      const eitherM = p.match(/^\+(\d+)\s+in\s+either\s+([A-Za-z\s]+?)\s+or\s+([A-Za-z\s]+?)\s+Skills?/i);
+      if (eitherM) {
+        const rank = parseInt(eitherM[1], 10);
+        const options = [eitherM[2].trim(), eitherM[3].trim()];
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `Skill Choice: ${options.join(' or ')} (Rank ${rank})`,
+          type: 'skill',
+          category: 'options',
+          options,
+          rank,
+          sourcePerk: raw
+        });
+        continue;
+      }
+
+      // I. X or Y Skills: +2 Catcher or Shield Block Skills, +3 Rapier or Longsword Skill
+      const orSkillM = p.match(/^\+(\d+)\s+([A-Za-z\s]+?)\s+or\s+([A-Za-z\s]+?)\s+Skills?$/i);
+      if (orSkillM) {
+        const rank = parseInt(orSkillM[1], 10);
+        const options = [orSkillM[2].trim(), orSkillM[3].trim()];
+        choices.push({
+          id: `choice_${idx++}`,
+          label: `Skill Choice: ${options.join(' or ')} (Rank ${rank})`,
+          type: 'skill',
+          category: 'options',
+          options,
+          rank,
+          sourcePerk: raw
+        });
+        continue;
+      }
+    }
+
+    return choices;
+  }
+
+  /**
+   * Returns catalog options for a choice descriptor.
+   *
+   * @param {object} choice
+   * @returns {string[]}
+   */
+  static getCatalogOptions(choice) {
+    if (!choice) return [];
+    if (choice.category === 'options' && Array.isArray(choice.options)) {
+      return choice.options;
+    }
+
+    if (choice.category === 'crafting') {
+      return [
+        'Alchemy', 'Brewing', 'Carpentry', 'Cooking', 'Fabricate',
+        'Gemcutting', 'Leatherworking', 'Repair', 'Salvage', 'Smithing',
+        'Tailoring', 'Tattoo', 'Tinkering', 'Trap Engineer'
+      ];
+    }
+
+    if (choice.category === 'edged_weapon') {
+      return [
+        'Axe', 'Dagger', 'Edged Weapons', 'Greatsword', 'Handaxe',
+        'Longsword', 'Rapier', 'Shortsword', 'Slice Attack'
+      ];
+    }
+
+    if (choice.category === 'reach_weapon') {
+      return ['Halberd', 'Lance', 'Polearm', 'Reach Weapons', 'Spear', 'Whip'];
+    }
+
+    if (choice.category === 'melee_weapon') {
+      return [
+        'Axe', 'Blunt Weapons', 'Club', 'Dagger', 'Edged Weapons', 'Flail',
+        'Greatsword', 'Halberd', 'Handaxe', 'Herding Weapons', 'Improvised Weapons',
+        'Lance', 'Longsword', 'Mace', 'Polearm', 'Pugilism', 'Quarterstaff',
+        'Rapier', 'Reach Weapons', 'Shortsword', 'Spear', 'Staff',
+        'Unarmed Combat', 'Warhammer', 'Whip', 'Wrasslin'
+      ];
+    }
+
+    if (choice.category === 'weapon') {
+      return [
+        'Axe', 'Blunt Weapons', 'Bow', 'Chainsaw', 'Club', 'Crossbow',
+        'Dagger', 'Edged Weapons', 'Flail', 'Greatsword', 'Gun', 'Halberd',
+        'Handaxe', 'Handgun', 'Herding Weapons', 'Improvised Weapons', 'Javelin',
+        'Lance', 'Longbow', 'Longsword', 'Mace', 'Polearm', 'Pugilism',
+        'Quarterstaff', 'Ranged Weapons', 'Rapier', 'Reach Weapons', 'Shotgun',
+        'Shortbow', 'Shortsword', 'Shuriken', 'Slice Attack', 'Sling', 'Spear',
+        'Staff', 'Throwing Weapons', 'Unarmed Combat', 'Warhammer', 'Whip', 'Wrasslin'
+      ];
+    }
+
+    if (choice.type === 'spell' || choice.category === 'spell') {
+      return DCC_SPELLS.map(s => s.name).sort();
+    }
+
+    return DCC_SKILLS.map(s => s.name).sort();
+  }
+
+  /**
+   * Prompts the user with an interactive dialog to choose skills or spells.
+   *
+   * @param {object} def - Race or Class definition object
+   * @param {Array<object>} choices - Array of choice objects from detectChoices
+   * @param {object} [options={}]
+   * @returns {Promise<object|null>} Object mapping choice IDs to selected names, or null if cancelled
+   */
+  static async promptChoicesDialog(def, choices, options = {}) {
+    if (!choices || choices.length === 0) return {};
+
+    const DialogClass = globalThis.foundry?.appv1?.applications?.Dialog ?? globalThis.Dialog ?? null;
+    if (!DialogClass) return null;
+
+    // Build Choice HTML rows
+    const rowsHtml = choices.map((ch) => {
+      const catalog = this.getCatalogOptions(ch);
+      const optionsHtml = catalog.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+      return `
+        <div class="dcc-choice-row" style="margin-bottom: 12px; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
+          <div style="font-weight: bold; font-family: 'Oswald', sans-serif; font-size: 13px; color: #333; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <span><i class="fa-solid fa-crosshairs" style="color: #c0392b;"></i> ${ch.label}</span>
+            <span class="dcc-badge" style="background: #c0392b; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 2px;">Rank +${ch.rank}</span>
+          </div>
+          ${ch.sourcePerk ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px; font-style: italic;">From perk: "${ch.sourcePerk}"</div>` : ''}
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select name="${ch.id}" class="dcc-choice-select" data-choice-id="${ch.id}" style="flex: 1; padding: 4px; font-size: 12px;">
+              ${optionsHtml}
+              <option value="__custom__">-- Custom Write-in... --</option>
+            </select>
+          </div>
+          <input type="text" name="${ch.id}_custom" class="dcc-choice-custom" data-choice-id="${ch.id}" placeholder="Enter custom name..." style="display: none; width: 100%; margin-top: 6px; padding: 4px; font-size: 12px; box-sizing: border-box;" />
+        </div>
+      `;
+    }).join('');
+
+    const content = `
+      <div class="dcc-dialog-choices" style="padding: 6px; font-family: 'Oswald', sans-serif;">
+        <div style="background: #c0392b; color: #fff; padding: 8px 10px; border-radius: 4px 4px 0 0; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-list-check"></i> Choose Perks: ${def.name}
+          </h3>
+          <p style="margin: 4px 0 0; font-size: 11px; opacity: 0.9;">
+            This ${def.type || 'definition'} provides choices for skills or spells. Select your preferences below:
+          </p>
+        </div>
+        <form class="dcc-choices-form">
+          ${rowsHtml}
+        </form>
+      </div>
+    `;
+
+    return new Promise((resolve) => {
+      let isResolved = false;
+
+      const dlg = new DialogClass({
+        title: `${def.name} - Select Choices`,
+        content,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: 'Confirm & Apply',
+            callback: (html) => {
+              isResolved = true;
+              const selections = {};
+              for (const ch of choices) {
+                const sel = html.find(`select[name="${ch.id}"]`);
+                const selVal = typeof sel.val === 'function' ? sel.val() : sel.value;
+                if (selVal === '__custom__') {
+                  const customInp = html.find(`input[name="${ch.id}_custom"]`);
+                  const customVal = (typeof customInp.val === 'function' ? customInp.val() : customInp.value || '').trim();
+                  selections[ch.id] = customVal || (this.getCatalogOptions(ch)[0] || 'Custom Choice');
+                } else {
+                  selections[ch.id] = selVal || (this.getCatalogOptions(ch)[0] || 'Choice');
+                }
+              }
+              resolve(selections);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: 'Cancel',
+            callback: () => {
+              isResolved = true;
+              resolve(null);
+            }
+          }
+        },
+        default: 'confirm',
+        close: () => {
+          if (!isResolved) resolve(null);
+        },
+        render: (html) => {
+          html.find('.dcc-choice-select').on?.('change', (ev) => {
+            const select = ev.currentTarget;
+            const choiceId = select.dataset?.choiceId || select.getAttribute?.('data-choice-id');
+            const customInput = html.find(`input[name="${choiceId}_custom"]`);
+            if (select.value === '__custom__') {
+              if (customInput.show) customInput.show();
+              if (customInput.focus) customInput.focus();
+            } else {
+              if (customInput.hide) customInput.hide();
+            }
+          });
+        }
+      }, {
+        width: 480,
+        classes: ['dcc-dialog', 'dcc-choices-wizard']
+      });
+
+      dlg.render(true);
+    });
+  }
+
+  /**
+   * Resolves detected choices against user selections or options into structured arrays.
+   *
+   * @param {object} def
+   * @param {Array<object>} choices
+   * @param {Array|object|string} userSelections
+   * @returns {{ chosenSkills: Array<object>, chosenSpells: Array<object> }}
+   */
+  static resolveChoices(def, choices, userSelections = {}) {
+    const chosenSkills = [];
+    const chosenSpells = [];
+
+    if (!choices || choices.length === 0) {
+      return { chosenSkills, chosenSpells };
+    }
+
+    choices.forEach((ch, idx) => {
+      let selectedName = '';
+
+      if (Array.isArray(userSelections)) {
+        const item = userSelections[idx];
+        if (typeof item === 'string') selectedName = item;
+        else if (item && typeof item === 'object') selectedName = item.name;
+      } else if (typeof userSelections === 'string') {
+        if (idx === 0) selectedName = userSelections;
+      } else if (userSelections && typeof userSelections === 'object') {
+        selectedName = userSelections[ch.id] ||
+          userSelections[ch.label] ||
+          userSelections[idx] ||
+          userSelections[ch.category];
+      }
+
+      if (!selectedName) {
+        const opts = this.getCatalogOptions(ch);
+        selectedName = opts[0] || (ch.type === 'spell' ? 'Fireball' : 'Longsword');
+      }
+
+      selectedName = String(selectedName).trim();
+      const rank = ch.rank || 1;
+
+      if (ch.type === 'spell') {
+        const matchedName = matchKnownSpell(selectedName);
+        const spellDoc = DCC_SPELLS.find(s => normalizeKey(s.name) === normalizeKey(matchedName));
+        chosenSpells.push({
+          name: matchedName,
+          rank,
+          mpCost: spellDoc?.system?.manaCost || 0,
+          choiceId: ch.id
+        });
+      } else {
+        const matchedName = matchKnownSkill(selectedName);
+        const skillDoc = DCC_SKILLS.find(s => normalizeKey(s.name) === normalizeKey(matchedName));
+        chosenSkills.push({
+          name: matchedName,
+          rank,
+          isPassive: Boolean(skillDoc?.system?.isPassive),
+          choiceId: ch.id
+        });
+      }
+    });
+
+    return { chosenSkills, chosenSpells };
   }
 
   // =========================================================================
@@ -800,7 +1319,7 @@ export class DCCRaceClassApplier {
    * @param {string} raceIdentifier
    * @returns {Promise<boolean>}
    */
-  static async applyRace(actor, raceIdentifier) {
+  static async applyRace(actor, raceIdentifier, options = {}) {
     if (!actor) return false;
 
     // Clearing race
@@ -815,6 +1334,23 @@ export class DCCRaceClassApplier {
       await this.removeRace(actor);
       await actor.update?.({ 'system.details.race': raceIdentifier });
       return true;
+    }
+
+    // Choice resolution
+    const choices = this.detectChoices(def);
+    let resolvedChoices = { chosenSkills: [], chosenSpells: [] };
+
+    if (choices.length > 0) {
+      if (options.choices !== undefined) {
+        resolvedChoices = this.resolveChoices(def, choices, options.choices);
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog)) {
+        const userSelections = await this.promptChoicesDialog(def, choices, options);
+        if (userSelections === null) return false; // User cancelled
+        resolvedChoices = this.resolveChoices(def, choices, userSelections);
+      } else {
+        // Headless default fallback
+        resolvedChoices = this.resolveChoices(def, choices, {});
+      }
     }
 
     // 1. Revert previous race first
@@ -858,14 +1394,15 @@ export class DCCRaceClassApplier {
       if (bonuses.movement.burrow) updates['system.attributes.speed.burrow'] = bonuses.movement.burrow;
     }
 
-    // 6. Apply Granted Skills
+    // 6. Apply Granted Skills (base + chosen)
+    const allSkillsToGrant = [...bonuses.skills, ...(resolvedChoices.chosenSkills || [])];
     const appliedSkills = [];
-    for (const s of bonuses.skills) {
+    for (const s of allSkillsToGrant) {
       const existing = actor.items?.find?.(i => i.type === 'skill' && normalizeKey(i.name) === normalizeKey(s.name));
       if (existing) {
         const curRank = Number(existing.system?.rank) || 0;
         await existing.update?.({ 'system.rank': curRank + s.rank });
-        appliedSkills.push({ id: existing.id, name: existing.name, rank: s.rank, preExistingRank: curRank, createdByRace: false });
+        appliedSkills.push({ id: existing.id, name: existing.name, rank: s.rank, preExistingRank: curRank, createdByRace: false, isChoice: Boolean(s.choiceId) });
       } else {
         const skillDoc = DCC_SKILLS.find(sk => normalizeKey(sk.name) === normalizeKey(s.name));
         if (typeof actor.createEmbeddedDocuments === 'function') {
@@ -885,23 +1422,25 @@ export class DCCRaceClassApplier {
             },
             flags: {
               'carl-rpg': {
-                grantedBy: 'race'
+                grantedBy: 'race',
+                isChoice: Boolean(s.choiceId)
               }
             }
           }]);
-          appliedSkills.push({ id: created?.id, name: s.name, rank: s.rank, preExistingRank: 0, createdByRace: true });
+          appliedSkills.push({ id: created?.id, name: s.name, rank: s.rank, preExistingRank: 0, createdByRace: true, isChoice: Boolean(s.choiceId) });
         }
       }
     }
 
-    // 7. Apply Granted Spells
+    // 7. Apply Granted Spells (base + chosen)
+    const allSpellsToGrant = [...bonuses.spells, ...(resolvedChoices.chosenSpells || [])];
     const appliedSpells = [];
-    for (const sp of bonuses.spells) {
+    for (const sp of allSpellsToGrant) {
       const existing = actor.items?.find?.(i => i.type === 'spell' && normalizeKey(i.name) === normalizeKey(sp.name));
       if (existing) {
         const curRank = Number(existing.system?.rank) || 0;
         await existing.update?.({ 'system.rank': curRank + sp.rank });
-        appliedSpells.push({ id: existing.id, name: existing.name, rank: sp.rank, preExistingRank: curRank, createdByRace: false });
+        appliedSpells.push({ id: existing.id, name: existing.name, rank: sp.rank, preExistingRank: curRank, createdByRace: false, isChoice: Boolean(sp.choiceId) });
       } else {
         const spellDoc = DCC_SPELLS.find(spd => normalizeKey(spd.name) === normalizeKey(sp.name));
         if (typeof actor.createEmbeddedDocuments === 'function') {
@@ -920,11 +1459,12 @@ export class DCCRaceClassApplier {
             },
             flags: {
               'carl-rpg': {
-                grantedBy: 'race'
+                grantedBy: 'race',
+                isChoice: Boolean(sp.choiceId)
               }
             }
           }]);
-          appliedSpells.push({ id: created?.id, name: sp.name, rank: sp.rank, preExistingRank: 0, createdByRace: true });
+          appliedSpells.push({ id: created?.id, name: sp.name, rank: sp.rank, preExistingRank: 0, createdByRace: true, isChoice: Boolean(sp.choiceId) });
         }
       }
     }
@@ -942,7 +1482,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 9. Embed Race Item Document
+    // 9. Embed Race Item Document with chosenSkills and chosenSpells
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -955,7 +1495,11 @@ export class DCCRaceClassApplier {
           size: bonuses.sizeRaw || `${bonuses.size} (4)`,
           drBonus: bonuses.drBonus,
           movement: bonuses.movement,
-          stats: bonuses.stats
+          stats: bonuses.stats,
+          chosenSkills: resolvedChoices.chosenSkills || [],
+          chosenSpells: resolvedChoices.chosenSpells || [],
+          skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
+          spells: [...(def.system?.spells || []), ...(resolvedChoices.chosenSpells || [])]
         },
         flags: {
           'carl-rpg': {
@@ -976,6 +1520,8 @@ export class DCCRaceClassApplier {
         conditionItemIds: createdConditionIds,
         skills: appliedSkills,
         spells: appliedSpells,
+        chosenSkills: resolvedChoices.chosenSkills || [],
+        chosenSpells: resolvedChoices.chosenSpells || [],
         size: bonuses.size,
         originalSize,
         itemId: embeddedId
@@ -1159,7 +1705,7 @@ export class DCCRaceClassApplier {
    * @param {string} classIdentifier
    * @returns {Promise<boolean>}
    */
-  static async applyClass(actor, classIdentifier) {
+  static async applyClass(actor, classIdentifier, options = {}) {
     if (!actor) return false;
 
     // Clearing class
@@ -1174,6 +1720,23 @@ export class DCCRaceClassApplier {
       await this.removeClass(actor);
       await actor.update?.({ 'system.details.class': classIdentifier });
       return true;
+    }
+
+    // Choice resolution
+    const choices = this.detectChoices(def);
+    let resolvedChoices = { chosenSkills: [], chosenSpells: [] };
+
+    if (choices.length > 0) {
+      if (options.choices !== undefined) {
+        resolvedChoices = this.resolveChoices(def, choices, options.choices);
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog)) {
+        const userSelections = await this.promptChoicesDialog(def, choices, options);
+        if (userSelections === null) return false; // User cancelled
+        resolvedChoices = this.resolveChoices(def, choices, userSelections);
+      } else {
+        // Headless default fallback
+        resolvedChoices = this.resolveChoices(def, choices, {});
+      }
     }
 
     // 1. Revert previous class first
@@ -1212,14 +1775,15 @@ export class DCCRaceClassApplier {
       if (bonuses.movement.burrow) updates['system.attributes.speed.burrow'] = bonuses.movement.burrow;
     }
 
-    // 6. Apply Granted Skills
+    // 6. Apply Granted Skills (base + chosen)
+    const allSkillsToGrant = [...bonuses.skills, ...(resolvedChoices.chosenSkills || [])];
     const appliedSkills = [];
-    for (const s of bonuses.skills) {
+    for (const s of allSkillsToGrant) {
       const existing = actor.items?.find?.(i => i.type === 'skill' && normalizeKey(i.name) === normalizeKey(s.name));
       if (existing) {
         const curRank = Number(existing.system?.rank) || 0;
         await existing.update?.({ 'system.rank': curRank + s.rank });
-        appliedSkills.push({ id: existing.id, name: existing.name, rank: s.rank, preExistingRank: curRank, createdByClass: false });
+        appliedSkills.push({ id: existing.id, name: existing.name, rank: s.rank, preExistingRank: curRank, createdByClass: false, isChoice: Boolean(s.choiceId) });
       } else {
         const skillDoc = DCC_SKILLS.find(sk => normalizeKey(sk.name) === normalizeKey(s.name));
         if (typeof actor.createEmbeddedDocuments === 'function') {
@@ -1239,23 +1803,25 @@ export class DCCRaceClassApplier {
             },
             flags: {
               'carl-rpg': {
-                grantedBy: 'class'
+                grantedBy: 'class',
+                isChoice: Boolean(s.choiceId)
               }
             }
           }]);
-          appliedSkills.push({ id: created?.id, name: s.name, rank: s.rank, preExistingRank: 0, createdByClass: true });
+          appliedSkills.push({ id: created?.id, name: s.name, rank: s.rank, preExistingRank: 0, createdByClass: true, isChoice: Boolean(s.choiceId) });
         }
       }
     }
 
-    // 7. Apply Granted Spells
+    // 7. Apply Granted Spells (base + chosen)
+    const allSpellsToGrant = [...bonuses.spells, ...(resolvedChoices.chosenSpells || [])];
     const appliedSpells = [];
-    for (const sp of bonuses.spells) {
+    for (const sp of allSpellsToGrant) {
       const existing = actor.items?.find?.(i => i.type === 'spell' && normalizeKey(i.name) === normalizeKey(sp.name));
       if (existing) {
         const curRank = Number(existing.system?.rank) || 0;
         await existing.update?.({ 'system.rank': curRank + sp.rank });
-        appliedSpells.push({ id: existing.id, name: existing.name, rank: sp.rank, preExistingRank: curRank, createdByClass: false });
+        appliedSpells.push({ id: existing.id, name: existing.name, rank: sp.rank, preExistingRank: curRank, createdByClass: false, isChoice: Boolean(sp.choiceId) });
       } else {
         const spellDoc = DCC_SPELLS.find(spd => normalizeKey(spd.name) === normalizeKey(sp.name));
         if (typeof actor.createEmbeddedDocuments === 'function') {
@@ -1274,11 +1840,12 @@ export class DCCRaceClassApplier {
             },
             flags: {
               'carl-rpg': {
-                grantedBy: 'class'
+                grantedBy: 'class',
+                isChoice: Boolean(sp.choiceId)
               }
             }
           }]);
-          appliedSpells.push({ id: created?.id, name: sp.name, rank: sp.rank, preExistingRank: 0, createdByClass: true });
+          appliedSpells.push({ id: created?.id, name: sp.name, rank: sp.rank, preExistingRank: 0, createdByClass: true, isChoice: Boolean(sp.choiceId) });
         }
       }
     }
@@ -1296,7 +1863,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 9. Embed Class Item Document
+    // 9. Embed Class Item Document with chosenSkills and chosenSpells
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -1308,7 +1875,11 @@ export class DCCRaceClassApplier {
           classType: bonuses.classType,
           drBonus: bonuses.drBonus,
           movement: bonuses.movement,
-          stats: bonuses.stats
+          stats: bonuses.stats,
+          chosenSkills: resolvedChoices.chosenSkills || [],
+          chosenSpells: resolvedChoices.chosenSpells || [],
+          skills: [...(def.system?.skills || []), ...(resolvedChoices.chosenSkills || [])],
+          spells: [...(def.system?.spells || []), ...(resolvedChoices.chosenSpells || [])]
         },
         flags: {
           'carl-rpg': {
@@ -1329,6 +1900,8 @@ export class DCCRaceClassApplier {
         conditionItemIds: createdConditionIds,
         skills: appliedSkills,
         spells: appliedSpells,
+        chosenSkills: resolvedChoices.chosenSkills || [],
+        chosenSpells: resolvedChoices.chosenSpells || [],
         itemId: embeddedId
       });
     }

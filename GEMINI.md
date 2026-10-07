@@ -109,6 +109,16 @@ This document defines the core directives, workflow rules, architecture standard
   - **Loot / Consumables**: Use item and output chat message (`ChatMessage.create(...)`).
   - **Buff / Debuff**: Apply or remove the buff/debuff to the actor. Include Buff/Debuff calculation and affects in chat cards and calculations.  Allow application of buffs or debuffs to targeted actors or groups of actors. 
 
+### 6. Users Will Create Content
+- Players and GMs will create new content such as new races, classes, items, etc. This content should be supported by the system and should be easy to create and use and interact with existing builders and calculations. 
+  - For instance secondary skills like Dirty Fighting will interact with multiple checks and game mechanics, and new skills like this should be able to be created and interact with existing mechanics and skills. 
+  - Magic users will frequently want to create and use custom spells.  These should be supported by the system and should be easy to create and use.  
+  - New items should be easily composed and allow for all the same interactions as existing items. This should include the ability to give skills and spells that users cannot normally acquire.  Often this involves rules like cooldowns of 2 hours per rank of skill or spell given.  Example A level 15 Iron Shell skill grants the user the ability to cast Iron Shell at will but with a 30 hour cooldown.
+  
+### 7. All rules will be broken
+- When players break the rules they should be rewarded for doing so. 
+- This means anything that can be created should not enforce rules like the 30 point buy class creation.  The system should track and calculate the correct values based on the rules, but the rules should not be enforced.  For example a class could be created with 100 points of stats and the system should track the correct values based on the rules. Calling out the violation is good so that its clear this is an exception which the AI might patch at any time. 
+
 ### 6. Design & Styling (DCC Theme)
 - Follow the established Dungeon Crawler Carl visual theme:
   - Primary font: `'Oswald', sans-serif`

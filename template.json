@@ -360,6 +360,8 @@
       },
       "skills": [],
       "spells": [],
+      "chosenSkills": [],
+      "chosenSpells": [],
       "perks": [],
       "abilities": "",
       "description": ""
@@ -385,6 +387,8 @@
       },
       "skills": [],
       "spells": [],
+      "chosenSkills": [],
+      "chosenSpells": [],
       "perks": [],
       "abilities": "",
       "description": ""

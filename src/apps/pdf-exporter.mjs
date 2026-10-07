@@ -245,7 +245,10 @@ export async function exportCrawlerToPdf(actor, options = {}) {
 
   // Extract embedded items
   const items = Array.from(actor.items || []);
-  const attacks = items.filter(i => (i.type === 'attack' && i.system?.equipped !== false) || (i.type === 'gear' && i.system?.equipped && isWeaponGear(i)));
+  const synthAttacks = typeof actor.getSynthesizedAttacks === 'function' ? actor.getSynthesizedAttacks() : null;
+  const attacks = (synthAttacks && synthAttacks.length > 0)
+    ? synthAttacks
+    : items.filter(i => (i.type === 'attack' && i.system?.equipped !== false) || (i.type === 'gear' && i.system?.equipped && isWeaponGear(i)));
   const skills = items.filter(i => i.type === 'skill');
   const spells = items.filter(i => i.type === 'spell');
   const gear = items.filter(i => i.type === 'gear');
@@ -354,14 +357,18 @@ export async function exportCrawlerToPdf(actor, options = {}) {
     const atk = attacks[i];
     if (atk) {
       const atkSys = atk.system || {};
-      setTextField(form, row.name, atk.name);
-      setTextField(form, row.rank, atkSys.rank ?? '');
-      const toHitMod = atkSys.toHitMod ?? atkSys.statMod;
+      const name = atk.displayName || atk.name || '';
+      setTextField(form, row.name, name);
+      const rank = atk.skillRank ?? atkSys.rank ?? '';
+      setTextField(form, row.rank, rank != null && rank !== '' ? String(rank) : '');
+      const toHitMod = atk.toHitMod ?? atkSys.toHitMod ?? atkSys.statMod;
       setTextField(form, row.toHitMod, toHitMod != null && toHitMod !== '' ? formatMod(toHitMod) : '');
-      setTextField(form, row.dice, atkSys.damageDice ?? atkSys.dice ?? '');
-      const dmgMod = atkSys.damageMod ?? atkSys.damageStatMod;
+      const dice = atk.combinedDice ?? atkSys.damageDice ?? atkSys.dice ?? '';
+      setTextField(form, row.dice, dice);
+      const dmgMod = atk.dmgStatMod ?? atk.displayDmgMod ?? atkSys.damageMod ?? atkSys.damageStatMod;
       setTextField(form, row.dmgMod, dmgMod != null && dmgMod !== '' ? formatMod(dmgMod) : '');
-      setTextField(form, row.effects, atkSys.effects ?? atkSys.description ?? '');
+      const effects = atk.effects ?? atk.displayEffects ?? atkSys.effects ?? atkSys.description ?? '';
+      setTextField(form, row.effects, effects);
     }
   }
 
@@ -413,7 +420,13 @@ export async function exportCrawlerToPdf(actor, options = {}) {
   setTextField(form, 'Text Field 99', details.pastTrauma || '');
   setTextField(form, 'Text Field 100', details.looseEnds || '');
   setTextField(form, 'Text Field 101', details.regrets || '');
-  setTextField(form, 'Text Field 102', details.notes || '');
+  const combatTechs = typeof actor.getCombatTechniques === 'function' ? actor.getCombatTechniques() : [];
+  let notesText = details.notes || '';
+  if (combatTechs.length > 0) {
+    const techSummaries = combatTechs.map(t => `• ${t.name} (R${t.rank}): ${t.summary}`).join('\n');
+    notesText = notesText ? `${notesText}\n\n[COMBAT MANEUVERS]:\n${techSummaries}` : `[COMBAT MANEUVERS]:\n${techSummaries}`;
+  }
+  setTextField(form, 'Text Field 102', notesText);
 
   // =========================================================================
   // PAGE 3: SKILLS & KNOWN SPELLS (20 Rows)

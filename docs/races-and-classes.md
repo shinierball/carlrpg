@@ -447,3 +447,21 @@ Both the Class Creator and Race Creator studios share an identical, high-contras
    - Target Crawler selector with 1-click **Apply to Crawler**.
    - **Save as Item** to the Foundry World Items directory.
    - **Export JSON** for portable sharing and backup.
+
+---
+
+## 13. Wizard-Driven Race & Class Choice Selection
+
+Certain race and class perks grant options to choose custom skills, weapons, or spells:
+- **Dwarf, Classic**: "+3 in two different crafting Skills of your choice".
+- **Igneous**: Fire-based offensive action or spell selections.
+- **Blade Dancer / Swashbuckler / Weapon Masters**: "+2 in an Edged weapon Skill of your choice" or "+2 in a Reach weapon Skill of your choice".
+- **Spellcasters**: Choosing specific spells at given ranks upon class selection.
+
+### Interactive Choice Dialog (`promptChoicesDialog`)
+When applying a race or class from the Crawler Character Sheet dropdown, drag-and-drop, or the Point Builder studios:
+1. The applier detects all choice requirements from the definitions (`detectChoices`).
+2. An interactive DCC-styled modal dialog prompts the player to select their choices from relevant compendium options (e.g. categorized Crafting, Edged Weapons, Reach Weapons, or Spell libraries).
+3. Players can also enter a custom write-in skill/spell name to honor rule breaking or custom GM content.
+4. If cancelled, the operation cleanly aborts and reverts any dropdown selections without modifying the actor.
+5. Chosen skills/spells are recorded on the embedded Race/Class item under `system.chosenSkills` and `system.chosenSpells`, embedded onto the actor, and tracked in `appliedRace`/`appliedClass` flags for clean reversal when swapping races/classes.

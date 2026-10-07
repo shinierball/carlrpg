@@ -857,7 +857,7 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
 
       const actor = globalThis.game?.actors?.get(this.targetActorId);
       if (actor) {
-        await this.applyToActor(actor);
+        await this.applyToActor(actor, { interactive: true });
       }
     });
 

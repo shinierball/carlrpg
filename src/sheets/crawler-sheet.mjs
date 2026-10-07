@@ -760,6 +760,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     }
     context.buffs.sort(sortItems);
     context.debuffs.sort(sortItems);
+    // Incorporate synthesized unarmed/combat skill attacks
+    if (typeof this.actor.getSynthesizedAttacks === 'function') {
+      const synthAttacks = this.actor.getSynthesizedAttacks();
+      for (const sa of synthAttacks) {
+        if (sa.isSkillAttack && !context.attacks.some(a => a.id === sa.id || a.name?.toLowerCase() === sa.name?.toLowerCase())) {
+          context.attacks.push(sa);
+        }
+      }
+    }
+
+    // Combat Techniques & Maneuvers
+    context.combatTechniques = typeof this.actor.getCombatTechniques === 'function' ? this.actor.getCombatTechniques() : [];
+    context.primedTechniques = context.combatTechniques.filter(t => t.isPrimed);
+    context.primedTechniquesCount = context.primedTechniques.length;
+
     context.attacks.sort(sortItems);
     context.stowedAttacks.sort(sortItems);
     context.stowedAttacksCount = context.stowedAttacks.length;
@@ -1501,10 +1516,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.dcc-race-selector').change(async ev => {
       ev.preventDefault();
       const raceName = ev.currentTarget.value;
+      const prevRace = this.actor?.system?.details?.race || '';
+      let success = false;
       if (typeof this.actor?.applyRace === 'function') {
-        await this.actor.applyRace(raceName);
+        success = await this.actor.applyRace(raceName, { interactive: true });
       } else {
-        await DCCRaceClassApplier.applyRace(this.actor, raceName);
+        success = await DCCRaceClassApplier.applyRace(this.actor, raceName, { interactive: true });
+      }
+      if (success === false) {
+        ev.currentTarget.value = prevRace;
       }
     });
 
@@ -1512,10 +1532,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.dcc-class-selector').change(async ev => {
       ev.preventDefault();
       const className = ev.currentTarget.value;
+      const prevClass = this.actor?.system?.details?.class || '';
+      let success = false;
       if (typeof this.actor?.applyClass === 'function') {
-        await this.actor.applyClass(className);
+        success = await this.actor.applyClass(className, { interactive: true });
       } else {
-        await DCCRaceClassApplier.applyClass(this.actor, className);
+        success = await DCCRaceClassApplier.applyClass(this.actor, className, { interactive: true });
+      }
+      if (success === false) {
+        ev.currentTarget.value = prevClass;
       }
     });
 
@@ -1861,14 +1886,34 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // Roll Attack: Hit or Damage
     html.find('.roll-attack-hit').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
-      if (item) this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
+      const item = this.actor.items?.get ? this.actor.items.get(itemId) : (this.actor.items || []).find(i => i.id === itemId);
+      if (item) {
+        this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
+      } else {
+        const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
+        if (synth) this.actor.rollAttack(synth.item || synth, 'hit', { showDialog: !ev.shiftKey });
+      }
     });
 
     html.find('.roll-attack-dmg').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
-      if (item) this.actor.rollAttack(item, 'damage', { showDialog: !ev.shiftKey });
+      const item = this.actor.items?.get ? this.actor.items.get(itemId) : (this.actor.items || []).find(i => i.id === itemId);
+      if (item) {
+        this.actor.rollAttack(item, 'damage', { showDialog: !ev.shiftKey });
+      } else {
+        const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
+        if (synth) this.actor.rollAttack(synth.item || synth, 'damage', { showDialog: !ev.shiftKey });
+      }
+    });
+
+    // Toggle Combat Technique Primed State
+    html.find('.toggle-combat-technique').click(async ev => {
+      ev.preventDefault();
+      const techId = $(ev.currentTarget).data('techniqueId') || $(ev.currentTarget).closest('[data-technique-id]').data('techniqueId');
+      if (techId && typeof this.actor.toggleTechniquePrimed === 'function') {
+        await this.actor.toggleTechniquePrimed(techId);
+        this.render(false);
+      }
     });
 
     // Roll Skill (owned or gear-granted)
@@ -2374,16 +2419,16 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // If dropping a Race, Class, or Deity, automatically apply/update actor
     if (item.type === 'race') {
       if (typeof this.actor?.applyRace === 'function') {
-        await this.actor.applyRace(item.name);
+        await this.actor.applyRace(item.name, { interactive: true });
       } else {
-        await DCCRaceClassApplier.applyRace(this.actor, item.name);
+        await DCCRaceClassApplier.applyRace(this.actor, item.name, { interactive: true });
       }
       return item;
     } else if (item.type === 'class') {
       if (typeof this.actor?.applyClass === 'function') {
-        await this.actor.applyClass(item.name);
+        await this.actor.applyClass(item.name, { interactive: true });
       } else {
-        await DCCRaceClassApplier.applyClass(this.actor, item.name);
+        await DCCRaceClassApplier.applyClass(this.actor, item.name, { interactive: true });
       }
       return item;
     } else if (item.type === 'deity') {

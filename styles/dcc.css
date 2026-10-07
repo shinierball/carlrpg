@@ -1007,6 +1007,68 @@ select.dcc-box-input.dcc-size-select,
   transform: scale(1.15);
 }
 
+/* ---------------- COMBAT TECHNIQUES & MANEUVERS STRIP ---------------- */
+.dcc-combat-techniques-strip {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #fbf8f5;
+  border: 1px solid #d4c5b9;
+  border-radius: 4px;
+}
+
+.dcc-technique-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #c0392b;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font-family: var(--font-primary, 'Oswald', sans-serif);
+  font-size: 11px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.dcc-technique-pill:hover {
+  background: #fbeee6;
+  border-color: #962d22;
+  transform: translateY(-1px);
+}
+
+.dcc-technique-pill.primed {
+  background: #c0392b;
+  color: #fff;
+  border-color: #782117;
+  box-shadow: 0 0 6px rgba(192, 57, 43, 0.4);
+}
+
+.dcc-technique-pill.primed:hover {
+  background: #a93226;
+}
+
+.dcc-technique-pill .dcc-tech-name {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.dcc-technique-pill .dcc-tech-summary {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.dcc-technique-pill .dcc-tech-badge {
+  background: #f39c12;
+  color: #141418;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+}
+
 /* ---------------- HOTLIST ---------------- */
 .dcc-hotlist-section {
   margin-top: 14px;

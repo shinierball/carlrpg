@@ -1,3 +1,43 @@
+## 2.4.12
+
+### Wizard-Driven Choices in Race & Class Application
+
+- **Dynamic Choice Detection & Catalog Matching (`src/data/race-class-applier.mjs`)**:
+  - Implemented `detectChoices()` to automatically parse choice perks across canonical and custom races and classes (e.g., Dwarf Classic's "+3 in two different crafting Skills of your choice", reach weapon skills, edged weapon skills, universal weapon choices, spell choices, and explicit comma-separated option lists).
+  - Implemented `getCatalogOptions()` to provide filtered compendium catalog choices (crafting skills, weapon skills, edged weapons, reach weapons, spells) while offering a custom write-in fallback so player creativity and rule breaking are fully supported.
+- **Interactive Choice Wizard Dialog (`src/data/race-class-applier.mjs`)**:
+  - Created `promptChoicesDialog()` presenting a styled modal dialog when applying a race or class interactively.
+  - Users select desired skills/spells for each choice slot. On cancellation or dialog closure, gracefully aborts application without altering actor state or dropping invalid selections.
+  - Fully backward compatible with automated and programmatic calls: headless invocations accept pre-populated `options.choices` or fall back cleanly to valid defaults without hanging.
+- **Embedded Document Schema & Full Lifecycle Tracking (`template.json`, `src/documents/actor.mjs`, `src/apps/base-point-builder.mjs`)**:
+  - Added `chosenSkills` and `chosenSpells` to `race` and `class` item schemas.
+  - Chosen skills and spells are persisted onto the race/class item documents embedded on the actor (`system.chosenSkills`, `system.chosenSpells`, `system.skills`, `system.spells`).
+  - Integrated with actor lifecycle tracking: chosen skills and spells are granted to the crawler and registered in `appliedRace`/`appliedClass` flags, allowing complete and clean removal via `removeRace()` and `removeClass()`.
+  - Updated Character Sheet (`src/sheets/crawler-sheet.mjs`) dropdowns and drag-and-drop listeners to trigger the wizard dialog interactively, reverting dropdown state on cancel.
+  - Updated Point Builders (`src/apps/base-point-builder.mjs`, `class-creator.mjs`, `race-creator.mjs`) to resolve choices when applying custom classes or races directly from the builder.
+- **Automated Unit Testing (`tests/race-class-choices-wizard.test.mjs`)**:
+  - Added 10 unit tests verifying choice detection, catalog filtering, choice resolution, Dwarf Classic crafting choices, Igneous fire abilities, Blade Dancer / Swashbuckler weapon choices, dialog confirm and cancel flows, and point builder integration.
+  - 100% test pass rate across all 854 tests in 158 suites.
+
+## 2.4.11
+
+### Skill-Driven Attack Synthesis, Combat Techniques & Maneuvers Strip, and Offline Human PDF Pre-Calculations
+
+- **Unified Attack Roster & Skill Attack Synthesis (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`)**:
+  - Synthesized attack roster via `actor.getSynthesizedAttacks()`, unifying equipped weapons with primary unarmed and combat skills (*Pugilism*, *Unarmed Combat*, *Wrasslin'*, *Bite*, *Back Claw*, *Slice Attack*, *Improvised Weapons*, etc.).
+  - Primary combat skills compute To-Hit modifiers using exact DCC mechanics (Skill Rank + Stat Mod) and display unified composite damage formulas combining base dice and Rank Damage Die (e.g., Rank 5 Pugilism: `3d2 + 1d4 + 4` Bludgeoning).
+  - Character Sheet Core tab displays `[SKILL]` and `[WEAPON]` badges on attack rows for immediate visual clarity.
+- **Combat Techniques & Maneuvers Strip (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`, `styles/dcc.css`)**:
+  - Implemented dedicated interactive **Combat Techniques & Maneuvers** strip below the Attacks table for secondary combat skills (*Powerful Strike*, *Dirty Fighting*, *Iron Punch*, *Choke Out*, *Skullcracker*, *Toss*, etc.).
+  - Supports VTT one-click priming/toggling (`.toggle-combat-technique`) to prepare maneuvers for the crawler's next strike.
+  - Primed techniques dynamically inject bonus damage dice and status debuffs (e.g. *Woozy*, *Blinded*, *Stunned*) into attack rolls and damage cards, automatically clearing upon strike execution.
+- **Offline Human Character Sheet PDF Calculations (`src/apps/pdf-exporter.mjs`)**:
+  - Exported characters now populate the Page 1 Attacks table with fully calculated composite dice formulas and To-Hit bonuses.
+  - Appends a dedicated `[COMBAT MANEUVERS]` reference section directly into character notes on Page 1, giving physical table players zero ambiguity about dice and maneuver effects.
+- **Automated Unit Testing (`tests/attack-skill-synthesis.test.mjs`)**:
+  - Added full test suite verifying unarmed skill synthesis, weapon-skill pairing, technique priming toggling, damage card bonus injection, and PDF composite field population.
+  - 100% test pass rate across all 844 tests in 157 suites.
+
 ## 2.4.10
 
 ### Race Item Sheet Redundant Stat Modifier Box Cleanup & Accurate Stat Application

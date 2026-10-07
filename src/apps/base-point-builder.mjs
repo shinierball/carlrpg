@@ -19,6 +19,7 @@ import {
   DCC_CANONICAL_PRESETS
 } from '../data/point-build-catalog.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
+import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 
 export class DCCBasePointBuilderApp extends DCCBaseApplication {
   static get defaultOptions() {
@@ -815,11 +816,59 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
 
   /**
    * Applies the custom class/race directly to a Crawler Actor.
+   *
+   * @param {Actor} actor
+   * @param {object} [options={}]
+   * @returns {Promise<Item|null>}
    */
-  async applyToActor(actor) {
+  async applyToActor(actor, options = {}) {
     if (!actor) return null;
 
-    const itemData = this.createItemData();
+    let itemData = this.createItemData();
+
+    // Check for detected choices or (Choice) items
+    const choices = DCCRaceClassApplier.detectChoices(itemData);
+    let resolvedChoices = { chosenSkills: [], chosenSpells: [] };
+
+    if (choices.length > 0) {
+      if (options.choices !== undefined) {
+        resolvedChoices = DCCRaceClassApplier.resolveChoices(itemData, choices, options.choices);
+      } else if (options.interactive || (typeof document !== 'undefined' && !options.skipDialog)) {
+        const userSelections = await DCCRaceClassApplier.promptChoicesDialog(itemData, choices, options);
+        if (userSelections === null) return null; // Cancelled
+        resolvedChoices = DCCRaceClassApplier.resolveChoices(itemData, choices, userSelections);
+      } else {
+        resolvedChoices = DCCRaceClassApplier.resolveChoices(itemData, choices, {});
+      }
+    }
+
+    // Resolve into builder's skill/spell lists
+    if (resolvedChoices.chosenSkills.length > 0) {
+      for (const cs of resolvedChoices.chosenSkills) {
+        const choiceIdx = this.skills.findIndex(s => s.name?.includes('(Choice)'));
+        if (choiceIdx !== -1) {
+          this.skills[choiceIdx] = { ...this.skills[choiceIdx], name: cs.name, rank: cs.rank, isPassive: Boolean(cs.isPassive) };
+        } else if (!this.skills.some(s => s.name === cs.name)) {
+          this.skills.push({ name: cs.name, rank: cs.rank, isPassive: Boolean(cs.isPassive) });
+        }
+      }
+    }
+    if (resolvedChoices.chosenSpells.length > 0) {
+      for (const csp of resolvedChoices.chosenSpells) {
+        const choiceIdx = this.spells.findIndex(sp => sp.name?.includes('(Choice)'));
+        if (choiceIdx !== -1) {
+          this.spells[choiceIdx] = { ...this.spells[choiceIdx], name: csp.name, rank: csp.rank, mpCost: csp.mpCost || 0 };
+        } else if (!this.spells.some(sp => sp.name === csp.name)) {
+          this.spells.push({ name: csp.name, rank: csp.rank, mpCost: csp.mpCost || 0 });
+        }
+      }
+    }
+
+    // Recreate item data with updated skills/spells & chosenSkills/chosenSpells
+    itemData = this.createItemData();
+    if (!itemData.system) itemData.system = {};
+    itemData.system.chosenSkills = resolvedChoices.chosenSkills;
+    itemData.system.chosenSpells = resolvedChoices.chosenSpells;
 
     // 1. Embed the class/race item
     let createdItem = null;
@@ -827,28 +876,38 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       const [item] = await actor.createEmbeddedDocuments('Item', [itemData]);
       createdItem = item;
 
-      // 2. Also embed granted skill items
+      // 2. Also embed granted skill and spell items
       const skillGrants = [];
       for (const s of this.skills) {
-        if (s.name) {
+        if (s.name && !s.name.includes('(Choice)')) {
           skillGrants.push({
             name: s.name,
             type: 'skill',
             system: {
               rank: s.rank,
               isPassive: Boolean(s.isPassive)
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: this.builderType || 'custom'
+              }
             }
           });
         }
       }
       for (const sp of this.spells) {
-        if (sp.name) {
+        if (sp.name && !sp.name.includes('(Choice)')) {
           skillGrants.push({
             name: sp.name,
             type: 'spell',
             system: {
               rank: sp.rank,
               mpCost: sp.mpCost || 0
+            },
+            flags: {
+              'carl-rpg': {
+                grantedBy: this.builderType || 'custom'
+              }
             }
           });
         }
@@ -864,6 +923,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     if (this.builderType === 'race') {
       updates['system.details.race'] = this.name || 'Custom Race';
       updates['system.attributes.size'] = this.getSizeName();
+    } else {
+      updates['system.details.class'] = this.name || 'Custom Class';
     }
     for (const [stat, delta] of Object.entries(this.stats)) {
       if (delta !== 0 && currentStats[stat]) {
@@ -880,6 +941,10 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
 
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
+    }
+
+    if (typeof this.render === 'function') {
+      this.render();
     }
 
     if (globalThis.ui?.notifications) {

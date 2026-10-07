@@ -215,7 +215,7 @@ export class DCCRaceClassApplier {
       if (m) {
         const val = parseInt(m[1].replace(/\s+/g, ''), 10);
         const wordsStr = m[2];
-        const words = wordsStr.split(/(?:,\s*|\s+and\s+)/i).map(w => w.trim().toLowerCase());
+        const words = wordsStr.split(/(?:,\s*(?:and\s+)?|\s+and\s+)/i).map(w => w.replace(/^and\s+/i, '').trim().toLowerCase());
         for (const w of words) {
           if (['strength', 'str'].includes(w)) stats.str += val;
           else if (['dexterity', 'dex'].includes(w)) stats.dex += val;

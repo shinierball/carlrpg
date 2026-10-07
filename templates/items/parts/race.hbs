@@ -56,45 +56,6 @@
   </div>
   {{/if}}
 
-  {{!-- STAT MODIFIERS DISPLAY --}}
-  <div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #c0392b;">
-    <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #c0392b;">
-      <span><i class="fa-solid fa-bolt"></i> RACIAL ABILITY STAT MODIFIERS</span>
-      <span style="font-size: 10px; color: #fff; font-weight: normal;">Applied directly to Crawler Core Stats</span>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px; background: #fbfbfb;">
-      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
-        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">STR</div>
-        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.str}}#c0392b{{else}}#777{{/if}};">
-          {{#if parsedBonuses.stats.str}}{{#if (gte parsedBonuses.stats.str 1)}}+{{/if}}{{parsedBonuses.stats.str}}{{else}}+0{{/if}}
-        </div>
-      </div>
-      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
-        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">DEX</div>
-        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.dex}}#c0392b{{else}}#777{{/if}};">
-          {{#if parsedBonuses.stats.dex}}{{#if (gte parsedBonuses.stats.dex 1)}}+{{/if}}{{parsedBonuses.stats.dex}}{{else}}+0{{/if}}
-        </div>
-      </div>
-      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
-        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">CON</div>
-        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.con}}#c0392b{{else}}#777{{/if}};">
-          {{#if parsedBonuses.stats.con}}{{#if (gte parsedBonuses.stats.con 1)}}+{{/if}}{{parsedBonuses.stats.con}}{{else}}+0{{/if}}
-        </div>
-      </div>
-      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
-        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">INT</div>
-        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.int}}#c0392b{{else}}#777{{/if}};">
-          {{#if parsedBonuses.stats.int}}{{#if (gte parsedBonuses.stats.int 1)}}+{{/if}}{{parsedBonuses.stats.int}}{{else}}+0{{/if}}
-        </div>
-      </div>
-      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
-        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">CHA</div>
-        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.cha}}#c0392b{{else}}#777{{/if}};">
-          {{#if parsedBonuses.stats.cha}}{{#if (gte parsedBonuses.stats.cha 1)}}+{{/if}}{{parsedBonuses.stats.cha}}{{else}}+0{{/if}}
-        </div>
-      </div>
-    </div>
-  </div>
 
   {{!-- GRANTED SKILLS & SPELLS --}}
   {{#if (or parsedBonuses.skills.length parsedBonuses.spells.length)}}

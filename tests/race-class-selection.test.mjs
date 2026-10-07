@@ -592,5 +592,44 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     assert.equal(actor.system.abilities.str.value, 10, 'STR should revert to 10');
   });
 
+  test('16. Race item template omits separate racial ability stat modifier box while preserving perks list and accurate stat application', async () => {
+    const templatePath = path.resolve('templates/items/parts/race.hbs');
+    const templateContent = fs.readFileSync(templatePath, 'utf-8');
+
+    // Box should be removed from race item sheet partial
+    assert.ok(
+      !templateContent.includes('RACIAL ABILITY STAT MODIFIERS'),
+      'race.hbs should not contain RACIAL ABILITY STAT MODIFIERS box'
+    );
+    // Racial perks & traits should remain
+    assert.ok(
+      templateContent.includes('RACIAL PERKS & TRAITS'),
+      'race.hbs should retain RACIAL PERKS & TRAITS list'
+    );
+
+    // Verify race stat application remains accurate on an actor
+    const actor = new DCCActor({
+      name: 'High Elf Mage',
+      type: 'crawler',
+      system: {
+        attributes: { size: 'Medium', dr: { armor: 0, buffs: 0, total: 0 } },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    await actor.applyRace('Elf, High');
+    assert.equal(actor.system.details.race, 'Elf, High');
+    assert.equal(actor.system.abilities.int.value, 14, 'Elf, High applies +4 INT');
+    assert.equal(actor.system.abilities.cha.value, 14, 'Elf, High applies +4 CHA');
+    assert.equal(actor.system.abilities.dex.value, 14, 'Elf, High applies +4 DEX');
+  });
+
 });
 

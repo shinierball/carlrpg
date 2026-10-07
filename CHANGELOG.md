@@ -1,3 +1,18 @@
+## 2.4.10
+
+### Race Item Sheet Redundant Stat Modifier Box Cleanup & Accurate Stat Application
+
+- **Race Item Sheet Presentation (`templates/items/parts/race.hbs`)**:
+  - Removed the redundant `RACIAL ABILITY STAT MODIFIERS` block from the race item sheet partial.
+  - Racial traits and stat modifiers remain clearly presented in the dedicated `RACIAL PERKS & TRAITS` list (`perksList`), eliminating duplicate or inconsistent stat representations when viewing Race items in the compendium.
+- **Racial Stat Modifier Application Accuracy (`src/data/race-class-applier.mjs`)**:
+  - Verified and refined stat parsing in `DCCRaceClassApplier.parseStats` to handle comma-and separated ability lists with Oxford commas (e.g., `+4 Intelligence, Dexterity, and Charisma`) cleanly.
+  - Ensures accurate direct application of racial ability score bonuses to Crawler core stats across all races.
+- **Automated Unit Testing (`tests/race-class-selection.test.mjs`)**:
+  - Added unit test asserting `templates/items/parts/race.hbs` omits the separate stat modifier box while retaining `RACIAL PERKS & TRAITS`.
+  - Validated that race application continues to correctly apply stat bonuses to Crawler characters.
+  - 100% test pass rate across all 838 tests in 156 suites.
+
 ## 2.4.9
 
 ### All Canonical Class Templates Loadable & Race Point Ledger Design Parity

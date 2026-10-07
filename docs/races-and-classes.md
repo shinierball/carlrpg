@@ -73,9 +73,9 @@ Every race possesses an official size rating that determines physical presence, 
 
 ---
 
-## 3. Classes System & Archetypes (Pages 144–157)
+## 3. Classes System & Archetypes (Pages 144–161)
 
-CarlRPG presents 51 canonical classes across 10 core archetypes plus multiclass combinations:
+CarlRPG presents 53 canonical classes across 10 core archetypes plus multiclass combinations (52 rulebook classes including *Black Inquisitor General* and the canonical *Dungeon Dad* point-build example):
 
 1. **Arcanist** (Artificers, crafters, enchanters):
    - *Boring Ol’ Arcanist*, *Alchemist*, *Douchy Wizard School Wand-Maker*, *Infernocrafter*, *Prison Tattoo Artist*.
@@ -84,11 +84,11 @@ CarlRPG presents 51 canonical classes across 10 core archetypes plus multiclass 
 3. **Bard** (Performers, influencers, crowd-pleasers):
    - *Boring Ol’ Bard*, *Artist Alley Mogul* (Bard/Merchant), *Former Child Actor*, *NecroBard* (Bard/Necromancer), *Poet Laureate*, *Professional Roadie* (Bard/Rogue), *Spellbinder*.
 4. **Cleric** (Deity worshippers, divine conduits):
-   - *Boring Ol’ Cleric*, *Santero*.
+   - *Boring Ol’ Cleric*, *Black Inquisitor General* (Cleric/Mage/Paladin), *Santero*.
 5. **Druid** (Nature shapeshifters, elemental summoners):
    - *Boring Ol’ Druid*, *Herbalist* (Arcanist/Druid), *Lifebringer*, *PHysicker*, *Shepherd*.
 6. **Fighter** (Combat masters, weapon specialists, brawlers):
-   - *Boring Ol’ Fighter*, *Pit Fighter*, *Shotgun Messenger*, *Straight-to-DVD Action Hero*, *Sword and Boarder*, *Monster Truck Driver*, *Zulu Warrior*.
+   - *Boring Ol’ Fighter*, *Dungeon Dad* (Barbarian/Fighter point build), *Pit Fighter*, *Shotgun Messenger*, *Straight-to-DVD Action Hero*, *Sword and Boarder*, *Monster Truck Driver*, *Zulu Warrior*.
 7. **Mage** (Arcane casters, blasters, element masters):
    - *Boring Ol’ Mage*, *Blizzardmancer*, *Crisper*, *Fire Spiritualist* (Bard/Mage), *Forsaken Aerialist*, *Necromancer* (Mage/Necromancer).
 8. **Monk** (Unarmed martial artists, ki masters):
@@ -377,5 +377,44 @@ Selecting a race or class immediately applies its benefits to the crawler. When 
 4. **Embedded Documents & Flag Tracking**:
    - The engine automatically embeds an official Item document of type `'race'` or `'class'` on the actor and stores clean metadata under actor flags (`appliedRace`, `appliedClass`).
    - Dragging and dropping Race or Class compendium items onto the character sheet automatically invokes `actor.applyRace()` and `actor.applyClass()`.
+
+---
+
+## 10. Damage Resistance, Movement Speeds & Advantage/Disadvantage Conditions
+
+### Damage Resistance (DR) Integration
+- Racial and class Damage Resistance bonuses (e.g. Amazonian `+2 DR`, Tigran `+1 DR Buff`, Igneous `+3 DR`) are parsed and added directly to `system.attributes.dr.buffs`.
+- When switching or removing a race or class, the exact granted DR bonus is subtracted from `system.attributes.dr.buffs`, leaving armor, gear, and temporary buffs intact.
+
+### Dynamic Movement Speeds & Modes
+- **Walk Movement Deltas**: Races granting move deltas (e.g., Tigran `+10ft Move`) modify the actor's walk speed (`system.attributes.speed.move`) by the parsed delta. Reverting the race subtracts the delta cleanly.
+- **Special Movement Modes**: The system supports dedicated movement attributes on actors:
+  - `system.attributes.speed.climb`: e.g., Arachnid innate ceiling and wall climb move (20 ft).
+  - `system.attributes.speed.swim`: e.g., Crocodilian swim speed (20 ft).
+  - `system.attributes.speed.fly`: e.g., Bune, Obsidian Butterfly, Skyfowl flight speeds (20 ft).
+  - `system.attributes.speed.burrow`: e.g., Fathom Dwarf stone and earth burrowing (20 ft).
+- Upon removing or switching races, granted special movement modes are reset to 0.
+
+### Advantage & Disadvantage as Custom Active Condition Items
+In CarlRPG, Advantage and Disadvantage are not passive text notes; they are active, tracked game objects:
+- **Advantage on Checks**: Automatically instantiated as custom embedded `Item` documents of type `'buff'`, assigned a permanent duration tagged with `[RACIAL]` or `[CLASS]`, and flagged with `flags['carl-rpg'].grantedBy = 'race' | 'class'` and `flags['carl-rpg'].isAdvantage = true`. Examples include *Advantage: Feline Reflexes* (Cat), *Advantage: High Ground Bravado* (Swashbuckler), and *Advantage: Roadie Rigging* (Professional Roadie).
+- **Disadvantage on Checks**: Automatically instantiated as custom embedded `Item` documents of type `'debuff'`, assigned a permanent duration, and flagged with `flags['carl-rpg'].grantedBy = 'race' | 'class'` and `flags['carl-rpg'].isDisadvantage = true`. Examples include *Disadvantage: Clawed Clumsiness* (Tigran), *Disadvantage: Highborn Arrogance* (High Elf vs. dwarves/rat-kin), and *Disadvantage: Cold-Blooded Torpor* (Crocodilian).
+- **Automated Removal**: When a race or class is swapped or removed, all condition items granted by that source are deleted from the actor's embedded items list.
+
+---
+
+## 11. Dedicated Race & Class Item Sheets
+
+Opening any Race or Class item (from compendiums, world items, or embedded crawler items) displays a purpose-built, high-contrast DCC-styled interface:
+1. **Header Metadata**:
+   - For Races: Heritage picker (`Earth` vs `Alien`), Size category (`Medium (4)`, `Large (5)`, etc.), DR bonus, and Walk speed delta.
+   - For Classes: Archetype indicator (`Fighter`, `Mage`, `Cleric`, etc.), DR bonus, and Walk speed delta.
+2. **Special Movement Badges**: Visual badges for Climb, Swim, Flight, and Burrow speeds.
+3. **Core Stat Modifiers Grid**: High-contrast grid showing exact STR, DEX, CON, INT, and CHA bonuses/penalties with DCC Red styling.
+4. **Granted Skills & Spells Cards**: Card deck displaying all granted skill proficiencies and spells with rank indicators.
+5. **Advantage & Disadvantage Condition Cards**: Distinct green and red cards summarizing generated Buff and Debuff effects.
+6. **Perks & Traits List**: Bulleted breakdown of all canonical features, coupons, and unique rules.
+7. **Description & Lore**: Narrative backstory, cultural context, and roleplaying guidance.
+
 
 

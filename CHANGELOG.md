@@ -1,3 +1,27 @@
+## 2.4.7
+
+### Damage Resistance, Movement Modes, Condition Handling & Dedicated Race/Class Sheets
+
+- **Comprehensive Mechanics Audit & Integration (`src/data/races.mjs`, `src/data/classes.mjs`, `src/data/race-class-applier.mjs`)**:
+  - Full audit of all 30 playable races and 53 classes (including *Black Inquisitor General* and point-build canonical *Dungeon Dad*) resolving all unaccounted mechanics:
+    - **Damage Resistance (DR)**: Explicitly parses DR bonuses (e.g. Amazonian `+2 DR`, Tigran `+1 DR Buff`, Igneous `+3 DR`) and applies them to `system.attributes.dr.buffs`. Reversing a race or class cleanly subtracts the exact bonus.
+    - **Movement Speeds & Modes**: Added support for walk deltas (e.g. Tigran `+10ft Move`) on `system.attributes.speed.move`, as well as special movement modes: `climb` (e.g. Arachnid 20 ft), `swim` (e.g. Crocodilian 20 ft), `fly` (e.g. Bune, Obsidian Butterfly, Skyfowl 20 ft), and `burrow` (e.g. Fathom Dwarf 20 ft). All modes revert cleanly to 0 upon removal.
+    - **Advantage & Disadvantage as Custom Active Condition Items**: All Advantage conditions on checks are generated and applied as custom embedded `Item` documents of type `'buff'` (e.g. *Advantage: Feline Reflexes*, *Advantage: High Ground Bravado*, *Advantage: Roadie Rigging*); Disadvantage conditions are generated as custom embedded `Item` documents of type `'debuff'` (e.g. *Disadvantage: Clawed Clumsiness*, *Disadvantage: Highborn Arrogance*, *Disadvantage: Cold-Blooded Torpor*). Both types are flagged with `grantedBy: 'race'|'class'` and automatically deleted when swapping or removing races/classes.
+- **Dedicated Race & Class Item Sheets (`templates/items/parts/race.hbs`, `templates/items/parts/class.hbs`, `src/sheets/item-sheet.mjs`)**:
+  - Created high-contrast, DCC-themed item sheet partial templates preloaded in `src/dcc.mjs`.
+  - Feature responsive header badges for Heritage, Size, DR bonuses, and walk/climb/swim/fly/burrow speeds.
+  - Interactive grid displaying STR, DEX, CON, INT, and CHA stat modifiers in DCC Red boxes.
+  - Granted Skills and Spells card decks showing names, ranks, and mana costs.
+  - Distinct Advantage Buff and Disadvantage Debuff preview cards summarizing generated condition items.
+  - Perks & Features bulleted list, prerequisites alert banner, and editable abilities/lore textareas.
+- **Data Sanitation & OCR Artifact Cleaning**:
+  - Cleaned intra-word spaces across `src/data/races.mjs` and `src/data/classes.mjs` (e.g., `"f or"` -> `"for"`, `"Dext erity"` -> `"Dexterity"`, `"Sk ill"` -> `"Skill"`, `"Cat -like"` -> `"Cat-like"`).
+  - Restored *Black Inquisitor General* and cleaned chapter header leakages in *Prison Tattoo Artist*, *Shieldmaiden*, *Spellbinder*, *Santero*, *Shepherd*, *Zulu Warrior*, *Necromancer*, *Street Monk*, *Sacred Paladin*, *Swashbuckler*, *Tigran*, and *Primal*.
+  - Rebuilt all LevelDB compendium packs with 53 classes and 30 races.
+- **Automated Unit Testing & Verification (`tests/race-class-selection.test.mjs`, `tests/races-classes-compendium.test.mjs`)**:
+  - Added unit tests 10 through 15 verifying Amazonian stats, skills (+2 Bow, +2 Endurance, +2 Pugilism), and +2 DR; Advantage buff item generation; Disadvantage debuff item generation; movement deltas and special movement modes; item sheet context preparation; and clean condition/DR removal without side-effects.
+  - 100% test pass rate across the entire test suite (831 tests across 156 test suites).
+
 ## 2.4.6
 
 ### Dynamic Race & Class Selection with Non-Item Rank Preservation & Automated Reversal

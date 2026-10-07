@@ -381,6 +381,8 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/items/parts/skill.hbs',
     'systems/carl-rpg/templates/items/parts/loot.hbs',
     'systems/carl-rpg/templates/items/parts/traits.hbs',
+    'systems/carl-rpg/templates/items/parts/race.hbs',
+    'systems/carl-rpg/templates/items/parts/class.hbs',
     'systems/carl-rpg/templates/apps/skill-manager.hbs',
     'systems/carl-rpg/templates/apps/spell-manager.hbs',
     'systems/carl-rpg/templates/apps/item-manager.hbs',

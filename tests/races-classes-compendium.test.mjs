@@ -51,14 +51,14 @@ describe('DCC RPG Races and Classes Compendiums & Datasets', () => {
     assert.equal(alienCount, 7, 'Expected 7 Alien races');
   });
 
-  test('all 52 canonical classes are present with valid schemas and unique IDs', () => {
-    assert.equal(DCC_CLASSES.length, 52, 'Expected 52 classes (51 core + Dungeon Dad example)');
+  test('all 53 canonical classes are present with valid schemas and unique IDs', () => {
+    assert.equal(DCC_CLASSES.length, 53, 'Expected 53 classes (52 core + Dungeon Dad example)');
 
     const expectedClasses = [
       'Boring Ol’ Arcanist', 'Alchemist', 'Douchy Wizard School Wand-Maker', 'Infernocrafter', 'Prison Tattoo Artist',
       'Boring Ol’ Barbarian', 'Gladiator', 'Harii', 'Feral Cat Berserker', 'Shieldmaiden',
       'Boring Ol’ Bard', 'Artist Alley Mogul', 'Former Child Actor', 'NecroBard', 'Poet Laureate',
-      'Professional Roadie', 'Spellbinder', 'Boring Ol’ Cleric', 'Santero', 'Boring Ol’ Druid',
+      'Professional Roadie', 'Spellbinder', 'Boring Ol’ Cleric', 'Black Inquisitor General', 'Santero', 'Boring Ol’ Druid',
       'Herbalist', 'Lifebringer', 'PHysicker', 'Shepherd', 'Boring Ol’ Fighter',
       'Pit Fighter', 'Shotgun Messenger', 'Straight-to-DVD Action Hero', 'Sword and Boarder', 'Monster Truck Driver',
       'Zulu Warrior', 'Boring Ol’ Mage', 'Blizzardmancer', 'Crisper', 'Fire Spiritualist',
@@ -122,6 +122,6 @@ describe('DCC RPG Races and Classes Compendiums & Datasets', () => {
     assert.ok(Array.isArray(globalThis.game?.dcc?.races), 'game.dcc.races must be an array');
     assert.equal(globalThis.game.dcc.races.length, 30);
     assert.ok(Array.isArray(globalThis.game?.dcc?.classes), 'game.dcc.classes must be an array');
-    assert.equal(globalThis.game.dcc.classes.length, 52);
+    assert.equal(globalThis.game.dcc.classes.length, 53);
   });
 });

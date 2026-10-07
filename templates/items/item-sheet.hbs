@@ -18,7 +18,15 @@
       {{> "systems/carl-rpg/templates/items/parts/gear.hbs"}}
     {{/if}}
 
-    {{#if (or (eq item.type "race") (eq item.type "class") (eq item.type "deity") (eq item.type "sponsor"))}}
+    {{#if (eq item.type "race")}}
+      {{> "systems/carl-rpg/templates/items/parts/race.hbs"}}
+    {{/if}}
+
+    {{#if (eq item.type "class")}}
+      {{> "systems/carl-rpg/templates/items/parts/class.hbs"}}
+    {{/if}}
+
+    {{#if (or (eq item.type "deity") (eq item.type "sponsor"))}}
       {{> "systems/carl-rpg/templates/items/parts/traits.hbs"}}
     {{/if}}
 

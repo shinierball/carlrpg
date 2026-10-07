@@ -1,6 +1,7 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
 import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
+import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller
@@ -589,6 +590,23 @@ export class DCCItemSheet extends BaseItemSheet {
       }
       context.outcomesTotalWeight = totalWeight;
       context.isWeightValid = totalWeight === 100;
+    }
+
+    if (context.item.type === 'race') {
+      const bonuses = DCCRaceClassApplier.parseRaceBonuses(this.item);
+      context.parsedBonuses = bonuses;
+      context.heritage = this.item.system?.heritage || bonuses?.heritage || 'Earth';
+      context.size = this.item.system?.size || bonuses?.sizeRaw || 'Medium (4)';
+      context.prerequisites = this.item.system?.prerequisites || '';
+      context.perksList = Array.isArray(this.item.system?.perks) ? this.item.system.perks : (this.item.perks || []);
+    }
+
+    if (context.item.type === 'class') {
+      const bonuses = DCCRaceClassApplier.parseClassBonuses(this.item);
+      context.parsedBonuses = bonuses;
+      context.archetype = this.item.system?.archetype || this.item.system?.classType || bonuses?.classType || 'Fighter';
+      context.prerequisites = this.item.system?.prerequisites || '';
+      context.perksList = Array.isArray(this.item.system?.perks) ? this.item.system.perks : (this.item.perks || []);
     }
 
     return context;

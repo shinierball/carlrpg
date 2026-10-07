@@ -67,7 +67,11 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
       }),
       speed: new fields.SchemaField({
         move: new fields.NumberField({ integer: true, initial: 20 }),
-        step: new fields.NumberField({ integer: true, initial: 10 })
+        step: new fields.NumberField({ integer: true, initial: 10 }),
+        climb: new fields.NumberField({ integer: true, initial: 0 }),
+        swim: new fields.NumberField({ integer: true, initial: 0 }),
+        fly: new fields.NumberField({ integer: true, initial: 0 }),
+        burrow: new fields.NumberField({ integer: true, initial: 0 })
       }),
       aiFavor: new fields.NumberField({ integer: true, initial: 0 }),
       size: new fields.StringField({ initial: 'Medium' }),

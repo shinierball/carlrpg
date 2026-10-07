@@ -6,6 +6,7 @@ import path from 'node:path';
 import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
 import { DCCCrawlerSheet } from '../src/sheets/crawler-sheet.mjs';
+import { DCCItemSheet } from '../src/sheets/item-sheet.mjs';
 import { DCCRaceClassApplier } from '../src/data/race-class-applier.mjs';
 
 describe('DCC RPG - Race & Class Selection and Reversal System', () => {
@@ -353,4 +354,243 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     assert.equal(actor.system.details.class, 'Pit Fighter');
   });
 
+  test('10. Amazonian race applies +6 STR, +3 DEX, +2 Bow, +2 Endurance, +2 Pugilism, +2 DR, and Medium size', async () => {
+    const actor = new DCCActor({
+      name: 'Amazonian Hero',
+      type: 'crawler',
+      system: {
+        attributes: {
+          size: 'Medium',
+          dr: { armor: 0, buffs: 0, total: 0 }
+        },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    await actor.applyRace('Amazonian');
+    assert.equal(actor.system.details.race, 'Amazonian');
+
+    // Stat changes
+    assert.equal(actor.system.abilities.str.value, 16, '+6 Strength');
+    assert.equal(actor.system.abilities.dex.value, 13, '+3 Dexterity');
+    assert.equal(actor.system.abilities.con.value, 10);
+
+    // DR bonus
+    assert.equal(actor.system.attributes.dr.buffs, 2, '+2 DR bonus applied to buffs');
+
+    // Skills
+    const bow = actor.items.find(i => i.type === 'skill' && i.name.toLowerCase() === 'bow');
+    assert.ok(bow, 'Bow skill should be granted');
+    assert.equal(bow.system.rank, 2, 'Bow rank should be 2');
+
+    const endurance = actor.items.find(i => i.type === 'skill' && i.name.toLowerCase() === 'endurance');
+    assert.ok(endurance, 'Endurance skill should be granted');
+    assert.equal(endurance.system.rank, 2, 'Endurance rank should be 2');
+
+    const pugilism = actor.items.find(i => i.type === 'skill' && i.name.toLowerCase() === 'pugilism');
+    assert.ok(pugilism, 'Pugilism skill should be granted');
+    assert.equal(pugilism.system.rank, 2, 'Pugilism rank should be 2');
+
+    // Size
+    assert.equal(actor.system.attributes.size, 'Medium');
+
+    // Applied race flag
+    const flag = actor.getFlag('carl-rpg', 'appliedRace');
+    assert.ok(flag);
+    assert.equal(flag.drBonus, 2);
+    assert.equal(flag.stats.str, 6);
+    assert.equal(flag.stats.dex, 3);
+  });
+
+  test('11. Advantage perks generate custom embedded Buff items with grantedBy flag', async () => {
+    const actor = new DCCActor({
+      name: 'Cat Crawler',
+      type: 'crawler',
+      system: {
+        attributes: { size: 'Medium' },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    await actor.applyRace('Cat');
+
+    // Cat has "Advantage on Cat-like Reflexes Skill Checks"
+    const buffs = actor.items.filter(i => i.type === 'buff');
+    assert.ok(buffs.length >= 1, 'Should have at least 1 embedded Buff item for Advantage');
+
+    const catBuff = buffs.find(b => b.getFlag('carl-rpg', 'grantedBy') === 'race' && b.getFlag('carl-rpg', 'isAdvantage'));
+    assert.ok(catBuff, 'Should have a buff flagged with isAdvantage and grantedBy: race');
+    assert.ok(catBuff.name.includes('Advantage'), 'Buff name should include Advantage');
+    assert.ok(catBuff.system.description.toLowerCase().includes('advantage'), 'Buff description should detail the advantage condition');
+  });
+
+  test('12. Disadvantage perks generate custom embedded Debuff items with grantedBy flag', async () => {
+    const actor = new DCCActor({
+      name: 'Tigran Crawler',
+      type: 'crawler',
+      system: {
+        attributes: {
+          size: 'Medium',
+          speed: { move: 20, climb: 0, swim: 0, fly: 0, burrow: 0 }
+        },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    await actor.applyRace('Tigran');
+
+    // Tigran has "Disadvantage on Dexterity-based Skills that require fine manipulation..."
+    const debuffs = actor.items.filter(i => i.type === 'debuff');
+    assert.ok(debuffs.length >= 1, 'Should have at least 1 embedded Debuff item for Disadvantage');
+
+    const tigranDebuff = debuffs.find(d => d.getFlag('carl-rpg', 'grantedBy') === 'race' && d.getFlag('carl-rpg', 'isDisadvantage'));
+    assert.ok(tigranDebuff, 'Should have a debuff flagged with isDisadvantage and grantedBy: race');
+    assert.ok(tigranDebuff.name.includes('Disadvantage'), 'Debuff name should include Disadvantage');
+  });
+
+  test('13. Movement speed modifiers (walk deltas and climb/swim/fly/burrow modes) apply and revert cleanly', async () => {
+    const actor = new DCCActor({
+      name: 'Speedster',
+      type: 'crawler',
+      system: {
+        attributes: {
+          size: 'Medium',
+          speed: { move: 20, climb: 0, swim: 0, fly: 0, burrow: 0 }
+        },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    // Arachnid grants Climb Move
+    await actor.applyRace('Arachnid');
+    assert.equal(actor.system.attributes.speed.climb, 20, 'Climb speed should be 20');
+
+    // Switch to Tigran (+10ft Move)
+    await actor.applyRace('Tigran');
+    assert.equal(actor.system.attributes.speed.climb, 0, 'Climb speed should revert to 0');
+    assert.equal(actor.system.attributes.speed.move, 30, 'Walk move should be 20 base + 10 Tigran delta = 30');
+
+    // Remove race reverts back to 20
+    await actor.removeRace();
+    assert.equal(actor.system.attributes.speed.move, 20, 'Walk move should revert to 20');
+    assert.equal(actor.system.attributes.speed.climb, 0);
+  });
+
+  test('14. DCCItemSheet._prepareContext populates rich structured preview for Race and Class items', async () => {
+    const raceItem = new DCCItem({
+      name: 'Amazonian',
+      type: 'race',
+      system: {
+        heritage: 'Earth',
+        size: 'Medium (4)',
+        perks: [
+          '+6 Strength',
+          '+3 Dexterity',
+          '+2 Bow, Endurance, and Pugilism Skills',
+          '+2 DR'
+        ]
+      }
+    });
+
+    const raceSheet = new DCCItemSheet(raceItem);
+    const raceContext = await raceSheet.getData();
+
+    assert.ok(raceContext.parsedBonuses);
+    assert.equal(raceContext.parsedBonuses.stats.str, 6);
+    assert.equal(raceContext.parsedBonuses.stats.dex, 3);
+    assert.equal(raceContext.parsedBonuses.drBonus, 2);
+    assert.equal(raceContext.parsedBonuses.skills.length, 3);
+    assert.equal(raceContext.heritage, 'Earth');
+    assert.equal(raceContext.size, 'Medium (4)');
+
+    const classItem = new DCCItem({
+      name: 'Boring Ol’ Fighter',
+      type: 'class',
+      system: {
+        classType: 'Fighter',
+        perks: [
+          '+2 Strength and Constitution',
+          '+3 Dodge Skill'
+        ]
+      }
+    });
+
+    const classSheet = new DCCItemSheet(classItem);
+    const classContext = await classSheet.getData();
+
+    assert.ok(classContext.parsedBonuses);
+    assert.equal(classContext.parsedBonuses.stats.str, 2);
+    assert.equal(classContext.parsedBonuses.stats.con, 2);
+    assert.equal(classContext.parsedBonuses.skills.length, 1);
+    assert.equal(classContext.parsedBonuses.skills[0].name, 'Dodge');
+    assert.equal(classContext.parsedBonuses.skills[0].rank, 3);
+    assert.equal(classContext.archetype, 'Fighter');
+  });
+
+  test('15. Swapping race and class cleans up all granted condition items and DR buffs without leftover side-effects', async () => {
+    const actor = new DCCActor({
+      name: 'Cleaner',
+      type: 'crawler',
+      system: {
+        attributes: {
+          size: 'Medium',
+          dr: { armor: 0, buffs: 0, total: 0 }
+        },
+        abilities: {
+          str: { value: 10, unenhanced: 10, mod: 4 },
+          dex: { value: 10, unenhanced: 10, mod: 4 },
+          con: { value: 10, unenhanced: 10, mod: 4 },
+          int: { value: 10, unenhanced: 10, mod: 4 },
+          cha: { value: 10, unenhanced: 10, mod: 4 }
+        },
+        details: { race: '', class: '' }
+      }
+    });
+
+    // Apply Cat (Advantage buff)
+    await actor.applyRace('Cat');
+    let catBuff = actor.items.find(i => i.type === 'buff' && i.getFlag('carl-rpg', 'grantedBy') === 'race');
+    assert.ok(catBuff, 'Cat buff should exist');
+
+    // Switch to Amazonian (DR +2, no buff)
+    await actor.applyRace('Amazonian');
+    catBuff = actor.items.find(i => i.type === 'buff' && i.getFlag('carl-rpg', 'grantedBy') === 'race');
+    assert.equal(catBuff, undefined, 'Previous race buff must be cleanly deleted');
+    assert.equal(actor.system.attributes.dr.buffs, 2, 'Amazonian DR buffs should be 2');
+
+    // Remove Amazonian
+    await actor.removeRace();
+    assert.equal(actor.system.attributes.dr.buffs, 0, 'DR buffs should revert to 0');
+    assert.equal(actor.system.abilities.str.value, 10, 'STR should revert to 10');
+  });
+
 });
+

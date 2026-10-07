@@ -263,12 +263,176 @@ export class DCCRaceClassApplier {
   }
 
   /**
+   * Parses passive Damage Resistance/Reduction from definition.
+   */
+  static parseDR(data) {
+    if (data?.system?.drBonus !== undefined && data.system.drBonus !== null && Number(data.system.drBonus) > 0) {
+      return Number(data.system.drBonus);
+    }
+    if (data?.drBonus !== undefined && data.drBonus !== null && Number(data.drBonus) > 0) {
+      return Number(data.drBonus);
+    }
+
+    const perks = Array.isArray(data?.system?.perks)
+      ? data.system.perks
+      : (Array.isArray(data?.perks) ? data.perks : []);
+
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+      const m = p.match(/^\+(\d+)\s+DR(?:\s+Buff)?/i) || p.match(/^\+(\d+)\s+Damage\s+Reduction/i);
+      if (m) {
+        return parseInt(m[1], 10);
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * Parses movement deltas and special movement modes (climb, swim, fly, burrow).
+   */
+  static parseMovement(data) {
+    const move = { walkDelta: 0, climb: 0, swim: 0, fly: 0, burrow: 0 };
+
+    if (data?.system?.movement && typeof data.system.movement === 'object') {
+      if (data.system.movement.walkDelta) move.walkDelta = Number(data.system.movement.walkDelta) || 0;
+      if (data.system.movement.climb) move.climb = Number(data.system.movement.climb) || 0;
+      if (data.system.movement.swim) move.swim = Number(data.system.movement.swim) || 0;
+      if (data.system.movement.fly) move.fly = Number(data.system.movement.fly) || 0;
+      if (data.system.movement.burrow) move.burrow = Number(data.system.movement.burrow) || 0;
+      return move;
+    }
+
+    const perks = Array.isArray(data?.system?.perks)
+      ? data.system.perks
+      : (Array.isArray(data?.perks) ? data.perks : []);
+
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+      const walkMatch = p.match(/^\+(\d+)ft\s+Move/i);
+      if (walkMatch) {
+        move.walkDelta += parseInt(walkMatch[1], 10);
+      }
+      if (/\bclimb\b/i.test(p) && !/Skill/i.test(p)) {
+        move.climb = 20;
+      }
+      if (/\bswim\b/i.test(p) && !/Skill/i.test(p)) {
+        move.swim = 20;
+      }
+      if (/\bburrow\b/i.test(p)) {
+        move.burrow = 20;
+      }
+      if (/\b(flight|fly|wings capable of flight)\b/i.test(p) && !/Spell/i.test(p)) {
+        move.fly = 20;
+      }
+    }
+
+    return move;
+  }
+
+  /**
+   * Parses Advantage (Buffs) and Disadvantage (Debuffs) conditions from perks.
+   */
+  static parseConditions(data, type = 'race') {
+    const buffs = [];
+    const debuffs = [];
+
+    const perks = Array.isArray(data?.system?.perks)
+      ? data.system.perks
+      : (Array.isArray(data?.perks) ? data.perks : []);
+
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+
+      // Advantage -> Custom Buff item
+      if (/\bAdvantage\b/i.test(p) && !/\bDisadvantage\b/i.test(p) && !/Troll-?type enemies have Advantage/i.test(p)) {
+        let title = 'Advantage on Checks';
+        const pLower = p.toLowerCase();
+        if (pLower.includes('cat-like reflexes')) title = 'Advantage: Feline Reflexes';
+        else if (pLower.includes('deception')) title = 'Advantage: Silent Deception';
+        else if (pLower.includes('intimidat')) title = 'Advantage: Menacing Presence';
+        else if (pLower.includes('escape artist')) title = 'Advantage: Slippery Contortionist';
+        else if (pLower.includes('earth') || pLower.includes('dirt')) title = 'Advantage: Earthen Affinity';
+        else if (pLower.includes('settlement')) title = 'Advantage: Cosmopolitan Charm';
+        else if (pLower.includes('int and con')) title = 'Advantage: Glacial Fortitude';
+        else if (pLower.includes('advancement')) title = 'Advantage: Skill Advancement';
+        else if (pLower.includes('ambush')) title = 'Advantage: Volcanic Ambush & Intimidation';
+        else if (pLower.includes('fear') || pLower.includes('respect')) title = 'Advantage: Ferocious Visage';
+        else if (pLower.includes('hunger') || pLower.includes('thirst')) title = 'Advantage: Scavenger Guts';
+        else if (pLower.includes('charisma')) title = 'Advantage: Unbearably Cute';
+        else if (pLower.includes('perception')) title = 'Advantage: Raptor Vision';
+        else if (pLower.includes('poison') || pLower.includes('shit-faced')) title = 'Advantage: Cast Iron Liver';
+        else if (pLower.includes('repair')) title = 'Advantage: Roadie Rigging';
+        else if (pLower.includes('higher position') || pLower.includes('higher ground')) title = 'Advantage: High Ground Bravado';
+        else if (pLower.includes('elemental creatures')) title = 'Advantage: Elemental Attunement';
+        else title = `Advantage: ${p.slice(0, 40)}`;
+
+        buffs.push({
+          name: title,
+          type: 'buff',
+          img: 'icons/svg/aura.svg',
+          system: {
+            buffType: 'special',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: `<p><strong>Advantage</strong>: ${p}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data.name,
+              isAdvantage: true,
+              condition: p
+            }
+          }
+        });
+      }
+
+      // Disadvantage -> Custom Debuff item
+      if (/\bDisadvantage\b/i.test(p) || /Troll-?type enemies have Advantage/i.test(p)) {
+        let title = 'Disadvantage on Checks';
+        const pLower = p.toLowerCase();
+        if (pLower.includes('felines')) title = 'Disadvantage: Uncanny Feline Valley';
+        else if (pLower.includes('fatigued')) title = 'Disadvantage: Cold-Blooded Torpor';
+        else if (pLower.includes('elves') || pLower.includes('fairies')) title = 'Disadvantage: Ancient Grudge';
+        else if (pLower.includes('dwarves') || pLower.includes('rat-kin')) title = 'Disadvantage: Highborn Arrogance';
+        else if (pLower.includes('conceal') || pLower.includes('stealth')) title = 'Disadvantage: Smoldering Presence';
+        else if (pLower.includes('fine manipulation') || pLower.includes('motor coordination')) title = 'Disadvantage: Clawed Clumsiness';
+        else if (pLower.includes('wrasslin') || pLower.includes('troll')) title = 'Disadvantage: Troll Bait';
+        else title = `Disadvantage: ${p.slice(0, 40)}`;
+
+        debuffs.push({
+          name: title,
+          type: 'debuff',
+          img: 'icons/svg/downgrade.svg',
+          system: {
+            severity: 'Minor',
+            duration: `Permanent (${type === 'race' ? 'Racial' : 'Class'})`,
+            description: `<p><strong>Disadvantage</strong>: ${p}</p>`
+          },
+          flags: {
+            'carl-rpg': {
+              grantedBy: type,
+              sourceName: data.name,
+              isDisadvantage: true,
+              condition: p
+            }
+          }
+        });
+      }
+    }
+
+    return { buffs, debuffs };
+  }
+
+  /**
    * Fully decomposes a race definition into applied bonuses.
    */
   static parseRaceBonuses(raceDef) {
     if (!raceDef) return null;
     const stats = this.parseStats(raceDef);
     const { skills, spells } = this.parseSkillsAndSpells(raceDef);
+    const drBonus = this.parseDR(raceDef);
+    const movement = this.parseMovement(raceDef);
+    const conditions = this.parseConditions(raceDef, 'race');
     const size = raceDef.system?.size || 'Medium (4)';
     const parsedSize = getSizeInfo(size);
 
@@ -279,7 +443,10 @@ export class DCCRaceClassApplier {
       sizeRaw: size,
       stats,
       skills,
-      spells
+      spells,
+      drBonus,
+      movement,
+      conditions
     };
   }
 
@@ -290,6 +457,9 @@ export class DCCRaceClassApplier {
     if (!classDef) return null;
     const stats = this.parseStats(classDef);
     const { skills, spells } = this.parseSkillsAndSpells(classDef);
+    const drBonus = this.parseDR(classDef);
+    const movement = this.parseMovement(classDef);
+    const conditions = this.parseConditions(classDef, 'class');
     const classType = classDef.system?.classType || 'Fighter';
 
     return {
@@ -297,7 +467,10 @@ export class DCCRaceClassApplier {
       classType,
       stats,
       skills,
-      spells
+      spells,
+      drBonus,
+      movement,
+      conditions
     };
   }
 
@@ -476,7 +649,41 @@ export class DCCRaceClassApplier {
       updates['system.attributes.size'] = orig;
     }
 
-    // 4. Revert Skills
+    // 4. Revert DR
+    if (applied?.drBonus) {
+      const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
+      updates['system.attributes.dr.buffs'] = Math.max(0, curDR - applied.drBonus);
+    }
+
+    // 5. Revert Movement
+    if (applied?.movement) {
+      if (applied.movement.walkDelta) {
+        const curMove = Number(actor.system?.attributes?.speed?.move) || 20;
+        updates['system.attributes.speed.move'] = curMove - applied.movement.walkDelta;
+      }
+      if (applied.movement.climb) updates['system.attributes.speed.climb'] = 0;
+      if (applied.movement.swim) updates['system.attributes.speed.swim'] = 0;
+      if (applied.movement.fly) updates['system.attributes.speed.fly'] = 0;
+      if (applied.movement.burrow) updates['system.attributes.speed.burrow'] = 0;
+    }
+
+    // 6. Delete Condition Items (Buffs & Debuffs)
+    const condIdsToDelete = [];
+    if (Array.isArray(applied?.conditionItemIds)) {
+      condIdsToDelete.push(...applied.conditionItemIds);
+    }
+    if (actor.items) {
+      for (const item of actor.items) {
+        if (['buff', 'debuff'].includes(item.type) && item.getFlag?.('carl-rpg', 'grantedBy') === 'race') {
+          if (!condIdsToDelete.includes(item.id)) condIdsToDelete.push(item.id);
+        }
+      }
+    }
+    if (condIdsToDelete.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
+      await actor.deleteEmbeddedDocuments('Item', condIdsToDelete);
+    }
+
+    // 7. Revert Skills
     if (Array.isArray(applied?.skills)) {
       const itemsToDelete = [];
       for (const s of applied.skills) {
@@ -506,7 +713,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 5. Revert Spells
+    // 8. Revert Spells
     if (Array.isArray(applied?.spells)) {
       const spellsToDelete = [];
       for (const sp of applied.spells) {
@@ -533,18 +740,18 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 6. Delete embedded Race Item documents
+    // 9. Delete embedded Race Item documents
     const raceItems = actor.items?.filter?.(i => i.type === 'race') || [];
     if (raceItems.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
       await actor.deleteEmbeddedDocuments('Item', raceItems.map(i => i.id));
     }
 
-    // 7. Clear flag
+    // 10. Clear flag
     if (typeof actor.unsetFlag === 'function') {
       await actor.unsetFlag('carl-rpg', 'appliedRace');
     }
 
-    // 8. Commit actor updates
+    // 11. Commit actor updates
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
     }
@@ -599,7 +806,25 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 4. Apply Granted Skills
+    // 4. Apply DR
+    if (bonuses.drBonus) {
+      const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
+      updates['system.attributes.dr.buffs'] = curDR + bonuses.drBonus;
+    }
+
+    // 5. Apply Movement
+    if (bonuses.movement) {
+      if (bonuses.movement.walkDelta) {
+        const curMove = Number(actor.system?.attributes?.speed?.move) || 20;
+        updates['system.attributes.speed.move'] = curMove + bonuses.movement.walkDelta;
+      }
+      if (bonuses.movement.climb) updates['system.attributes.speed.climb'] = bonuses.movement.climb;
+      if (bonuses.movement.swim) updates['system.attributes.speed.swim'] = bonuses.movement.swim;
+      if (bonuses.movement.fly) updates['system.attributes.speed.fly'] = bonuses.movement.fly;
+      if (bonuses.movement.burrow) updates['system.attributes.speed.burrow'] = bonuses.movement.burrow;
+    }
+
+    // 6. Apply Granted Skills
     const appliedSkills = [];
     for (const s of bonuses.skills) {
       const existing = actor.items?.find?.(i => i.type === 'skill' && normalizeKey(i.name) === normalizeKey(s.name));
@@ -617,9 +842,12 @@ export class DCCRaceClassApplier {
             system: {
               rank: s.rank,
               stat: skillDoc?.system?.stat || 'str',
-              skillType: skillDoc?.system?.skillType || 'Utility',
+              skillType: skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
+              type: skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
               category: skillDoc?.system?.category || 'Combat',
-              isPassive: Boolean(s.isPassive)
+              notes: skillDoc?.system?.notes || '',
+              upgrades: skillDoc?.system?.upgrades || '',
+              isPassive: Boolean(s.isPassive || skillDoc?.system?.isPassive)
             },
             flags: {
               'carl-rpg': {
@@ -632,7 +860,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 5. Apply Granted Spells
+    // 7. Apply Granted Spells
     const appliedSpells = [];
     for (const sp of bonuses.spells) {
       const existing = actor.items?.find?.(i => i.type === 'spell' && normalizeKey(i.name) === normalizeKey(sp.name));
@@ -649,7 +877,12 @@ export class DCCRaceClassApplier {
             img: spellDoc?.img || 'icons/svg/lightning.svg',
             system: {
               rank: sp.rank,
-              mpCost: spellDoc?.system?.mpCost || sp.mpCost || 0
+              stat: spellDoc?.system?.stat || 'int',
+              manaCost: spellDoc?.system?.manaCost || sp.mpCost || 0,
+              range: spellDoc?.system?.range || 'Self',
+              duration: spellDoc?.system?.duration || 'Instantaneous',
+              spellType: spellDoc?.system?.spellType || 'Attack',
+              description: spellDoc?.system?.description || ''
             },
             flags: {
               'carl-rpg': {
@@ -662,7 +895,20 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 6. Embed Race Item Document
+    // 8. Apply Advantage & Disadvantage as Custom Buffs & Debuffs
+    const conditionItemsToCreate = [
+      ...(bonuses.conditions?.buffs || []),
+      ...(bonuses.conditions?.debuffs || [])
+    ];
+    const createdConditionIds = [];
+    if (conditionItemsToCreate.length > 0 && typeof actor.createEmbeddedDocuments === 'function') {
+      const created = await actor.createEmbeddedDocuments('Item', conditionItemsToCreate);
+      for (const doc of (created || [])) {
+        if (doc?.id) createdConditionIds.push(doc.id);
+      }
+    }
+
+    // 9. Embed Race Item Document
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -672,7 +918,10 @@ export class DCCRaceClassApplier {
         system: {
           ...(def.system || {}),
           heritage: bonuses.heritage,
-          size: bonuses.sizeRaw || `${bonuses.size} (4)`
+          size: bonuses.sizeRaw || `${bonuses.size} (4)`,
+          drBonus: bonuses.drBonus,
+          movement: bonuses.movement,
+          stats: bonuses.stats
         },
         flags: {
           'carl-rpg': {
@@ -683,11 +932,14 @@ export class DCCRaceClassApplier {
       embeddedId = embedded?.id;
     }
 
-    // 7. Store Applied Race Metadata Flag
+    // 10. Store Applied Race Metadata Flag
     if (typeof actor.setFlag === 'function') {
       await actor.setFlag('carl-rpg', 'appliedRace', {
         name: def.name,
         stats: bonuses.stats,
+        drBonus: bonuses.drBonus,
+        movement: bonuses.movement,
+        conditionItemIds: createdConditionIds,
         skills: appliedSkills,
         spells: appliedSpells,
         size: bonuses.size,
@@ -696,7 +948,7 @@ export class DCCRaceClassApplier {
       });
     }
 
-    // 8. Commit Actor Updates
+    // 11. Commit Actor Updates
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
     }
@@ -756,7 +1008,41 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 3. Revert Skills
+    // 3. Revert DR
+    if (applied?.drBonus) {
+      const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
+      updates['system.attributes.dr.buffs'] = Math.max(0, curDR - applied.drBonus);
+    }
+
+    // 4. Revert Movement
+    if (applied?.movement) {
+      if (applied.movement.walkDelta) {
+        const curMove = Number(actor.system?.attributes?.speed?.move) || 20;
+        updates['system.attributes.speed.move'] = curMove - applied.movement.walkDelta;
+      }
+      if (applied.movement.climb) updates['system.attributes.speed.climb'] = 0;
+      if (applied.movement.swim) updates['system.attributes.speed.swim'] = 0;
+      if (applied.movement.fly) updates['system.attributes.speed.fly'] = 0;
+      if (applied.movement.burrow) updates['system.attributes.speed.burrow'] = 0;
+    }
+
+    // 5. Delete Condition Items (Buffs & Debuffs)
+    const condIdsToDelete = [];
+    if (Array.isArray(applied?.conditionItemIds)) {
+      condIdsToDelete.push(...applied.conditionItemIds);
+    }
+    if (actor.items) {
+      for (const item of actor.items) {
+        if (['buff', 'debuff'].includes(item.type) && item.getFlag?.('carl-rpg', 'grantedBy') === 'class') {
+          if (!condIdsToDelete.includes(item.id)) condIdsToDelete.push(item.id);
+        }
+      }
+    }
+    if (condIdsToDelete.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
+      await actor.deleteEmbeddedDocuments('Item', condIdsToDelete);
+    }
+
+    // 6. Revert Skills
     if (Array.isArray(applied?.skills)) {
       const itemsToDelete = [];
       for (const s of applied.skills) {
@@ -786,7 +1072,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 4. Revert Spells
+    // 7. Revert Spells
     if (Array.isArray(applied?.spells)) {
       const spellsToDelete = [];
       for (const sp of applied.spells) {
@@ -813,18 +1099,18 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 5. Delete embedded Class Item documents
+    // 8. Delete embedded Class Item documents
     const classItems = actor.items?.filter?.(i => i.type === 'class') || [];
     if (classItems.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
       await actor.deleteEmbeddedDocuments('Item', classItems.map(i => i.id));
     }
 
-    // 6. Clear flag
+    // 9. Clear flag
     if (typeof actor.unsetFlag === 'function') {
       await actor.unsetFlag('carl-rpg', 'appliedClass');
     }
 
-    // 7. Commit actor updates
+    // 10. Commit actor updates
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
     }
@@ -874,7 +1160,25 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 4. Apply Granted Skills
+    // 4. Apply DR
+    if (bonuses.drBonus) {
+      const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
+      updates['system.attributes.dr.buffs'] = curDR + bonuses.drBonus;
+    }
+
+    // 5. Apply Movement
+    if (bonuses.movement) {
+      if (bonuses.movement.walkDelta) {
+        const curMove = Number(actor.system?.attributes?.speed?.move) || 20;
+        updates['system.attributes.speed.move'] = curMove + bonuses.movement.walkDelta;
+      }
+      if (bonuses.movement.climb) updates['system.attributes.speed.climb'] = bonuses.movement.climb;
+      if (bonuses.movement.swim) updates['system.attributes.speed.swim'] = bonuses.movement.swim;
+      if (bonuses.movement.fly) updates['system.attributes.speed.fly'] = bonuses.movement.fly;
+      if (bonuses.movement.burrow) updates['system.attributes.speed.burrow'] = bonuses.movement.burrow;
+    }
+
+    // 6. Apply Granted Skills
     const appliedSkills = [];
     for (const s of bonuses.skills) {
       const existing = actor.items?.find?.(i => i.type === 'skill' && normalizeKey(i.name) === normalizeKey(s.name));
@@ -892,9 +1196,12 @@ export class DCCRaceClassApplier {
             system: {
               rank: s.rank,
               stat: skillDoc?.system?.stat || 'str',
-              skillType: skillDoc?.system?.skillType || 'Utility',
+              skillType: skillDoc?.system?.skillType || skillDoc?.system?.type || 'Utility',
+              type: skillDoc?.system?.type || skillDoc?.system?.skillType || 'Utility',
               category: skillDoc?.system?.category || 'Combat',
-              isPassive: Boolean(s.isPassive)
+              notes: skillDoc?.system?.notes || '',
+              upgrades: skillDoc?.system?.upgrades || '',
+              isPassive: Boolean(s.isPassive || skillDoc?.system?.isPassive)
             },
             flags: {
               'carl-rpg': {
@@ -907,7 +1214,7 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 5. Apply Granted Spells
+    // 7. Apply Granted Spells
     const appliedSpells = [];
     for (const sp of bonuses.spells) {
       const existing = actor.items?.find?.(i => i.type === 'spell' && normalizeKey(i.name) === normalizeKey(sp.name));
@@ -924,7 +1231,12 @@ export class DCCRaceClassApplier {
             img: spellDoc?.img || 'icons/svg/lightning.svg',
             system: {
               rank: sp.rank,
-              mpCost: spellDoc?.system?.mpCost || sp.mpCost || 0
+              stat: spellDoc?.system?.stat || 'int',
+              manaCost: spellDoc?.system?.manaCost || sp.mpCost || 0,
+              range: spellDoc?.system?.range || 'Self',
+              duration: spellDoc?.system?.duration || 'Instantaneous',
+              spellType: spellDoc?.system?.spellType || 'Attack',
+              description: spellDoc?.system?.description || ''
             },
             flags: {
               'carl-rpg': {
@@ -937,7 +1249,20 @@ export class DCCRaceClassApplier {
       }
     }
 
-    // 6. Embed Class Item Document
+    // 8. Apply Advantage & Disadvantage as Custom Buffs & Debuffs
+    const conditionItemsToCreate = [
+      ...(bonuses.conditions?.buffs || []),
+      ...(bonuses.conditions?.debuffs || [])
+    ];
+    const createdConditionIds = [];
+    if (conditionItemsToCreate.length > 0 && typeof actor.createEmbeddedDocuments === 'function') {
+      const created = await actor.createEmbeddedDocuments('Item', conditionItemsToCreate);
+      for (const doc of (created || [])) {
+        if (doc?.id) createdConditionIds.push(doc.id);
+      }
+    }
+
+    // 9. Embed Class Item Document
     let embeddedId = null;
     if (typeof actor.createEmbeddedDocuments === 'function') {
       const [embedded] = await actor.createEmbeddedDocuments('Item', [{
@@ -946,7 +1271,10 @@ export class DCCRaceClassApplier {
         img: def.img || 'icons/default-icons/class.svg',
         system: {
           ...(def.system || {}),
-          classType: bonuses.classType
+          classType: bonuses.classType,
+          drBonus: bonuses.drBonus,
+          movement: bonuses.movement,
+          stats: bonuses.stats
         },
         flags: {
           'carl-rpg': {
@@ -957,18 +1285,21 @@ export class DCCRaceClassApplier {
       embeddedId = embedded?.id;
     }
 
-    // 7. Store Applied Class Metadata Flag
+    // 10. Store Applied Class Metadata Flag
     if (typeof actor.setFlag === 'function') {
       await actor.setFlag('carl-rpg', 'appliedClass', {
         name: def.name,
         stats: bonuses.stats,
+        drBonus: bonuses.drBonus,
+        movement: bonuses.movement,
+        conditionItemIds: createdConditionIds,
         skills: appliedSkills,
         spells: appliedSpells,
         itemId: embeddedId
       });
     }
 
-    // 8. Commit Actor Updates
+    // 11. Commit Actor Updates
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
     }

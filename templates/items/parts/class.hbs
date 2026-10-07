@@ -1,0 +1,187 @@
+{{!-- CLASS ITEM SHEET PARTIAL --}}
+<div class="dcc-class-sheet">
+  {{!-- HEADER METADATA BADGES & SETTINGS --}}
+  <div class="dcc-field-row" style="margin-bottom: 8px;">
+    <div class="dcc-field-group small">
+      <span class="dcc-field-label">Archetype</span>
+      <input class="dcc-field-input" type="text" name="system.classType" value="{{#if archetype}}{{archetype}}{{else}}{{system.classType}}{{/if}}" placeholder="Fighter" style="font-weight: bold; font-family: 'Oswald', sans-serif;" />
+    </div>
+    <div class="dcc-field-group small" style="max-width: 90px;">
+      <span class="dcc-field-label">DR Bonus</span>
+      <input class="dcc-field-input" type="number" name="system.drBonus" value="{{#if parsedBonuses.drBonus}}{{parsedBonuses.drBonus}}{{else}}{{system.drBonus}}{{/if}}" placeholder="0" />
+    </div>
+    <div class="dcc-field-group small" style="max-width: 110px;">
+      <span class="dcc-field-label">Walk Move (+/-)</span>
+      <input class="dcc-field-input" type="number" name="system.movement.walkDelta" value="{{#if parsedBonuses.movement.walkDelta}}{{parsedBonuses.movement.walkDelta}}{{else}}{{system.movement.walkDelta}}{{/if}}" placeholder="+0ft" />
+    </div>
+  </div>
+
+  {{!-- MOVEMENT MODES PILLS --}}
+  {{#if (or parsedBonuses.movement.climb parsedBonuses.movement.swim parsedBonuses.movement.fly parsedBonuses.movement.burrow system.movement.climb system.movement.swim system.movement.fly system.movement.burrow)}}
+  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+    {{#if (or parsedBonuses.movement.climb system.movement.climb)}}
+      <span class="dcc-badge" style="background: #27ae60; color: #fff; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px;">
+        <i class="fa-solid fa-person-climbing"></i> Climb Speed: {{#if parsedBonuses.movement.climb}}{{parsedBonuses.movement.climb}}{{else}}{{system.movement.climb}}{{/if}} ft
+      </span>
+    {{/if}}
+    {{#if (or parsedBonuses.movement.swim system.movement.swim)}}
+      <span class="dcc-badge" style="background: #2980b9; color: #fff; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px;">
+        <i class="fa-solid fa-person-swimming"></i> Swim Speed: {{#if parsedBonuses.movement.swim}}{{parsedBonuses.movement.swim}}{{else}}{{system.movement.swim}}{{/if}} ft
+      </span>
+    {{/if}}
+    {{#if (or parsedBonuses.movement.fly system.movement.fly)}}
+      <span class="dcc-badge" style="background: #8e44ad; color: #fff; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px;">
+        <i class="fa-solid fa-feather-pointed"></i> Flight Speed: {{#if parsedBonuses.movement.fly}}{{parsedBonuses.movement.fly}}{{else}}{{system.movement.fly}}{{/if}} ft
+      </span>
+    {{/if}}
+    {{#if (or parsedBonuses.movement.burrow system.movement.burrow)}}
+      <span class="dcc-badge" style="background: #d35400; color: #fff; padding: 2px 6px; font-size: 11px; font-weight: bold; border-radius: 3px;">
+        <i class="fa-solid fa-mound"></i> Burrow Speed: {{#if parsedBonuses.movement.burrow}}{{parsedBonuses.movement.burrow}}{{else}}{{system.movement.burrow}}{{/if}} ft
+      </span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- PREREQUISITES --}}
+  {{#if prerequisites}}
+  <div style="background: #fff8e1; border-left: 4px solid #f39c12; padding: 6px 10px; margin-bottom: 8px; font-size: 12px;">
+    <strong><i class="fa-solid fa-triangle-exclamation"></i> Prerequisites:</strong> {{prerequisites}}
+  </div>
+  {{/if}}
+
+  {{!-- STAT MODIFIERS DISPLAY --}}
+  <div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #c0392b;">
+    <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #c0392b;">
+      <span><i class="fa-solid fa-bolt"></i> CLASS ABILITY STAT MODIFIERS</span>
+      <span style="font-size: 10px; color: #fff; font-weight: normal;">Applied directly to Crawler Core Stats</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px; background: #fbfbfb;">
+      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">STR</div>
+        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.str}}#c0392b{{else}}#777{{/if}};">
+          {{#if parsedBonuses.stats.str}}{{#if (gte parsedBonuses.stats.str 1)}}+{{/if}}{{parsedBonuses.stats.str}}{{else}}+0{{/if}}
+        </div>
+      </div>
+      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">DEX</div>
+        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.dex}}#c0392b{{else}}#777{{/if}};">
+          {{#if parsedBonuses.stats.dex}}{{#if (gte parsedBonuses.stats.dex 1)}}+{{/if}}{{parsedBonuses.stats.dex}}{{else}}+0{{/if}}
+        </div>
+      </div>
+      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">CON</div>
+        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.con}}#c0392b{{else}}#777{{/if}};">
+          {{#if parsedBonuses.stats.con}}{{#if (gte parsedBonuses.stats.con 1)}}+{{/if}}{{parsedBonuses.stats.con}}{{else}}+0{{/if}}
+        </div>
+      </div>
+      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">INT</div>
+        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.int}}#c0392b{{else}}#777{{/if}};">
+          {{#if parsedBonuses.stats.int}}{{#if (gte parsedBonuses.stats.int 1)}}+{{/if}}{{parsedBonuses.stats.int}}{{else}}+0{{/if}}
+        </div>
+      </div>
+      <div style="text-align: center; border: 1px solid #ccc; background: #fff; padding: 4px; border-radius: 3px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #555;">CHA</div>
+        <div style="font-size: 16px; font-weight: bold; color: {{#if parsedBonuses.stats.cha}}#c0392b{{else}}#777{{/if}};">
+          {{#if parsedBonuses.stats.cha}}{{#if (gte parsedBonuses.stats.cha 1)}}+{{/if}}{{parsedBonuses.stats.cha}}{{else}}+0{{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{!-- GRANTED SKILLS & SPELLS --}}
+  {{#if (or parsedBonuses.skills.length parsedBonuses.spells.length)}}
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+    {{#if parsedBonuses.skills.length}}
+    <div style="border: 1px solid #27ae60; background: #fff; border-radius: 3px; overflow: hidden;">
+      <div style="background: #27ae60; color: #fff; font-family: 'Oswald', sans-serif; font-size: 11px; padding: 3px 6px;">
+        <i class="fa-solid fa-award"></i> GRANTED SKILLS
+      </div>
+      <div style="padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+        {{#each parsedBonuses.skills as |sk|}}
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f0f9f2; border: 1px solid #c3e6cb; padding: 3px 6px; border-radius: 3px; font-size: 11px;">
+            <span style="font-weight: bold; color: #155724;">{{sk.name}}</span>
+            <span style="background: #27ae60; color: #fff; font-weight: bold; padding: 1px 5px; border-radius: 2px;">+{{sk.rank}}</span>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if parsedBonuses.spells.length}}
+    <div style="border: 1px solid #2980b9; background: #fff; border-radius: 3px; overflow: hidden;">
+      <div style="background: #2980b9; color: #fff; font-family: 'Oswald', sans-serif; font-size: 11px; padding: 3px 6px;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> GRANTED SPELLS
+      </div>
+      <div style="padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+        {{#each parsedBonuses.spells as |sp|}}
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #eaf2f8; border: 1px solid #bee5eb; padding: 3px 6px; border-radius: 3px; font-size: 11px;">
+            <span style="font-weight: bold; color: #0c5460;">{{sp.name}}</span>
+            <span style="background: #2980b9; color: #fff; font-weight: bold; padding: 1px 5px; border-radius: 2px;">Rank {{sp.rank}}</span>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- ADVANTAGE & DISADVANTAGE CONDITIONS --}}
+  {{#if (or parsedBonuses.conditions.buffs.length parsedBonuses.conditions.debuffs.length)}}
+  <div style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;">
+    {{#if parsedBonuses.conditions.buffs.length}}
+      <div style="border: 1px solid #2ecc71; background: #fafffb; border-radius: 3px; padding: 6px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #27ae60; font-weight: bold; margin-bottom: 4px;">
+          <i class="fa-solid fa-angles-up"></i> ADVANTAGE CONDITIONS (BUFFS EMBEDDED)
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          {{#each parsedBonuses.conditions.buffs as |b|}}
+            <div style="background: #e8f8f0; border-left: 3px solid #2ecc71; padding: 4px 6px; font-size: 11px;">
+              <strong>{{b.name}}:</strong> {{{b.system.description}}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+
+    {{#if parsedBonuses.conditions.debuffs.length}}
+      <div style="border: 1px solid #e74c3c; background: #fffcfc; border-radius: 3px; padding: 6px;">
+        <div style="font-family: 'Oswald', sans-serif; font-size: 11px; color: #c0392b; font-weight: bold; margin-bottom: 4px;">
+          <i class="fa-solid fa-angles-down"></i> DISADVANTAGE CONDITIONS (DEBUFFS EMBEDDED)
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          {{#each parsedBonuses.conditions.debuffs as |d|}}
+            <div style="background: #fdedec; border-left: 3px solid #e74c3c; padding: 4px 6px; font-size: 11px;">
+              <strong>{{d.name}}:</strong> {{{d.system.description}}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- PERKS & FEATURES LIST --}}
+  {{#if perksList.length}}
+  <div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #333;">
+    <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; background: #333;">
+      <span><i class="fa-solid fa-star"></i> CLASS PERKS & TRAITS</span>
+    </div>
+    <ul style="margin: 0; padding: 6px 6px 6px 20px; background: #fafafa; font-size: 12px; line-height: 1.4;">
+      {{#each perksList as |pk|}}
+        <li style="margin-bottom: 3px;">{{pk}}</li>
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+
+  {{!-- RAW ABILITIES / LORE EDITABLE FIELDS --}}
+  <div class="dcc-field-group" style="margin-bottom: 8px;">
+    <span class="dcc-field-label">Special Abilities & Mechanics</span>
+    <textarea class="dcc-field-input" name="system.abilities" style="height: 100px;">{{system.abilities}}</textarea>
+  </div>
+  <div class="dcc-field-group">
+    <span class="dcc-field-label">Description & Lore</span>
+    <textarea class="dcc-field-input" name="system.description" style="height: 90px;">{{system.description}}</textarea>
+  </div>
+</div>

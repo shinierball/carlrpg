@@ -21,7 +21,7 @@
           "mana": { "value": 10, "max": 10 },
           "evade": { "items": 0, "buffs": 0, "total": 4 },
           "dr": { "armor": 0, "items": 0, "buffs": 0, "total": 0 },
-          "speed": { "move": 20, "step": 10 },
+          "speed": { "move": 20, "step": 10, "climb": 0, "swim": 0, "fly": 0, "burrow": 0 },
           "aiFavor": 0,
           "size": "Medium",
           "debuffs": "",
@@ -340,10 +340,52 @@
       "notes": ""
     },
     "race": {
+      "heritage": "Earth",
+      "size": "Medium (4)",
+      "prerequisites": "",
+      "drBonus": 0,
+      "movement": {
+        "walkDelta": 0,
+        "climb": 0,
+        "swim": 0,
+        "fly": 0,
+        "burrow": 0
+      },
+      "stats": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "cha": 0
+      },
+      "skills": [],
+      "spells": [],
+      "perks": [],
       "abilities": "",
       "description": ""
     },
     "class": {
+      "classType": "Fighter",
+      "archetype": "Fighter",
+      "prerequisites": "",
+      "drBonus": 0,
+      "movement": {
+        "walkDelta": 0,
+        "climb": 0,
+        "swim": 0,
+        "fly": 0,
+        "burrow": 0
+      },
+      "stats": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "cha": 0
+      },
+      "skills": [],
+      "spells": [],
+      "perks": [],
       "abilities": "",
       "description": ""
     },

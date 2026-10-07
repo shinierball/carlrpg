@@ -154,10 +154,10 @@ describe('DCC RPG Spell Actions & Damage Rolls', () => {
     assert.equal(r10.dice, '3d12');
     assert.equal(r10.formula, '3d12 + 1d10 + 4');
 
-    // Rank 15: 4d12 + 1d12 + 4
+    // Rank 15: 4d12 + 1d8 + 1d6 + 4
     const r15 = crawler.getSpellDamageData(createFireballAtRank(15));
     assert.equal(r15.dice, '4d12');
-    assert.equal(r15.formula, '4d12 + 1d12 + 4');
+    assert.equal(r15.formula, '4d12 + 1d8 + 1d6 + 4');
   });
 
   test('rollSpellDamage generates interactive damage card with flags and action buttons', async () => {

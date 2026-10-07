@@ -91,6 +91,145 @@ export const DAMAGE_EFFECT_AI_FAVOR = {
 };
 
 /**
+ * Structured configurations for canonical DCC RPG combat techniques and damage effects.
+ * Used for dynamic damage resolution and fallback defaults.
+ */
+export const DEFAULT_TECHNIQUE_CONFIGS = {
+  'iron punch': {
+    isDamageEffect: true,
+    appliesToTags: ['pugilism', 'unarmed', 'hand to hand'],
+    baseDiceCountMod: '+1',
+    damageBonus: '1d2',
+    damageType: 'Physical',
+    rankBreaks: {
+      rank5: { baseDiceCountMod: '+1', rankDamageDice: 1, notes: 'Add 1 Rank damage die' },
+      rank10: { baseDiceCountMod: '+1', rankDamageDice: 0, debuff: 'Stunned', notes: 'Target gains Stunned Debuff' },
+      rank15: { baseDiceCountMod: '+1', rankDamageDice: 1, debuff: 'Stunned', notes: 'Add 1 Rank damage die and target gains Stunned Debuff' }
+    }
+  },
+  'powerful strike': {
+    isDamageEffect: true,
+    appliesToTags: ['foot soldier', 'noggin knocker', 'noggin nocker', 'pugilism', 'unarmed', 'hand to hand', 'melee'],
+    baseDiceCountMod: '* @rank',
+    damageBonus: '1d6',
+    damageType: '',
+    cooldown: '30 hours',
+    rankBreaks: {
+      rank5: { notes: 'Cooldown: 10 hours' },
+      rank10: { notes: 'Cooldown: 5 hours' },
+      rank15: { notes: 'Cooldown: 2 hours' }
+    }
+  },
+  'skullcracker': {
+    isDamageEffect: true,
+    appliesToTags: ['noggin knocker', 'noggin nocker', 'unarmed', 'hand to hand'],
+    baseDiceCountMod: '+1',
+    damageBonus: '1d4',
+    damageType: 'Physical',
+    rankBreaks: {
+      rank5: { baseDiceCountMod: '+1', notes: '+1d4 base damage' },
+      rank10: { rankDamageDice: 1, debuff: 'Stunned', notes: 'Add 1 Rank damage die and Stunned Debuff' },
+      rank15: { rankDamageDice: 1, debuff: 'Blood Trail', notes: 'Add 1 Rank damage die and Blood Trail Debuff' }
+    }
+  },
+  'toss': {
+    isDamageEffect: true,
+    appliesToTags: ['wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    damageBonus: '1d8',
+    damageType: 'Bludgeoning',
+    stat: 'str',
+    notes: 'Deal +1d8 base damage + Str Bludgeoning, end Held Debuff, and throw target'
+  },
+  'dirty fighting': {
+    isDamageEffect: true,
+    appliesToTags: ['pugilism', 'wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    debuffName: 'Woozy',
+    rankBreaks: {
+      rank5: { debuff: 'The Taint' },
+      rank10: { debuff: 'Blinded' }
+    }
+  },
+  'smush': {
+    isDamageEffect: true,
+    appliesToTags: ['foot soldier', 'unarmed', 'hand to hand'],
+    cooldown: '1/round',
+    notes: 'Deal ×2 total damage if target has 20% Health Bar or less'
+  },
+  'choke out': {
+    isDamageEffect: true,
+    appliesToTags: ['wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    notes: 'Deal ×2 total damage if target is at 10% Health Bar or less'
+  }
+};
+
+/**
+ * Safely evaluates a numeric modifier string or formula against a base numeric value and rank.
+ * Supports:
+ * - "+1", "-2", "3" (addition/subtraction)
+ * - "* @rank", "* 2" (multiplication)
+ * - "/ 2" (division)
+ *
+ * @param {number} baseValue
+ * @param {string|number} modString
+ * @param {number} [rank=1]
+ * @returns {number}
+ */
+export function evaluateModifier(baseOrMod, modOrContext, rankOrNothing = 1) {
+  let baseValue = 0;
+  let modString = baseOrMod;
+  let rank = 1;
+
+  if (typeof baseOrMod === 'number' && (typeof modOrContext === 'string' || typeof modOrContext === 'number' || modOrContext === null || modOrContext === undefined)) {
+    baseValue = baseOrMod;
+    modString = modOrContext;
+    rank = typeof rankOrNothing === 'number' ? rankOrNothing : (rankOrNothing?.rank ?? 1);
+  } else {
+    modString = baseOrMod;
+    if (typeof modOrContext === 'object' && modOrContext !== null) {
+      rank = Number(modOrContext.rank) || 1;
+      baseValue = Number(modOrContext.base) || 0;
+    } else if (typeof modOrContext === 'number') {
+      rank = modOrContext;
+    }
+  }
+
+  if (modString === undefined || modString === null || modString === '') return baseValue;
+  if (typeof modString === 'number') {
+    return Number.isFinite(modString) ? (baseValue !== 0 ? baseValue + modString : modString) : baseValue;
+  }
+  const clean = String(modString).replace(/@rank/gi, String(Math.max(1, rank))).trim();
+  if (!clean) return baseValue;
+
+  if (clean.startsWith('*')) {
+    const mult = parseFloat(clean.slice(1).trim());
+    return Number.isFinite(mult) ? Math.max(1, Math.round((baseValue || 1) * mult)) : baseValue;
+  }
+  if (clean.startsWith('/')) {
+    const div = parseFloat(clean.slice(1).trim());
+    return (Number.isFinite(div) && div !== 0) ? Math.max(1, Math.round((baseValue || 1) / div)) : baseValue;
+  }
+
+  const mathMatch = clean.match(/^(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)$/);
+  if (mathMatch) {
+    const a = parseFloat(mathMatch[1]);
+    const op = mathMatch[2];
+    const b = parseFloat(mathMatch[3]);
+    let res = 0;
+    if (op === '+') res = a + b;
+    else if (op === '-') res = a - b;
+    else if (op === '*') res = a * b;
+    else if (op === '/' && b !== 0) res = a / b;
+    return Math.round(res);
+  }
+
+  const num = parseFloat(clean.replace(/^\+/, ''));
+  if (Number.isFinite(num)) {
+    return baseValue !== 0 ? Math.max(0, baseValue + num) : num;
+  }
+  return baseValue;
+}
+
+/**
  * Determines whether a gear item functions as an attack / weapon.
  * Recognized if:
  * 1. Explicitly marked as weapon (system.isWeapon === true)
@@ -1375,7 +1514,7 @@ export class DCCActor extends BaseActor {
     // 2. Canonical mapping by attackItem.name
     const normName = (attackItem.name || '').toLowerCase().trim();
     if (CANONICAL_DAMAGE_EFFECTS[normName]) {
-      return [...CANONICAL_DAMAGE_EFFECTS[normName]];
+      effects.push(...CANONICAL_DAMAGE_EFFECTS[normName]);
     }
 
     // 3. Check matching skill if attackItem is not a skill itself
@@ -1384,17 +1523,168 @@ export class DCCActor extends BaseActor {
     if (matchingSkill) {
       const msNorm = (matchingSkill.name || '').toLowerCase().trim();
       if (CANONICAL_DAMAGE_EFFECTS[msNorm]) {
-        return [...CANONICAL_DAMAGE_EFFECTS[msNorm]];
+        effects.push(...CANONICAL_DAMAGE_EFFECTS[msNorm]);
       }
       const msSys = matchingSkill.system || {};
       if (Array.isArray(msSys.optionalEffects) && msSys.optionalEffects.length > 0) {
-        return [...new Set(msSys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean))];
+        effects.push(...msSys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean));
       } else if (typeof msSys.optionalEffects === 'string' && msSys.optionalEffects.trim()) {
-        return [...new Set(msSys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean))];
+        effects.push(...msSys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean));
       }
     }
 
-    return [];
+    // 4. Dynamic discovery from owned skills configured as techniques / damage effects
+    const attackTags = [
+      normName,
+      ...(Array.isArray(sys.tags) ? sys.tags : []),
+      (sys.weaponCategory || '').toLowerCase(),
+      (sys.weaponType || '').toLowerCase(),
+      (sys.skillType || sys.type || '').toLowerCase(),
+      (sys.category || '').toLowerCase()
+    ].map(t => String(t).toLowerCase().trim()).filter(Boolean);
+
+    for (const s of skills) {
+      const sSys = s.system || {};
+      const isTech = sSys.isTechnique === true || sSys.techniqueConfig?.isDamageEffect === true;
+      const cType = (sSys.checkType || '').toLowerCase();
+      if (!isTech && !cType.includes('damage effect')) continue;
+
+      const rawApplies = [
+        ...(Array.isArray(sSys.appliesTo) ? sSys.appliesTo : (typeof sSys.appliesTo === 'string' ? sSys.appliesTo.split(',') : [])),
+        ...(Array.isArray(sSys.techniqueConfig?.appliesToTags) ? sSys.techniqueConfig.appliesToTags : (typeof sSys.techniqueConfig?.appliesToTags === 'string' ? sSys.techniqueConfig.appliesToTags.split(',') : []))
+      ];
+
+      const appliesTo = rawApplies.map(a => String(a).toLowerCase().trim()).filter(Boolean);
+      const applies = appliesTo.some(a => attackTags.includes(a) || attackTags.some(t => t.includes(a) || a.includes(t)));
+      if (applies && s.name) {
+        effects.push(s.name.trim());
+      }
+    }
+
+    return [...new Set(effects)];
+  }
+
+  /**
+   * Dynamically resolves a Damage Effect item, its active rank, technique configuration,
+   * rank breaks, and calculated bonuses for a skill or attack.
+   *
+   * @param {string|object} chosenEffectRaw Name, tag, or Item instance of the chosen damage effect
+   * @param {Item} [baseItem=null] The weapon/skill receiving the damage effect
+   * @param {object} [options={}]
+   * @returns {object|null}
+   */
+  resolveDamageEffect(chosenEffectRaw, baseItem = null, options = {}) {
+    if (!chosenEffectRaw) return null;
+    const effectName = typeof chosenEffectRaw === 'string'
+      ? chosenEffectRaw.trim()
+      : (chosenEffectRaw?.name ? String(chosenEffectRaw.name).trim() : '');
+    if (!effectName || effectName.toLowerCase() === 'none') return null;
+
+    const effLower = effectName.toLowerCase();
+    const effTag = effLower.replace(/\s+/g, '_');
+
+    // 1. Locate effect Item (either passed in or in actor's inventory)
+    let effectItem = (typeof chosenEffectRaw === 'object' && (chosenEffectRaw.system || chosenEffectRaw._id || chosenEffectRaw.id))
+      ? chosenEffectRaw
+      : null;
+
+    if (!effectItem) {
+      const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+      effectItem = skills.find(s => (s.name || '').toLowerCase().trim() === effLower || s.system?.tags?.includes(effTag)) || null;
+    }
+
+    // 2. Resolve default canonical definition if item is missing or unconfigured
+    const canonicalDefault = DEFAULT_TECHNIQUE_CONFIGS[effLower] || null;
+
+    const sys = effectItem?.system || {};
+    const tConfig = sys.techniqueConfig || {};
+
+    // 3. Determine effective rank of the damage effect
+    const rank = options.effectRank !== undefined
+      ? Number(options.effectRank)
+      : (options.rank !== undefined
+        ? Number(options.rank)
+        : (Number(effectItem?.modifiedRank ?? sys.modifiedRank ?? effectItem?.effectiveRank ?? sys.rank) || (effLower === 'powerful strike' ? 1 : (canonicalDefault ? 1 : 0))));
+
+    // 4. Gather active rank breaks
+    const activeBreaks = [];
+    const sourceBreaks = (sys.rankBreaks && Object.keys(sys.rankBreaks).length > 0)
+      ? sys.rankBreaks
+      : canonicalDefault?.rankBreaks;
+
+    if (sourceBreaks) {
+      const thresholds = [
+        { thresh: 5, data: sourceBreaks.rank5, label: 'Rank 5' },
+        { thresh: 10, data: sourceBreaks.rank10, label: 'Rank 10' },
+        { thresh: 15, data: sourceBreaks.rank15, label: 'Rank 15' },
+        { thresh: 20, data: sourceBreaks.rank20, label: 'Rank 20' }
+      ];
+      for (const b of thresholds) {
+        if (rank >= b.thresh && b.data) {
+          activeBreaks.push(b);
+        }
+      }
+    }
+
+    // 5. Consolidate modifiers
+    const baseCountMod = tConfig.baseDiceCountMod || canonicalDefault?.baseDiceCountMod || '';
+    const breakCountMods = activeBreaks.map(b => b.data.baseDiceCountMod).filter(Boolean);
+    const breakDamageDice = activeBreaks.map(b => b.data.damageDice).filter(Boolean);
+    const extraRankDice = activeBreaks.reduce((sum, b) => sum + (Number(b.data.rankDamageDice) || 0), 0);
+    const debuffs = [];
+    if (tConfig.debuffName || canonicalDefault?.debuffName) {
+      debuffs.push(tConfig.debuffName || canonicalDefault.debuffName);
+    }
+    for (const b of activeBreaks) {
+      if (b.data.debuff && !debuffs.includes(b.data.debuff)) {
+        debuffs.push(b.data.debuff);
+      }
+    }
+
+    const damageBonus = tConfig.damageBonus || canonicalDefault?.damageBonus || '';
+    const damageType = tConfig.damageType || canonicalDefault?.damageType || '';
+    const stat = (tConfig.stat || canonicalDefault?.stat || '').toLowerCase();
+    const cooldown = tConfig.cooldown || canonicalDefault?.cooldown || 'None';
+    const flatMod = evaluateModifier(0, tConfig.flatDamageMod || canonicalDefault?.flatDamageMod || '', rank);
+    const totalBaseCountMod = evaluateModifier(0, baseCountMod, rank) + breakCountMods.reduce((sum, mod) => sum + evaluateModifier(0, mod, rank), 0);
+
+    const bonusParts = [];
+    if (damageBonus) {
+      const dm = damageBonus.match(/(\d+)d(\d+)/i);
+      if (dm) {
+        bonusParts.push({ count: parseInt(dm[1], 10), sides: parseInt(dm[2], 10), type: damageType });
+      }
+    }
+    for (const bDice of breakDamageDice) {
+      const dm = bDice.replace(/^\+/, '').trim().match(/(\d+)d(\d+)/i);
+      if (dm) {
+        bonusParts.push({ count: parseInt(dm[1], 10), sides: parseInt(dm[2], 10), type: damageType });
+      }
+    }
+
+    return {
+      name: effectItem?.name || effectName,
+      lowerName: effLower,
+      item: effectItem,
+      rank,
+      effectiveRank: rank,
+      isDamageEffect: Boolean(tConfig.isDamageEffect ?? canonicalDefault?.isDamageEffect ?? true),
+      baseCountMod,
+      totalBaseCountMod,
+      breakCountMods,
+      breakDamageDice,
+      extraRankDice,
+      damageBonus,
+      damageType,
+      stat,
+      flatMod,
+      bonusParts,
+      debuff: debuffs[debuffs.length - 1] || '',
+      debuffs,
+      cooldown,
+      notes: sys.notes || canonicalDefault?.notes || '',
+      activeBreaks
+    };
   }
 
   /**
@@ -1552,7 +1842,7 @@ export class DCCActor extends BaseActor {
     const rawBaseDamage = sys.baseDamage || '';
     const textToSearch = rawBaseDamage || rawNotes;
 
-    const isPugilism = /pugilism/i.test(skillName);
+    const isPugilism = skillName.toLowerCase() === 'pugilism' || Boolean(sys.tags?.includes('pugilism'));
     let baseCount = isPugilism ? (rank >= 15 ? 5 : (rank >= 10 ? 4 : (rank >= 5 ? 3 : 1))) : 1;
     let baseSides = isPugilism ? 2 : 4;
     let statKey = (sys.stat || 'str').toLowerCase();
@@ -1583,10 +1873,13 @@ export class DCCActor extends BaseActor {
 
     const skillType = sys.skillType || sys.type || '';
     const checkType = (sys.checkType || '').toLowerCase();
-    const isCombatSkill = /combat/i.test(sys.category || '') ||
+    const sLower = skillName.toLowerCase();
+    const isCombatSkill = (sys.category || '').toLowerCase() === 'combat' ||
       ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
       checkType.includes('attack') ||
-      /pugilism|unarmed combat/i.test(skillName);
+      sLower === 'pugilism' ||
+      sLower === 'unarmed combat' ||
+      Boolean(sys.tags?.includes('pugilism') || sys.tags?.includes('unarmed'));
 
     const hasExplicitDamage = Boolean(rawBaseDamage || diceMatch || textToSearch.match(/(\d+)d(\d+)/i) || /base damage/i.test(textToSearch));
 
@@ -1681,13 +1974,28 @@ export class DCCActor extends BaseActor {
 
     // Hand-to-Hand Damage Effects:
     // Unarmed Combat cannot combine with Damage Effects.
-    const isUnarmed = /unarmed combat/i.test(skillName);
+    const isUnarmed = skillName.toLowerCase() === 'unarmed combat' || Boolean(sys.tags?.includes('unarmed'));
 
-    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : options.effect);
+    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : (options.chosenEffect !== undefined ? options.chosenEffect : options.effect));
     const chosenEffect = typeof chosenEffectRaw === 'string'
       ? chosenEffectRaw.trim()
       : (chosenEffectRaw?.name ? String(chosenEffectRaw.name).trim() : '');
     const isNone = chosenEffect.toLowerCase() === 'none';
+
+    let effectData = null;
+    if (!isUnarmed && !isNone) {
+      if (chosenEffect) {
+        effectData = this.resolveDamageEffect(chosenEffectRaw, skillItem, options);
+      } else if (options.ironPunch) {
+        effectData = this.resolveDamageEffect('Iron Punch', skillItem, options);
+      } else if (isPugilism && chosenEffectRaw === undefined) {
+        // Fallback for tests when no effect option was passed
+        const ownedIp = this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && (i.name.toLowerCase() === 'iron punch' || i.system?.tags?.includes('iron_punch'))) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && (i.name.toLowerCase() === 'iron punch' || i.system?.tags?.includes('iron_punch')))) : null;
+        if (ownedIp) {
+          effectData = this.resolveDamageEffect(ownedIp, skillItem, options);
+        }
+      }
+    }
 
     let ironPunchApplied = false;
     let ironPunchRank = 0;
@@ -1699,93 +2007,105 @@ export class DCCActor extends BaseActor {
     let smushApplied = false;
     let chokeOutApplied = false;
     let dirtyFightingApplied = false;
+    let extraEffectRankDie = null;
+    let tossBonus = null;
+    const extraDamageParts = [];
 
-    if (!isUnarmed && !isNone) {
-      if (chosenEffect) {
-        if (/iron punch/i.test(chosenEffect)) {
-          ironPunchApplied = true;
-        } else if (/powerful strike/i.test(chosenEffect)) {
-          powerfulStrikeApplied = true;
-        } else if (/skullcracker/i.test(chosenEffect)) {
-          skullcrackerApplied = true;
-        } else if (/toss/i.test(chosenEffect)) {
-          tossApplied = true;
-        } else if (/smush/i.test(chosenEffect)) {
-          smushApplied = true;
-        } else if (/choke out/i.test(chosenEffect)) {
-          chokeOutApplied = true;
-        } else if (/dirty fighting/i.test(chosenEffect)) {
-          dirtyFightingApplied = true;
+    if (effectData) {
+      const eName = effectData.lowerName;
+      const eRank = effectData.rank;
+
+      // Dynamic Base Dice Count Modification
+      if (effectData.baseCountMod) {
+        baseCount = evaluateModifier(baseCount, effectData.baseCountMod, eRank);
+      }
+      for (const mod of effectData.breakCountMods) {
+        baseCount = evaluateModifier(baseCount, mod, eRank);
+      }
+
+      // Dynamic debuffs from technique / breaks
+      for (const d of effectData.debuffs) {
+        if (!targetDebuffsFromBreaks.includes(d)) {
+          targetDebuffsFromBreaks.push(d);
         }
-      } else if (options.ironPunch) {
+      }
+
+      // Dynamic Rank Damage Die on the Effect (for effects that grant rank dice like Iron Punch R5+, Skullcracker R10+)
+      if (eRank >= 5 && (effectData.extraRankDice > 0 || eName === 'iron punch' || (eName === 'skullcracker' && eRank >= 10))) {
+        extraEffectRankDie = getRankDamageDie(eRank);
+      }
+
+      // Dynamic Bonus Packet (e.g. Toss or custom damage bonus)
+      if (effectData.damageBonus && (eName === 'toss' || !effectData.baseCountMod)) {
+        const bonusStatKey = effectData.stat || 'str';
+        const bonusStatMod = this.system?.abilities?.[bonusStatKey]?.mod ?? 0;
+        tossBonus = {
+          type: effectData.damageType || 'Bludgeoning',
+          dice: effectData.damageBonus,
+          stat: bonusStatKey,
+          statMod: bonusStatMod,
+          source: effectData.name
+        };
+      }
+
+      if (effectData.bonusParts?.length > 0 && eName !== 'toss') {
+        for (const bp of effectData.bonusParts) {
+          extraDamageParts.push({
+            id: `effect-bonus-${extraDamageParts.length}`,
+            type: bp.type || damageType,
+            dice: `${bp.count}d${bp.sides}`,
+            source: effectData.name
+          });
+        }
+      }
+
+      // Backward-compatibility flags
+      if (eName === 'iron punch') {
         ironPunchApplied = true;
-      } else if (isPugilism && chosenEffectRaw === undefined) {
-        // Fallback for tests when no effect option was passed
-        const ownedIp = this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null;
-        if (ownedIp) {
-          ironPunchApplied = true;
-        }
-      }
-
-      if (ironPunchApplied) {
-        const ironPunchItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /iron punch/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /iron punch/i.test(i.name))) : null);
-        ironPunchRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(ironPunchItem?.system?.modifiedRank ?? ironPunchItem?.system?.rank ?? rank) || 0);
-
-        // Iron Punch adds +1d2 base damage to Pugilism strike, plus +1d2 at R5, R10, R15 milestones
-        if (baseSides === 2) {
-          let ipBonusCount = 1;
-          if (ironPunchRank >= 5) ipBonusCount += 1;
-          if (ironPunchRank >= 10) ipBonusCount += 1;
-          if (ironPunchRank >= 15) ipBonusCount += 1;
-          baseCount += ipBonusCount;
-        }
-      }
-
-      if (powerfulStrikeApplied) {
-        const psItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /powerful strike/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /powerful strike/i.test(i.name))) : null);
-        powerfulStrikeRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(psItem?.system?.modifiedRank ?? psItem?.system?.rank) || 1);
-        baseCount = Math.max(1, baseCount * Math.max(1, powerfulStrikeRank));
-      }
-
-      if (skullcrackerApplied) {
-        const scItem = typeof chosenEffectRaw === 'object' ? chosenEffectRaw : (this.items ? (this.items.find ? this.items.find(i => i.type === 'skill' && /skullcracker/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'skill' && /skullcracker/i.test(i.name))) : null);
-        skullcrackerRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(scItem?.system?.modifiedRank ?? scItem?.system?.rank) || 0);
-        baseCount += (skullcrackerRank >= 5 ? 2 : 1);
+        ironPunchRank = eRank;
+      } else if (eName === 'powerful strike') {
+        powerfulStrikeApplied = true;
+        powerfulStrikeRank = eRank;
+      } else if (eName === 'skullcracker') {
+        skullcrackerApplied = true;
+        skullcrackerRank = eRank;
+      } else if (eName === 'toss') {
+        tossApplied = true;
+      } else if (eName === 'smush') {
+        smushApplied = true;
+      } else if (eName === 'choke out') {
+        chokeOutApplied = true;
+      } else if (eName === 'dirty fighting') {
+        dirtyFightingApplied = true;
       }
     }
 
     // Rank Damage Die
     const rankDie = getRankDamageDie(rank);
     if (extraRankDiceFromBreaks > 0 && rankDie.dice) {
-      const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
-      if (dm) {
-        const total = parseInt(dm[1], 10) + extraRankDiceFromBreaks;
-        rankDie.dice = `${total}d${dm[2]}`;
+      if (rankDie.dice.includes('+')) {
+        rankDie.dice = rankDie.dice.replace(/(\d+)d(\d+)/, (_, c, s) => `${parseInt(c, 10) + extraRankDiceFromBreaks}d${s}`);
+      } else {
+        const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
+        if (dm) {
+          const total = parseInt(dm[1], 10) + extraRankDiceFromBreaks;
+          rankDie.dice = `${total}d${dm[2]}`;
+        }
       }
     } else if (extraRankDiceFromBreaks > 0 && rankDie.value > 0) {
       rankDie.value += extraRankDiceFromBreaks;
     }
-    let ironPunchRankDie = null;
-    if (ironPunchApplied && ironPunchRank >= 5) {
-      ironPunchRankDie = getRankDamageDie(ironPunchRank);
-    }
-    let skullcrackerRankDie = null;
-    if (skullcrackerApplied && skullcrackerRank >= 10) {
-      skullcrackerRankDie = getRankDamageDie(skullcrackerRank);
-    }
+    const ironPunchRankDie = (ironPunchApplied && ironPunchRank >= 5) ? extraEffectRankDie : null;
+    const skullcrackerRankDie = (skullcrackerApplied && skullcrackerRank >= 10) ? extraEffectRankDie : null;
 
-    const extraEffectRankDie = ironPunchRankDie || skullcrackerRankDie;
+    if (!extraEffectRankDie) {
+      extraEffectRankDie = ironPunchRankDie || skullcrackerRankDie;
+    }
     let combinedRankDieStr = '';
     if (extraEffectRankDie && extraEffectRankDie.dice && rankDie.dice) {
       const m1 = rankDie.dice.match(/(\d+)d(\d+)/i);
       const m2 = extraEffectRankDie.dice.match(/(\d+)d(\d+)/i);
-      if (m1 && m2 && m1[2] === m2[2]) {
+      if (m1 && m2 && m1[2] === m2[2] && !rankDie.dice.includes('+') && !extraEffectRankDie.dice.includes('+')) {
         const totalRankCount = parseInt(m1[1], 10) + parseInt(m2[1], 10);
         combinedRankDieStr = `${totalRankCount}d${m1[2]}`;
       } else {
@@ -1802,8 +2122,9 @@ export class DCCActor extends BaseActor {
     // Fire Fingers Rank 15 Passive Melee Bonus:
     // "Your Pugilism, Unarmed Combat, and Slice Attack strikes add 1 Fire Fingers Rank damage die (Fire)."
     let fireFingersBonus = null;
-    if (isPugilism || isUnarmed || /slice attack/i.test(skillName)) {
-      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && /fire fingers/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && /fire fingers/i.test(i.name))) : null;
+    const sLowerName = skillName.toLowerCase();
+    if (isPugilism || isUnarmed || sLowerName === 'slice attack' || Boolean(sys.tags?.includes('slice_attack'))) {
+      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && (i.name.toLowerCase() === 'fire fingers' || i.system?.tags?.includes('fire_fingers'))) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && (i.name.toLowerCase() === 'fire fingers' || i.system?.tags?.includes('fire_fingers')))) : null;
       const ffRank = Number(ffSpell?.system?.modifiedRank ?? ffSpell?.system?.rank) || 0;
       if (ffRank >= 15) {
         const ffDie = getRankDamageDie(ffRank);
@@ -1816,9 +2137,8 @@ export class DCCActor extends BaseActor {
       }
     }
 
-    // Toss Effect Bonus: +1d8 Bludgeoning + Str Mod
-    let tossBonus = null;
-    if (tossApplied) {
+    // Fallback Toss Effect Bonus if not already created
+    if (!tossBonus && tossApplied) {
       tossBonus = {
         type: 'Bludgeoning',
         dice: '1d8',
@@ -1877,6 +2197,9 @@ export class DCCActor extends BaseActor {
       damageType,
       rankDie,
       chosenEffect: isNone ? 'none' : chosenEffect,
+      effectData,
+      chosenEffectItem: effectData?.item || null,
+      extraEffectRankDie,
       ironPunchApplied,
       ironPunchRank,
       ironPunchRankDie,
@@ -1891,6 +2214,10 @@ export class DCCActor extends BaseActor {
       chokeOutApplied,
       dirtyFightingApplied,
       combinedRankDieStr,
+      extraDamageParts,
+      rankDamageDie: combinedRankDieStr || rankDie.dice || '',
+      debuff: targetDebuffsFromBreaks[targetDebuffsFromBreaks.length - 1] || '',
+      debuffs: targetDebuffsFromBreaks,
       fireFingersBonus,
       formula,
       formulaWithStat,
@@ -1951,6 +2278,19 @@ export class DCCActor extends BaseActor {
           statMod: sData.tossBonus.statMod,
           value: 0,
           source: 'Toss'
+        });
+      }
+
+      // Extra Technique Damage Parts
+      for (const ep of (sData.extraDamageParts || [])) {
+        parts.push({
+          id: ep.id || `skill-extra-${parts.length}`,
+          type: ep.type || sData.damageType || 'Physical',
+          dice: ep.dice || '',
+          stat: ep.stat || '',
+          statMod: ep.statMod || 0,
+          value: ep.value || 0,
+          source: ep.source || 'Technique'
         });
       }
 
@@ -2156,63 +2496,73 @@ export class DCCActor extends BaseActor {
     }
 
     // Optional Damage Effects handling for weapon/attack items
-    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : options.effect);
+    const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : (options.chosenEffect !== undefined ? options.chosenEffect : options.effect));
     const chosenEffect = typeof chosenEffectRaw === 'string'
       ? chosenEffectRaw.trim()
       : (chosenEffectRaw?.name ? String(chosenEffectRaw.name).trim() : '');
     const isNone = chosenEffect.toLowerCase() === 'none';
 
     if (chosenEffect && !isNone) {
-      const eLower = chosenEffect.toLowerCase();
-      if (/powerful strike/i.test(eLower)) {
-        const psSkill = skills.find(s => /powerful strike/i.test(s.name));
-        const psRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(psSkill?.system?.modifiedRank ?? psSkill?.system?.rank) || 1);
-        if (parts.length > 0 && parts[0].dice) {
+      const effectData = this.resolveDamageEffect(chosenEffectRaw, attackItem, options);
+      if (effectData) {
+        const eLower = effectData.lowerName;
+        const eRank = effectData.rank;
+
+        // Base Dice Multiplier (e.g. Powerful Strike * @rank)
+        const isMultiplierMod = typeof effectData.baseCountMod === 'string' && effectData.baseCountMod.trim().startsWith('*');
+        if (isMultiplierMod && parts.length > 0 && parts[0].dice) {
           const m = parts[0].dice.match(/(\d+)d(\d+)/i);
           if (m) {
-            const count = parseInt(m[1], 10) * Math.max(1, psRank);
+            const count = evaluateModifier(parseInt(m[1], 10), effectData.baseCountMod, eRank);
             parts[0].dice = `${count}d${m[2]}`;
-            parts[0].source = `${parts[0].source} (Powerful Strike R${psRank})`;
+            parts[0].source = `${parts[0].source} (${effectData.name} R${eRank})`;
           }
         }
-      } else if (/iron punch/i.test(eLower)) {
-        const ipSkill = skills.find(s => /iron punch/i.test(s.name));
-        const ipRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(ipSkill?.system?.modifiedRank ?? ipSkill?.system?.rank) || 0);
-        let ipDice = '1d2';
-        if (ipRank >= 5) {
-          const ipDie = getRankDamageDie(ipRank);
-          if (ipDie.dice) ipDice += ` + ${ipDie.dice}`;
+
+        // Damage Bonus packet (e.g. Iron Punch, Toss, Skullcracker, or custom technique)
+        if (effectData.damageBonus || effectData.breakCountMods.length > 0 || effectData.breakDamageDice?.length > 0 || effectData.bonusParts?.length > 0) {
+          let bDice = effectData.damageBonus;
+          if (eLower === 'skullcracker') {
+            bDice = eRank >= 5 ? '2d4' : '1d4';
+          }
+          if (eRank >= 5 && (effectData.extraRankDice > 0 || eLower === 'iron punch')) {
+            const rDie = getRankDamageDie(eRank);
+            if (rDie.dice) bDice = bDice ? `${bDice} + ${rDie.dice}` : rDie.dice;
+          }
+          const bStat = effectData.stat;
+          const bStatMod = bStat ? (this.system?.abilities?.[bStat]?.mod ?? 0) : 0;
+          if (bDice) {
+            parts.push({
+              id: `effect-${effectData.lowerName.replace(/\s+/g, '-')}-${parts.length}`,
+              type: effectData.damageType || primaryType,
+              dice: bDice,
+              stat: bStat || '',
+              statMod: bStatMod,
+              value: 0,
+              source: `${effectData.name}${eRank > 0 ? ` (Rank ${eRank})` : ''}`
+            });
+          }
+          if (effectData.breakDamageDice?.length > 0 && eLower !== 'skullcracker' && eLower !== 'iron punch') {
+            for (const bd of effectData.breakDamageDice) {
+              const cleanD = bd.replace(/^\+/, '').trim();
+              if (cleanD) {
+                parts.push({
+                  id: `effect-break-${parts.length}`,
+                  type: effectData.damageType || primaryType,
+                  dice: cleanD,
+                  stat: '',
+                  statMod: 0,
+                  value: 0,
+                  source: `${effectData.name} Rank Break`
+                });
+              }
+            }
+          }
         }
-        parts.push({
-          id: `effect-iron-punch-${parts.length}`,
-          type: 'Physical',
-          dice: ipDice,
-          stat: '',
-          statMod: 0,
-          value: 0,
-          source: `Iron Punch (Rank ${ipRank})`
-        });
-      } else if (/skullcracker/i.test(eLower)) {
-        const scSkill = skills.find(s => /skullcracker/i.test(s.name));
-        const scRank = options.effectRank !== undefined
-          ? Number(options.effectRank)
-          : (Number(scSkill?.system?.modifiedRank ?? scSkill?.system?.rank) || 0);
-        const scDice = scRank >= 5 ? '2d4' : '1d4';
-        parts.push({
-          id: `effect-skullcracker-${parts.length}`,
-          type: 'Physical',
-          dice: scDice,
-          stat: '',
-          statMod: 0,
-          value: 0,
-          source: `Skullcracker (Rank ${scRank})`
-        });
-        if (scRank >= 10) {
-          const scDie = getRankDamageDie(scRank);
+
+        // Skullcracker R10+ Rank Die in parts
+        if (eRank >= 10 && eLower === 'skullcracker') {
+          const scDie = getRankDamageDie(eRank);
           if (scDie.dice || scDie.value) {
             parts.push({
               id: `effect-skullcracker-rankdie-${parts.length}`,
@@ -2221,21 +2571,10 @@ export class DCCActor extends BaseActor {
               stat: '',
               statMod: 0,
               value: scDie.value || 0,
-              source: `Skullcracker Rank ${scRank} Die`
+              source: `Skullcracker Rank ${eRank} Die`
             });
           }
         }
-      } else if (/toss/i.test(eLower)) {
-        const strMod = this.system?.abilities?.str?.mod ?? 0;
-        parts.push({
-          id: `effect-toss-${parts.length}`,
-          type: 'Bludgeoning',
-          dice: '1d8',
-          stat: 'str',
-          statMod: strMod,
-          value: 0,
-          source: 'Toss'
-        });
       } else {
         const customDiceMatch = chosenEffect.match(/(\+?\d+d\d+)(?:\s+([a-zA-Z]+))?/i);
         if (customDiceMatch) {
@@ -2278,10 +2617,14 @@ export class DCCActor extends BaseActor {
     }
 
     // Fire Fingers Rank 15 Passive Melee Bonus on Weapon Attack
-    const isMeleeH2H = /pugilism|unarmed combat|slice attack/i.test(attackItem.name || '') ||
-      (matchingSkill && /pugilism|unarmed combat|slice attack/i.test(matchingSkill.name || ''));
+    const aName = (attackItem.name || '').toLowerCase();
+    const mName = (matchingSkill?.name || '').toLowerCase();
+    const isMeleeH2H = ['pugilism', 'unarmed combat', 'slice attack'].includes(aName) ||
+      Boolean(attackItem.system?.tags?.includes('unarmed')) ||
+      ['pugilism', 'unarmed combat', 'slice attack'].includes(mName) ||
+      Boolean(matchingSkill?.system?.tags?.includes('unarmed'));
     if (isMeleeH2H) {
-      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && /fire fingers/i.test(i.name)) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && /fire fingers/i.test(i.name))) : null;
+      const ffSpell = this.items ? (this.items.find ? this.items.find(i => i.type === 'spell' && (i.name.toLowerCase() === 'fire fingers' || i.system?.tags?.includes('fire_fingers'))) : Array.from(this.items.values?.() || this.items).find(i => i.type === 'spell' && (i.name.toLowerCase() === 'fire fingers' || i.system?.tags?.includes('fire_fingers')))) : null;
       const ffRank = Number(ffSpell?.system?.modifiedRank ?? ffSpell?.system?.rank) || 0;
       if (ffRank >= 15) {
         const ffDie = getRankDamageDie(ffRank);
@@ -2375,6 +2718,16 @@ export class DCCActor extends BaseActor {
   }
 
   /**
+   * Helper alias for resolving weapon damage parts.
+   * @param {Item} attackItem
+   * @param {object} [options={}]
+   * @returns {Array<object>}
+   */
+  _calculateWeaponDamageParts(attackItem, options = {}) {
+    return this.getAttackDamageParts(attackItem, options);
+  }
+
+  /**
    * Applies primed or active combat technique modifications to attack damage parts.
    * @param {Array<object>} parts
    * @param {object} options
@@ -2392,79 +2745,55 @@ export class DCCActor extends BaseActor {
       const normTech = (tech.name || '').toLowerCase().trim();
       if (effLower && effLower.includes(normTech)) continue;
 
-      if (/powerful strike/i.test(normTech)) {
-        if (parts.length > 0 && parts[0].dice && !parts[0].source?.includes('Powerful Strike')) {
+      const effectData = this.resolveDamageEffect(tech.name, null, { effectRank: tech.rank });
+      if (effectData) {
+        const eLower = effectData.lowerName;
+        const eRank = effectData.rank;
+
+        const isMultiplierMod = typeof effectData.baseCountMod === 'string' && effectData.baseCountMod.trim().startsWith('*');
+        if (isMultiplierMod && parts.length > 0 && parts[0].dice && !parts[0].source?.includes(effectData.name)) {
           const m = parts[0].dice.match(/(\d+)d(\d+)/i);
           if (m) {
-            const rank = Math.max(1, Number(tech.rank) || 1);
-            const count = parseInt(m[1], 10) * rank;
+            const count = evaluateModifier(parseInt(m[1], 10), effectData.baseCountMod, eRank);
             parts[0].dice = `${count}d${m[2]}`;
-            parts[0].source = `${parts[0].source} (Powerful Strike R${rank})`;
+            parts[0].source = `${parts[0].source} (${effectData.name} R${eRank})`;
           }
-        }
-      } else if (/iron punch/i.test(normTech)) {
-        let ipDice = '1d2';
-        if (tech.rank >= 5) {
-          const ipDie = getRankDamageDie(tech.rank);
-          if (ipDie.dice) ipDice += ` + ${ipDie.dice}`;
-        }
-        parts.push({
-          id: `technique-iron-punch-${parts.length}`,
-          type: 'Physical',
-          dice: ipDice,
-          stat: '',
-          statMod: 0,
-          value: 0,
-          source: `Iron Punch (Rank ${tech.rank})`
-        });
-      } else if (/skullcracker/i.test(normTech)) {
-        const scDice = tech.rank >= 5 ? '2d4' : '1d4';
-        parts.push({
-          id: `technique-skullcracker-${parts.length}`,
-          type: 'Physical',
-          dice: scDice,
-          stat: '',
-          statMod: 0,
-          value: 0,
-          source: `Skullcracker (Rank ${tech.rank})`
-        });
-        if (tech.rank >= 10) {
-          const scDie = getRankDamageDie(tech.rank);
-          if (scDie.dice || scDie.value) {
+        } else if (effectData.damageBonus || effectData.breakCountMods.length > 0) {
+          let bDice = effectData.damageBonus;
+          if (eLower === 'skullcracker') {
+            bDice = eRank >= 5 ? '2d4' : '1d4';
+          }
+          if (eRank >= 5 && (effectData.extraRankDice > 0 || eLower === 'iron punch')) {
+            const rDie = getRankDamageDie(eRank);
+            if (rDie.dice) bDice = bDice ? `${bDice} + ${rDie.dice}` : rDie.dice;
+          }
+          const bStat = effectData.stat;
+          const bStatMod = bStat ? (this.system?.abilities?.[bStat]?.mod ?? 0) : 0;
+          if (bDice) {
             parts.push({
-              id: `technique-skullcracker-rankdie-${parts.length}`,
-              type: 'Physical',
-              dice: scDie.dice || '',
-              stat: '',
-              statMod: 0,
-              value: scDie.value || 0,
-              source: `Skullcracker Rank ${tech.rank} Die`
+              id: `technique-${effectData.lowerName.replace(/\s+/g, '-')}-${parts.length}`,
+              type: effectData.damageType || primaryType,
+              dice: bDice,
+              stat: bStat || '',
+              statMod: bStatMod,
+              value: 0,
+              source: `${effectData.name} (Rank ${eRank})`
             });
           }
-        }
-      } else if (/toss/i.test(normTech)) {
-        const strMod = this.system?.abilities?.str?.mod ?? 0;
-        parts.push({
-          id: `technique-toss-${parts.length}`,
-          type: 'Bludgeoning',
-          dice: '1d8',
-          stat: 'str',
-          statMod: strMod,
-          value: 0,
-          source: 'Toss'
-        });
-      } else if (tech.damageBonus) {
-        const customMatch = String(tech.damageBonus).match(/(\+?\d+d\d+)(?:\s+([a-zA-Z]+))?/i);
-        if (customMatch) {
-          parts.push({
-            id: `technique-${tech.id || 'tech'}-${parts.length}`,
-            type: customMatch[2] || primaryType,
-            dice: customMatch[1].replace('+', '').trim(),
-            stat: '',
-            statMod: 0,
-            value: 0,
-            source: `${tech.name} (Technique)`
-          });
+          if (eRank >= 10 && eLower === 'skullcracker') {
+            const scDie = getRankDamageDie(eRank);
+            if (scDie.dice || scDie.value) {
+              parts.push({
+                id: `technique-skullcracker-rankdie-${parts.length}`,
+                type: 'Physical',
+                dice: scDie.dice || '',
+                stat: '',
+                statMod: 0,
+                value: scDie.value || 0,
+                source: `Skullcracker Rank ${eRank} Die`
+              });
+            }
+          }
         }
       }
     }
@@ -2485,9 +2814,10 @@ export class DCCActor extends BaseActor {
       const cType = (sys.checkType || '').toLowerCase();
       const notes = (sys.notes || '').toLowerCase();
       
-      const isExplicitTech = sys.isTechnique === true;
+      const isExplicitTech = sys.isTechnique === true || sys.techniqueConfig?.isDamageEffect === true;
       const isDmgEffect = cType.includes('damage effect') || notes.includes('damage effect');
-      const isKnownManeuver = /^(powerful strike|dirty fighting|iron punch|choke out|skullcracker|toss|low blow|sneak attack|disarm|cleave)$/i.test(normName);
+      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave']);
+      const isKnownManeuver = Boolean(sys.tags?.includes('maneuver')) || KNOWN_MANEUVERS.has(normName) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName]);
 
       if (isExplicitTech || isDmgEffect || isKnownManeuver) {
         const rank = Number(s.modifiedRank ?? sys.modifiedRank ?? sys.rank) || 0;
@@ -2498,33 +2828,34 @@ export class DCCActor extends BaseActor {
         let damageBonus = '';
         let debuffName = '';
 
-        if (/powerful strike/i.test(normName)) {
+        if (normName === 'powerful strike' || sys.tags?.includes('powerful_strike')) {
           summary = 'Multiply base dice x Rank';
           icon = 'fa-hand-back-fist';
           damageBonus = '1d6';
-        } else if (/dirty fighting/i.test(normName)) {
+        } else if (normName === 'dirty fighting' || sys.tags?.includes('dirty_fighting')) {
           summary = rank >= 10 ? 'Inflict Blinded / Taint' : (rank >= 5 ? 'Inflict Woozy / Taint' : 'Inflict Woozy Debuff');
           icon = 'fa-eye-slash';
           debuffName = rank >= 10 ? 'Blinded' : 'Woozy';
-        } else if (/iron punch/i.test(normName)) {
+        } else if (normName === 'iron punch' || sys.tags?.includes('iron_punch')) {
           summary = rank >= 10 ? '+1d2 Dmg + Stunned' : (rank >= 5 ? '+1d2 + 1d4 Dmg' : '+1d2 Base Dmg');
           icon = 'fa-shield-halved';
           damageBonus = '1d2';
           if (rank >= 10) debuffName = 'Stunned';
-        } else if (/choke out/i.test(normName)) {
+        } else if (normName === 'choke out' || sys.tags?.includes('choke_out')) {
           summary = rank >= 15 ? '8x Total Dmg' : (rank >= 10 ? '4x Total Dmg' : '2x Total Dmg vs <10% HP');
           icon = 'fa-hand-cuffs';
-        } else if (/skullcracker/i.test(normName)) {
+        } else if (normName === 'skullcracker' || sys.tags?.includes('skullcracker')) {
           summary = rank >= 15 ? '+1d4 Dmg + Woozy' : (rank >= 5 ? '+2d4 Base Dmg' : '+1d4 Base Dmg');
           icon = 'fa-skull';
           damageBonus = rank >= 5 ? '2d4' : '1d4';
-        } else if (/toss/i.test(normName)) {
+        } else if (normName === 'toss' || sys.tags?.includes('toss')) {
           summary = '1d8 Dmg + Opposed Throw';
           icon = 'fa-person-falling';
           damageBonus = '1d8';
-        } else if (sys.techniqueConfig?.damageBonus) {
-          damageBonus = sys.techniqueConfig.damageBonus;
-          summary = `+${damageBonus} Dmg`;
+        } else if (sys.techniqueConfig?.damageBonus || sys.techniqueConfig?.baseDiceCountMod) {
+          damageBonus = sys.techniqueConfig.damageBonus || '';
+          const countMod = sys.techniqueConfig.baseDiceCountMod ? `Dice: ${sys.techniqueConfig.baseDiceCountMod}` : '';
+          summary = [damageBonus ? `+${damageBonus} Dmg` : '', countMod].filter(Boolean).join(' | ');
           if (sys.techniqueConfig.debuffName) {
             debuffName = sys.techniqueConfig.debuffName;
             summary += ` + ${debuffName}`;
@@ -2623,17 +2954,19 @@ export class DCCActor extends BaseActor {
     // 2. Unarmed / Combat Skills (that function as primary attacks)
     const attackSkills = skills.filter(s => {
       const sys = s.system || {};
-      if (sys.isTechnique) return false;
+      if (sys.isTechnique || sys.techniqueConfig?.isDamageEffect) return false;
       const cType = (sys.checkType || '').toLowerCase();
       if (cType.includes('damage effect') || cType.includes('passive')) return false;
       const normName = s.name.toLowerCase().trim();
-      if (/^(powerful strike|dirty fighting|iron punch|choke out|skullcracker|toss|low blow|sneak attack|disarm|cleave)$/i.test(normName)) return false;
+      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave']);
+      if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
 
       const dmgData = typeof this.getSkillDamageData === 'function' ? this.getSkillDamageData(s) : { hasDamage: false };
       const sType = (sys.skillType || sys.type || '').toLowerCase();
       const isCombatType = ['strike', 'bashing', 'hand to hand', 'edge', 'reach', 'ranged'].includes(sType);
       const isCombatCat = (sys.category || '').toLowerCase() === 'combat';
-      const isKnownUnarmed = /^(pugilism|unarmed combat|wrasslin|bite|back claw|slice attack|club|improvised weapons|martial arts)$/i.test(normName);
+      const KNOWN_UNARMED = new Set(['pugilism', 'unarmed combat', 'wrasslin', 'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts']);
+      const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
 
       return dmgData.hasDamage || isKnownUnarmed || (isCombatCat && (cType.includes('attack') || isCombatType));
     });
@@ -3081,8 +3414,11 @@ export class DCCActor extends BaseActor {
       const typedDamage = {};
 
       let effectMult = options.effectMultiplier || 1;
-      if (chosenEffect && (/smush/i.test(chosenEffect) || /choke out/i.test(chosenEffect))) {
-        effectMult = 2;
+      if (chosenEffect) {
+        const ce = chosenEffect.toLowerCase();
+        if (ce === 'smush' || ce === 'choke out') {
+          effectMult = 2;
+        }
       }
 
       for (const part of parts) {
@@ -3867,10 +4203,14 @@ export class DCCActor extends BaseActor {
     // Rank Damage Die scaling table
     const rankDie = getRankDamageDie(rank);
     if (extraSpellRankDice > 0 && rankDie.dice) {
-      const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
-      if (dm) {
-        const total = parseInt(dm[1], 10) + extraSpellRankDice;
-        rankDie.dice = `${total}d${dm[2]}`;
+      if (rankDie.dice.includes('+')) {
+        rankDie.dice = rankDie.dice.replace(/(\d+)d(\d+)/, (_, c, s) => `${parseInt(c, 10) + extraSpellRankDice}d${s}`);
+      } else {
+        const dm = rankDie.dice.match(/(\d+)d(\d+)/i);
+        if (dm) {
+          const total = parseInt(dm[1], 10) + extraSpellRankDice;
+          rankDie.dice = `${total}d${dm[2]}`;
+        }
       }
     } else if (extraSpellRankDice > 0 && rankDie.value > 0) {
       rankDie.value += extraSpellRankDice;

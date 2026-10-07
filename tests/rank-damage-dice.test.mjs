@@ -25,16 +25,23 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       // Rank 8-9: +1d8
       assert.deepEqual(getRankDamageDie(8), { dice: '1d8', value: 0, text: '+1d8' });
       assert.deepEqual(getRankDamageDie(9), { dice: '1d8', value: 0, text: '+1d8' });
-      // Rank 10-13: +1d10
+      // Rank 10-11: +1d10
       assert.deepEqual(getRankDamageDie(10), { dice: '1d10', value: 0, text: '+1d10' });
       assert.deepEqual(getRankDamageDie(11), { dice: '1d10', value: 0, text: '+1d10' });
-      assert.deepEqual(getRankDamageDie(12), { dice: '1d10', value: 0, text: '+1d10' });
-      assert.deepEqual(getRankDamageDie(13), { dice: '1d10', value: 0, text: '+1d10' });
-      // Rank 14-16+: +1d12
-      assert.deepEqual(getRankDamageDie(14), { dice: '1d12', value: 0, text: '+1d12' });
-      assert.deepEqual(getRankDamageDie(15), { dice: '1d12', value: 0, text: '+1d12' });
-      assert.deepEqual(getRankDamageDie(16), { dice: '1d12', value: 0, text: '+1d12' });
-      assert.deepEqual(getRankDamageDie(20), { dice: '1d12', value: 0, text: '+1d12' });
+      // Rank 12-13: +1d12
+      assert.deepEqual(getRankDamageDie(12), { dice: '1d12', value: 0, text: '+1d12' });
+      assert.deepEqual(getRankDamageDie(13), { dice: '1d12', value: 0, text: '+1d12' });
+      // Rank 14-15: +1d8 + 1d6
+      assert.deepEqual(getRankDamageDie(14), { dice: '1d8 + 1d6', value: 0, text: '+1d8 + 1d6' });
+      assert.deepEqual(getRankDamageDie(15), { dice: '1d8 + 1d6', value: 0, text: '+1d8 + 1d6' });
+      // Rank 16-17: +2d8
+      assert.deepEqual(getRankDamageDie(16), { dice: '2d8', value: 0, text: '+2d8' });
+      assert.deepEqual(getRankDamageDie(17), { dice: '2d8', value: 0, text: '+2d8' });
+      // Rank 18-19: +1d10 + 1d8
+      assert.deepEqual(getRankDamageDie(18), { dice: '1d10 + 1d8', value: 0, text: '+1d10 + 1d8' });
+      assert.deepEqual(getRankDamageDie(19), { dice: '1d10 + 1d8', value: 0, text: '+1d10 + 1d8' });
+      // Rank 20+: +2d10
+      assert.deepEqual(getRankDamageDie(20), { dice: '2d10', value: 0, text: '+2d10' });
     });
   });
 
@@ -72,9 +79,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, formula: '2d6 + 1d6 + 3', formulaWithStat: '2d6 + 1d6 + Int Fire' },
       { rank: 8, formula: '2d6 + 1d8 + 3', formulaWithStat: '2d6 + 1d8 + Int Fire' },
       { rank: 10, formula: '3d6 + 1d10 + 3', formulaWithStat: '3d6 + 1d10 + Int Fire' },
-      { rank: 14, formula: '3d6 + 1d12 + 3', formulaWithStat: '3d6 + 1d12 + Int Fire' },
-      { rank: 15, formula: '4d6 + 1d12 + 3', formulaWithStat: '4d6 + 1d12 + Int Fire' },
-      { rank: 16, formula: '4d6 + 1d12 + 3', formulaWithStat: '4d6 + 1d12 + Int Fire' }
+      { rank: 14, formula: '3d6 + 1d8 + 1d6 + 3', formulaWithStat: '3d6 + 1d8 + 1d6 + Int Fire' },
+      { rank: 15, formula: '4d6 + 1d8 + 1d6 + 3', formulaWithStat: '4d6 + 1d8 + 1d6 + Int Fire' },
+      { rank: 16, formula: '4d6 + 2d8 + 3', formulaWithStat: '4d6 + 2d8 + Int Fire' }
     ];
 
     for (const exp of expected) {
@@ -125,9 +132,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, formula: '2d12 + 1d6 + 3', formulaWithStat: '2d12 + 1d6 + Int Fire' },
       { rank: 8, formula: '2d12 + 1d8 + 3', formulaWithStat: '2d12 + 1d8 + Int Fire' },
       { rank: 10, formula: '3d12 + 1d10 + 3', formulaWithStat: '3d12 + 1d10 + Int Fire' },
-      { rank: 14, formula: '3d12 + 1d12 + 3', formulaWithStat: '3d12 + 1d12 + Int Fire' },
-      { rank: 15, formula: '4d12 + 1d12 + 3', formulaWithStat: '4d12 + 1d12 + Int Fire' },
-      { rank: 16, formula: '4d12 + 1d12 + 3', formulaWithStat: '4d12 + 1d12 + Int Fire' }
+      { rank: 14, formula: '3d12 + 1d8 + 1d6 + 3', formulaWithStat: '3d12 + 1d8 + 1d6 + Int Fire' },
+      { rank: 15, formula: '4d12 + 1d8 + 1d6 + 3', formulaWithStat: '4d12 + 1d8 + 1d6 + Int Fire' },
+      { rank: 16, formula: '4d12 + 2d8 + 3', formulaWithStat: '4d12 + 2d8 + Int Fire' }
     ];
 
     for (const exp of expected) {
@@ -179,9 +186,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, formula: '2d4 + 1d6 + 2', formulaWithStat: '2d4 + 1d6 + Int Force' },
       { rank: 8, formula: '2d4 + 1d8 + 2', formulaWithStat: '2d4 + 1d8 + Int Force' },
       { rank: 10, formula: '3d4 + 1d10 + 2', formulaWithStat: '3d4 + 1d10 + Int Force & Fire' },
-      { rank: 14, formula: '3d4 + 1d12 + 2', formulaWithStat: '3d4 + 1d12 + Int Force & Fire' },
-      { rank: 15, formula: '9d4 + 1d12 + 2', formulaWithStat: '9d4 + 1d12 + Int Force & Fire' },
-      { rank: 16, formula: '9d4 + 1d12 + 2', formulaWithStat: '9d4 + 1d12 + Int Force & Fire' }
+      { rank: 14, formula: '3d4 + 1d8 + 1d6 + 2', formulaWithStat: '3d4 + 1d8 + 1d6 + Int Force & Fire' },
+      { rank: 15, formula: '9d4 + 1d8 + 1d6 + 2', formulaWithStat: '9d4 + 1d8 + 1d6 + Int Force & Fire' },
+      { rank: 16, formula: '9d4 + 2d8 + 2', formulaWithStat: '9d4 + 2d8 + Int Force & Fire' }
     ];
 
     for (const exp of expected) {
@@ -246,9 +253,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, formula: '2d4 + 1d6 + 3', formulaWithStat: '2d4 + 1d6 + Str Bludgeoning' },
       { rank: 8, formula: '2d4 + 1d8 + 3', formulaWithStat: '2d4 + 1d8 + Str Bludgeoning' },
       { rank: 10, formula: '3d4 + 1d10 + 3', formulaWithStat: '3d4 + 1d10 + Str Bludgeoning' },
-      { rank: 14, formula: '3d4 + 1d12 + 3', formulaWithStat: '3d4 + 1d12 + Str Bludgeoning' },
-      { rank: 15, formula: '4d4 + 1d12 + 3', formulaWithStat: '4d4 + 1d12 + Str Bludgeoning' },
-      { rank: 16, formula: '4d4 + 1d12 + 3', formulaWithStat: '4d4 + 1d12 + Str Bludgeoning' }
+      { rank: 14, formula: '3d4 + 1d8 + 1d6 + 3', formulaWithStat: '3d4 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 15, formula: '4d4 + 1d8 + 1d6 + 3', formulaWithStat: '4d4 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 16, formula: '4d4 + 2d8 + 3', formulaWithStat: '4d4 + 2d8 + Str Bludgeoning' }
     ];
 
     for (const exp of expected) {
@@ -312,9 +319,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, formula: '2d2 + 1d6 + 3', formulaWithStat: '2d2 + 1d6 + Str Bludgeoning' },
       { rank: 8, formula: '2d2 + 1d8 + 3', formulaWithStat: '2d2 + 1d8 + Str Bludgeoning' },
       { rank: 10, formula: '3d2 + 1d10 + 3', formulaWithStat: '3d2 + 1d10 + Str Bludgeoning' },
-      { rank: 14, formula: '3d2 + 1d12 + 3', formulaWithStat: '3d2 + 1d12 + Str Bludgeoning' },
-      { rank: 15, formula: '4d2 + 1d12 + 3', formulaWithStat: '4d2 + 1d12 + Str Bludgeoning' },
-      { rank: 16, formula: '4d2 + 1d12 + 3', formulaWithStat: '4d2 + 1d12 + Str Bludgeoning' }
+      { rank: 14, formula: '3d2 + 1d8 + 1d6 + 3', formulaWithStat: '3d2 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 15, formula: '4d2 + 1d8 + 1d6 + 3', formulaWithStat: '4d2 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 16, formula: '4d2 + 2d8 + 3', formulaWithStat: '4d2 + 2d8 + Str Bludgeoning' }
     ];
 
     for (const exp of expected) {
@@ -377,10 +384,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 5, formula: '4d2 + 2d4 + 4', formulaWithStat: '4d2 + 2d4 + Str Bludgeoning' },
       { rank: 6, formula: '4d2 + 2d6 + 4', formulaWithStat: '4d2 + 2d6 + Str Bludgeoning' },
       { rank: 8, formula: '4d2 + 2d8 + 4', formulaWithStat: '4d2 + 2d8 + Str Bludgeoning' },
-      { rank: 10, formula: '6d2 + 2d10 + 4', formulaWithStat: '6d2 + 2d10 + Str Bludgeoning' },
-      { rank: 14, formula: '6d2 + 2d12 + 4', formulaWithStat: '6d2 + 2d12 + Str Bludgeoning' },
-      { rank: 15, formula: '8d2 + 2d12 + 4', formulaWithStat: '8d2 + 2d12 + Str Bludgeoning' },
-      { rank: 16, formula: '8d2 + 2d12 + 4', formulaWithStat: '8d2 + 2d12 + Str Bludgeoning' }
+      { rank: 14, formula: '6d2 + 1d8 + 1d6 + 1d8 + 1d6 + 4', formulaWithStat: '6d2 + 1d8 + 1d6 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 15, formula: '8d2 + 1d8 + 1d6 + 1d8 + 1d6 + 4', formulaWithStat: '8d2 + 1d8 + 1d6 + 1d8 + 1d6 + Str Bludgeoning' },
+      { rank: 16, formula: '8d2 + 4d8 + 4', formulaWithStat: '8d2 + 4d8 + Str Bludgeoning' }
     ];
 
     for (const m of milestones) {
@@ -454,9 +460,9 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       { rank: 6, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d6' },
       { rank: 8, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d8' },
       { rank: 10, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d10' },
-      { rank: 14, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d12' },
-      { rank: 15, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d12' },
-      { rank: 16, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d12' }
+      { rank: 14, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d8 + 1d6' },
+      { rank: 15, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '1d8 + 1d6' },
+      { rank: 16, expectedDice: '1d8', expectedRankVal: 0, expectedRankDice: '2d8' }
     ];
 
     for (const m of milestones) {
@@ -535,22 +541,22 @@ describe('Official DCC RPG Rank Damage Die & Damage Rules', () => {
       // 1. Pugilism skill damage
       const pugDmg = actor.getSkillDamageData(pugilism);
       assert.ok(pugDmg.fireFingersBonus, 'Pugilism should gain Fire Fingers bonus');
-      assert.equal(pugDmg.fireFingersBonus.dice, '1d12');
+      assert.equal(pugDmg.fireFingersBonus.dice, '1d8 + 1d6');
       assert.equal(pugDmg.fireFingersBonus.type, 'Fire');
-      assert.ok(pugDmg.formula.includes('+ 1d12'));
-      assert.ok(pugDmg.formulaWithStat.includes('+ 1d12 Fire'));
+      assert.ok(pugDmg.formula.includes('+ 1d8 + 1d6'));
+      assert.ok(pugDmg.formulaWithStat.includes('+ 1d8 + 1d6 Fire'));
 
       // 2. Unarmed Combat skill damage
       const ucDmg = actor.getSkillDamageData(unarmed);
       assert.ok(ucDmg.fireFingersBonus, 'Unarmed Combat should gain Fire Fingers bonus');
-      assert.equal(ucDmg.fireFingersBonus.dice, '1d12');
-      assert.ok(ucDmg.formula.includes('+ 1d12'));
+      assert.equal(ucDmg.fireFingersBonus.dice, '1d8 + 1d6');
+      assert.ok(ucDmg.formula.includes('+ 1d8 + 1d6'));
 
       // 3. Slice Attack weapon attack
       const sliceParts = actor.getAttackDamageParts(sliceAttack);
       const ffPart = sliceParts.find(p => p.id === 'fire-fingers-passive');
       assert.ok(ffPart, 'Slice Attack should receive Fire Fingers passive part');
-      assert.equal(ffPart.dice, '1d12');
+      assert.equal(ffPart.dice, '1d8 + 1d6');
       assert.equal(ffPart.type, 'Fire');
 
       // 4. Longsword should NOT receive Fire Fingers passive bonus

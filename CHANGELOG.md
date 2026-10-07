@@ -1,3 +1,41 @@
+## 2.4.15
+
+### Dynamic Damage Effects & Techniques Engine
+
+- **Data-Driven Combat Maneuvers & Damage Effects (`src/documents/actor.mjs`)**:
+  - Eliminated hardcoded string and regex checks across `getSkillDamageData`, `getAttackDamageParts`, `_applyTechniqueBonuses`, and `getCombatTechniques`.
+  - Implemented `resolveDamageEffect(chosenEffectRaw, baseItem, options)` to look up technique items dynamically on the actor, fall back to canonical defaults, and merge active milestone rank breaks.
+  - Implemented `DEFAULT_TECHNIQUE_CONFIGS` defining structured parameters for canonical maneuvers (*Iron Punch*, *Powerful Strike*, *Skullcracker*, *Smush*, *Toss*, *Choke Out*, *Dirty Fighting*).
+  - Implemented `evaluateModifier(baseOrMod, modOrContext, rank)` supporting overloaded calling conventions, flat modifiers, multipliers (`* @rank`), and arithmetic formulas.
+- **Dynamic Skill & Technique Schema Expansion (`template.json`, `src/models/items/skill-model.mjs`)**:
+  - Expanded `techniqueConfig` schema to include `isDamageEffect`, `appliesToTags`, `baseDiceCountMod`, `baseDiceSidesMod`, `flatDamageMod`, `damageBonus`, `damageType`, `debuffName`, and `cooldown`.
+  - Added `baseDiceCountMod` to each tier of `rankBreaks` (`rank5`, `rank10`, `rank15`, `rank20`) for progressive milestone scaling.
+- **Manual Technique Creation & Sheet UI (`templates/items/parts/skill.hbs`, `src/sheets/item-sheet.mjs`)**:
+  - Added form controls for `isDamageEffect`, `baseDiceCountMod`, `flatDamageMod`, `cooldown`, and `debuffName` in the skill item sheet.
+  - Added `baseDiceCountMod` inputs to all four Rank Break milestone cards.
+- **Dynamic Discovery & Combat Integration (`src/documents/actor.mjs`)**:
+  - Updated `getValidDamageEffects(attackItem)` to dynamically discover owned techniques/skills applying via `appliesTo` or `techniqueConfig.appliesToTags` matching weapon categories, types, or skill tags.
+- **Automated Unit Testing (`tests/dynamic-damage-effects.test.mjs`)**:
+  - Created dedicated test suite validating custom user techniques, milestone rank break scaling without hardcoded names, tag-based discovery, unarmed/weapon attack calculation, and CarlRPG rules compliance.
+  - All 873 tests across 160 suites pass with 0 failures.
+
+## 2.4.14
+
+### Runtime Regex Stripping and Structured Static Assets
+
+- **Pre-Compiled Structured Canonical Assets (`scripts/compile-canonical-assets.mjs`, `src/data/races.mjs`, `src/data/classes.mjs`)**:
+  - Implemented offline compilation pipeline transforming narrative perk strings into pre-calculated static assets directly in `DCC_RACES` (30 races) and `DCC_CLASSES` (53 classes).
+  - Explicitly codifies `stats`, `drBonus`, `movement`, `skills`, and `spells` schemas into the static files, completely eliminating runtime text/regex parsing on canonical race/class application.
+- **Combat Runtime Regex Elimination (`src/documents/actor.mjs`)**:
+  - Replaced runtime regex matching (`/pugilism/i`, `/unarmed combat/i`, `/fire fingers/i`, `/slice attack/i`) with exact string matching and structured tag checks (`sys.tags`).
+  - Replaced maneuver and unarmed checks with high-performance `Set` lookups (`KNOWN_MANEUVERS`, `KNOWN_UNARMED`) and tag lookups.
+  - Replaced combat effect regex checks (`/iron punch/i`, `/powerful strike/i`, `/skullcracker/i`, `/toss/i`, `/smush/i`, `/choke out/i`, `/dirty fighting/i`) with exact string matching.
+- **Rank Damage Die Structuring (`src/data/rank-dice.mjs`)**:
+  - Added non-enumerable `count` and `sides` properties to `getRankDamageDie()` output for direct property access without regex decomposition, maintaining full backwards compatibility with deep equality assertions.
+- **Automated Unit Testing (`tests/runtime-codification.test.mjs`)**:
+  - Added dedicated test suite verifying pre-compiled canonical race/class schemas, exact combat effect resolution, and passive tag evaluation.
+  - 100% test pass rate across all 866 tests in 160 suites.
+
 ## 2.4.13
 
 ### Interactive Perks and Detriments for Races and Classes

@@ -311,15 +311,15 @@ describe('DCC RPG - Rank Break Configurations (Ranks 5, 10, 15, 20) for Skills a
       skillItem.system.modifiedRank = 15;
       let dmg15 = actor.getSkillDamageData(skillItem);
       assert.equal(dmg15.baseCount, 5, '5d8 base damage (1 + 1 + 1 + 2)');
-      assert.ok(dmg15.rankDie.dice.includes('3d12'), `Rank die should be 3d12, got: ${dmg15.rankDie.dice}`);
+      assert.ok(dmg15.rankDie.dice.includes('3d8 + 1d6'), `Rank die should be 3d8 + 1d6, got: ${dmg15.rankDie.dice}`);
 
-      // Rank 20: +2 more rank dice (total +4 rank dice = 5 rank dice), Stunned debuff, notes
+      // Rank 20: +2 more rank dice (total +4 rank dice), Stunned debuff, notes
       skillItem.system.rank = 20;
       skillItem.modifiedRank = 20;
       skillItem.system.modifiedRank = 20;
       let dmg20 = actor.getSkillDamageData(skillItem);
       assert.equal(dmg20.baseCount, 5, '5d8 base damage');
-      assert.ok(dmg20.rankDie.dice.includes('5d12'), `Rank die should be 5d12, got: ${dmg20.rankDie.dice}`);
+      assert.ok(dmg20.rankDie.dice.includes('6d10'), `Rank die should be 6d10, got: ${dmg20.rankDie.dice}`);
       assert.ok(dmg20.targetDebuffs.includes('Bleeding'));
       assert.ok(dmg20.targetDebuffs.includes('Crippled'));
       assert.ok(dmg20.targetDebuffs.includes('Stunned'));

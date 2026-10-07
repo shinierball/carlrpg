@@ -308,7 +308,26 @@ export const DCC_SKILLS = [
       notes: "Wrasslin' Damage Effect, Passive. If target is at 10% Health Bar or less, you deal ×2 total damage.",
       upgrades: "Rank 5: Activates at 20% Health Bar or less.\nRank 10: Activates at 40% Health Bar or less, deals ×4 total damage.\nRank 15: Activates at 80% Health Bar or less, deals ×8 total damage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Wrasslin'", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["wrasslin", "unarmed"],
+        baseDiceCountMod: "",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "",
+        damageType: "",
+        debuffName: "",
+        cooldown: "None"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Activates at 20% Health Bar or less" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Activates at 40% Health Bar or less, deals ×4 total damage" },
+        rank15: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Activates at 80% Health Bar or less, deals ×8 total damage" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -326,7 +345,26 @@ export const DCC_SKILLS = [
       notes: "Pugilism or Wrasslin' Damage Effect, Passive. If Attack is Critical Fail, lose 1 Popularity. Apply Woozy Debuff to target.",
       upgrades: "Rank 5: Also apply The Taint Debuff.\nRank 10: Also apply Blinded Debuff. No longer lose Popularity on Critical Fails.\nRank 15: Apply an immediate Minor Injury Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Pugilism", "Wrasslin'", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["pugilism", "wrasslin", "unarmed"],
+        baseDiceCountMod: "",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "",
+        damageType: "",
+        debuffName: "Woozy",
+        cooldown: "None"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "The Taint", notes: "Also apply The Taint Debuff" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "Blinded", notes: "Also apply Blinded Debuff. No longer lose Popularity on Critical Fails." },
+        rank15: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "Minor Injury", notes: "Apply an immediate Minor Injury Debuff." },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -344,7 +382,26 @@ export const DCC_SKILLS = [
       notes: "Pugilism Damage Effect, Passive. Deal +1d2 base damage.",
       upgrades: "Rank 5: Add 1 Rank damage die.\nRank 10: Choose to have target gain Stunned Debuff instead of rolling damage.\nRank 15: Add 1 Rank damage die, and target gains Stunned Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Pugilism", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["pugilism", "unarmed"],
+        baseDiceCountMod: "+1",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "1d2",
+        damageType: "Physical",
+        debuffName: "",
+        cooldown: "None"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "+1", rankDamageDice: 1, buffsResistances: "", debuff: "", notes: "Add 1 Rank damage die" },
+        rank10: { damageDice: "", baseDiceCountMod: "+1", rankDamageDice: 0, buffsResistances: "", debuff: "Stunned", notes: "Choose to have target gain Stunned Debuff" },
+        rank15: { damageDice: "", baseDiceCountMod: "+1", rankDamageDice: 1, buffsResistances: "", debuff: "Stunned", notes: "Add 1 Rank damage die, and target gains Stunned Debuff" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -362,7 +419,26 @@ export const DCC_SKILLS = [
       notes: "Foot Soldier, Noggin Nocker, or Pugilism Damage Effect. Cooldown: 30 hours. Multiply base damage dice by Rank in this Skill, then add modifiers.",
       upgrades: "Rank 5: Cooldown is 10 hours.\nRank 10: Cooldown is 5 hours.\nRank 15: Cooldown is 2 hours.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Foot Soldier", "Noggin Nocker", "Pugilism", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["foot soldier", "noggin knocker", "noggin nocker", "pugilism", "unarmed"],
+        baseDiceCountMod: "* @rank",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "1d6",
+        damageType: "",
+        debuffName: "",
+        cooldown: "30 hours"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Cooldown is 10 hours" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Cooldown is 5 hours" },
+        rank15: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Cooldown is 2 hours" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -380,7 +456,26 @@ export const DCC_SKILLS = [
       notes: "Noggin Nocker Damage Effect, Passive. If target is same size as you, gain +1d4 base damage.",
       upgrades: "Rank 5: +1d4 base damage if target is same size.\nRank 10: If same size, add 1 Rank damage die and target gains Stunned Debuff.\nRank 15: Add 1 Rank damage die and target gains Blood Trail Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Noggin Nocker", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["noggin knocker", "noggin nocker", "unarmed"],
+        baseDiceCountMod: "+1",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "1d4",
+        damageType: "Physical",
+        debuffName: "",
+        cooldown: "None"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "+1", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "+1d4 base damage if target is same size" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 1, buffsResistances: "", debuff: "Stunned", notes: "If same size, add 1 Rank damage die and target gains Stunned Debuff" },
+        rank15: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 1, buffsResistances: "", debuff: "Blood Trail", notes: "Add 1 Rank damage die and target gains Blood Trail Debuff" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -398,7 +493,26 @@ export const DCC_SKILLS = [
       notes: "Foot Soldier Damage Effect, Passive. Target must have 20% Health Bar or less. Cooldown: Once per round. Deal ×2 total damage.",
       upgrades: "Rank 5: Activates at 30% Health Bar or less and deals ×3 damage.\nRank 10: No cooldown.\nRank 15: Activates at 40% Health Bar or less and deals ×4 damage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Foot Soldier", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["foot soldier", "unarmed"],
+        baseDiceCountMod: "",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "",
+        damageType: "",
+        debuffName: "",
+        cooldown: "Once per round"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Activates at 30% Health Bar or less and deals ×3 damage" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "No cooldown" },
+        rank15: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Activates at 40% Health Bar or less and deals ×4 damage" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
   {
@@ -416,7 +530,26 @@ export const DCC_SKILLS = [
       notes: "Wrasslin' Damage Effect, Passive. Deal +1d8 base damage + Str Bludgeoning, end Held Debuff, and throw target 5 ft per 5 Ranks (min 5 ft). Only foes smaller than you.",
       upgrades: "Rank 5: Toss foes up to own size.\nRank 10: Toss foes one size larger.\nRank 15: +1d8 base damage, toss foes two sizes larger.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isTechnique: true,
+      appliesTo: ["Wrasslin'", "Unarmed Combat"],
+      techniqueConfig: {
+        isDamageEffect: true,
+        appliesToTags: ["wrasslin", "unarmed"],
+        baseDiceCountMod: "",
+        baseDiceSidesMod: "",
+        flatDamageMod: "",
+        damageBonus: "1d8",
+        damageType: "Bludgeoning",
+        debuffName: "",
+        cooldown: "None"
+      },
+      rankBreaks: {
+        rank5: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Toss foes up to own size" },
+        rank10: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "Toss foes one size larger" },
+        rank15: { damageDice: "1d8", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "+1d8 base damage, toss foes two sizes larger" },
+        rank20: { damageDice: "", baseDiceCountMod: "", rankDamageDice: 0, buffsResistances: "", debuff: "", notes: "" }
+      }
     }
   },
 

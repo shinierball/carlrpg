@@ -58,14 +58,30 @@
   </div>
   <div style="padding: 6px; background: #fafafa; border: 1px solid #ddd;">
     {{#if system.isTechnique}}
+      <div class="dcc-field-row" style="margin-bottom: 6px; align-items: center; gap: 12px;">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;">
+          <input type="checkbox" name="system.techniqueConfig.isDamageEffect" {{#if system.techniqueConfig.isDamageEffect}}checked{{/if}} />
+          <strong>Functions as Optional Damage Effect / Attack Maneuver</strong>
+        </label>
+      </div>
       <div class="dcc-field-row" style="margin-bottom: 6px;">
         <div class="dcc-field-group" style="flex: 2;">
-          <span class="dcc-field-label">Applies To (Weapons / Skills / Categories)</span>
-          <input class="dcc-field-input" type="text" name="system.appliesTo" value="{{appliesToString}}" placeholder="e.g. Chainsaw, Power Weapons, Pugilism" style="font-size: 11px;" />
+          <span class="dcc-field-label">Applies To (Weapons / Skills / Tags)</span>
+          <input class="dcc-field-input" type="text" name="system.appliesTo" value="{{appliesToString}}" placeholder="e.g. Chainsaw, Power Weapons, Pugilism, unarmed" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Base Dice Count Mod</span>
+          <input class="dcc-field-input" type="text" name="system.techniqueConfig.baseDiceCountMod" value="{{system.techniqueConfig.baseDiceCountMod}}" placeholder="e.g. +1 or * @rank" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Flat Damage Mod</span>
+          <input class="dcc-field-input" type="text" name="system.techniqueConfig.flatDamageMod" value="{{system.techniqueConfig.flatDamageMod}}" placeholder="e.g. + @rank" style="font-size: 11px;" />
+        </div>
+      </div>
+      <div class="dcc-field-row" style="margin-bottom: 6px;">
+        <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Technique Damage Bonus</span>
-          <input class="dcc-field-input" type="text" name="system.techniqueConfig.damageBonus" value="{{system.techniqueConfig.damageBonus}}" placeholder="e.g. +2d4" style="font-size: 11px;" />
+          <input class="dcc-field-input" type="text" name="system.techniqueConfig.damageBonus" value="{{system.techniqueConfig.damageBonus}}" placeholder="e.g. +2d4 or 1d8" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Bonus Damage Type</span>
@@ -75,6 +91,19 @@
               <option value="{{dt}}" {{#if (eq ../system.techniqueConfig.damageType dt)}}selected{{/if}}>{{dt}}</option>
             {{/each}}
           </select>
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">On-Use Target Debuff</span>
+          <select class="dcc-field-input" name="system.techniqueConfig.debuffName" style="font-size: 11px;">
+            <option value="">-- None --</option>
+            {{#each availableDebuffs as |deb|}}
+              <option value="{{deb.name}}" {{#if (eq ../system.techniqueConfig.debuffName deb.name)}}selected{{/if}}>{{deb.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Cooldown</span>
+          <input class="dcc-field-input" type="text" name="system.techniqueConfig.cooldown" value="{{system.techniqueConfig.cooldown}}" placeholder="e.g. 30 hours, 1/round" style="font-size: 11px;" />
         </div>
       </div>
     {{/if}}
@@ -135,6 +164,10 @@
           <input class="dcc-field-input" type="text" name="system.rankBreaks.rank5.damageDice" value="{{system.rankBreaks.rank5.damageDice}}" placeholder="e.g. 2d4" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Base Dice Count Mod</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank5.baseDiceCountMod" value="{{system.rankBreaks.rank5.baseDiceCountMod}}" placeholder="e.g. +1" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Add'l Rank Damage Dies</span>
           <input class="dcc-field-input" type="number" name="system.rankBreaks.rank5.rankDamageDice" value="{{system.rankBreaks.rank5.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
         </div>
@@ -167,6 +200,10 @@
         <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Additional Damage Dice</span>
           <input class="dcc-field-input" type="text" name="system.rankBreaks.rank10.damageDice" value="{{system.rankBreaks.rank10.damageDice}}" placeholder="e.g. 2d4" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Base Dice Count Mod</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank10.baseDiceCountMod" value="{{system.rankBreaks.rank10.baseDiceCountMod}}" placeholder="e.g. +1" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Add'l Rank Damage Dies</span>
@@ -203,6 +240,10 @@
           <input class="dcc-field-input" type="text" name="system.rankBreaks.rank15.damageDice" value="{{system.rankBreaks.rank15.damageDice}}" placeholder="e.g. 2d4" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Base Dice Count Mod</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank15.baseDiceCountMod" value="{{system.rankBreaks.rank15.baseDiceCountMod}}" placeholder="e.g. +1" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Add'l Rank Damage Dies</span>
           <input class="dcc-field-input" type="number" name="system.rankBreaks.rank15.rankDamageDice" value="{{system.rankBreaks.rank15.rankDamageDice}}" placeholder="0" min="0" style="font-size: 11px;" />
         </div>
@@ -235,6 +276,10 @@
         <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Additional Damage Dice</span>
           <input class="dcc-field-input" type="text" name="system.rankBreaks.rank20.damageDice" value="{{system.rankBreaks.rank20.damageDice}}" placeholder="e.g. 2d6" style="font-size: 11px;" />
+        </div>
+        <div class="dcc-field-group" style="flex: 1;">
+          <span class="dcc-field-label">Base Dice Count Mod</span>
+          <input class="dcc-field-input" type="text" name="system.rankBreaks.rank20.baseDiceCountMod" value="{{system.rankBreaks.rank20.baseDiceCountMod}}" placeholder="e.g. +1" style="font-size: 11px;" />
         </div>
         <div class="dcc-field-group" style="flex: 1;">
           <span class="dcc-field-label">Add'l Rank Damage Dies</span>

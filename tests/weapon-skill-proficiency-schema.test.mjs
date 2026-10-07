@@ -50,6 +50,11 @@ describe('DCC RPG - Weapon Skill Proficiency & Technique Schema', () => {
     assert.equal(template.Item.skill.isTechnique, false);
     assert.deepEqual(template.Item.skill.appliesTo, []);
     assert.deepEqual(template.Item.skill.techniqueConfig, {
+      isDamageEffect: false,
+      appliesToTags: [],
+      baseDiceCountMod: '',
+      baseDiceSidesMod: '',
+      flatDamageMod: '',
       damageBonus: '',
       damageType: '',
       debuffName: '',

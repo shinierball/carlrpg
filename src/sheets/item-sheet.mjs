@@ -456,6 +456,7 @@ export class DCCItemSheet extends BaseItemSheet {
         if (!context.system.rankBreaks[rKey]) {
           context.system.rankBreaks[rKey] = {
             damageDice: '',
+            baseDiceCountMod: '',
             rankDamageDice: 0,
             buffsResistances: '',
             debuff: '',
@@ -463,6 +464,7 @@ export class DCCItemSheet extends BaseItemSheet {
           };
         } else {
           context.system.rankBreaks[rKey].damageDice = context.system.rankBreaks[rKey].damageDice || '';
+          context.system.rankBreaks[rKey].baseDiceCountMod = context.system.rankBreaks[rKey].baseDiceCountMod || '';
           context.system.rankBreaks[rKey].rankDamageDice = Number(context.system.rankBreaks[rKey].rankDamageDice) || 0;
           context.system.rankBreaks[rKey].buffsResistances = context.system.rankBreaks[rKey].buffsResistances || '';
           context.system.rankBreaks[rKey].debuff = context.system.rankBreaks[rKey].debuff || '';
@@ -759,6 +761,7 @@ export class DCCItemSheet extends BaseItemSheet {
           const raw = expanded.system.rankBreaks[rKey] || {};
           cleanedBreaks[rKey] = {
             damageDice: (raw.damageDice || '').trim(),
+            baseDiceCountMod: (raw.baseDiceCountMod || '').trim(),
             rankDamageDice: parseInt(raw.rankDamageDice, 10) || 0,
             buffsResistances: (raw.buffsResistances || '').trim(),
             debuff: (raw.debuff || '').trim(),

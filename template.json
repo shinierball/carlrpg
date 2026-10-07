@@ -10,27 +10,77 @@
     "templates": {
       "baseStats": {
         "abilities": {
-          "str": { "value": 10, "unenhanced": 10, "mod": 4 },
-          "int": { "value": 10, "unenhanced": 10, "mod": 4 },
-          "con": { "value": 10, "unenhanced": 10, "mod": 4 },
-          "dex": { "value": 10, "unenhanced": 10, "mod": 4 },
-          "cha": { "value": 10, "unenhanced": 10, "mod": 4 }
+          "str": {
+            "value": 10,
+            "unenhanced": 10,
+            "mod": 4
+          },
+          "int": {
+            "value": 10,
+            "unenhanced": 10,
+            "mod": 4
+          },
+          "con": {
+            "value": 10,
+            "unenhanced": 10,
+            "mod": 4
+          },
+          "dex": {
+            "value": 10,
+            "unenhanced": 10,
+            "mod": 4
+          },
+          "cha": {
+            "value": 10,
+            "unenhanced": 10,
+            "mod": 4
+          }
         },
         "attributes": {
-          "hp": { "value": 40, "max": 40, "temp": 0, "pct": 100 },
-          "mana": { "value": 10, "max": 10 },
-          "evade": { "items": 0, "buffs": 0, "total": 4 },
-          "dr": { "armor": 0, "items": 0, "buffs": 0, "total": 0 },
-          "speed": { "move": 20, "step": 10, "climb": 0, "swim": 0, "fly": 0, "burrow": 0 },
+          "hp": {
+            "value": 40,
+            "max": 40,
+            "temp": 0,
+            "pct": 100
+          },
+          "mana": {
+            "value": 10,
+            "max": 10
+          },
+          "evade": {
+            "items": 0,
+            "buffs": 0,
+            "total": 4
+          },
+          "dr": {
+            "armor": 0,
+            "items": 0,
+            "buffs": 0,
+            "total": 0
+          },
+          "speed": {
+            "move": 20,
+            "step": 10,
+            "climb": 0,
+            "swim": 0,
+            "fly": 0,
+            "burrow": 0
+          },
           "aiFavor": 0,
           "size": "Medium",
           "debuffs": "",
-          "externalBuffs": { "buff1": "", "buff2": "", "buff3": "" }
+          "externalBuffs": {
+            "buff1": "",
+            "buff2": "",
+            "buff3": ""
+          }
         }
       }
     },
     "crawler": {
-      "templates": ["baseStats"],
+      "templates": [
+        "baseStats"
+      ],
       "details": {
         "party": "",
         "crawlerNumber": "",
@@ -97,7 +147,9 @@
       }
     },
     "pet": {
-      "templates": ["baseStats"],
+      "templates": [
+        "baseStats"
+      ],
       "details": {
         "level": 1,
         "special": "",
@@ -107,7 +159,11 @@
     },
     "mount_vehicle": {
       "attributes": {
-        "hp": { "value": 30, "max": 30, "pct": 100 },
+        "hp": {
+          "value": 30,
+          "max": 30,
+          "pct": 100
+        },
         "size": "Large",
         "occupants": "",
         "accessories": "",
@@ -116,7 +172,9 @@
       }
     },
     "npc": {
-      "templates": ["baseStats"],
+      "templates": [
+        "baseStats"
+      ],
       "details": {
         "level": 1,
         "xpValue": 0,
@@ -125,7 +183,9 @@
       }
     },
     "mob": {
-      "templates": ["baseStats"],
+      "templates": [
+        "baseStats"
+      ],
       "attributes": {
         "treasure": "",
         "xp": 0,
@@ -186,11 +246,18 @@
       "isTechnique": false,
       "appliesTo": [],
       "techniqueConfig": {
+        "isDamageEffect": false,
+        "appliesToTags": [],
+        "baseDiceCountMod": "",
+        "baseDiceSidesMod": "",
+        "flatDamageMod": "",
         "damageBonus": "",
         "damageType": "",
         "debuffName": "",
         "cooldown": "None"
       },
+      "optionalEffects": [],
+      "selectedEffect": "",
       "fumbleDebuff": "",
       "onHitDebuff": "",
       "onHitDebuffMinRank": 0,
@@ -199,6 +266,7 @@
       "rankBreaks": {
         "rank5": {
           "damageDice": "",
+          "baseDiceCountMod": "",
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
@@ -206,6 +274,7 @@
         },
         "rank10": {
           "damageDice": "",
+          "baseDiceCountMod": "",
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
@@ -213,6 +282,7 @@
         },
         "rank15": {
           "damageDice": "",
+          "baseDiceCountMod": "",
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
@@ -220,12 +290,14 @@
         },
         "rank20": {
           "damageDice": "",
+          "baseDiceCountMod": "",
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "tags": []
     },
     "attack": {
       "equipped": true,
@@ -243,7 +315,8 @@
       "damageParts": [],
       "effects": "",
       "optionalEffects": [],
-      "selectedEffect": ""
+      "selectedEffect": "",
+      "tags": []
     },
     "spell": {
       "rank": 1,
@@ -302,7 +375,8 @@
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "tags": []
     },
     "gear": {
       "slot": "torso",
@@ -321,11 +395,26 @@
       "drBonus": 0,
       "evadeBonus": 0,
       "abilityModifiers": {
-        "str": { "value": 0, "type": "flat" },
-        "int": { "value": 0, "type": "flat" },
-        "con": { "value": 0, "type": "flat" },
-        "dex": { "value": 0, "type": "flat" },
-        "cha": { "value": 0, "type": "flat" }
+        "str": {
+          "value": 0,
+          "type": "flat"
+        },
+        "int": {
+          "value": 0,
+          "type": "flat"
+        },
+        "con": {
+          "value": 0,
+          "type": "flat"
+        },
+        "dex": {
+          "value": 0,
+          "type": "flat"
+        },
+        "cha": {
+          "value": 0,
+          "type": "flat"
+        }
       },
       "skillModifiers": [],
       "damageParts": [],
@@ -337,7 +426,8 @@
         "max": 0
       },
       "outcomes": [],
-      "notes": ""
+      "notes": "",
+      "tags": []
     },
     "race": {
       "heritage": "Earth",
@@ -367,7 +457,10 @@
       "chosenPerks": [],
       "chosenDetriments": [],
       "abilities": "",
-      "description": ""
+      "description": "",
+      "tags": [],
+      "grantedItems": [],
+      "choices": []
     },
     "class": {
       "classType": "Fighter",
@@ -397,7 +490,10 @@
       "chosenPerks": [],
       "chosenDetriments": [],
       "abilities": "",
-      "description": ""
+      "description": "",
+      "tags": [],
+      "grantedItems": [],
+      "choices": []
     },
     "deity": {
       "boons": "",
@@ -423,7 +519,8 @@
       "tableName": "",
       "outcomes": [],
       "notes": "",
-      "description": ""
+      "description": "",
+      "tags": []
     },
     "buff": {
       "buffType": "stat",
@@ -435,7 +532,8 @@
       "statModifiers": [],
       "damageModifiers": [],
       "duration": "1 Hour",
-      "description": ""
+      "description": "",
+      "tags": []
     },
     "debuff": {
       "severity": "Minor",
@@ -446,7 +544,8 @@
       "statModifiers": [],
       "damageModifiers": [],
       "duration": "Combat",
-      "description": ""
+      "description": "",
+      "tags": []
     },
     "achievement": {
       "quote": "",

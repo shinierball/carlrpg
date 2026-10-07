@@ -15,22 +15,63 @@
  * | Rank 4–5 | +1d4 | Adds a 1d4 Rank damage die |
  * | Rank 6–7 | +1d6 | Adds a 1d6 Rank damage die |
  * | Rank 8–9 | +1d8 | Adds a 1d8 Rank damage die |
- * | Rank 10–13 | +1d10 | Adds a 1d10 Rank damage die |
- * | Rank 14–15+ | +1d12 | Adds a 1d12 Rank damage die |
+ * | Rank 10–11 | +1d10 | Adds a 1d10 Rank damage die |
+ * | Rank 12–13 | +1d12 | Adds a 1d12 Rank damage die |
+ * | Rank 14–15 | +1d8 + 1d6 | Adds a d8 and d6 Rank damage die |
+ * | Rank 16–17 | +2d8 | Adds 2d8 Rank damage die |
+ * | Rank 18–19 | +1d10 + 1d8 | Adds a d10 and d8 Rank damage die |
+ * | Rank 20+ | +2d10 | Adds 2d10 Rank damage die |
  *
  * @param {number} rank
  * @returns {{ dice: string, value: number, text: string }}
  */
 export function getRankDamageDie(rank) {
   const r = Math.max(0, Number(rank) || 0);
-  if (r <= 0) return { dice: '', value: 0, text: '+0' };
-  if (r === 1) return { dice: '', value: 1, text: '+1' };
-  if (r <= 3) return { dice: '1d2', value: 0, text: '+1d2' };
-  if (r <= 5) return { dice: '1d4', value: 0, text: '+1d4' };
-  if (r <= 7) return { dice: '1d6', value: 0, text: '+1d6' };
-  if (r <= 9) return { dice: '1d8', value: 0, text: '+1d8' };
-  if (r <= 13) return { dice: '1d10', value: 0, text: '+1d10' };
-  return { dice: '1d12', value: 0, text: '+1d12' };
+  let base;
+  let count = 0;
+  let sides = 0;
+  let parts = [];
+  if (r <= 0) {
+    base = { dice: '', value: 0, text: '+0' };
+  } else if (r === 1) {
+    base = { dice: '', value: 1, text: '+1' };
+  } else if (r <= 3) {
+    base = { dice: '1d2', value: 0, text: '+1d2' };
+    count = 1; sides = 2; parts = [{ count: 1, sides: 2 }];
+  } else if (r <= 5) {
+    base = { dice: '1d4', value: 0, text: '+1d4' };
+    count = 1; sides = 4; parts = [{ count: 1, sides: 4 }];
+  } else if (r <= 7) {
+    base = { dice: '1d6', value: 0, text: '+1d6' };
+    count = 1; sides = 6; parts = [{ count: 1, sides: 6 }];
+  } else if (r <= 9) {
+    base = { dice: '1d8', value: 0, text: '+1d8' };
+    count = 1; sides = 8; parts = [{ count: 1, sides: 8 }];
+  } else if (r <= 11) {
+    base = { dice: '1d10', value: 0, text: '+1d10' };
+    count = 1; sides = 10; parts = [{ count: 1, sides: 10 }];
+  } else if (r <= 13) {
+    base = { dice: '1d12', value: 0, text: '+1d12' };
+    count = 1; sides = 12; parts = [{ count: 1, sides: 12 }];
+  } else if (r <= 15) { // 1d8 + 1d6
+    base = { dice: '1d8 + 1d6', value: 0, text: '+1d8 + 1d6' };
+    count = 2; sides = 8; parts = [{ count: 1, sides: 8 }, { count: 1, sides: 6 }];
+  } else if (r <= 17) {
+    base = { dice: '2d8', value: 0, text: '+2d8' };
+    count = 2; sides = 8; parts = [{ count: 2, sides: 8 }];
+  } else if (r <= 19) { // 1d10 + 1d8
+    base = { dice: '1d10 + 1d8', value: 0, text: '+1d10 + 1d8' };
+    count = 2; sides = 10; parts = [{ count: 1, sides: 10 }, { count: 1, sides: 8 }];
+  } else { // max 20+
+    base = { dice: '2d10', value: 0, text: '+2d10' };
+    count = 2; sides = 10; parts = [{ count: 2, sides: 10 }];
+  }
+  Object.defineProperties(base, {
+    count: { value: count, enumerable: false, writable: true },
+    sides: { value: sides, enumerable: false, writable: true },
+    parts: { value: parts, enumerable: false, writable: true }
+  });
+  return base;
 }
 
 /**

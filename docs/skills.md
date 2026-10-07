@@ -100,4 +100,27 @@ At each milestone, the following options can be independently configured:
 3. **Buffs or Resistances (`buffsResistances`)**: Descriptive buffs, stat bonuses, or damage resistances unlocked at the milestone (e.g. `+2 STR`, `Fire Resistance`, `+1 Cleave`).
 4. **Target Debuffs (`debuff`)**: A status condition or debuff inflicted on targets upon successful hit (e.g. `Bleeding`, `Crippled`, `Stunned`, `Burned`). Active debuffs generate interactive **[ 🩸 Inflict Condition ]** buttons on the chat damage card for one-click target application.
 5. **Non-Defined Ability Notes (`notes`)**: Freeform notes documenting custom narrative or mechanical perks not formally parameterized by standard dice or conditions (e.g. *Instant decapitation chance on critical hits against humanoids*).
+6. **Milestone Base Dice Count Modifier (`baseDiceCountMod`)**: Explicit formula or integer adjustment modifying base attack dice count (e.g. `+1`, `+2`, `* @rank`) unlocked at this rank break.
+
+---
+
+## Dynamic Damage Effects & Techniques Engine
+
+Combat techniques and damage effects (such as *Iron Punch*, *Powerful Strike*, *Skullcracker*, *Smush*, *Toss*, *Choke Out*, *Dirty Fighting*, or custom player/GM techniques) are fully data-driven and dynamic, eliminating hardcoded string checks in combat resolution.
+
+### Technique Configuration (`techniqueConfig`)
+Any skill item configured with `isTechnique: true` or `techniqueConfig.isDamageEffect: true` provides structured combat maneuver parameters:
+- **`appliesToTags`**: Target categories, weapon types, or skills this technique can be used with (e.g. `["bashing", "hammer", "pugilism"]`, `["edge", "dagger"]`).
+- **`baseDiceCountMod`**: Modifier formula applied to the base attack's dice count (e.g. `+1`, `+2`, `* @rank`).
+- **`flatDamageMod`**: Numeric or formula flat damage added to the attack.
+- **`damageBonus`**: Bonus damage packet die (e.g. `1d4`, `1d6`, `1d8`).
+- **`damageType`**: Damage type of the bonus packet (e.g. `Bludgeoning`, `Fire`, `Slashing`).
+- **`debuffName`**: Condition inflicted on the target on hit (e.g. `Dazed`, `Burning`, `Woozy`).
+- **`cooldown`**: Maneuver cooldown or usage constraint (e.g. `2 hours`, `1/round`, `30 hours`).
+
+### Combat Resolution Flow
+1. **Dynamic Discovery (`getValidDamageEffects`)**: When rolling an attack (or opening an attack dialog), the system dynamically queries the actor's inventory for skills with `isTechnique: true` whose `appliesToTags` match the weapon category, weapon model, or skill tags.
+2. **Resolution (`resolveDamageEffect`)**: Merges the technique's baseline `techniqueConfig` with active milestone `rankBreaks` (Rank 5, 10, 15, 20) based on the actor's modified technique rank.
+3. **Execution**: Multiplies or adds base dice (`baseDiceCountMod`), injects typed bonus packets (`bonusParts`), adds extra rank damage dice (`extraRankDice`), and binds on-hit condition buttons (`debuffs`) directly into interactive chat damage cards.
+
 

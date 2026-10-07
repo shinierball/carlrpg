@@ -26,11 +26,18 @@ export class SkillDataModel extends BaseItemDataModel {
       isTechnique: new fields.BooleanField({ initial: false }),
       appliesTo: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       techniqueConfig: new fields.SchemaField({
+        isDamageEffect: new fields.BooleanField({ initial: false }),
+        appliesToTags: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+        baseDiceCountMod: new fields.StringField({ initial: '' }),
+        baseDiceSidesMod: new fields.StringField({ initial: '' }),
+        flatDamageMod: new fields.StringField({ initial: '' }),
         damageBonus: new fields.StringField({ initial: '' }),
         damageType: new fields.StringField({ initial: '' }),
         debuffName: new fields.StringField({ initial: '' }),
         cooldown: new fields.StringField({ initial: 'None' })
       }),
+      optionalEffects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      selectedEffect: new fields.StringField({ initial: '' }),
       fumbleDebuff: new fields.StringField({ initial: '' }),
       onHitDebuff: new fields.StringField({ initial: '' }),
       onHitDebuffMinRank: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
@@ -39,6 +46,7 @@ export class SkillDataModel extends BaseItemDataModel {
       rankBreaks: new fields.SchemaField({
         rank5: new fields.SchemaField({
           damageDice: new fields.StringField({ initial: '' }),
+          baseDiceCountMod: new fields.StringField({ initial: '' }),
           rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
           buffsResistances: new fields.StringField({ initial: '' }),
           debuff: new fields.StringField({ initial: '' }),
@@ -46,6 +54,7 @@ export class SkillDataModel extends BaseItemDataModel {
         }),
         rank10: new fields.SchemaField({
           damageDice: new fields.StringField({ initial: '' }),
+          baseDiceCountMod: new fields.StringField({ initial: '' }),
           rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
           buffsResistances: new fields.StringField({ initial: '' }),
           debuff: new fields.StringField({ initial: '' }),
@@ -53,6 +62,7 @@ export class SkillDataModel extends BaseItemDataModel {
         }),
         rank15: new fields.SchemaField({
           damageDice: new fields.StringField({ initial: '' }),
+          baseDiceCountMod: new fields.StringField({ initial: '' }),
           rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
           buffsResistances: new fields.StringField({ initial: '' }),
           debuff: new fields.StringField({ initial: '' }),
@@ -60,6 +70,7 @@ export class SkillDataModel extends BaseItemDataModel {
         }),
         rank20: new fields.SchemaField({
           damageDice: new fields.StringField({ initial: '' }),
+          baseDiceCountMod: new fields.StringField({ initial: '' }),
           rankDamageDice: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
           buffsResistances: new fields.StringField({ initial: '' }),
           debuff: new fields.StringField({ initial: '' }),

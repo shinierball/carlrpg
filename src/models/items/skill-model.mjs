@@ -18,6 +18,8 @@ export class SkillDataModel extends BaseItemDataModel {
       checkType: new fields.StringField({ initial: 'Stat Check' }),
       category: new fields.StringField({ initial: 'Utility' }),
       canGainRanks: new fields.BooleanField({ initial: true }),
+      isAttack: new fields.BooleanField({ initial: false }),
+      hasDamage: new fields.BooleanField({ initial: false }),
       cooldown: new fields.StringField({ initial: 'None' }),
       baseDamage: new fields.StringField({ initial: '' }),
       notes: new fields.HTMLField({ initial: '' }),

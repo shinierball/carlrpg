@@ -123,4 +123,20 @@ Any skill item configured with `isTechnique: true` or `techniqueConfig.isDamageE
 2. **Resolution (`resolveDamageEffect`)**: Merges the technique's baseline `techniqueConfig` with active milestone `rankBreaks` (Rank 5, 10, 15, 20) based on the actor's modified technique rank.
 3. **Execution**: Multiplies or adds base dice (`baseDiceCountMod`), injects typed bonus packets (`bonusParts`), adds extra rank damage dice (`extraRankDice`), and binds on-hit condition buttons (`debuffs`) directly into interactive chat damage cards.
 
+---
+
+## Skill Classification & Action Discrimination
+
+CarlRPG strictly differentiates between attack actions that deal damage and tactical/utility/interrupt combat maneuvers:
+
+- **Action Classification (`isAttack`)**:
+  - Attack skills target enemies, roll to hit vs Evade (`actor.rollAttack(item, 'hit')`), and show up as attacks on the character sheet, Hotlist, and Token HUD with the `[ATTACK]` badge.
+  - Non-attack actions (e.g. *Call a Play*, *Intervene*, *Taunt*, *Catcher*, *Throwing*, *Tracking*) have `isAttack: false`. They roll as skill checks (`actor.rollSkill(item)`) and display with the `[SKILL]` badge.
+  - Setting `category: "Combat"` on an action does **not** make it an attack. Category defines when the action is used, while `isAttack` defines whether it functions as an offensive combat strike.
+
+- **Explicit Damage Resolution (`hasDamage` & `baseDamage`)**:
+  - A skill only rolls damage if it has explicit damage configured via `system.baseDamage` or `system.hasDamage: true`, or is a canonical unarmed combat form (*Pugilism*, *Unarmed Combat*).
+  - Utility and tactical combat skills that describe dice rolls in their rules notes (such as *Call a Play*'s "Roll 2d6" or *Intervene*'s "Roll 1d6") are cleanly evaluated as `hasDamage: false` and do not generate false damage rolls.
+
+
 

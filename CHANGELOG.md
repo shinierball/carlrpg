@@ -1,3 +1,24 @@
+## 2.4.17
+
+### Skill Classification & Action Discrimination Engine
+
+- **Decoupled Combat Category from Attack Classification (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `src/apps/crawler-token-hud.mjs`)**:
+  - Eliminated legacy heuristics that unconditionally marked any skill with `category: "Combat"` as an offensive attack.
+  - Tactical combat actions, defensive interrupts, and utility skills (*Call a Play*, *Intervene*, *Taunt*, *Catcher*) are correctly recognized as non-attack actions (`isAttack: false`) and display with the `[SKILL]` badge on character sheets, Hotlist slots, and Token HUDs.
+  - Clicking these skills rolls standard skill checks (`actor.rollSkill(item)`) rather than rolling to hit.
+- **Strict Data-Driven Damage Discrimination (`src/documents/actor.mjs`)**:
+  - Refactored `getSkillDamageData` to require explicit damage configurations (`system.baseDamage` or `system.hasDamage: true`) or canonical unarmed strikes (*Pugilism*, *Unarmed Combat*).
+  - Eliminated greedy regular expression scanning across arbitrary freeform `notes` fields, preventing auxiliary dice in rules descriptions (e.g. *Call a Play*'s "Roll 2d6" or *Intervene*'s "Roll 1d6") from generating unwanted damage rolls.
+  - Non-damaging skills cleanly return `hasDamage: false` without defaulting to fallback damage values.
+- **Skill Classification Schema & Item Sheet UI (`template.json`, `src/models/items/skill-model.mjs`, `templates/items/parts/skill.hbs`)**:
+  - Added explicit `isAttack: false` and `hasDamage: false` booleans to `Item.skill` template schema and `SkillDataModel`.
+  - Added dedicated interactive controls to the Skill Item Sheet: `Category` dropdown, `Base Damage Formula` input, `Is Attack Action` checkbox, and `Deals Damage` checkbox.
+- **Official Dataset Update (`src/data/skills.mjs`)**:
+  - Codified `isAttack: false`, `hasDamage: false`, and empty `baseDamage: ""` for *Call a Play*, *Intervene*, *Taunt*, and *Catcher*.
+- **Comprehensive Verification (`tests/skill-classification.test.mjs`)**:
+  - Added full test suite validating schema definitions, dataset entries, `getSkillDamageData` discrimination, sheet/hotlist presentation, and synthesized attack roster filtering.
+  - 884 tests across 160 suites pass with 0 failures.
+
 ## 2.4.16
 
 ### Wizard-Driven Choices & Custom Abilities in Race and Class Creators

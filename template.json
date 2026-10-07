@@ -239,6 +239,8 @@
       "checkType": "Stat Check",
       "category": "Utility",
       "canGainRanks": true,
+      "isAttack": false,
+      "hasDamage": false,
       "cooldown": "None",
       "baseDamage": "",
       "notes": "",

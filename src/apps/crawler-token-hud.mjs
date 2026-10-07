@@ -182,10 +182,15 @@ export class DCCCrawlerHotbarHUD {
           hasDamage = Boolean(dmg?.hasDamage);
           const checkType = (resolvedItem.system?.checkType || '').toLowerCase();
           const skillType = resolvedItem.system?.skillType || resolvedItem.system?.type || '';
-          isAttack = hasDamage ||
-            checkType.includes('attack') ||
-            ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-            (resolvedItem.system?.category || '').toLowerCase() === 'combat';
+          if (resolvedItem.system?.isAttack === true) {
+            isAttack = true;
+          } else if (resolvedItem.system?.isAttack === false) {
+            isAttack = false;
+          } else {
+            isAttack = hasDamage ||
+              checkType.includes('attack') ||
+              ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+          }
           badge = isAttack ? 'ATTACK' : 'SKILL';
           const rk = resolvedItem.system?.modifiedRank ?? resolvedItem.system?.rank ?? 1;
           detail = `Rank ${rk}`;
@@ -600,10 +605,16 @@ export class DCCCrawlerActionHUD {
 
         const checkType = (item.system?.checkType || '').toLowerCase();
         const skillType = item.system?.skillType || item.system?.type || '';
-        const isAttack = dmgData.hasDamage ||
-          checkType.includes('attack') ||
-          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-          (item.system?.category || '').toLowerCase() === 'combat';
+        let isAttack = false;
+        if (item.system?.isAttack === true) {
+          isAttack = true;
+        } else if (item.system?.isAttack === false) {
+          isAttack = false;
+        } else {
+          isAttack = dmgData.hasDamage ||
+            checkType.includes('attack') ||
+            ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+        }
 
         skills.push({
           id: item.id,
@@ -853,10 +864,16 @@ export class DCCCrawlerActionHUD {
         : { hasDamage: false };
       const checkType = (item.system?.checkType || '').toLowerCase();
       const skillType = item.system?.skillType || item.system?.type || '';
-      const isAttack = dmgData.hasDamage ||
-        checkType.includes('attack') ||
-        ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-        (item.system?.category || '').toLowerCase() === 'combat';
+      let isAttack = false;
+      if (item.system?.isAttack === true) {
+        isAttack = true;
+      } else if (item.system?.isAttack === false) {
+        isAttack = false;
+      } else {
+        isAttack = dmgData.hasDamage ||
+          checkType.includes('attack') ||
+          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+      }
 
       if (isAttack && typeof this.actor.rollAttack === 'function') {
         await this.actor.rollAttack(item, 'hit');

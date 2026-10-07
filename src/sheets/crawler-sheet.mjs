@@ -611,10 +611,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       skill.hasDamage = dmgData.hasDamage;
       skill.damageFormulaWithStat = dmgData.formulaWithStat;
       const checkType = (skill.system?.checkType || '').toLowerCase();
-      skill.isAttack = dmgData.hasDamage ||
-        checkType.includes('attack') ||
-        ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-        (skill.system?.category || '').toLowerCase() === 'combat';
+      if (skill.system?.isAttack === true) {
+        skill.isAttack = true;
+      } else if (skill.system?.isAttack === false) {
+        skill.isAttack = false;
+      } else {
+        skill.isAttack = dmgData.hasDamage ||
+          checkType.includes('attack') ||
+          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+      }
     }
 
     // Add granted skills from equipped gear that the actor doesn't own
@@ -680,10 +685,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
         grantedSkill.hasDamage = grantedDmg.hasDamage;
         grantedSkill.damageFormulaWithStat = grantedDmg.formulaWithStat;
         const checkType = (grantedSkill.system?.checkType || '').toLowerCase();
-        grantedSkill.isAttack = grantedDmg.hasDamage ||
-          checkType.includes('attack') ||
-          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-          (grantedSkill.system?.category || '').toLowerCase() === 'combat';
+        if (grantedSkill.system?.isAttack === true) {
+          grantedSkill.isAttack = true;
+        } else if (grantedSkill.system?.isAttack === false) {
+          grantedSkill.isAttack = false;
+        } else {
+          grantedSkill.isAttack = grantedDmg.hasDamage ||
+            checkType.includes('attack') ||
+            ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+        }
 
         this._grantedSkills.set(grantedId, grantedSkill);
         context.skills.push(grantedSkill);
@@ -884,10 +894,15 @@ export class DCCCrawlerSheet extends BaseActorSheet {
           slotHasDamage = dmgData?.hasDamage ?? false;
           const checkType = (resolvedItem.system?.checkType || '').toLowerCase();
           const skillType = resolvedItem.system?.skillType || resolvedItem.system?.type || '';
-          isAttack = slotHasDamage ||
-            checkType.includes('attack') ||
-            ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-            (resolvedItem.system?.category || '').toLowerCase() === 'combat';
+          if (resolvedItem.system?.isAttack === true) {
+            isAttack = true;
+          } else if (resolvedItem.system?.isAttack === false) {
+            isAttack = false;
+          } else {
+            isAttack = slotHasDamage ||
+              checkType.includes('attack') ||
+              ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType);
+          }
           badge = isAttack ? 'ATTACK' : 'SKILL';
           const rk = resolvedItem.system?.modifiedRank ?? resolvedItem.system?.rank ?? 1;
           detail = `Rank ${rk}`;
@@ -1975,12 +1990,18 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const checkType = (item.system?.checkType || '').toLowerCase();
       const skillType = item.system?.skillType || item.system?.type || '';
       const dmgData = typeof this.actor.getSkillDamageData === 'function' ? this.actor.getSkillDamageData(item) : { hasDamage: false };
-      const isAttack = item.isAttack ?? (
-        dmgData.hasDamage ||
-        checkType.includes('attack') ||
-        ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-        (item.system?.category || '').toLowerCase() === 'combat'
-      );
+      let isAttack = false;
+      if (item.system?.isAttack === true) {
+        isAttack = true;
+      } else if (item.system?.isAttack === false) {
+        isAttack = false;
+      } else {
+        isAttack = item.isAttack ?? (
+          dmgData.hasDamage ||
+          checkType.includes('attack') ||
+          ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType)
+        );
+      }
 
       if (isAttack) {
         this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });

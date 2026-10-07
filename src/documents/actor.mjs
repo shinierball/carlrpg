@@ -1839,51 +1839,47 @@ export class DCCActor extends BaseActor {
       : (Number(skillItem?.modifiedRank ?? sys.modifiedRank ?? skillItem?.effectiveRank ?? sys.rank) || 0);
 
     const rawNotes = sys.notes || '';
-    const rawBaseDamage = sys.baseDamage || '';
-    const textToSearch = rawBaseDamage || rawNotes;
+    let rawBaseDamage = (sys.baseDamage || '').trim();
 
-    const isPugilism = skillName.toLowerCase() === 'pugilism' || Boolean(sys.tags?.includes('pugilism'));
-    let baseCount = isPugilism ? (rank >= 15 ? 5 : (rank >= 10 ? 4 : (rank >= 5 ? 3 : 1))) : 1;
-    let baseSides = isPugilism ? 2 : 4;
-    let statKey = (sys.stat || 'str').toLowerCase();
-    let damageType = sys.damageType || (isPugilism ? 'Bludgeoning' : 'Physical');
-
-    // Parse Base Damage e.g. "Base Damage: 1d4 + Str Bludgeoning", "1d2 + Str Bludgeoning", or "Deal +1d2 base damage"
-    const diceMatch = textToSearch.match(/(?:(?:Base Damage|deal)\s*:?\s*)?(\+?\d+d\d+)(?:\s*\+\s*([a-zA-Z]+))?\s*([a-zA-Z\s]+)?/i);
-    if (diceMatch) {
-      const dParts = diceMatch[1].replace('+', '').match(/(\d+)d(\d+)/i);
-      if (dParts) {
-        baseCount = parseInt(dParts[1], 10);
-        baseSides = parseInt(dParts[2], 10);
-      }
-      if (diceMatch[2] && !/per|ft|\//i.test(diceMatch[2])) {
-        statKey = diceMatch[2].toLowerCase();
-      }
-      if (diceMatch[3]) {
-        const dt = diceMatch[3].trim().split(/[.,\n]/)[0].trim();
-        if (dt && !/base|damage|upgrade/i.test(dt)) damageType = dt;
-      }
-    } else {
-      const simpleDice = textToSearch.match(/(\d+)d(\d+)/i);
-      if (simpleDice) {
-        baseCount = parseInt(simpleDice[1], 10);
-        baseSides = parseInt(simpleDice[2], 10);
+    // If baseDamage is not populated, check if notes contains an explicit "Base Damage:" clause
+    if (!rawBaseDamage && typeof rawNotes === 'string' && rawNotes.includes('Base Damage:')) {
+      const parts = rawNotes.split('Base Damage:');
+      if (parts[1]) {
+        rawBaseDamage = parts[1].split('.')[0].split('\n')[0].trim();
       }
     }
 
+    const sLower = skillName.toLowerCase().trim();
+    const isPugilism = sLower === 'pugilism' || Boolean(sys.tags?.includes('pugilism'));
+    const isUnarmed = sLower === 'unarmed combat' || Boolean(sys.tags?.includes('unarmed'));
     const skillType = sys.skillType || sys.type || '';
     const checkType = (sys.checkType || '').toLowerCase();
-    const sLower = skillName.toLowerCase();
-    const isCombatSkill = (sys.category || '').toLowerCase() === 'combat' ||
-      ['Edge', 'Bashing', 'Reach', 'Ranged', 'Strike', 'Hand to Hand'].includes(skillType) ||
-      checkType.includes('attack') ||
-      sLower === 'pugilism' ||
-      sLower === 'unarmed combat' ||
-      Boolean(sys.tags?.includes('pugilism') || sys.tags?.includes('unarmed'));
 
-    const hasExplicitDamage = Boolean(rawBaseDamage || diceMatch || textToSearch.match(/(\d+)d(\d+)/i) || /base damage/i.test(textToSearch));
+    // Fallback for built-in unarmed attack items where base damage formula was stored in notes
+    if (!rawBaseDamage && (isPugilism || isUnarmed) && typeof rawNotes === 'string' && /(\d+)d(\d+)/i.test(rawNotes)) {
+      rawBaseDamage = rawNotes;
+    }
 
-    if (!isCombatSkill && !hasExplicitDamage) {
+    // Strict data-driven damage determination:
+    // Non-attack skills or explicitly non-damaging skills NEVER deal damage unless forced.
+    const explicitNoDamage = sys.hasDamage === false || (sys.isAttack === false && !rawBaseDamage && !options.forceDamage);
+    const explicitHasDamage = sys.hasDamage === true;
+    const hasDamageConfig = Boolean(rawBaseDamage) || isPugilism || isUnarmed || Boolean(options.forceDamage);
+
+    let hasDamage = false;
+    if (explicitNoDamage && !options.forceDamage) {
+      hasDamage = false;
+    } else if (explicitHasDamage) {
+      hasDamage = true;
+    } else {
+      hasDamage = hasDamageConfig;
+    }
+
+    let statKey = (sys.stat || 'str').toLowerCase();
+    if (!hasDamage) {
+      if (!this.system?.abilities?.[statKey]) {
+        statKey = (sys.stat || 'str').toLowerCase();
+      }
       return {
         hasDamage: false,
         skillName,
@@ -1898,6 +1894,35 @@ export class DCCActor extends BaseActor {
         formulaWithStat: '',
         rawNotes
       };
+    }
+
+    let baseCount = isPugilism ? (rank >= 15 ? 5 : (rank >= 10 ? 4 : (rank >= 5 ? 3 : 1))) : 1;
+    let baseSides = isPugilism ? 2 : (isUnarmed ? 4 : 4);
+    let damageType = sys.damageType || (isPugilism || isUnarmed ? 'Bludgeoning' : 'Physical');
+
+    // Parse Base Damage formula only if rawBaseDamage is defined
+    if (rawBaseDamage) {
+      const diceMatch = rawBaseDamage.match(/(?:(?:Base Damage|deal)\s*:?\s*)?(\+?\d+d\d+)(?:\s*\+\s*([a-zA-Z]+))?\s*([a-zA-Z\s]+)?/i);
+      if (diceMatch) {
+        const dParts = diceMatch[1].replace('+', '').match(/(\d+)d(\d+)/i);
+        if (dParts) {
+          baseCount = parseInt(dParts[1], 10);
+          baseSides = parseInt(dParts[2], 10);
+        }
+        if (diceMatch[2] && !/per|ft|\//i.test(diceMatch[2])) {
+          statKey = diceMatch[2].toLowerCase();
+        }
+        if (diceMatch[3]) {
+          const dt = diceMatch[3].trim().split(/[.,\n]/)[0].trim();
+          if (dt && !/base|damage|upgrade/i.test(dt)) damageType = dt;
+        }
+      } else {
+        const simpleDice = rawBaseDamage.match(/(\d+)d(\d+)/i);
+        if (simpleDice) {
+          baseCount = parseInt(simpleDice[1], 10);
+          baseSides = parseInt(simpleDice[2], 10);
+        }
+      }
     }
 
     // Ensure statKey is valid ability on this actor
@@ -1974,7 +1999,6 @@ export class DCCActor extends BaseActor {
 
     // Hand-to-Hand Damage Effects:
     // Unarmed Combat cannot combine with Damage Effects.
-    const isUnarmed = skillName.toLowerCase() === 'unarmed combat' || Boolean(sys.tags?.includes('unarmed'));
 
     const chosenEffectRaw = (options.damageEffect !== undefined ? options.damageEffect : (options.chosenEffect !== undefined ? options.chosenEffect : options.effect));
     const chosenEffect = typeof chosenEffectRaw === 'string'
@@ -2961,14 +2985,16 @@ export class DCCActor extends BaseActor {
       const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave']);
       if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
 
+      if (sys.isAttack === false) return false;
+
       const dmgData = typeof this.getSkillDamageData === 'function' ? this.getSkillDamageData(s) : { hasDamage: false };
       const sType = (sys.skillType || sys.type || '').toLowerCase();
       const isCombatType = ['strike', 'bashing', 'hand to hand', 'edge', 'reach', 'ranged'].includes(sType);
-      const isCombatCat = (sys.category || '').toLowerCase() === 'combat';
       const KNOWN_UNARMED = new Set(['pugilism', 'unarmed combat', 'wrasslin', 'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts']);
       const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
 
-      return dmgData.hasDamage || isKnownUnarmed || (isCombatCat && (cType.includes('attack') || isCombatType));
+      if (sys.isAttack === true) return true;
+      return dmgData.hasDamage && (isKnownUnarmed || cType.includes('attack') || isCombatType);
     });
 
     for (const skill of attackSkills) {

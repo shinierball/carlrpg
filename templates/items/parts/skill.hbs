@@ -47,6 +47,35 @@
   </div>
 </div>
 
+<div class="dcc-field-row" style="margin-bottom: 8px; flex-wrap: wrap; align-items: center; gap: 8px;">
+  <div class="dcc-field-group small">
+    <span class="dcc-field-label">Category</span>
+    <select name="system.category" class="dcc-field-input">
+      <option value="Utility" {{#if (eq system.category "Utility")}}selected{{/if}}>Utility</option>
+      <option value="Combat" {{#if (eq system.category "Combat")}}selected{{/if}}>Combat</option>
+      <option value="Tactical" {{#if (eq system.category "Tactical")}}selected{{/if}}>Tactical</option>
+      <option value="Defensive" {{#if (eq system.category "Defensive")}}selected{{/if}}>Defensive</option>
+      <option value="Buff" {{#if (eq system.category "Buff")}}selected{{/if}}>Buff</option>
+      <option value="Debuff" {{#if (eq system.category "Debuff")}}selected{{/if}}>Debuff</option>
+      <option value="General" {{#if (eq system.category "General")}}selected{{/if}}>General</option>
+    </select>
+  </div>
+  <div class="dcc-field-group" style="flex: 2;">
+    <span class="dcc-field-label">Base Damage Formula</span>
+    <input class="dcc-field-input" type="text" name="system.baseDamage" value="{{system.baseDamage}}" placeholder="e.g. 1d8 + Str Piercing" />
+  </div>
+  <div class="dcc-field-group" style="display: flex; flex-direction: row; align-items: center; gap: 12px; margin-top: 14px;">
+    <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;" title="Check if this skill is an attack action that targets enemies and rolls to hit">
+      <input type="checkbox" name="system.isAttack" {{#if system.isAttack}}checked{{/if}} />
+      <strong>Is Attack Action</strong>
+    </label>
+    <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer;" title="Check if this skill inflicts direct damage">
+      <input type="checkbox" name="system.hasDamage" {{#if system.hasDamage}}checked{{/if}} />
+      <strong>Deals Damage</strong>
+    </label>
+  </div>
+</div>
+
 {{!-- WEAPON PROFICIENCY, TECHNIQUES & SPECIAL CONDITIONS --}}
 <div class="dcc-stat-block" style="margin-bottom: 10px; border: 1px solid #7f8c8d;">
   <div class="dcc-banner-header" style="font-size: 11px; padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; background: #34495e;">

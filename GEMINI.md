@@ -79,6 +79,14 @@ This document defines the core directives, workflow rules, architecture standard
 
 ## 🛠️ Implementation Best Practices & Gotchas
 
+### 0. DO NOT USE REGEXP or pattern matching unless absolutely necessary and then ask for permission
+- Do not use regexp or pattern matching unless absolutely necessary and then ask for permission.
+- Instead use data driven code to store information and use that information to make decisions
+- Do not use string matching. Use data structures to store information.
+- A vast majority of unintended functionality and bugs have been caused by greedy pattern matching it is mostly unnecessary
+- Assume all content is created by users so make any functionality dependent on selecting and utilizing arbitrary data forced into a structure rather than well defined strings.  No magic numbers or strings allowed everything should be pulled from a compendium or item definition where possible. 
+
+
 ### 1. Template Preloading
 - Any new `.hbs` partial template added to `templates/` **must be registered in `loadTemplates` in `src/dcc.mjs`**, or Foundry will fail to render the partial dynamically.
 
@@ -119,11 +127,12 @@ This document defines the core directives, workflow rules, architecture standard
 - When players break the rules they should be rewarded for doing so. 
 - This means anything that can be created should not enforce rules like the 30 point buy class creation.  The system should track and calculate the correct values based on the rules, but the rules should not be enforced.  For example a class could be created with 100 points of stats and the system should track the correct values based on the rules. Calling out the violation is good so that its clear this is an exception which the AI might patch at any time. 
 
-### 6. Design & Styling (DCC Theme)
+### 8. Design & Styling (DCC Theme)
 - Follow the established Dungeon Crawler Carl visual theme:
   - Primary font: `'Oswald', sans-serif`
   - Accent / DCC Red: `#c0392b` / `#962d22`
   - Clean borders, high contrast, readable inputs, and crisp state badges (`[EQUIPPED]`, `[SPELL]`, `[ATTACK]`, `[ITEM]`, `[BUFF]`, `[DEBUFF]`).
+
 
 ---
 

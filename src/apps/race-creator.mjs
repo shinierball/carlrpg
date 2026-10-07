@@ -29,6 +29,7 @@ import {
 } from '../data/point-build-catalog.mjs';
 import { DCC_RACES } from '../data/races.mjs';
 import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
+import { DCCRaceClassApplier, cleanOCRText } from '../data/race-class-applier.mjs';
 
 export const DCC_RACE_SIZE_OPTIONS = [
   { size: 1, name: 'Tiny', label: '1 Tiny', cost: 3, description: 'Size 1 (Tiny): +3 BP (Major Benefit). Extremely diminutive creature.' },
@@ -129,37 +130,211 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
     // Look up canonical race in DCC_RACES dataset
     const canonicalRace = DCC_RACES.find(r => r._id === presetId || r.name.toLowerCase() === String(presetId).toLowerCase());
     if (canonicalRace) {
+      this.resetBuild();
       this.name = canonicalRace.name;
       this.description = canonicalRace.system?.description ? canonicalRace.system.description.replace(/<[^>]+>/g, '').trim() : '';
       this.prerequisites = canonicalRace.system?.prerequisites || '';
+      this.notes = canonicalRace.system?.notes || '';
       this.heritage = canonicalRace.system?.heritage === 'Alien' ? 'Alien' : 'Earth';
       
       const parsedSize = getSizeInfo(canonicalRace.system?.size);
       this.size = parsedSize.size;
 
-      // Reset build items
-      this.stats = { str: 0, dex: 0, con: 0, int: 0, cha: 0 };
-      this.skills = [];
-      this.spells = [];
-      this.selectedBenefits = [];
-      this.selectedDetriments = [];
-      this.customBenefits = [];
-      this.customDetriments = [];
+      // Parse stats
+      const parsedStats = DCCRaceClassApplier.parseStats(canonicalRace);
+      this.stats = { ...parsedStats };
 
-      // Extract stats from perks
-      if (Array.isArray(canonicalRace.system?.perks)) {
-        for (const perk of canonicalRace.system.perks) {
-          const perkClean = perk.replace(/[\u2212\u2013\u2014-]/g, '-');
-          const statMatches = perkClean.matchAll(/([+\-]\d+)\s+(Strength|Dexterity|Constitution|Intelligence|Charisma)/gi);
-          for (const m of statMatches) {
-            const val = parseInt(m[1], 10);
-            const statKey = m[2].substring(0, 3).toLowerCase();
-            if (this.stats.hasOwnProperty(statKey)) {
-              this.stats[statKey] += val;
-            }
-          }
+      // Parse DR
+      const dr = DCCRaceClassApplier.parseDR(canonicalRace);
+      this.setDRBonus(dr);
+
+      // Parse skills & spells
+      const parsedGrants = DCCRaceClassApplier.parseSkillsAndSpells(canonicalRace);
+      for (const sk of parsedGrants.skills) {
+        this.addSkill({ name: sk.name, rank: sk.rank, isPassive: sk.isPassive });
+      }
+      for (const sp of parsedGrants.spells) {
+        this.addSpell({ name: sp.name, rank: sp.rank, mpCost: sp.mpCost || 0 });
+      }
+
+      // Check choice skills in perks
+      const perks = Array.isArray(canonicalRace.system?.perks) ? canonicalRace.system.perks : [];
+      for (const raw of perks) {
+        const p = cleanOCRText(raw);
+        const choiceMatch = p.match(/^\+(\d+)\s+in\s+(?:a|one)\s+(weapon|crafting|combat)\s+Skill\s+of\s+your\s+choice/i);
+        if (choiceMatch) {
+          const rank = parseInt(choiceMatch[1], 10);
+          const typeName = choiceMatch[2].charAt(0).toUpperCase() + choiceMatch[2].slice(1).toLowerCase();
+          this.addSkill({ name: `${typeName} Skill (Choice)`, rank, isPassive: false });
         }
       }
+
+      // Map perks into catalog benefits, detriments, or custom perks
+      this._populateRacePerks(canonicalRace);
+    }
+  }
+
+  _populateRacePerks(race) {
+    const perks = Array.isArray(race.system?.perks) ? race.system.perks : [];
+    
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+
+      // 1. Skip stat modifiers (already handled in stats)
+      const statMatch = p.match(/^([+\-]\s*\d+)\s+(?:to\s+)?([A-Za-z,\s]+?)(?:\s+(?:Skills?|Spells?|table|Buff|DR|\(benefit\)|table of your choice))?(?:\s*\(.*?\))?$/i);
+      if (statMatch) {
+        const words = statMatch[2].split(/(?:,\s*|\s+and\s+)/i).map(w => w.trim().toLowerCase());
+        const isStat = words.some(w => ['strength', 'str', 'dexterity', 'dex', 'constitution', 'con', 'intelligence', 'int', 'charisma', 'cha'].includes(w));
+        if (isStat) continue;
+      }
+      if (p.includes('-1 to all St')) continue;
+
+      // 2. Skip DR bonus (already handled in drBonus)
+      if (/^[+\-]\d+\s+DR/i.test(p) || /^[+\-]\d+\s+Damage\s+Reduction/i.test(p)) continue;
+
+      // 3. Skip Spells (already handled in spells)
+      if (/^\+\d+\s+(?:in\s+)?[A-Za-z0-9\s,\u0027’\-!]+?\s+Spells?/i.test(p)) continue;
+
+      // 4. Skip Skills (already handled in skills)
+      if (/^\+\d+\s+(?:in\s+)?[A-Za-z0-9\s,\u0027’\-]+?\s+Skills?/i.test(p)) continue;
+      if (/^\+\d+\s+in\s+(?:a|one)\s+(weapon|crafting|combat)\s+Skill\s+of\s+your\s+choice/i.test(p)) continue;
+
+      // 5. Skip Earth Box & Galactic Fanbase (handled by heritage)
+      if (/silver earth box/i.test(p) || /earth hobby/i.test(p) || /galactic fanbase/i.test(p)) continue;
+
+      // 6. Match catalog benefits / detriments
+      const low = p.toLowerCase();
+
+      if (low.includes('can see in total darkness') || low.includes('can see total darkness')) {
+        this.addCatalogBenefit('minor_darkvision');
+        continue;
+      }
+      if (low.includes('innate climb move') || low.includes('spider climb')) {
+        this.addCatalogBenefit('major_climb_movement');
+        continue;
+      }
+      if (low.includes('capable of flight') || low.includes('wings capable of flight') || low.includes('butterfly wings')) {
+        this.addCatalogBenefit('major_limited_flight');
+        continue;
+      }
+      if (low.includes('ability to fly')) {
+        this.addCatalogBenefit('epic_unrestricted_flight');
+        continue;
+      }
+      if (low.includes('ability to breathe underwater') || low.includes('breathe underwater')) {
+        this.addCatalogBenefit('mod_water_breathing');
+        continue;
+      }
+      if (low.includes('ability to burrow')) {
+        this.addCatalogBenefit('mod_burrow');
+        continue;
+      }
+      if (low.includes('no need to breathe')) {
+        this.addCatalogBenefit('major_anaerobic_biology');
+        continue;
+      }
+      if (low.includes('four arms')) {
+        this.addCatalogBenefit('extreme_additional_arm');
+        continue;
+      }
+      if (low.includes('doppelgänger shape-changing')) {
+        this.addCatalogBenefit('extreme_doppelganger_morph');
+        continue;
+      }
+      if (low.includes('changeling shapeshifting')) {
+        this.addCatalogBenefit('epic_changeling_shapeshifting');
+        continue;
+      }
+      if (low.includes('nine lives')) {
+        this.addCatalogBenefit('epic_major_defense_immunity');
+        continue;
+      }
+      if (low.includes('the manager') || low.includes('becomes their manager')) {
+        this.addCatalogBenefit('major_manager_assistance');
+        continue;
+      }
+      if (low.includes('can be raised to rank 20') || low.includes('can be raised to 20')) {
+        if (low.includes('and')) this.addCatalogBenefit('mod_linked_rank_20');
+        else this.addCatalogBenefit('minor_rank_20_cap');
+        continue;
+      }
+      if (low.includes('reassigning those points between those stats')) {
+        this.addCatalogBenefit('mod_reassign_stats');
+        continue;
+      }
+      if (low.includes('may use cha mod instead of con mod in their health bar')) {
+        this.addCatalogBenefit('major_con_swap_hp');
+        continue;
+      }
+      if (low.includes('deal ×2 total damage') || low.includes('deal x2 total damage')) {
+        this.addCatalogBenefit('major_situational_double_dmg');
+        continue;
+      }
+      if (low.includes('coupon good for one free training at a weapon training guild')) {
+        this.addCatalogBenefit('mod_guild_access');
+        continue;
+      }
+      if (low.includes('advantage on all charisma-based checks') || low.includes('roll with advantage on all charisma-based checks')) {
+        this.addCatalogBenefit('epic_stat_skill_advantage');
+        continue;
+      }
+      if (low.includes('advantage on int and con stat checks')) {
+        this.addCatalogBenefit('extreme_stat_checks_advantage');
+        continue;
+      }
+      if (low.includes('skill advancement check with advantage')) {
+        this.addCatalogBenefit('mod_advancement_advantage');
+        continue;
+      }
+      if (low.includes('advantage')) {
+        this.addCatalogBenefit('minor_conditional_advantage');
+        continue;
+      }
+      if (low.includes('immunity to poison and all diseases')) {
+        this.addCatalogBenefit('epic_disease_poison_immunity');
+        continue;
+      }
+      if (low.includes('immunity to poison')) {
+        this.addCatalogBenefit('extreme_poison_immunity');
+        continue;
+      }
+      if (low.includes('immunity to fire')) {
+        this.addCatalogBenefit('epic_major_defense_immunity');
+        continue;
+      }
+
+      // Detriments
+      if (low.includes('cannot worship a deity')) {
+        this.addCatalogDetriment('det_minor_prohibited_worship');
+        continue;
+      }
+      if (low.includes('vulnerable to') || low.includes('vulnerability:')) {
+        this.addCatalogDetriment('det_minor_uncommon_vulnerability');
+        continue;
+      }
+      if (low.includes('disadvantage on dexterity-based skill') || low.includes('disadvantage on all movement skills')) {
+        this.addCatalogDetriment('det_mod_movement_disadvantage');
+        continue;
+      }
+      if (low.includes('disadvantage')) {
+        this.addCatalogDetriment('det_minor_conditional_disadvantage');
+        continue;
+      }
+      if (low.includes('deal half damage with strength-based melee weapons')) {
+        this.addCatalogDetriment('det_minor_halve_nonfocus_damage');
+        continue;
+      }
+
+      // Custom Perk fallback
+      const isDetriment = low.includes('vulnerability') || low.includes('penalty') || low.includes('disadvantage') || low.includes('lose') || low.includes('cannot') || low.includes('halved');
+      this.addCustomPerk({
+        name: p,
+        type: isDetriment ? 'detriment' : 'benefit',
+        tier: 'Moderate',
+        points: 2,
+        extraPoints: 1,
+        description: p
+      });
     }
   }
 
@@ -283,6 +458,8 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       sizeName: this.getSizeName(),
       sizeOptions,
       stats: this.stats,
+      drBonus: this.drBonus,
+      drCost: this.drBonus * 2,
       skills: this.skills,
       spells: this.spells,
       benefits: [...heritagePerks, ...this.selectedBenefits],
@@ -429,6 +606,15 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       });
     });
 
+    // Damage Reduction (DR) Stepper
+    $html.find('.dcc-dr-step-btn').on('click', ev => {
+      ev.preventDefault();
+      const delta = Number($(ev.currentTarget).data('delta')) || 0;
+      reRenderWithState(ev, () => {
+        this.stepDR(delta);
+      });
+    });
+
     // Add Skill
     $html.find('.dcc-add-skill-btn').on('click', ev => {
       ev.preventDefault();
@@ -489,6 +675,16 @@ export class DCCRaceCreatorApp extends DCCBasePointBuilderApp {
       const isChecked = ev.currentTarget.checked;
 
       reRenderWithState(ev, () => {
+        if (benefitId && String(benefitId).startsWith('mod_dr_buff_')) {
+          if (isChecked) {
+            const rank = benefitId === 'mod_dr_buff_1' ? 1 : (benefitId === 'mod_dr_buff_2' ? 2 : (benefitId === 'mod_dr_buff_3' ? 3 : 1));
+            this.setDRBonus(rank);
+          } else {
+            this.setDRBonus(0);
+          }
+          return;
+        }
+
         if (isChecked) {
           const item = DCC_POINT_BUILD_BENEFITS.find(b => b.id === benefitId);
           if (item && !this.selectedBenefits.some(b => b.id === benefitId)) {

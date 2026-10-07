@@ -197,10 +197,10 @@ test('DCC Race Creator Studio - Preset Loading (Canonical Cat Race)', () => {
   assert.equal(data.sizeName, 'Small');
   assert.equal(data.sizeCost, 3); // Small size is 3 BP
 
-  // Stats parsed: +4 DEX, +2 CON, +1 CHA, -3 STR
+  // Stats parsed: +4 DEX, -2 CON, -1 CHA, -3 STR
   assert.equal(app.stats.dex, 4);
-  assert.equal(app.stats.con, 2);
-  assert.equal(app.stats.cha, 1);
+  assert.equal(app.stats.con, -2);
+  assert.equal(app.stats.cha, -1);
   assert.equal(app.stats.str, -3);
 
   const itemData = app.createItemData();
@@ -291,3 +291,92 @@ test('DCC Race Creator Studio - World Item Creation and Crawler Sheet Applicatio
   assert.equal(skillItem.type, 'skill');
   assert.equal(skillItem.system.rank, 2);
 });
+
+test('DCC Race Creator Studio - Damage Reduction (DR) Stepper and Point Accounting', async () => {
+  const app = new DCCRaceCreatorApp();
+
+  assert.equal(app.drBonus, 0);
+  assert.equal(app.getData().drBonus, 0);
+  assert.equal(app.getData().drCost, 0);
+
+  // Increment DR to +2 (costs 4 BP)
+  app.stepDR(2);
+  assert.equal(app.drBonus, 2);
+  assert.equal(app.getData().drCost, 4);
+  assert.equal(app.getData().benefitCost, 4);
+  assert.ok(app.selectedBenefits.some(b => b.id === 'mod_dr_buff_2'));
+
+  const itemData = app.createItemData();
+  assert.equal(itemData.system.drBonus, 2);
+  assert.ok(itemData.system.perks.some(p => p.includes('DR')));
+
+  const actor = new DCCActor({
+    name: 'Carapace Crawler',
+    type: 'crawler',
+    system: {
+      attributes: {
+        dr: { value: 0, buffs: 0 }
+      }
+    }
+  });
+
+  await app.applyToActor(actor);
+  assert.equal(actor.system.attributes.dr.buffs, 2);
+});
+
+test('DCC Race Creator Studio - Canonical Race Templates Load and Populate All Fields', () => {
+  const app = new DCCRaceCreatorApp();
+  const data = app.getData();
+
+  // All 30 Canonical DCC Races listed in presets
+  assert.equal(data.presets.length, 30);
+
+  // Test loading Amazonian
+  const amazonPreset = data.presets.find(p => p.name.includes("Amazonian"));
+  assert.ok(amazonPreset);
+  app.loadPreset(amazonPreset.id);
+
+  assert.equal(app.name, "Amazonian");
+  assert.equal(app.heritage, 'Earth');
+  assert.equal(app.size, 4);
+  assert.equal(app.stats.str, 6);
+  assert.equal(app.stats.dex, 3);
+  assert.equal(app.drBonus, 2);
+  assert.ok(app.skills.some(s => s.name === 'Bow'));
+  assert.ok(app.skills.some(s => s.name === 'Endurance'));
+  assert.ok(app.skills.some(s => s.name === 'Pugilism'));
+  assert.ok(app.getPointLedger().pointsSpent > 0);
+
+  // Test loading Cat (Size 2, negative STR, positive DEX)
+  const catPreset = data.presets.find(p => p.name.startsWith("Cat "));
+  assert.ok(catPreset);
+  app.loadPreset(catPreset.id);
+
+  assert.equal(app.name, "Cat");
+  assert.equal(app.size, 2); // Small size category
+  assert.equal(app.stats.str, -3);
+  assert.equal(app.stats.dex, 4);
+  assert.ok(app.skills.some(s => s.name === 'Slice'));
+  assert.ok(app.getPointLedger().pointsSpent > 0);
+});
+
+test('DCC Race Creator Studio - Template Renders Sidebar Matching Class Creator Point Ledger', async () => {
+  const { readFileSync } = await import('node:fs');
+  const templatePath = new URL('../templates/apps/race-creator.hbs', import.meta.url).pathname;
+  const templateSrc = readFileSync(templatePath, 'utf8');
+
+  // Verify modern point ledger classes match class builder point ledger
+  assert.ok(templateSrc.includes('dcc-studio-sidebar'), 'Must use dcc-studio-sidebar container');
+  assert.ok(templateSrc.includes('dcc-sticky-receipt'), 'Must use dcc-sticky-receipt container');
+  assert.ok(templateSrc.includes('dcc-receipt-header-card'), 'Must use dcc-receipt-header-card');
+  assert.ok(templateSrc.includes('dcc-gauge-numbers'), 'Must use dcc-gauge-numbers for large spent/budget numbers');
+  assert.ok(templateSrc.includes('dcc-spent-num'), 'Must use dcc-spent-num');
+  assert.ok(templateSrc.includes('dcc-budget-num'), 'Must use dcc-budget-num');
+  assert.ok(templateSrc.includes('dcc-legality-badge'), 'Must use dcc-legality-badge');
+  assert.ok(templateSrc.includes('dcc-budget-breakdown'), 'Must use dcc-budget-breakdown');
+  assert.ok(templateSrc.includes('dcc-receipt-items-card'), 'Must use dcc-receipt-items-card');
+  assert.ok(templateSrc.includes('dcc-receipt-row'), 'Must use dcc-receipt-row');
+  assert.ok(templateSrc.includes('dcc-target-crawler-card'), 'Must use dcc-target-crawler-card');
+  assert.ok(templateSrc.includes('dcc-receipt-actions'), 'Must use dcc-receipt-actions');
+});
+

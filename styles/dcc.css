@@ -8069,6 +8069,10 @@ select.dcc-box-input.dcc-size-select,
   gap: 8px;
 }
 
+.dcc-stats-grid.has-dr {
+  grid-template-columns: repeat(6, 1fr);
+}
+
 .dcc-stat-box {
   background: #111118;
   border: 1px solid #2d2d3f;
@@ -8078,6 +8082,15 @@ select.dcc-box-input.dcc-size-select,
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.dcc-stat-box.dcc-dr-box {
+  border-color: #31445b;
+  background: #10141d;
+}
+
+.dcc-dr-box .dcc-stat-header {
+  color: #5dade2;
 }
 
 .dcc-stat-header {
@@ -8094,7 +8107,8 @@ select.dcc-box-input.dcc-size-select,
   gap: 6px;
 }
 
-.dcc-stat-step-btn {
+.dcc-stat-step-btn,
+.dcc-dr-step-btn {
   background: #252535;
   border: 1px solid #444455;
   color: #ffffff;
@@ -8114,6 +8128,11 @@ select.dcc-box-input.dcc-size-select,
 .dcc-stat-step-btn:hover {
   background: #c0392b;
   border-color: #e74c3c;
+}
+
+.dcc-dr-step-btn:hover {
+  background: #2980b9;
+  border-color: #5dade2;
 }
 
 .dcc-stat-val {

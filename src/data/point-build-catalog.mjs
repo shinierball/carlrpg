@@ -134,11 +134,27 @@ export const DCC_POINT_BUILD_BENEFITS = [
   // ==========================================
   {
     id: 'mod_dr_buff_1',
-    name: '+1 DR Buff (Max +3 DR total)',
+    name: '+1 DR Buff',
     tier: 'moderate',
     cost: 2,
     category: 'Defense',
-    description: 'Permanently gain +1 Damage Reduction (DR). Can be purchased up to 3 times for a total of +3 DR.'
+    description: 'Permanently gain +1 Damage Reduction (DR). Costs 2 BP (can be purchased up to 3 times for a total of +3 DR).'
+  },
+  {
+    id: 'mod_dr_buff_2',
+    name: '+2 DR Buff',
+    tier: 'moderate',
+    cost: 4,
+    category: 'Defense',
+    description: 'Permanently gain +2 Damage Reduction (DR). Costs 4 BP (purchased twice).'
+  },
+  {
+    id: 'mod_dr_buff_3',
+    name: '+3 DR Buff',
+    tier: 'moderate',
+    cost: 6,
+    category: 'Defense',
+    description: 'Permanently gain +3 Damage Reduction (DR). Costs 6 BP (maximum standard limit of +3 DR).'
   },
   {
     id: 'mod_kill_heal_bar',
@@ -822,7 +838,7 @@ export const DCC_CANONICAL_PRESETS = [
         customText: 'Roll a bonus 1d4 when you make the Help or Intervene Actions and add it to the benefit provided to your target.'
       },
       {
-        id: 'mod_dr_buff_1',
+        id: 'mod_dr_buff_2',
         name: '+2 DR Buff (Purchased Twice)',
         cost: 4,
         category: 'Defense',

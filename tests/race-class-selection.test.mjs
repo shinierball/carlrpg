@@ -151,9 +151,9 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     await actor.applyRace('Shapeshifter');
     assert.equal(actor.system.details.race, 'Changeling');
 
-    // Changeling grants: +3 CHA, +2 INT, +2 Ambush, +2 Deception, +1 Escape Artist
+    // Changeling grants: +3 CHA, -2 INT, +2 Ambush, +2 Deception, +1 Escape Artist
     assert.equal(actor.system.abilities.cha.value, 13); // 10 base + 3
-    assert.equal(actor.system.abilities.int.value, 12); // 10 base + 2
+    assert.equal(actor.system.abilities.int.value, 8); // 10 base - 2
 
     // Changing class to Boring Ol' Mage:
     await actor.applyClass('Boring Ol’ Mage');
@@ -173,12 +173,12 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     // STR: 10 base - 2 Mage = 8
     // CON: 10 base = 10
     // DEX: 10 base - 2 Mage = 8
-    // INT: 10 base + 2 Changeling + 5 Mage = 17
+    // INT: 10 base - 2 Changeling + 5 Mage = 13
     // CHA: 10 base + 3 Changeling + 5 Mage = 18
     assert.equal(actor.system.abilities.str.value, 8, 'STR should be 8');
     assert.equal(actor.system.abilities.dex.value, 8, 'DEX should be 8');
     assert.equal(actor.system.abilities.con.value, 10, 'CON should be 10');
-    assert.equal(actor.system.abilities.int.value, 17, 'INT should be 17');
+    assert.equal(actor.system.abilities.int.value, 13, 'INT should be 13');
     assert.equal(actor.system.abilities.cha.value, 18, 'CHA should be 18');
 
     // Mage granted skills: Lore (+2) and Arcane (+1)

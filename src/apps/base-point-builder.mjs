@@ -67,6 +67,9 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       cha: Number(options.stats?.cha) || 0
     };
 
+    // Damage Reduction (DR) Bonus (starts at 0, 2 BP per +1 DR)
+    this.drBonus = options.drBonus !== undefined ? Number(options.drBonus) : 0;
+
     // Skills & Spells Arrays
     this.skills = Array.isArray(options.skills)
       ? options.skills.map(s => ({
@@ -151,6 +154,46 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     this.stats[key] = Number(value) || 0;
   }
 
+  /**
+   * Adjust Damage Reduction (DR) by delta (+1 or -1).
+   * Automatically synchronizes with the Moderate Benefit catalog (2 BP per +1 DR).
+   */
+  stepDR(delta) {
+    const cur = Number(this.drBonus) || 0;
+    this.setDRBonus(Math.max(0, cur + Number(delta)));
+  }
+
+  /**
+   * Sets Damage Reduction (DR) to an absolute value and synchronizes catalog benefits.
+   */
+  setDRBonus(val) {
+    const next = Math.max(0, Number(val) || 0);
+    this.drBonus = next;
+
+    // Synchronize selectedBenefits: remove existing DR benefits
+    this.selectedBenefits = this.selectedBenefits.filter(b => !b.id.startsWith('mod_dr_buff_'));
+
+    if (next === 1) {
+      const b = DCC_POINT_BUILD_BENEFITS.find(x => x.id === 'mod_dr_buff_1');
+      if (b) this.selectedBenefits.push({ ...b });
+    } else if (next === 2) {
+      const b = DCC_POINT_BUILD_BENEFITS.find(x => x.id === 'mod_dr_buff_2');
+      if (b) this.selectedBenefits.push({ ...b });
+    } else if (next === 3) {
+      const b = DCC_POINT_BUILD_BENEFITS.find(x => x.id === 'mod_dr_buff_3');
+      if (b) this.selectedBenefits.push({ ...b });
+    } else if (next > 3) {
+      this.selectedBenefits.push({
+        id: `mod_dr_buff_${next}`,
+        name: `+${next} DR Buff`,
+        tier: 'moderate',
+        cost: next * 2,
+        category: 'Defense',
+        description: `Permanently gain +${next} Damage Reduction (DR). Costs ${next * 2} BP (2 BP per +1 DR).`
+      });
+    }
+  }
+
   addSkill({ name, rank = 1, isPassive = false, type = 'active' } = {}) {
     const passive = Boolean(isPassive || type === 'passive');
     const r = Math.max(0, Number(rank) || 1);
@@ -187,6 +230,12 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
   }
 
   addCatalogBenefit(benefitId) {
+    if (benefitId && benefitId.startsWith('mod_dr_buff_')) {
+      const rank = benefitId === 'mod_dr_buff_1' ? 1 : (benefitId === 'mod_dr_buff_2' ? 2 : (benefitId === 'mod_dr_buff_3' ? 3 : 1));
+      this.setDRBonus(rank);
+      return;
+    }
+
     const item = DCC_POINT_BUILD_BENEFITS.find(b => b.id === benefitId);
     if (item && !this.selectedBenefits.some(b => b.id === benefitId)) {
       this.selectedBenefits.push({ ...item });
@@ -194,6 +243,11 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
   }
 
   removeCatalogBenefit(benefitId) {
+    if (benefitId && benefitId.startsWith('mod_dr_buff_')) {
+      this.setDRBonus(0);
+      return;
+    }
+
     this.selectedBenefits = this.selectedBenefits.filter(b => b.id !== benefitId);
   }
 
@@ -232,6 +286,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     this.prerequisites = '';
     this.notes = '';
     this.stats = { str: 0, dex: 0, con: 0, int: 0, cha: 0 };
+    this.drBonus = 0;
     this.skills = [];
     this.spells = [];
     this.selectedBenefits = [];
@@ -280,6 +335,18 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     }
     if (Array.isArray(data.selectedDetriments || data.detriments)) {
       this.selectedDetriments = [...(data.selectedDetriments || data.detriments)];
+    }
+
+    if (data.system?.drBonus !== undefined || data.drBonus !== undefined) {
+      this.setDRBonus(data.system?.drBonus ?? data.drBonus);
+    } else {
+      const drBenefit = this.selectedBenefits.find(b => b.id?.startsWith('mod_dr_buff_'));
+      if (drBenefit) {
+        const rank = drBenefit.id === 'mod_dr_buff_3' ? 3 : (drBenefit.id === 'mod_dr_buff_2' ? 2 : 1);
+        this.drBonus = rank;
+      } else {
+        this.drBonus = 0;
+      }
     }
   }
 
@@ -568,6 +635,8 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       prerequisites: this.prerequisites,
       notes: this.notes,
       stats: this.stats,
+      drBonus: this.drBonus,
+      drCost: this.drBonus * 2,
       skills: this.skills,
       spells: this.spells,
       benefits: this.selectedBenefits,
@@ -623,6 +692,11 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     }
     if (statPartsPos.length) list.push(statPartsPos.join(', '));
     if (statPartsNeg.length) list.push(statPartsNeg.join(', '));
+
+    // DR bonus (if not already represented in selectedBenefits)
+    if (this.drBonus > 0 && !this.selectedBenefits.some(b => b.id?.startsWith('mod_dr_buff_'))) {
+      list.push(`+${this.drBonus} Damage Reduction (DR)`);
+    }
 
     // Skills
     for (const s of this.skills) {
@@ -697,6 +771,7 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
         bonuses: {
           stats: { ...this.stats }
         },
+        drBonus: this.drBonus,
         skills: this.skills.map(s => ({ name: s.name, rank: s.rank, isPassive: s.isPassive })),
         spells: this.spells.map(sp => ({ name: sp.name, rank: sp.rank, isPassive: sp.isPassive })),
         perks: abilities,
@@ -797,6 +872,12 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
       }
     }
 
+    // 4. Apply DR bonus if defined
+    if (this.drBonus > 0) {
+      const curDR = Number(actor.system?.attributes?.dr?.buffs) || 0;
+      updates['system.attributes.dr.buffs'] = curDR + this.drBonus;
+    }
+
     if (Object.keys(updates).length > 0 && typeof actor.update === 'function') {
       await actor.update(updates);
     }
@@ -826,6 +907,17 @@ export class DCCBasePointBuilderApp extends DCCBaseApplication {
     if (preset.selectedDetriments) this.selectedDetriments = preset.selectedDetriments.map(d => ({ ...d }));
     this.customBenefits = [];
     this.customDetriments = [];
+
+    // Synchronize drBonus from preset benefits
+    const drBenefit = this.selectedBenefits.find(b => b.id?.startsWith('mod_dr_buff_') || (b.category === 'Defense' && b.name.includes('DR')));
+    if (drBenefit) {
+      if (drBenefit.id === 'mod_dr_buff_3' || drBenefit.name.includes('+3')) this.drBonus = 3;
+      else if (drBenefit.id === 'mod_dr_buff_2' || drBenefit.name.includes('+2') || drBenefit.cost === 4) this.drBonus = 2;
+      else if (drBenefit.id === 'mod_dr_buff_1' || drBenefit.name.includes('+1') || drBenefit.cost === 2) this.drBonus = 1;
+      else this.drBonus = Math.max(0, Math.floor((drBenefit.cost || 0) / 2));
+    } else {
+      this.drBonus = preset.drBonus || 0;
+    }
   }
 
   /**

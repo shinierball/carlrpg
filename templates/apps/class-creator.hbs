@@ -69,13 +69,13 @@
         </div>
       </section>
 
-      <!-- 2. Ability Score Deltas -->
+      <!-- 2. Ability Score & Defense Adjustments -->
       <section class="dcc-builder-section">
         <div class="dcc-section-title">
-          <i class="fa-solid fa-bolt"></i> 2. Ability Score Adjustments
-          <span class="dcc-section-badge">+1 BP per +1 Stat | -2 Stats = +1 Extra BP</span>
+          <i class="fa-solid fa-bolt"></i> 2. Ability Score & Defense Adjustments
+          <span class="dcc-section-badge">+1 BP per +1 Stat | 2 BP per +1 DR (Max +3) | -2 Stats = +1 Extra BP</span>
         </div>
-        <div class="dcc-stats-grid">
+        <div class="dcc-stats-grid has-dr">
           <!-- STR -->
           <div class="dcc-stat-box">
             <div class="dcc-stat-header">STR</div>
@@ -148,6 +148,21 @@
             </div>
             <div class="dcc-stat-cost-tag">
               {{#if (gt stats.cha 0)}}+{{stats.cha}} BP{{else if (lt stats.cha 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- DR (Damage Reduction) -->
+          <div class="dcc-stat-box dcc-dr-box">
+            <div class="dcc-stat-header" title="Damage Reduction (Rulebook p. 159: +1 DR per 2 BP, max +3 standard)">DR</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-dr-step-btn" data-delta="-1" title="Decrease DR">-</button>
+              <span class="dcc-stat-val {{#if (gt drBonus 0)}}positive{{/if}}">
+                +{{drBonus}}
+              </span>
+              <button type="button" class="dcc-dr-step-btn" data-delta="1" title="Increase DR">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt drBonus 0)}}+{{drCost}} BP{{else}}0 BP{{/if}}
             </div>
           </div>
         </div>

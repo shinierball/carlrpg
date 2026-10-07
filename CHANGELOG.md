@@ -1,3 +1,52 @@
+## 2.4.9
+
+### All Canonical Class Templates Loadable & Race Point Ledger Design Parity
+
+- **Full Canonical Class Template Loading (`src/apps/class-creator.mjs`, `templates/apps/class-creator.hbs`)**:
+  - Resolved issue where only *Dungeon Dad* would load and the other loadable classes appeared blank:
+    - Expanded the Class Creator template selector dropdown from 6 entries to all 54 templates (the canonical custom *Dungeon Dad* preset plus all 53 canonical classes from `DCC_CLASSES`, sorted alphabetically).
+    - Upgraded `loadPreset(presetId)` in `DCCClassCreatorApp` to look up classes in `DCC_CLASSES` and fully populate the studio: class name, description, prerequisites, notes, archetype selection, Earth Class flag (detecting Silver Earth Box and Earth Hobby Potion grants), ability scores (STR, DEX, CON, INT, CHA), Damage Reduction (DR), granted skills (including choice skills like *Weapon Skill (Choice)*), granted spells, catalog benefits/detriments, and custom perks.
+- **Race Creator Studio Point Ledger Design Parity (`templates/apps/race-creator.hbs`, `src/apps/race-creator.mjs`)**:
+  - Redesigned the Race Creator studio right column point ledger to match the Class Creator point ledger layout, typography, and card hierarchy:
+    - Integrated `.dcc-studio-sidebar` with `.dcc-sticky-receipt`.
+    - Live `.dcc-receipt-header-card` with large `XX / YY BP` gauges (`.dcc-gauge-numbers`, `.dcc-spent-num`, `.dcc-budget-num`), soft-limit legality badge (`.dcc-legality-badge`), and 3-column budget breakdown (`.dcc-budget-breakdown` displaying Base, Detriments, and Target BP).
+    - Itemized point receipt card (`.dcc-receipt-items-card`) displaying contributions with clean `.dcc-receipt-row` styling.
+    - Preserved direct crawler application (`.dcc-target-crawler-card`), Save as Race Item, Apply to Crawler, and Export JSON actions.
+- **Race Creator Template Loading Parity (`src/apps/race-creator.mjs`)**:
+  - Upgraded `DCCRaceCreatorApp.loadPreset` to also leverage `DCCRaceClassApplier` for parsing stats, DR bonus, granted skills, spells, and perks into catalog benefits/detriments across all 30 canonical races.
+- **Enhanced OCR Cleanup & Data Normalization (`src/data/race-class-applier.mjs`)**:
+  - Expanded `cleanOCRText()` to clean intra-word OCR spacing artifacts (`Rag e` -> `Rage`, `Arc anist` -> `Arcanist`, `Alchem y` -> `Alchemy`, `Smithin g` -> `Smithing`, `Ta ttoo` -> `Tattoo`, `r oom` -> `room`, `Manag er` -> `Manager`, `Pet s` -> `Pets`, etc.).
+  - Enhanced `matchKnownSkill` and `matchKnownSpell` to strip parenthetical annotations and exclamation points for robust matching against canonical datasets.
+  - Updated stat regex to handle optional whitespace between signs and values (e.g. `+ 5 Charisma`) and ignore parenthetical notes.
+- **Automated Unit Testing (`tests/class-creator.test.mjs`, `tests/race-creator.test.mjs`)**:
+  - Added unit test verifying all 54 templates appear in the Class Creator template selector.
+  - Added unit test verifying canonical classes (e.g. *Boring Ol' Barbarian*, *Alchemist*, *Harii*, *Dungeon Dad*) load and populate stats, skills, spells, DR, perks, and ledger points spent without leaving fields blank.
+  - Added unit tests for `DCCRaceCreatorApp` verifying canonical race preset loading and verifying that `race-creator.hbs` renders the modern point ledger DOM elements.
+  - 100% test pass rate across all 837 tests in 156 suites.
+
+## 2.4.8
+
+### Damage Reduction (DR) Steppers & Incremental Point Accounting in Class and Race Builders
+
+- **Interactive DR Incrementer Controls (`templates/apps/class-creator.hbs`, `templates/apps/race-creator.hbs`, `styles/dcc.css`)**:
+  - Added dedicated Damage Reduction (DR) stepper boxes with `[-]` and `[+]` interactive controls directly into Section 2 (*Ability Score & Defense Adjustments*) alongside STR, DEX, CON, INT, and CHA.
+  - Automatically calculates and displays the Build Point cost: **2 BP per +1 DR** (e.g. +1 DR = 2 BP, +2 DR = 4 BP, +3 DR = 6 BP) in compliance with Chapter 3 (Page 159) of the Core Rulebook.
+  - Styled with DCC slate-blue defense theme (`.dcc-dr-box`, `.dcc-dr-step-btn`, `.dcc-stats-grid.has-dr`) and fluid 6-column responsive grid layout.
+- **Moderate Benefit Catalog Synchronization (`src/data/point-build-catalog.mjs`, `src/apps/base-point-builder.mjs`)**:
+  - Expanded Moderate Benefits catalog with distinct purchases:
+    - `mod_dr_buff_1`: `+1 DR Buff` (2 BP)
+    - `mod_dr_buff_2`: `+2 DR Buff` (4 BP)
+    - `mod_dr_buff_3`: `+3 DR Buff` (6 BP, standard limit)
+  - Seamless two-way synchronization: adjusting the Section 2 DR stepper automatically updates the active catalog benefit in the point ledger/receipt, and checking any DR buff checkbox in the catalog accordion synchronizes the stepper and unchecks alternative ranks without duplicate cost.
+- **Data Model, Persistence & Actor Application (`src/apps/base-point-builder.mjs`, `src/apps/class-creator.mjs`, `src/apps/race-creator.mjs`)**:
+  - `createItemData()` stamps `system.drBonus` directly onto the generated Class or Race item.
+  - `compileAbilitiesList()` includes `+X Damage Reduction (DR)` in perks and abilities text.
+  - Full support for JSON export/import and preset loading (including canonical *Dungeon Dad* with +2 DR).
+  - `applyToActor()` directly updates `system.attributes.dr.buffs` on the targeted Crawler actor when applied from the studio.
+- **Automated Unit Testing & Verification (`tests/class-creator.test.mjs`, `tests/race-creator.test.mjs`)**:
+  - Added unit test suites verifying DR stepper incrementing, point ledger costs (2 BP per rank), mutual exclusion in catalog selections, item data generation, export/import round-tripping, and actor DR buff application.
+  - 100% test pass rate across the full suite (833 tests passing with 0 failures).
+
 ## 2.4.7
 
 ### Damage Resistance, Movement Modes, Condition Handling & Dedicated Race/Class Sheets

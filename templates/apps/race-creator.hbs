@@ -77,12 +77,13 @@
       </section>
 
       <!-- 2. Ability Score Deltas -->
+      <!-- 2. Ability Score & Defense Adjustments -->
       <section class="dcc-builder-section">
         <div class="dcc-section-title">
-          <i class="fa-solid fa-bolt"></i> 2. Ability Score Adjustments
-          <span class="dcc-section-badge">+1 BP per +1 Stat | -2 Stats = +1 Extra BP</span>
+          <i class="fa-solid fa-bolt"></i> 2. Ability Score & Defense Adjustments
+          <span class="dcc-section-badge">+1 BP per +1 Stat | 2 BP per +1 DR (Max +3) | -2 Stats = +1 Extra BP</span>
         </div>
-        <div class="dcc-stats-grid">
+        <div class="dcc-stats-grid has-dr">
           <!-- STR -->
           <div class="dcc-stat-box">
             <div class="dcc-stat-header">STR</div>
@@ -155,6 +156,21 @@
             </div>
             <div class="dcc-stat-cost-tag">
               {{#if (gt stats.cha 0)}}+{{stats.cha}} BP{{else if (lt stats.cha 0)}}Detriment{{else}}0 BP{{/if}}
+            </div>
+          </div>
+
+          <!-- DR (Damage Reduction) -->
+          <div class="dcc-stat-box dcc-dr-box">
+            <div class="dcc-stat-header" title="Damage Reduction (Rulebook p. 159: +1 DR per 2 BP, max +3 standard)">DR</div>
+            <div class="dcc-stat-controls">
+              <button type="button" class="dcc-dr-step-btn" data-delta="-1" title="Decrease DR">-</button>
+              <span class="dcc-stat-val {{#if (gt drBonus 0)}}positive{{/if}}">
+                +{{drBonus}}
+              </span>
+              <button type="button" class="dcc-dr-step-btn" data-delta="1" title="Increase DR">+</button>
+            </div>
+            <div class="dcc-stat-cost-tag">
+              {{#if (gt drBonus 0)}}+{{drCost}} BP{{else}}0 BP{{/if}}
             </div>
           </div>
         </div>
@@ -375,113 +391,95 @@
       </section>
     </div>
 
-    <!-- Right Column: Terminal Ledger & Actions -->
-    <div class="dcc-studio-ledger-column">
-      <!-- Live Points Terminal -->
-      <div class="dcc-terminal-card">
-        <div class="dcc-terminal-header">
-          <i class="fa-solid fa-calculator"></i>
-          <span>RACE BUILD POINT LEDGER</span>
+    <!-- Right Column: Sticky Point Ledger & Receipt -->
+    <div class="dcc-studio-sidebar">
+      <div class="dcc-sticky-receipt">
+        <!-- Live Point Gauge Card -->
+        <div class="dcc-receipt-header-card">
+          <div class="dcc-gauge-title">POINT BUILD LEDGER</div>
+          <div class="dcc-gauge-numbers">
+            <span class="dcc-spent-num">{{ledger.pointsSpent}}</span>
+            <span class="dcc-gauge-divider">/</span>
+            <span class="dcc-budget-num">{{ledger.effectiveBudget}}</span>
+            <span class="dcc-bp-label">BP</span>
+          </div>
+
+          <!-- Legality / Soft Limit Status Badge -->
+          <div class="dcc-legality-badge {{#if ledger.isLegal}}legal{{else}}overbudget{{/if}}">
+            {{#if ledger.isLegal}}
+              <i class="fa-solid fa-circle-check"></i> LEGAL BUILD ({{ledger.balance}} BP Left)
+            {{else}}
+              <i class="fa-solid fa-triangle-exclamation"></i> OVER BUDGET (+{{ledger.overbudgetAmount}} BP)
+              <div class="dcc-soft-hint">Soft limit: Not enforced (GM permitted)</div>
+            {{/if}}
+          </div>
+
+          <!-- Budget Breakdown Row -->
+          <div class="dcc-budget-breakdown">
+            <div class="dcc-breakdown-col">
+              <span class="dcc-b-lbl">Base</span>
+              <span class="dcc-b-val">{{ledger.baseBudget}}</span>
+            </div>
+            <div class="dcc-breakdown-col">
+              <span class="dcc-b-lbl">Detriments</span>
+              <span class="dcc-b-val positive">+{{ledger.extraPoints}}</span>
+            </div>
+            <div class="dcc-breakdown-col">
+              <span class="dcc-b-lbl">Target</span>
+              <span class="dcc-b-val">{{ledger.effectiveBudget}}</span>
+            </div>
+          </div>
         </div>
 
-        <div class="dcc-terminal-metrics">
-          <div class="dcc-metric-row">
-            <span class="dcc-metric-label">Base Budget:</span>
-            <span class="dcc-metric-value">{{ledger.baseBudget}} BP</span>
-          </div>
-          <div class="dcc-metric-row">
-            <span class="dcc-metric-label">Extra BP (Detriments):</span>
-            <span class="dcc-metric-value green">+{{ledger.extraPoints}} BP</span>
-          </div>
-          <div class="dcc-metric-row subtotal">
-            <span class="dcc-metric-label">Effective Budget:</span>
-            <span class="dcc-metric-value">{{ledger.effectiveBudget}} BP</span>
-          </div>
-          <div class="dcc-metric-row">
-            <span class="dcc-metric-label">Total Points Spent:</span>
-            <span class="dcc-metric-value red">{{ledger.pointsSpent}} BP</span>
-          </div>
-          <div class="dcc-metric-row total {{#if ledger.isOverbudget}}overbudget{{/if}}">
-            <span class="dcc-metric-label">Remaining Balance:</span>
-            <span class="dcc-metric-value {{#if (gte ledger.balance 0)}}green{{else}}red{{/if}}">
-              {{ledger.balance}} BP
-            </span>
-          </div>
-        </div>
-
-        <!-- Soft-Limit Warning Badges -->
-        <div class="dcc-status-badges-row">
-          {{#if ledger.isOverbudget}}
-            <div class="dcc-badge-alert overbudget">
-              <i class="fa-solid fa-triangle-exclamation"></i> OVER BUDGET (-{{ledger.overbudgetAmount}} BP)
-              <span class="dcc-badge-subtext">Soft limit: saving is still allowed per GM discretion</span>
-            </div>
-          {{else}}
-            <div class="dcc-badge-alert legal">
-              <i class="fa-solid fa-circle-check"></i> LEGAL RACE BUILD ({{ledger.balance}} BP Left)
-            </div>
-          {{/if}}
-
-          {{#if ledger.isDetrimentCapped}}
-            <div class="dcc-badge-warning">
-              <i class="fa-solid fa-circle-info"></i> Detriments exceed standard +5 Extra BP cap
-            </div>
-          {{/if}}
-
-          {{#if ledger.isPassiveExceeded}}
-            <div class="dcc-badge-warning">
-              <i class="fa-solid fa-circle-info"></i> Passive skills exceed standard 5-point limit
-            </div>
-          {{/if}}
-        </div>
-
-        <!-- Itemized Receipt Ledger -->
-        <div class="dcc-receipt-section">
-          <div class="dcc-receipt-header">
-            <i class="fa-solid fa-receipt"></i> Itemized Point Receipt
-          </div>
+        <!-- Itemized Receipt Card -->
+        <div class="dcc-receipt-items-card">
+          <div class="dcc-items-title"><i class="fa-solid fa-receipt"></i> Itemized Point Contributions</div>
           <div class="dcc-receipt-list">
             {{#if ledger.receiptItems.length}}
               {{#each ledger.receiptItems}}
-                <div class="dcc-receipt-item {{#if this.isExtra}}extra{{/if}}">
-                  <span class="dcc-receipt-label">{{this.label}}</span>
-                  <span class="dcc-receipt-cost {{#if this.isExtra}}green{{else}}red{{/if}}">
-                    {{#if this.isExtra}}+{{this.extraPoints}} Extra{{else}}{{this.cost}} BP{{/if}}
-                  </span>
+                <div class="dcc-receipt-row {{#if this.isExtra}}extra-point{{/if}}">
+                  <span class="dcc-r-label">{{this.label}}</span>
+                  {{#if this.isExtra}}
+                    <span class="dcc-r-cost refund">+{{this.extraPoints}} Extra BP</span>
+                  {{else}}
+                    <span class="dcc-r-cost">+{{this.cost}} BP</span>
+                  {{/if}}
                 </div>
               {{/each}}
             {{else}}
-              <div class="dcc-receipt-empty">No attributes or perks selected yet. Spend your 25 points!</div>
+              <div class="dcc-receipt-empty">No attributes or perks added yet.</div>
             {{/if}}
           </div>
         </div>
 
-        <!-- 1-Click Action Hub -->
-        <div class="dcc-actions-hub">
-          <button type="button" class="dcc-btn dcc-save-race-btn" title="Create a new Race Item in the World Items directory">
-            <i class="fa-solid fa-floppy-disk"></i> Save to Items Directory
-          </button>
-          
-          <div class="dcc-btn-split-row">
-            <button type="button" class="dcc-btn dcc-export-json-btn" title="Export build configuration as JSON">
-              <i class="fa-solid fa-file-export"></i> Export JSON
-            </button>
+        <!-- Crawler Sheet Direct Application -->
+        {{#if crawlers.length}}
+          <div class="dcc-target-crawler-card">
+            <label><i class="fa-solid fa-person-running"></i> Apply to World Crawler:</label>
+            <select class="dcc-target-crawler-select">
+              <option value="">-- Choose Crawler --</option>
+              {{#each crawlers}}
+                <option value="{{this.id}}" {{#if this.isSelected}}selected{{/if}}>{{this.name}}</option>
+              {{/each}}
+            </select>
           </div>
+        {{/if}}
 
-          <div class="dcc-apply-actor-box">
-            <label class="dcc-apply-label"><i class="fa-solid fa-user-plus"></i> Apply to Active Crawler:</label>
-            <div class="dcc-apply-row">
-              <select class="dcc-target-crawler-select">
-                <option value="">-- Select Crawler --</option>
-                {{#each crawlers}}
-                  <option value="{{this.id}}" {{#if this.isSelected}}selected{{/if}}>{{this.name}}</option>
-                {{/each}}
-              </select>
-              <button type="button" class="dcc-btn dcc-apply-crawler-btn">
-                <i class="fa-solid fa-bolt"></i> Apply Race
-              </button>
-            </div>
-          </div>
+        <!-- Action Buttons -->
+        <div class="dcc-receipt-actions">
+          <button type="button" class="dcc-btn dcc-save-race-btn" title="Create race item in Foundry Items directory">
+            <i class="fa-solid fa-floppy-disk"></i> Save as Race Item
+          </button>
+
+          {{#if crawlers.length}}
+            <button type="button" class="dcc-btn dcc-apply-crawler-btn" title="Embed race and apply stat bonuses to crawler">
+              <i class="fa-solid fa-bolt"></i> Apply to Crawler
+            </button>
+          {{/if}}
+
+          <button type="button" class="dcc-btn dcc-export-json-btn" title="Export build configuration as JSON">
+            <i class="fa-solid fa-file-export"></i> Export JSON
+          </button>
         </div>
       </div>
     </div>

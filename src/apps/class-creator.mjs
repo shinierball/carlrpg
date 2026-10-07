@@ -22,6 +22,7 @@ import {
   DCC_CANONICAL_PRESETS
 } from '../data/point-build-catalog.mjs';
 import { DCC_CLASSES } from '../data/classes.mjs';
+import { DCCRaceClassApplier, cleanOCRText } from '../data/race-class-applier.mjs';
 
 export const DCC_CLASS_ARCHETYPES = [
   'Arcanist',
@@ -82,10 +83,281 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
 
   loadPreset(presetId) {
     super.loadPreset(presetId);
+
+    // 1. Check DCC_CANONICAL_PRESETS (e.g. Dungeon Dad)
     const preset = DCC_CANONICAL_PRESETS.find(p => p.id === presetId);
     if (preset) {
       if (preset.classTypes) this.classTypes = [...preset.classTypes];
+      this.archetype = this.classTypes[0] || 'Fighter';
       if (preset.isEarth !== undefined) this.isEarthClass = Boolean(preset.isEarth);
+      return;
+    }
+
+    // 2. Check DCC_CLASSES (all canonical classes)
+    const canonicalClass = DCC_CLASSES.find(c => c._id === presetId || c.name.toLowerCase() === String(presetId).toLowerCase());
+    if (canonicalClass) {
+      this.resetBuild();
+      this.name = canonicalClass.name;
+      this.description = canonicalClass.system?.description ? canonicalClass.system.description.replace(/<[^>]+>/g, '').trim() : '';
+      this.prerequisites = canonicalClass.system?.prerequisites || '';
+      this.notes = canonicalClass.system?.notes || '';
+
+      const rawTypes = canonicalClass.system?.classType || 'Fighter';
+      this.classTypes = rawTypes.split(',').map(t => t.trim()).filter(Boolean);
+      this.archetype = this.classTypes[0] || 'Fighter';
+      if (this.archetype) {
+        this.archetype = this.archetype.charAt(0).toUpperCase() + this.archetype.slice(1);
+      }
+
+      const perks = Array.isArray(canonicalClass.system?.perks) ? canonicalClass.system.perks : [];
+      const abilities = canonicalClass.system?.abilities || '';
+      this.isEarthClass = perks.some(p => /silver earth box/i.test(p) || /earth hobby/i.test(p)) ||
+                          /silver earth box/i.test(abilities) ||
+                          /earth hobby/i.test(abilities);
+
+      // Parse stats
+      const parsedStats = DCCRaceClassApplier.parseStats(canonicalClass);
+      this.stats = { ...parsedStats };
+
+      // Parse DR bonus
+      const dr = DCCRaceClassApplier.parseDR(canonicalClass);
+      this.setDRBonus(dr);
+
+      // Parse granted skills and spells
+      const parsedGrants = DCCRaceClassApplier.parseSkillsAndSpells(canonicalClass);
+      for (const sk of parsedGrants.skills) {
+        this.addSkill({ name: sk.name, rank: sk.rank, isPassive: sk.isPassive });
+      }
+      for (const sp of parsedGrants.spells) {
+        this.addSpell({ name: sp.name, rank: sp.rank, mpCost: sp.mpCost || 0 });
+      }
+
+      // Check choice skills in perks
+      for (const raw of perks) {
+        const p = cleanOCRText(raw);
+        const choiceMatch = p.match(/^\+(\d+)\s+in\s+(?:a|one)\s+(weapon|crafting|combat)\s+Skill\s+of\s+your\s+choice/i);
+        if (choiceMatch) {
+          const rank = parseInt(choiceMatch[1], 10);
+          const typeName = choiceMatch[2].charAt(0).toUpperCase() + choiceMatch[2].slice(1).toLowerCase();
+          this.addSkill({ name: `${typeName} Skill (Choice)`, rank, isPassive: false });
+        }
+      }
+
+      // Map perks to catalog benefits / detriments or custom perks
+      this._populateClassPerks(canonicalClass);
+    }
+  }
+
+  _populateClassPerks(cls) {
+    const perks = Array.isArray(cls.system?.perks) ? cls.system.perks : [];
+    
+    for (const raw of perks) {
+      const p = cleanOCRText(raw);
+
+      // 1. Skip stat modifiers (already handled in stats)
+      const statMatch = p.match(/^([+\-]\s*\d+)\s+(?:to\s+)?([A-Za-z,\s]+?)(?:\s+(?:Skills?|Spells?|table|Buff|DR|\(benefit\)|table of your choice))?(?:\s*\(.*?\))?$/i);
+      if (statMatch) {
+        const words = statMatch[2].split(/(?:,\s*|\s+and\s+)/i).map(w => w.trim().toLowerCase());
+        const isStat = words.some(w => ['strength', 'str', 'dexterity', 'dex', 'constitution', 'con', 'intelligence', 'int', 'charisma', 'cha'].includes(w));
+        if (isStat) continue;
+      }
+      if (p.includes('-1 to all St')) continue;
+
+      // 2. Skip DR bonus (already handled in drBonus)
+      if (/^[+\-]\d+\s+DR/i.test(p) || /^[+\-]\d+\s+Damage\s+Reduction/i.test(p)) continue;
+
+      // 3. Skip Spells (already handled in spells)
+      if (/^\+\d+\s+(?:in\s+)?[A-Za-z0-9\s,\u0027’\-!]+?\s+Spells?/i.test(p)) continue;
+
+      // 4. Skip Skills (already handled in skills)
+      if (/^\+\d+\s+(?:in\s+)?[A-Za-z0-9\s,\u0027’\-]+?\s+Skills?/i.test(p)) continue;
+      if (/^\+\d+\s+in\s+(?:a|one)\s+(weapon|crafting|combat)\s+Skill\s+of\s+your\s+choice/i.test(p)) continue;
+
+      // 5. Skip Earth Box (handled by isEarthClass)
+      if (/silver earth box/i.test(p) || /earth hobby/i.test(p)) continue;
+
+      // 6. Match catalog benefits / detriments
+      const low = p.toLowerCase();
+
+      // Catalog Benefits:
+      if (low.includes('rage (benefit)')) {
+        this.addCatalogBenefit('major_rage');
+        continue;
+      }
+      if (low.includes('immunity to poison and all diseases')) {
+        this.addCatalogBenefit('epic_disease_poison_immunity');
+        continue;
+      }
+      if (low.includes('immunity to poison')) {
+        this.addCatalogBenefit('extreme_poison_immunity');
+        continue;
+      }
+      if (low.includes('can see in total darkness')) {
+        this.addCatalogBenefit('minor_darkvision');
+        continue;
+      }
+      if (low.includes('access to the desperado club')) {
+        this.addCatalogBenefit('minor_club_desperado');
+        continue;
+      }
+      if (low.includes('access to club vanquisher')) {
+        this.addCatalogBenefit('minor_club_vanquisher');
+        continue;
+      }
+      if (low.includes('access to all membership-based clubs')) {
+        this.addCatalogBenefit('mod_all_clubs');
+        continue;
+      }
+      if (low.includes('dungeon book of the floor club') || low.includes('spell book of the level') || low.includes('spellbook of the floor')) {
+        this.addCatalogBenefit('mod_book_of_the_floor');
+        continue;
+      }
+      if (low.includes('crafting table') || low.includes('arcanist table') || low.includes('alchemy table') || low.includes('smithing table') || low.includes('tattoo chair') || low.includes('makeup table')) {
+        this.addCatalogBenefit('minor_crafting_table_t1');
+        continue;
+      }
+      if (low.includes('ability to fly')) {
+        this.addCatalogBenefit('epic_unrestricted_flight');
+        continue;
+      }
+      if (low.includes('ability to breathe underwater')) {
+        this.addCatalogBenefit('mod_water_breathing');
+        continue;
+      }
+      if (low.includes('ability to burrow')) {
+        this.addCatalogBenefit('mod_burrow');
+        continue;
+      }
+      if (low.includes('limb regeneration benefit')) {
+        this.addCatalogBenefit('epic_limb_regeneration');
+        continue;
+      }
+      if (low.includes('free room at all saferooms')) {
+        this.addCatalogBenefit('minor_safe_room');
+        continue;
+      }
+      if (low.includes('discount at all stores') || low.includes('interest earned on all coins')) {
+        this.addCatalogBenefit('minor_store_discount');
+        continue;
+      }
+      if (low.includes('gain a friendly pet') || low.includes('gain a bonded mount')) {
+        this.addCatalogBenefit('major_pet_or_mount');
+        continue;
+      }
+      if (low.includes('the manager benefit')) {
+        this.addCatalogBenefit('major_manager_assistance');
+        continue;
+      }
+      if (low.includes('can be raised to rank 20') || low.includes('can be raised to 20')) {
+        if (low.includes('and')) this.addCatalogBenefit('mod_linked_rank_20');
+        else this.addCatalogBenefit('minor_rank_20_cap');
+        continue;
+      }
+      if (low.includes('gold for every mob killed') || low.includes('gold for every mob you kill')) {
+        this.addCatalogBenefit('mod_mob_gold_bounty');
+        continue;
+      }
+      if (low.includes('gain +1 popularity') || low.includes('+1 popularity')) {
+        this.addCatalogBenefit('mod_popularity_action');
+        continue;
+      }
+      if (low.includes('mod a second time')) {
+        this.addCatalogBenefit('mod_secondary_stat_mod');
+        continue;
+      }
+      if (low.includes('mana recovers at twice the normal rate') || low.includes('double mana regeneration')) {
+        this.addCatalogBenefit('minor_double_mana_terrain');
+        continue;
+      }
+      if (low.includes('resistance to')) {
+        this.addCatalogBenefit('mod_uncommon_resistance');
+        continue;
+      }
+      if (low.includes('heal 1 additional health bar slot')) {
+        this.addCatalogBenefit('mod_healing_spell_boost');
+        continue;
+      }
+      if (low.includes('gain access to a patron') || low.includes('choose a patron') || low.includes('may gain access to a patron')) {
+        this.addCatalogBenefit('mod_patron_benefit');
+        continue;
+      }
+      if (low.includes('all the damage you deal is sonic')) {
+        this.addCatalogBenefit('mod_damage_type_shift');
+        continue;
+      }
+      if (low.includes('grant +1 dr to your party') || low.includes('grant regeneration at your skill rank to all party members')) {
+        this.addCatalogBenefit('major_party_buff_daily');
+        continue;
+      }
+      if (low.includes('can access any weapon training guild')) {
+        this.addCatalogBenefit('mod_guild_access');
+        continue;
+      }
+      if (low.includes('can see twice as far')) {
+        this.addCatalogBenefit('minor_telescopic_vision');
+        continue;
+      }
+      if (low.includes('double the duration of your rank 5')) {
+        this.addCatalogBenefit('extreme_double_spell_duration');
+        continue;
+      }
+      if (low.includes('skill advancement checks')) {
+        this.addCatalogBenefit('minor_advancement_check');
+        continue;
+      }
+      if (low.includes('advantage when making a repair') || low.includes('advantage when attacking') || low.includes('advantage on checks against') || low.includes('advantage when using a melee attack')) {
+        this.addCatalogBenefit('minor_conditional_advantage');
+        continue;
+      }
+      if (low.includes('roll a bonus 1d4 when you make the help')) {
+        this.addCatalogBenefit('major_bonus_die_1d4');
+        continue;
+      }
+
+      // Catalog Detriments:
+      if (low.includes('must worship a deity')) {
+        this.addCatalogDetriment('det_minor_mandatory_worship');
+        continue;
+      }
+      if (low.includes('vulnerable to') || low.includes('vulnerability:') || low.includes('no dr against ice')) {
+        this.addCatalogDetriment('det_minor_uncommon_vulnerability');
+        continue;
+      }
+      if (low.includes('pay +1 mana')) {
+        this.addCatalogDetriment('det_minor_unfavored_spell_mana');
+        continue;
+      }
+      if (low.includes('pay +3 mana')) {
+        this.addCatalogDetriment('det_mod_class_spell_mana_3');
+        continue;
+      }
+      if (low.includes('may not use melee weapons other than')) {
+        this.addCatalogDetriment('det_mod_weapon_restriction');
+        continue;
+      }
+      if (low.includes('add no stat mod bonus damage') || low.includes('add no stat mod')) {
+        this.addCatalogDetriment('det_mod_no_weapon_stat_mod');
+        continue;
+      }
+      if (low.includes('cannot choose this class if you have access') || low.includes('cannot choose a cleric-type class')) {
+        this.addCatalogDetriment('det_minor_club_exclusion');
+        continue;
+      }
+      if (low.includes('ranks in all dexterity skill') || low.includes('ranks in all strength skill')) {
+        this.addCatalogDetriment('det_minor_skill_penalties');
+        continue;
+      }
+
+      // 7. Otherwise, add as Custom Perk
+      const isDetriment = low.includes('vulnerability') || low.includes('penalty') || low.includes('disadvantage') || low.includes('cannot') || low.includes('prohibited');
+      this.addCustomPerk({
+        name: p,
+        type: isDetriment ? 'detriment' : 'benefit',
+        tier: 'Moderate',
+        points: 2,
+        extraPoints: 1,
+        description: p
+      });
     }
   }
 
@@ -214,12 +486,16 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
           }))
       : [];
 
-    // Presets list
+    // Presets list: Canonical Custom Presets + All Canonical DCC Classes
     const presets = [
-      ...DCC_CANONICAL_PRESETS,
-      ...DCC_CLASSES.slice(0, 5).map(c => ({
+      ...DCC_CANONICAL_PRESETS.map(p => ({
+        id: p.id,
+        name: `${p.name} (Canonical Custom Class)`,
+        isCanonical: true
+      })),
+      ...DCC_CLASSES.slice().sort((a, b) => a.name.localeCompare(b.name)).map(c => ({
         id: c._id,
-        name: `${c.name} (${c.system.classType})`,
+        name: `${c.name} (${c.system.classType || 'Class'})`,
         isCanonical: true
       }))
     ];
@@ -235,6 +511,8 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
       archetypePills,
       archetype: this.archetype,
       stats: this.stats,
+      drBonus: this.drBonus,
+      drCost: this.drBonus * 2,
       skills: this.skills,
       spells: this.spells,
       benefits: this.isEarthClass
@@ -377,6 +655,15 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
       });
     });
 
+    // Damage Reduction (DR) Stepper
+    $html.find('.dcc-dr-step-btn').on('click', ev => {
+      ev.preventDefault();
+      const delta = Number($(ev.currentTarget).data('delta')) || 0;
+      reRenderWithState(ev, () => {
+        this.stepDR(delta);
+      });
+    });
+
     // Add Skill
     $html.find('.dcc-add-skill-btn').on('click', ev => {
       ev.preventDefault();
@@ -437,6 +724,16 @@ export class DCCClassCreatorApp extends DCCBasePointBuilderApp {
       const isChecked = ev.currentTarget.checked;
 
       reRenderWithState(ev, () => {
+        if (benefitId && String(benefitId).startsWith('mod_dr_buff_')) {
+          if (isChecked) {
+            const rank = benefitId === 'mod_dr_buff_1' ? 1 : (benefitId === 'mod_dr_buff_2' ? 2 : (benefitId === 'mod_dr_buff_3' ? 3 : 1));
+            this.setDRBonus(rank);
+          } else {
+            this.setDRBonus(0);
+          }
+          return;
+        }
+
         if (isChecked) {
           const item = DCC_POINT_BUILD_BENEFITS.find(b => b.id === benefitId);
           if (item && !this.selectedBenefits.some(b => b.id === benefitId)) {

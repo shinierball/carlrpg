@@ -38,9 +38,41 @@ export function getInvertedKey(str) {
 export function cleanOCRText(t) {
   return String(t || '')
     .replace(/[\u2212\u2013\u2014]/g, '-')
+    .replace(/\+\s+(\d+)/g, '+$1')
+    .replace(/-\s+(\d+)/g, '-$1')
     .replace(/Sk\s*ills?/gi, 'Skill')
     .replace(/Spe\s*lls?/gi, 'Spell')
     .replace(/Ear\s*th/gi, 'Earth')
+    .replace(/Rag\s*e/gi, 'Rage')
+    .replace(/Arc\s*anist/gi, 'Arcanist')
+    .replace(/Alchem\s*y/gi, 'Alchemy')
+    .replace(/Smithin\s*g/gi, 'Smithing')
+    .replace(/Ta\s*ttoo/gi, 'Tattoo')
+    .replace(/cr\s*afting/gi, 'crafting')
+    .replace(/Salv\s*age/gi, 'Salvage')
+    .replace(/Intimida\s*te/gi, 'Intimidate')
+    .replace(/Att\s*ack/gi, 'Attack')
+    .replace(/Dodg\s*e/gi, 'Dodge')
+    .replace(/Bloc\s*k/gi, 'Block')
+    .replace(/gr\s*ant/gi, 'grant')
+    .replace(/siz\s*e/gi, 'size')
+    .replace(/r\s*oom/gi, 'room')
+    .replace(/interes\s*t/gi, 'interest')
+    .replace(/s\s*tores/gi, 'stores')
+    .replace(/Manag\s*er/gi, 'Manager')
+    .replace(/Pet\s*s/gi, 'Pets')
+    .replace(/friendl\s*y/gi, 'friendly')
+    .replace(/re\s*generation/gi, 'regeneration')
+    .replace(/t\s*wice/gi, 'twice')
+    .replace(/c\s*an/gi, 'can')
+    .replace(/Collec\s*tor/gi, 'Collector')
+    .replace(/res\s*t/gi, 'rest')
+    .replace(/da\s*y/gi, 'day')
+    .replace(/Whenev\s*er/gi, 'Whenever')
+    .replace(/ag\s*ainst/gi, 'against')
+    .replace(/Ether\s*eal/gi, 'Ethereal')
+    .replace(/St\s*at/gi, 'Stat')
+    .replace(/g\s*ain/gi, 'gain')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -49,7 +81,8 @@ export function cleanOCRText(t) {
  * Normalizes a parsed skill name against canonical DCC_SKILLS.
  */
 export function matchKnownSkill(raw) {
-  const clean = String(raw || '').trim().replace(/^and\s+/i, '').replace(/\s+Attack$/i, '').trim();
+  let clean = String(raw || '').trim().replace(/^and\s+/i, '').replace(/\s+Attack$/i, '').trim();
+  clean = clean.replace(/\s*\(.*?\)/g, '').trim();
   const norm = normalizeKey(clean);
   const found = DCC_SKILLS.find(s => normalizeKey(s.name) === norm);
   return found ? found.name : clean;
@@ -59,7 +92,8 @@ export function matchKnownSkill(raw) {
  * Normalizes a parsed spell name against canonical DCC_SPELLS.
  */
 export function matchKnownSpell(raw) {
-  const clean = String(raw || '').trim().replace(/^and\s+/i, '').trim();
+  let clean = String(raw || '').trim().replace(/^and\s+/i, '').trim();
+  clean = clean.replace(/\s*\(.*?\)/g, '').trim();
   const norm = normalizeKey(clean);
   const found = DCC_SPELLS.find(s => normalizeKey(s.name) === norm);
   return found ? found.name : clean;
@@ -177,9 +211,9 @@ export class DCCRaceClassApplier {
       }
 
       // Regex matching "+3 Strength", "+2 to Dexterity and Constitution", "-2 Charisma", "+3 Strength, Constitution, and Charisma"
-      const m = p.match(/^([+\-]\d+)\s+(?:to\s+)?([A-Za-z,\s]+?)(?:\s+(?:Skills?|Spells?|table|Buff|DR|\(benefit\)|table of your choice))?$/i);
+      const m = p.match(/^([+\-]\s*\d+)\s+(?:to\s+)?([A-Za-z,\s]+?)(?:\s+(?:Skills?|Spells?|table|Buff|DR|\(benefit\)|table of your choice))?(?:\s*\(.*?\))?$/i);
       if (m) {
-        const val = parseInt(m[1], 10);
+        const val = parseInt(m[1].replace(/\s+/g, ''), 10);
         const wordsStr = m[2];
         const words = wordsStr.split(/(?:,\s*|\s+and\s+)/i).map(w => w.trim().toLowerCase());
         for (const w of words) {
@@ -227,7 +261,7 @@ export class DCCRaceClassApplier {
       const p = cleanOCRText(raw);
 
       // Check for Spells: e.g. "+3 Web Spell", "+2 Earworm, Heal Others, and Shield Spells"
-      const spellMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-]+?)\s+Spell/i);
+      const spellMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-!]+?)\s+Spells?/i);
       if (spellMatch) {
         const rank = parseInt(spellMatch[1], 10);
         const spellNames = spellMatch[2].split(/(?:,\s*|\s+and\s+)/i).map(s => s.trim()).filter(Boolean);
@@ -240,7 +274,7 @@ export class DCCRaceClassApplier {
       }
 
       // Check for Skills: e.g. "+5 Arcane Skill", "+2 Bow, Endurance, and Pugilism Skills", "+3 Cat-like Reflexes"
-      const skillMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-]+?)\s+Skill/i);
+      const skillMatch = p.match(/^\+(\d+)\s+(?:in\s+)?([A-Za-z0-9\s,\u0027’\-]+?)\s+Skills?/i);
       if (skillMatch) {
         const rank = parseInt(skillMatch[1], 10);
         const skillNames = skillMatch[2].split(/(?:,\s*|\s+and\s+)/i).map(s => s.trim()).filter(Boolean);

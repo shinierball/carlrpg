@@ -237,3 +237,161 @@ test('DCC Class Creator App - World Item Creation and Actor Application', async 
   assert.equal(skillItem.type, 'skill');
   assert.equal(skillItem.system.rank, 2);
 });
+
+test('DCC Class Creator Studio - Damage Reduction (DR) Stepper and Point Accounting', async () => {
+  const app = new DCCClassCreatorApp();
+
+  // Initial DR is 0
+  assert.equal(app.drBonus, 0);
+  assert.equal(app.getData().drBonus, 0);
+  assert.equal(app.getData().drCost, 0);
+
+  // 1. Increment DR to +1 (costs 2 BP)
+  app.stepDR(1);
+  assert.equal(app.drBonus, 1);
+  assert.equal(app.getData().drCost, 2);
+  assert.equal(app.getData().benefitCost, 2);
+  assert.ok(app.selectedBenefits.some(b => b.id === 'mod_dr_buff_1'));
+  assert.equal(app.selectedBenefits.filter(b => b.id.startsWith('mod_dr_buff_')).length, 1);
+
+  // 2. Increment DR beyond +1 to +2 (costs 4 BP)
+  app.stepDR(1);
+  assert.equal(app.drBonus, 2);
+  assert.equal(app.getData().drCost, 4);
+  assert.equal(app.getData().benefitCost, 4);
+  assert.ok(app.selectedBenefits.some(b => b.id === 'mod_dr_buff_2'));
+  assert.equal(app.selectedBenefits.filter(b => b.id.startsWith('mod_dr_buff_')).length, 1);
+
+  // 3. Increment DR to +3 (costs 6 BP)
+  app.stepDR(1);
+  assert.equal(app.drBonus, 3);
+  assert.equal(app.getData().drCost, 6);
+  assert.equal(app.getData().benefitCost, 6);
+  assert.ok(app.selectedBenefits.some(b => b.id === 'mod_dr_buff_3'));
+  assert.equal(app.selectedBenefits.filter(b => b.id.startsWith('mod_dr_buff_')).length, 1);
+
+  // 4. Decrement DR back to +2
+  app.stepDR(-1);
+  assert.equal(app.drBonus, 2);
+  assert.equal(app.getData().drCost, 4);
+  assert.ok(app.selectedBenefits.some(b => b.id === 'mod_dr_buff_2'));
+
+  // 5. Selecting from catalog synchronizes drBonus
+  app.addCatalogBenefit('mod_dr_buff_3');
+  assert.equal(app.drBonus, 3);
+  assert.equal(app.getData().drCost, 6);
+
+  app.addCatalogBenefit('mod_dr_buff_1');
+  assert.equal(app.drBonus, 1);
+  assert.equal(app.getData().drCost, 2);
+
+  app.removeCatalogBenefit('mod_dr_buff_1');
+  assert.equal(app.drBonus, 0);
+  assert.equal(app.getData().drCost, 0);
+
+  // 6. Test Item Data compilation with DR +2
+  app.setDRBonus(2);
+  const itemData = app.createItemData();
+  assert.equal(itemData.system.drBonus, 2);
+  assert.ok(itemData.system.perks.some(p => p.includes('DR')));
+
+  // 7. Test JSON Export and Import
+  const jsonStr = app.exportBuildJSON();
+  const restoredApp = new DCCClassCreatorApp();
+  restoredApp.importBuildJSON(jsonStr);
+  assert.equal(restoredApp.drBonus, 2);
+  assert.equal(restoredApp.getData().drCost, 4);
+
+  // 8. Test Actor Application applies DR buffs
+  const actor = new DCCActor({
+    name: 'Iron Tank',
+    type: 'crawler',
+    system: {
+      attributes: {
+        dr: { value: 0, buffs: 0 }
+      }
+    }
+  });
+
+  await app.applyToActor(actor);
+  assert.equal(actor.system.attributes.dr.buffs, 2);
+});
+
+test('DCC Class Creator Studio - Canonical Class Template Selector Lists All 54 Presets', () => {
+  const app = new DCCClassCreatorApp();
+  const data = app.getData();
+
+  // 1 Canonical Preset (Dungeon Dad) + 53 Canonical DCC Classes = 54 Templates
+  assert.equal(data.presets.length, 54);
+  assert.equal(data.presets[0].id, 'dungeon_dad');
+  assert.ok(data.presets.some(p => p.name.includes("Boring Ol’ Barbarian")));
+  assert.ok(data.presets.some(p => p.name.includes("Alchemist")));
+  assert.ok(data.presets.some(p => p.name.includes("Gladiator")));
+  assert.ok(data.presets.some(p => p.name.includes("Harii")));
+  assert.ok(data.presets.some(p => p.name.includes("Shieldmaiden")));
+});
+
+test('DCC Class Creator Studio - All Canonical Class Templates Load and Fully Populate Builder', () => {
+  const app = new DCCClassCreatorApp();
+  const data = app.getData();
+
+  // Test loading Boring Ol Barbarian
+  const barbarianPreset = data.presets.find(p => p.name.includes("Boring Ol’ Barbarian"));
+  assert.ok(barbarianPreset);
+  app.loadPreset(barbarianPreset.id);
+
+  assert.equal(app.name, "Boring Ol’ Barbarian");
+  assert.equal(app.archetype, 'barbarian');
+  assert.equal(app.classTypes[0], 'Barbarian');
+  assert.equal(app.stats.str, 6);
+  assert.equal(app.stats.con, 5);
+  assert.equal(app.drBonus, 2);
+  assert.ok(app.skills.some(s => s.name === 'Endurance' && s.rank === 2));
+  assert.ok(app.skills.some(s => s.name === 'Intimidate' && s.rank === 1));
+  assert.ok(app.skills.some(s => s.name === 'Weapon Skill (Choice)' && s.rank === 3));
+  assert.ok(app.selectedBenefits.some(b => b.id === 'major_rage'));
+
+  const barbarianLedger = app.getPointLedger();
+  assert.ok(barbarianLedger.pointsSpent > 0);
+  assert.ok(barbarianLedger.receiptItems.length > 0);
+
+  // Test loading Alchemist (Arcanist archetype, Poison Immunity)
+  const alchemistPreset = data.presets.find(p => p.name.includes("Alchemist"));
+  assert.ok(alchemistPreset);
+  app.loadPreset(alchemistPreset.id);
+
+  assert.equal(app.name, "Alchemist");
+  assert.equal(app.archetype, 'arcanist');
+  assert.equal(app.classTypes[0], 'Arcanist');
+  assert.equal(app.stats.con, 3);
+  assert.equal(app.stats.int, 3);
+  assert.ok(app.skills.some(s => s.name === 'Alchemy' && s.rank === 5));
+  assert.ok(app.skills.some(s => s.name === 'Infusion' && s.rank === 3));
+  assert.ok(app.selectedBenefits.some(b => b.id === 'extreme_poison_immunity'));
+  assert.ok(app.getPointLedger().pointsSpent > 0);
+
+  // Test loading Harii (Earth Class, Darkvision, Desperado Club)
+  const hariiPreset = data.presets.find(p => p.name.includes("Harii"));
+  assert.ok(hariiPreset);
+  app.loadPreset(hariiPreset.id);
+
+  assert.equal(app.name, "Harii");
+  assert.equal(app.isEarthClass, true);
+  assert.equal(app.drBonus, 1);
+  assert.ok(app.skills.some(s => s.name === 'Ambush' && s.rank === 4));
+  assert.ok(app.skills.some(s => s.name === 'Stealth' && s.rank === 4));
+  assert.ok(app.selectedBenefits.some(b => b.id === 'minor_darkvision'));
+  assert.ok(app.selectedBenefits.some(b => b.id === 'minor_club_desperado'));
+
+  // Test loading Dungeon Dad (Canonical Custom Class)
+  app.loadPreset('dungeon_dad');
+  assert.equal(app.name, 'Dungeon Dad');
+  assert.equal(app.isEarthClass, true);
+  assert.equal(app.drBonus, 2);
+  assert.equal(app.stats.cha, 2);
+  assert.equal(app.stats.dex, -2);
+  assert.ok(app.skills.some(s => s.name === 'Catcher' && s.rank === 3));
+  assert.ok(app.spells.some(sp => sp.name === 'Hot Stuff Aura' && sp.rank === 2));
+  assert.ok(app.getPointLedger().pointsSpent > 0);
+});
+

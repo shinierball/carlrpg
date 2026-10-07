@@ -279,8 +279,9 @@ The **Class Creator Studio** (Option A: *"Terminal Ledger" Accordion Studio*) pr
 
 ### Architecture & Design
 - **Base Point Engine (`DCCBasePointBuilderApp`)**:
-  - Reusable point accounting foundation shared between the Class Creator (30 BP base budget) and the upcoming Race Creator (25 BP base budget).
-  - Automatically handles positive stat point costs (+1 BP per stat pt), negative stat penalty refunds (+1 Extra BP per $-2$ penalty), skill/spell ranks (+2 BP per rank), passive rank cap tracking (soft flag if passive ranks $> 5$), catalog benefits, catalog detriments (with $+5$ extra BP legal cap tracking), and freeform custom perks.
+  - Reusable point accounting foundation shared between the Class Creator (30 BP base budget) and the Race Creator (25 BP base budget).
+  - Automatically handles positive stat point costs (+1 BP per stat pt), negative stat penalty refunds (+1 Extra BP per $-2$ penalty), Damage Reduction (+1 DR per 2 BP, up to +3 standard limit via dedicated steppers or catalog benefits), skill/spell ranks (+2 BP per rank), passive rank cap tracking (soft flag if passive ranks $> 5$), catalog benefits, catalog detriments (with $+5$ extra BP legal cap tracking), and freeform custom perks.
+  - Features dedicated **Damage Reduction (DR) Steppers** in Section 2 (*Ability Score & Defense Adjustments*) with `[-]` and `[+]` controls, auto-calculating 2 BP per rank (e.g. +1 DR = 2 BP, +2 DR = 4 BP, +3 DR = 6 BP) with two-way synchronization to the Moderate Benefits catalog.
   - Generates live itemized receipts with exact costs per element.
 - **Soft-Limit Non-Enforcement Policy**:
   - Calculates and displays exact points spent, extra points earned, effective budget, and balance in real time.
@@ -416,5 +417,33 @@ Opening any Race or Class item (from compendiums, world items, or embedded crawl
 6. **Perks & Traits List**: Bulleted breakdown of all canonical features, coupons, and unique rules.
 7. **Description & Lore**: Narrative backstory, cultural context, and roleplaying guidance.
 
+---
 
+## 12. Point Build Studios & Unified Point Ledger System
 
+The system provides interactive studios for custom point building:
+- **Class Creator Studio (`DCCClassCreatorApp`)**: 30 Base Build Points with live point ledger.
+- **Race Creator Studio (`DCCRaceCreatorApp`)**: 25 Base Build Points with live point ledger.
+
+### Full Canonical Template Loading
+- **54 Class Templates**: The Class Creator includes the canonical *Dungeon Dad* custom preset plus all 53 canonical classes from the Core Rulebook. Loading any class template automatically populates:
+  - Identity, description, prerequisites, and notes.
+  - Archetypes and Earth Class flag (Silver Earth Box detection).
+  - Ability scores (STR, DEX, CON, INT, CHA).
+  - Damage Reduction (DR) bonus with 2 BP per +1 DR accounting.
+  - Granted skills (including choice skills like *Weapon Skill (Choice)*) and spells.
+  - Catalog benefits/detriments and custom perks.
+- **30 Race Templates**: The Race Creator includes all 30 playable species, automatically populating heritage, size category, stats, DR, skills, spells, and perks.
+
+### Unified Sticky Point Ledger & Receipt
+Both the Class Creator and Race Creator studios share an identical, high-contrast visual design and card hierarchy in the sticky sidebar:
+1. **Receipt Header Card**:
+   - **Live Point Gauge**: Displays spent vs. budget points (`XX / YY BP`) in large, prominent typography.
+   - **Legality & Soft-Limit Badge**: Displays green `LEGAL BUILD (N BP Left)` or amber `OVER BUDGET (+N BP)` with soft-limit GM-discretion indicator.
+   - **3-Column Budget Breakdown**: Base Budget, Extra BP from Detriments, and Effective Target Budget.
+2. **Itemized Receipt Card**:
+   - Detailed list of all point contributions (`.dcc-receipt-row`), distinguishing point costs and extra BP refunds.
+3. **Action Hub**:
+   - Target Crawler selector with 1-click **Apply to Crawler**.
+   - **Save as Item** to the Foundry World Items directory.
+   - **Export JSON** for portable sharing and backup.

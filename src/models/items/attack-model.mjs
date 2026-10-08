@@ -32,7 +32,8 @@ export class AttackDataModel extends BaseItemDataModel {
       effects: new fields.HTMLField({ initial: '' }),
       critMultiplier: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       optionalEffects: new fields.ArrayField(new fields.StringField(), { initial: [] }),
-      selectedEffect: new fields.StringField({ initial: '' })
+      selectedEffect: new fields.StringField({ initial: '' }),
+      rankBreaks: new fields.ObjectField({ initial: {} })
     };
   }
 }

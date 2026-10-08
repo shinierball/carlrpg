@@ -1,3 +1,29 @@
+## 2.4.25
+
+### Character Item Advancement UI & Calculation Refactor
+
+- **Item Sheet Advancement & Schema Alignments (`template.json`, `src/models/items/*`, `src/sheets/item-sheet.mjs`)**:
+  - Added structured milestone `rankBreaks` (rank5, rank10, rank15, rank20) support to `AttackDataModel` and `GearDataModel`, allowing custom and artifact weapons/gear to define explicit milestone breaks directly on item documents.
+  - Added `healingPerRound` to `BuffDataModel` and `damagePerRound` to `DebuffDataModel` schemas.
+  - Fixed HTML nesting and unclosed container `<div>` tags in `templates/items/parts/buff.hbs` and `templates/items/parts/debuff.hbs`.
+  - Updated `DCCItemSheet._prepareContext()` and `_updateObject()` to hydrate, edit, and persist `rankBreaks` for `attack` and `gear` items alongside `skill` and `spell`.
+- **Equipped Gear Skills & Spells Advancement Integration (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `templates/actors/parts/spells.hbs`)**:
+  - Implemented spell derivation loop in `DCCActor.prepareDerivedData()` reflecting gear spell bonuses (`gearSkillBonuses` where `isSpell: true`), calculating `itemBonus`, `modifiedRank`, and `statMod`.
+  - Added `actor.getSpellRank(name)` method resolving modified spell ranks from owned spells or equipped gear bonuses.
+  - Enhanced `actor.getSkillRank(name)` to inspect equipped gear skill bonuses when a skill document is not directly owned.
+  - Enhanced `DCCCrawlerSheet._prepareContext()` with `this._grantedSpells` Map to surface unowned spells granted by equipped gear in `context.spells` with clear `[EQUIPPED GEAR]` badges and gear rank bonus indicators.
+  - Connected spell roll and damage action listeners (`.roll-spell`, `.roll-spell-dmg`, `.roll-spell-hit`, and hotlist triggers) to execute from granted spells seamlessly.
+- **Buff & Debuff Mechanics & Healing/Damage Over Time (`src/documents/actor.mjs`)**:
+  - Added `actor.getHealingOverTime()` and `actor.getDamageOverTime()` aggregation methods totaling per-round healing and damage across active buffs, debuffs, and equipped gear.
+  - Normalized `actor.getActiveBuffs()` to support both `buff1..buff3` and `slot1..slot3` keys across external buff slots.
+  - Verified and integrated buff/debuff stat modifiers, damage multipliers, damage type reductions, advantage/disadvantage roll modifiers with targeted `affects`, and limb count modifications impacting hands limit.
+- **Weapons & Primary Attacks Advancement (`src/documents/actor.mjs`)**:
+  - Enhanced `_buildWeaponAttackProfile()` and `rollAttack()` to resolve item-level `rankBreaks` directly from weapons/attacks, ensuring custom weapons scale damage dice, rank dice, and milestone bonuses accurately even without external skill documents.
+  - Verified multi-typed damage packets (`damageParts`) rolling and scaling.
+- **Automated Verification (`tests/item-attributes-advancement.test.mjs`)**:
+  - Created comprehensive test suite with 13 automated unit tests verifying schemas, item sheet hydration/persistence, gear granted skills and spells, buffs/debuffs (HoT, DoT, limb limits, advantage/disadvantage), and weapons with multi-damage packets and item-level rankBreaks.
+  - All 956 unit tests across 173 test suites passing with 0 failures.
+
 ## 2.4.24
 
 ### Advancement Milestones (Rank 5, 10, 15, 20) UI & Compendium Synchronization

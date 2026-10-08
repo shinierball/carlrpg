@@ -53,6 +53,7 @@ export class GearDataModel extends BaseItemDataModel {
       }),
       outcomes: new fields.ArrayField(new fields.ObjectField(), { initial: [] }),
       notes: new fields.HTMLField({ initial: '' }),
+      rankBreaks: new fields.ObjectField({ initial: {} }),
       description: new fields.HTMLField({ initial: '' })
     };
   }

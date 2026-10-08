@@ -9,6 +9,7 @@ export class DebuffDataModel extends BaseItemDataModel {
     return {
       severity: new fields.StringField({ initial: 'Minor' }),
       damageType: new fields.StringField({ initial: '' }),
+      damagePerRound: new fields.StringField({ initial: '' }),
       reductionPercent: new fields.NumberField({ initial: 0 }),
       rounding: new fields.StringField({ initial: 'up' }),
       rollModifierMode: new fields.StringField({ initial: 'none' }),

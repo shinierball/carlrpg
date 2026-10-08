@@ -1126,6 +1126,30 @@ export class DCCActor extends BaseActor {
         item.itemSources = gearData ? gearData.sources.join(', ') : '';
         item.typeSources = typeSources;
       }
+
+      // Prepare Spells: item bonuses from equipped gear and modifiedRank
+      const spells = this.items.filter ? this.items.filter(i => i.type === 'spell') : Array.from(this.items.values?.() ?? this.items).filter(i => i.type === 'spell');
+      for (const spell of spells) {
+        const norm = spell.name.toLowerCase().trim();
+        const baseRank = Number(spell.system?.rank) || 1;
+        const gearData = gearSkillBonuses.get(norm);
+        const itemBonus = gearData ? gearData.bonus : 0;
+        const modifiedRank = Math.max(1, baseRank + itemBonus);
+
+        const stat = spell.system?.stat || 'int';
+        const statMod = system.abilities?.[stat]?.mod ?? 0;
+
+        if (spell.system) {
+          spell.system.itemBonus = itemBonus;
+          spell.system.modifiedRank = modifiedRank;
+          spell.system.statMod = statMod;
+        }
+        spell.baseRank = baseRank;
+        spell.itemBonus = itemBonus;
+        spell.modifiedRank = modifiedRank;
+        spell.statMod = statMod;
+        spell.statModStr = statMod >= 0 ? `+${statMod}` : `${statMod}`;
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -2668,7 +2692,7 @@ export class DCCActor extends BaseActor {
     // Base damage scaling from matching skill rank upgrades & rank breaks
     let upgradedDice = '';
     let extraWeaponRankDiceCount = 0;
-    if (matchingSkill && skillRank >= 5) {
+    if ((matchingSkill || sys.rankBreaks) && skillRank >= 5) {
       const baseDiceStr = sys.damageDice || sys.damageParts?.[0]?.dice || '';
       const dm = baseDiceStr.match(/(\d+)d(\d+)/i);
       if (dm) {
@@ -2677,7 +2701,7 @@ export class DCCActor extends BaseActor {
         const processedWeaponTiers = new Set();
 
         // 1. Structured Rank Breaks scaling (primary)
-        const rb = matchingSkill.system?.rankBreaks;
+        const rb = matchingSkill?.system?.rankBreaks || sys.rankBreaks;
         if (rb) {
           const breaks = [
             { thresh: 5, key: 'rank5', data: rb.rank5 },
@@ -3362,12 +3386,12 @@ export class DCCActor extends BaseActor {
     }
 
     // Rank break extra dice
-    if (matchingSkill?.system?.rankBreaks) {
-      const rb = matchingSkill.system.rankBreaks;
-      if (skillRank >= 5 && rb.rank5?.damageDice) combinedDice += ` + ${rb.rank5.damageDice.replace(/^\+/, '')}`;
-      if (skillRank >= 10 && rb.rank10?.damageDice) combinedDice += ` + ${rb.rank10.damageDice.replace(/^\+/, '')}`;
-      if (skillRank >= 15 && rb.rank15?.damageDice) combinedDice += ` + ${rb.rank15.damageDice.replace(/^\+/, '')}`;
-      if (skillRank >= 20 && rb.rank20?.damageDice) combinedDice += ` + ${rb.rank20.damageDice.replace(/^\+/, '')}`;
+    const activeRankBreaks = matchingSkill?.system?.rankBreaks || sys.rankBreaks;
+    if (activeRankBreaks) {
+      if (skillRank >= 5 && activeRankBreaks.rank5?.damageDice) combinedDice += ` + ${activeRankBreaks.rank5.damageDice.replace(/^\+/, '')}`;
+      if (skillRank >= 10 && activeRankBreaks.rank10?.damageDice) combinedDice += ` + ${activeRankBreaks.rank10.damageDice.replace(/^\+/, '')}`;
+      if (skillRank >= 15 && activeRankBreaks.rank15?.damageDice) combinedDice += ` + ${activeRankBreaks.rank15.damageDice.replace(/^\+/, '')}`;
+      if (skillRank >= 20 && activeRankBreaks.rank20?.damageDice) combinedDice += ` + ${activeRankBreaks.rank20.damageDice.replace(/^\+/, '')}`;
     }
 
     let techniqueBonusDice = '';
@@ -4157,7 +4181,14 @@ export class DCCActor extends BaseActor {
       if (Array.isArray(rawBuffs)) {
         buffKeys = rawBuffs.slice(0, 3);
       } else if (typeof rawBuffs === 'object') {
-        buffKeys = [rawBuffs.buff1, rawBuffs.buff2, rawBuffs.buff3];
+        buffKeys = [
+          rawBuffs.buff1 || rawBuffs.slot1,
+          rawBuffs.buff2 || rawBuffs.slot2,
+          rawBuffs.buff3 || rawBuffs.slot3
+        ].filter(Boolean);
+        if (buffKeys.length === 0) {
+          buffKeys = Object.values(rawBuffs).filter(Boolean).slice(0, 3);
+        }
       }
 
       for (const key of buffKeys) {
@@ -7051,8 +7082,115 @@ export class DCCActor extends BaseActor {
     const norm = skillName.toLowerCase().trim();
     const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
     const skill = skills.find(s => s.name?.toLowerCase().trim() === norm);
-    if (!skill) return 0;
-    return Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
+    if (skill) {
+      return Number(skill.system?.modifiedRank ?? skill.system?.rank) || 0;
+    }
+    // Check equipped gear skill bonuses when not owned directly
+    const equippedGear = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' && i.system?.equipped)) : [];
+    let gearBonus = 0;
+    for (const item of equippedGear) {
+      let rawMods = item.system?.skillModifiers;
+      if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+        rawMods = Object.values(rawMods);
+      }
+      const skillMods = Array.isArray(rawMods) ? rawMods : [];
+      for (const sm of skillMods) {
+        if (sm?.name && sm.name.toLowerCase().trim() === norm) {
+          gearBonus += Number(sm.bonus) || 0;
+        }
+      }
+    }
+    return gearBonus;
+  }
+
+  /**
+   * Look up an actor's effective or modified rank for a spell by name (case-insensitive).
+   * @param {string} spellName
+   * @returns {number} The spell rank (0 if not possessed)
+   */
+  getSpellRank(spellName) {
+    if (!spellName) return 0;
+    const norm = spellName.toLowerCase().trim();
+    const spells = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'spell') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'spell')) : [];
+    const spell = spells.find(s => s.name?.toLowerCase().trim() === norm);
+    if (spell) {
+      return Number(spell.system?.modifiedRank ?? spell.system?.rank) || 1;
+    }
+    // Check equipped gear granting the spell
+    const equippedGear = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'gear' && i.system?.equipped) : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'gear' && i.system?.equipped)) : [];
+    for (const item of equippedGear) {
+      let rawMods = item.system?.skillModifiers;
+      if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+        rawMods = Object.values(rawMods);
+      }
+      const skillMods = Array.isArray(rawMods) ? rawMods : [];
+      for (const sm of skillMods) {
+        if (sm?.name && sm.name.toLowerCase().trim() === norm) {
+          return Number(sm.bonus ?? sm.rank) || 1;
+        }
+      }
+      const rawSpells = item.system?.grantedSpells || item.system?.spells;
+      const explicitSpells = Array.isArray(rawSpells) ? rawSpells : (rawSpells && typeof rawSpells === 'object' ? Object.values(rawSpells) : []);
+      for (const sp of explicitSpells) {
+        const sName = typeof sp === 'string' ? sp : (sp?.name || sp?.spellName);
+        if (sName && sName.toLowerCase().trim() === norm) {
+          return Number(sp.rank ?? sp.bonus) || 1;
+        }
+      }
+      const rawOutcomes = item.system?.outcomes;
+      const outcomes = Array.isArray(rawOutcomes) ? rawOutcomes : (rawOutcomes && typeof rawOutcomes === 'object' ? Object.values(rawOutcomes) : []);
+      for (const out of outcomes) {
+        if (out?.type === 'spell' && (out.spellName || out.name)?.toLowerCase().trim() === norm) {
+          return Number(out.rank ?? out.bonus) || 1;
+        }
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * Aggregate active Heal-Over-Time (HoT) effects from active buffs.
+   * @returns {Array<{ name: string, healingPerRound: string|number, duration: string }>}
+   */
+  getHealingOverTime() {
+    const activeBuffs = this.getActiveBuffs();
+    const hots = [];
+    for (const buff of activeBuffs) {
+      if (!buff) continue;
+      const bSys = buff.system || buff;
+      if (bSys.healingPerRound) {
+        hots.push({
+          name: buff.name,
+          healingPerRound: bSys.healingPerRound,
+          duration: bSys.duration || ''
+        });
+      }
+    }
+    return hots;
+  }
+
+  /**
+   * Aggregate active Damage-Over-Time (DoT) effects from active debuffs.
+   * @returns {Array<{ name: string, damagePerRound: string|number, damageType: string, duration: string }>}
+   */
+  getDamageOverTime() {
+    const debuffs = this.items
+      ? (this.items.filter ? this.items.filter(i => i.type === 'debuff') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'debuff'))
+      : [];
+    const dots = [];
+    for (const debuff of debuffs) {
+      if (!debuff) continue;
+      const dSys = debuff.system || {};
+      if (dSys.damagePerRound) {
+        dots.push({
+          name: debuff.name,
+          damagePerRound: dSys.damagePerRound,
+          damageType: dSys.damageType || '',
+          duration: dSys.duration || ''
+        });
+      }
+    }
+    return dots;
   }
 
   /**

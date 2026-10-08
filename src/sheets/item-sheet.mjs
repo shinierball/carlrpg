@@ -498,8 +498,8 @@ export class DCCItemSheet extends BaseItemSheet {
     context.availableSpells = await this.getAvailableSpells();
     context.availableRollTables = await this.getAvailableRollTables();
 
-    // Prepare Rank Breaks configuration for skills and spells (Ranks 5, 10, 15, 20)
-    if (['skill', 'spell'].includes(context.item.type)) {
+    // Prepare Rank Breaks configuration for skills, spells, attacks, and gear (Ranks 5, 10, 15, 20)
+    if (['skill', 'spell', 'attack', 'gear'].includes(context.item.type)) {
       context.system.rankBreaks = hydrateRankBreaks(
         context.system.rankBreaks,
         context.system.upgrades,
@@ -781,7 +781,7 @@ export class DCCItemSheet extends BaseItemSheet {
       }
     }
 
-    if (this.item.type === 'skill' || this.item.type === 'spell') {
+    if (['skill', 'spell', 'attack', 'gear'].includes(this.item.type)) {
       if (this.item.type === 'skill') {
         if (formData['system.skillType']) {
           formData['system.type'] = formData['system.skillType'];
@@ -804,7 +804,7 @@ export class DCCItemSheet extends BaseItemSheet {
       let mods = expanded.system?.damageModifiers;
       if (mods !== undefined) {
         expanded.system.damageModifiers = Array.isArray(mods) ? mods : Object.values(mods);
-      } else {
+      } else if (this.item.type === 'skill' || this.item.type === 'spell') {
         expanded.system = expanded.system || {};
         expanded.system.damageModifiers = [];
       }
@@ -813,7 +813,9 @@ export class DCCItemSheet extends BaseItemSheet {
           delete formData[key];
         }
       }
-      formData['system.damageModifiers'] = expanded.system.damageModifiers;
+      if (expanded.system?.damageModifiers) {
+        formData['system.damageModifiers'] = expanded.system.damageModifiers;
+      }
 
       if (expanded.system?.rankBreaks) {
         const cleanedBreaks = {};

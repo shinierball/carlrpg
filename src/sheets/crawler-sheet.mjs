@@ -11,6 +11,7 @@ import { DCC_SIZES, getSizeInfo } from '../data/sizes.mjs';
 import { rollBackgroundTable } from '../data/background-tables.mjs';
 import { getRequiredGrindingHours, getAdvancementTarget } from '../data/grinding.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
+import { DCC_SPELLS } from '../data/spells.mjs';
 
 /**
  * Helper to format active gear bonuses into a readable string summary
@@ -705,7 +706,140 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
     context.skills.sort(sortItems);
 
-    // Prepare spells (stat modifiers, damage data, sorting)
+    // Prepare spells (gear bonuses, granted spells, stat modifiers, damage data, sorting)
+    this._grantedSpells = new Map();
+    const ownedSpellNames = new Set(context.spells.map(s => s.name.toLowerCase().trim()));
+    const gearGrantedSpells = new Map();
+
+    // 1. First pass: Apply gear bonuses to owned spells and collect gear granted spells
+    for (const spell of context.spells) {
+      const sNorm = spell.name.toLowerCase().trim();
+      const gearData = gearSkillBonuses.get(sNorm);
+      const itemBonus = gearData ? gearData.bonus : 0;
+      const baseRank = Number(spell.system?.rank) || 1;
+      const modifiedRank = Math.max(1, baseRank + itemBonus);
+      spell.itemBonus = itemBonus;
+      spell.modifiedRank = modifiedRank;
+      if (spell.system) {
+        spell.system.itemBonus = itemBonus;
+        spell.system.modifiedRank = modifiedRank;
+      }
+    }
+
+    // 2. Collect spells granted by equipped gear
+    for (const item of context.gear) {
+      if (!item.system?.equipped) continue;
+
+      // A. skillModifiers referencing spells or with type: 'spell'
+      let rawMods = item.system.skillModifiers;
+      if (rawMods && !Array.isArray(rawMods) && typeof rawMods === 'object') {
+        rawMods = Object.values(rawMods);
+      }
+      const skillMods = Array.isArray(rawMods) ? rawMods : [];
+      for (const sm of skillMods) {
+        if (!sm || !sm.name) continue;
+        const norm = sm.name.toLowerCase().trim();
+        const isOfficialSkill = (CONFIG.DCC?.skills || []).some(s => s.name.toLowerCase().trim() === norm);
+        const officialSpell = (CONFIG.DCC?.spells || DCC_SPELLS || []).find(s => s.name.toLowerCase().trim() === norm);
+        const isSpell = sm.type === 'spell' || (!isOfficialSkill && officialSpell);
+        if (isSpell) {
+          const rank = Number(sm.bonus ?? sm.rank) || 1;
+          if (!gearGrantedSpells.has(norm)) {
+            gearGrantedSpells.set(norm, { rank, sources: [], originalName: sm.name });
+          }
+          const entry = gearGrantedSpells.get(norm);
+          entry.rank = Math.max(entry.rank, rank);
+          entry.sources.push(`${item.name}`);
+        }
+      }
+
+      // B. explicit grantedSpells or spells array on gear
+      const rawSpells = item.system.grantedSpells || item.system.spells;
+      const explicitSpells = Array.isArray(rawSpells) ? rawSpells : (rawSpells && typeof rawSpells === 'object' ? Object.values(rawSpells) : []);
+      for (const sp of explicitSpells) {
+        if (!sp) continue;
+        const sName = typeof sp === 'string' ? sp : (sp.name || sp.spellName);
+        if (!sName) continue;
+        const norm = sName.toLowerCase().trim();
+        const rank = Number(sp.rank ?? sp.bonus) || 1;
+        if (!gearGrantedSpells.has(norm)) {
+          gearGrantedSpells.set(norm, { rank, sources: [], originalName: sName });
+        }
+        const entry = gearGrantedSpells.get(norm);
+        entry.rank = Math.max(entry.rank, rank);
+        entry.sources.push(`${item.name}`);
+      }
+
+      // C. outcomes of type 'spell' on activated gear
+      const rawOutcomes = item.system.outcomes;
+      const outcomes = Array.isArray(rawOutcomes) ? rawOutcomes : (rawOutcomes && typeof rawOutcomes === 'object' ? Object.values(rawOutcomes) : []);
+      for (const out of outcomes) {
+        if (out && out.type === 'spell') {
+          const sName = out.spellName || out.name;
+          if (!sName) continue;
+          const norm = sName.toLowerCase().trim();
+          const rank = Number(out.rank ?? out.bonus) || 1;
+          if (!gearGrantedSpells.has(norm)) {
+            gearGrantedSpells.set(norm, { rank, sources: [], originalName: sName });
+          }
+          const entry = gearGrantedSpells.get(norm);
+          entry.rank = Math.max(entry.rank, rank);
+          entry.sources.push(`${item.name}`);
+        }
+      }
+    }
+
+    // 3. Instantiate granted spells that the actor doesn't own
+    for (const [norm, data] of gearGrantedSpells.entries()) {
+      if (!ownedSpellNames.has(norm)) {
+        const official = (CONFIG.DCC?.spells || DCC_SPELLS || []).find(s => s.name.toLowerCase().trim() === norm);
+        const grantedId = `granted-spell-${norm.replace(/\s+/g, '-')}`;
+        const stat = official?.system?.stat || 'int';
+        const mod = context.system.abilities?.[stat]?.mod ?? 0;
+
+        const grantedSpell = {
+          id: grantedId,
+          _id: grantedId,
+          name: official ? official.name : data.originalName,
+          type: 'spell',
+          img: official?.img || 'icons/svg/wand.svg',
+          isGranted: true,
+          itemSources: data.sources.join(', '),
+          statMod: mod,
+          statModStr: mod >= 0 ? `+${mod}` : `${mod}`,
+          system: {
+            rank: data.rank,
+            modifiedRank: data.rank,
+            stat: stat,
+            manaCost: official?.system?.manaCost ?? 0,
+            range: official?.system?.range || '30 feet',
+            duration: official?.system?.duration || 'Instantaneous',
+            cooldown: official?.system?.cooldown || 'None',
+            spellType: official?.system?.spellType || 'Attack',
+            damageType: official?.system?.damageType || '',
+            baseDamage: official?.system?.baseDamage || '',
+            damageModifiers: official?.system?.damageModifiers || [],
+            critMultiplierR5: official?.system?.critMultiplierR5 || 1,
+            critMultiplierR15: official?.system?.critMultiplierR15 || 1,
+            fumbleDebuff: official?.system?.fumbleDebuff || '',
+            onHitDebuff: official?.system?.onHitDebuff || '',
+            onHitDebuffMinRank: official?.system?.onHitDebuffMinRank || 0,
+            optionalEffects: official?.system?.optionalEffects || [],
+            selectedEffect: official?.system?.selectedEffect || '',
+            description: official?.system?.description || `Granted by ${data.sources.join(', ')}`,
+            quote: official?.system?.quote || '',
+            upgrades: official?.system?.upgrades || {},
+            rankBreaks: official?.system?.rankBreaks || {},
+            notes: `Granted by ${data.sources.join(', ')}`
+          }
+        };
+
+        this._grantedSpells.set(grantedId, grantedSpell);
+        context.spells.push(grantedSpell);
+      }
+    }
+
+    // 4. Calculate damage data and metadata for all spells in context
     for (const spell of context.spells) {
       const stat = spell.system?.stat || 'int';
       const mod = context.system.abilities?.[stat]?.mod ?? 0;
@@ -2042,21 +2176,21 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // Roll / Cast Spell
     html.find('.roll-spell').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
+      const item = this.actor.items.get(itemId) || this._grantedSpells?.get(itemId);
       if (item) this.actor.rollSpell(item);
     });
 
     // Roll Spell Damage
     html.find('.roll-spell-dmg, .roll-spell-damage').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
+      const item = this.actor.items.get(itemId) || this._grantedSpells?.get(itemId);
       if (item) this.actor.rollSpellDamage(item);
     });
 
     // Roll Spell Attack / To Hit
     html.find('.roll-spell-hit').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
-      const item = this.actor.items.get(itemId);
+      const item = this.actor.items.get(itemId) || this._grantedSpells?.get(itemId);
       if (item) this.actor.rollSpellAttack(item);
     });
 
@@ -2293,15 +2427,20 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       ev.preventDefault();
       const itemId = $(ev.currentTarget).data('itemId');
       let item = this.actor.items.get?.(itemId) ||
-        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId)) ||
+        this._grantedSpells?.get(itemId);
 
-      // Fallback: check if it matches a compendium spell
+      // Fallback: check if it matches a compendium or granted spell
       if (!item && CONFIG.DCC?.spells) {
         const compSpell = CONFIG.DCC.spells.find(s => s._id === itemId || s.name === itemId);
         if (compSpell) {
-          const owned = this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim());
+          const owned = (this.actor.items.find ? this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim()) : null) ||
+            this._grantedSpells?.get(`granted-spell-${compSpell.name.toLowerCase().trim().replace(/\s+/g, '-')}`);
           item = owned;
         }
+      }
+      if (!item && this._grantedSpells) {
+        item = Array.from(this._grantedSpells.values()).find(s => s.id === itemId || s.name.toLowerCase().trim() === String(itemId).toLowerCase().trim());
       }
 
       if (item && typeof this.actor.rollSpell === 'function') {
@@ -2316,14 +2455,19 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       ev.preventDefault();
       const itemId = $(ev.currentTarget).data('itemId');
       let item = this.actor.items.get?.(itemId) ||
-        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId));
+        (Array.isArray(this.actor.items) ? this.actor.items.find(it => it.id === itemId) : this.actor.items.find?.(it => it.id === itemId)) ||
+        this._grantedSpells?.get(itemId);
 
       if (!item && CONFIG.DCC?.spells) {
         const compSpell = CONFIG.DCC.spells.find(s => s._id === itemId || s.name === itemId);
         if (compSpell) {
-          const owned = this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim());
+          const owned = (this.actor.items.find ? this.actor.items.find(s => s.name.toLowerCase().trim() === compSpell.name.toLowerCase().trim()) : null) ||
+            this._grantedSpells?.get(`granted-spell-${compSpell.name.toLowerCase().trim().replace(/\s+/g, '-')}`);
           item = owned;
         }
+      }
+      if (!item && this._grantedSpells) {
+        item = Array.from(this._grantedSpells.values()).find(s => s.id === itemId || s.name.toLowerCase().trim() === String(itemId).toLowerCase().trim());
       }
 
       if (item && typeof this.actor.rollSpellDamage === 'function') {

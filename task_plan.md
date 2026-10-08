@@ -1,26 +1,28 @@
-# Task Plan: Advancement Milestones (Rank 5, 10, 15, 20) UI & Calculation Synchronization
+# Task Plan: Character Item Advancement UI & Calculation Refactor
 
-- [x] **Investigation**:
-  - Identified root cause: Spells in `src/data/spells.mjs` and skills in `src/data/skills.mjs` historically stored advancements only as unstructured text in `upgrades` (either objects with `rank5`, `rank10`, `rank15` string properties or multiline strings).
-  - The Item Sheet (`src/sheets/item-sheet.mjs`) expected structured `rankBreaks` objects (`damageDice`, `rankDamageDice`, `buffsResistances`, `debuff`, `notes`), leaving UI inputs empty.
-  - Runtime damage calculation previously parsed `upgrades` via regular expressions on the fly, creating risk of double-counting if `rankBreaks` was populated.
-  - Gear weapons scale through associated weapon proficiency skills (e.g., Bow, Longsword), so populating skill `rankBreaks` propagates to weapon scaling.
+## Status: COMPLETE (v2.4.25)
 
-- [x] **Data-Driven Hydration & Controller Update**:
-  - Implemented `parseUpgradeTextToRankBreak()` and `hydrateRankBreaks()` in `src/data/rank-dice.mjs` to parse legacy upgrade text into structured `rankBreaks` dynamically.
-  - Updated `DCCItemSheet._prepareContext()` in `src/sheets/item-sheet.mjs` to auto-hydrate `rankBreaks` on all existing and imported items.
-  - Updated `DCCItemSheet._updateObject()` to persist modified `rankBreaks` and sync `upgrades` while preserving existing notes.
+### Objectives & Results
+1. **Schema & Model Support**:
+   - Added structured `rankBreaks` (rank5, rank10, rank15, rank20) to `AttackDataModel` and `GearDataModel` schemas.
+   - Added `healingPerRound` to `BuffDataModel` and `damagePerRound` to `DebuffDataModel`.
+   - Fixed unclosed container markup in buff and debuff sheet templates (`templates/items/parts/buff.hbs`, `debuff.hbs`).
+   - Extended `DCCItemSheet` to hydrate, edit, and persist milestone rank breaks for attack and gear items.
 
-- [x] **Canonical Dataset & Compendium Packaging**:
-  - Updated all 54 spells in `src/data/spells.mjs` and all 121 skills in `src/data/skills.mjs` with explicit, canonical `rankBreaks` objects.
-  - Updated `buildSpells()` in `scripts/build-packs.mjs` to preserve `...spell.system` (including `rankBreaks`).
-  - Rebuilt all compendium packs via `scripts/build-packs.mjs`.
+2. **Gear Granting Skills & Spells**:
+   - Updated `DCCActor.prepareDerivedData` to process gear bonuses for spells alongside skills, calculating `itemBonus`, `modifiedRank`, and stat modifiers.
+   - Added `actor.getSpellRank(name)` and updated `actor.getSkillRank(name)` to resolve bonuses even for unowned granted abilities.
+   - Enhanced `DCCCrawlerSheet` to populate unowned spells granted by equipped gear (`this._grantedSpells`), rendering them in the Spells tab with `[EQUIPPED GEAR]` badges and wiring cast/damage actions on sheet and hotlist.
 
-- [x] **Actor Roll Calculation & Double-Counting Elimination**:
-  - Refactored `getSpellDamageData()`, `getSkillDamageData()`, and `_buildWeaponAttackProfile()` in `src/documents/actor.mjs` to prioritize structured `rankBreaks` and track processed tiers to guarantee zero double-counting.
-  - Used `Math.max` across `modifiedRank` and `sys.rank` in `getSkillDamageData()` for reliable rank scaling.
+3. **Buffs & Debuffs Attributes**:
+   - Verified stat modifiers, damage multipliers, damage type reductions, limb modifiers affecting hands limits, and advantage/disadvantage roll modifiers.
+   - Added `actor.getHealingOverTime()` and `actor.getDamageOverTime()` aggregation methods.
+   - Normalized `actor.getActiveBuffs()` across `buff1..buff3` and `slot1..slot3` naming schemes.
 
-- [x] **Verification**:
-  - Created automated test suite in `tests/rank-breaks-advancement.test.mjs` with 11 unit tests.
-  - Full test suite passing with 0 failures: `node --test tests/*.test.mjs` (943 tests passing across 167 suites).
-  - Version bumped to `2.4.24` in `system.json` and documented in `CHANGELOG.md`.
+4. **Weapons & Attack Advancement**:
+   - Verified multi-typed damage packets (`damageParts`).
+   - Enhanced `_buildWeaponAttackProfile()` and `rollAttack()` to resolve item-level `rankBreaks` directly from weapons/attacks.
+
+5. **Automated Verification**:
+   - Automated unit test suite `tests/item-attributes-advancement.test.mjs` (13 tests) covering all behaviors.
+   - All 956 tests across 173 test suites passing with 0 failures.

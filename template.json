@@ -327,6 +327,40 @@
       "effects": "",
       "optionalEffects": [],
       "selectedEffect": "",
+      "rankBreaks": {
+        "rank5": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank10": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank15": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank20": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        }
+      },
       "tags": []
     },
     "spell": {
@@ -439,6 +473,40 @@
       },
       "outcomes": [],
       "notes": "",
+      "rankBreaks": {
+        "rank5": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank10": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank15": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        },
+        "rank20": {
+          "damageDice": "",
+          "baseDiceCountMod": "",
+          "rankDamageDice": 0,
+          "buffsResistances": "",
+          "debuff": "",
+          "notes": ""
+        }
+      },
       "tags": []
     },
     "race": {

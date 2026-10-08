@@ -10,6 +10,7 @@ export class BuffDataModel extends BaseItemDataModel {
       buffType: new fields.StringField({ initial: 'stat' }),
       stat: new fields.StringField({ initial: 'str' }),
       value: new fields.NumberField({ initial: 2 }),
+      healingPerRound: new fields.StringField({ initial: '' }),
       damageMultiplier: new fields.NumberField({ initial: 1 }),
       damageType: new fields.StringField({ initial: '' }),
       rollModifierMode: new fields.StringField({ initial: 'none' }),

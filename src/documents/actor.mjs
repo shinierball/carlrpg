@@ -2061,7 +2061,7 @@ export class DCCActor extends BaseActor {
     const skillName = skillItem?.name || 'Skill';
     const rank = options.rank !== undefined
       ? Number(options.rank)
-      : (Number(skillItem?.modifiedRank ?? sys.modifiedRank ?? skillItem?.effectiveRank ?? sys.rank) || 0);
+      : Math.max(Number(skillItem?.modifiedRank) || 0, Number(sys.modifiedRank) || 0, Number(skillItem?.effectiveRank) || 0, Number(sys.rank) || 0);
 
     const rawNotes = sys.notes || '';
     let rawBaseDamage = (sys.baseDamage || '').trim();
@@ -2161,21 +2161,84 @@ export class DCCActor extends BaseActor {
     }
     const statMod = this.system?.abilities?.[statKey]?.mod ?? 0;
 
-    // Upgrades parsing
+    // Upgrades and Rank Breaks parsing (prioritize structured rankBreaks)
+    let extraRankDiceFromBreaks = 0;
+    const rankBreakExtraDamageDice = [];
+    const targetDebuffsFromBreaks = [];
+    const rankBreakBuffs = [];
+    const rankBreakNotes = [];
+    const processedSkillTiers = new Set();
+
+    if (sys.rankBreaks) {
+      const breaks = [
+        { thresh: 5, key: 'rank5', data: sys.rankBreaks.rank5, label: 'Rank 5' },
+        { thresh: 10, key: 'rank10', data: sys.rankBreaks.rank10, label: 'Rank 10' },
+        { thresh: 15, key: 'rank15', data: sys.rankBreaks.rank15, label: 'Rank 15' },
+        { thresh: 20, key: 'rank20', data: sys.rankBreaks.rank20, label: 'Rank 20' }
+      ];
+      for (const b of breaks) {
+        if (rank >= b.thresh && b.data) {
+          let tierHandled = false;
+          if (b.data.damageDice) {
+            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
+            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
+            if (dm && parseInt(dm[2], 10) === baseSides) {
+              baseCount += parseInt(dm[1], 10);
+              tierHandled = true;
+            } else if (cleanDice) {
+              rankBreakExtraDamageDice.push(cleanDice);
+              tierHandled = true;
+            }
+          }
+          if (b.data.baseDiceCountMod) {
+            const m = parseInt(String(b.data.baseDiceCountMod).replace('+', ''), 10);
+            if (Number.isFinite(m)) {
+              baseCount += m;
+              tierHandled = true;
+            }
+          }
+          if (b.data.rankDamageDice) {
+            extraRankDiceFromBreaks += Number(b.data.rankDamageDice) || 0;
+            tierHandled = true;
+          }
+          if (b.data.debuff && !targetDebuffsFromBreaks.includes(b.data.debuff)) {
+            targetDebuffsFromBreaks.push(b.data.debuff);
+            tierHandled = true;
+          }
+          if (b.data.buffsResistances) {
+            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
+            tierHandled = true;
+          }
+          if (b.data.notes) {
+            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
+            if (b.thresh === 15) {
+              const multMatch = b.data.notes.match(/base damage\s*[×x*]\s*(\d+)/i) || b.data.notes.match(/(\d+)\s*[×x*]\s*base damage/i);
+              if (multMatch) {
+                baseCount *= parseInt(multMatch[1], 10);
+                tierHandled = true;
+              }
+            }
+          }
+          if (tierHandled) processedSkillTiers.add(b.key);
+        }
+      }
+    }
+
+    // Secondary fallback: only parse legacy string upgrades if not already handled by structured rankBreaks
     const upgrades = parseUpgrades(sys.upgrades);
-    if (rank >= 5 && upgrades.rank5) {
+    if (rank >= 5 && upgrades.rank5 && !processedSkillTiers.has('rank5')) {
       const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
       if (u5 && parseInt(u5[2], 10) === baseSides) {
         baseCount += parseInt(u5[1], 10);
       }
     }
-    if (rank >= 10 && upgrades.rank10) {
+    if (rank >= 10 && upgrades.rank10 && !processedSkillTiers.has('rank10')) {
       const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)\s+base damage/i);
       if (u10 && parseInt(u10[2], 10) === baseSides) {
         baseCount += parseInt(u10[1], 10);
       }
     }
-    if (rank >= 15 && upgrades.rank15) {
+    if (rank >= 15 && upgrades.rank15 && !processedSkillTiers.has('rank15')) {
       const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
       if (u15 && parseInt(u15[2], 10) === baseSides) {
         baseCount += parseInt(u15[1], 10);
@@ -2183,47 +2246,6 @@ export class DCCActor extends BaseActor {
       const multMatch = upgrades.rank15.match(/base damage\s*[×x*]\s*(\d+)/i) || upgrades.rank15.match(/(\d+)\s*[×x*]\s*base damage/i);
       if (multMatch) {
         baseCount *= parseInt(multMatch[1], 10);
-      }
-    }
-
-    // Rank Breaks configuration parsing (Ranks 5, 10, 15, 20)
-    let extraRankDiceFromBreaks = 0;
-    const rankBreakExtraDamageDice = [];
-    const targetDebuffsFromBreaks = [];
-    const rankBreakBuffs = [];
-    const rankBreakNotes = [];
-
-    if (sys.rankBreaks) {
-      const breaks = [
-        { thresh: 5, data: sys.rankBreaks.rank5, label: 'Rank 5' },
-        { thresh: 10, data: sys.rankBreaks.rank10, label: 'Rank 10' },
-        { thresh: 15, data: sys.rankBreaks.rank15, label: 'Rank 15' },
-        { thresh: 20, data: sys.rankBreaks.rank20, label: 'Rank 20' }
-      ];
-      for (const b of breaks) {
-        if (rank >= b.thresh && b.data) {
-          if (b.data.damageDice) {
-            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
-            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
-            if (dm && parseInt(dm[2], 10) === baseSides) {
-              baseCount += parseInt(dm[1], 10);
-            } else if (cleanDice) {
-              rankBreakExtraDamageDice.push(cleanDice);
-            }
-          }
-          if (b.data.rankDamageDice) {
-            extraRankDiceFromBreaks += Number(b.data.rankDamageDice) || 0;
-          }
-          if (b.data.debuff && !targetDebuffsFromBreaks.includes(b.data.debuff)) {
-            targetDebuffsFromBreaks.push(b.data.debuff);
-          }
-          if (b.data.buffsResistances) {
-            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
-          }
-          if (b.data.notes) {
-            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
-          }
-        }
       }
     }
 
@@ -2647,48 +2669,55 @@ export class DCCActor extends BaseActor {
     let upgradedDice = '';
     let extraWeaponRankDiceCount = 0;
     if (matchingSkill && skillRank >= 5) {
-      const upgrades = parseUpgrades(matchingSkill.system?.upgrades);
       const baseDiceStr = sys.damageDice || sys.damageParts?.[0]?.dice || '';
       const dm = baseDiceStr.match(/(\d+)d(\d+)/i);
       if (dm) {
         let count = parseInt(dm[1], 10);
         const sides = parseInt(dm[2], 10);
-        if (skillRank >= 5 && upgrades.rank5) {
-          const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
-          if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
-        }
-        if (skillRank >= 10 && upgrades.rank10) {
-          const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)\s+base damage/i);
-          if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
-        }
-        if (skillRank >= 15 && upgrades.rank15) {
-          const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
-          if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
-        }
+        const processedWeaponTiers = new Set();
 
-        // Rank Breaks scaling
+        // 1. Structured Rank Breaks scaling (primary)
         const rb = matchingSkill.system?.rankBreaks;
         if (rb) {
           const breaks = [
-            { thresh: 5, data: rb.rank5 },
-            { thresh: 10, data: rb.rank10 },
-            { thresh: 15, data: rb.rank15 },
-            { thresh: 20, data: rb.rank20 }
+            { thresh: 5, key: 'rank5', data: rb.rank5 },
+            { thresh: 10, key: 'rank10', data: rb.rank10 },
+            { thresh: 15, key: 'rank15', data: rb.rank15 },
+            { thresh: 20, key: 'rank20', data: rb.rank20 }
           ];
           for (const b of breaks) {
             if (skillRank >= b.thresh && b.data) {
+              let handled = false;
               if (b.data.damageDice) {
                 const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
                 const mDice = cleanDice.match(/^(\d+)d(\d+)$/i);
                 if (mDice && parseInt(mDice[2], 10) === sides) {
                   count += parseInt(mDice[1], 10);
+                  handled = true;
                 }
               }
               if (b.data.rankDamageDice) {
                 extraWeaponRankDiceCount += Number(b.data.rankDamageDice) || 0;
+                handled = true;
               }
+              if (handled) processedWeaponTiers.add(b.key);
             }
           }
+        }
+
+        // 2. Secondary fallback for legacy upgrades
+        const upgrades = parseUpgrades(matchingSkill.system?.upgrades);
+        if (skillRank >= 5 && upgrades.rank5 && !processedWeaponTiers.has('rank5')) {
+          const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
+        }
+        if (skillRank >= 10 && upgrades.rank10 && !processedWeaponTiers.has('rank10')) {
+          const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
+        }
+        if (skillRank >= 15 && upgrades.rank15 && !processedWeaponTiers.has('rank15')) {
+          const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)\s+base damage/i);
+          if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
         }
 
         upgradedDice = `${count}d${sides}`;
@@ -3264,13 +3293,14 @@ export class DCCActor extends BaseActor {
     return attacks;
   }
 
-  _buildWeaponAttackProfile(item, skills, primedTechs = []) {
+  _buildWeaponAttackProfile(item, skills = (this.items?.filter(i => i.type === 'skill') || []), primedTechs = []) {
     const sys = item.system || {};
     const normName = (item.name || '').toLowerCase().trim();
     const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+    const skillList = Array.isArray(skills) ? skills : (this.items?.filter(i => i.type === 'skill') || []);
     
     // 4-layer matching for primary skill
-    const matchedSkills = skills.filter(s => {
+    const matchedSkills = skillList.filter(s => {
       const sName = s.name.toLowerCase().trim();
       if (sName === normName) return true;
       if (associated.some(as => as.toLowerCase().trim() === sName)) return true;
@@ -4644,22 +4674,81 @@ export class DCCActor extends BaseActor {
       }
     }
 
-    const rawUpgrades = sys.upgrades || {};
-    const upgrades = parseUpgrades(rawUpgrades);
+    // 1. Structured Rank Breaks configuration parsing (Ranks 5, 10, 15, 20) (primary)
+    let extraSpellRankDice = 0;
+    const rankBreakExtraDice = [];
+    const rankBreakBuffs = [];
+    const rankBreakNotes = [];
+    const processedSpellTiers = new Set();
 
     if (diceMatch) {
       count = parseInt(diceMatch[1], 10);
       sides = parseInt(diceMatch[2], 10);
+    }
 
-      // Check rank upgrades for bonus damage dice and effects
-      if (rank >= 5 && upgrades.rank5) {
+    if (sys.rankBreaks) {
+      const breaks = [
+        { thresh: 5, key: 'rank5', data: sys.rankBreaks.rank5, label: 'Rank 5' },
+        { thresh: 10, key: 'rank10', data: sys.rankBreaks.rank10, label: 'Rank 10' },
+        { thresh: 15, key: 'rank15', data: sys.rankBreaks.rank15, label: 'Rank 15' },
+        { thresh: 20, key: 'rank20', data: sys.rankBreaks.rank20, label: 'Rank 20' }
+      ];
+      for (const b of breaks) {
+        if (rank >= b.thresh && b.data) {
+          let tierHandled = false;
+          if (b.data.damageDice) {
+            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
+            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
+            if (dm && sides && parseInt(dm[2], 10) === sides) {
+              count += parseInt(dm[1], 10);
+              tierHandled = true;
+            } else if (cleanDice) {
+              rankBreakExtraDice.push(cleanDice);
+              tierHandled = true;
+            }
+          }
+          if (b.data.rankDamageDice) {
+            extraSpellRankDice += Number(b.data.rankDamageDice) || 0;
+            tierHandled = true;
+          }
+          if (b.data.debuff && !debuffs.includes(b.data.debuff)) {
+            debuffs.push(b.data.debuff);
+            tierHandled = true;
+          }
+          if (b.data.buffsResistances) {
+            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
+            tierHandled = true;
+          }
+          if (b.data.notes) {
+            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
+            if (b.thresh === 15) {
+              const multMatch = b.data.notes.match(/multiply\s+(?:the\s+)?base damage(?:\s+dice)?\s+by\s+(\d+)/i) ||
+                b.data.notes.match(/base damage(?:\s+dice)?\s*(?:multiplied by|[×x*])\s*(\d+)/i) ||
+                b.data.notes.match(/(\d+)\s*[×x*]\s*base damage/i);
+              if (multMatch) {
+                count *= parseInt(multMatch[1], 10);
+                tierHandled = true;
+              }
+            }
+          }
+          if (tierHandled) processedSpellTiers.add(b.key);
+        }
+      }
+    }
+
+    // 2. Secondary fallback: check legacy rank upgrades if tier not already handled by structured rankBreaks
+    const rawUpgrades = sys.upgrades || {};
+    const upgrades = parseUpgrades(rawUpgrades);
+
+    if (diceMatch) {
+      if (rank >= 5 && upgrades.rank5 && !processedSpellTiers.has('rank5')) {
         const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)/i);
         if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
         if (/Burned Debuff/i.test(upgrades.rank5)) {
           debuffs.push(/1\s*or\s*more\s*Health\s*Bar/i.test(upgrades.rank5) ? 'Burned (on 1+ HB loss)' : 'Burned');
         }
       }
-      if (rank >= 10 && upgrades.rank10) {
+      if (rank >= 10 && upgrades.rank10 && !processedSpellTiers.has('rank10')) {
         const u10 = upgrades.rank10.match(/\+(\d+)d(\d+)/i);
         if (u10 && parseInt(u10[2], 10) === sides) count += parseInt(u10[1], 10);
         if (/Force and Fire/i.test(upgrades.rank10)) {
@@ -4669,7 +4758,7 @@ export class DCCActor extends BaseActor {
           debuffs.push('Burned');
         }
       }
-      if (rank >= 15 && upgrades.rank15) {
+      if (rank >= 15 && upgrades.rank15 && !processedSpellTiers.has('rank15')) {
         const u15 = upgrades.rank15.match(/\+(\d+)d(\d+)/i);
         if (u15 && parseInt(u15[2], 10) === sides) count += parseInt(u15[1], 10);
         const multMatch = upgrades.rank15.match(/multiply\s+(?:the\s+)?base damage(?:\s+dice)?\s+by\s+(\d+)/i) ||
@@ -4680,46 +4769,6 @@ export class DCCActor extends BaseActor {
         }
         if (/Burned Debuff/i.test(upgrades.rank15) && !debuffs.includes('Burned')) {
           debuffs.push('Burned');
-        }
-      }
-    }
-
-    // Rank Breaks configuration parsing (Ranks 5, 10, 15, 20)
-    let extraSpellRankDice = 0;
-    const rankBreakExtraDice = [];
-    const rankBreakBuffs = [];
-    const rankBreakNotes = [];
-
-    if (sys.rankBreaks) {
-      const breaks = [
-        { thresh: 5, data: sys.rankBreaks.rank5, label: 'Rank 5' },
-        { thresh: 10, data: sys.rankBreaks.rank10, label: 'Rank 10' },
-        { thresh: 15, data: sys.rankBreaks.rank15, label: 'Rank 15' },
-        { thresh: 20, data: sys.rankBreaks.rank20, label: 'Rank 20' }
-      ];
-      for (const b of breaks) {
-        if (rank >= b.thresh && b.data) {
-          if (b.data.damageDice) {
-            const cleanDice = b.data.damageDice.replace(/^\+/, '').trim();
-            const dm = cleanDice.match(/^(\d+)d(\d+)$/i);
-            if (dm && sides && parseInt(dm[2], 10) === sides) {
-              count += parseInt(dm[1], 10);
-            } else if (cleanDice) {
-              rankBreakExtraDice.push(cleanDice);
-            }
-          }
-          if (b.data.rankDamageDice) {
-            extraSpellRankDice += Number(b.data.rankDamageDice) || 0;
-          }
-          if (b.data.debuff && !debuffs.includes(b.data.debuff)) {
-            debuffs.push(b.data.debuff);
-          }
-          if (b.data.buffsResistances) {
-            rankBreakBuffs.push(`${b.label}: ${b.data.buffsResistances}`);
-          }
-          if (b.data.notes) {
-            rankBreakNotes.push(`${b.label}: ${b.data.notes}`);
-          }
         }
       }
     }

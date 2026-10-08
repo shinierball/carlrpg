@@ -3,6 +3,7 @@ import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { getRecommendedAssociatedSkills, getRecommendedOptionalEffects } from '../data/weapon-associations.mjs';
+import { hydrateRankBreaks } from '../data/rank-dice.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller
@@ -499,26 +500,11 @@ export class DCCItemSheet extends BaseItemSheet {
 
     // Prepare Rank Breaks configuration for skills and spells (Ranks 5, 10, 15, 20)
     if (['skill', 'spell'].includes(context.item.type)) {
-      if (!context.system.rankBreaks) context.system.rankBreaks = {};
-      for (const rKey of ['rank5', 'rank10', 'rank15', 'rank20']) {
-        if (!context.system.rankBreaks[rKey]) {
-          context.system.rankBreaks[rKey] = {
-            damageDice: '',
-            baseDiceCountMod: '',
-            rankDamageDice: 0,
-            buffsResistances: '',
-            debuff: '',
-            notes: ''
-          };
-        } else {
-          context.system.rankBreaks[rKey].damageDice = context.system.rankBreaks[rKey].damageDice || '';
-          context.system.rankBreaks[rKey].baseDiceCountMod = context.system.rankBreaks[rKey].baseDiceCountMod || '';
-          context.system.rankBreaks[rKey].rankDamageDice = Number(context.system.rankBreaks[rKey].rankDamageDice) || 0;
-          context.system.rankBreaks[rKey].buffsResistances = context.system.rankBreaks[rKey].buffsResistances || '';
-          context.system.rankBreaks[rKey].debuff = context.system.rankBreaks[rKey].debuff || '';
-          context.system.rankBreaks[rKey].notes = context.system.rankBreaks[rKey].notes || (context.system.upgrades?.[rKey] || '');
-        }
-      }
+      context.system.rankBreaks = hydrateRankBreaks(
+        context.system.rankBreaks,
+        context.system.upgrades,
+        context.availableDebuffs?.map(d => d.name)
+      );
     }
 
     if (context.item.type === 'skill') {
@@ -833,13 +819,14 @@ export class DCCItemSheet extends BaseItemSheet {
         const cleanedBreaks = {};
         for (const rKey of ['rank5', 'rank10', 'rank15', 'rank20']) {
           const raw = expanded.system.rankBreaks[rKey] || {};
+          const existingBreak = this.item.system?.rankBreaks?.[rKey] || {};
           cleanedBreaks[rKey] = {
-            damageDice: (raw.damageDice || '').trim(),
-            baseDiceCountMod: (raw.baseDiceCountMod || '').trim(),
-            rankDamageDice: parseInt(raw.rankDamageDice, 10) || 0,
-            buffsResistances: (raw.buffsResistances || '').trim(),
-            debuff: (raw.debuff || '').trim(),
-            notes: (raw.notes || '').trim()
+            damageDice: raw.damageDice !== undefined ? raw.damageDice.trim() : (existingBreak.damageDice || ''),
+            baseDiceCountMod: raw.baseDiceCountMod !== undefined ? raw.baseDiceCountMod.trim() : (existingBreak.baseDiceCountMod || ''),
+            rankDamageDice: raw.rankDamageDice !== undefined ? (parseInt(raw.rankDamageDice, 10) || 0) : (existingBreak.rankDamageDice || 0),
+            buffsResistances: raw.buffsResistances !== undefined ? raw.buffsResistances.trim() : (existingBreak.buffsResistances || ''),
+            debuff: raw.debuff !== undefined ? raw.debuff.trim() : (existingBreak.debuff || ''),
+            notes: (raw.notes !== undefined && raw.notes.trim() !== '') ? raw.notes.trim() : (existingBreak.notes || '')
           };
         }
         for (const key of Object.keys(formData)) {
@@ -851,11 +838,21 @@ export class DCCItemSheet extends BaseItemSheet {
 
         // Keep legacy upgrades synchronized
         if (this.item.type === 'spell' && !formData['system.upgrades']) {
+          const existingUpgrades = this.item.system?.upgrades || {};
+          const formatUpgradeSummary = (b, existing) => {
+            if (b.notes) return b.notes;
+            const parts = [];
+            if (b.damageDice) parts.push(`+${b.damageDice.replace(/^\+/, '')} base damage`);
+            if (b.rankDamageDice) parts.push(`and ${b.rankDamageDice} Rank damage die`);
+            if (b.debuff) parts.push(`and target gains the ${b.debuff} Debuff`);
+            if (parts.length > 0) return parts.join(', ') + '.';
+            return existing || '';
+          };
           formData['system.upgrades'] = {
-            rank5: cleanedBreaks.rank5.notes,
-            rank10: cleanedBreaks.rank10.notes,
-            rank15: cleanedBreaks.rank15.notes,
-            rank20: cleanedBreaks.rank20.notes
+            rank5: formatUpgradeSummary(cleanedBreaks.rank5, existingUpgrades.rank5),
+            rank10: formatUpgradeSummary(cleanedBreaks.rank10, existingUpgrades.rank10),
+            rank15: formatUpgradeSummary(cleanedBreaks.rank15, existingUpgrades.rank15),
+            rank20: formatUpgradeSummary(cleanedBreaks.rank20, existingUpgrades.rank20)
           };
         }
       }

@@ -129,7 +129,8 @@ async function buildSpells() {
           rank5: spell.system.upgrades?.rank5 || "",
           rank10: spell.system.upgrades?.rank10 || "",
           rank15: spell.system.upgrades?.rank15 || ""
-        }
+        },
+        ...spell.system
       },
       effects: [],
       folder: null,

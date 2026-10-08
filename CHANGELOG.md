@@ -1,3 +1,23 @@
+## 2.4.24
+
+### Advancement Milestones (Rank 5, 10, 15, 20) UI & Compendium Synchronization
+
+- **Item Sheet Advancement Milestones UI (`src/sheets/item-sheet.mjs`, `src/data/rank-dice.mjs`)**:
+  - Fixed issue where opening spells (such as *Dirt Clod*) or skills (such as *Pugilism*) to edit did not display their Rank 5, 10, and 15 milestone configurations in the Item Sheet UI.
+  - Implemented data-driven `hydrateRankBreaks()` and `parseUpgradeTextToRankBreak()` to automatically parse and populate structured `rankBreaks` (including `damageDice`, `rankDamageDice`, `debuff`, `buffsResistances`, and `notes`) for any existing, embedded, or custom items in `DCCItemSheet._prepareContext()`.
+  - Updated `_updateObject()` to persist modified `rankBreaks` and keep legacy `upgrades` synchronized without inadvertently erasing existing notes or milestone descriptions.
+- **Canonical Datasets & Compendium Packaging (`src/data/spells.mjs`, `src/data/skills.mjs`, `scripts/build-packs.mjs`)**:
+  - Upgraded all 54 spells in `DCC_SPELLS` and all 121 skills in `DCC_SKILLS` with explicit, canonical `rankBreaks` objects containing typed damage dice, rank damage dice, debuff inflictions, and milestone notes.
+  - Updated `buildSpells()` in `scripts/build-packs.mjs` to spread `...spell.system`, preserving `rankBreaks`, `damageModifiers`, `optionalEffects`, and advanced schema fields in the compiled compendium packs.
+  - Successfully rebuilt all compendium packs (`packs/spells`, `packs/skills`).
+- **Actor Damage Roll Scaling & Double-Counting Prevention (`src/documents/actor.mjs`)**:
+  - Refactored `getSpellDamageData()`, `getSkillDamageData()`, and `_buildWeaponAttackProfile()` to prioritize structured `rankBreaks` as the primary source of truth.
+  - Implemented processed tier tracking (`processedSpellTiers`, `processedSkillTiers`) to guarantee each rank milestone tier is applied exactly once, preventing double-counting between structured `rankBreaks` and legacy upgrade strings.
+  - Corrected skill rank resolution in `getSkillDamageData()` using `Math.max` across `modifiedRank` and `sys.rank`, ensuring rank scaling is accurately applied even if derived properties are unprimed.
+- **Automated Verification (`tests/rank-breaks-advancement.test.mjs`)**:
+  - Added 11 automated unit tests verifying canonical spell and skill datasets, Item Sheet UI context, editing and persistence in `_updateObject()`, cumulative damage scaling across Ranks 1, 5, 10, 15, and zero double-counting.
+  - All 943 unit tests passing with 0 failures.
+
 ## 2.4.22
 
 ### Compendium Skill Validation & Canonical Damage Effects Alignment

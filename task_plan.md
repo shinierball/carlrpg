@@ -1,27 +1,26 @@
-- # Task Plan: Wrasslin Attack Integration & Compendium Skill Validation
+# Task Plan: Advancement Milestones (Rank 5, 10, 15, 20) UI & Calculation Synchronization
 
-## User Request
-- "I can't seem to get wrasslin added as an attack on the character sheet. It is an attack action, how do I get it added?"
+- [x] **Investigation**:
+  - Identified root cause: Spells in `src/data/spells.mjs` and skills in `src/data/skills.mjs` historically stored advancements only as unstructured text in `upgrades` (either objects with `rank5`, `rank10`, `rank15` string properties or multiline strings).
+  - The Item Sheet (`src/sheets/item-sheet.mjs`) expected structured `rankBreaks` objects (`damageDice`, `rankDamageDice`, `buffsResistances`, `debuff`, `notes`), leaving UI inputs empty.
+  - Runtime damage calculation previously parsed `upgrades` via regular expressions on the fly, creating risk of double-counting if `rankBreaks` was populated.
+  - Gear weapons scale through associated weapon proficiency skills (e.g., Bow, Longsword), so populating skill `rankBreaks` propagates to weapon scaling.
 
-## Root Cause Diagnosed
-1. In `template.json`, skills have `"isAttack": false` and `"hasDamage": false` as schema defaults.
-2. In `src/apps/skill-manager.mjs`, when adding a skill to an actor via `addSkillToActor`, `toCreate` omitted `isAttack`, `hasDamage`, `baseDamage`, `damageStat`, `damageType`, and `optionalEffects`. Foundry merged with `template.json` defaults, leaving `isAttack: false` on the created item.
-3. In `src/documents/actor.mjs` line 3239, `getSynthesizedAttacks()` checked `if (sys.isAttack === false) return false;`. Because `sys.isAttack` defaulted to `false`, canonical strike/unarmed attack skills (like Wrasslin) were immediately rejected and never reached the `isKnownUnarmed` check.
-4. In `src/documents/actor.mjs` line 2094, `getSkillDamageData()` checked `explicitNoDamage = sys.hasDamage === false...`, which marked `hasDamage: false` if `sys.hasDamage` was `false` from `template.json`.
-5. In `templates/actors/parts/page1-core.hbs`, the ATTACKS header only had `Add Attack` (which created a blank "New Attack" item) with no library picker to select known attack skills like Wrasslin.
+- [x] **Data-Driven Hydration & Controller Update**:
+  - Implemented `parseUpgradeTextToRankBreak()` and `hydrateRankBreaks()` in `src/data/rank-dice.mjs` to parse legacy upgrade text into structured `rankBreaks` dynamically.
+  - Updated `DCCItemSheet._prepareContext()` in `src/sheets/item-sheet.mjs` to auto-hydrate `rankBreaks` on all existing and imported items.
+  - Updated `DCCItemSheet._updateObject()` to persist modified `rankBreaks` and sync `upgrades` while preserving existing notes.
 
-## Resolution Implemented
-1. `src/apps/skill-manager.mjs`:
-   - Updated `getUnifiedSkills()` to index all system fields (`isAttack`, `isTechnique`, `hasDamage`, `baseDamage`, `damageStat`, `damageType`, `optionalEffects`, `techniqueConfig`, `upgrades`, `rankBreaks`).
-   - Updated `addSkillToActor` to spread `...(def.system || {})`, preserving all attack and damage definitions.
-   - Added support for `options.activeCategory` in `DCCSkillManager`.
-2. `src/documents/actor.mjs`:
-   - In `getSynthesizedAttacks()`, canonical unarmed/strike attack skills (`KNOWN_UNARMED`, including Wrasslin) bypass the `sys.isAttack === false` check, allowing them to synthesize into the Attacks table even if `isAttack: false` was set by schema defaults or legacy data.
-   - In `getSkillDamageData()`, `isPrimaryAttack` protects against `explicitNoDamage`, ensuring Wrasslin calculates base damage (`1d4`), stat mod (`STR`), and rank damage dice.
-   - In `_buildSkillAttackProfile()`, set `name` and `displayName` cleanly to `skill.name` (preserving `Pugilism (Unarmed)` for backwards compatibility).
-3. `templates/actors/parts/page1-core.hbs` & `src/sheets/crawler-sheet.mjs`:
-   - Added a `Select Attack` link in the ATTACKS banner header (`<a class="open-skill-picker" data-category="combat">`) next to `Add Attack`.
-   - Updated `_openSkillPicker(activeCategory)` to pre-filter `DCCSkillManager` to Combat skills when opened from the Attacks section.
-4. Verification:
-   - Added automated tests 11 & 12 in `tests/attack-vs-technique-classification.test.mjs`.
-   - All 932 tests across 163 suites pass with 0 failures (`node --test tests/*.test.mjs`).
+- [x] **Canonical Dataset & Compendium Packaging**:
+  - Updated all 54 spells in `src/data/spells.mjs` and all 121 skills in `src/data/skills.mjs` with explicit, canonical `rankBreaks` objects.
+  - Updated `buildSpells()` in `scripts/build-packs.mjs` to preserve `...spell.system` (including `rankBreaks`).
+  - Rebuilt all compendium packs via `scripts/build-packs.mjs`.
+
+- [x] **Actor Roll Calculation & Double-Counting Elimination**:
+  - Refactored `getSpellDamageData()`, `getSkillDamageData()`, and `_buildWeaponAttackProfile()` in `src/documents/actor.mjs` to prioritize structured `rankBreaks` and track processed tiers to guarantee zero double-counting.
+  - Used `Math.max` across `modifiedRank` and `sys.rank` in `getSkillDamageData()` for reliable rank scaling.
+
+- [x] **Verification**:
+  - Created automated test suite in `tests/rank-breaks-advancement.test.mjs` with 11 unit tests.
+  - Full test suite passing with 0 failures: `node --test tests/*.test.mjs` (943 tests passing across 167 suites).
+  - Version bumped to `2.4.24` in `system.json` and documented in `CHANGELOG.md`.

@@ -98,6 +98,103 @@ export function parseUpgrades(upgrades) {
 }
 
 /**
+ * Convert an unstructured milestone upgrade text into a structured rankBreak object.
+ * Extracts damageDice, baseDiceCountMod, rankDamageDice, debuff, buffsResistances, and notes.
+ *
+ * @param {string} text
+ * @param {string[]} [knownDebuffs=[]]
+ * @returns {{ damageDice: string, baseDiceCountMod: string, rankDamageDice: number, buffsResistances: string, debuff: string, notes: string }}
+ */
+export function parseUpgradeTextToRankBreak(text, knownDebuffs = []) {
+  const result = {
+    damageDice: '',
+    baseDiceCountMod: '',
+    rankDamageDice: 0,
+    buffsResistances: '',
+    debuff: '',
+    notes: ''
+  };
+  if (!text || typeof text !== 'string') return result;
+  const t = text.trim();
+  if (!t) return result;
+  result.notes = t;
+
+  // 1. Additional Damage Dice (e.g. +2d2 base damage, +1d6, 1d12 base damage)
+  const dmg = t.match(/\+(\d+d\d+)(?:\s+(?:base\s+)?damage)?/i) || t.match(/(\d+d\d+)\s+(?:base\s+)?damage/i);
+  if (dmg) {
+    result.damageDice = dmg[1];
+  }
+
+  // 2. Base Dice Count Mod (e.g. base dice count +1, etc.)
+  const countMod = t.match(/base\s+dice\s+count\s*([+-]\d+)/i);
+  if (countMod) {
+    result.baseDiceCountMod = countMod[1];
+  }
+
+  // 3. Rank Damage Dice (e.g. 1 Rank damage die, add 1 Rank damage die)
+  const rDie = t.match(/(\d+)\s+Rank\s+damage\s+di[ec]/i) || t.match(/add\s+(?:one|1)\s+.*Rank\s+damage\s+di[ec]/i);
+  if (rDie && !t.includes("Misc Junk")) {
+    result.rankDamageDice = rDie[1] ? parseInt(rDie[1], 10) : 1;
+  }
+
+  // 4. Debuff match against known canonical debuffs (data-driven)
+  const debuffList = Array.isArray(knownDebuffs) && knownDebuffs.length > 0 ? knownDebuffs : [
+    'Woozy', 'Queasy', 'Burned', 'Shocked', 'Stunned', 'Bleeding', 'Poisoned', 'Held', 'Stiff Legs',
+    'The Taint', 'Sore as Shit', 'Muted', 'Take Down', 'Fatigued', 'Exhausted', 'Frightened', 'Prone',
+    'Blinded', 'Reduced Sight', 'Terrified', 'Staggered', 'Shakey', 'Frozen', 'Crippled',
+    'Minor Injury', 'Major Injury', 'Blood Trail', 'Drowning', 'Dying', 'Enraged',
+    'Long-Term Major Injury', 'Long-Term Minor Injury', 'Paralyzed', 'Sepsis', 'Shit-Faced'
+  ];
+  for (const dName of debuffList) {
+    const regex = new RegExp(`\\b${dName}\\b(?:\\s+Debuff)?`, 'i');
+    if (regex.test(t)) {
+      const isHealing = new RegExp(`(?:heal|mend|remove|cure|end|avoid)\\w*\\s+(?:an?\\s+)?(?:Long-Term\\s+)?(?:Minor\\s+Injury|Major\\s+Injury|${dName})`, 'i').test(t);
+      const isHeldItems = dName.toLowerCase() === 'held' && /held\s+items?/i.test(t);
+      if (!isHealing && !isHeldItems) {
+        result.debuff = dName;
+        break;
+      }
+    }
+  }
+
+  // 5. Buffs / Resistances
+  const buff = t.match(/([A-Za-z\s]+?\s+Resistance|\+\d+\s+DR|\+\d+\s+[A-Z]{3}|\bDR\s*\+\s*\d+)/i);
+  if (buff) {
+    result.buffsResistances = buff[1].trim();
+  }
+
+  return result;
+}
+
+/**
+ * Hydrate rankBreaks with structured properties derived from upgrades when rankBreaks is incomplete.
+ * @param {object} [existingRankBreaks={}]
+ * @param {object|string} [rawUpgrades={}]
+ * @param {string[]} [knownDebuffs=[]]
+ * @returns {object} Fully populated rankBreaks object with rank5, rank10, rank15, rank20
+ */
+export function hydrateRankBreaks(existingRankBreaks = {}, rawUpgrades = {}, knownDebuffs = []) {
+  const breaks = {};
+  const upgrades = parseUpgrades(rawUpgrades);
+
+  for (const rKey of ['rank5', 'rank10', 'rank15', 'rank20']) {
+    const existing = existingRankBreaks?.[rKey] || {};
+    const parsed = parseUpgradeTextToRankBreak(upgrades[rKey] || '', knownDebuffs);
+
+    breaks[rKey] = {
+      damageDice: existing.damageDice !== undefined && existing.damageDice !== '' ? String(existing.damageDice).trim() : parsed.damageDice,
+      baseDiceCountMod: existing.baseDiceCountMod !== undefined && existing.baseDiceCountMod !== '' ? String(existing.baseDiceCountMod).trim() : parsed.baseDiceCountMod,
+      rankDamageDice: existing.rankDamageDice !== undefined && Number(existing.rankDamageDice) > 0 ? Number(existing.rankDamageDice) : parsed.rankDamageDice,
+      buffsResistances: existing.buffsResistances !== undefined && existing.buffsResistances !== '' ? String(existing.buffsResistances).trim() : parsed.buffsResistances,
+      debuff: existing.debuff !== undefined && existing.debuff !== '' ? String(existing.debuff).trim() : parsed.debuff,
+      notes: existing.notes !== undefined && existing.notes !== '' ? String(existing.notes).trim() : (parsed.notes || '')
+    };
+  }
+
+  return breaks;
+}
+
+/**
  * Standard Evade difficulty formula:
  * Target Evade (Standard Difficulty) = 10 + Foe Dex Mod + Floor Number
  * @param {number} [foeDexMod=0]

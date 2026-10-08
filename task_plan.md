@@ -1,28 +1,42 @@
-# Task Plan: Character Item Advancement UI & Calculation Refactor
+- The boring old mage class in the compendium has a few issues.  These are probably common for classes and we should make another sweep of them. 
+  - +3 in a fire spell should trigger the choice of a fire spell. Currently it adds a spell at Rank 3 called "a fire". This is not what is intended  I'm guessing we are not tagging spells correctly or at all.  For instance Fireball should have the following tags. "Attack, Fire, Area of Effect" which can be seen in the spell definition in the rulebook which looks like 
+        "Fireball
+        “It almost reluctantly meanders toward you. Then
+        your world explodes.”
+        Attack, Fire, Area of Effect
+        Mana Cost: 45
+        Range: 80 feet
+        Cooldown: Once per scene
+        A creeping beach ball-sized sphere of fire emanates
+        from you. Since it moves so slowly, your attack is
+        made with Disadvantage. When the impact zone has
+        been determined, each creature in a 10ft Blast radius
+        takes full damage.
+        On Fail, roll 1d8 for direction (see Figure 3, p. 200). The
+        amount the Skill Check missed by is the distance away
+        in feet it impacts.
+        Base Damage: 1d12 + Int Fire, 10ft Blast radius
+        UPGRADES
+        Rank 5: +1d12 base damage. Those who lose 1 or more
+        Health Bar slots via this attack gain the Burned Debuff.
+        Rank 10: +1d12 base damage and becomes an 80ft
+        Line attack (and keeps the Blast).
+        Rank 15: +1d12 base damage and +40ft Splash (on
+        the Blast)."
 
-## Status: COMPLETE (v2.4.25)
+        This seems to be a recurring issue and we should look at how we classify skills, spells, and items in general. Lets talk
+- It did not parse the word Force correct and added a spell called "a Forc e" at rank 2 rather than giving a choice of force spell.
+- It added a spell at rank 2 called "2 different" rather than giving a choice of 2 different spells passive spells at rank 2.  It also did not parse the work passive correctly adding a space. 
 
-### Objectives & Results
-1. **Schema & Model Support**:
-   - Added structured `rankBreaks` (rank5, rank10, rank15, rank20) to `AttackDataModel` and `GearDataModel` schemas.
-   - Added `healingPerRound` to `BuffDataModel` and `damagePerRound` to `DebuffDataModel`.
-   - Fixed unclosed container markup in buff and debuff sheet templates (`templates/items/parts/buff.hbs`, `debuff.hbs`).
-   - Extended `DCCItemSheet` to hydrate, edit, and persist milestone rank breaks for attack and gear items.
+Come up with a plan for how to tag spells, abilities, items and what ever else so that we can easily associate and gather them by tag. For instance the Fireball spell above should have the tags "Spell", "Area of Effect", "Fire" 
+Dirt Cloud would have "Attack", "Bludgeoning"
+Drain Life would have "Attack", "Necrotic"
+Holy Aura is more complex with "Attack", "Holy", "Area of Effect", "Charisma", "Favored: Paladin", "Favored: Cleric"
 
-2. **Gear Granting Skills & Spells**:
-   - Updated `DCCActor.prepareDerivedData` to process gear bonuses for spells alongside skills, calculating `itemBonus`, `modifiedRank`, and stat modifiers.
-   - Added `actor.getSpellRank(name)` and updated `actor.getSkillRank(name)` to resolve bonuses even for unowned granted abilities.
-   - Enhanced `DCCCrawlerSheet` to populate unowned spells granted by equipped gear (`this._grantedSpells`), rendering them in the Spells tab with `[EQUIPPED GEAR]` badges and wiring cast/damage actions on sheet and hotlist.
+Favored spells cost less for casters with a class of that type.  Which points to classes also having tags. 
 
-3. **Buffs & Debuffs Attributes**:
-   - Verified stat modifiers, damage multipliers, damage type reductions, limb modifiers affecting hands limits, and advantage/disadvantage roll modifiers.
-   - Added `actor.getHealingOverTime()` and `actor.getDamageOverTime()` aggregation methods.
-   - Normalized `actor.getActiveBuffs()` across `buff1..buff3` and `slot1..slot3` naming schemes.
+The tagging system should be comprehensive and allow us to easily associate and gather items by tag.  It should be flexible enough to handle the complexities of the DCC rules while also being simple enough to use. When we create new entities (spells, classes, items of all types) we should have the ability to tag them with as many tags as we need to ensure they are properly categorized. 
 
-4. **Weapons & Attack Advancement**:
-   - Verified multi-typed damage packets (`damageParts`).
-   - Enhanced `_buildWeaponAttackProfile()` and `rollAttack()` to resolve item-level `rankBreaks` directly from weapons/attacks.
 
-5. **Automated Verification**:
-   - Automated unit test suite `tests/item-attributes-advancement.test.mjs` (13 tests) covering all behaviors.
-   - All 956 tests across 173 test suites passing with 0 failures.
+
+

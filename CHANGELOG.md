@@ -1,4 +1,26 @@
+## 2.4.26
+
+### Combat Technique Scoping, Effects Dropdown Harmonization & Skill Idempotence
+
+- **Combat Technique Scoping & Strict Applicability (`src/documents/actor.mjs`)**:
+  - Implemented `isTechniqueApplicable(tech, attackItem)`: strictly enforces official DCC RPG rules preventing *Unarmed Combat* from receiving damage effects or combat techniques.
+  - Restricted techniques like *Toss* to their associated skills (*Wrasslin*), preventing primed techniques from bleeding into unrelated weapons or unarmed attacks.
+  - Updated `_applyTechniquesToDamageParts()`, `rollAttack()`, and `getSynthesizedAttacks()` to filter active and primed techniques via `isTechniqueApplicable()`.
+- **Effects Dropdown Scoping & Priming Harmonization (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`)**:
+  - Added `actor.getSelectableDamageEffects(attackItem)` which filters valid effects down to those the crawler actually knows or possesses via equipped gear.
+  - Updated crawler sheet attack roster (`page1-core.hbs`) to populate the damage effect dropdown from `selectableDamageEffects`, ensuring crawlers only see effects they have unlocked.
+  - Synchronized dropdown selection with priming: selecting an effect immediately updates `displayDamage` and passes `selectedEffect` to `rollAttack()` without prompting an extraneous modal dialog.
+  - Added immediate re-render on `.attack-damage-effect-select` change listener.
+- **Damage Formula Formatting Cleanup (`src/documents/actor.mjs`)**:
+  - Cleaned formula token construction in `_buildWeaponAttackProfile()` and `_buildSkillAttackProfile()`, eliminating duplicate `+` signs (`+ +`) and duplicate stat modifier additions.
+- **Skill Document Idempotence (`src/documents/actor.mjs`)**:
+  - Enhanced `DCCActor.createEmbeddedDocuments()` for `Item` types: when adding a skill that the crawler already possesses, the system deduplicates by retaining the higher rank and upgrading the existing skill document rather than creating redundant duplicates.
+- **Automated Verification (`tests/combat-technique-attack-associations.test.mjs`)**:
+  - Added comprehensive test suite with 10 unit tests covering technique scoping, primed Toss restriction, selectable effects dropdown filtering, dropdown-to-roll harmonization, formula formatting, and skill idempotence.
+  - All 966 unit tests across 179 suites passing with 0 failures.
+
 ## 2.4.25
+
 
 ### Character Item Advancement UI & Calculation Refactor
 

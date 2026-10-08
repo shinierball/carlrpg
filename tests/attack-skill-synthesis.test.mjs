@@ -159,7 +159,8 @@ describe('DCC RPG - Attack & Skill Synthesis & Combat Techniques (Hybrid Option 
       type: 'skill',
       system: {
         rank: 2,
-        category: 'combat'
+        category: 'combat',
+        appliesTo: ['Dagger']
       }
     }, crawler);
     crawler.items.push(dagger, ironPunch);

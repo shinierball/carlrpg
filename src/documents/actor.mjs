@@ -12,6 +12,7 @@ import {
 } from '../data/grinding.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
+import { CANONICAL_WEAPON_TECHNIQUE_MAP } from '../data/weapon-associations.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -243,6 +244,7 @@ export function isWeaponGear(item) {
   if (!item || item.type !== 'gear') return false;
   const sys = item.system || {};
   if (sys.isWeapon === true) return true;
+  if (sys.weaponCategory || sys.weaponType) return true;
   const slot = (sys.slot || '').toLowerCase();
   const rawParts = sys.damageParts;
   const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
@@ -589,6 +591,43 @@ export class DCCActor extends BaseActor {
               await existingSpell.update({ 'system.rank': incomingRank });
             }
             existingReturns.push(existingSpell);
+            continue;
+          }
+        } else if (itemData.type === 'skill') {
+          const norm = (itemData.name || '').toLowerCase().trim();
+          const sourceUuid = itemData.flags?.core?.sourceId || itemData.flags?.['carl-rpg']?.sourceUuid || itemData.uuid;
+          const compId = itemData.flags?.['carl-rpg']?.compendiumId || itemData.id || itemData._id;
+
+          const existingItems = Array.isArray(this.items) ? this.items : Array.from(this.items?.values?.() || []);
+          const existingSkills = existingItems.filter(i => {
+            if (i.type !== 'skill') return false;
+            const iSource = i.flags?.core?.sourceId || i.flags?.['carl-rpg']?.sourceUuid;
+            const iCompId = i.flags?.['carl-rpg']?.compendiumId;
+            if (sourceUuid && iSource === sourceUuid) return true;
+            if (compId && iCompId === compId) return true;
+            return (i.name || '').toLowerCase().trim() === norm;
+          });
+
+          if (existingSkills.length > 0) {
+            // Sort existing skills by rank descending
+            existingSkills.sort((a, b) => (Number(b.system?.rank) || 0) - (Number(a.system?.rank) || 0));
+            const bestExisting = existingSkills[0];
+            const incomingRank = Number(itemData.system?.rank) || 0;
+            const currentRank = Number(bestExisting.system?.rank) || 0;
+
+            // Remove any redundant duplicate skill documents that may already exist
+            if (existingSkills.length > 1) {
+              const toDelete = existingSkills.slice(1).map(i => i.id || i._id).filter(Boolean);
+              if (toDelete.length > 0 && typeof this.deleteEmbeddedDocuments === 'function') {
+                await this.deleteEmbeddedDocuments('Item', toDelete);
+              }
+            }
+
+            // Retain the higher rank between incoming and existing
+            if (incomingRank > currentRank) {
+              await bestExisting.update({ 'system.rank': incomingRank });
+            }
+            existingReturns.push(bestExisting);
             continue;
           }
         }
@@ -1732,9 +1771,86 @@ export class DCCActor extends BaseActor {
   }
 
   /**
+   * Checks whether a combat technique is applicable to a specific weapon or attack item.
+   * Enforces official DCC RPG limitations (Unarmed Combat cannot choose or receive damage effects)
+   * and matches weapon category, weapon type, and associated skill tags.
+   * @param {object|Item} tech
+   * @param {object|Item} attackItem
+   * @returns {boolean}
+   */
+  isTechniqueApplicable(tech, attackItem) {
+    if (!tech || !attackItem) return false;
+    const attackName = (attackItem.name || '').toLowerCase().trim();
+    const techName = (tech.name || '').toLowerCase().trim();
+
+    // Official DCC RPG rule: Unarmed Combat explicitly cannot choose or receive any Damage Effect/Technique.
+    if (attackName === 'unarmed combat' || attackName === 'unarmed') {
+      return false;
+    }
+
+    const sys = attackItem.system || {};
+    const attackTags = new Set([
+      attackName,
+      (sys.weaponType || '').toLowerCase().trim(),
+      (sys.weaponCategory || '').toLowerCase().trim(),
+      (sys.skillType || sys.type || '').toLowerCase().trim()
+    ].filter(Boolean));
+
+    if (Array.isArray(sys.associatedSkills)) {
+      for (const as of sys.associatedSkills) {
+        attackTags.add(String(as).toLowerCase().trim());
+      }
+    }
+    if (Array.isArray(sys.tags)) {
+      for (const t of sys.tags) {
+        attackTags.add(String(t).toLowerCase().trim());
+      }
+    }
+    if (attackItem.matchingSkillName) {
+      attackTags.add(attackItem.matchingSkillName.toLowerCase().trim());
+    }
+
+    // Check default technique configs
+    const defConfig = DEFAULT_TECHNIQUE_CONFIGS[techName];
+    if (defConfig?.appliesToTags) {
+      for (const t of defConfig.appliesToTags) {
+        if (attackTags.has(String(t).toLowerCase().trim())) return true;
+      }
+    }
+
+    // Check technique item appliesTo / techniqueConfig
+    const tSys = tech.system || tech.item?.system || {};
+    const rawApplies = [
+      ...(Array.isArray(tech.appliesTo) ? tech.appliesTo : []),
+      ...(Array.isArray(tSys.appliesTo) ? tSys.appliesTo : (typeof tSys.appliesTo === 'string' ? tSys.appliesTo.split(',') : [])),
+      ...(Array.isArray(tSys.techniqueConfig?.appliesToTags) ? tSys.techniqueConfig.appliesToTags : (typeof tSys.techniqueConfig?.appliesToTags === 'string' ? tSys.techniqueConfig.appliesToTags.split(',') : []))
+    ];
+    for (const ra of rawApplies) {
+      if (ra && attackTags.has(String(ra).toLowerCase().trim())) {
+        return true;
+      }
+    }
+
+    // Check canonical weapon technique map and damage effects
+    for (const tag of attackTags) {
+      const canonTechs = CANONICAL_WEAPON_TECHNIQUE_MAP[tag];
+      if (Array.isArray(canonTechs) && canonTechs.some(ct => ct.toLowerCase().trim() === techName)) {
+        return true;
+      }
+      const canonEffects = CANONICAL_DAMAGE_EFFECTS[tag];
+      if (Array.isArray(canonEffects) && canonEffects.some(ce => ce.toLowerCase().trim() === techName)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Determine all valid optional damage effects for an attack item or skill.
    * Discovers canonical effects for Pugilism, Noggin Knocker, Wrasslin, and Foot Soldier,
    * as well as custom user-defined optionalEffects configured on the item or matching skill.
+   * Filters discovered techniques to those the actor actually knows or has from gear.
    * @param {Item} attackItem
    * @returns {string[]} List of valid damage effect names
    */
@@ -1749,36 +1865,46 @@ export class DCCActor extends BaseActor {
 
     const sys = attackItem.system || {};
 
-    // 1. Explicitly configured optionalEffects on the item itself
-    let effects = [];
+    // 1. Explicitly configured optionalEffects on the item itself (e.g. artifact weapons)
+    let intrinsicEffects = [];
     if (Array.isArray(sys.optionalEffects) && sys.optionalEffects.length > 0) {
-      effects = sys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean);
+      intrinsicEffects = sys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean);
     } else if (typeof sys.optionalEffects === 'string' && sys.optionalEffects.trim()) {
-      effects = sys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean);
+      intrinsicEffects = sys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean);
     }
 
-    if (effects.length > 0) {
-      return [...new Set(effects)];
+    if (intrinsicEffects.length > 0) {
+      return [...new Set(intrinsicEffects)];
     }
+
+    // Helper: check if actor actually knows the effect (embedded skill or gear-granted)
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    const knowsEffect = (effectName) => {
+      const normEf = effectName.toLowerCase().trim();
+      if (skills.some(s => (s.name || '').toLowerCase().trim() === normEf)) return true;
+      if (typeof this.getSkillRank === 'function' && this.getSkillRank(effectName) > 0) return true;
+      return false;
+    };
+
+    let candidateEffects = [];
 
     // 2. Canonical mapping by attackItem.name
     if (CANONICAL_DAMAGE_EFFECTS[normName]) {
-      effects.push(...CANONICAL_DAMAGE_EFFECTS[normName]);
+      candidateEffects.push(...CANONICAL_DAMAGE_EFFECTS[normName]);
     }
 
     // 3. Check matching skill if attackItem is not a skill itself
-    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
     const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === normName);
     if (matchingSkill) {
       const msNorm = (matchingSkill.name || '').toLowerCase().trim();
       if (CANONICAL_DAMAGE_EFFECTS[msNorm]) {
-        effects.push(...CANONICAL_DAMAGE_EFFECTS[msNorm]);
+        candidateEffects.push(...CANONICAL_DAMAGE_EFFECTS[msNorm]);
       }
       const msSys = matchingSkill.system || {};
       if (Array.isArray(msSys.optionalEffects) && msSys.optionalEffects.length > 0) {
-        effects.push(...msSys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean));
+        candidateEffects.push(...msSys.optionalEffects.map(e => (typeof e === 'string' ? e.trim() : (e?.name || '').trim())).filter(Boolean));
       } else if (typeof msSys.optionalEffects === 'string' && msSys.optionalEffects.trim()) {
-        effects.push(...msSys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean));
+        candidateEffects.push(...msSys.optionalEffects.split(',').map(s => s.trim()).filter(Boolean));
       }
     }
 
@@ -1806,11 +1932,38 @@ export class DCCActor extends BaseActor {
       const appliesTo = rawApplies.map(a => String(a).toLowerCase().trim()).filter(Boolean);
       const applies = appliesTo.some(a => attackTags.includes(a) || attackTags.some(t => t.includes(a) || a.includes(t)));
       if (applies && s.name) {
-        effects.push(s.name.trim());
+        candidateEffects.push(s.name.trim());
       }
     }
 
-    return [...new Set(effects)];
+    return [...new Set(candidateEffects)];
+  }
+
+  /**
+   * Determine the selectable damage effects for an attack item or skill,
+   * filtered strictly to those the actor actually knows or possesses via gear.
+   * @param {Item|object} attackItem
+   * @returns {string[]} List of damage effects the actor can select
+   */
+  getSelectableDamageEffects(attackItem) {
+    if (!attackItem) return [];
+    const validEffects = this.getValidDamageEffects(attackItem);
+    if (!validEffects || validEffects.length === 0) return [];
+
+    const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
+    const knowsEffect = (effectName) => {
+      const normEf = effectName.toLowerCase().trim();
+      if (skills.some(s => (s.name || '').toLowerCase().trim() === normEf)) return true;
+      if (typeof this.getSkillRank === 'function' && this.getSkillRank(effectName) > 0) return true;
+      return false;
+    };
+
+    const selectable = validEffects.filter(knowsEffect);
+    const selected = attackItem.system?.selectedEffect || attackItem.selectedEffect;
+    if (selected && selected !== 'none' && !selectable.includes(selected)) {
+      selectable.push(selected);
+    }
+    return [...new Set(selectable)];
   }
 
   /**
@@ -2653,7 +2806,7 @@ export class DCCActor extends BaseActor {
         }
       }
 
-      this._applyTechniquesToDamageParts(parts, options, options.damageEffect || options.effect || '', sData.damageType || 'Physical');
+      this._applyTechniquesToDamageParts(parts, options, options.damageEffect || options.effect || '', sData.damageType || 'Physical', attackItem);
       return parts;
     }
 
@@ -3020,7 +3173,7 @@ export class DCCActor extends BaseActor {
       }
     }
 
-    this._applyTechniquesToDamageParts(parts, options, chosenEffect, primaryType);
+    this._applyTechniquesToDamageParts(parts, options, chosenEffect, primaryType, attackItem);
     return parts;
   }
 
@@ -3040,15 +3193,19 @@ export class DCCActor extends BaseActor {
    * @param {object} options
    * @param {string|object} chosenEffect
    * @param {string} primaryType
+   * @param {Item|object} [attackItem=null]
    * @private
    */
-  _applyTechniquesToDamageParts(parts, options = {}, chosenEffect = '', primaryType = 'Physical') {
+  _applyTechniquesToDamageParts(parts, options = {}, chosenEffect = '', primaryType = 'Physical', attackItem = null) {
     const activeTechs = options.techniques || (options.includePrimedTechniques !== false && typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
     if (!Array.isArray(activeTechs) || activeTechs.length === 0) return;
 
     const effLower = (typeof chosenEffect === 'string' ? chosenEffect : (chosenEffect?.name || '')).toLowerCase();
 
     for (const tech of activeTechs) {
+      if (attackItem && typeof this.isTechniqueApplicable === 'function' && !this.isTechniqueApplicable(tech, attackItem)) {
+        continue;
+      }
       const normTech = (tech.name || '').toLowerCase().trim();
       if (effLower && effLower.includes(normTech)) continue;
 
@@ -3204,6 +3361,7 @@ export class DCCActor extends BaseActor {
           damageBonus,
           debuffName,
           notes: sys.notes || '',
+          system: sys,
           item: s
         });
       }
@@ -3275,7 +3433,8 @@ export class DCCActor extends BaseActor {
     const rawAttacks = this.items ? (this.items.filter ? this.items.filter(i => (i.type === 'attack' && i.system?.equipped !== false) || (i.type === 'gear' && isWeaponGear(i) && i.system?.equipped)) : Array.from(this.items.values?.() || this.items).filter(i => (i.type === 'attack' && i.system?.equipped !== false) || (i.type === 'gear' && isWeaponGear(i) && i.system?.equipped))) : [];
 
     for (const item of rawAttacks) {
-      const profile = this._buildWeaponAttackProfile(item, skills, primedTechs);
+      const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, item));
+      const profile = this._buildWeaponAttackProfile(item, skills, applicableTechs);
       if (profile) attacks.push(profile);
     }
 
@@ -3310,7 +3469,8 @@ export class DCCActor extends BaseActor {
     for (const skill of attackSkills) {
       const normSkill = skill.name.toLowerCase().trim();
       if (attacks.some(a => a.name.toLowerCase() === normSkill || a.displayName?.toLowerCase() === normSkill || a.matchingSkillName?.toLowerCase() === normSkill)) continue;
-      const profile = this._buildSkillAttackProfile(skill, primedTechs);
+      const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, skill));
+      const profile = this._buildSkillAttackProfile(skill, applicableTechs);
       if (profile) attacks.push(profile);
     }
 
@@ -3394,21 +3554,48 @@ export class DCCActor extends BaseActor {
       if (skillRank >= 20 && activeRankBreaks.rank20?.damageDice) combinedDice += ` + ${activeRankBreaks.rank20.damageDice.replace(/^\+/, '')}`;
     }
 
+    const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, item));
+    let activeEffect = (sys.selectedEffect && sys.selectedEffect !== 'none') ? sys.selectedEffect : null;
+    if (!activeEffect && applicableTechs.length > 0) {
+      activeEffect = applicableTechs[0].name;
+    }
+
     let techniqueBonusDice = '';
-    for (const tech of primedTechs) {
-      if (tech.damageBonus) {
-        techniqueBonusDice += ` + ${tech.damageBonus} [${tech.name}]`;
+    if (activeEffect) {
+      const effectData = this.resolveDamageEffect(activeEffect, item);
+      if (effectData?.damageBonus) {
+        techniqueBonusDice = `+ ${effectData.damageBonus} [${effectData.name}]`;
       }
+    } else {
+      for (const tech of applicableTechs) {
+        if (tech.damageBonus) {
+          techniqueBonusDice += `+ ${tech.damageBonus} [${tech.name}] `;
+        }
+      }
+      techniqueBonusDice = techniqueBonusDice.trim();
     }
 
     const dmgStatKey = (primaryPart?.stat || sys.damageStat || toHitStat).toLowerCase();
     const dmgStatMod = this.system?.abilities?.[dmgStatKey]?.mod ?? 0;
     const displayDmgMod = dmgStatMod >= 0 ? `+${dmgStatMod}` : `${dmgStatMod}`;
-    const statStr = dmgStatKey ? ` + ${dmgStatKey.toUpperCase()}` : '';
     const typeStr = dmgType ? ` (${dmgType})` : '';
     const extra = parts.length > 1 ? ` (+${parts.length - 1} parts)` : '';
-    const rankDieStr = rankDie ? ` + ${rankDie}` : '';
-    const displayDamage = `${baseDice}${rankDieStr}${statStr}${typeStr}${techniqueBonusDice}${extra}`;
+
+    const formulaTokens = [baseDice];
+    if (rankDie) {
+      formulaTokens.push(rankDie.replace(/^\+/, '').trim());
+    }
+    if (techniqueBonusDice) {
+      formulaTokens.push(techniqueBonusDice.replace(/^\s*\+\s*/, '').trim());
+    }
+    if (dmgStatKey) {
+      formulaTokens.push(dmgStatKey.toUpperCase());
+    }
+    const cleanFormula = formulaTokens.join(' + ')
+      .replace(/\+\s*\+/g, '+')
+      .replace(/\+\s*-\s*/g, '- ')
+      .trim();
+    const displayDamage = `${cleanFormula}${typeStr}${extra}`;
 
     const critMult = (skillRank >= 15 && matchingSkill?.system?.critMultiplierR15) ? matchingSkill.system.critMultiplierR15
       : ((skillRank >= 5 && matchingSkill?.system?.critMultiplierR5) ? matchingSkill.system.critMultiplierR5 : (sys.critMultiplier !== undefined ? Number(sys.critMultiplier) : 2));
@@ -3436,7 +3623,7 @@ export class DCCActor extends BaseActor {
       displayToHit,
       baseDice,
       rankDamageDie: rankDie,
-      combinedDice,
+      combinedDice: rankDie ? `${baseDice} + ${rankDie.replace(/^\+/, '').trim()}` : baseDice,
       dmgStat: dmgStatKey,
       dmgStatMod,
       displayDmgMod,
@@ -3445,10 +3632,11 @@ export class DCCActor extends BaseActor {
       effects,
       displayEffects: effects,
       validDamageEffects: typeof this.getValidDamageEffects === 'function' ? this.getValidDamageEffects(item) : [],
+      selectableDamageEffects: typeof this.getSelectableDamageEffects === 'function' ? this.getSelectableDamageEffects(item) : [],
       hasOptionalEffects: (typeof this.getValidDamageEffects === 'function' ? this.getValidDamageEffects(item).length > 0 : false),
-      selectedEffect: sys.selectedEffect || 'none',
+      selectedEffect: activeEffect || sys.selectedEffect || 'none',
       favorBonus: DAMAGE_EFFECT_AI_FAVOR[normName] || 0,
-      primedTechniquesCount: primedTechs.length
+      primedTechniquesCount: applicableTechs.length
     };
   }
 
@@ -3469,28 +3657,61 @@ export class DCCActor extends BaseActor {
     const displayToHitRank = rank;
     const displayToHit = `${displayToHitStat} (${rank})`;
 
-    let combinedDice = dmgData.formula || (isPugilism ? '1d2' : '1d4');
+    const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, skill));
+    let activeEffect = (sys.selectedEffect && sys.selectedEffect !== 'none') ? sys.selectedEffect : null;
+    if (!activeEffect && applicableTechs.length > 0) {
+      activeEffect = applicableTechs[0].name;
+    }
+
+    let techniqueBonusDice = '';
+    if (activeEffect) {
+      const effectData = this.resolveDamageEffect(activeEffect, skill);
+      if (effectData?.damageBonus) {
+        techniqueBonusDice = `+ ${effectData.damageBonus} [${effectData.name}]`;
+      }
+    } else {
+      for (const tech of applicableTechs) {
+        if (tech.damageBonus) {
+          techniqueBonusDice += `+ ${tech.damageBonus} [${tech.name}] `;
+        }
+      }
+      techniqueBonusDice = techniqueBonusDice.trim();
+    }
+
+    let baseDicePart = '';
     if (isPugilism && (!sys.baseDamage || !sys.notes?.includes('Base Damage'))) {
       let diceCount = 1;
       if (rank >= 15) diceCount = 5;
       else if (rank >= 10) diceCount = 4;
       else if (rank >= 5) diceCount = 3;
-      const rDie = getRankDamageDie(rank).dice;
-      combinedDice = `${diceCount}d2${rDie ? ` + ${rDie}` : ''}`;
+      baseDicePart = `${diceCount}d2`;
+    } else {
+      baseDicePart = dmgData.baseDice || (isPugilism ? (rank >= 5 ? '3d2' : '1d2') : '1d4');
     }
 
-    let techniqueBonusDice = '';
-    for (const tech of primedTechs) {
-      if (tech.damageBonus) {
-        techniqueBonusDice += ` + ${tech.damageBonus} [${tech.name}]`;
-      }
-    }
+    let rankDiePart = dmgData.rankDamageDie || getRankDamageDie(rank).dice;
 
     const dmgStatKey = (isNogginKnocker ? (sys.damageStat || 'con') : (isPugilism ? (sys.damageStat || 'str') : (dmgData.stat || sys.damageStat || sys.stat || 'str'))).toLowerCase();
     const dmgStatMod = this.system?.abilities?.[dmgStatKey]?.mod ?? 0;
     const displayDmgMod = dmgStatMod >= 0 ? `+${dmgStatMod}` : `${dmgStatMod}`;
     const damageType = dmgData.damageType || sys.damageType || (isPugilism || isWrasslin ? 'Bludgeoning' : 'Physical');
-    const displayDamage = `${combinedDice}${techniqueBonusDice} + ${displayDmgMod} (${damageType})`;
+
+    const formulaTokens = [baseDicePart];
+    if (rankDiePart) {
+      formulaTokens.push(rankDiePart.replace(/^\+/, '').trim());
+    }
+    if (techniqueBonusDice) {
+      formulaTokens.push(techniqueBonusDice.replace(/^\s*\+\s*/, '').trim());
+    }
+    if (dmgStatMod !== 0) {
+      formulaTokens.push(String(dmgStatMod));
+    }
+
+    const cleanFormula = formulaTokens.join(' + ')
+      .replace(/\+\s*\+/g, '+')
+      .replace(/\+\s*-\s*/g, '- ')
+      .trim();
+    const displayDamage = `${cleanFormula} (${damageType})`;
 
     const critMult = (rank >= 15 && sys.critMultiplierR15) ? sys.critMultiplierR15
       : ((rank >= 5 && sys.critMultiplierR5) ? sys.critMultiplierR5 : (rank >= 5 ? 4 : 2));
@@ -3501,7 +3722,6 @@ export class DCCActor extends BaseActor {
     }
 
     const validEffects = typeof this.getValidDamageEffects === 'function' ? this.getValidDamageEffects(skill) : [];
-
     const attackName = isPugilism ? `${skill.name} (Unarmed)` : skill.name;
 
     return {
@@ -3521,9 +3741,9 @@ export class DCCActor extends BaseActor {
       displayToHitStat,
       displayToHitRank,
       displayToHit,
-      baseDice: dmgData.baseDice || (isPugilism ? (rank >= 5 ? '3d2' : '1d2') : '1d4'),
-      rankDamageDie: getRankDamageDie(rank).dice,
-      combinedDice,
+      baseDice: baseDicePart,
+      rankDamageDie: rankDiePart,
+      combinedDice: rankDiePart ? `${baseDicePart} + ${rankDiePart}` : baseDicePart,
       dmgStat: dmgStatKey,
       dmgStatMod,
       displayDmgMod,
@@ -3532,10 +3752,11 @@ export class DCCActor extends BaseActor {
       effects,
       displayEffects: effects,
       validDamageEffects: validEffects,
+      selectableDamageEffects: typeof this.getSelectableDamageEffects === 'function' ? this.getSelectableDamageEffects(skill) : validEffects,
       hasOptionalEffects: validEffects.length > 0,
-      selectedEffect: sys.selectedEffect || 'none',
+      selectedEffect: activeEffect || sys.selectedEffect || 'none',
       favorBonus: DAMAGE_EFFECT_AI_FAVOR[normName] || 0,
-      primedTechniquesCount: primedTechs.length
+      primedTechniquesCount: applicableTechs.length
     };
   }
 
@@ -3750,9 +3971,13 @@ export class DCCActor extends BaseActor {
 
     // Check for optional damage effects on attack or skill
     const validEffects = this.getValidDamageEffects(attackItem);
-    let chosenEffect = options.damageEffect !== undefined ? options.damageEffect : (options.effect !== undefined ? options.effect : null);
+    let chosenEffect = options.damageEffect !== undefined
+      ? options.damageEffect
+      : (options.effect !== undefined
+          ? options.effect
+          : (attackItem.system?.selectedEffect || null));
 
-    if (chosenEffect === null && validEffects && validEffects.length > 0) {
+    if (chosenEffect === null && validEffects && validEffects.length > 0 && !options.skipDialog) {
       chosenEffect = await this.promptDamageEffectDialog(attackItem, options);
       if (chosenEffect === null) {
         // User cancelled dialog
@@ -3817,7 +4042,8 @@ export class DCCActor extends BaseActor {
       const statMod = this.system.abilities?.[toHitStat]?.mod ?? 0;
       const isUntrained = this.type === 'mob' ? false : (rank <= 0);
 
-      const activeTechs = options.techniques || (typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
+      const allActiveTechs = options.techniques || (typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
+      const activeTechs = allActiveTechs.filter(t => typeof this.isTechniqueApplicable !== 'function' || this.isTechniqueApplicable(t, attackItem));
       let effectTag = '';
       if (chosenEffect && chosenEffect !== 'none') {
         effectTag = ` [Effect: ${chosenEffect}]`;
@@ -4034,7 +4260,8 @@ export class DCCActor extends BaseActor {
       // Resolve custom critical multiplier and on-hit debuffs from matching skill and active techniques
       let critMultiplier = (attackItem?.system?.critMultiplier !== undefined) ? Number(attackItem.system.critMultiplier) : 2;
       const onHitDebuffs = [];
-      const activeTechs = options.techniques || (typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
+      const allActiveTechs = options.techniques || (typeof this.getPrimedTechniques === 'function' ? this.getPrimedTechniques() : []);
+      const activeTechs = allActiveTechs.filter(t => typeof this.isTechniqueApplicable !== 'function' || this.isTechniqueApplicable(t, attackItem));
       for (const t of activeTechs) {
         if (t.debuffName && !onHitDebuffs.includes(t.debuffName)) {
           onHitDebuffs.push(t.debuffName);

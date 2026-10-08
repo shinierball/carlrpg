@@ -74,6 +74,7 @@ export function isWeaponGear(item) {
   if (!item || item.type !== 'gear') return false;
   const sys = item.system || {};
   if (sys.isWeapon === true) return true;
+  if (sys.weaponCategory || sys.weaponType) return true;
   const slot = (sys.slot || '').toLowerCase();
   const rawParts = sys.damageParts;
   const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
@@ -138,12 +139,16 @@ export function prepareAttackDisplay(item, actor) {
   if (typeof actor?.getValidDamageEffects === 'function') {
     const validEffects = actor.getValidDamageEffects(item);
     item.validDamageEffects = validEffects;
+    item.selectableDamageEffects = typeof actor.getSelectableDamageEffects === 'function'
+      ? actor.getSelectableDamageEffects(item)
+      : validEffects;
     item.hasOptionalEffects = validEffects.length > 0;
     const normName = (item.name || '').toLowerCase().trim();
     item.favorBonus = DAMAGE_EFFECT_AI_FAVOR[normName] || 0;
     item.selectedEffect = sys.selectedEffect || 'none';
   } else {
     item.validDamageEffects = [];
+    item.selectableDamageEffects = [];
     item.hasOptionalEffects = false;
     item.selectedEffect = sys.selectedEffect || 'none';
     item.favorBonus = 0;
@@ -2096,22 +2101,22 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.roll-attack-hit').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items?.get ? this.actor.items.get(itemId) : (this.actor.items || []).find(i => i.id === itemId);
-      if (item) {
-        this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
-      } else {
-        const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
-        if (synth) this.actor.rollAttack(synth.item || synth, 'hit', { showDialog: !ev.shiftKey });
+      const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
+      const attackItem = item || (synth ? (synth.item || synth) : null);
+      if (attackItem) {
+        const damageEffect = item?.system?.selectedEffect || synth?.selectedEffect;
+        this.actor.rollAttack(attackItem, 'hit', { showDialog: !ev.shiftKey, damageEffect });
       }
     });
 
     html.find('.roll-attack-dmg').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items?.get ? this.actor.items.get(itemId) : (this.actor.items || []).find(i => i.id === itemId);
-      if (item) {
-        this.actor.rollAttack(item, 'damage', { showDialog: !ev.shiftKey });
-      } else {
-        const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
-        if (synth) this.actor.rollAttack(synth.item || synth, 'damage', { showDialog: !ev.shiftKey });
+      const synth = typeof this.actor.getSynthesizedAttacks === 'function' ? this.actor.getSynthesizedAttacks().find(a => a.id === itemId) : null;
+      const attackItem = item || (synth ? (synth.item || synth) : null);
+      if (attackItem) {
+        const damageEffect = item?.system?.selectedEffect || synth?.selectedEffect;
+        this.actor.rollAttack(attackItem, 'damage', { showDialog: !ev.shiftKey, damageEffect });
       }
     });
 
@@ -2148,7 +2153,8 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       }
 
       if (isAttack) {
-        this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey });
+        const damageEffect = item.system?.selectedEffect;
+        this.actor.rollAttack(item, 'hit', { showDialog: !ev.shiftKey, damageEffect });
       } else {
         this.actor.rollSkill(item);
       }
@@ -2158,7 +2164,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     html.find('.roll-skill-dmg, .roll-skill-damage').click(ev => {
       const itemId = $(ev.currentTarget).closest('[data-item-id]').data('itemId');
       const item = this.actor.items.get(itemId) || this._grantedSkills?.get(itemId);
-      if (item) this.actor.rollSkillDamage(item, { showDialog: !ev.shiftKey });
+      if (item) {
+        const damageEffect = item.system?.selectedEffect;
+        this.actor.rollSkillDamage(item, { showDialog: !ev.shiftKey, damageEffect });
+      }
     });
 
     // Change selected optional damage effect on sheet
@@ -2170,6 +2179,7 @@ export class DCCCrawlerSheet extends BaseActorSheet {
       const item = this.actor.items.get(itemId);
       if (item) {
         await item.update({ 'system.selectedEffect': val });
+        this.render(false);
       }
     });
 

@@ -134,9 +134,11 @@ CarlRPG strictly differentiates between attack actions that deal damage and tact
   - Non-attack actions (e.g. *Call a Play*, *Intervene*, *Taunt*, *Catcher*, *Throwing*, *Tracking*) have `isAttack: false`. They roll as skill checks (`actor.rollSkill(item)`) and display with the `[SKILL]` badge.
   - Setting `category: "Combat"` on an action does **not** make it an attack. Category defines when the action is used, while `isAttack` defines whether it functions as an offensive combat strike.
 
-- **Explicit Damage Resolution (`hasDamage` & `baseDamage`)**:
-  - A skill only rolls damage if it has explicit damage configured via `system.baseDamage` or `system.hasDamage: true`, or is a canonical unarmed combat form (*Pugilism*, *Unarmed Combat*).
-  - Utility and tactical combat skills that describe dice rolls in their rules notes (such as *Call a Play*'s "Roll 2d6" or *Intervene*'s "Roll 1d6") are cleanly evaluated as `hasDamage: false` and do not generate false damage rolls.
+- **Technique Applicability & Priming Scoping (`isTechniqueApplicable`)**:
+  - Techniques are scoped strictly to applicable attacks via tags and weapon associations. For example, *Toss* applies exclusively to *Wrasslin* and will never modify unrelated weapon attacks.
+  - In accordance with official DCC RPG rules (*Limitations: Cannot choose a Damage Effect*), *Unarmed Combat* is strictly barred from receiving or combining with combat techniques or damage effects.
+  - The attack damage effects dropdown on the character sheet displays `selectableDamageEffects`, restricting choices to effects the crawler actually knows or has granted via gear.
 
-
-
+- **Skill Document Idempotence**:
+  - When skills are added to an actor (via compendium drag-and-drop, point-build class/race presets, or `createEmbeddedDocuments`), the system prevents duplicate skill documents.
+  - If a skill already exists on the actor with the same name, compendium ID, or source UUID, the higher rank between the incoming and existing document is retained, and redundant duplicates are automatically cleaned up.

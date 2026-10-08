@@ -609,7 +609,7 @@
                 <div style="display: flex; flex-direction: column; gap: 2px;">
                   <select class="attack-damage-effect-select" data-item-id="{{attack.id}}" style="font-size: 10px; height: 20px; padding: 0 4px; max-width: 140px; border: 1px solid #c0392b; border-radius: 3px; background: #fff; cursor: pointer;">
                     <option value="none" {{#if (eq attack.selectedEffect 'none')}}selected{{/if}}>None{{#if attack.favorBonus}} (+{{attack.favorBonus}} Favor){{/if}}</option>
-                    {{#each attack.validDamageEffects as |eff|}}
+                    {{#each (or attack.selectableDamageEffects attack.validDamageEffects) as |eff|}}
                       <option value="{{eff}}" {{#if (eq ../attack.selectedEffect eff)}}selected{{/if}}>{{eff}}</option>
                     {{/each}}
                   </select>

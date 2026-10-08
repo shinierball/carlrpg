@@ -22,7 +22,13 @@ export const DCC_SKILLS = [
       notes: "Limitations: The target must have an appendage you can clamp down onto. You taste your victim’s blood. Base Damage: 1d8 + Str Piercing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage. You may latch on to move when the foe moves during their next Action (then you let go).\nRank 15: +1d8 base damage, and the target gains the Woozy Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -40,7 +46,13 @@ export const DCC_SKILLS = [
       notes: "Base Damage: 1d6 + Str Slashing.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage\nRank 15: +1d6 base damage, and the target gains the Blood Trail Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "str",
+      damageType: "Slashing"
     }
   },
   {
@@ -58,7 +70,13 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1. Base Damage: 1d4 + Str Slashing.",
       upgrades: "Rank 5: +1d4 base damage\nRank 10: +1d4 base damage\nRank 15: +2d4 base damage",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Slashing"
     }
   },
 
@@ -80,7 +98,13 @@ export const DCC_SKILLS = [
       notes: "Base Damage: 1d6 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage, and the target gains the Woozy Debuff.\nRank 15: +1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
   {
@@ -98,7 +122,13 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1. Pick up something and smack someone else with it. Object must weigh at least 1 lb and no more than your Str in lbs. Base Damage: 1d4 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d4 base damage, and you can throw the item (using this Skill) up to a range of Rank ×5 feet.\nRank 10: +1d4 base damage, and you roll your first Attack each combat with Advantage.\nRank 15: +1d4 base damage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
   {
@@ -116,7 +146,13 @@ export const DCC_SKILLS = [
       notes: "Limitations: Requires two hands to wield. Base Damage: 1d10 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d10 base damage\nRank 10: +1d10 base damage\nRank 15: +1d10 base damage, and the target (of your size or smaller) is pushed 15 feet.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d10",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
 
@@ -138,7 +174,13 @@ export const DCC_SKILLS = [
       notes: "Base Damage: 1d6 + Str Slashing.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage, and you may make an extra free Attack with Disadvantage against another adjacent foe.\nRank 15: +1d6 base damage, and on an Amazing Success or better, sever an arm (disarming two-handed weapons).",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "str",
+      damageType: "Slashing"
     }
   },
   {
@@ -156,7 +198,13 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1. Base Damage: 1d4 + Str Piercing.",
       upgrades: "Rank 5: +1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR).\nRank 10: +1d4 base damage, and you can throw this weapon up to a range of Rank × 5 feet.\nRank 15: +1d4 base damage, and Attacks targeting the back deal ×2 damage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -174,7 +222,13 @@ export const DCC_SKILLS = [
       notes: "Base Damage: 1d8 + Str Slashing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage\nRank 15: +1d8 base damage, and you gain a +1 Evade Buff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "str",
+      damageType: "Slashing"
     }
   },
   {
@@ -192,7 +246,13 @@ export const DCC_SKILLS = [
       notes: "Base Damage: 1d6 + Dex Piercing.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage, and you gain a +1 Evade Buff.\nRank 15: +1d6 base damage, and you gain a +1 Evade Buff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "dex",
+      damageType: "Piercing"
     }
   },
 
@@ -214,7 +274,14 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1 (only if no Damage Effect is used). Choose Powerful Strike or Smush Damage Effect before rolling to hit. Base Damage: 1d4 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d4 base damage\nRank 10: +1d4 base damage\nRank 15: +1d4 base damage, and the target gains the Sore as Shit Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Bludgeoning",
+      optionalEffects: ["Powerful Strike", "Smush"]
     }
   },
   {
@@ -232,7 +299,14 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1 (only if no Damage Effect is used). Limitations: On Success, you lose 1 Health Bar slot. Choose Skullcracker or Powerful Strike. Base Damage: 1d4 + Con Bludgeoning.",
       upgrades: "Rank 5: +1d4 base damage, and you don’t take any damage from your own Attack.\nRank 10: +1d4 base damage, and add 1 Rank damage die.\nRank 15: +1d4 base damage, and the target gains the Woozy Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "con",
+      damageType: "Bludgeoning",
+      optionalEffects: ["Skullcracker", "Powerful Strike"]
     }
   },
   {
@@ -250,7 +324,14 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 2 (only if no Damage Effect is used). Choose Dirty Fighting, Iron Punch, or Powerful Strike before rolling. Base Damage: 1d2 + Str Bludgeoning.",
       upgrades: "Rank 5: +2d2 base damage\nRank 10: +1d2 base damage\nRank 15: +1d2 base damage, and you may make an extra free Attack with Disadvantage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d2",
+      damageStat: "str",
+      damageType: "Bludgeoning",
+      optionalEffects: ["Dirty Fighting", "Iron Punch", "Powerful Strike"]
     }
   },
   {
@@ -268,7 +349,14 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1. Limitations: Cannot choose a Damage Effect. Mixture of all strikes. Base Damage: 1d4 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d4 base damage\nRank 10: +1d4 base damage\nRank 15: +2d4 base damage",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Bludgeoning",
+      optionalEffects: []
     }
   },
   {
@@ -286,7 +374,14 @@ export const DCC_SKILLS = [
       notes: "AI Favor: 1 (only if no Damage Effect is used). Limitations: Requires two hands. Choose Choke Out, Dirty Fighting, or Toss. On Success, target gains Held Debuff. Base Damage: 1d4 + Str Bludgeoning.",
       upgrades: "Rank 5: Maintain Held at no Action cost, but check to prevent escape is at Disadvantage.\nRank 10: +1d4 base damage\nRank 15: +1d4 base damage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Bludgeoning",
+      optionalEffects: ["Choke Out", "Dirty Fighting", "Toss"]
     }
   },
 
@@ -310,10 +405,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Wrasslin'", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Wrasslin"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["wrasslin", "unarmed"],
+        appliesToTags: ["wrasslin", "wrasslin'"],
         baseDiceCountMod: "",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -347,10 +444,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Pugilism", "Wrasslin'", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Pugilism", "Wrasslin"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["pugilism", "wrasslin", "unarmed"],
+        appliesToTags: ["pugilism", "wrasslin", "wrasslin'"],
         baseDiceCountMod: "",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -384,10 +483,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Pugilism", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Pugilism"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["pugilism", "unarmed"],
+        appliesToTags: ["pugilism"],
         baseDiceCountMod: "+1",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -421,10 +522,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Foot Soldier", "Noggin Nocker", "Pugilism", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Foot Soldier", "Noggin Nocker", "Pugilism"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["foot soldier", "noggin knocker", "noggin nocker", "pugilism", "unarmed"],
+        appliesToTags: ["foot soldier", "noggin knocker", "noggin nocker", "pugilism"],
         baseDiceCountMod: "* @rank",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -458,10 +561,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Noggin Nocker", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Noggin Nocker"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["noggin knocker", "noggin nocker", "unarmed"],
+        appliesToTags: ["noggin knocker", "noggin nocker"],
         baseDiceCountMod: "+1",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -495,10 +600,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Foot Soldier", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Foot Soldier"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["foot soldier", "unarmed"],
+        appliesToTags: ["foot soldier"],
         baseDiceCountMod: "",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -532,10 +639,12 @@ export const DCC_SKILLS = [
       checked: false,
       damageModifiers: [],
       isTechnique: true,
-      appliesTo: ["Wrasslin'", "Unarmed Combat"],
+      isAttack: false,
+      hasDamage: false,
+      appliesTo: ["Wrasslin"],
       techniqueConfig: {
         isDamageEffect: true,
-        appliesToTags: ["wrasslin", "unarmed"],
+        appliesToTags: ["wrasslin", "wrasslin'"],
         baseDiceCountMod: "",
         baseDiceSidesMod: "",
         flatDamageMod: "",
@@ -571,7 +680,13 @@ export const DCC_SKILLS = [
       notes: "Range: 100 feet. Requires two hands and ammunition. Base Damage: 1d6 + Str Piercing.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage, add 1 Rank damage die.\nRank 15: +1d6 base damage, and target gains Blood Trail Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -589,7 +704,13 @@ export const DCC_SKILLS = [
       notes: "Range: 50 feet. Requires two hands and ammunition. Cooldown: Once per round. Base Damage: 1d8 Piercing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage, target gains Blood Trail Debuff.\nRank 15: +1d8 base damage, range is 100 feet.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "dex",
+      damageType: "Piercing"
     }
   },
   {
@@ -607,7 +728,13 @@ export const DCC_SKILLS = [
       notes: "Range: 150 feet. Requires ammunition. Spend one Action to reload after Major Fail or worse. Base Damage: 1d8 Piercing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage\nRank 15: +1d8 base damage, target gains Staggered Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "dex",
+      damageType: "Piercing"
     }
   },
   {
@@ -625,7 +752,13 @@ export const DCC_SKILLS = [
       notes: "Range: 40 feet. Base Damage: 1d8 + Str Piercing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage, deals Armor-Piercing damage (ignores DR).\nRank 15: +1d8 base damage, range increases by Str in feet.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -643,7 +776,13 @@ export const DCC_SKILLS = [
       notes: "Range: 30 feet. Requires two hands and ammunition. Spend one Action to reload after Major Fail or worse. Base Damage: 1d10 Piercing.",
       upgrades: "Rank 5: +1d10 base damage\nRank 10: +1d10 base damage\nRank 15: +1d10 base damage, +5ft Splash.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d10",
+      damageStat: "dex",
+      damageType: "Piercing"
     }
   },
   {
@@ -661,7 +800,13 @@ export const DCC_SKILLS = [
       notes: "Range: 30 feet. AI Favor: 1. Base Damage: 1d4 + Str Piercing.",
       upgrades: "Rank 5: +1d4 base damage, range is 40 feet.\nRank 10: +1d4 base damage, make an extra free attack with Disadvantage.\nRank 15: +1d4 base damage, make an extra free attack with Disadvantage.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -679,7 +824,13 @@ export const DCC_SKILLS = [
       notes: "Range: 30 feet. AI Favor: 2. Requires two hands. Base Damage: 1d2 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d2 base damage, range increases by Str in feet.\nRank 10: +1d2 base damage, add 1 Rank damage die.\nRank 15: +1d2 base damage, add 1 Rank damage die.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d2",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
 
@@ -701,7 +852,13 @@ export const DCC_SKILLS = [
       notes: "Range: 10 feet. AI Favor: 1. Requires two hands. Base Damage: 1d4 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d4 base damage, slide target 5 feet.\nRank 10: +1d4 base damage, can make a Sling attack with range 50 ft using Dex to hit.\nRank 15: +1d4 base damage, target gains Take Down Debuff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d4",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
   {
@@ -719,7 +876,13 @@ export const DCC_SKILLS = [
       notes: "Range: 10 feet. Must be mounted. Cannot be used with Attack of Opportunity or Zone of Control. Base Damage: 1d12 + Str Piercing.",
       upgrades: "Rank 5: +1d12 base damage\nRank 10: +1d12 base damage, +1 damage per 10 ft mount moved this turn.\nRank 15: +1d12 base damage, +X damage (X = size of mount).",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d12",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -737,7 +900,13 @@ export const DCC_SKILLS = [
       notes: "Range: 10 feet. Requires two hands. Base Damage: 1d8 + Str Piercing.",
       upgrades: "Rank 5: +1d8 base damage\nRank 10: +1d8 base damage, and +1 Rank in Zone of Control Skill.\nRank 15: +1d8 base damage, and +1 Rank in Zone of Control Skill.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d8",
+      damageStat: "str",
+      damageType: "Piercing"
     }
   },
   {
@@ -755,7 +924,13 @@ export const DCC_SKILLS = [
       notes: "Range: 10 feet. Requires two hands. Base Damage: 1d6 + Str Bludgeoning.",
       upgrades: "Rank 5: +1d6 base damage\nRank 10: +1d6 base damage, and gain a +1 Evade Buff.\nRank 15: +1d6 base damage, and gain a +1 Evade Buff.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: true,
+      isTechnique: false,
+      hasDamage: true,
+      baseDamage: "1d6",
+      damageStat: "str",
+      damageType: "Bludgeoning"
     }
   },
 
@@ -777,7 +952,10 @@ export const DCC_SKILLS = [
       notes: "Generic weapon mastery skill. Grants a generic bonus equal to its Rank to all member skills of type Edge (Axe, Dagger, Longsword, Rapier).",
       upgrades: "Rank advances weapon mastery for all edged weapons.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: false,
+      isTechnique: false,
+      hasDamage: false
     }
   },
   {
@@ -795,7 +973,10 @@ export const DCC_SKILLS = [
       notes: "Generic weapon mastery skill. Grants a generic bonus equal to its Rank to all member skills of type Bashing (Club, Improvised Weapons, Warhammer).",
       upgrades: "Rank advances weapon mastery for all blunt/bashing weapons.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: false,
+      isTechnique: false,
+      hasDamage: false
     }
   },
   {
@@ -813,7 +994,10 @@ export const DCC_SKILLS = [
       notes: "Generic weapon mastery skill. Grants a generic bonus equal to its Rank to all member skills of type Reach (Herding Weapons, Lance, Polearm, Quarterstaff).",
       upgrades: "Rank advances weapon mastery for all reach weapons.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: false,
+      isTechnique: false,
+      hasDamage: false
     }
   },
   {
@@ -831,7 +1015,10 @@ export const DCC_SKILLS = [
       notes: "Generic weapon mastery skill. Grants a generic bonus equal to its Rank to all member skills of type Ranged (Bow, Crossbow, Handgun, Javelin, Shotgun, Shuriken, Slingshot).",
       upgrades: "Rank advances weapon mastery for all ranged weapons.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: false,
+      isTechnique: false,
+      hasDamage: false
     }
   },
   {
@@ -849,7 +1036,10 @@ export const DCC_SKILLS = [
       notes: "Generic mastery skill. Grants a generic bonus equal to its Rank to all member skills of type Strike (Bite, Back Claw, Slice Attack).",
       upgrades: "Rank advances mastery for natural strike attacks.",
       checked: false,
-      damageModifiers: []
+      damageModifiers: [],
+      isAttack: false,
+      isTechnique: false,
+      hasDamage: false
     }
   },
 
@@ -2337,6 +2527,7 @@ export const DCC_SKILLS = [
       category: "Combat",
       checkType: "Standard Action (2d6)",
       isAttack: false,
+      isTechnique: false,
       hasDamage: false,
       baseDamage: "",
       notes: "Standard Action. Encourage an ally. Roll 2d6; targeted ally adds higher d6 to upcoming Skill Check or damage roll.",
@@ -2358,6 +2549,7 @@ export const DCC_SKILLS = [
       category: "Combat",
       checkType: "Interrupt Action (1d6)",
       isAttack: false,
+      isTechnique: false,
       hasDamage: false,
       baseDamage: "",
       notes: "Interrupt Action. Assist an ally's roll. Roll 1d6 and add result directly to party member's d20 roll.",

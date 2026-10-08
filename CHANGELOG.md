@@ -1,3 +1,51 @@
+## 2.4.22
+
+### Compendium Skill Validation & Canonical Damage Effects Alignment
+
+- **Comprehensive Compendium Classification (`src/data/skills.mjs`, `src/documents/actor.mjs`, `src/data/weapon-associations.mjs`)**:
+  - Validated and categorized all 121 skills in the DCC compendium (`DCC_SKILLS`) with strict data-driven flags:
+    - **26 Primary Attack Skills** marked with `isAttack: true`, `isTechnique: false`, `hasDamage: true`, `baseDamage`, `damageStat`, and `damageType`:
+      - Natural strikes: *Bite*, *Back Claw*, *Slice Attack*
+      - Bashing: *Club*, *Improvised Weapons*, *Warhammer*
+      - Edge: *Axe*, *Dagger*, *Longsword*, *Rapier*
+      - Hand to Hand: *Foot Soldier*, *Noggin Nocker*, *Pugilism*, *Unarmed Combat*, *Wrasslin*
+      - Ranged: *Bow*, *Crossbow*, *Handgun*, *Javelin*, *Shotgun*, *Shuriken*, *Slingshot*
+      - Reach: *Herding Weapons*, *Lance*, *Polearm*, *Quarterstaff*
+    - **7 Canonical Damage Effects** marked with `isTechnique: true`, `isAttack: false`, `hasDamage: false`, `techniqueConfig.isDamageEffect: true`:
+      - *Choke Out*: Wrasslin
+      - *Dirty Fighting*: Pugilism, Wrasslin
+      - *Iron Punch*: Pugilism
+      - *Powerful Strike*: Foot Soldier, Noggin Nocker, Pugilism
+      - *Skullcracker*: Noggin Nocker
+      - *Smush*: Foot Soldier
+      - *Toss*: Wrasslin
+    - **Strict Unarmed Combat Limitation**: Enforced official DCC RPG limitation (*"Limitations: Cannot choose a Damage Effect"*) by purging `Unarmed Combat` from `appliesTo` and `appliesToTags` across all 7 damage effects, setting `unarmed: []` in `CANONICAL_WEAPON_TECHNIQUE_MAP`, and guarding `actor.getValidDamageEffects()` to immediately return `[]` for Unarmed Combat.
+    - **5 Weapon Group Masteries** (*Edged Weapons*, *Blunt Weapons*, *Reach Weapons*, *Ranged Weapons*, *Strike Weapons*): marked `isAttack: false`, `isTechnique: false`, `hasDamage: false`.
+    - **2 Tactical Combat Actions** (*Call a Play*, *Intervene*): marked `isAttack: false`, `isTechnique: false`, `hasDamage: false`.
+    - **81 Utility / Passive / Crafting Skills**: confirmed non-attack, non-technique.
+- **Compendium Packaging (`scripts/build-packs.mjs`)**:
+  - Updated `buildSkills()` to preserve all skill schema fields (`...skill.system`), preventing loss of `isAttack`, `isTechnique`, `hasDamage`, `baseDamage`, `damageStat`, `optionalEffects`, and `techniqueConfig` upon building packs.
+- **Automated Verification (`tests/attack-vs-technique-classification.test.mjs`)**:
+  - Expanded test suite to 10 automated unit tests verifying all 26 attack skills, all 7 damage effects, Unarmed Combat restriction, weapon group masteries, and 121-skill compendium integrity.
+  - All 930 unit tests across 163 suites passing with 0 failures.
+
+## 2.4.21
+
+### Primary Attacks vs Combat Techniques Classification (Wrasslin, Pugilism & Toss)
+
+- **Primary Attack & Combat Technique Distinction (`src/data/skills.mjs`, `src/documents/actor.mjs`, `src/data/weapon-associations.mjs`)**:
+  - Explicitly classified *Wrasslin*, *Pugilism*, *Foot Soldier*, *Noggin Knocker*, and *Unarmed Combat* as primary attack actions (`isAttack: true`, `isTechnique: false`, `hasDamage: true`, `baseDamage`, `optionalEffects`).
+  - Explicitly classified *Toss*, *Choke Out*, *Dirty Fighting*, *Iron Punch*, *Powerful Strike*, *Skullcracker*, and *Smush* as combat techniques / damage effects (`isTechnique: true`, `isAttack: false`, `hasDamage: false`).
+  - Removed greedy substring matching on `notes.includes('damage effect')` in `actor.getCombatTechniques()` (resolving Rule 0 violation where notes text like "only if no Damage Effect is used" caused attacks to be misclassified as techniques).
+  - Added strict data-driven exclusions to `actor.getCombatTechniques()` ensuring primary attacks are never rendered in the Combat Techniques & Maneuvers strip.
+  - Added *Pugilism* and *Wrasslin* to `CANONICAL_WEAPON_SKILL_MAP` and `CANONICAL_WEAPON_TECHNIQUE_MAP`.
+- **Sheet Attacks Table & Damage Effects Integration**:
+  - *Wrasslin* now synthesizes into the Attacks table as a primary attack with DEX/STR checks and displays optional technique choices (*Choke Out*, *Dirty Fighting*, *Toss*).
+  - *Toss* functions as an optional combat technique when wrasslin, dealing +1d8 Bludgeoning damage bonus when selected.
+  - Preserved AI Favor bonuses (+1 for Wrasslin, +2 for Pugilism) when rolling attacks without techniques.
+- **Automated Verification (`tests/attack-vs-technique-classification.test.mjs`)**:
+  - Added 5 unit tests validating data definitions, technique exclusion, attacks table synthesis, Toss damage effect execution with Wrasslin, and custom user-created skills. All 925 tests across 163 suites pass with 0 failures.
+
 ## 2.4.20
 
 ### Enforced Number of Hands & Limbs Subsystem

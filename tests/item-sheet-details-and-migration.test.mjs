@@ -122,4 +122,54 @@ test('DCC RPG Item Sheet Rendering & Legacy Schema Migration', async (t) => {
     assert.equal(andHelper(true, true, true), true);
     assert.equal(andHelper(true, false, true), false);
   });
+
+  await t.test('7. Handlebars helper or returns truthy operand rather than boolean and works with eq', () => {
+    const orHelper = globalThis.Handlebars?.helpers?.or;
+    const eqHelper = globalThis.Handlebars?.helpers?.eq;
+    assert.equal(typeof orHelper, 'function', 'Handlebars or helper must be registered');
+    assert.equal(orHelper('Utility', 'Edge'), 'Utility');
+    assert.equal(orHelper('', 'Bashing'), 'Bashing');
+    assert.equal(orHelper(null, 'Reach'), 'Reach');
+    assert.equal(orHelper(false, false), false);
+
+    // Equality test mimicking template select matching
+    assert.equal(eqHelper(orHelper('Bashing', 'Edge'), 'Bashing'), true);
+    assert.equal(eqHelper(orHelper('Utility', 'Edge'), 'Utility'), true);
+    assert.equal(eqHelper(orHelper('Utility', ''), 'Edge'), false);
+  });
+
+  await t.test('8. DCCItemSheet preserves skillType and precomputes skillTypeOptions without reverting to Edge', async () => {
+    const skill = new DCCItem({
+      name: 'Custom Lockpicking',
+      type: 'skill',
+      system: {
+        rank: 1,
+        stat: 'dex',
+        skillType: 'Utility',
+        type: 'Utility'
+      }
+    });
+
+    const sheet = new DCCItemSheet(skill);
+    const context = await sheet.getData();
+
+    assert.equal(context.currentSkillType, 'Utility');
+    const utilityOpt = context.skillTypeOptions.find(o => o.value === 'Utility');
+    const edgeOpt = context.skillTypeOptions.find(o => o.value === 'Edge');
+    assert.ok(utilityOpt);
+    assert.ok(edgeOpt);
+    assert.equal(utilityOpt.selected, true, 'Utility option must be selected for a Utility skill');
+    assert.equal(edgeOpt.selected, false, 'Edge option must not be selected');
+
+    // Simulate changing skill type to Bashing via sheet update
+    await sheet._updateObject({}, { 'system.skillType': 'Bashing' });
+    assert.equal(skill.system.skillType, 'Bashing', 'skillType must update to Bashing');
+    assert.equal(skill.system.type, 'Bashing', 'system.type must synchronize to Bashing');
+
+    const updatedContext = await sheet.getData();
+    const bashingOpt = updatedContext.skillTypeOptions.find(o => o.value === 'Bashing');
+    assert.equal(bashingOpt.selected, true, 'Bashing option must now be selected');
+    const updatedEdgeOpt = updatedContext.skillTypeOptions.find(o => o.value === 'Edge');
+    assert.equal(updatedEdgeOpt.selected, false, 'Edge option must not be selected after switching to Bashing');
+  });
 });

@@ -1,20 +1,73 @@
-- [x] ***Item Idempotence*** Items should be unique per entry for non consumables and are. Crawlers should not be. I should be able to edit a crawler on any scene and the changes will persist across all scenes and into the future.  Same with spells.  A spell should be globally unique.  If you modify a spell in the compendium it should update for every user.  Same with items, Classes, Races, buffs and debuffs in the compendium. (Completed: compendium-sync engine, baseActor synthetic token synchronization, drop & add idempotence, unit test suite).
+[x] ***Verify Combat Techniques*** Verify skills are attributed correctly as attacks or Damage Effects.  This should be clearly stated but for clarity the only CANONICAL 
+damage effects are:
+    Choke Out
+    Dirty Fighting
+    Iron Punch
+    Powerful Strike
+    Skullcracker
+    Toss
+    Smush
 
+They will have as part of their description the strike they are associated with. 
+example: 
 
-- [x] ***Use the same interface for item creation and Editing Globally*** The button in the right global nav for Items should use the same item Builder as the item editor.  This also applies to Classes, Races, Spells, and any other object that can be created. (Completed: unified createAndEditItem, openGlobalItemCreatorDialog, custom studio launcher hooks, unit test suite).
+Toss
+Wrasslin’ Damage Effect, Passive
+You deal +1d8 base damage + Str Bludgeoning, end
+the Held Debuff, and throw the target 5 feet for every
+five Ranks (minimum 5 feet) you have in this Skill. You
+can only Toss foes of a smaller size than you.
+UPGRADES
+Rank 5: You can Toss foes up to your own size or smaller.
+Rank 10: You can Toss foes one size larger than you or
+smaller.
+Rank 15: +1d8 base damage, and you can throw foes
+two sizes larger than you or smaller.
 
-- [x] ***Associated Skills in item Creation*** Instead of a comma seperated set of values for associated skills populating that field should be driven by the existing set of skills that could be associated.  Come up with a strategy for selecting and creating associated skills for items.  Simple examples - All crossbows should be associated with the Crossbow skill.  All Ranged weapons should be associated with the Ranged Weapons Skill and the Aiming Skill. (Completed: CANONICAL_WEAPON_SKILL_MAP, tag pills, dropdown pickers, auto-suggest actions, unit test suite).
+Is a Wrasslin' Damage Effect
 
-- [x] ***Optional Effects/Combat Techniques in item Creation*** Instead of a comma seperated set of values for effects and combat techniques field should be driven by the existing set of skills and effects that could be associated.  Come up with a strategy for selecting and creating associated skills for items. (Completed: CANONICAL_WEAPON_TECHNIQUE_MAP, tag pills, dropdown pickers, auto-suggest actions, unit test suite).
+Damage effects may be applicable for multiple skills. We need to ensure that the correct skills are associated with the correct damage effects.
 
-- [x] ***Hard coded associations should be moved to skill/item definition and not be in arbitrary code*** For instance weapon associations with code like "if (name.includes('crossbow'))" should be removed and replaced with a system where the association is encoded in the skill set definition. (Completed: removed arbitrary substring checks; data-driven skill appliesTo integration in weapon-associations.mjs, unit test suite).
+They will have as part of their description the strike they are associated with. 
 
-- [x] ***Advantage Buffs and Disadvantage Debuffs*** If a user has a Buff or Debuff (permanent or external) that is active when the skill, attack, or other roll that the buff or debuff affects should correctly roll with advantage or disadvantage. First come up with options on how to implement this feature. (Completed: Data-Driven Roll Scope Targeting Option 1; CANONICAL_CONDITION_ROLL_MODIFIERS, rollModifierMode & affects schemas, centralized getRollAdvantageState with cancellation across attacks, spells, skills, and stats, unit test suite). 
+Combat Techniques or attacks will be clearly marked as such. For example:
 
-- [x] ***Default Multipliers for Crit Range*** Critical Hit Multipliers should default to 1x on all ranks for an item or spell during the creation process.  They should be easily adjustable by the GM. (Completed: 1x defaults across GearDataModel, SkillDataModel, SpellDataModel, sheet GM editor, unit test suite).
+Unarmed Combat
+Melee Attack, Str
+AI Favor: 1
+Limitations: Cannot choose a Damage Effect.
+Every crawler starts out with this Skill. This is a mixture
+of all strikes, so call it what you will when you Attack.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage
+Rank 10: +1d4 base damage
+Rank 15: +2d4 base damage
 
-- [x] ***Gold Values Should be Editable by Game Masters only*** - currently you cannot edit the value of an item or set its value on creation.  Game masters should be able to do that. (Completed: GM-editable inputs, non-GM disabled/readonly display, server-side payload stripping in _updateObject, unit test suite). 
+States it is a Str based Melee Attack.
 
-- [x] ***Enforced number of hands*** - Normally crawlers can only use two hands for wielding gear. There should be a warning if that number is exceeded, however some classes or injuries will allow crawlers to have more or less hands. Similarly quadrupeds will have four legs but no arms. Set a warning on the crawler sheet if this number is exceeded. A simple example would be a Centaur. They have 2 legs, two arms and a horse body. They could have 2 hands for wielding gear and 4 hooves for locomotion. The number of legs and arms should be adjustable by the GM. This should default to 2 for most humanoids but allow for variations for other species. Consider using Buffs/Debuffs for changing the number of limbs. (Completed: limbs schema {arms, legs, hands}, handsRequired gear tracking, active buff/debuff limbModifiers, canonical condition modifiers, GM-only editing with security stripping, crawler sheet warning banners & badges, 10 automated unit tests).
+Check all of the Combat skills and make sure they are correctly classified as attacks or damage effects.
 
-
+**Verification Status: COMPLETED**
+- Validated all 121 compendium skills in `DCC_SKILLS` (`src/data/skills.mjs`):
+  - 26 Primary Attack Skills: `isAttack: true`, `isTechnique: false`, `hasDamage: true`, valid `baseDamage`, `damageStat`, and `damageType`.
+    - Natural strikes: *Bite*, *Back Claw*, *Slice Attack*
+    - Bashing: *Club*, *Improvised Weapons*, *Warhammer*
+    - Edge: *Axe*, *Dagger*, *Longsword*, *Rapier*
+    - Hand to Hand: *Foot Soldier*, *Noggin Nocker*, *Pugilism*, *Unarmed Combat*, *Wrasslin*
+    - Ranged: *Bow*, *Crossbow*, *Handgun*, *Javelin*, *Shotgun*, *Shuriken*, *Slingshot*
+    - Reach: *Herding Weapons*, *Lance*, *Polearm*, *Quarterstaff*
+  - 7 Canonical Damage Effects: `isTechnique: true`, `isAttack: false`, `hasDamage: false`, `techniqueConfig.isDamageEffect: true`.
+    - *Choke Out*: Wrasslin
+    - *Dirty Fighting*: Pugilism, Wrasslin
+    - *Iron Punch*: Pugilism
+    - *Powerful Strike*: Foot Soldier, Noggin Nocker, Pugilism
+    - *Skullcracker*: Noggin Nocker
+    - *Smush*: Foot Soldier
+    - *Toss*: Wrasslin
+    - Strictly purged `Unarmed Combat` from `appliesTo` and `appliesToTags` for all damage effects.
+  - 5 Weapon Group Masteries (*Edged Weapons*, *Blunt Weapons*, *Reach Weapons*, *Ranged Weapons*, *Strike Weapons*): `isAttack: false`, `isTechnique: false`, `hasDamage: false`.
+  - 2 Tactical Combat Actions (*Call a Play*, *Intervene*): `isAttack: false`, `isTechnique: false`, `hasDamage: false`.
+  - 81 Utility / Passive / Crafting / Exploration skills: `isAttack: false`, `isTechnique: false`, `hasDamage: false`.
+- Compendium pack builder `scripts/build-packs.mjs` preserves all skill system metadata (`isAttack`, `isTechnique`, `hasDamage`, etc.).
+- Automated test coverage in `tests/attack-vs-technique-classification.test.mjs` validates all 121 skills. 930 tests passing across 163 suites.

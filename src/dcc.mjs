@@ -350,7 +350,14 @@ Hooks.once('init', async function() {
     const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
     return terms.every(Boolean);
   });
-  Handlebars.registerHelper('or', (a, b) => Boolean(a || b));
+  Handlebars.registerHelper('or', (...args) => {
+    const last = args[args.length - 1];
+    const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
+    for (const term of terms) {
+      if (term) return term;
+    }
+    return false;
+  });
   Handlebars.registerHelper('not', (a) => !a);
   Handlebars.registerHelper('gte', (a, b) => Number(a) >= Number(b));
   Handlebars.registerHelper('numberFormat', (value, options) => {

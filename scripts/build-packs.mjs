@@ -61,7 +61,8 @@ async function buildSkills() {
         category: skill.system.category || "Utility",
         notes: skill.system.notes,
         upgrades: skill.system.upgrades || "",
-        checked: false
+        checked: false,
+        ...skill.system
       },
       effects: [],
       folder: null,

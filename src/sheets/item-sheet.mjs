@@ -521,6 +521,20 @@ export class DCCItemSheet extends BaseItemSheet {
       }
     }
 
+    if (context.item.type === 'skill') {
+      const currentSkillType = context.system.skillType || context.system.type || 'Utility';
+      context.currentSkillType = currentSkillType;
+      context.skillTypeOptions = [
+        { value: 'Edge', label: 'Edge', selected: currentSkillType === 'Edge' },
+        { value: 'Bashing', label: 'Bashing', selected: currentSkillType === 'Bashing' },
+        { value: 'Reach', label: 'Reach', selected: currentSkillType === 'Reach' },
+        { value: 'Ranged', label: 'Ranged', selected: currentSkillType === 'Ranged' },
+        { value: 'Strike', label: 'Strike', selected: currentSkillType === 'Strike' },
+        { value: 'Hand to Hand', label: 'Hand to Hand', selected: currentSkillType === 'Hand to Hand' },
+        { value: 'Utility', label: 'Utility', selected: currentSkillType === 'Utility' }
+      ];
+    }
+
     if (context.item.type === 'loot') {
       const lootType = String(context.system?.lootType || '').toLowerCase().trim();
       context.isScratchTicket = lootType === 'scratch_ticket' || lootType === 'scratch-off-ticket' || lootType.includes('scratch');
@@ -782,6 +796,13 @@ export class DCCItemSheet extends BaseItemSheet {
     }
 
     if (this.item.type === 'skill' || this.item.type === 'spell') {
+      if (this.item.type === 'skill') {
+        if (formData['system.skillType']) {
+          formData['system.type'] = formData['system.skillType'];
+        } else if (formData['system.type']) {
+          formData['system.skillType'] = formData['system.type'];
+        }
+      }
       if (typeof formData['system.appliesTo'] === 'string') {
         formData['system.appliesTo'] = formData['system.appliesTo']
           .split(',')

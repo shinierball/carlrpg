@@ -86,7 +86,6 @@ This document defines the core directives, workflow rules, architecture standard
 - A vast majority of unintended functionality and bugs have been caused by greedy pattern matching it is mostly unnecessary
 - Assume all content is created by users so make any functionality dependent on selecting and utilizing arbitrary data forced into a structure rather than well defined strings.  No magic numbers or strings allowed everything should be pulled from a compendium or item definition where possible. 
 
-
 ### 1. Template Preloading
 - Any new `.hbs` partial template added to `templates/` **must be registered in `loadTemplates` in `src/dcc.mjs`**, or Foundry will fail to render the partial dynamically.
 
@@ -142,7 +141,8 @@ This document defines the core directives, workflow rules, architecture standard
 2. **Formulate the Test Case**: Identify the exact conditions and assertions needed in a corresponding `tests/<feature>.test.mjs` file.
 3. **Implement**: Make clean, focused changes across source files, templates, and styles.
 4. **Verify**: Execute `node --test tests/*.test.mjs`. Fix any failures.
-5. **Inspect Diff**: Verify `git diff` to ensure no stray files or accidental edits.
-6. **Report**: Summarize changes clearly and point out verified test results.
-7. **Documentation**: Create or update documentation in the `docs/` directory to reflect the changes. Update the README.md to reflect the changes. Update the CHANGELOG.md to reflect the changes.
-8. **Release**: Increment the patch version in `system.json` and `template.json` to all foundry to detect system changes for updates. For major functional changes increment the minor version. For breaking changes increment the major version. For minor functional changes increment the patch version. Identify and create any migrations required to maintain the integrity of old data specifically skills/spells/classes/races and items. This should include migration for all compendium entries and non compendium items. 
+5. **Migrate**: Create a migration script for any data changes if required. Run migration script to update all existing data in the compendium and non compendium data.
+6. **Inspect Diff**: Verify `git diff` to ensure no stray files or accidental edits.
+7. **Report**: Summarize changes clearly and point out verified test results.
+8. **Documentation**: Create or update documentation in the `docs/` directory to reflect the changes. Update the README.md to reflect the changes. Update the CHANGELOG.md to reflect the changes.
+9. **Release**: Increment the patch version in `system.json` and `template.json` to all foundry to detect system changes for updates. For major functional changes increment the minor version. For breaking changes increment the major version. For minor functional changes increment the patch version. Identify and create any migrations required to maintain the integrity of old data specifically skills/spells/classes/races and items. This should include migration for all compendium entries and non compendium items. 

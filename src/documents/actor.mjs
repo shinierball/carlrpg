@@ -98,7 +98,7 @@ export const DAMAGE_EFFECT_AI_FAVOR = {
 export const DEFAULT_TECHNIQUE_CONFIGS = {
   'iron punch': {
     isDamageEffect: true,
-    appliesToTags: ['pugilism', 'unarmed', 'hand to hand'],
+    appliesToTags: ['pugilism'],
     baseDiceCountMod: '+1',
     damageBonus: '1d2',
     damageType: 'Physical',
@@ -110,7 +110,7 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'powerful strike': {
     isDamageEffect: true,
-    appliesToTags: ['foot soldier', 'noggin knocker', 'noggin nocker', 'pugilism', 'unarmed', 'hand to hand', 'melee'],
+    appliesToTags: ['foot soldier', 'noggin knocker', 'noggin nocker', 'pugilism'],
     baseDiceCountMod: '* @rank',
     damageBonus: '1d6',
     damageType: '',
@@ -123,7 +123,7 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'skullcracker': {
     isDamageEffect: true,
-    appliesToTags: ['noggin knocker', 'noggin nocker', 'unarmed', 'hand to hand'],
+    appliesToTags: ['noggin knocker', 'noggin nocker'],
     baseDiceCountMod: '+1',
     damageBonus: '1d4',
     damageType: 'Physical',
@@ -135,7 +135,7 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'toss': {
     isDamageEffect: true,
-    appliesToTags: ['wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    appliesToTags: ['wrasslin', "wrasslin'"],
     damageBonus: '1d8',
     damageType: 'Bludgeoning',
     stat: 'str',
@@ -143,7 +143,7 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'dirty fighting': {
     isDamageEffect: true,
-    appliesToTags: ['pugilism', 'wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    appliesToTags: ['pugilism', 'wrasslin', "wrasslin'"],
     debuffName: 'Woozy',
     rankBreaks: {
       rank5: { debuff: 'The Taint' },
@@ -152,13 +152,13 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'smush': {
     isDamageEffect: true,
-    appliesToTags: ['foot soldier', 'unarmed', 'hand to hand'],
+    appliesToTags: ['foot soldier'],
     cooldown: '1/round',
     notes: 'Deal ×2 total damage if target has 20% Health Bar or less'
   },
   'choke out': {
     isDamageEffect: true,
-    appliesToTags: ['wrasslin', "wrasslin'", 'unarmed', 'hand to hand'],
+    appliesToTags: ['wrasslin', "wrasslin'"],
     notes: 'Deal ×2 total damage if target is at 10% Health Bar or less'
   }
 };
@@ -1716,6 +1716,13 @@ export class DCCActor extends BaseActor {
    */
   getValidDamageEffects(attackItem) {
     if (!attackItem) return [];
+    const normName = (attackItem.name || '').toLowerCase().trim();
+
+    // Official DCC RPG rule: Unarmed Combat explicitly cannot choose any damage effect.
+    if (normName === 'unarmed combat' || normName === 'unarmed') {
+      return [];
+    }
+
     const sys = attackItem.system || {};
 
     // 1. Explicitly configured optionalEffects on the item itself
@@ -1731,7 +1738,6 @@ export class DCCActor extends BaseActor {
     }
 
     // 2. Canonical mapping by attackItem.name
-    const normName = (attackItem.name || '').toLowerCase().trim();
     if (CANONICAL_DAMAGE_EFFECTS[normName]) {
       effects.push(...CANONICAL_DAMAGE_EFFECTS[normName]);
     }
@@ -2071,11 +2077,15 @@ export class DCCActor extends BaseActor {
     const sLower = skillName.toLowerCase().trim();
     const isPugilism = sLower === 'pugilism' || Boolean(sys.tags?.includes('pugilism'));
     const isUnarmed = sLower === 'unarmed combat' || Boolean(sys.tags?.includes('unarmed'));
+    const isWrasslin = sLower === 'wrasslin' || sLower === "wrasslin'" || Boolean(sys.tags?.includes('wrasslin'));
+    const isFootSoldier = sLower === 'foot soldier' || Boolean(sys.tags?.includes('foot_soldier'));
+    const isNogginKnocker = sLower === 'noggin knocker' || sLower === 'noggin nocker' || Boolean(sys.tags?.includes('noggin_knocker'));
+    const isPrimaryAttack = isPugilism || isUnarmed || isWrasslin || isFootSoldier || isNogginKnocker;
     const skillType = sys.skillType || sys.type || '';
     const checkType = (sys.checkType || '').toLowerCase();
 
     // Fallback for built-in unarmed attack items where base damage formula was stored in notes
-    if (!rawBaseDamage && (isPugilism || isUnarmed) && typeof rawNotes === 'string' && /(\d+)d(\d+)/i.test(rawNotes)) {
+    if (!rawBaseDamage && isPrimaryAttack && typeof rawNotes === 'string' && /(\d+)d(\d+)/i.test(rawNotes)) {
       rawBaseDamage = rawNotes;
     }
 
@@ -2083,7 +2093,7 @@ export class DCCActor extends BaseActor {
     // Non-attack skills or explicitly non-damaging skills NEVER deal damage unless forced.
     const explicitNoDamage = sys.hasDamage === false || (sys.isAttack === false && !rawBaseDamage && !options.forceDamage);
     const explicitHasDamage = sys.hasDamage === true;
-    const hasDamageConfig = Boolean(rawBaseDamage) || isPugilism || isUnarmed || Boolean(options.forceDamage);
+    const hasDamageConfig = Boolean(rawBaseDamage) || isPrimaryAttack || Boolean(options.forceDamage);
 
     let hasDamage = false;
     if (explicitNoDamage && !options.forceDamage) {
@@ -2094,7 +2104,8 @@ export class DCCActor extends BaseActor {
       hasDamage = hasDamageConfig;
     }
 
-    let statKey = (sys.stat || 'str').toLowerCase();
+    let defaultStat = isNogginKnocker ? 'con' : (isPugilism ? 'str' : (sys.stat || 'str'));
+    let statKey = (sys.damageStat || defaultStat).toLowerCase();
     if (!hasDamage) {
       if (!this.system?.abilities?.[statKey]) {
         statKey = (sys.stat || 'str').toLowerCase();
@@ -2116,8 +2127,8 @@ export class DCCActor extends BaseActor {
     }
 
     let baseCount = isPugilism ? (rank >= 15 ? 5 : (rank >= 10 ? 4 : (rank >= 5 ? 3 : 1))) : 1;
-    let baseSides = isPugilism ? 2 : (isUnarmed ? 4 : 4);
-    let damageType = sys.damageType || (isPugilism || isUnarmed ? 'Bludgeoning' : 'Physical');
+    let baseSides = isPugilism ? 2 : 4;
+    let damageType = sys.damageType || (isPrimaryAttack ? 'Bludgeoning' : 'Physical');
 
     // Parse Base Damage formula only if rawBaseDamage is defined
     if (rawBaseDamage) {
@@ -3050,17 +3061,38 @@ export class DCCActor extends BaseActor {
     const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
     const techniques = [];
 
+    const PRIMARY_ATTACK_SKILLS = new Set([
+      'pugilism',
+      'wrasslin',
+      "wrasslin'",
+      'foot soldier',
+      'noggin knocker',
+      'noggin nocker',
+      'unarmed combat',
+      'bite',
+      'back claw',
+      'slice attack',
+      'club',
+      'improvised weapons',
+      'martial arts'
+    ]);
+
     for (const s of skills) {
       const sys = s.system || {};
       const name = (s.name || '').trim();
       const normName = name.toLowerCase();
+
+      // Explicit Rule: Primary attacks are strictly attacks, NEVER combat techniques
+      if (sys.isAttack === true || PRIMARY_ATTACK_SKILLS.has(normName) || sys.isTechnique === false) {
+        continue;
+      }
+
       const cType = (sys.checkType || '').toLowerCase();
-      const notes = (sys.notes || '').toLowerCase();
       
       const isExplicitTech = sys.isTechnique === true || sys.techniqueConfig?.isDamageEffect === true;
-      const isDmgEffect = cType.includes('damage effect') || notes.includes('damage effect');
-      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave']);
-      const isKnownManeuver = Boolean(sys.tags?.includes('maneuver')) || KNOWN_MANEUVERS.has(normName) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName]);
+      const isDmgEffect = cType.includes('damage effect');
+      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave', 'smush']);
+      const isKnownManeuver = Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || KNOWN_MANEUVERS.has(normName) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName]);
 
       if (isExplicitTech || isDmgEffect || isKnownManeuver) {
         const rank = Number(s.modifiedRank ?? sys.modifiedRank ?? sys.rank) || 0;
@@ -3201,15 +3233,15 @@ export class DCCActor extends BaseActor {
       const cType = (sys.checkType || '').toLowerCase();
       if (cType.includes('damage effect') || cType.includes('passive')) return false;
       const normName = s.name.toLowerCase().trim();
-      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave']);
-      if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
+      const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave', 'smush']);
+      if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
 
       if (sys.isAttack === false) return false;
 
       const dmgData = typeof this.getSkillDamageData === 'function' ? this.getSkillDamageData(s) : { hasDamage: false };
       const sType = (sys.skillType || sys.type || '').toLowerCase();
       const isCombatType = ['strike', 'bashing', 'hand to hand', 'edge', 'reach', 'ranged'].includes(sType);
-      const KNOWN_UNARMED = new Set(['pugilism', 'unarmed combat', 'wrasslin', 'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts']);
+      const KNOWN_UNARMED = new Set(['pugilism', 'unarmed combat', 'wrasslin', "wrasslin'", 'foot soldier', 'noggin knocker', 'noggin nocker', 'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts']);
       const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
 
       if (sys.isAttack === true) return true;
@@ -3366,14 +3398,17 @@ export class DCCActor extends BaseActor {
 
     const normName = skill.name.toLowerCase().trim();
     const isPugilism = normName === 'pugilism';
-    const toHitStat = (dmgData.stat || sys.stat || (isPugilism ? 'dex' : 'str')).toLowerCase();
+    const isWrasslin = normName === 'wrasslin' || normName === "wrasslin'";
+    const isNogginKnocker = normName === 'noggin knocker' || normName === 'noggin nocker';
+    const isFootSoldier = normName === 'foot soldier';
+    const toHitStat = (sys.toHitStat || (isPugilism ? 'dex' : (sys.stat || 'str'))).toLowerCase();
     const statMod = this.system?.abilities?.[toHitStat]?.mod ?? 0;
     const toHitMod = rank + statMod;
     const displayToHitStat = toHitStat.toUpperCase();
     const displayToHitRank = rank;
     const displayToHit = `${displayToHitStat} (${rank})`;
 
-    let combinedDice = dmgData.formula || '1d4';
+    let combinedDice = dmgData.formula || (isPugilism ? '1d2' : '1d4');
     if (isPugilism && (!sys.baseDamage || !sys.notes?.includes('Base Damage'))) {
       let diceCount = 1;
       if (rank >= 15) diceCount = 5;
@@ -3390,10 +3425,10 @@ export class DCCActor extends BaseActor {
       }
     }
 
-    const dmgStatKey = (isPugilism ? (sys.damageStat || 'str') : (dmgData.stat || sys.damageStat || sys.stat || 'str')).toLowerCase();
+    const dmgStatKey = (isNogginKnocker ? (sys.damageStat || 'con') : (isPugilism ? (sys.damageStat || 'str') : (dmgData.stat || sys.damageStat || sys.stat || 'str'))).toLowerCase();
     const dmgStatMod = this.system?.abilities?.[dmgStatKey]?.mod ?? 0;
     const displayDmgMod = dmgStatMod >= 0 ? `+${dmgStatMod}` : `${dmgStatMod}`;
-    const damageType = dmgData.damageType || (isPugilism ? 'Bludgeoning' : 'Physical');
+    const damageType = dmgData.damageType || sys.damageType || (isPugilism || isWrasslin ? 'Bludgeoning' : 'Physical');
     const displayDamage = `${combinedDice}${techniqueBonusDice} + ${displayDmgMod} (${damageType})`;
 
     const critMult = (rank >= 15 && sys.critMultiplierR15) ? sys.critMultiplierR15

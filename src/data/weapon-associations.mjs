@@ -57,6 +57,9 @@ export const CANONICAL_WEAPON_SKILL_MAP = {
   'fist': ['Hand-to-Hand Combat', 'Brawling', 'Melee Combat'],
   'unarmed': ['Hand-to-Hand Combat', 'Brawling', 'Melee Combat'],
   'brass knuckles': ['Hand-to-Hand Combat', 'Brawling', 'Melee Combat'],
+  'pugilism': ['Pugilism', 'Hand-to-Hand Combat', 'Brawling'],
+  'wrasslin': ['Wrasslin', 'Hand-to-Hand Combat', 'Brawling'],
+  "wrasslin'": ['Wrasslin', 'Hand-to-Hand Combat', 'Brawling'],
   'shield': ['Shield Defense', 'Melee Combat']
 };
 
@@ -68,8 +71,8 @@ export const CANONICAL_WEAPON_TECHNIQUE_MAP = {
   'Bashing': ['Skullcracker', 'Smush', 'Powerful Strike'],
   'Blunt': ['Skullcracker', 'Smush', 'Powerful Strike'],
   'Reach': ['Impale', 'Powerful Strike'],
-  'Hand to Hand': ['Iron Punch', 'Choke Out', 'Toss', 'Smush', 'Dirty Fighting'],
-  'Unarmed': ['Iron Punch', 'Choke Out', 'Toss', 'Smush', 'Dirty Fighting'],
+  'Hand to Hand': [],
+  'Unarmed': [],
 
   // Specific Types
   'crossbow': ['Aiming', 'Power Shot'],
@@ -83,8 +86,15 @@ export const CANONICAL_WEAPON_TECHNIQUE_MAP = {
   'sword': ['Serrated Tear', 'Powerful Strike'],
   'broadsword': ['Serrated Tear', 'Powerful Strike'],
   'dagger': ['Serrated Tear', 'Dirty Fighting'],
-  'unarmed': ['Iron Punch', 'Choke Out', 'Toss', 'Smush', 'Dirty Fighting'],
-  'fist': ['Iron Punch', 'Choke Out', 'Toss', 'Smush', 'Dirty Fighting']
+  'unarmed': [],
+  'unarmed combat': [],
+  'fist': [],
+  'pugilism': ['Dirty Fighting', 'Iron Punch', 'Powerful Strike'],
+  'wrasslin': ['Choke Out', 'Dirty Fighting', 'Toss'],
+  "wrasslin'": ['Choke Out', 'Dirty Fighting', 'Toss'],
+  'foot soldier': ['Powerful Strike', 'Smush'],
+  'noggin knocker': ['Skullcracker', 'Powerful Strike'],
+  'noggin nocker': ['Skullcracker', 'Powerful Strike']
 };
 
 /**

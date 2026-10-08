@@ -1655,7 +1655,14 @@ if (!globalThis.Handlebars) {
       const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
       return terms.every(Boolean);
     },
-    or: (a, b) => Boolean(a || b),
+    or: (...args) => {
+      const last = args[args.length - 1];
+      const terms = (last && typeof last === 'object' && 'hash' in last) ? args.slice(0, -1) : args;
+      for (const term of terms) {
+        if (term) return term;
+      }
+      return false;
+    },
     not: (a) => !a,
     gte: (a, b) => Number(a) >= Number(b),
     numberFormat: (value, options) => {

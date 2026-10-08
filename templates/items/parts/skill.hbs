@@ -22,13 +22,19 @@
   <div class="dcc-field-group small">
     <span class="dcc-field-label">Skill Type</span>
     <select name="system.skillType" class="dcc-field-input">
-      <option value="Edge" {{#if (eq (or system.skillType system.type) "Edge")}}selected{{/if}}>Edge</option>
-      <option value="Bashing" {{#if (eq (or system.skillType system.type) "Bashing")}}selected{{/if}}>Bashing</option>
-      <option value="Reach" {{#if (eq (or system.skillType system.type) "Reach")}}selected{{/if}}>Reach</option>
-      <option value="Ranged" {{#if (eq (or system.skillType system.type) "Ranged")}}selected{{/if}}>Ranged</option>
-      <option value="Strike" {{#if (eq (or system.skillType system.type) "Strike")}}selected{{/if}}>Strike</option>
-      <option value="Hand to Hand" {{#if (eq (or system.skillType system.type) "Hand to Hand")}}selected{{/if}}>Hand to Hand</option>
-      <option value="Utility" {{#if (eq (or system.skillType system.type) "Utility")}}selected{{/if}}>Utility</option>
+      {{#if skillTypeOptions}}
+        {{#each skillTypeOptions}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+        {{/each}}
+      {{else}}
+        <option value="Edge" {{#if (eq (or system.skillType system.type) "Edge")}}selected{{/if}}>Edge</option>
+        <option value="Bashing" {{#if (eq (or system.skillType system.type) "Bashing")}}selected{{/if}}>Bashing</option>
+        <option value="Reach" {{#if (eq (or system.skillType system.type) "Reach")}}selected{{/if}}>Reach</option>
+        <option value="Ranged" {{#if (eq (or system.skillType system.type) "Ranged")}}selected{{/if}}>Ranged</option>
+        <option value="Strike" {{#if (eq (or system.skillType system.type) "Strike")}}selected{{/if}}>Strike</option>
+        <option value="Hand to Hand" {{#if (eq (or system.skillType system.type) "Hand to Hand")}}selected{{/if}}>Hand to Hand</option>
+        <option value="Utility" {{#if (eq (or system.skillType system.type) "Utility")}}selected{{/if}}>Utility</option>
+      {{/if}}
     </select>
   </div>
   <div class="dcc-field-group small">

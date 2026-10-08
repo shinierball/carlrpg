@@ -6,6 +6,7 @@ import { DCCActor } from '../src/documents/actor.mjs';
 import { DCCItem } from '../src/documents/item.mjs';
 import { DCCCrawlerSheet } from '../src/sheets/crawler-sheet.mjs';
 import { DCC_SKILLS } from '../src/data/skills.mjs';
+import { DCCSkillManager } from '../src/apps/skill-manager.mjs';
 
 describe('DCC RPG - Attacks vs Combat Techniques Classification (Wrasslin, Pugilism & Toss)', () => {
   let crawler;
@@ -313,6 +314,78 @@ describe('DCC RPG - Attacks vs Combat Techniques Classification (Wrasslin, Pugil
     assert.equal(techniqueCount, 7, 'Must have exactly 7 combat techniques / damage effects');
     assert.equal(otherCount, 88, 'Must have exactly 88 utility, mastery, and tactical skills');
     assert.equal(attackCount + techniqueCount + otherCount, 121, 'Total must equal 121 skills');
+  });
+
+  it('11. Wrasslin with default isAttack: false or legacy uninitialized flags synthesizes into attacks table', async () => {
+    // Simulate skill item where template.json schema default was isAttack: false, hasDamage: false
+    const legacyWrasslin = new DCCItem({
+      name: 'Wrasslin',
+      type: 'skill',
+      system: {
+        rank: 3,
+        stat: 'str',
+        category: 'Combat',
+        isAttack: false,
+        hasDamage: false
+      }
+    }, crawler);
+    crawler.items.push(legacyWrasslin);
+
+    const attacks = crawler.getSynthesizedAttacks();
+    const wrasslinAtk = attacks.find(a => a.name === 'Wrasslin');
+    assert.ok(wrasslinAtk, 'Wrasslin must synthesize into attacks despite isAttack: false default');
+    assert.equal(wrasslinAtk.isSkillAttack, true);
+    assert.equal(wrasslinAtk.skillRank, 3);
+    assert.equal(wrasslinAtk.displayToHit, 'STR (3)');
+    assert.equal(wrasslinAtk.toHitMod, 8); // STR mod 5 + Rank 3 = 8
+    assert.equal(wrasslinAtk.baseDice, '1d4');
+    assert.equal(wrasslinAtk.damageType, 'Bludgeoning');
+    assert.deepEqual(wrasslinAtk.validDamageEffects, ['Choke Out', 'Dirty Fighting', 'Toss']);
+
+    // Check crawler sheet context preparation
+    const sheet = new DCCCrawlerSheet(crawler);
+    const context = await sheet._prepareContext({});
+    const sheetAtk = context.attacks.find(a => a.name === 'Wrasslin');
+    assert.ok(sheetAtk, 'Crawler sheet context.attacks must include Wrasslin');
+  });
+
+  it('12. DCCSkillManager adds Wrasslin preserving full attack attributes and synthesizes into attacks', async () => {
+    const manager = new DCCSkillManager({ actor: crawler });
+    const allSkills = await manager.getUnifiedSkills();
+    const wrasslinDef = allSkills.find(s => s.name.toLowerCase() === 'wrasslin');
+    assert.ok(wrasslinDef, 'Wrasslin must be indexed in DCCSkillManager');
+    assert.equal(wrasslinDef.system.isAttack, true);
+    assert.equal(wrasslinDef.system.hasDamage, true);
+
+    // Simulate adding skill to actor
+    const toCreate = [{
+      name: wrasslinDef.name,
+      type: 'skill',
+      img: wrasslinDef.img,
+      system: {
+        stat: wrasslinDef.system?.stat || 'str',
+        skillType: wrasslinDef.system?.skillType || wrasslinDef.system?.type || 'Utility',
+        type: wrasslinDef.system?.type || wrasslinDef.system?.skillType || 'Utility',
+        category: wrasslinDef.system?.category || 'Utility',
+        checkType: wrasslinDef.system?.checkType || 'Stat Check',
+        notes: wrasslinDef.system?.notes || '',
+        ...(wrasslinDef.system || {}),
+        rank: 2
+      }
+    }];
+    await crawler.createEmbeddedDocuments('Item', toCreate);
+
+    const created = crawler.items.find(i => i.name === 'Wrasslin');
+    assert.ok(created, 'Wrasslin item must exist on actor');
+    assert.equal(created.system.isAttack, true);
+    assert.equal(created.system.hasDamage, true);
+    assert.equal(created.system.baseDamage, '1d4');
+
+    const attacks = crawler.getSynthesizedAttacks();
+    const wrasslinAtk = attacks.find(a => a.name === 'Wrasslin');
+    assert.ok(wrasslinAtk, 'Wrasslin must appear in synthesized attacks');
+    assert.equal(wrasslinAtk.baseDice, '1d4');
+    assert.equal(wrasslinAtk.dmgStat, 'str');
   });
 });
 

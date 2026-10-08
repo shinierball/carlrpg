@@ -2091,7 +2091,7 @@ export class DCCActor extends BaseActor {
 
     // Strict data-driven damage determination:
     // Non-attack skills or explicitly non-damaging skills NEVER deal damage unless forced.
-    const explicitNoDamage = sys.hasDamage === false || (sys.isAttack === false && !rawBaseDamage && !options.forceDamage);
+    const explicitNoDamage = (sys.hasDamage === false && !isPrimaryAttack) || (sys.isAttack === false && !isPrimaryAttack && !rawBaseDamage && !options.forceDamage);
     const explicitHasDamage = sys.hasDamage === true;
     const hasDamageConfig = Boolean(rawBaseDamage) || isPrimaryAttack || Boolean(options.forceDamage);
 
@@ -3226,7 +3226,12 @@ export class DCCActor extends BaseActor {
       if (profile) attacks.push(profile);
     }
 
-    // 2. Unarmed / Combat Skills (that function as primary attacks)
+    // 2. Unarmed / Combat Strike Skills (that function as primary attacks without requiring weapon gear)
+    const KNOWN_UNARMED = new Set([
+      'pugilism', 'unarmed combat', 'wrasslin', "wrasslin'", 'foot soldier', 'noggin knocker', 'noggin nocker',
+      'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts'
+    ]);
+
     const attackSkills = skills.filter(s => {
       const sys = s.system || {};
       if (sys.isTechnique || sys.techniqueConfig?.isDamageEffect) return false;
@@ -3236,20 +3241,22 @@ export class DCCActor extends BaseActor {
       const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave', 'smush']);
       if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
 
-      if (sys.isAttack === false) return false;
+      const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
+      const isKnownAttack = isKnownUnarmed || Boolean(sys.tags?.includes('attack'));
+
+      if (sys.isAttack === false && !isKnownAttack) return false;
 
       const dmgData = typeof this.getSkillDamageData === 'function' ? this.getSkillDamageData(s) : { hasDamage: false };
       const sType = (sys.skillType || sys.type || '').toLowerCase();
       const isCombatType = ['strike', 'bashing', 'hand to hand', 'edge', 'reach', 'ranged'].includes(sType);
-      const KNOWN_UNARMED = new Set(['pugilism', 'unarmed combat', 'wrasslin', "wrasslin'", 'foot soldier', 'noggin knocker', 'noggin nocker', 'bite', 'back claw', 'slice attack', 'club', 'improvised weapons', 'martial arts']);
-      const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
 
-      if (sys.isAttack === true) return true;
+      if (sys.isAttack === true || isKnownAttack) return true;
       return dmgData.hasDamage && (isKnownUnarmed || cType.includes('attack') || isCombatType);
     });
 
     for (const skill of attackSkills) {
-      if (attacks.some(a => a.name.toLowerCase() === skill.name.toLowerCase())) continue;
+      const normSkill = skill.name.toLowerCase().trim();
+      if (attacks.some(a => a.name.toLowerCase() === normSkill || a.displayName?.toLowerCase() === normSkill || a.matchingSkillName?.toLowerCase() === normSkill)) continue;
       const profile = this._buildSkillAttackProfile(skill, primedTechs);
       if (profile) attacks.push(profile);
     }
@@ -3441,12 +3448,14 @@ export class DCCActor extends BaseActor {
 
     const validEffects = typeof this.getValidDamageEffects === 'function' ? this.getValidDamageEffects(skill) : [];
 
+    const attackName = isPugilism ? `${skill.name} (Unarmed)` : skill.name;
+
     return {
       id: skill.id,
       item: skill,
       system: sys,
-      name: `${skill.name} (Unarmed)`,
-      displayName: `${skill.name} (Unarmed)`,
+      name: attackName,
+      displayName: attackName,
       matchingSkillName: skill.name,
       isSkillAttack: true,
       isWeaponGear: false,

@@ -14,7 +14,7 @@ export class DCCSkillManager extends DCCBaseApplication {
     this.item = options.item || null;
     this.targetIndex = options.targetIndex ?? null;
     this.onSelect = options.onSelect || null;
-    this.activeCategory = 'all';
+    this.activeCategory = options.activeCategory || 'all';
     this.activeStat = 'all';
     this.searchQuery = '';
   }
@@ -64,7 +64,11 @@ export class DCCSkillManager extends DCCBaseApplication {
     const pack = typeof game !== 'undefined' ? game.packs?.get('carl-rpg.skills') : null;
     if (pack) {
       try {
-        const index = await pack.getIndex({ fields: ['system.stat', 'system.checkType', 'system.category', 'system.skillType', 'system.type', 'system.notes', 'img'] });
+        const index = await pack.getIndex({ fields: [
+          'system.stat', 'system.checkType', 'system.category', 'system.skillType', 'system.type', 'system.notes', 'img',
+          'system.isAttack', 'system.isTechnique', 'system.hasDamage', 'system.baseDamage', 'system.damageStat', 'system.damageType',
+          'system.optionalEffects', 'system.techniqueConfig', 'system.upgrades', 'system.rankBreaks'
+        ] });
         for (const entry of index) {
           skillsMap.set(entry.name.toLowerCase().trim(), {
             id: entry._id,
@@ -80,7 +84,8 @@ export class DCCSkillManager extends DCCBaseApplication {
               type: entry.system?.type || entry.system?.skillType || 'Utility',
               checkType: entry.system?.checkType || 'Stat Check',
               category: entry.system?.category || 'Utility',
-              notes: entry.system?.notes || ''
+              notes: entry.system?.notes || '',
+              ...entry.system
             }
           });
         }
@@ -108,7 +113,8 @@ export class DCCSkillManager extends DCCBaseApplication {
             type: s.system?.type || s.system?.skillType || 'Utility',
             checkType: s.system?.checkType || 'Stat Check',
             category: s.system?.category || 'Utility',
-            notes: s.system?.notes || ''
+            notes: s.system?.notes || '',
+            ...s.system
           }
         });
       }
@@ -133,7 +139,8 @@ export class DCCSkillManager extends DCCBaseApplication {
               type: item.system?.type || item.system?.skillType || 'Utility',
               checkType: item.system?.checkType || 'Stat Check',
               category: item.system?.category || 'General',
-              notes: item.system?.notes || ''
+              notes: item.system?.notes || '',
+              ...(item.system || {})
             }
           });
         }
@@ -344,13 +351,14 @@ export class DCCSkillManager extends DCCBaseApplication {
             type: 'skill',
             img: def.img,
             system: {
-              rank: 0,
-              stat: def.system.stat || 'str',
-              skillType: def.system.skillType || def.system.type || 'Utility',
-              type: def.system.type || def.system.skillType || 'Utility',
-              category: def.system.category || 'Utility',
-              checkType: def.system.checkType || 'Stat Check',
-              notes: def.system.notes || ''
+              stat: def.system?.stat || 'str',
+              skillType: def.system?.skillType || def.system?.type || 'Utility',
+              type: def.system?.type || def.system?.skillType || 'Utility',
+              category: def.system?.category || 'Utility',
+              checkType: def.system?.checkType || 'Stat Check',
+              notes: def.system?.notes || '',
+              ...(def.system || {}),
+              rank: 0
             }
           });
         }

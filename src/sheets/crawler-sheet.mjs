@@ -1731,7 +1731,8 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     // Open Skill Library Picker
     html.find('.open-skill-picker').click(ev => {
       ev.preventDefault();
-      this._openSkillPicker();
+      const targetCategory = $(ev.currentTarget).data('category') || 'all';
+      this._openSkillPicker(targetCategory);
     });
 
     // Open Spells Compendium / Manager
@@ -2453,9 +2454,10 @@ export class DCCCrawlerSheet extends BaseActorSheet {
 
   /**
    * Open interactive modal to choose skills from the DCC Skill Library & Manager
+   * @param {string} [activeCategory='all']
    */
-  _openSkillPicker() {
-    new DCCSkillManager({ actor: this.actor }).render(true);
+  _openSkillPicker(activeCategory = 'all') {
+    new DCCSkillManager({ actor: this.actor, activeCategory }).render(true);
   }
 
   /**

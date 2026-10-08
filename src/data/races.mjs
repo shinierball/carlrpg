@@ -56,6 +56,67 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 6,
+            "dex": 3,
+            "con": 0,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bow",
+          "rank": 2,
+          "ref": "id.skill.bow"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 2,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 2,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Bow, Endurance, and Pugilism Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "Each floor, you receive a coupon good for one free training at a weapon training Guild"
+        }
       ]
     }
   },
@@ -102,6 +163,55 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 5,
+            "con": 0,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 20,
+            "swim": 0,
+            "fly": 0,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Web",
+          "rank": 3,
+          "ref": "id.spell.web"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Web Spell, which costs half the normal Mana to cast"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Climbing, Perception, and Performance (with a stringed instrument specialty) Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "You have an innate Climb Move equal to your normal Move value, without needing Checks (unless under duress)"
+        }
       ]
     }
   },
@@ -154,6 +264,69 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -3,
+            "dex": 4,
+            "con": -2,
+            "int": 0,
+            "cha": -1
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Small (2); Animal"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-1 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Cat-like Reflexes"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Slice Attack Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on Cat-like Reflexes Skill Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "Nine Lives: Take half damage from the first 9 attacks each day"
+        },
+        {
+          "kind": "perk",
+          "name": "Vulnerability: Take double damage from Dogs and Beasts"
+        }
       ]
     }
   },
@@ -214,6 +387,74 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": -2,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Cat-Like Reflexes",
+          "rank": 2,
+          "ref": "id.skill.cat-like-reflexes"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Good First Impression",
+          "rank": 2,
+          "ref": "id.skill.good-first-impression"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Light on Your Feet",
+          "rank": 2,
+          "ref": "id.skill.light-on-your-feet"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Cat-like Reflexes, Good First Impression, Light on your Feet, and Slice Attack Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Your Slice Attacks may add your Cha Mod to the damage instead of Str"
+        },
+        {
+          "kind": "perk",
+          "name": "Toxoplasma G.: Once per day, your allies have Rank 5 Catcher Skill (and the +5 DR Upgrade!) for one round to protect only you from attacks about to hit you. Those who do gain 1 AI Favor"
+        },
+        {
+          "kind": "perk",
+          "name": "When dealing with felines other than Cat Girls/Boys, you make Charisma-based Skill Checks with Disadvantage"
+        }
       ]
     }
   },
@@ -260,6 +501,58 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -3,
+            "dex": 5,
+            "con": -3,
+            "int": 0,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Ambush and Creepy Chains (Club) Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Creepy Chains : Can use any chain as a weapon (use the Club weapon Skill, but with a 10ft range). A Changbi Demon can lengthen or shorten any chain by 50% once per scene"
+        },
+        {
+          "kind": "perk",
+          "name": "Each time a foe touches a Changbi Demon with their bare skin (such as with Hand-to-Hand attacks), that foe takes 1d4+F Acid"
+        },
+        {
+          "kind": "perk",
+          "name": "No need to breathe"
+        },
+        {
+          "kind": "perk",
+          "name": "vulnerable to Holy damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Cannot w orship a deity"
+        }
       ]
     }
   },
@@ -319,6 +612,79 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": -2,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Large (5)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 2,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Deception",
+          "rank": 2,
+          "ref": "id.skill.deception"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Escape Artist",
+          "rank": 1,
+          "ref": "id.skill.escape-artist"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Ambush and Decep tion Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Escape Ar tist Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on Deception Skill Checks when no talking is needed"
+        },
+        {
+          "kind": "perk",
+          "name": "Changelings gain free Access to organizations and producers by impersonating other crawlers and Syndicate celebrities, but can only use those relevant to the currently shifted individual"
+        },
+        {
+          "kind": "perk",
+          "name": "Changeling Shapeshifting: A Changeling who touches a member of another Race can shapeshift themselves into that Race, building a “library” of Races they can transform into. A Changeling can shapeshift into another Race as an Action to make an Unopposed Deception Skill Check. While shapeshifted into that other Race, they gain that Race’s bonuses other than statistics and Skills. For example, a Changeling shapeshifted into a Crocodilian would gain the Race’s Advantage on Intimidation Skill Checks, DR Buff, bonus after a full meal, and additional fatigue penalty on Charisma-based Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "While shapeshifted into another Race, these changes are conveyed to World Dungeon systems, including information on viewers’ HUDs, mini-maps, and other systems"
+        },
+        {
+          "kind": "perk",
+          "name": "Changelings can’t touch mimicstype creatures. Don’t ask why or what happens—it’s bad"
+        }
       ]
     }
   },
@@ -372,6 +738,68 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -4,
+            "dex": 0,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Large (5)"
+        },
+        {
+          "kind": "dr",
+          "value": 3
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 2,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Powerful Strike",
+          "rank": 2,
+          "ref": "id.skill.powerful-strike"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Pugilism and Po werful Strike Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "When phy sically menacing someone in person, roll Intimidate Skill Checks with Advantage"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Buff for all of your Skill Checks for 1 hour after eating a full meal"
+        },
+        {
+          "kind": "perk",
+          "name": "While you ha ve the Fatigued Debuff, roll all Charisma-based Checks with Disadvantage"
+        }
       ]
     }
   },
@@ -426,6 +854,72 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -3,
+            "dex": 0,
+            "con": -4,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Unchanged, but size changes when shifting"
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Deception",
+          "rank": 1,
+          "ref": "id.skill.deception"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 1,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Decep tion and Endurance Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "Due to shift ing mass, can determine their maximum weight to lift based on Constitution instead of Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on Escape Artist Skill Checks and can make such Checks while being Held or watched"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per scene , as an Action, you can incorporate a held weapon into their mass to deal additional damage equal to their Con Mod. Items incorporated this way can’t be disarmed"
+        },
+        {
+          "kind": "perk",
+          "name": "Doppelgänger Shape-Changing: As an Action, you can transform into any shape of comparable mass, incorporating carried and worn items into the new shape in the same percentage (that is, a Doppelgänger holding metal equal to half their weight must assume a shape that is one-third metal). This transformation is painful, causing you to mark off 1 Health Bar slot per change. If you attempt to change your shape to resemble a specific person or object, do so with an Unopposed Deception Skill Check"
+        }
       ]
     }
   },
@@ -476,6 +970,89 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": -4,
+            "int": -2,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 2,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "crafting",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "skillGroup.crafting"
+            ]
+          },
+          "label": "Crafting Skill 1 (Rank 3)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "crafting",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "skillGroup.crafting"
+            ]
+          },
+          "label": "Crafting Skill 2 (Rank 3)"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in two different crafting Skills of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Endurance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "All crafting Skills can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "When dealing with elves or fairies, make all Charisma-based Checks with Disadvantage"
+        }
       ]
     }
   },
@@ -532,6 +1109,67 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 0,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Engineering",
+          "rank": 3,
+          "ref": "id.skill.engineering"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dumpster Diving",
+          "rank": 2,
+          "ref": "id.skill.dumpster-diving"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Salvage",
+          "rank": 2,
+          "ref": "id.skill.salvage"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Engineerin g Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dumpster Di ving and Salvage Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Roll d20 Check s with Advantage when earth, rocks, and dirt are involved"
+        },
+        {
+          "kind": "perk",
+          "name": "Can produce a 15ft Cone of light from a harmless lizard nesting atop their heads, and can easily acquire a new lizard if the existing one is lost or killed"
+        }
       ]
     }
   },
@@ -585,6 +1223,64 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 4,
+            "con": 0,
+            "int": 4,
+            "cha": 4
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Intimida tion",
+          "rank": 2,
+          "ref": "id.skill.intimida-tion"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 1,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Intelligence, Dexterity, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intimidation Skill, and you can use your Cha Mod"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Lore Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "You recover Mana at twice the normal rate in a natural environment"
+        },
+        {
+          "kind": "perk",
+          "name": "Add 1d4 to your Evade Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "When dealing with Dwarves, Rat-Kin, or anyone smelly or dirty, make all Charisma-based Checks with Disadvantage"
+        },
+        {
+          "kind": "perk",
+          "name": "Two different Charisma-based Skills can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -640,6 +1336,63 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 6,
+            "con": 0,
+            "int": 0,
+            "cha": 6
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Good First Impression",
+          "rank": 3,
+          "ref": "id.skill.good-first-impression"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 2,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Streetwise",
+          "rank": 2,
+          "ref": "id.skill.streetwise"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 to split as you please between Intelligence, Dexterity, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Good Fir st Impression Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Negotiation and Streetwise Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per floor during a Long Rest, a City Elf can adjust the +4 spent between Charisma, Intelligence, and Dexterity, reassigning those points between those Stats"
+        },
+        {
+          "kind": "perk",
+          "name": "When entering a settlement for the first time, make your first Charisma-based Check with Advantage. On an Amazing success or better, you have made a permanent contact"
+        }
       ]
     }
   },
@@ -692,6 +1445,60 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": 0,
+            "int": 3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Acute Ears",
+          "rank": 3,
+          "ref": "id.skill.acute-ears"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Hide in Shadows",
+          "rank": 3,
+          "ref": "id.skill.hide-in-shadows"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Intelligence and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Acut e Ears and Hide in Shadows Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Gain Ad vantage when you use the Hide in Shadows Skill at night"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per da y, can instruct the shadow of a living thing to use the Taunt Skill at Rank equal to Floor Number (and no Stat Mod) to pull attacks away from you"
+        },
+        {
+          "kind": "perk",
+          "name": "Hide in Shadow s and one crafting Skill of your choice can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -740,6 +1547,63 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": -2,
+            "con": 0,
+            "int": 0,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Petite (3)"
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 20,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Persuasion",
+          "rank": 2,
+          "ref": "id.skill.persuasion"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Charisma, Int elligence, and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Persua sion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Melee attacks deal +1d4 Ice damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Roll with Advantage on Int and Con Stat Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "The cra wler’s Game Guide becomes their Manager"
+        },
+        {
+          "kind": "perk",
+          "name": "Capable of flight for up to 1 minute per scene"
+        }
       ]
     }
   },
@@ -783,6 +1647,46 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 2,
+            "con": 2,
+            "int": 2,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Typically Medium (4)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 to all St ats"
+        },
+        {
+          "kind": "perk",
+          "name": "At the end of each floor, roll one Skill Advancement Check with Advantage if that Skill is Rank 9 or less"
+        },
+        {
+          "kind": "perk",
+          "name": "Gain 1 AI Favor each time you level up"
+        },
+        {
+          "kind": "perk",
+          "name": "When you take damage, you may spend 1 AI Favor to gain DR equal to your Con (as many times as you have AI Favor to spend)"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per da y, when you would make an untrained Skill Check on a non-Passive Utility Skill, you can roll as if you had 2 Ranks in the Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per floor, you can spend an Action to remove any single Debuff you’re suffering from, even Injuries"
+        }
       ]
     }
   },
@@ -901,6 +1805,165 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -4,
+            "dex": 0,
+            "con": 6,
+            "int": -2,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Large (5)"
+        },
+        {
+          "kind": "dr",
+          "value": 3
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 0,
+            "burrow": 20
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 1,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lava Burst",
+          "rank": 1,
+          "ref": "id.skill.lava-burst"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Volcanic Sprint",
+          "rank": 1,
+          "ref": "id.skill.volcanic-sprint"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "spell",
+          "filter": {
+            "all": [
+              "kind.spell"
+            ]
+          },
+          "label": "Spell 1 (Rank 2)"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "spell",
+          "filter": {
+            "all": [
+              "kind.spell"
+            ]
+          },
+          "label": "Spell 2 (Rank 2)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill (Rank 3)"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Endurance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per da y, double your Move for 20 seconds"
+        },
+        {
+          "kind": "perk",
+          "name": "As an Action, make a Con Stat Check. On success, deal 1d8+F Fire damage, 5ft Burst radius"
+        },
+        {
+          "kind": "perk",
+          "name": "No Survival Checks needed in harsh heat conditions and can breathe underwater"
+        },
+        {
+          "kind": "perk",
+          "name": "Immunity to Fire damage, and vulnerable to Ice damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Ability to burrow"
+        },
+        {
+          "kind": "perk",
+          "name": "Lose 1 Health Bar slot each time you Access your Inventory (not Hotlist)"
+        },
+        {
+          "kind": "perk",
+          "name": "Disadvantage on Checks to conceal your presence or nature (such as Stealth)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in two Spells of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in one weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage when using the Ambush and Intimidation Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "during t he day, Strength is halved, but Spells cost half the Mana to cast"
+        },
+        {
+          "kind": "perk",
+          "name": "during t he night, Strength is doubled, but Spells cost double the Mana to cast"
+        }
       ]
     }
   },
@@ -956,6 +2019,82 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": -4,
+            "int": -2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4), mostly due to wings"
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 20,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Intimidate",
+          "rank": 2,
+          "ref": "id.skill.intimidate"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intimida te and Slice Attack Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a Spell of your c hoice"
+        },
+        {
+          "kind": "perk",
+          "name": "Has f our translucent butterfly wings that can reach up to 15 feet and deliver touch- or melee-range Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "May use Cha Mod instead of Con Mod in their Health Bar"
+        },
+        {
+          "kind": "perk",
+          "name": "Upon entering the Sixth Floor, choose to either gain Stronger Wings (wings are now capable of flight for up to 2 minutes per scene, with +20ft Move when flying) or Ferocious Visage (Advantage when using any Skill to inspire fear or respect)"
+        },
+        {
+          "kind": "perk",
+          "name": "Add 1d4 to your Evade Checks"
+        }
       ]
     }
   },
@@ -994,6 +2133,16 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Intelligence during the day, +5 Strength during the night"
+        }
       ]
     }
   },
@@ -1033,6 +2182,30 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -1,
+            "dex": -1,
+            "con": -1,
+            "int": -1,
+            "cha": -1
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Unchanged"
+        },
+        {
+          "kind": "perk",
+          "name": "-1 to all St ats"
+        },
+        {
+          "kind": "perk",
+          "name": "All Skills can be raised to Rank 20 THE WORLD Dungeon ON HARD MODE: PRIMALS Primals were the first known species to conquer the universe. After, they seemingly disappeared and have since become “the boogeymen of the cosmos.” In the first Dungeon Crawler World seasons, every crawler was a Primal, but since then, they’ve been relegated to the back catalog, behind all of the shiny and popular Race choices. Choosing a Primal is taking the World Dungeon on hard mode—you’re declining the many significant bonuses of choosing another Race (even plain old humans have more benefits) and accepting a penalty to all of your stats in exchange for the opportunity to raise any Skill above the World Dungeon’s soft cap of 15 Ranks. Raising a Skill to 15 is already difficult, requiring concentration to reach that degree of mastery. Primals get that challenge and say “Hold my beer” as they careen into maximizing as many of their Skills as possible. If you make this choice, we salute you—but don’t say we didn’t warn you."
+        }
       ]
     }
   },
@@ -1094,6 +2267,78 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 1,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Petite (3)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Escape Plan",
+          "rank": 2,
+          "ref": "id.skill.escape-plan"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Stealth",
+          "rank": 2,
+          "ref": "id.skill.stealth"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bite",
+          "rank": 1,
+          "ref": "id.skill.bite"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Survival",
+          "rank": 1,
+          "ref": "id.skill.survival"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Escape Plan and Stealth Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Bite and Survival Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on Checks to resist hunger and thirst"
+        },
+        {
+          "kind": "perk",
+          "name": "Can con verse with common house rats to gather minimal information while in buildings"
+        },
+        {
+          "kind": "perk",
+          "name": "May add Dex Mod to Bite damage instead of Str"
+        }
       ]
     }
   },
@@ -1146,6 +2391,60 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 6,
+            "dex": 2,
+            "con": 6,
+            "int": -3,
+            "cha": -1
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Large (5)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Foot Soldier",
+          "rank": 3,
+          "ref": "id.skill.foot-soldier"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Smush",
+          "rank": 3,
+          "ref": "id.skill.smush"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "-1 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Foot Soldier and Smush Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Smush Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -1197,6 +2496,56 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 6,
+            "con": 0,
+            "int": 0,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 2,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Wrasslin",
+          "rank": 2,
+          "ref": "id.skill.wrasslin"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Pugilism and Wr asslin’ Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in all Edg ed weapon Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Four Arms : Your Hands/Holding Gear slot allows for four items (or two weapons requiring two hands)"
+        }
       ]
     }
   },
@@ -1256,6 +2605,93 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 3,
+            "con": 0,
+            "int": 0,
+            "cha": -4
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 10,
+            "climb": 0,
+            "swim": 0,
+            "fly": 0,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 2,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Cat-Like Reflexes",
+          "rank": 2,
+          "ref": "id.skill.cat-like-reflexes"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Ambush, Cat-like Reflexes, and Slice Attack Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "+10ft Move"
+        },
+        {
+          "kind": "perk",
+          "name": "When attacking during a Surprise Action, deal ×2 total damage with melee attacks"
+        },
+        {
+          "kind": "perk",
+          "name": "Disadvantage on Dexterity-based Skills that require fine manipulation or motor coordination"
+        }
       ]
     }
   },
@@ -1312,6 +2748,67 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": -2,
+            "int": -3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Determine Value",
+          "rank": 3,
+          "ref": "id.skill.determine-value"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Fabricate",
+          "rank": 3,
+          "ref": "id.skill.fabricate"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 3,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Determine Value, Fabricate, and Negotiation Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "At Le vel 50, +2 Dexterity and gain wings capable of flying up to 500ft per scene"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity each time you roll a Critical Hit in combat"
+        }
       ]
     }
   },
@@ -1367,6 +2864,63 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 0,
+            "con": 0,
+            "int": -3,
+            "cha": -3
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Large (5)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Find Crawler",
+          "rank": 3,
+          "ref": "id.skill.find-crawler"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Investigation",
+          "rank": 3,
+          "ref": "id.skill.investigation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Leadership",
+          "rank": 3,
+          "ref": "id.skill.leadership"
+        },
+        {
+          "kind": "perk",
+          "name": "-3 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Find Crawler, Investigation, and Leadership Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Find Crawler and Persuasion Skills can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity each time you roll a Critical Hit on a Charisma Skill Check or on a Spell Skill Check outside of combat"
+        }
       ]
     }
   },
@@ -1419,6 +2973,95 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 3,
+            "con": 0,
+            "int": 0,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Zone of Control",
+          "rank": 2,
+          "ref": "id.skill.zone-of-control"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "options",
+          "options": [
+            "Jumping",
+            "Light on Your Feet"
+          ],
+          "label": "Jumping or Light on Your Feet (Rank 3)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "reach_weapon",
+          "filter": {
+            "any": [
+              "weapon.spear",
+              "weapon.polearm"
+            ]
+          },
+          "label": "Reach Weapon Skill (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "-2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in either Jumping or Light on Your Feet Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Zone of Cont rol and a Reach weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Tongue Lashing: Ranged attack; [Rank = Floor Number] + Dex to hit. 1d8 + Str, Bludgeoning, 30ft range. Add 1d8 at Rank 5, 10, and 15. Rank is always equal to the Floor Number and cannot be raised by other means"
+        },
+        {
+          "kind": "perk",
+          "name": "Gain a +2 DR bre astplate (Torso) with your Grulke Battalion crest, not that it means much anymore"
+        },
+        {
+          "kind": "perk",
+          "name": "Trolltype enemies have Advantage on Wrasslin’ Checks against you, and when successful, they lick you"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when a troll-type enemy licks you or when you achieve an Amazing success or better on an Attack against a troll-type enemy"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when you score a Critical Hit on a larger foe in combat"
+        }
       ]
     }
   },
@@ -1473,6 +3116,68 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 1,
+            "con": 0,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Explosive-based",
+          "rank": 3,
+          "ref": "id.skill.explosive-based"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Regeneration",
+          "rank": 1,
+          "ref": "id.skill.regeneration"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "-5 Charisma. Charisma is capped at 10"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in all Trap-ba sed and Explosive-based Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Reg eneration Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Free ac cess to all Hobgoblin Sapper Workshops"
+        },
+        {
+          "kind": "perk",
+          "name": "At the end of each floor, roll one Explosive or Trap-based Skill Advancement Check with Advantage"
+        },
+        {
+          "kind": "perk",
+          "name": "All explosiv es and trap-making Skills can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when you kill an enemy with a trap or explosive once per scene"
+        }
       ]
     }
   },
@@ -1539,6 +3244,98 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 5,
+            "con": -4,
+            "int": 0,
+            "cha": 5
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Small (2); Animal"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bite",
+          "rank": 2,
+          "ref": "id.skill.bite"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 1,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Dexterity and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Strength. Strength is capped at 10"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Bite, Dodge, and Slice Attack Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Ambush Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "You roll with Advantage on all Charisma-based Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Take no damage from falling"
+        },
+        {
+          "kind": "perk",
+          "name": "Light on your Feet Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "You deal half damage with Strength-based melee weapons"
+        },
+        {
+          "kind": "perk",
+          "name": "vulnerable to Bludgeoning damage"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when you act in the Surprise Round of a combat or roll a Critical Fail on an Evade Check"
+        }
       ]
     }
   },
@@ -1600,6 +3397,88 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 0,
+            "int": 0,
+            "cha": -4
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 20,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bite",
+          "rank": 3,
+          "ref": "id.skill.bite"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 3,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Tracking",
+          "rank": 3,
+          "ref": "id.skill.tracking"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Diplomacy",
+          "rank": 1,
+          "ref": "id.skill.diplomacy"
+        },
+        {
+          "kind": "perk",
+          "name": "-4 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Bite, Performance, and Tracking Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Diplomacy Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Has wings capable of flight for up to 50 seconds per scene"
+        },
+        {
+          "kind": "perk",
+          "name": "Disadvantage on all Checks to conceal emotion or presence (such as Deception and Stealth)"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when you roll a Critical Hit on a Charisma Skill Check"
+        }
       ]
     }
   },
@@ -1649,6 +3528,67 @@ export const DCC_RACES = [
       "archetypes": [],
       "tags": [
         "kind.race"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -1,
+            "dex": 3,
+            "con": -1,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "size",
+          "size": "Medium (4)"
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 20,
+            "burrow": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 2,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "-1 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Slice Attack Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in all Charisma-based Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on the Perception Skill for observing things 10+ feet away"
+        },
+        {
+          "kind": "perk",
+          "name": "Capable of flight for up to 3 minutes per scene. However, Skyfowl who choose a Cleric-based Class have their wings clipped and can only make short hops of up to 10 seconds per scene when flying"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 popularity when you roll a Critical Hit on a Leadership, Perception, Persuasion, or Taunt Skill Check"
+        }
       ]
     }
   }

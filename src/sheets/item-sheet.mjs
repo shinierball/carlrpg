@@ -1,9 +1,11 @@
 import { DCCSkillManager } from '../apps/skill-manager.mjs';
+import { DCCTagManager } from '../apps/tag-manager.mjs';
 import { DCC_BUFFS, DCC_DEBUFFS } from '../data/buffs.mjs';
 import { DCC_SPELLS } from '../data/spells.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { getRecommendedAssociatedSkills, getRecommendedOptionalEffects } from '../data/weapon-associations.mjs';
 import { hydrateRankBreaks } from '../data/rank-dice.mjs';
+import { getTagDefinition, getItemAllTags } from '../data/tags.mjs';
 
 /**
  * Dungeon Crawler Carl Item Sheet Controller
@@ -659,6 +661,23 @@ export class DCCItemSheet extends BaseItemSheet {
       context.perksList = Array.isArray(this.item.system?.perks) ? this.item.system.perks : (this.item.perks || []);
     }
 
+    // CarlRPG 3.0.0 Unified Tagging context
+    const explicitTags = Array.isArray(this.item.system?.tags) ? this.item.system.tags : [];
+    const allTags = this.item.allTags instanceof Set ? this.item.allTags : (typeof getItemAllTags === 'function' ? getItemAllTags(this.item) : new Set(explicitTags));
+    const derivedTags = Array.from(allTags).filter(t => !explicitTags.includes(t));
+    context.tagsData = {
+      identifier: this.item.system?.identifier || '',
+      explicitTags: explicitTags.map(t => {
+        const def = getTagDefinition(t);
+        return { id: t, label: def?.label || t, namespace: def?.namespace || 'custom' };
+      }),
+      derivedTags: derivedTags.map(t => {
+        const def = getTagDefinition(t);
+        return { id: t, label: def?.label || t, namespace: def?.namespace || 'derived' };
+      }),
+      allTagsCount: allTags.size
+    };
+
     return context;
   }
 
@@ -989,6 +1008,48 @@ export class DCCItemSheet extends BaseItemSheet {
     // Immediate blur save
     html.find('input, select, textarea').on('blur', () => {
       this.submit();
+    });
+
+    // Open Tag Manager
+    html.find('.dcc-open-tag-manager').click(ev => {
+      ev.preventDefault();
+      new DCCTagManager().render(true);
+    });
+
+    // Remove Tag pill
+    html.find('.dcc-remove-tag-btn').click(async ev => {
+      ev.preventDefault();
+      const tagId = ev.currentTarget.dataset.tagId;
+      const currentTags = Array.isArray(this.item.system?.tags) ? [...this.item.system.tags] : [];
+      const updated = currentTags.filter(t => t !== tagId);
+      await this.item.update({ 'system.tags': updated });
+      this.render(false);
+    });
+
+    // Add Tag
+    const handleAddTag = async () => {
+      const input = html.find('.dcc-new-tag-input');
+      const val = (input.val() || '').trim().toLowerCase();
+      if (!val) return;
+      const currentTags = Array.isArray(this.item.system?.tags) ? [...this.item.system.tags] : [];
+      if (!currentTags.includes(val)) {
+        currentTags.push(val);
+        await this.item.update({ 'system.tags': currentTags });
+        input.val('');
+        this.render(false);
+      }
+    };
+
+    html.find('.dcc-add-tag-btn').click(async ev => {
+      ev.preventDefault();
+      await handleAddTag();
+    });
+
+    html.find('.dcc-new-tag-input').on('keydown', async ev => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        await handleAddTag();
+      }
     });
 
     // Add Skill Modifier from DCC Compendium

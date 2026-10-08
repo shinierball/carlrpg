@@ -1,0 +1,59 @@
+<div class="dcc-item-tags-section" style="margin-top: 15px; border-top: 2px solid #000; padding-top: 10px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <h3 style="margin: 0; font-family: 'Oswald', sans-serif; font-size: 14px; text-transform: uppercase; color: #111;">
+      <i class="fa-solid fa-tags" style="color: #c0392b;"></i> Tags & Taxonomy
+    </h3>
+    <button type="button" class="dcc-btn dcc-open-tag-manager" style="background: #2c3e50; color: #fff; border: 1px solid #1a252f; padding: 2px 8px; font-size: 11px; font-family: 'Oswald', sans-serif; cursor: pointer; border-radius: 3px;">
+      <i class="fa-solid fa-folder-tree"></i> Tag Manager
+    </button>
+  </div>
+
+  {{!-- Item Identifier Slug --}}
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 8px; border-radius: 3px;">
+    <label style="font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; color: #555; white-space: nowrap;">
+      Identifier Slug:
+    </label>
+    <input type="text" name="system.identifier" value="{{system.identifier}}" placeholder="e.g. {{item.name}}" class="dcc-field-input" style="flex: 1; font-size: 12px; font-family: monospace;" />
+  </div>
+
+  {{!-- Explicit Tags List --}}
+  <div style="margin-bottom: 8px;">
+    <label style="font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; color: #7f8c8d; display: block; margin-bottom: 4px;">
+      Explicit Tags:
+    </label>
+    <div class="dcc-tag-pills" style="display: flex; flex-wrap: wrap; gap: 4px;">
+      {{#each tagsData.explicitTags as |tag|}}
+        <span class="dcc-tag-pill" style="display: inline-flex; align-items: center; gap: 4px; background: #eaf2f8; border: 1px solid #aed6f1; color: #1b4f72; padding: 2px 6px; border-radius: 12px; font-size: 11px; font-family: monospace;">
+          <span>{{tag.id}}</span>
+          <a class="dcc-remove-tag-btn" data-action="remove-tag" data-tag-id="{{tag.id}}" title="Remove Tag" style="color: #c0392b; cursor: pointer; font-weight: bold; font-family: sans-serif;">&times;</a>
+        </span>
+      {{else}}
+        <span style="font-size: 11px; color: #999; font-style: italic;">No explicit tags defined.</span>
+      {{/each}}
+    </div>
+  </div>
+
+  {{!-- Add Tag Controls --}}
+  <div class="dcc-add-tag-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px;">
+    <input type="text" class="dcc-new-tag-input dcc-field-input" placeholder="Add tag (e.g. element.fire, favored.mage)" style="flex: 1; font-size: 11px; font-family: monospace;" />
+    <button type="button" class="dcc-btn dcc-add-tag-btn" style="background: #27ae60; color: #fff; border: 1px solid #1e8449; padding: 3px 10px; font-size: 11px; font-family: 'Oswald', sans-serif; cursor: pointer; border-radius: 3px;">
+      <i class="fa-solid fa-plus"></i> Add
+    </button>
+  </div>
+
+  {{!-- Derived / Runtime Tags (Read-only) --}}
+  {{#if tagsData.derivedTags.length}}
+    <div style="margin-top: 6px; background: #fafafa; border: 1px dashed #ddd; padding: 6px 8px; border-radius: 3px;">
+      <label style="font-family: 'Oswald', sans-serif; font-size: 10px; text-transform: uppercase; color: #888; display: block; margin-bottom: 4px;">
+        Derived & Identity Tags (Computed at Runtime):
+      </label>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+        {{#each tagsData.derivedTags as |tag|}}
+          <span style="display: inline-block; background: #f2f3f4; border: 1px solid #d5d8dc; color: #5d6d7e; padding: 1px 5px; border-radius: 10px; font-size: 10px; font-family: monospace;">
+            {{tag.id}} <small style="color: #999;">[DERIVED]</small>
+          </span>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+</div>

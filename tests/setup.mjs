@@ -8,6 +8,7 @@ import { DCC_ITEMS } from '../src/data/items.mjs';
 import { DCC_RACES } from '../src/data/races.mjs';
 import { DCC_CLASSES } from '../src/data/classes.mjs';
 import { getItemAllTags, ARCHETYPE_TO_TAG } from '../src/data/tags.mjs';
+import { TagIndex, tagIndex } from '../src/apps/tag-index.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -262,7 +263,6 @@ export class MockItem {
     this.type = data.type || 'gear';
     this.img = data.img || 'icons/svg/item-bag.svg';
     this.pack = data.pack || null;
-    this.uuid = data.uuid || (this.pack ? `Compendium.${this.pack}.${this.id}` : null);
     this.isCompendium = Boolean(this.pack || data.isCompendium);
     if (globalThis.CONFIG?.Item?.dataModels?.[this.type]) {
       const ModelClass = globalThis.CONFIG.Item.dataModels[this.type];
@@ -271,6 +271,7 @@ export class MockItem {
       this.system = structuredClone(data.system || {});
     }
     this.actor = actor;
+    this.uuid = data.uuid || (this.pack ? `Compendium.${this.pack}.${this.id}` : (this.actor ? `${this.actor.uuid || 'Actor.' + (this.actor.id || this.actor._id)}.Item.${this.id}` : `Item.${this.id}`));
     this.sort = Number(data.sort) || 0;
     this.flags = structuredClone(data.flags || {});
     this.prepareData();
@@ -419,15 +420,30 @@ if (!globalThis.Item) {
 }
 
 export class MockCompendium {
-  constructor(metadata = {}) {
+  constructor(metadata = {}, docType = 'Item') {
+    if (typeof metadata === 'string') {
+      metadata = { id: metadata, type: docType || 'Item' };
+    }
     this.metadata = metadata;
     this.collection = metadata.id || (`${metadata.package || 'carl-rpg'}.${metadata.name || 'items'}`);
-    this.documentName = metadata.type || 'Item';
+    this.documentName = metadata.type || docType || 'Item';
     this.documents = [];
     this.locked = false;
   }
-  async getIndex() {
-    return new Map(this.documents.map(d => [d.id || d._id, { _id: d.id || d._id, name: d.name, type: d.type, img: d.img }]));
+  async getIndex(options = {}) {
+    const entries = this.documents.map(d => ({
+      _id: d.id || d._id,
+      id: d.id || d._id,
+      name: d.name,
+      type: d.type,
+      img: d.img,
+      uuid: d.uuid || `Compendium.${this.collection}.${d.id || d._id}`,
+      system: structuredClone(d.system || {})
+    }));
+    const map = new Map(entries.map(e => [e._id, e]));
+    map.values = function() { return entries[Symbol.iterator](); };
+    map[Symbol.iterator] = function*() { yield* entries; };
+    return map;
   }
   get(id) {
     return this.documents.find(d => d.id === id || d._id === id);
@@ -738,6 +754,35 @@ if (!globalThis.game) {
       }
     };
   }
+}
+
+globalThis.game.dcc = globalThis.game.dcc || {};
+globalThis.game.dcc.TagIndex = TagIndex;
+globalThis.game.dcc.tags = tagIndex;
+globalThis.game.carlRpg = globalThis.game.dcc;
+globalThis.game.carlRpg.tags = tagIndex;
+
+if (!globalThis.fromUuid) {
+  globalThis.fromUuid = async function(uuid) {
+    if (!uuid) return null;
+    if (uuid.startsWith('Compendium.')) {
+      const parts = uuid.split('.');
+      const packName = `${parts[1]}.${parts[2]}`;
+      const docId = parts[3];
+      const pack = globalThis.game?.packs?.get(packName);
+      if (pack) {
+        if (typeof pack.getDocument === 'function') return await pack.getDocument(docId);
+        if (typeof pack.get === 'function') return pack.get(docId);
+      }
+    } else if (uuid.startsWith('Item.')) {
+      const id = uuid.replace('Item.', '');
+      return globalThis.game?.items?.get ? globalThis.game.items.get(id) : globalThis.game?.items?.find?.(i => i.id === id || i._id === id);
+    } else if (uuid.startsWith('Actor.')) {
+      const id = uuid.replace('Actor.', '');
+      return globalThis.game?.actors?.get ? globalThis.game.actors.get(id) : globalThis.game?.actors?.find?.(a => a.id === id || a._id === id);
+    }
+    return null;
+  };
 }
 
 if (!globalThis.Folder) {
@@ -1948,4 +1993,7 @@ if (!globalThis.canvas) {
     }
   };
 }
+
+export { TagIndex, tagIndex };
+
 

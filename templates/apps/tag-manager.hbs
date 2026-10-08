@@ -1,0 +1,119 @@
+<div class="dcc-tag-manager-container" style="display: flex; flex-direction: column; height: 100%; font-family: var(--font-primary, sans-serif); background: #fdfaf2; padding: 12px; box-sizing: border-box; overflow: hidden;">
+
+  {{!-- Header --}}
+  <div class="dcc-tm-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #c0392b; padding-bottom: 8px; margin-bottom: 10px;">
+    <div>
+      <h2 style="margin: 0; font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; font-size: 20px;">
+        <i class="fa-solid fa-tags" style="color: #c0392b;"></i> Tag Manager & Taxonomy
+      </h2>
+      <div style="font-size: 11px; color: #666;">
+        Explore, filter, and inspect canonical keywords and custom system tags across the game engine.
+      </div>
+    </div>
+    <div style="font-family: 'Oswald', sans-serif; font-size: 13px; color: #2c3e50; font-weight: bold;">
+      Total Tags: {{totalTagsCount}}
+    </div>
+  </div>
+
+  {{!-- Search Bar --}}
+  <div style="margin-bottom: 10px; display: flex; gap: 8px;">
+    <div style="flex: 1; position: relative;">
+      <input type="text" class="dcc-tag-search-input dcc-field-input" placeholder="Search by tag ID or label..." value="{{searchQuery}}" style="width: 100%; font-size: 13px; padding: 6px 10px; border: 1px solid #000; box-sizing: border-box;" />
+    </div>
+    {{#if searchQuery}}
+      <button type="button" class="dcc-btn dcc-clear-search-btn" style="background: #95a5a6; color: #fff; border: 1px solid #7f8c8d; padding: 4px 10px; font-family: 'Oswald', sans-serif; font-size: 12px; cursor: pointer; border-radius: 3px;">
+        Clear
+      </button>
+    {{/if}}
+  </div>
+
+  {{!-- Namespace Filter Tabs --}}
+  <div class="dcc-tm-tabs" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #d4cbb3; padding-bottom: 6px;">
+    {{#each namespaceTabs as |tab|}}
+      <button type="button" class="dcc-tm-tab {{#if tab.active}}active{{/if}}" data-namespace="{{tab.id}}" style="padding: 3px 8px; font-size: 11px; font-family: 'Oswald', sans-serif; text-transform: uppercase; border: 1px solid #000; background: {{#if tab.active}}#c0392b{{else}}#fff{{/if}}; color: {{#if tab.active}}#fff{{else}}#111{{/if}}; cursor: pointer; border-radius: 2px;">
+        {{tab.label}} ({{tab.count}})
+      </button>
+    {{/each}}
+  </div>
+
+  {{!-- Tag Table / List --}}
+  <div class="dcc-tm-list" style="flex: 1; overflow-y: auto; background: #fff; border: 1px solid #000; padding: 8px; box-sizing: border-box; margin-bottom: 12px;">
+    {{#if tagsList.length}}
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: #f2f3f4; border-bottom: 2px solid #ccc; text-align: left; font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; color: #333;">
+            <th style="padding: 6px 8px;">Tag ID</th>
+            <th style="padding: 6px 8px;">Label</th>
+            <th style="padding: 6px 8px;">Namespace</th>
+            <th style="padding: 6px 8px; text-align: center;">Usage Count</th>
+            <th style="padding: 6px 8px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each tagsList as |tag|}}
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 6px 8px; font-family: monospace; font-weight: bold; color: #1b4f72;">
+                {{tag.id}}
+              </td>
+              <td style="padding: 6px 8px;">
+                {{tag.label}}
+                {{#if tag.description}}
+                  <div style="font-size: 10px; color: #777;">{{tag.description}}</div>
+                {{/if}}
+              </td>
+              <td style="padding: 6px 8px;">
+                <span style="display: inline-block; padding: 1px 6px; font-size: 10px; text-transform: uppercase; background: #eaf2f8; border: 1px solid #aed6f1; border-radius: 8px; color: #2980b9;">
+                  {{tag.namespace}}
+                </span>
+              </td>
+              <td style="padding: 6px 8px; text-align: center;">
+                <span class="dcc-tag-count-badge" style="display: inline-block; padding: 1px 6px; font-size: 11px; font-weight: bold; background: #eaeded; border-radius: 10px; color: #2c3e50;">
+                  {{tag.count}}
+                </span>
+              </td>
+              <td style="padding: 6px 8px; text-align: right;">
+                {{#if tag.isCustom}}
+                  <button type="button" class="dcc-btn dcc-delete-tag-btn" data-tag-id="{{tag.id}}" title="Delete Custom Tag" style="background: #c0392b; color: #fff; border: 1px solid #962d22; padding: 2px 6px; font-size: 10px; cursor: pointer; border-radius: 2px;">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                {{else}}
+                  <span style="font-size: 10px; color: #999; font-style: italic;">Core</span>
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+      <div style="text-align: center; padding: 30px; color: #999; font-style: italic;">
+        No tags match the current filter or search query.
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- Create Custom Tag Section --}}
+  <div class="dcc-tm-create-box" style="background: #fff; border: 2px solid #000; padding: 8px 10px; box-sizing: border-box;">
+    <h4 style="margin: 0 0 6px 0; font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 12px; color: #111;">
+      <i class="fa-solid fa-plus-circle" style="color: #27ae60;"></i> Register New Custom Tag
+    </h4>
+    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+      <input type="text" class="dcc-custom-tag-id dcc-field-input" placeholder="Tag ID (e.g. custom.toxic_spit)" style="flex: 2; min-width: 160px; font-size: 11px; font-family: monospace;" />
+      <input type="text" class="dcc-custom-tag-label dcc-field-input" placeholder="Display Label (e.g. Toxic Spit)" style="flex: 2; min-width: 140px; font-size: 11px;" />
+      <select class="dcc-custom-tag-namespace dcc-field-input" style="flex: 1; min-width: 100px; font-size: 11px;">
+        <option value="custom">custom</option>
+        <option value="element">element</option>
+        <option value="action">action</option>
+        <option value="archetype">archetype</option>
+        <option value="stat">stat</option>
+        <option value="skillGroup">skillGroup</option>
+        <option value="weaponClass">weaponClass</option>
+        <option value="technique">technique</option>
+        <option value="rule">rule</option>
+      </select>
+      <button type="button" class="dcc-btn dcc-register-custom-tag-btn" style="background: #27ae60; color: #fff; border: 1px solid #1e8449; padding: 4px 12px; font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; cursor: pointer; border-radius: 2px;">
+        Register Tag
+      </button>
+    </div>
+  </div>
+
+</div>

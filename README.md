@@ -10,6 +10,14 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 
 - Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
 
+- **CarlRPG 3.0.0 Unified Tagging System & Tag Taxonomy Engine**:
+  - **Namespaced Tag IDs**: Fully data-driven keyword architecture covering 10 namespaces (`kind.*`, `action.*`, `element.*`, `archetype.*`, `favored.*`, `weapon.*`, `weaponClass.*`, `weaponProp.*`, `skillGroup.*`, `technique.*`, `rule.*`, `id.*`, and `custom.*`). Zero regex matching or string heuristics across the game engine.
+  - **TagQuery Engine**: Structured queries (`matchesTagQuery(tags, query)`) evaluating string, array, or `{ all, any, none }` Boolean queries with automatic reference expansion (`expandTagReferences`).
+  - **High-Performance Tag Index Service**: In-memory `TagIndex` singleton (`game.dcc.tags`) indexing world items and compendiums with live mutation hooks (`createItem`, `updateItem`, `deleteItem`).
+  - **Structured Class & Race Grants**: Complete `system.grants` specification across all 53 classes and 30 races cleanly applying stat boosts, skills, spells, choices, and archetype skill modifiers (e.g., Boring Ol' Mage -3 to Dex/Str skills floored at 1).
+  - **Favored Spell Mechanics**: Automatic caster archetype evaluation via `favored.*` tags, imposing +1 MP penalty for non-favored class casters while exempting classless crawlers and pets per official DCC rules.
+  - **Interactive Tag Manager App & Sheet Editor**: Full visual browser (`DCCTagManager`) with namespace filtering, usage counts, custom tag creation, and item sheet tag badges with autocomplete and 1-click removal.
+
 - **Item Idempotence, Crawler Cross-Scene Persistence & Compendium Synchronization**:
   - **Discrete Non-Consumable Items**: Gear, weapons, and armor exist as discrete, unique entries per acquisition so each can be equipped, modified, and tracked independently. Consumable loot (e.g. potions) stacks quantity.
   - **Crawler Cross-Scene Persistence**: Crawlers and pets are singular, global entities. Editing a crawler on any scene automatically updates the world actor, keeping all scenes and tokens perfectly synchronized into the future.

@@ -1,3 +1,31 @@
+## 3.0.0
+
+### CarlRPG 3.0.0 — Unified Tagging System, Structured Grants & Tag Taxonomy Engine
+
+- **Unified Tagging Architecture (`src/data/tags.mjs`, `src/utils/tag-query.mjs`, `src/apps/tag-index.mjs`)**:
+  - Replaced all ad-hoc string comparisons, substring heuristics, and regex matching with exact, namespaced tag IDs across 10 official namespaces (`kind.*`, `action.*`, `element.*`, `archetype.*`, `favored.*`, `weapon.*`, `weaponClass.*`, `weaponProp.*`, `skillGroup.*`, `technique.*`, `rule.*`, `id.*`, and `custom.*`).
+  - Implemented `TagQuery` engine (`matchesTagQuery(targetTags, query)`) supporting single string matches, array conjunctions (all required), and structured boolean query objects (`{ all: [], any: [], none: [] }`).
+  - Added reference expansion (`expandTagReferences`) allowing `favored.*` spell tags to resolve against corresponding caster `archetype.*` tags.
+  - Implemented O(1) in-memory `TagIndex` indexing all world and compendium items, providing instantaneous tag querying and live mutation hooks (`createItem`, `updateItem`, `deleteItem`).
+- **Canonical Dataset Tagging & Stable Identifiers**:
+  - Tagged all 54 canonical spells, 121 skills, 53 classes, and 30 races with stable identifiers, explicit tags, and rebuilt compendium packs.
+  - Data models (`template.json`, `src/models/items/*`) enhanced with `identifier`, `tags`, `grants`, `appliesTo`, and `requires`.
+  - Item documents feature `.allTags` getter unifying explicit tags, auto-computed derived tags, and stable identity tags (`id.<type>.<slug>`).
+- **Structured Grants & Race/Class Applier Engine (`src/data/race-class-applier.mjs`, `src/data/classes.mjs`, `src/data/races.mjs`)**:
+  - Implemented structured `system.grants` on all 53 classes and 30 races, defining exact mechanical payloads (`stat`, `skill`, `spell`, `choice`, `skillModifier`, `benefit`, `detriment`).
+  - `parseGrants` preserves custom racial and class skill/spell attributes (`stat`, `checkType`, `baseDamage`, `cooldown`, etc.) while cleanly managing archetype skill modifiers (e.g., Boring Ol' Mage -3 to Dex/Str skills floored at 1).
+- **Combat Techniques & Skill Associations (`src/documents/actor.mjs`)**:
+  - Configured canonical techniques (Iron Punch, Powerful Strike, Skullcracker, Toss, Dirty Fighting, Smush, Choke Out) with structured `appliesTo` TagQueries.
+  - `isTechniqueApplicable` evaluates attack tags using `matchesTagQuery` + `expandTagReferences`, strictly enforcing the canonical rule prohibiting techniques on Unarmed Combat via `rule.no-damage-effects`.
+- **Spell Casting & Favored Mana Mechanics (`src/documents/actor.mjs`)**:
+  - `DCCActor.rollSpell` evaluates `favored.*` spell tags against the caster's archetype tags (`actor.getArchetypeTags()`), charging non-favored casters a +1 MP penalty.
+  - Correctly exempts classless crawlers (levels 1-2) and pets from the +1 MP penalty per official DCC RPG rules.
+- **Tag Manager & Taxonomy UI (`src/apps/tag-manager.mjs`, `templates/apps/tag-manager.hbs`, `templates/items/parts/tags.hbs`)**:
+  - Interactive Tag Manager application (`DCCTagManager`) accessible via Item Directory sidebar button, featuring namespace filter tabs, search filtering, tag usage counts, and custom tag creation.
+  - Item Sheet Tag Editor partial displaying explicit tag badges with 1-click removal, autocomplete add tag input, identifier slug input, and derived runtime tags indicator.
+- **Migration Engine 3.0.0 (`src/migrations/migration-3.0.0.mjs`, `src/migration.mjs`)**:
+  - Automated migration engine to upgrade existing campaign worlds and actor items to 3.0.0 without regular expressions.
+
 ## 2.4.26
 
 ### Combat Technique Scoping, Effects Dropdown Harmonization & Skill Idempotence

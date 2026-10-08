@@ -339,7 +339,12 @@ export function computeDerivedTags(item) {
     derived.add(STAT_TO_TAG[statVal]);
   }
 
-  // Damage type -> element
+  // Element / Damage type -> element
+  if (sys.element) {
+    const elStr = String(sys.element).trim().toLowerCase();
+    const el = elStr.startsWith('element.') ? elStr : (damageTypeToElement(elStr) || `element.${elStr}`);
+    if (el) derived.add(el);
+  }
   if (sys.damageType) {
     const el = damageTypeToElement(sys.damageType);
     if (el) derived.add(el);
@@ -362,7 +367,7 @@ export function computeDerivedTags(item) {
   }
 
   // Weapon gear
-  if (type === 'gear' && sys.isWeapon) {
+  if (type === 'gear' && (sys.isWeapon || sys.category === 'weapon')) {
     derived.add('kind.weapon');
   }
 

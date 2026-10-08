@@ -13,7 +13,8 @@ import {
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
 import { CANONICAL_WEAPON_TECHNIQUE_MAP } from '../data/weapon-associations.mjs';
-import { ARCHETYPE_TO_TAG, getItemAllTags } from '../data/tags.mjs';
+import { ARCHETYPE_TO_TAG, getItemAllTags, getTagDefinition } from '../data/tags.mjs';
+import { matchesTagQuery, expandTagReferences } from '../utils/tag-query.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -100,7 +101,8 @@ export const DAMAGE_EFFECT_AI_FAVOR = {
 export const DEFAULT_TECHNIQUE_CONFIGS = {
   'iron punch': {
     isDamageEffect: true,
-    appliesToTags: ['pugilism'],
+    appliesTo: { any: ['id.skill.pugilism', 'technique.pugilism'] },
+    appliesToTags: ['pugilism', 'id.skill.pugilism', 'technique.pugilism'],
     baseDiceCountMod: '+1',
     damageBonus: '1d2',
     damageType: 'Physical',
@@ -112,7 +114,8 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'powerful strike': {
     isDamageEffect: true,
-    appliesToTags: ['foot soldier', 'noggin knocker', 'noggin nocker', 'pugilism'],
+    appliesTo: { any: ['id.skill.foot-soldier', 'id.skill.noggin-nocker', 'id.skill.pugilism', 'technique.foot_soldier', 'technique.noggin_nocker', 'technique.pugilism'] },
+    appliesToTags: ['foot soldier', 'noggin knocker', 'noggin nocker', 'pugilism', 'id.skill.foot-soldier', 'id.skill.noggin-nocker', 'id.skill.pugilism'],
     baseDiceCountMod: '* @rank',
     damageBonus: '1d6',
     damageType: '',
@@ -125,7 +128,8 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'skullcracker': {
     isDamageEffect: true,
-    appliesToTags: ['noggin knocker', 'noggin nocker'],
+    appliesTo: { any: ['id.skill.noggin-nocker', 'technique.noggin_nocker'] },
+    appliesToTags: ['noggin knocker', 'noggin nocker', 'id.skill.noggin-nocker', 'technique.noggin_nocker'],
     baseDiceCountMod: '+1',
     damageBonus: '1d4',
     damageType: 'Physical',
@@ -137,7 +141,8 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'toss': {
     isDamageEffect: true,
-    appliesToTags: ['wrasslin', "wrasslin'"],
+    appliesTo: { any: ['id.skill.wrasslin', 'technique.wrasslin'] },
+    appliesToTags: ['wrasslin', "wrasslin'", 'id.skill.wrasslin', 'technique.wrasslin'],
     damageBonus: '1d8',
     damageType: 'Bludgeoning',
     stat: 'str',
@@ -145,7 +150,8 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'dirty fighting': {
     isDamageEffect: true,
-    appliesToTags: ['pugilism', 'wrasslin', "wrasslin'"],
+    appliesTo: { any: ['id.skill.pugilism', 'id.skill.wrasslin', 'technique.pugilism', 'technique.wrasslin'] },
+    appliesToTags: ['pugilism', 'wrasslin', "wrasslin'", 'id.skill.pugilism', 'id.skill.wrasslin'],
     debuffName: 'Woozy',
     rankBreaks: {
       rank5: { debuff: 'The Taint' },
@@ -154,13 +160,15 @@ export const DEFAULT_TECHNIQUE_CONFIGS = {
   },
   'smush': {
     isDamageEffect: true,
-    appliesToTags: ['foot soldier'],
+    appliesTo: { any: ['id.skill.foot-soldier', 'technique.foot_soldier'] },
+    appliesToTags: ['foot soldier', 'id.skill.foot-soldier', 'technique.foot_soldier'],
     cooldown: '1/round',
     notes: 'Deal ×2 total damage if target has 20% Health Bar or less'
   },
   'choke out': {
     isDamageEffect: true,
-    appliesToTags: ['wrasslin', "wrasslin'"],
+    appliesTo: { any: ['id.skill.wrasslin', 'technique.wrasslin'] },
+    appliesToTags: ['wrasslin', "wrasslin'", 'id.skill.wrasslin', 'technique.wrasslin'],
     notes: 'Deal ×2 total damage if target is at 10% Health Bar or less'
   }
 };
@@ -1781,59 +1789,91 @@ export class DCCActor extends BaseActor {
    */
   isTechniqueApplicable(tech, attackItem) {
     if (!tech || !attackItem) return false;
-    const attackName = (attackItem.name || '').toLowerCase().trim();
-    const techName = (tech.name || '').toLowerCase().trim();
 
-    // Official DCC RPG rule: Unarmed Combat explicitly cannot choose or receive any Damage Effect/Technique.
-    if (attackName === 'unarmed combat' || attackName === 'unarmed') {
-      return false;
+    // 1. Gather all tags of the attackItem
+    const attackItemTags = attackItem.allTags instanceof Set
+      ? new Set(attackItem.allTags)
+      : (typeof getItemAllTags === 'function' ? getItemAllTags(attackItem) : new Set(attackItem.system?.tags || []));
+
+    const attackName = (attackItem.name || '').toLowerCase().trim();
+    if (attackName) {
+      attackItemTags.add(attackName);
+      attackItemTags.add(`id.skill.${attackName.replace(/[\s_']+/g, '-')}`);
+      attackItemTags.add(`id.weapon.${attackName.replace(/[\s_']+/g, '-')}`);
+      attackItemTags.add(`id.attack.${attackName.replace(/[\s_']+/g, '-')}`);
     }
 
     const sys = attackItem.system || {};
-    const attackTags = new Set([
-      attackName,
-      (sys.weaponType || '').toLowerCase().trim(),
-      (sys.weaponCategory || '').toLowerCase().trim(),
-      (sys.skillType || sys.type || '').toLowerCase().trim()
-    ].filter(Boolean));
+    if (sys.weaponType) attackItemTags.add(String(sys.weaponType).toLowerCase().trim());
+    if (sys.weaponCategory) attackItemTags.add(String(sys.weaponCategory).toLowerCase().trim());
+    if (sys.skillType || sys.type) attackItemTags.add(String(sys.skillType || sys.type).toLowerCase().trim());
 
     if (Array.isArray(sys.associatedSkills)) {
       for (const as of sys.associatedSkills) {
-        attackTags.add(String(as).toLowerCase().trim());
+        const clean = String(as).toLowerCase().trim();
+        attackItemTags.add(clean);
+        attackItemTags.add(clean.startsWith('id.skill.') ? clean : `id.skill.${clean.replace(/[\s_']+/g, '-')}`);
       }
     }
     if (Array.isArray(sys.tags)) {
       for (const t of sys.tags) {
-        attackTags.add(String(t).toLowerCase().trim());
+        attackItemTags.add(String(t).toLowerCase().trim());
       }
     }
     if (attackItem.matchingSkillName) {
-      attackTags.add(attackItem.matchingSkillName.toLowerCase().trim());
+      const clean = attackItem.matchingSkillName.toLowerCase().trim();
+      attackItemTags.add(clean);
+      attackItemTags.add(`id.skill.${clean.replace(/[\s_']+/g, '-')}`);
+    }
+    if (attackItem.matchingSkill?.allTags) {
+      for (const t of attackItem.matchingSkill.allTags) attackItemTags.add(t);
     }
 
-    // Check default technique configs
+    // Expand references (e.g. technique.pugilism -> id.skill.pugilism)
+    const expandedAttackTags = expandTagReferences(attackItemTags);
+
+    // 2. Official DCC RPG rule: Entity with rule.no-damage-effects explicitly cannot choose or receive any Damage Effect/Technique.
+    if (expandedAttackTags.has('rule.no-damage-effects') || attackName === 'unarmed combat' || attackName === 'unarmed') {
+      return false;
+    }
+
+    // 3. Resolve technique requirement / appliesTo
+    const techName = (tech.name || '').toLowerCase().trim();
+    const tSys = tech.system || tech.item?.system || {};
     const defConfig = DEFAULT_TECHNIQUE_CONFIGS[techName];
-    if (defConfig?.appliesToTags) {
-      for (const t of defConfig.appliesToTags) {
-        if (attackTags.has(String(t).toLowerCase().trim())) return true;
+
+    // Priority 3a: Explicit TagQuery on technique
+    const appliesTo = tech.appliesTo || tSys.appliesTo || defConfig?.appliesTo;
+    if (appliesTo) {
+      if (typeof appliesTo === 'object' && !Array.isArray(appliesTo)) {
+        if (matchesTagQuery(expandedAttackTags, appliesTo)) return true;
+      } else if (Array.isArray(appliesTo) && appliesTo.length > 0) {
+        for (const target of appliesTo) {
+          const cleanTarget = String(target).toLowerCase().trim();
+          const targetTag = cleanTarget.startsWith('id.skill.') ? cleanTarget : `id.skill.${cleanTarget.replace(/[\s_']+/g, '-')}`;
+          if (expandedAttackTags.has(cleanTarget) || expandedAttackTags.has(targetTag)) return true;
+        }
       }
     }
 
-    // Check technique item appliesTo / techniqueConfig
-    const tSys = tech.system || tech.item?.system || {};
-    const rawApplies = [
+    // Priority 3b: techniqueConfig.appliesToTags (legacy / sheet form)
+    const rawAppliesTags = [
       ...(Array.isArray(tech.appliesTo) ? tech.appliesTo : []),
       ...(Array.isArray(tSys.appliesTo) ? tSys.appliesTo : (typeof tSys.appliesTo === 'string' ? tSys.appliesTo.split(',') : [])),
-      ...(Array.isArray(tSys.techniqueConfig?.appliesToTags) ? tSys.techniqueConfig.appliesToTags : (typeof tSys.techniqueConfig?.appliesToTags === 'string' ? tSys.techniqueConfig.appliesToTags.split(',') : []))
+      ...(Array.isArray(tSys.techniqueConfig?.appliesToTags) ? tSys.techniqueConfig.appliesToTags : (typeof tSys.techniqueConfig?.appliesToTags === 'string' ? tSys.techniqueConfig.appliesToTags.split(',') : [])),
+      ...(Array.isArray(defConfig?.appliesToTags) ? defConfig.appliesToTags : [])
     ];
-    for (const ra of rawApplies) {
-      if (ra && attackTags.has(String(ra).toLowerCase().trim())) {
+    for (const ra of rawAppliesTags) {
+      if (!ra) continue;
+      const clean = String(ra).toLowerCase().trim();
+      const idTag = clean.startsWith('id.skill.') ? clean : `id.skill.${clean.replace(/[\s_']+/g, '-')}`;
+      if (expandedAttackTags.has(clean) || expandedAttackTags.has(idTag)) {
         return true;
       }
     }
 
-    // Check canonical weapon technique map and damage effects
-    for (const tag of attackTags) {
+    // Priority 3c: Canonical weapon technique map and damage effects fallback
+    for (const tag of expandedAttackTags) {
       const canonTechs = CANONICAL_WEAPON_TECHNIQUE_MAP[tag];
       if (Array.isArray(canonTechs) && canonTechs.some(ct => ct.toLowerCase().trim() === techName)) {
         return true;
@@ -1857,9 +1897,16 @@ export class DCCActor extends BaseActor {
    */
   getValidDamageEffects(attackItem) {
     if (!attackItem) return [];
-    const normName = (attackItem.name || '').toLowerCase().trim();
 
-    // Official DCC RPG rule: Unarmed Combat explicitly cannot choose any damage effect.
+    const attackTags = attackItem.allTags instanceof Set
+      ? attackItem.allTags
+      : (typeof getItemAllTags === 'function' ? getItemAllTags(attackItem) : new Set(attackItem.system?.tags || []));
+
+    // Official DCC RPG rule: Entities with rule.no-damage-effects cannot choose any damage effect.
+    if (attackTags.has('rule.no-damage-effects')) {
+      return [];
+    }
+    const normName = (attackItem.name || '').toLowerCase().trim();
     if (normName === 'unarmed combat' || normName === 'unarmed') {
       return [];
     }
@@ -1880,13 +1927,6 @@ export class DCCActor extends BaseActor {
 
     // Helper: check if actor actually knows the effect (embedded skill or gear-granted)
     const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
-    const knowsEffect = (effectName) => {
-      const normEf = effectName.toLowerCase().trim();
-      if (skills.some(s => (s.name || '').toLowerCase().trim() === normEf)) return true;
-      if (typeof this.getSkillRank === 'function' && this.getSkillRank(effectName) > 0) return true;
-      return false;
-    };
-
     let candidateEffects = [];
 
     // 2. Canonical mapping by attackItem.name
@@ -1910,29 +1950,13 @@ export class DCCActor extends BaseActor {
     }
 
     // 4. Dynamic discovery from owned skills configured as techniques / damage effects
-    const attackTags = [
-      normName,
-      ...(Array.isArray(sys.tags) ? sys.tags : []),
-      (sys.weaponCategory || '').toLowerCase(),
-      (sys.weaponType || '').toLowerCase(),
-      (sys.skillType || sys.type || '').toLowerCase(),
-      (sys.category || '').toLowerCase()
-    ].map(t => String(t).toLowerCase().trim()).filter(Boolean);
-
     for (const s of skills) {
       const sSys = s.system || {};
       const isTech = sSys.isTechnique === true || sSys.techniqueConfig?.isDamageEffect === true;
       const cType = (sSys.checkType || '').toLowerCase();
       if (!isTech && !cType.includes('damage effect')) continue;
 
-      const rawApplies = [
-        ...(Array.isArray(sSys.appliesTo) ? sSys.appliesTo : (typeof sSys.appliesTo === 'string' ? sSys.appliesTo.split(',') : [])),
-        ...(Array.isArray(sSys.techniqueConfig?.appliesToTags) ? sSys.techniqueConfig.appliesToTags : (typeof sSys.techniqueConfig?.appliesToTags === 'string' ? sSys.techniqueConfig.appliesToTags.split(',') : []))
-      ];
-
-      const appliesTo = rawApplies.map(a => String(a).toLowerCase().trim()).filter(Boolean);
-      const applies = appliesTo.some(a => attackTags.includes(a) || attackTags.some(t => t.includes(a) || a.includes(t)));
-      if (applies && s.name) {
+      if (this.isTechniqueApplicable(s, attackItem) && s.name) {
         candidateEffects.push(s.name.trim());
       }
     }
@@ -3450,12 +3474,18 @@ export class DCCActor extends BaseActor {
       if (sys.isTechnique || sys.techniqueConfig?.isDamageEffect) return false;
       const cType = (sys.checkType || '').toLowerCase();
       if (cType.includes('damage effect') || cType.includes('passive')) return false;
+
+      const sTags = s.allTags instanceof Set
+        ? s.allTags
+        : (typeof getItemAllTags === 'function' ? getItemAllTags(s) : new Set(sys.tags || []));
+      if (sTags.has('action.passive')) return false;
+
       const normName = s.name.toLowerCase().trim();
       const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave', 'smush']);
-      if (KNOWN_MANEUVERS.has(normName) || Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
+      if (KNOWN_MANEUVERS.has(normName) || sTags.has('kind.technique') || Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
 
-      const isKnownUnarmed = KNOWN_UNARMED.has(normName) || Boolean(sys.tags?.includes('unarmed'));
-      const isKnownAttack = isKnownUnarmed || Boolean(sys.tags?.includes('attack'));
+      const isKnownUnarmed = KNOWN_UNARMED.has(normName) || sTags.has('weaponClass.unarmed') || Boolean(sys.tags?.includes('unarmed'));
+      const isKnownAttack = isKnownUnarmed || sTags.has('action.attack') || Boolean(sys.tags?.includes('attack'));
 
       if (sys.isAttack === false && !isKnownAttack) return false;
 
@@ -5407,7 +5437,29 @@ export class DCCActor extends BaseActor {
       sys.freeCast
     );
     const baseManaCost = Math.max(0, Number(sys.manaCost) || 0);
-    const manaCost = isFreeCast ? 0 : baseManaCost;
+
+    // Check Favored spell mechanics (+1 MP for non-favored classes when caster has a class)
+    const spellTags = spellItem.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(spellItem) : new Set(sys.tags || []));
+    const favoredTags = Array.from(spellTags).filter(t => typeof t === 'string' && t.startsWith('favored.'));
+
+    let isFavored = true;
+    let favoredPenalty = 0;
+
+    const actorArchetypes = typeof this.getArchetypeTags === 'function' ? this.getArchetypeTags() : new Set();
+    if (favoredTags.length > 0 && actorArchetypes.size > 0) {
+      isFavored = favoredTags.some(ft => {
+        const def = getTagDefinition(ft);
+        const targetArchetype = def?.references || `archetype.${ft.replace(/^favored\./, '')}`;
+        return targetArchetype && actorArchetypes.has(targetArchetype);
+      });
+
+      if (!isFavored) {
+        favoredPenalty = 1;
+      }
+    }
+
+    const effectiveCost = isFreeCast ? 0 : (opts.manaCost !== undefined ? Number(opts.manaCost) : (baseManaCost + favoredPenalty));
+    const manaCost = effectiveCost;
     const rawMana = this.system?.attributes?.mana?.value !== undefined
       ? Number(this.system.attributes.mana.value)
       : (Number(this.system?.attributes?.mana?.max) || 0);
@@ -5442,6 +5494,8 @@ export class DCCActor extends BaseActor {
             reason: 'insufficient_mana',
             manaCost,
             baseManaCost,
+            favoredPenalty,
+            isFavored,
             currentMana
           }
         }
@@ -5509,7 +5563,7 @@ export class DCCActor extends BaseActor {
 
     const manaDisplay = isFreeCast
       ? `<span style="color: #27ae60; font-weight: bold;"><i class="fa-solid fa-gift"></i> 0 MP (Free Cast)</span>`
-      : (manaCost > 0 ? `<span style="color: #2980b9; font-weight: bold;">${manaCost} MP</span> <small style="color: #7f8c8d;">(${newMana} MP left)</small>` : '<span style="color: #2980b9; font-weight: bold;">None</span>');
+      : (manaCost > 0 ? `<span style="color: #2980b9; font-weight: bold;">${manaCost} MP</span>${favoredPenalty > 0 ? ` <small style="color: #c0392b; font-weight: bold;">(+1 non-favored)</small>` : ''} <small style="color: #7f8c8d;">(${newMana} MP left)</small>` : '<span style="color: #2980b9; font-weight: bold;">None</span>');
 
     const sourceBadge = opts.originItem || opts.isConsumable || opts.isItemEffect
       ? `<div><strong>Source:</strong> <span style="color: #8e44ad; font-weight: bold;"><i class="fa-solid fa-wand-magic-sparkles"></i> ${opts.originItem?.name || 'Item / Consumable Effect'}</span></div>`
@@ -5619,6 +5673,8 @@ export class DCCActor extends BaseActor {
           spellSuccess: true,
           manaCost,
           baseManaCost,
+          favoredPenalty,
+          isFavored,
           freeCast: isFreeCast,
           remainingMana: isFreeCast ? currentMana : newMana,
           isHeal: Boolean(healInfo),
@@ -6096,13 +6152,6 @@ export class DCCActor extends BaseActor {
     return created[0] || null;
   }
 
-  /**
-   * Alias for applyFatiguedDebuff for backwards compatibility.
-   * @returns {Promise<Item>}
-   */
-  async applyExhaustedDebuff() {
-    return this.applyFatiguedDebuff();
-  }
 
   /**
    * Mend injury debuffs from this actor.

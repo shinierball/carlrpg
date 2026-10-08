@@ -9,6 +9,9 @@ import { DCC_CLASSES } from './classes.mjs';
 import { DCC_SKILLS } from './skills.mjs';
 import { DCC_SPELLS } from './spells.mjs';
 import { getSizeInfo } from './sizes.mjs';
+import { matchesTagQuery } from '../utils/tag-query.mjs';
+import { getItemAllTags } from './tags.mjs';
+import { tagIndex } from '../apps/tag-index.mjs';
 
 /**
  * Normalizes text for comparison by removing whitespace and non-alphanumeric chars.
@@ -1256,14 +1259,77 @@ export class DCCRaceClassApplier {
   }
 
   /**
+   * Decomposes structured grants (system.grants) into concrete bonus components.
+   * @param {object} def
+   * @returns {object|null}
+   */
+  static parseGrants(def) {
+    const grants = def.system?.grants || def.grants;
+    if (!Array.isArray(grants) || grants.length === 0) return null;
+
+    const stats = { str: 0, dex: 0, con: 0, int: 0, cha: 0 };
+    const skills = [];
+    const spells = [];
+    const skillModifiers = [];
+    let drBonus = def.system?.drBonus || 0;
+    const movement = { walkDelta: 0, climb: 0, swim: 0, fly: 0, burrow: 0 };
+    let size = def.system?.size || null;
+
+    for (const g of grants) {
+      if (g.kind === 'stat' && g.stats) {
+        for (const [st, val] of Object.entries(g.stats)) {
+          if (stats[st] !== undefined) stats[st] += Number(val) || 0;
+        }
+      } else if (g.kind === 'skill' && g.mode === 'fixed') {
+        const customSkill = (def.system?.skills || def.skills || []).find(sk => normalizeKey(sk.name) === normalizeKey(g.name));
+        skills.push({
+          name: g.name,
+          rank: Number(g.rank) || (customSkill ? Number(customSkill.rank) || 1 : 1),
+          stat: g.stat || customSkill?.stat || undefined,
+          checkType: g.checkType || customSkill?.checkType || undefined,
+          baseDamage: g.baseDamage || customSkill?.baseDamage || undefined,
+          canGainRanks: g.canGainRanks !== undefined ? Boolean(g.canGainRanks) : (customSkill?.canGainRanks !== undefined ? Boolean(customSkill.canGainRanks) : undefined),
+          cooldown: g.cooldown || customSkill?.cooldown || undefined,
+          category: g.category || customSkill?.category || undefined,
+          notes: g.notes || customSkill?.notes || undefined,
+          isPassive: g.isPassive !== undefined ? Boolean(g.isPassive) : (customSkill?.isPassive !== undefined ? Boolean(customSkill.isPassive) : undefined)
+        });
+      } else if (g.kind === 'spell' && g.mode === 'fixed') {
+        const customSpell = (def.system?.spells || def.spells || []).find(sp => normalizeKey(sp.name) === normalizeKey(g.name));
+        spells.push({
+          name: g.name,
+          rank: Number(g.rank) || (customSpell ? Number(customSpell.rank) || 1 : 1),
+          mpCost: Number(g.mpCost) || (customSpell ? Number(customSpell.mpCost) || 0 : 0),
+          isPassive: g.isPassive !== undefined ? Boolean(g.isPassive) : (customSpell?.isPassive !== undefined ? Boolean(customSpell.isPassive) : undefined)
+        });
+      } else if (g.kind === 'skillModifier') {
+        skillModifiers.push(g);
+      } else if (g.kind === 'dr') {
+        drBonus = Number(g.value) || drBonus;
+      } else if (g.kind === 'movement' && g.movement) {
+        for (const [k, v] of Object.entries(g.movement)) {
+          if (movement[k] !== undefined) movement[k] += Number(v) || 0;
+        }
+      } else if (g.kind === 'size' && g.size) {
+        size = g.size;
+      }
+    }
+
+    return { stats, skills, spells, skillModifiers, drBonus, movement, size };
+  }
+
+  /**
    * Fully decomposes a race definition into applied bonuses.
    */
   static parseRaceBonuses(raceDef, options = {}) {
     if (!raceDef) return null;
-    const stats = this.parseStats(raceDef);
-    const { skills, spells } = this.parseSkillsAndSpells(raceDef);
-    const drBonus = this.parseDR(raceDef);
-    const movement = this.parseMovement(raceDef);
+    const grantData = this.parseGrants(raceDef);
+    const stats = grantData ? grantData.stats : this.parseStats(raceDef);
+    const skills = grantData ? grantData.skills : this.parseSkillsAndSpells(raceDef).skills;
+    const spells = grantData ? grantData.spells : this.parseSkillsAndSpells(raceDef).spells;
+    const skillModifiers = grantData ? grantData.skillModifiers : [];
+    const drBonus = grantData ? grantData.drBonus : this.parseDR(raceDef);
+    const movement = grantData ? grantData.movement : this.parseMovement(raceDef);
     const choices = this.detectChoices(raceDef);
     const { perks, detriments } = this.extractPerksAndDetriments(raceDef);
     const chosenPerks = options.chosenPerks || raceDef.system?.chosenPerks || raceDef.chosenPerks || perks;
@@ -1273,7 +1339,7 @@ export class DCCRaceClassApplier {
     const chosenBuffs = options.chosenBuffs || raceDef.system?.chosenBuffs || raceDef.chosenBuffs || buffs;
     const chosenDebuffs = options.chosenDebuffs || raceDef.system?.chosenDebuffs || raceDef.chosenDebuffs || debuffs;
     const conditions = this.parseConditions(raceDef, 'race', { chosenPerks, chosenDetriments, chosenBuffs, chosenDebuffs });
-    const size = raceDef.system?.size || 'Medium (4)';
+    const size = (grantData && grantData.size) ? grantData.size : (raceDef.system?.size || 'Medium (4)');
     const parsedSize = getSizeInfo(size);
 
     return {
@@ -1284,6 +1350,7 @@ export class DCCRaceClassApplier {
       stats,
       skills,
       spells,
+      skillModifiers,
       choices,
       perks,
       detriments,
@@ -1304,11 +1371,14 @@ export class DCCRaceClassApplier {
    */
   static parseClassBonuses(classDef, options = {}) {
     if (!classDef) return null;
-    const stats = this.parseStats(classDef);
-    const { skills, spells } = this.parseSkillsAndSpells(classDef);
+    const grantData = this.parseGrants(classDef);
+    const stats = grantData ? grantData.stats : this.parseStats(classDef);
+    const skills = grantData ? grantData.skills : this.parseSkillsAndSpells(classDef).skills;
+    const spells = grantData ? grantData.spells : this.parseSkillsAndSpells(classDef).spells;
+    const skillModifiers = grantData ? grantData.skillModifiers : [];
     const choices = this.detectChoices(classDef);
-    const drBonus = this.parseDR(classDef);
-    const movement = this.parseMovement(classDef);
+    const drBonus = grantData ? grantData.drBonus : this.parseDR(classDef);
+    const movement = grantData ? grantData.movement : this.parseMovement(classDef);
     const { perks, detriments } = this.extractPerksAndDetriments(classDef);
     const chosenPerks = options.chosenPerks || classDef.system?.chosenPerks || classDef.chosenPerks || perks;
     const chosenDetriments = options.chosenDetriments || classDef.system?.chosenDetriments || classDef.chosenDetriments || detriments;
@@ -1325,6 +1395,7 @@ export class DCCRaceClassApplier {
       stats,
       skills,
       spells,
+      skillModifiers,
       choices,
       perks,
       detriments,
@@ -1354,6 +1425,31 @@ export class DCCRaceClassApplier {
     if (!def) return [];
     const choices = [];
     let idx = 0;
+
+    // 0. Structured system.grants (CarlRPG 3.0.0 Tagging & Grants Engine)
+    const grants = def.system?.grants || def.grants;
+    if (Array.isArray(grants) && grants.length > 0) {
+      for (const g of grants) {
+        if (g.mode === 'choice') {
+          const count = Number(g.count) || 1;
+          for (let i = 0; i < count; i++) {
+            choices.push({
+              id: `choice_${idx++}`,
+              label: g.label ? (count > 1 ? `${g.label} ${i + 1}` : g.label) : `Choice (Rank ${g.rank || 1})`,
+              type: g.kind || 'skill',
+              category: g.category || (g.options ? 'options' : (g.kind === 'spell' ? 'spell' : 'weapon')),
+              rank: Number(g.rank) || 1,
+              count: 1,
+              filter: g.filter || null,
+              options: g.options ? [...g.options] : null,
+              distinct: Boolean(g.distinct),
+              sourcePerk: g.label || g.sourcePerk || ''
+            });
+          }
+        }
+      }
+      if (choices.length > 0) return choices;
+    }
 
     // 1. Structured pre-existing system.choices
     if (Array.isArray(def.system?.choices) && def.system.choices.length > 0) {
@@ -1571,18 +1667,39 @@ export class DCCRaceClassApplier {
   static getCatalogOptions(choice) {
     if (!choice) return [];
     if (choice.category === 'options' && Array.isArray(choice.options)) {
-      return choice.options;
+      return [...choice.options];
+    }
+    if (choice.options && Array.isArray(choice.options)) {
+      return [...choice.options];
+    }
+
+    if (choice.filter) {
+      try {
+        const matches = tagIndex.find(choice.filter, { type: choice.type });
+        if (matches && matches.length > 0) {
+          return matches.map(m => m.name).sort();
+        }
+      } catch (_) {}
     }
 
     if (choice.category === 'crafting') {
+      try {
+        const matches = tagIndex.find({ all: ['kind.skill', 'skillGroup.crafting'] }, { type: 'skill' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return [
-        'Alchemy', 'Brewing', 'Carpentry', 'Cooking', 'Fabricate',
+        'Alchemy', 'Armor Making', 'Blacksmithing', 'Bowmaking', 'Brewing',
+        'Cooking', 'Enchanting', 'Engineering', 'Explosives Handling', 'Fabricate',
         'Gemcutting', 'Leatherworking', 'Repair', 'Salvage', 'Smithing',
         'Tailoring', 'Tattoo', 'Tinkering', 'Trap Engineer'
       ];
     }
 
     if (choice.category === 'edged_weapon') {
+      try {
+        const matches = tagIndex.find({ any: ['weapon.sword', 'weapon.dagger', 'weapon.blade'] }, { type: 'skill' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return [
         'Axe', 'Dagger', 'Edged Weapons', 'Greatsword', 'Handaxe',
         'Longsword', 'Rapier', 'Shortsword', 'Slice Attack'
@@ -1590,10 +1707,18 @@ export class DCCRaceClassApplier {
     }
 
     if (choice.category === 'reach_weapon') {
+      try {
+        const matches = tagIndex.find({ any: ['weapon.spear', 'weapon.polearm'] }, { type: 'skill' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return ['Halberd', 'Lance', 'Polearm', 'Reach Weapons', 'Spear', 'Whip'];
     }
 
     if (choice.category === 'melee_weapon') {
+      try {
+        const matches = tagIndex.find({ all: ['kind.skill', 'weaponClass.melee'] }, { type: 'skill' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return [
         'Axe', 'Blunt Weapons', 'Club', 'Dagger', 'Edged Weapons', 'Flail',
         'Greatsword', 'Halberd', 'Handaxe', 'Herding Weapons', 'Improvised Weapons',
@@ -1604,6 +1729,10 @@ export class DCCRaceClassApplier {
     }
 
     if (choice.category === 'weapon') {
+      try {
+        const matches = tagIndex.find({ any: ['skillGroup.combat', 'kind.weapon'] }, { type: 'skill' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return [
         'Axe', 'Blunt Weapons', 'Bow', 'Chainsaw', 'Club', 'Crossbow',
         'Dagger', 'Edged Weapons', 'Flail', 'Greatsword', 'Gun', 'Halberd',
@@ -1616,6 +1745,10 @@ export class DCCRaceClassApplier {
     }
 
     if (choice.type === 'spell' || choice.category === 'spell') {
+      try {
+        const matches = tagIndex.find({ all: ['kind.spell'] }, { type: 'spell' });
+        if (matches && matches.length > 0) return matches.map(m => m.name).sort();
+      } catch (_) {}
       return DCC_SPELLS.map(s => s.name).sort();
     }
 
@@ -2256,6 +2389,20 @@ export class DCCRaceClassApplier {
       }
     }
 
+    // 7.5 Revert Skill Modifiers
+    if (Array.isArray(applied?.skillModifiers)) {
+      for (const mod of applied.skillModifiers) {
+        const skillItem = actor.items?.find?.(i => i.type === 'skill' && (i.id === mod.id || normalizeKey(i.name) === normalizeKey(mod.name)));
+        if (skillItem) {
+          const curRank = Number(skillItem.system?.rank) || 0;
+          const restoredRank = Math.max(0, curRank - mod.actualDelta);
+          if (typeof skillItem.update === 'function') {
+            await skillItem.update({ 'system.rank': restoredRank });
+          }
+        }
+      }
+    }
+
     // 8. Revert Spells
     if (Array.isArray(applied?.spells)) {
       const spellsToDelete = [];
@@ -2489,6 +2636,29 @@ export class DCCRaceClassApplier {
       }
     }
 
+    // 7.5 Apply Skill Modifiers from Grants
+    const appliedSkillModifiers = [];
+    if (Array.isArray(bonuses.skillModifiers) && bonuses.skillModifiers.length > 0) {
+      for (const mod of bonuses.skillModifiers) {
+        for (const skill of (actor.items || [])) {
+          if (skill.type !== 'skill') continue;
+          const skillTags = skill.allTags || getItemAllTags(skill);
+          if (matchesTagQuery(skillTags, mod.filter)) {
+            const curRank = Number(skill.system?.rank) || 0;
+            if (mod.onlyIfOwned && curRank <= 0) continue;
+            const rankDelta = Number(mod.rankDelta) || 0;
+            const floor = mod.floor !== undefined ? mod.floor : 0;
+            const newRank = Math.max(floor, curRank + rankDelta);
+            const actualDelta = newRank - curRank;
+            if (actualDelta !== 0) {
+              await skill.update?.({ 'system.rank': newRank });
+              appliedSkillModifiers.push({ id: skill.id, name: skill.name, actualDelta, previousRank: curRank });
+            }
+          }
+        }
+      }
+    }
+
     // 8. Apply Advantage & Disadvantage as Custom Buffs & Debuffs
     const conditionItemsToCreate = [
       ...(bonuses.conditions?.buffs || []),
@@ -2552,6 +2722,7 @@ export class DCCRaceClassApplier {
         chosenDebuffs: bonuses.chosenDebuffs || [],
         skills: appliedSkills,
         spells: appliedSpells,
+        skillModifiers: appliedSkillModifiers,
         chosenSkills: resolvedChoices.chosenSkills || [],
         chosenSpells: resolvedChoices.chosenSpells || [],
         chosenPerks,
@@ -2684,6 +2855,20 @@ export class DCCRaceClassApplier {
       }
       if (itemsToDelete.length > 0 && typeof actor.deleteEmbeddedDocuments === 'function') {
         await actor.deleteEmbeddedDocuments('Item', itemsToDelete);
+      }
+    }
+
+    // 6.5 Revert Skill Modifiers
+    if (Array.isArray(applied?.skillModifiers)) {
+      for (const mod of applied.skillModifiers) {
+        const skillItem = actor.items?.find?.(i => i.type === 'skill' && (i.id === mod.id || normalizeKey(i.name) === normalizeKey(mod.name)));
+        if (skillItem) {
+          const curRank = Number(skillItem.system?.rank) || 0;
+          const restoredRank = Math.max(0, curRank - mod.actualDelta);
+          if (typeof skillItem.update === 'function') {
+            await skillItem.update({ 'system.rank': restoredRank });
+          }
+        }
       }
     }
 
@@ -2915,6 +3100,29 @@ export class DCCRaceClassApplier {
       }
     }
 
+    // 7.5 Apply Skill Modifiers from Grants
+    const appliedSkillModifiers = [];
+    if (Array.isArray(bonuses.skillModifiers) && bonuses.skillModifiers.length > 0) {
+      for (const mod of bonuses.skillModifiers) {
+        for (const skill of (actor.items || [])) {
+          if (skill.type !== 'skill') continue;
+          const skillTags = skill.allTags || getItemAllTags(skill);
+          if (matchesTagQuery(skillTags, mod.filter)) {
+            const curRank = Number(skill.system?.rank) || 0;
+            if (mod.onlyIfOwned && curRank <= 0) continue;
+            const rankDelta = Number(mod.rankDelta) || 0;
+            const floor = mod.floor !== undefined ? mod.floor : 0;
+            const newRank = Math.max(floor, curRank + rankDelta);
+            const actualDelta = newRank - curRank;
+            if (actualDelta !== 0) {
+              await skill.update?.({ 'system.rank': newRank });
+              appliedSkillModifiers.push({ id: skill.id, name: skill.name, actualDelta, previousRank: curRank });
+            }
+          }
+        }
+      }
+    }
+
     // 8. Apply Advantage & Disadvantage as Custom Buffs & Debuffs
     const conditionItemsToCreate = [
       ...(bonuses.conditions?.buffs || []),
@@ -2977,6 +3185,7 @@ export class DCCRaceClassApplier {
         chosenDebuffs: bonuses.chosenDebuffs || [],
         skills: appliedSkills,
         spells: appliedSpells,
+        skillModifiers: appliedSkillModifiers,
         chosenSkills: resolvedChoices.chosenSkills || [],
         chosenSpells: resolvedChoices.chosenSpells || [],
         chosenPerks,

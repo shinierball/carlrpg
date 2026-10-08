@@ -30,6 +30,8 @@ import {
   isPassiveSkill
 } from './apps/crawler-token-hud.mjs';
 import { DCC_ACHIEVEMENTS, DCC_ACHIEVEMENT_TIERS } from './data/achievements.mjs';
+import { TagIndex, tagIndex } from './apps/tag-index.mjs';
+import { DCCTagManager } from './apps/tag-manager.mjs';
 import { DCC_SKILLS } from './data/skills.mjs';
 import { DCC_SPELLS } from './data/spells.mjs';
 import { DCC_BUFFS, DCC_DAMAGE_TYPES, DCC_DEBUFFS } from './data/buffs.mjs';
@@ -117,6 +119,9 @@ Hooks.once('init', async function() {
     registerChatMessageHook,
     createAndEditItem,
     openGlobalItemCreatorDialog,
+    TagIndex,
+    tags: tagIndex,
+    DCCTagManager,
     applications: {
       DCCCrawlerSheet,
       DCCItemSheet,
@@ -132,7 +137,9 @@ Hooks.once('init', async function() {
       DCCCombatArchiveApp,
       DCCSessionEngine,
       DCCSessionManagerApp,
-      DCCRapidBatchImportApp
+      DCCRapidBatchImportApp,
+      TagIndex,
+      DCCTagManager
     },
     models: {
       // Items
@@ -157,6 +164,8 @@ Hooks.once('init', async function() {
     }
   };
 
+  game.carlRpg = game.dcc;
+
   CONFIG.DCC = {
     skills: DCC_SKILLS,
     spells: DCC_SPELLS,
@@ -179,7 +188,10 @@ Hooks.once('init', async function() {
       matrices: DCC_BACKGROUND_MATRICES
     },
     backgroundTables: DCC_BACKGROUND_TABLES,
-    rollBackgroundTable
+    rollBackgroundTable,
+    TagIndex,
+    tagIndex,
+    DCCTagManager
   };
 
   // Register document classes
@@ -321,6 +333,15 @@ Hooks.once('init', async function() {
     default: 13000000
   });
 
+  game.settings.register('carl-rpg', 'customTags', {
+    name: 'Custom Tags',
+    hint: 'Stores user-defined custom tag definitions across the world.',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
   DCCActor.getCurrentFloor = getCurrentFloor;
   DCCActor.setCurrentFloor = setCurrentFloor;
   DCCActor.getFloorTimer = getFloorTimer;
@@ -414,7 +435,9 @@ Hooks.once('init', async function() {
     'systems/carl-rpg/templates/apps/crawler-clock-hud.hbs',
     'systems/carl-rpg/templates/apps/rapid-batch-import.hbs',
     'systems/carl-rpg/templates/apps/class-creator.hbs',
-    'systems/carl-rpg/templates/apps/race-creator.hbs'
+    'systems/carl-rpg/templates/apps/race-creator.hbs',
+    'systems/carl-rpg/templates/items/parts/tags.hbs',
+    'systems/carl-rpg/templates/apps/tag-manager.hbs'
   ]);
 
   // Developer Hot-Reload Hook Handler
@@ -430,7 +453,7 @@ Hooks.once('init', async function() {
       }
       // Re-render all open DCC application sheets immediately
       for (const app of Object.values(ui.windows)) {
-        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCRaceCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp) {
+        if (app instanceof DCCCrawlerSheet || app instanceof DCCItemSheet || app instanceof DCCSkillManager || app instanceof DCCSpellManager || app instanceof DCCItemManager || app instanceof DCCCombatMetricsApp || app instanceof DCCCombatArchiveApp || app instanceof DCCSessionManagerApp || app instanceof DCCCrawlerCreatorApp || app instanceof DCCClassCreatorApp || app instanceof DCCRaceCreatorApp || app instanceof DCCAchievementManagerApp || app instanceof DCCGrindApp || app instanceof DCCTagManager) {
           app.render(false);
         }
       }
@@ -494,6 +517,9 @@ Hooks.once('init', async function() {
     },
     openRaceCreator(options = {}) {
       return new DCCRaceCreatorApp(options).render(true);
+    },
+    openTagManager(options = {}) {
+      return new DCCTagManager(options).render(true);
     },
     tokenHUD: getCrawlerTokenHUD(),
     openHotbarHUD(actor, token) {
@@ -739,8 +765,19 @@ function injectItemDirectoryButtons(app, html) {
     new DCCRaceCreatorApp().render(true);
   });
 
+  const tagBtn = $(`
+    <button type="button" class="dcc-open-tag-manager-btn" style="flex: 1; font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 11px; background: #1b4f72; color: #aed6f1; border: 1.5px solid #000; border-radius: 3px; padding: 5px 2px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-tags"></i> Tag Taxonomy
+    </button>
+  `);
+
+  tagBtn.click(ev => {
+    ev.preventDefault();
+    new DCCTagManager().render(true);
+  });
+
   const subBtnRow = $('<div style="display: flex; gap: 4px; margin: 2px 0 6px 0;"></div>');
-  subBtnRow.append(classBtn).append(raceBtn);
+  subBtnRow.append(classBtn).append(raceBtn).append(tagBtn);
 
   const btnGroup = $('<div class="dcc-item-directory-actions" style="margin-bottom: 4px;"></div>');
   btnGroup.append(btn).append(subBtnRow);
@@ -2256,264 +2293,64 @@ Hooks.once('ready', async function() {
       ?? globalThis.foundry?.documents?.Macro
       ?? globalThis.Macro;
 
-    const pack = game.packs.get('carl-rpg.skills');
-    if (pack) {
+    async function populatePackIfEmpty(packName, docClass, createDocsFn, label) {
+      const pack = game.packs.get(packName);
+      if (!pack || !docClass) return;
       try {
         const index = await pack.getIndex();
         if (index.size === 0) {
-          console.log('DCC RPG | Populating empty skills compendium...');
-          const docs = DCC_SKILLS.map(s => ({
-            name: s.name,
-            type: 'skill',
-            img: s.img,
-            system: s.system
-          }));
+          console.log(`DCC RPG | Populating empty ${label} compendium...`);
+          const docs = createDocsFn();
           const wasLocked = Boolean(pack.locked);
           if (wasLocked) {
             if (typeof pack.configure === 'function') await pack.configure({ locked: false });
             else pack.locked = false;
           }
-          await ItemDocClass.createDocuments(docs, { pack: pack.collection || 'carl-rpg.skills' });
+          await docClass.createDocuments(docs, { pack: pack.collection || packName });
           if (wasLocked) {
             if (typeof pack.configure === 'function') await pack.configure({ locked: true });
             else pack.locked = true;
           }
-          console.log(`DCC RPG | Successfully imported ${docs.length} skills into carl-rpg.skills.`);
+          console.log(`DCC RPG | Successfully imported ${docs.length} ${label} into ${packName}.`);
         }
       } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate skills compendium:', err);
+        console.warn(`DCC RPG | Could not inspect/populate ${label} compendium:`, err);
       }
     }
 
-    const spellsPack = game.packs.get('carl-rpg.spells');
-    if (spellsPack) {
-      try {
-        const index = await spellsPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty spells compendium...');
-          const docs = DCC_SPELLS.map(s => ({
-            name: s.name,
-            type: 'spell',
-            img: s.img,
-            system: s.system
-          }));
-          const wasLocked = Boolean(spellsPack.locked);
-          if (wasLocked) {
-            if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: false });
-            else spellsPack.locked = false;
-          }
-          await ItemDocClass.createDocuments(docs, { pack: spellsPack.collection || 'carl-rpg.spells' });
-          if (wasLocked) {
-            if (typeof spellsPack.configure === 'function') await spellsPack.configure({ locked: true });
-            else spellsPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} spells into carl-rpg.spells.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate spells compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.skills', ItemDocClass, () => DCC_SKILLS.map(s => ({
+      name: s.name, type: 'skill', img: s.img, system: s.system
+    })), 'skills');
 
-    const itemsPack = game.packs.get('carl-rpg.items');
-    if (itemsPack) {
-      try {
-        const index = await itemsPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty items compendium...');
-          const docs = DCC_ITEMS.map(i => ({
-            name: i.name,
-            type: i.type,
-            img: i.img,
-            system: i.system
-          }));
-          const wasLocked = Boolean(itemsPack.locked);
-          if (wasLocked) {
-            if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: false });
-            else itemsPack.locked = false;
-          }
-          await ItemDocClass.createDocuments(docs, { pack: itemsPack.collection || 'carl-rpg.items' });
-          if (wasLocked) {
-            if (typeof itemsPack.configure === 'function') await itemsPack.configure({ locked: true });
-            else itemsPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} items into carl-rpg.items.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate items compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.spells', ItemDocClass, () => DCC_SPELLS.map(s => ({
+      name: s.name, type: 'spell', img: s.img, system: s.system
+    })), 'spells');
 
-    const buffsPack = game.packs.get('carl-rpg.buffs');
-    if (buffsPack) {
-      try {
-        const index = await buffsPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty buffs & debuffs compendium...');
-          const buffDocs = DCC_BUFFS.map(b => ({
-            _id: b._id,
-            name: b.name,
-            type: 'buff',
-            img: b.img || 'icons/svg/aura.svg',
-            system: b.system
-          }));
-          const debuffDocs = DCC_DEBUFFS.map(d => ({
-            _id: d._id,
-            name: d.name,
-            type: 'debuff',
-            img: d.img || 'icons/svg/skull.svg',
-            system: d.system
-          }));
-          const docs = [...buffDocs, ...debuffDocs];
-          const wasLocked = Boolean(buffsPack.locked);
-          if (wasLocked) {
-            if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: false });
-            else buffsPack.locked = false;
-          }
-          await ItemDocClass.createDocuments(docs, { pack: buffsPack.collection || 'carl-rpg.buffs' });
-          if (wasLocked) {
-            if (typeof buffsPack.configure === 'function') await buffsPack.configure({ locked: true });
-            else buffsPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} buffs & debuffs into carl-rpg.buffs.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate buffs compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.items', ItemDocClass, () => DCC_ITEMS.map(i => ({
+      name: i.name, type: i.type, img: i.img, system: i.system
+    })), 'items');
 
-    const mobsPack = game.packs.get('carl-rpg.mobs');
-    if (mobsPack && ActorDocClass) {
-      try {
-        const index = await mobsPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty mobs compendium...');
-          const docs = DCC_MOBS.map(m => ({
-            _id: m._id,
-            name: m.name,
-            type: 'mob',
-            img: m.img || 'icons/svg/skull.svg',
-            system: m.system,
-            items: m.items || [],
-            prototypeToken: {
-              name: m.name,
-              actorLink: false,
-              disposition: -1,
-              displayName: 20,
-              displayBars: 40,
-              bar1: { attribute: 'attributes.hp' },
-              texture: { src: m.img || 'icons/svg/skull.svg' }
-            }
-          }));
-          const wasLocked = Boolean(mobsPack.locked);
-          if (wasLocked) {
-            if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: false });
-            else mobsPack.locked = false;
-          }
-          await ActorDocClass.createDocuments(docs, { pack: mobsPack.collection || 'carl-rpg.mobs' });
-          if (wasLocked) {
-            if (typeof mobsPack.configure === 'function') await mobsPack.configure({ locked: true });
-            else mobsPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} mobs into carl-rpg.mobs.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate mobs compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.buffs', ItemDocClass, () => [
+      ...DCC_BUFFS.map(b => ({ _id: b._id, name: b.name, type: 'buff', img: b.img || 'icons/svg/aura.svg', system: b.system })),
+      ...DCC_DEBUFFS.map(d => ({ _id: d._id, name: d.name, type: 'debuff', img: d.img || 'icons/svg/skull.svg', system: d.system }))
+    ], 'buffs & debuffs');
 
-    const racesPack = game.packs.get('carl-rpg.races');
-    if (racesPack) {
-      try {
-        const index = await racesPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty races compendium...');
-          const docs = DCC_RACES.map(r => ({
-            _id: r._id,
-            name: r.name,
-            type: 'race',
-            img: r.img || 'icons/svg/mystery-man.svg',
-            system: r.system
-          }));
-          const wasLocked = Boolean(racesPack.locked);
-          if (wasLocked) {
-            if (typeof racesPack.configure === 'function') await racesPack.configure({ locked: false });
-            else racesPack.locked = false;
-          }
-          await ItemDocClass.createDocuments(docs, { pack: racesPack.collection || 'carl-rpg.races' });
-          if (wasLocked) {
-            if (typeof racesPack.configure === 'function') await racesPack.configure({ locked: true });
-            else racesPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} races into carl-rpg.races.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate races compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.mobs', ActorDocClass, () => DCC_MOBS.map(m => ({
+      _id: m._id, name: m.name, type: 'mob', img: m.img || 'icons/svg/skull.svg', system: m.system, items: m.items || [],
+      prototypeToken: { name: m.name, actorLink: false, disposition: -1, displayName: 20, displayBars: 40, bar1: { attribute: 'attributes.hp' }, texture: { src: m.img || 'icons/svg/skull.svg' } }
+    })), 'mobs');
 
-    const classesPack = game.packs.get('carl-rpg.classes');
-    if (classesPack) {
-      try {
-        const index = await classesPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty classes compendium...');
-          const docs = DCC_CLASSES.map(c => ({
-            _id: c._id,
-            name: c.name,
-            type: 'class',
-            img: c.img || 'icons/svg/sword.svg',
-            system: c.system
-          }));
-          const wasLocked = Boolean(classesPack.locked);
-          if (wasLocked) {
-            if (typeof classesPack.configure === 'function') await classesPack.configure({ locked: false });
-            else classesPack.locked = false;
-          }
-          await ItemDocClass.createDocuments(docs, { pack: classesPack.collection || 'carl-rpg.classes' });
-          if (wasLocked) {
-            if (typeof classesPack.configure === 'function') await classesPack.configure({ locked: true });
-            else classesPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} classes into carl-rpg.classes.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate classes compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.races', ItemDocClass, () => DCC_RACES.map(r => ({
+      _id: r._id, name: r.name, type: 'race', img: r.img || 'icons/svg/mystery-man.svg', system: r.system
+    })), 'races');
 
-    // 3. Ensure macros compendium pack is populated if empty
-    const macrosPack = game.packs.get('carl-rpg.macros');
-    if (macrosPack && MacroDocClass) {
-      try {
-        const index = await macrosPack.getIndex();
-        if (index.size === 0) {
-          console.log('DCC RPG | Populating empty macros compendium...');
-          const docs = DCC_MACROS.map(m => ({
-            _id: m._id,
-            name: m.name,
-            type: m.type,
-            img: m.img,
-            command: m.command,
-            scope: m.scope || 'global',
-            ownership: m.ownership || { default: 2 },
-            flags: m.flags || {}
-          }));
-          const wasLocked = Boolean(macrosPack.locked);
-          if (wasLocked) {
-            if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: false });
-            else macrosPack.locked = false;
-          }
-          await MacroDocClass.createDocuments(docs, { pack: macrosPack.collection || 'carl-rpg.macros' });
-          if (wasLocked) {
-            if (typeof macrosPack.configure === 'function') await macrosPack.configure({ locked: true });
-            else macrosPack.locked = true;
-          }
-          console.log(`DCC RPG | Successfully imported ${docs.length} macros into carl-rpg.macros.`);
-        }
-      } catch (err) {
-        console.warn('DCC RPG | Could not inspect/populate macros compendium:', err);
-      }
-    }
+    await populatePackIfEmpty('carl-rpg.classes', ItemDocClass, () => DCC_CLASSES.map(c => ({
+      _id: c._id, name: c.name, type: 'class', img: c.img || 'icons/svg/sword.svg', system: c.system
+    })), 'classes');
+
+    await populatePackIfEmpty('carl-rpg.macros', MacroDocClass, () => DCC_MACROS.map(m => ({
+      _id: m._id, name: m.name, type: m.type, img: m.img, command: m.command, scope: m.scope || 'global', ownership: m.ownership || { default: 2 }, flags: m.flags || {}
+    })), 'macros');
 
     // 4. Ensure canonical DCC macros exist in world with Observer ownership (default: 2) so all users can execute them
     if (game.macros && MacroDocClass) {
@@ -2584,6 +2421,24 @@ Hooks.once('ready', async function() {
     if (typeof DCCCrawlerClockHUD?.get === 'function') {
       DCCCrawlerClockHUD.get().render();
     }
+  });
+
+  // Initialize TagIndex across compendiums and world items
+  try {
+    await tagIndex.buildIndex();
+  } catch (err) {
+    console.warn('DCC RPG | Failed to build initial TagIndex:', err);
+  }
+
+  // Reactive tag index updates on world item mutations
+  Hooks.on('createItem', (item) => {
+    if (!item?.isEmbedded) tagIndex.indexItem(item);
+  });
+  Hooks.on('updateItem', (item) => {
+    if (!item?.isEmbedded) tagIndex.updateItem(item);
+  });
+  Hooks.on('deleteItem', (item) => {
+    if (!item?.isEmbedded) tagIndex.removeItem(item?.uuid || item?.id);
   });
 });
 

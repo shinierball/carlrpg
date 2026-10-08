@@ -460,6 +460,42 @@ export async function resolveSingleOutcome(outcome, actor, originItem, isMultiMo
       </div>
     `;
   } else if (outType === 'damage' || outcome.damage) {
+    damageType = outcome.damageType || 'Physical';
+    const baseDamage = outcome.damage || '1d6';
+    let parsedFormula = String(baseDamage).replace(/\bint\b/gi, String(Number(actor?.system?.abilities?.int?.mod) || 0));
+    if (typeof Roll !== 'undefined') {
+      try {
+        const dRoll = await (new Roll(parsedFormula)).evaluate();
+        evaluatedDmg = dRoll.total;
+      } catch (_e) {
+        evaluatedDmg = 1;
+      }
+    } else {
+      evaluatedDmg = 6;
+    }
+    isDamageCard = evaluatedDmg > 0;
+    outcomeHtml = `
+      <div class="dcc-scratch-outcome dcc-outcome-damage" style="background: rgba(192, 57, 43, 0.08); border-left: 4px solid #c0392b; padding: 8px 10px; margin: 8px 0; border-radius: 3px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="margin: 0; color: #c0392b; font-size: 15px; font-weight: bold; text-transform: uppercase;">
+            <i class="fa-solid fa-burst"></i> ${outcome.name || 'Damage Effect'}
+          </h4>
+          <span class="dcc-badge dcc-badge-attack" style="font-size: 10px; background: #c0392b; color: #fff;">DAMAGE</span>
+        </div>
+        <p style="margin: 4px 0; font-size: 12px;">
+          <strong>Target:</strong> <span style="color: #111;">${targetName}${distLabel}</span>
+        </p>
+        <div style="font-size: 13px; font-weight: bold; color: #c0392b; margin: 4px 0;">
+          Inflicts <strong>${evaluatedDmg}</strong> (${damageType}) damage!
+        </div>
+        ${outcome.description ? `<p style="margin: 4px 0; font-size: 12px; color: #444;">${outcome.description}</p>` : ''}
+        <div style="margin-top: 8px;">
+          <button type="button" class="dcc-apply-damage-btn" data-multiplier="1" data-damage-value="${evaluatedDmg}" data-damage-type="${damageType}" data-target-id="${targetActor?.id || ''}" style="background: #c0392b; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">
+            <i class="fa-solid fa-burst"></i> Apply Damage (${evaluatedDmg})
+          </button>
+        </div>
+      </div>
+    `;
   } else if (outType === 'roll_table') {
     const tableName = outcome.tableName || outcome.name || 'Roll Table';
     const tableId = outcome.tableId || '';

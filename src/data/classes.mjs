@@ -57,6 +57,92 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.arcanist",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 0,
+            "int": 3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Arcane",
+          "rank": 5,
+          "ref": "id.skill.arcane"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Salvage",
+          "rank": 3,
+          "ref": "id.skill.salvage"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "crafting",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "skillGroup.crafting"
+            ]
+          },
+          "label": "Crafting Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 1,
+          "category": "crafting",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "skillGroup.crafting"
+            ]
+          },
+          "label": "Crafting Skill 2 (Rank 1)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Arcane Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Salv age Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a crafting Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in a crafting Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 1 Arc anist table"
+        },
+        {
+          "kind": "perk",
+          "name": "Arcane and one cr afting Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -112,6 +198,60 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.arcanist",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 3,
+            "int": 3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Alchemy",
+          "rank": 5,
+          "ref": "id.skill.alchemy"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Infusion",
+          "rank": 3,
+          "ref": "id.skill.infusion"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Alchemy Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Infusion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Immunity to Poison"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 1 Alchem y table"
+        },
+        {
+          "kind": "perk",
+          "name": "At the end of each floor, add 1 to your Skill Advancement Checks for Alchemy and Infusion"
+        },
+        {
+          "kind": "perk",
+          "name": "Alchemy Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -176,6 +316,78 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.arcanist",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": 1,
+            "con": 0,
+            "int": 5,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Arcane",
+          "rank": 5,
+          "ref": "id.skill.arcane"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 2,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 2,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Salvage",
+          "rank": 2,
+          "ref": "id.skill.salvage"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Arcane Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Lore , Negotiation, and Salvage Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier-1 cr afting table of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Arcanis t Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -232,6 +444,64 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.arcanist",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 1,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Arcane",
+          "rank": 5,
+          "ref": "id.skill.arcane"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Smithing",
+          "rank": 3,
+          "ref": "id.skill.smithing"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Arcane Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Smithing Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "resistance to Fire damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 1 Arc anist table"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 1 Smithin g table"
+        },
+        {
+          "kind": "perk",
+          "name": "Arcane Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -292,6 +562,71 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.arcanist",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": 3,
+            "int": 2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Tattoo Artistry",
+          "rank": 5,
+          "ref": "id.skill.tattoo-artistry"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Calligraphy",
+          "rank": 3,
+          "ref": "id.skill.calligraphy"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dagger",
+          "rank": 2,
+          "ref": "id.skill.dagger"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Tat too Artistry Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Calligr aphy Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dagger Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 1 Ta ttoo chair (table)"
+        },
+        {
+          "kind": "perk",
+          "name": "Tat too Artistry Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -347,6 +682,78 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.barbarian",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 6,
+            "dex": 0,
+            "con": 5,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 2,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Intimidate",
+          "rank": 1,
+          "ref": "id.skill.intimidate"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill (Rank 3)"
+        },
+        {
+          "kind": "perk",
+          "name": "+6 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Endurance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Intimida te Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Rag e (benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR Buff"
+        }
       ]
     }
   },
@@ -409,6 +816,89 @@ export const DCC_CLASSES = [
         "archetype.barbarian",
         "archetype.bard",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 0,
+            "con": 3,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 2,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Intimidation",
+          "rank": 2,
+          "ref": "id.skill.intimidation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Attack of Opportunity",
+          "rank": 1,
+          "ref": "id.skill.attack-of-opportunity"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength, Constitution, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Performance and Intimidation Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Att ack of Opportunity Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Rag e (benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per combat, after you kill an enemy, you can make an Unopposed Performance Skill Check. On an Amazing success or better, gain +1 popularity"
+        },
+        {
+          "kind": "perk",
+          "name": "One weapon Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -467,6 +957,82 @@ export const DCC_CLASSES = [
         "archetype.barbarian",
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": 1,
+            "con": 0,
+            "int": 1,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 4,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Stealth",
+          "rank": 4,
+          "ref": "id.skill.stealth"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength, Dexterity, and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Ambush and Stealth Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in one weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Rag e (benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -531,6 +1097,82 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.barbarian",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 2,
+            "con": 0,
+            "int": 0,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Slice",
+          "rank": 3,
+          "ref": "id.skill.slice"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 3,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 1,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity, Strength, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Slice Attack and Unarmed combat Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dodg e Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Ambush Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Rag e (benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -586,6 +1228,79 @@ export const DCC_CLASSES = [
         "archetype.barbarian",
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 3,
+            "con": 0,
+            "int": -2,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Shield Block",
+          "rank": 5,
+          "ref": "id.skill.shield-block"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength, Dexterity, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Shield Bloc k Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in one weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "Rag e (benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "One weapon Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Add your Str Mod a second time to your melee attack damage against males"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -653,6 +1368,104 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.bard",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 3,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Diplomacy",
+          "rank": 2,
+          "ref": "id.skill.diplomacy"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Good First Impression",
+          "rank": 1,
+          "ref": "id.skill.good-first-impression"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 1,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 1,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 1)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Performance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a Spell of your c hoice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Diplomacy Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Good Fir st Impression and Lore Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to all membership-based clubs, regardless of current memberships"
+        },
+        {
+          "kind": "perk",
+          "name": "Membership in the Dungeon Book of the Floor Club (all Spells)"
+        },
+        {
+          "kind": "perk",
+          "name": "Free r oom at all saferooms"
+        },
+        {
+          "kind": "perk",
+          "name": "You may g ain Access to a Patron"
+        },
+        {
+          "kind": "perk",
+          "name": "You pay +1 Mana to cast Spells that are not “Favored: Bard”"
+        }
       ]
     }
   },
@@ -720,6 +1533,78 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.merchant",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 5,
+            "con": 0,
+            "int": 0,
+            "cha": 5
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 2,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pathfinder",
+          "rank": 2,
+          "ref": "id.skill.pathfinder"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Shield",
+          "rank": 2,
+          "ref": "id.spell.shield"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dodg e, Negotiation, and Pathfinder Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Shield Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "A 25% discount at all s tores plus a 15% bonus to money earned from sales"
+        },
+        {
+          "kind": "perk",
+          "name": "10% interes t earned on all coins upon descent to the next floor"
+        },
+        {
+          "kind": "perk",
+          "name": "Dodg e Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -775,6 +1660,60 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.bard",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 0,
+            "cha": 10
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Character Actor",
+          "rank": 3,
+          "ref": "id.skill.character-actor"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Cockroach",
+          "rank": 2,
+          "ref": "id.skill.cockroach"
+        },
+        {
+          "kind": "perk",
+          "name": "+10 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Charact er Actor Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Cock roach Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Add 1 to your Skill Advancement Checks for Charisma-based Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Immunity to Poison and all diseases"
+        },
+        {
+          "kind": "perk",
+          "name": "The Manag er benefit"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -837,6 +1776,67 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.necromancer",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 0,
+            "con": 3,
+            "int": 3,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 4,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Turn Undead",
+          "rank": 3,
+          "ref": "id.spell.turn-undead"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Panty Dropper",
+          "rank": 3,
+          "ref": "id.spell.panty-dropper"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 to Intelligence, Constitution, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Performance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Turn Undead and Panty Dropper Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to all membership-based clubs, regardless of current memberships"
+        },
+        {
+          "kind": "perk",
+          "name": "Free r oom at all saferooms"
+        },
+        {
+          "kind": "perk",
+          "name": "You pay +1 Mana to cast Spells that are not “Favored: Bard” or that don’t deal Necrotic damage"
+        }
       ]
     }
   },
@@ -890,6 +1890,61 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.bard",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 3,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 5,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Performance Skill with the written word specialty"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Earworm (as spoken word poetry), Heal Others, and Shield Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to all membership-based clubs, regardless of current memberships"
+        },
+        {
+          "kind": "perk",
+          "name": "You pay +1 Mana to cast Spells that are not “Favored: Bard”"
+        },
+        {
+          "kind": "perk",
+          "name": "Performance Skill can be raised to 20"
+        },
+        {
+          "kind": "perk",
+          "name": "You must choose a Patron. The GM will give you a choice of at least two options when you select this class."
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -956,6 +2011,78 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 8,
+            "int": 0,
+            "cha": 8
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 4,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 3,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Iron Stomach",
+          "rank": 1,
+          "ref": "id.skill.iron-stomach"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Repair",
+          "rank": 1,
+          "ref": "id.skill.repair"
+        },
+        {
+          "kind": "perk",
+          "name": "+8 split bet ween Strength, Constitution, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Performance Skill, with a guitar specialty"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Negotiation Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Iron Stomach and Repair Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage on Checks against Poison or effects that give the Shit-Faced Debuff"
+        },
+        {
+          "kind": "perk",
+          "name": "At the start of each combat, you may declare that all the damage you deal is Sonic damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Roll with Advantage when making a Repair Skill Check"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1023,6 +2150,77 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.bard",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 2,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Good First Impression",
+          "rank": 2,
+          "ref": "id.skill.good-first-impression"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 2,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 2,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Hot Stuff Aura",
+          "rank": 2,
+          "ref": "id.spell.hot-stuff-aura"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Panty Dropper",
+          "rank": 2,
+          "ref": "id.spell.panty-dropper"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Charisma and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Good Fir st Impression, Lore, and Performance Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in Hot St uff Aura and Panty Dropper Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Add your Cha Mod a second time when making a Cha Skill Check during a potentially hostile situation"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Spellbook of the Floor club (“Favored: Bard” Spells only)"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per da y, you can draw the attention of everyone on the battlefield for around, preventing them from attacking (this includes party members, Mobs, and minions, but not Bosses)"
+        }
       ]
     }
   },
@@ -1089,6 +2287,96 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.cleric",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 3,
+            "cha": 4
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Religion",
+          "rank": 3,
+          "ref": "id.skill.religion"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 2,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Shield",
+          "rank": 2,
+          "ref": "id.spell.shield"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Turn Undead",
+          "rank": 2,
+          "ref": "id.spell.turn-undead"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a Weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Religion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Heal Others, Shield, and Turn Undead Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Spell Book of the Level club (“Favored: Cleric” Spells only)"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity (see Deities & Worship, p. 163)"
+        },
+        {
+          "kind": "perk",
+          "name": "You cannot choose a Cleric-type Class if you have Access to the Desperado Club"
+        }
       ]
     }
   },
@@ -1161,6 +2449,111 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.cleric",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 0,
+            "con": 2,
+            "int": -2,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Religion",
+          "rank": 2,
+          "ref": "id.skill.religion"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 1,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 2,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Shield",
+          "rank": 2,
+          "ref": "id.spell.shield"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Soul Collector",
+          "rank": 2,
+          "ref": "id.spell.soul-collector"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Heal Others, Shield, and Soul Collector Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Reli gion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Endurance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Dungeon Book of the Floor club (“Favored: Cleric” Spells only)"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity (see Deities & Worship, p. 163)"
+        },
+        {
+          "kind": "perk",
+          "name": "You cannot choose this Class if you have Access to the Desperado Club"
+        }
       ]
     }
   },
@@ -1217,6 +2610,60 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.druid",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 2,
+            "int": 2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Survival",
+          "rank": 2,
+          "ref": "id.skill.survival"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Nature's Breath",
+          "rank": 3,
+          "ref": "id.spell.nature-s-breath"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence, Constitution, and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Nature’s Breath Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in a Spell of your c hoice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a Spell of your c hoice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Survival Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Your Mana recovers at twice the normal rate in a natural environment"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Dungeon Book of the Floor club (“Favored: Druid” Spells only)"
+        }
       ]
     }
   },
@@ -1288,6 +2735,76 @@ export const DCC_CLASSES = [
         "archetype.arcanist",
         "archetype.druid",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 2,
+            "int": 2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Alchemy",
+          "rank": 2,
+          "ref": "id.skill.alchemy"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Cooking",
+          "rank": 2,
+          "ref": "id.skill.cooking"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "First Aid",
+          "rank": 2,
+          "ref": "id.skill.first-aid"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Survival",
+          "rank": 2,
+          "ref": "id.skill.survival"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Nature's Breath",
+          "rank": 2,
+          "ref": "id.spell.nature-s-breath"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Dirt Clod",
+          "rank": 2,
+          "ref": "id.spell.dirt-clod"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Constitution and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Alchemy , Cooking, First Aid, and Survival Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Nature’s Breath and Dirt Clod Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Your Mana recovers at twice the normal rate in a natural environment"
+        }
       ]
     }
   },
@@ -1359,6 +2876,84 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.druid",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 2,
+            "int": 1,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "First Aid",
+          "rank": 2,
+          "ref": "id.skill.first-aid"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pathfinder",
+          "rank": 2,
+          "ref": "id.skill.pathfinder"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Regeneration",
+          "rank": 2,
+          "ref": "id.skill.regeneration"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Survival",
+          "rank": 2,
+          "ref": "id.skill.survival"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Nature's Breath",
+          "rank": 2,
+          "ref": "id.spell.nature-s-breath"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Rank in all",
+          "rank": 1,
+          "ref": "id.spell.rank-in-all"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Firs t Aid, Pathfinder, Regeneration, and Survival Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Nature’s Breath Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Rank in all Spells with the Heal keyword"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per da y, you can grant Regeneration at your Skill Rank to all party members within 30 feet for 10 minutes"
+        }
       ]
     }
   },
@@ -1420,6 +3015,66 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.druid",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 3,
+            "int": 3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Nature's Breath",
+          "rank": 3,
+          "ref": "id.spell.nature-s-breath"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Oakhide",
+          "rank": 3,
+          "ref": "id.spell.oakhide"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Rootfoot",
+          "rank": 2,
+          "ref": "id.spell.rootfoot"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Solsplash",
+          "rank": 2,
+          "ref": "id.spell.solsplash"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Nature’s Breath and Oakhide Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Rootfoot and Solsplash Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Double Mana re generation when outdoors"
+        },
+        {
+          "kind": "perk",
+          "name": "Able to gr ant +1 DR to your party for 1 scene, once per day"
+        }
       ]
     }
   },
@@ -1487,6 +3142,86 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.druid",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 2,
+            "int": 2,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Animal Handling",
+          "rank": 3,
+          "ref": "id.skill.animal-handling"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pathfinder",
+          "rank": 2,
+          "ref": "id.skill.pathfinder"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Nature's Breath",
+          "rank": 2,
+          "ref": "id.spell.nature-s-breath"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Drain Life",
+          "rank": 2,
+          "ref": "id.spell.drain-life"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence, Charisma, and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Animal Handling Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Pat hfinder Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Nature’s Breath and Drain Life Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "You can see t wice as far as most creatures"
+        },
+        {
+          "kind": "perk",
+          "name": "Your Mana recovers at twice the normal rate in a natural environment"
+        },
+        {
+          "kind": "perk",
+          "name": "The Shepherd may not use melee weapons other than Herding weapons (see p. 182)"
+        },
+        {
+          "kind": "perk",
+          "name": "Gain a friendl y Pet"
+        },
+        {
+          "kind": "perk",
+          "name": "Pet s in your Herd gain +2 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1536,6 +3271,131 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 0,
+            "con": 2,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 3,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 5,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill (Rank 5)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "options",
+          "options": [
+            "Aiming",
+            "Bludgeoning Weapon",
+            "Bow",
+            "Catcher",
+            "Crossbow",
+            "Dirty Fighting",
+            "Dodge",
+            "Edged Weapon",
+            "Exotic Ranged Weapon",
+            "Firearms",
+            "Flail Weapon",
+            "Heavy Armor",
+            "Light Armor",
+            "Medium Armor",
+            "Mounted Combat",
+            "Polearm Weapon",
+            "Power Attack",
+            "Pugilism",
+            "Quick Draw",
+            "Reach Weapon",
+            "Shield Block",
+            "Slings",
+            "Small Blades",
+            "Thrown Weapon",
+            "Whips",
+            "Wrasslin"
+          ],
+          "label": "Combat Skill Choice 1 (Rank 2)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "options",
+          "options": [
+            "Aiming",
+            "Bludgeoning Weapon",
+            "Bow",
+            "Catcher",
+            "Crossbow",
+            "Dirty Fighting",
+            "Dodge",
+            "Edged Weapon",
+            "Exotic Ranged Weapon",
+            "Firearms",
+            "Flail Weapon",
+            "Heavy Armor",
+            "Light Armor",
+            "Medium Armor",
+            "Mounted Combat",
+            "Polearm Weapon",
+            "Power Attack",
+            "Pugilism",
+            "Quick Draw",
+            "Reach Weapon",
+            "Shield Block",
+            "Slings",
+            "Small Blades",
+            "Thrown Weapon",
+            "Whips",
+            "Wrasslin"
+          ],
+          "label": "Combat Skill Choice 2 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dodg e Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 to your c hoice of two of the following Skills: Aiming, Attack of Opportunity, Catcher, Shield Block, or Zone of Control Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Can Access any weapon training Guild. Upon arrival on each floor, you receive a coupon good for one free training at a weapon training Guild"
+        }
       ]
     }
   },
@@ -1595,6 +3455,71 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": 3,
+            "con": 0,
+            "int": 2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Attack of Opportunity",
+          "rank": 3,
+          "ref": "id.skill.attack-of-opportunity"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dirty Fighting",
+          "rank": 3,
+          "ref": "id.skill.dirty-fighting"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Att ack of Opportunity and Dirty Fighting Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dodg e and Improvised weapons Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1651,6 +3576,64 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 2,
+            "con": 2,
+            "int": 0,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Aiming",
+          "rank": 2,
+          "ref": "id.skill.aiming"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Intimidate",
+          "rank": 2,
+          "ref": "id.skill.intimidate"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Strength, Constitution, and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 in a Ranged weapon Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Aiming and Intimid ate Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in all muscle-po wered movement-related Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Can Access any weapon training Guild. Each floor, you receive a coupon good for one free training at a weapon training Guild"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1715,6 +3698,82 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 3,
+            "con": 3,
+            "int": -2,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 2,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Driving",
+          "rank": 1,
+          "ref": "id.skill.driving"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Running",
+          "rank": 1,
+          "ref": "id.skill.running"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 1,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength, Constitution, Dexterity, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Unarmed Combat Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Driv ing, Running, and Performance Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Take no damage from falling"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "The Manag er benefit"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1773,6 +3832,63 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 2,
+            "con": 2,
+            "int": -2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Shield Block",
+          "rank": 5,
+          "ref": "id.skill.shield-block"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Attack of Opportunity",
+          "rank": 2,
+          "ref": "id.skill.attack-of-opportunity"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Catcher",
+          "rank": 2,
+          "ref": "id.skill.catcher"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Strength, Constitution, and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Shield Bloc k Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in an Edg ed weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Att ack of Opportunity and Catcher Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        }
       ]
     }
   },
@@ -1835,6 +3951,79 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 2,
+            "con": 4,
+            "int": -2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Gear Head",
+          "rank": 3,
+          "ref": "id.skill.gear-head"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Driving",
+          "rank": 3,
+          "ref": "id.skill.driving"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pathfinder",
+          "rank": 3,
+          "ref": "id.skill.pathfinder"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Gear He ad, Driving, and Pathfinder Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "While moving in combat, you have a Con Mod bonus in your Health Bar slots (only) equal to 1/10th of the Move value of your means of conveyance. If on foot, you must have spent a Move Action during the previous round to gain this bonus"
+        },
+        {
+          "kind": "perk",
+          "name": "You bolt across the room and slam through each entity in the way. [Rank = Floor Number] + Dex to hit, 1d12 Bludgeoning, 2d10+3ft Line, then you gain the Fatigued Debuff. Critical Fail on a natural 4 or less. Cooldown: 30 hours. Add 1d at Rank 5, 10, and 15. Rank only increases by Floor"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per combat, roll 1d2 when you lose 2+ Health Bar slots. On a 1, the attacker loses 1 Health Bar slot"
+        },
+        {
+          "kind": "perk",
+          "name": "resistance to Force damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1893,6 +4082,67 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 3,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Attack of Opportunity",
+          "rank": 2,
+          "ref": "id.skill.attack-of-opportunity"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Endurance",
+          "rank": 2,
+          "ref": "id.skill.endurance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Running",
+          "rank": 2,
+          "ref": "id.skill.running"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength, Constitution, and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in one Melee We apon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Att ack of Opportunity, Endurance, and Running Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "One weapon Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -1942,20 +4192,7 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": [
-        {
-          "name": "a Fire",
-          "rank": 3
-        },
-        {
-          "name": "one Forc e",
-          "rank": 2
-        },
-        {
-          "name": "two different Passive",
-          "rank": 2
-        }
-      ],
+      "spells": [],
       "identifier": "boring-ol-mage",
       "archetypes": [
         "archetype.mage"
@@ -1963,6 +4200,145 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.mage",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": -2,
+            "con": 0,
+            "int": 5,
+            "cha": 5
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 2,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Arcane",
+          "rank": 1,
+          "ref": "id.skill.arcane"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "filter": {
+            "all": [
+              "kind.spell",
+              "element.fire"
+            ]
+          },
+          "label": "1 Fire Spell"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "filter": {
+            "all": [
+              "kind.spell",
+              "element.force"
+            ]
+          },
+          "label": "1 Force Spell"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "filter": {
+            "all": [
+              "kind.spell",
+              "element.sonic"
+            ]
+          },
+          "label": "1 Sonic Spell"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 2,
+          "rank": 2,
+          "distinct": true,
+          "filter": {
+            "all": [
+              "kind.spell",
+              "action.passive"
+            ]
+          },
+          "label": "2 Different Passive Spells"
+        },
+        {
+          "kind": "skillModifier",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "stat.dex"
+            ]
+          },
+          "rankDelta": -3,
+          "floor": 1,
+          "onlyIfOwned": true
+        },
+        {
+          "kind": "skillModifier",
+          "filter": {
+            "all": [
+              "kind.skill",
+              "stat.str"
+            ]
+          },
+          "rankDelta": -3,
+          "floor": 1,
+          "onlyIfOwned": true
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Strength and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in a Fire Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in one Force Spell and one Sonic Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in two different Passive Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Lore Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Arcane Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "−3 Ranks in all Dexterity Skills (to a minimum of 1 Rank if you have any Ranks)"
+        },
+        {
+          "kind": "perk",
+          "name": "−3 Ranks in all Strength Skills (to a minimum of 1 Rank if you have any Ranks)"
+        }
       ]
     }
   },
@@ -2023,6 +4399,67 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.mage",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": -2,
+            "dex": 3,
+            "con": 0,
+            "int": 4,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Aiming",
+          "rank": 2,
+          "ref": "id.skill.aiming"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Ice Blast",
+          "rank": 4,
+          "ref": "id.spell.ice-blast"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Frost Scar",
+          "rank": 4,
+          "ref": "id.spell.frost-scar"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Ice Blas t and Frost Scar Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Aiming Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "resistance to Ice damage"
+        },
+        {
+          "kind": "perk",
+          "name": "You can use t he Aiming Skill for single-target Ice Spells"
+        }
       ]
     }
   },
@@ -2092,6 +4529,85 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.mage",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": -2,
+            "int": 3,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lore",
+          "rank": 2,
+          "ref": "id.skill.lore"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Wall of Fire",
+          "rank": 3,
+          "ref": "id.spell.wall-of-fire"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Fire Fingers",
+          "rank": 3,
+          "ref": "id.spell.fire-fingers"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Fireball",
+          "rank": 2,
+          "ref": "id.spell.fireball"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Wilbur's Slow-Build Fireblast",
+          "rank": 2,
+          "ref": "id.spell.wilbur-s-slow-build-fireblast"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Wall of Fire and Fire Fingers Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Fireball and Wilbur’s Slow-Build Fireblast Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Lore Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "resistance to Fire damage"
+        },
+        {
+          "kind": "perk",
+          "name": "No DR ag ainst Ice or water-based damage"
+        }
       ]
     }
   },
@@ -2156,6 +4672,70 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.mage",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 2,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Holy Aura",
+          "rank": 2,
+          "ref": "id.spell.holy-aura"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Hot Stuff Aura",
+          "rank": 2,
+          "ref": "id.spell.hot-stuff-aura"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 2,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Intimate Touches",
+          "rank": 2,
+          "ref": "id.spell.intimate-touches"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Holy Aur a and Hot Stuff Aura Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Heal Others and Intimate Touches Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Heal Others Spell can be raised to 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Ether eal Hug: Once per day for one scene, you can grant your party +1 DR, Rank 4 Regeneration (as per the Skill), +1 to hit on weapon and Spell Skill Checks, and add 1d4 bonus when they deal damage"
+        },
+        {
+          "kind": "perk",
+          "name": "vulnerable to Ice damage"
+        }
       ]
     }
   },
@@ -2223,6 +4803,81 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.mage",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 5,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 3
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Alchemy",
+          "rank": 1,
+          "ref": "id.skill.alchemy"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Infusion",
+          "rank": 1,
+          "ref": "id.skill.infusion"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Tactics",
+          "rank": 1,
+          "ref": "id.skill.tactics"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Drain Life",
+          "rank": 3,
+          "ref": "id.spell.drain-life"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Soul Collector",
+          "rank": 3,
+          "ref": "id.spell.soul-collector"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Drain Life and Soul Collector Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Alchemy , Infusion, and Tactics Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Double the duration of your Rank 5 and lower Spells that have a duration"
+        },
+        {
+          "kind": "perk",
+          "name": "Your Spells c an be applied to a creature without it realizing it is under a Spell effect"
+        }
       ]
     }
   },
@@ -2287,6 +4942,74 @@ export const DCC_CLASSES = [
         "archetype.mage",
         "archetype.necromancer",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": -2,
+            "int": 2,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Soul Collector",
+          "rank": 4,
+          "ref": "id.spell.soul-collector"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Rise, Dead Minion!",
+          "rank": 4,
+          "ref": "id.spell.rise-dead-minion"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Drain Life",
+          "rank": 2,
+          "ref": "id.spell.drain-life"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Second Chance",
+          "rank": 2,
+          "ref": "id.spell.second-chance"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Constitution and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Soul Collec tor and Rise, Dead Minion! Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Drain Life and Second Chance Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per res t, you can ask the corpse of a dead creature a number of questions equal to your Int. The creature answers as truthfully as it can based on what it knew in life"
+        },
+        {
+          "kind": "perk",
+          "name": "Whenev er you kill an undead Mob, you heal 1 Health Bar, up to 5 Health Bar per combat"
+        }
       ]
     }
   },
@@ -2357,6 +5080,84 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.monk",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": 3,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 3,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Foot Soldier",
+          "rank": 1,
+          "ref": "id.skill.foot-soldier"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Iron Punch",
+          "rank": 1,
+          "ref": "id.skill.iron-punch"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Powerful Strike",
+          "rank": 1,
+          "ref": "id.skill.powerful-strike"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 1,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Smush",
+          "rank": 1,
+          "ref": "id.skill.smush"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Constitution and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Unarmed Combat Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Foot Soldier, Iron Punch, Powerful Strike, Pugilism, and Smush Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in Dexterity-based weapon Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Unarmed Combat Skill can be raised to Rank 20"
+        }
       ]
     }
   },
@@ -2428,6 +5229,95 @@ export const DCC_CLASSES = [
         "archetype.mage",
         "archetype.monk",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 0,
+            "int": 2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "movement",
+          "movement": {
+            "walkDelta": 0,
+            "climb": 0,
+            "swim": 0,
+            "fly": 20,
+            "burrow": 20
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 3,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Dirt Clod",
+          "rank": 1,
+          "ref": "id.spell.dirt-clod"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Fire Fingers",
+          "rank": 1,
+          "ref": "id.spell.fire-fingers"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Frost Scar",
+          "rank": 1,
+          "ref": "id.spell.frost-scar"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "all",
+          "rank": 1,
+          "ref": "id.spell.all"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Intelligence and Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Unarmed Combat Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Dirt Clod, Fir e Fingers, and Frost Scar Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in all Spells wit h the Electric, Fire, and Ice damage types"
+        },
+        {
+          "kind": "perk",
+          "name": "Advantage when attacking elemental creatures"
+        },
+        {
+          "kind": "perk",
+          "name": "The ability to breathe underwater"
+        },
+        {
+          "kind": "perk",
+          "name": "The ability to burrow"
+        },
+        {
+          "kind": "perk",
+          "name": "The ability to fly"
+        }
       ]
     }
   },
@@ -2486,6 +5376,64 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.monk",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 0,
+            "con": 5,
+            "int": -2,
+            "cha": -2
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 5,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Iron Punch",
+          "rank": 5,
+          "ref": "id.skill.iron-punch"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Pugilism and Iron Punc h Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "1 × Floor Number gold for every Mob you kill with a Pugilism or Unarmed combat Skill attack"
+        },
+        {
+          "kind": "perk",
+          "name": "When you kill a foe with a Pugilism or Unarmed combat Skill attack, +1 popularity"
+        },
+        {
+          "kind": "perk",
+          "name": "Pugilism Skill c an be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -2554,6 +5502,86 @@ export const DCC_CLASSES = [
         "archetype.druid",
         "archetype.monk",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 1,
+            "con": 3,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 3
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Smush",
+          "rank": 3,
+          "ref": "id.skill.smush"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Drain Life",
+          "rank": 3,
+          "ref": "id.spell.drain-life"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 2,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Self",
+          "rank": 2,
+          "ref": "id.spell.heal-self"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Drain Life Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Smush Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Heal Others and Heal Self Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Your healing Skills and Spells heal 1 additional Health Bar slot when targeting a single individual"
+        },
+        {
+          "kind": "perk",
+          "name": "Heal Others Spell can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -2620,6 +5648,82 @@ export const DCC_CLASSES = [
         "archetype.fighter",
         "archetype.monk",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": 2,
+            "con": 0,
+            "int": 0,
+            "cha": 1
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 3
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dirty Fighting",
+          "rank": 2,
+          "ref": "id.skill.dirty-fighting"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Streetwise",
+          "rank": 2,
+          "ref": "id.skill.streetwise"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 2,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Pugilism",
+          "rank": 1,
+          "ref": "id.skill.pugilism"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dirty Fighting Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Str eetwise and Unarmed combat Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Pugilism Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 in Dexterity-based weapon Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Skill Potion"
+        }
       ]
     }
   },
@@ -2680,6 +5784,97 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.paladin",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Protective Shell",
+          "rank": 3,
+          "ref": "id.spell.protective-shell"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 3,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Holy Aura",
+          "rank": 3,
+          "ref": "id.spell.holy-aura"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill (Rank 3)"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "options",
+          "options": [
+            "Catcher",
+            "Shield Block"
+          ],
+          "label": "Catcher or Shield Block (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Protective Shell, Heal Others, and Holy Aura Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Cat cher or Shield Block Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity"
+        },
+        {
+          "kind": "perk",
+          "name": "You cannot choose this Class if you have Access to the Desperado Club"
+        }
       ]
     }
   },
@@ -2751,6 +5946,85 @@ export const DCC_CLASSES = [
         "archetype.fighter",
         "archetype.paladin",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 2,
+            "dex": 0,
+            "con": 2,
+            "int": 0,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Catcher",
+          "rank": 2,
+          "ref": "id.skill.catcher"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Riding",
+          "rank": 2,
+          "ref": "id.skill.riding"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lance",
+          "rank": 2,
+          "ref": "id.skill.lance"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Shield",
+          "rank": 2,
+          "ref": "id.spell.shield"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Smite",
+          "rank": 2,
+          "ref": "id.spell.smite"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Cat cher, Riding, and Lance Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Shield and Smite Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "When protecting someone under your code by using Catcher, gain the benefit of Playing to the Cameras (no Disadvantage, as this is a Passive Skill). This counts as your “once per session” usage"
+        },
+        {
+          "kind": "perk",
+          "name": "Gain a bonded Mount one siz e bigger than you with Move 40, barding with DR 10, a Trample attack, and a pet carrier for it"
+        },
+        {
+          "kind": "perk",
+          "name": "When you or your Mount is the target of an Attack, your fancy riding allows you to redirect an attack at your Mount to yourself or vice versa"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity"
+        }
       ]
     }
   },
@@ -2818,6 +6092,104 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.paladin",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 0,
+            "con": 0,
+            "int": 0,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Catcher",
+          "rank": 2,
+          "ref": "id.skill.catcher"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Heal Others",
+          "rank": 2,
+          "ref": "id.spell.heal-others"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Smite",
+          "rank": 2,
+          "ref": "id.spell.smite"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Turn Undead",
+          "rank": 2,
+          "ref": "id.spell.turn-undead"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Cat cher Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Heal Others, Smite, and Turn Undead Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Dungeon Book of the Floor club (Favored: Cleric or Paladin Spells only)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity"
+        },
+        {
+          "kind": "perk",
+          "name": "You cannot choose this Class if you have Access to the Desperado Club"
+        }
       ]
     }
   },
@@ -2890,6 +6262,92 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 1,
+            "con": 0,
+            "int": 1,
+            "cha": 1
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Stealth",
+          "rank": 3,
+          "ref": "id.skill.stealth"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dagger",
+          "rank": 2,
+          "ref": "id.skill.dagger"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Detect Trap",
+          "rank": 2,
+          "ref": "id.skill.detect-trap"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Lockpicking",
+          "rank": 2,
+          "ref": "id.skill.lockpicking"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Ambush",
+          "rank": 1,
+          "ref": "id.skill.ambush"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Intelligence, Dexterity, and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Stealth Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dagger, Detect Trap, Dodge, and Lockpicking Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Ambush Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "1 x Floor Number gold for every Mob killed with a melee weapon"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Cannot choose this Class if you have Access to Club Vanquisher"
+        }
       ]
     }
   },
@@ -2946,6 +6404,68 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 2,
+            "con": 1,
+            "int": -2,
+            "cha": 0
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 1
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bomb Surgeon",
+          "rank": 3,
+          "ref": "id.skill.bomb-surgeon"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Find Trap",
+          "rank": 3,
+          "ref": "id.skill.find-trap"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Intelligence (After all, only dumbasses would choose to do this for a living.)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Bomb Surgeon and Find Trap Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in all Explosive -based Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 DR Buff"
+        },
+        {
+          "kind": "perk",
+          "name": "Limb Re generation benefit: In 12 days minus your Con Mod, one limb fully regrows"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -3033,6 +6553,122 @@ export const DCC_CLASSES = [
         "archetype.monk",
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 1,
+            "cha": 5
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Backfire",
+          "rank": 2,
+          "ref": "id.skill.backfire"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Escape Plan",
+          "rank": 2,
+          "ref": "id.skill.escape-plan"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Find Trap",
+          "rank": 2,
+          "ref": "id.skill.find-trap"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Bomb Surgeon",
+          "rank": 1,
+          "ref": "id.skill.bomb-surgeon"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Hide in Shadows",
+          "rank": 1,
+          "ref": "id.skill.hide-in-shadows"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Trap Engineer",
+          "rank": 1,
+          "ref": "id.skill.trap-engineer"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Unarmed Combat",
+          "rank": 1,
+          "ref": "id.skill.unarmed-combat"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Fear",
+          "rank": 1,
+          "ref": "id.spell.fear"
+        },
+        {
+          "kind": "perk",
+          "name": "+ 5 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Backfire , Escape Plan, and Find Trap Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Bomb Surgeon, Hide in Shadows, Trap Engineer, and Unarmed combat Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Fear Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "Add no St at Mod bonus damage when using Edged weapons"
+        },
+        {
+          "kind": "perk",
+          "name": "You pay +3 Mana to cast damage-dealing Spells"
+        },
+        {
+          "kind": "perk",
+          "name": "At the end of each floor, add 1 to one of your trap-related Skill Advancement Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "At the end of each floor, add 1 to one of your bomb-related Skill Advancement Checks"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Naughty Boys Employment Agency"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -3104,6 +6740,88 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 0,
+            "con": 0,
+            "int": 1,
+            "cha": 1
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Deception",
+          "rank": 4,
+          "ref": "id.skill.deception"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Stealth",
+          "rank": 4,
+          "ref": "id.skill.stealth"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dagger",
+          "rank": 2,
+          "ref": "id.skill.dagger"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Escape Plan",
+          "rank": 2,
+          "ref": "id.skill.escape-plan"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Determine Value",
+          "rank": 1,
+          "ref": "id.skill.determine-value"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Negotiation",
+          "rank": 1,
+          "ref": "id.skill.negotiation"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Intelligence and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Decep tion and Stealth Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Dagger and Escape Plan Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Determine Value and Negotiation Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Cannot choose this Class if you have Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -3165,6 +6883,75 @@ export const DCC_CLASSES = [
       "tags": [
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": 0,
+            "int": 0,
+            "cha": 4
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Deception",
+          "rank": 5,
+          "ref": "id.skill.deception"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dagger",
+          "rank": 3,
+          "ref": "id.skill.dagger"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Investigation",
+          "rank": 2,
+          "ref": "id.skill.investigation"
+        },
+        {
+          "kind": "perk",
+          "name": "+4 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+5 Decep tion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dagger Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Investigation Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Tier 3 Makeup Table"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to the Desperado Club"
+        },
+        {
+          "kind": "perk",
+          "name": "Cannot choose this Class if you have Access to Club Vanquisher"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Potion"
+        }
       ]
     }
   },
@@ -3233,6 +7020,90 @@ export const DCC_CLASSES = [
         "archetype.fighter",
         "archetype.rogue",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 0,
+            "dex": 3,
+            "con": 0,
+            "int": 0,
+            "cha": 3
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Balance",
+          "rank": 2,
+          "ref": "id.skill.balance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Dodge",
+          "rank": 2,
+          "ref": "id.skill.dodge"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Performance",
+          "rank": 1,
+          "ref": "id.skill.performance"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Light on Your Feet",
+          "rank": 1,
+          "ref": "id.skill.light-on-your-feet"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "options",
+          "options": [
+            "Rapier",
+            "Longsword"
+          ],
+          "label": "Rapier or Longsword (Rank 3)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Dexterity and Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Rapier or Longsword Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Balance and Dodge Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Performance Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Light on Your Feet Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Rapier or Longsword Skill can be raised to Rank 20"
+        },
+        {
+          "kind": "perk",
+          "name": "You have Advantage when using a melee attack from a higher position than your opponent"
+        },
+        {
+          "kind": "perk",
+          "name": "Once per combat, after you kill an enemy, you can make an Unopposed Performance Skill Check. On an Amazing Success or better, gain +1 Popularity"
+        }
       ]
     }
   },
@@ -3304,6 +7175,112 @@ export const DCC_CLASSES = [
         "archetype.bard",
         "archetype.fighter",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 1,
+            "dex": -2,
+            "con": 1,
+            "int": 0,
+            "cha": 2
+          }
+        },
+        {
+          "kind": "dr",
+          "value": 2
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Catcher",
+          "rank": 3,
+          "ref": "id.skill.catcher"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Repair",
+          "rank": 2,
+          "ref": "id.skill.repair"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Tactics",
+          "rank": 2,
+          "ref": "id.skill.tactics"
+        },
+        {
+          "kind": "spell",
+          "mode": "fixed",
+          "name": "Hot Stuff Aura",
+          "rank": 2,
+          "ref": "id.spell.hot-stuff-aura"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Strength and Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Dexterity"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Catcher Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Repair and Tactics Skills"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 to a Weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Hot Stuff Aura Spell"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 DR"
+        },
+        {
+          "kind": "perk",
+          "name": "When you and up to 6 allies consume a meal you cooked (taking at least 30 minutes to cook), each eater gains +1 Buff for all of their Skill Checks for 1 hour"
+        },
+        {
+          "kind": "perk",
+          "name": "You roll a bonus 1d4 when you make the Help or Intervene Actions and add it to the benefit provided to your target"
+        },
+        {
+          "kind": "perk",
+          "name": "Vulnerability: Necrotic damage"
+        },
+        {
+          "kind": "perk",
+          "name": "Silver Earth Box, with guaranteed Earth Hobby Skill Potion"
+        }
       ]
     }
   },
@@ -3371,6 +7348,110 @@ export const DCC_CLASSES = [
         "archetype.mage",
         "archetype.paladin",
         "kind.class"
+      ],
+      "grants": [
+        {
+          "kind": "stat",
+          "stats": {
+            "str": 3,
+            "dex": 0,
+            "con": -2,
+            "int": 3,
+            "cha": 1
+          }
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Find Trap",
+          "rank": 3,
+          "ref": "id.skill.find-trap"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Trap Engineer",
+          "rank": 2,
+          "ref": "id.skill.trap-engineer"
+        },
+        {
+          "kind": "skill",
+          "mode": "fixed",
+          "name": "Religion",
+          "rank": 1,
+          "ref": "id.skill.religion"
+        },
+        {
+          "kind": "skill",
+          "mode": "choice",
+          "count": 1,
+          "rank": 3,
+          "category": "weapon",
+          "filter": {
+            "any": [
+              "skillGroup.combat",
+              "kind.weapon"
+            ]
+          },
+          "label": "Weapon Skill 1 (Rank 3)"
+        },
+        {
+          "kind": "spell",
+          "mode": "choice",
+          "count": 1,
+          "rank": 2,
+          "category": "spell",
+          "filter": {
+            "all": [
+              "kind.spell"
+            ]
+          },
+          "label": "Spell 1 (Rank 2)"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Strength and Intelligence"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Charisma"
+        },
+        {
+          "kind": "perk",
+          "name": "−2 Constitution"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 Find Trap Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+3 in a Weapon Skill of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 Trap Engineer Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "+2 in a Spell of your choice"
+        },
+        {
+          "kind": "perk",
+          "name": "+1 Religion Skill"
+        },
+        {
+          "kind": "perk",
+          "name": "Can see in total darkness"
+        },
+        {
+          "kind": "perk",
+          "name": "Must worship a deity (see Deities & Worship, p. 163)"
+        },
+        {
+          "kind": "perk",
+          "name": "Access to all membership-based clubs, regardless of current memberships"
+        }
       ]
     }
   }

@@ -2599,12 +2599,6 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     }
   }
 
-  /**
-   * Take an 8-Hour Long Rest in a Safe Room
-   */
-  async _onSafeRoomRest() {
-    return this._onRest('long');
-  }
 
   /**
    * Open interactive modal to choose skills from the DCC Skill Library & Manager

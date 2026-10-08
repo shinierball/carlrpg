@@ -458,19 +458,6 @@ export class DCCSessionEngine {
     }
   }
 
-  /**
-   * Update a crawler's party affiliation
-   * @param {string} actorId
-   * @param {string} partyName
-   * @returns {Promise<Actor|null>}
-   */
-  static async setCrawlerParty(actorId, partyName) {
-    const actor = this._getActor(actorId);
-    if (!actor) return null;
-    await actor.update({ 'system.details.party': (partyName || '').trim() });
-    this._refreshOpenWindows();
-    return actor;
-  }
 
   /**
    * Assign a party affiliation to a group of crawlers
@@ -1081,37 +1068,6 @@ export class DCCSessionEngine {
     return createdEntries;
   }
 
-  /**
-   * Add or update Quest in active session
-   */
-  static async updateQuest({ id = null, title = '', status = 'active', reward = '', notes = '' } = {}) {
-    const sessions = this.getAllSessions();
-    const activeId = this.getActiveSessionId();
-    const session = sessions.find(s => s.id === activeId && s.status === 'active');
-    if (!session) return null;
-
-    let quest = session.quests.find(q => q.id === id);
-    if (!quest) {
-      quest = {
-        id: id || `quest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        title: title.trim() || 'New Quest',
-        status: status || 'active',
-        reward: reward.trim(),
-        notes: notes.trim(),
-        completedAt: status === 'completed' ? Date.now() : null
-      };
-      session.quests.push(quest);
-    } else {
-      quest.title = title.trim() || quest.title;
-      quest.status = status || quest.status;
-      quest.reward = reward.trim();
-      quest.notes = notes.trim();
-      if (status === 'completed' && !quest.completedAt) quest.completedAt = Date.now();
-    }
-
-    await this.saveAllSessions(sessions);
-    return quest;
-  }
 
   /**
    * Manually update a ledger entry (outcome, targetDC, notes, etc.)

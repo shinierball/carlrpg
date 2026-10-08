@@ -690,5 +690,31 @@ describe('DCC RPG - Scratch-off Ticket & Multi-Outcome Consumable Items', () => 
     assert.ok(templateContent.includes('type="number" name="system.outcomes.{{idx}}.weight"'), 'Weight input must be type="number"');
     assert.ok(templateContent.includes('outcome-weight-input'), 'Weight input must include outcome-weight-input class for real-time sanitization');
   });
+
+  it('19. Outcome resolution for pure Damage type evaluates formula and renders apply damage button', async () => {
+    await ticketItem.update({
+      'system.outcomes': [
+        {
+          name: 'Explosive Shrapnel',
+          weight: 100,
+          type: 'damage',
+          damage: '2d6 + Int',
+          damageType: 'Piercing',
+          targetType: 'closest_mob',
+          description: 'A burst of sharp iron shards'
+        }
+      ]
+    });
+
+    const msg = await ticketItem.useLoot();
+    const flags = msg.flags?.['carl-rpg'];
+    assert.equal(flags.outcome.name, 'Explosive Shrapnel');
+    assert.equal(flags.outcome.type, 'damage');
+    assert.ok(flags.damage > 0, 'Damage must be evaluated');
+    assert.ok(msg.content.includes('Explosive Shrapnel'));
+    assert.ok(msg.content.includes('dcc-apply-damage-btn'));
+    assert.ok(msg.content.includes('data-damage-type="Piercing"'));
+    assert.ok(msg.content.includes('DAMAGE'));
+  });
 });
 

@@ -162,10 +162,11 @@ describe('DCC RPG - Race & Class Selection and Reversal System', () => {
     // Reverting Fighter removed:
     // -2 STR, -2 CON (STR: 12 -> 10, CON: 12 -> 10)
     // And Dodge had 3 ranks removed: 5 - 3 = 2!
-    // Non-item ranks (2) MUST be preserved!
+    // Then Boring Ol' Mage applies -3 to Dexterity Skills (to a minimum of 1 Rank): 2 - 3 = 1!
+    // Non-item ranks (originally 2) are preserved before Mage class modifier is applied!
     dodge = actor.items.find(i => i.type === 'skill' && i.name.toLowerCase() === 'dodge');
     assert.ok(dodge, 'Dodge skill MUST NOT be deleted because it had non-item ranks higher than the removed amount');
-    assert.equal(dodge.system.rank, 2, 'Dodge skill should be at rank 2 (5 - 3 = 2)');
+    assert.equal(dodge.system.rank, 1, 'Dodge skill should be at rank 1 (5 - 3 from Fighter revert = 2, then -3 min 1 from Mage = 1)');
 
     // Now Mage benefits are applied:
     // +5 INT, +5 CHA, -2 STR, -2 DEX

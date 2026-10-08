@@ -7,6 +7,7 @@ export class DebuffDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      ...super.defineSchema(),
       severity: new fields.StringField({ initial: 'Minor' }),
       damageType: new fields.StringField({ initial: '' }),
       damagePerRound: new fields.StringField({ initial: '' }),

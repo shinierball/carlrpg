@@ -7,6 +7,7 @@ export class LootDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      ...super.defineSchema(),
       quantity: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       cooldown: new fields.StringField({ initial: 'None' }),

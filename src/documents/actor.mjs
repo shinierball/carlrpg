@@ -13,6 +13,7 @@ import {
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
 import { CANONICAL_WEAPON_TECHNIQUE_MAP } from '../data/weapon-associations.mjs';
+import { ARCHETYPE_TO_TAG, getItemAllTags } from '../data/tags.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -4393,6 +4394,58 @@ export class DCCActor extends BaseActor {
       payload.rawDamage = Number(rawDamage) || 0;
     }
     return DCCCombatMetrics.applyDamageToTarget(payload);
+  }
+
+  /**
+   * Get all archetype tags associated with this actor (e.g. Set {'archetype.mage'}).
+   * Evaluates embedded class and race items, as well as details.class.
+   * @returns {Set<string>}
+   */
+  getArchetypeTags() {
+    const archetypes = new Set();
+    const itemsList = this.items ? (Array.isArray(this.items) ? this.items : Array.from(this.items.values?.() || [])) : [];
+
+    for (const item of itemsList) {
+      if (item.type === 'class' || item.type === 'race') {
+        const itemTags = item.allTags || getItemAllTags(item);
+        for (const t of itemTags) {
+          if (t.startsWith('archetype.')) archetypes.add(t);
+        }
+      }
+    }
+
+    const className = (this.system?.details?.class || '').trim();
+    if (className) {
+      const parts = className.toLowerCase().split(/[\s,]+/);
+      for (const p of parts) {
+        if (ARCHETYPE_TO_TAG[p]) {
+          archetypes.add(ARCHETYPE_TO_TAG[p]);
+        }
+      }
+    }
+
+    return archetypes;
+  }
+
+  /**
+   * Get all identity and classification tags for this actor.
+   * Includes archetype tags, race, class, deity, and sponsor tags.
+   * @returns {Set<string>}
+   */
+  getIdentityTags() {
+    const tags = new Set(this.getArchetypeTags());
+    const itemsList = this.items ? (Array.isArray(this.items) ? this.items : Array.from(this.items.values?.() || [])) : [];
+
+    for (const item of itemsList) {
+      if (['class', 'race', 'deity', 'sponsor'].includes(item.type)) {
+        const itemTags = item.allTags || getItemAllTags(item);
+        for (const t of itemTags) {
+          tags.add(t);
+        }
+      }
+    }
+
+    return tags;
   }
 
   /**

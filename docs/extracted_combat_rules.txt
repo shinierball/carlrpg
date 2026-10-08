@@ -1,0 +1,1712 @@
+--- PAGE 79 ---
+Mark (playing Venus): Seriously! Nonetheless, we’ve 
+gotta survive for the next two weeks or so with the 
+hunters. Should we find a place to hunker down, or 
+stay on the move?
+Marianne (playing Michelle): I vote we find a place 
+to set up shop. Somewhere we can defend easily, and 
+that has several good escape routes.
+Anisha (playing Wren): I like the idea of stability, but 
+there are likely to be hundreds of hunters out there, 
+and there are only 5 of us. Not sure I’m keen to sit 
+where they can swarm us and see which hunter gets 
+my skull above their head.
+Marianne: Fair enough. Then let’s at least try to scout 
+around so we know what we can use to our advantage.
+Jose (playing Henry): I’ve got this! My Marine training 
+gave me several Ranks in Survival. I should be able to 
+make a Check to get at least some information about 
+the plants and such in the area, right, Theresa?
+Theresa: I could see Survival working, but since 
+you’re thinking about it instead of resisting it, let’s go 
+Int Survival Skill Check. Either with an Unopposed 
+Success or Failure, you’re going to remember things 
+that you’re sure are true.
+OFF-STAT CHECKS
+The Survival Skill is usually associated with a crawler’s 
+Con since it’s used to resist hazardous environments. 
+Since Henry is thinking about the potential dangers, 
+Theresa decides the Skill applies, but Jose must add 
+Henry’s Int Mod instead of Con (see Determine the 
+Approach, p. 58). With each Check, Theresa points out 
+the cost of Failure so the players can decide whether 
+they really want to make the Check.
+Jose: That’s a Difficulty 22 since we’re on the Sixth 
+Floor, right?
+Theresa: Right.
+Jose: Okay, 15 on the die, 3 for Int, and 8 Ranks of 
+Survival for a 26.
+Theresa: With that simple Success, you can identify 
+several large rubber and Brazil nut trees, which could 
+serve as a food source, as well as a few strangler figs 
+trying to choke the life out of the host trees.
+Marianne: Can I take a look at the buildings 
+to determine their condition? Are they going 
+to come down on our heads, or are they 
+relatively stable?
+
+21
+Jose: Don’t give the GM any ideas!
+Theresa: It’s okay, I already thought of that possibility. Go 
+ahead and make an Engineering Skill Check, Marianne.
+Marianne: Ugh, it’s a 12.
+Theresa: You are absolutely certain that all of the ruins 
+are completely stable. Whatever parts would be at 
+risk have already fallen to rubble. No sooner do you 
+come to that conclusion than a chunk of concrete the 
+size of a Volkswagen falls from the eighth story of one 
+of the buildings, shaking the earth as it crashes to the 
+ground, and kicking up a ton of concrete and plaster 
+dust in the area.
+Anisha: Yeah… I’m thinking you’re wrong about that 
+assessment. And breathing that stuff in can’t be good 
+for our lungs.
+Mark: We can always cover our faces with a damp 
+cloth. But it’ll be hard to fight that way if we run into 
+trouble. Can I make something we can wear to filter 
+our breathing air?2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 80 ---
+2
+Theresa: Sure, that’s pretty simple. Since a protective 
+mask would be Size 2, it would take you 4 hours to 
+craft one in the dungeon. It would give you Advantage 
+on any Checks against gas or dust. You could also 
+search through your Inventory and decide that some 
+of your Misc. Junk is a medical or painter mask, which 
+would give you +2 on Checks against gas or dust.
+CRAFTING IN THE DUNGEON
+Most crafting takes place in personal spaces at work‑
+benches, but if those are not available, the crawlers 
+will make what they can while in a dangerous area. 
+Due to the mask being Size 2, it takes 4 hours to craft 
+one. See Crafting (p. 221) for more details.
+Mark: Oof, that’s a lot of time. Even with each of us 
+making Fabricate Checks separately, I don’t think we 
+want to stay in one place that long. It’s just asking for 
+the hunters to jump us.
+Marianna: Jose was already against spending one 
+hour, let alone four.
+Jose: That’s right. Besides, you don’t make it onto the 
+recap by spending hours crafting. We need to act!
+Theresa: Alright, so what’s the plan, crawlers?
+PARTY DECISIONS
+When the party faces a choice that not everyone 
+agrees with, it’s important for the players to decide —
+and sometimes for their crawlers to discuss in role‑
+play —as a group. This group prefers to make decisions 
+democratically, so with three deciding that it takes too 
+long, they decide as a group to make the masks out of 
+Misc. Junk rather than spend the time crafting.
+
+Anisha: I’ve got to agree with Jose. Four hours is just 
+too much. I’ll spend the Misc. Junk as a quick fix.
+Marianne: Yeah, Michelle has plenty in her Inventory, 
+so I’ll do that, too.
+Mark: Sounds good to me, but I haven’t been tracking 
+Misc. Junk. Can one of our hoarders find one for me?
+Marianne: Sure, I’ve got plenty.
+Jose: Not me. I’m going to prove to you and the 
+audience that Henry’s Marine training is more than a 
+match for a bunch of overgrown house dust!
+Theresa: Alright, with your masks in place, you contin-
+ue through the ruins. Where are you going?
+Mark: We probably should have figured that out 
+before walking in. But since we want to stay on the 
+move, maybe we should try finding other crawlers to 
+join up with. Safety in numbers and all that.
+Anisha: I just got Find Crawler, too. Do we want to 
+start there?
+Mark: Be my guest.
+Theresa: This is a great time for Find Crawler. Since it’s 
+a Passive Skill, you don’t need to roll. When you acti-
+vate it, you see a group of 6 blue dots on your HUD 
+about 600 feet ahead of you and to your right, deeper 
+into the ruins and rubble off the road.
+PASSIVE SKILLS
+Passive Skills don’t require a Skill Check to perform 
+and don’t advance like other Skills. Each Passive Skill 
+listing in Crawlers & Customization notes how the 
+Skill increases in Rank.
+Anisha: Alright, let’s go.
+Theresa: Before you start heading in, are you chang-
+ing your marching order?
+Jose: Since my Survival Skill gave us the information 
+we needed before we walked in, and I have the high-
+est Perception, Henry can be the lead if that’s alright 
+with everyone else.
+Anisha: Wren can be up there with him in case we 
+run into trouble.
+Marianne: Michelle’s in the middle, where it’s safest.
+Daniel: I guess that makes Chase the rear guard.
+Mark: Venus is in the middle with Michelle.2
+
+--- PAGE 81 ---
+MARCHING ORDER
+As the party heads into a potentially hazardous 
+environment, determining the Marching Order helps 
+the GM determine who’ll be in trouble as unexpected 
+things happen —like Chase and Wren might be the 
+first ones to walk into a trap, or a ferocious group of 
+Mushroom Maniacs might come up from behind to 
+snack on Park first.
+Theresa: The ground tremors slightly at the ruins’ 
+entrance, and the tremors worsen significantly as the 
+party advances further inside. A thunderous CRACK 
+sounds from above as chunks of wall and flooring 
+fall from the buildings, shattering into the ground and 
+erupting into the same stifling dust from earlier. The 
+dust conceals the area like fog, and I’d like everyone to 
+make a Con Stat Check to resist breathing it in. With 
+Advantage if you have one of the working masks.
+Anisha: I rolled a 2 and a 13. With Advantage, I keep 
+the 13 and add +4 for Con, which makes it a total of 
+17 for Wren.
+Marianne: I rolled a 5 and 2. So with the 5 and +3 
+Con for Michelle, I’ve got a total of 8. So much for 
+that mask.
+Daniel: Chase’s mask must be defective. I got a 4.
+Mark: 16 for Venus.
+Jose: And I rolled a 19, for a total of 27! I told you I’d 
+be able to tough it out!
+STAT CHECKS
+Since this roll is to resist an effect, no Skill applies, 
+and the crawlers only add their Stat Mod to their 
+total. Stat Checks generally have a lower Difficulty 
+than Skill Checks, see Stat Checks in Determining the 
+Difficulty (p. 59).
+Theresa: Venus and Wren resist the effects of the 
+dust, and Henry just takes a deep breath to spite the 
+showrunners, feeling no ill effects! Chase and Michelle 
+start coughing violently; you both have the Poisoned 
+and Woozy Debuffs until cured. And you’re going to 
+have to wait to treat that because you hear the scrap-
+ing of claws against stone above you.
+Jose: Here we go again!
+
+21
+Combat
+One of the most common activities crawlers engage 
+in is combat, as nearly every other living thing (and 
+many unliving things) in the dungeon is constantly 
+trying to kill them. Combat is one of the most struc-
+tured parts of the game to ensure every player has 
+their opportunity in the spotlight and for their crawlers 
+to survive.
+DEGREES OF SUCCESS IN 
+COMBAT
+In combat, the degrees of Success have additional 
+mechanical significance for Attack Skill Checks (see 
+Attacks, Step 4) and Evade Checks (see the Evade 
+Action, Step 2).
+SUCCESS
+Meeting or beating the Difficulty is a Success. It gener-
+ally indicates progress toward a goal.
+Natural 20 (Critical Hit): On a roll of a Natural 20 (a 
+20 on the die without any modifiers), the player rolls 
+twice as many base damage dice and then adds their 
+crawler’s Stat Mod and other Buffs to the damage. If 
+an effect multiplies the “total damage,” that includes 
+the results from the extra Critical Hit dice.
+If the crawler achieves a Natural 20 on an Evade 
+Check, they gain Advantage on their next Attack Skill 
+Check against that Mob. And it’s probably good for 
+their self-esteem, too.
+Success by 10 or more (Amazing Success): The 
+crawler’s Attack deals extra damage equal to their 
+current Floor Number.
+If the crawler achieves an Amazing Success on an 
+Evade Check, they also gain Advantage on their 
+Attack Skill Check against that Mob.
+Success by 0–9 (Standard Success): This is the most 
+basic Successful result. For Attack Skills, a Standard 
+Success means the crawler hits and rolls damage.
+FAILURE
+A result under the Difficulty or target number is a 
+Failure. The GM ultimately decides what happens, 
+based on the degree of Failure and the current 
+situation.2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 82 ---
+2
+Fail by 1–2 (Near Miss Fail): A Failure, but there’s still 
+a chance to save the effort. When this result occurs, 
+the GM announces a “Near Miss” to allow other play-
+ers to help with an Intervene Action during combat 
+(see Crawler Reaction Phase, p. 81).
+Fail by 3–9 (Standard Fail): This is a normal Failure, 
+such as missing a target or failing to (or declining to) 
+Evade an Attack.
+Fail by 10 or more (Major Fail): A Failure to this 
+degree comes with some manner of consequence, 
+such as dropping a weapon or other important piece 
+of equipment, losing footing (reducing Movement), 
+running out of ammunition, or other penalty.
+Achieving a Major Fail on an Evade Check, the crawler 
+exposes a vulnerable spot which the Mob strikes. The 
+crawler suffers additional damage from the Attack equal 
+to the current Floor Number and gains a Minor Injury 
+Debuff after combat, once the adrenaline wears off.
+Natural 1 (Critical Fail): On a roll of a Natural 1 (a 1 
+on the die without any modifiers), the crawler suffers 
+the worst possible outcome. Consequences might 
+include pummeling an ally instead of an enemy, break-
+ing a weapon or important tool, or gaining a Debuff. 
+Getting a Critical Fail on an Evade Check, the crawl-
+er suffers twice as much damage and gains a Major 
+Injury Debuff after combat. And they feel pretty 
+dumb, too.
+STARTING COMBAT
+When it looks like a combat scene or encounter is 
+imminent, such as Mobs and crawlers in close quar-
+ters, establish the pre-combat situation by establishing 
+the location and determining surprise.
+ESTABLISH LOCATION
+At the start of a combat scene or encounter, it’s 
+important to determine where everyone is located 
+and what opportunities or challenges are present 
+in the environment. The GM should describe the 
+obvious terrain features at this point, along with any 
+obvious threats. 
+DETERMINE SURPRISE
+Normally, combat occurs when Mobs encounter the 
+crawlers and the Mobs go first. Cunning crawlers may 
+make use of their Skills, such as Stealth and Ambush, 
+to get the drop on foes.
+
+When crawlers surprise their foes, they get a free 
+Action to spend before the normal flow of combat 
+begins. Not it’s only one action, and the surprise 
+round only happens once, at the start of combat.
+MAPS IN COMBAT
+Some groups love tactical maps. Others prefer a 
+theater‑of‑the‑mind style, imagining the Action with‑
+out a grid. Many groups fall somewhere in between, 
+using tokens or painted miniatures to show general 
+positioning—who’s in striking range, who’s a Move 
+Action away, and who’s farther out.
+Use whichever approach works best for your table. 
+For groups that enjoy tactical play and precise 
+movement, you can use either square‑ or hex‑based 
+maps. The most common scale is 1‑inch squares 
+or hexes representing 5 feet, which has become a 
+standard for tabletop RPGs.
+For vehicles or larger‑scale encounters, a useful 
+scale is 1 inch represents 50 feet.
+When using square maps, moving or attacking diag‑
+onally works the same as moving or attacking into an 
+orthogonally adjacent space, with no extra cost or 
+measurement required. Bonus points if you knew what 
+“orthogonally” meant before reading this section.
+STEP-BY-STEP COMBAT
+A combat scene unfolds in the following steps:
+1.  Mob Action Declaration: The GM announces 
+what the Mobs are doing, including their move-
+ment, whom they plan to Attack, and how.
+2.  Crawler Reaction Phase: Players can choose to 
+use Actions on Interrupts.
+3.  Mob Attack Resolution: Mobs complete their 
+Attacks and other Actions.
+4.  Crawler Action Phase: Players spend their remain-
+ing Actions and finish their turns.
+5.  Clean Up: Any effects that happen at the end of 
+the round occur, all combatants reset their Action 
+count, and a new round begins at Step 1 if needed.2
+
+--- PAGE 83 ---
+STEP 1: MOB ACTION 
+DECLARATION
+The GM announces the Mobs’ Actions during this step, 
+including their general movement, which Attacks or 
+other Actions they will use, and whom they are targeting.
+Low-quality Mobs each have 1 Move Action and 1 
+other Action per round, usually an Attack, typically divid-
+ing their Attacks evenly between the crawlers in range.
+High-quality Mobs, such as Elites and Bosses, are 
+exceptionally dangerous. They have 1 Action per 
+crawler each round, unless their Stat Block says other-
+wise. They continue to have this many Actions even if 
+some crawlers are out of commission or dead. Now 
+you know why you might need to run away, dragging 
+your Dying friends behind you.
+Determine Targeting
+Mobs target crawlers based on a variety of factors, 
+such as whom they perceive to be the greatest threat, 
+who is closest, which crawlers have items or effects 
+that dissuade or enrage them (such as Fairy-class 
+
+21
+Mobs against a crawler with a Goblin Pass), or, my 
+personal favorite, randomly.
+STEP 2: CRAWLER REACTION 
+PHASE
+After all Mobs have announced their movement, 
+Actions, and targets, the crawlers can use Interrupt 
+Actions to react prior to the resolution of Mob 
+Actions. Spending Actions during this phase counts 
+against the two Actions that each crawler gets every 
+round, and determining when to spend Actions is a 
+significant part of game strategy.
+And if you screw it up, you might die. No pressure, 
+right?
+The Interrupt Actions that crawlers can take include:
+Evade (Interrupt): The most common Interrupt Action, 
+a crawler who takes this Action attempts to avoid 
+Attacks against them. The player rolls a separate Evade 
+Check against each Attack directed at their crawler, so 
+if three Attacks are directed at the crawler, the player 
+makes 3 Evade Checks. The Difficulty of the Evade 2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 84 ---
+2
+Check is determined by the Mob’s Attack value (see 
+Step 5 for additional details). Successful evasion of an 
+Area Attack reduces the damage by 50%.
+Intervene (Interrupt): The most flexible Interrupt, 
+Intervene allows one crawler to help another at the 
+cost of an Action. The Intervening crawler rolls 1d6 and 
+can add the result of that die roll to another crawler’s 
+Action after the result is announced. This can be used 
+on any d20 Check (except Stat Checks), but is most 
+useful for turning a Near Miss Fail result into a Success.
+Catcher (Interrupt): Heroic, foolish, or tough crawl-
+ers with Ranks in this Passive Skill prize this Interrupt 
+Action, which allows them to take the hit for an 
+adjacent ally (using their Step to get into position 
+if needed). The Catcher crawler cannot Evade the 
+Attack they’re catching.
+Healing (Interrupt): A crawler can take this special-
+ized version of the Cast a Spell or Use a Hotlist Item 
+Action to activate a Spell or item with the healing trait. 
+This healing applies before the Mob deals its damage 
+(because we’re nice like that). The Healing Action 
+may also be used as a normal Action during the crawl-
+er Action Phase, which also allows a crawler to Make 
+a Check, such as First Aid.
+Taunt (Interrupt): Bold crawlers use this Action to 
+make an Int-Opposed Taunt Skill Check against a 
+Mob, drawing them to Attack the crawler using Taunt 
+instead of the Mob’s original target. After using the 
+Taunt Action, the crawler may then choose to spend 
+an Action to Evade those and any other Attacks.
+Once all players have finished their Interrupt 
+Actions, play proceeds to Step 3.
+STEP 3: MOB ACTION 
+RESOLUTION
+In this step, the Mobs deal damage to the crawlers 
+who either failed to Evade or didn’t bother to Evade 
+during Step 2. Any other effects from a Mob’s Attack, 
+such as Debuffs, also apply now.
+The GM rolls each Attack’s damage dice, adds the 
+appropriate Stat Mod to the total, and applies any 
+additional effects, such as Debuffs, from the Attack. 
+Crawlers apply their Damage Resistance (p. 93) to 
+the Attack’s damage before marking damage on their 
+Health Bar (see Applying Damage to the Health Bar, p. 
+94).
+
+STEP 4: CRAWLER ACTION PHASE
+Now players can use any remaining Actions for their 
+crawler to strike back. Crawlers can take their Actions 
+in any order and may even intermingle them. No 
+initiative here! Crawlers may use both of their Actions 
+to Attack if they wish. The Actions that players can 
+take in this phase include:
+Attack
+A crawler strikes at a Mob with their fists or feet, a 
+melee weapon, a ranged weapon, or a Spell. The 
+crawler can swap the weapon in their hand for 
+another weapon from their Hotlist as part of the 
+Attack Action.
+Choose a Target: Select a target within range. Most 
+melee Weapon Skills have a range of 5 feet, and 
+Weapon Skills with the Reach keyword have a range 
+of 10 feet. Reach Weapon Skills cannot Attack 
+through occupied spaces, but they can Attack diago-
+nally through the corner between two spaces, as long 
+as at least one of those spaces is unoccupied.
+Spellcasters must spend their Mana Points to acti-
+vate the Spell now.
+Ranged Weapon Skills list their maximum range, and 
+there is no penalty for attacking a foe within that range.
+Ranged weapons and Spells that target a foe 
+outside of their range automatically fail. 
+Determine Modifiers: The player and GM determine 
+what modifications apply to the Skill Check (if any), 
+such as benefits from Buffs, penalties from Debuffs, 
+modifiers based on target size, and environmental 
+challenges like low light or cover.
+Make the Attack!: The player rolls their Weapon Skill 
+Check.
+To Attack, roll 1d20 + Skill Rank + Stat Mod as usual. 
+The target number for the Attack is the Mob’s Evade 
+score, which is 10 + Dex Mod + Floor.
+The Stat Blocks of some Mobs may have addition-
+al modifiers. After the roll, the GM determines their 
+crawler’s degree of Success (and opportunity for an 
+ally to take the Intervene Action if needed). If the 
+Attack hits, the player rolls damage based on their 
+Attack or Spell.2
+
+--- PAGE 85 ---
+FOR THE GM: MOB ON MOB ACTION
+Clever crawlers may find ways to cause Mobs to Attack each other or Bosses. When this sort of NPC
+action occurs, the GM can simply decide. Pick David or Goliath depending on what makes things the most inter‑
+esting. If the story doesn’t suggest a clear winner, directly compare the Attack and Evade (or other relevant Stats) 
+between the NPCs to determine the outcome, assuming the NPC with the better value wins. If you want to play to 
+find out (remember that GMs don’t roll Attack Skill Checks), roll 1d12 and use Table 8. It’s skewed toward the more 
+powerful NPC but allows for the underdog to come out on top sometimes.
+TABLE 8: NPC VS. NPC
+ROLL OR 
+CHOOSE EFFECT
+1 The attacking NPC outright loses or misses badly, achieving a Major Fail, and everyone—other 
+Mobs, Bosses, and crawlers—gains Advantage to Attack it until the end of the round or a Debuff 
+of the GM’s choosing.
+2–4 The attacking NPC misses or possibly just loses the fight.
+5–8 The attacking NPC hits if its relevant Stat is higher than the defender’s opposing Stat
+9–1 1 The attacking NPC hits and deals damage as normal or possibly wins the fight.
+12 The attacking NPC achieves an Amazing Success, dealing damage to the defender with a bonus 
+equal to twice the Floor Number or a similar Buff or just emerges victorious.
+Keep in mind that even if you stick with the static values, Mobs attacking other Mobs and missing still consume 
+their Actions, which can be a huge swing in the crawlers’ favor during an intense combat.2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+MELEE ATTACKS
+Most melee Attacks use your Str to hit and damage.
+RANGED ATTACKS
+Physical ranged Attacks use Dex to hit, some apply Str 
+to damage, while others have no damage bonus.
+Ranged Attacks suffer Disadvantage if made within 
+the melee reach of an enemy.
+SPELL ATTACKS
+Most Spells use Int to hit and damage.
+Ranged Spell Attacks also suffer Disadvantage if 
+made within the melee reach of an enemy.
+AREA OF EFFECT ATTACKS
+Attacks like the Spell Fireball or the Goblin Dynamite Skill 
+to use explosives deal damage over a wide area. These 
+Area Attack qualities are listed with the Attack Skill entry. 
+When making an Area Attack, the attacker makes a single 
+Attack roll against a foe of their choosing within range 
+as usual, with the potential benefit of dealing damage to 
+more creatures than just the target of the Attack.
+If the Attack is successful, the attacker rolls damage 
+once and applies the full damage to all creatures, 
+
+21
+‑versus‑NPC 
+crawler and Mob alike, in the affected area (including 
+the target of the Attack). Resistances and DR reduce 
+the damage as usual.
+On Fail, most Attacks have misfired and no crea-
+tures take any damage, unless it’s a Critical Fail and 
+it hits the wrong target. However, Area Attacks like 
+Fireball and Dynamite still land somewhere and deal 
+damage to whatever is near the new impact area. 
+Only Attacks like Throwing and Fireball that reference 
+Figure 3 (p. 200) do anything on a Fail.
+Some Area Attacks also have a Splash damage area 
+(not to be confused with everyone’s favorite Otter 
+stripper from the Penis Parade, Splash Zone), a radius 
+from the initial blast which deals half as much damage 
+to those in the area. Anyone caught in the splash zone 
+of that damage applies DR and other effects normally.
+A crawler affected by an Area Attack can Evade 
+(if they spend an Action to do so), and may have 
+situational modifiers from cover, elevation, among 
+others. A victim who Evades an Area Attack reduc-
+es the damage by 50%. A successful Evade in the 
+splash zone reduces the damage by another 50% so 
+only 25% of the damage is applied. Such damage 
+is rounded down as usual. Taking a Step during an 
+
+--- PAGE 86 ---
+2
+Evade Check (or any Interrupt) is not fast enough to 
+outrun an explosion, so you can’t simply duck out of 
+the affected area.
+AREA OF EFFECT TYPES
+Spells, weapons, items, Mobs, and Bosses use Area 
+Attacks in various ways. There are several different 
+types of Areas:
+• Blast: Extends outward in all directions from the 
+target (or where the explosive landed) to the listed 
+distance.*
+• Burst: Extends outward in all directions from the 
+caster to the listed distance.
+• Line: Extends outward in a 5-foot wide line from the 
+caster to the listed distance.
+• Cone: Extends outward in a 60 degree arc from the 
+caster to the listed distance.
+• +Splash: Extends outward beyond the full-damage 
+area, dealing half damage within the Splash distance. 
+This is typically an add-on to other Area types, and 
+extends in the same way. Some attacks feature only a 
+Splash effect: The target takes full damage, but every-
+one in the Splash area takes half damage
+Figure 2Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026.
+(From Target)(From Target)
+CC
+OO
+NN
+EECC
+OO
+SS
+NN
+PP
+EELL
+AA
+SS
+HH
+(From Caster)(From Caster)
+BLAST OR BURST SPLASHBLAST OR BURST SPLASH
+
+Example: A “20ft Cone +10ft Splash” means the 
+Cone is 30 feet in length. Victims in the first 20 feet 
+of the Cone take full damage, while victims in last 10 
+feet Splash zone of the Cone take half damage.
+*If you’re using a battle map, the target or impact 
+area of a “10ft Blast radius” is the origin of the Blast 
+effect. From that 5ft × 5ft space, the Blast extends 
+outward two spaces in every direction. If you’re not 
+tracking the exact position of each crawler, Mob, and 
+other NPCs, you’ll need to make a reasonable call on 
+who is affected in any Area Attack situation. See Figure 
+2 for examples of Area Attacks.
+Attack Modifiers
+Several additional situations may alter the Evade score 
+of a target or otherwise modify the Attack.
+COVER
+Objects can get in the way of Attacks made at greater-
+than-melee range, causing such Attacks to be made 
+with Disadvantage. Attacks made at melee range are 
+unaffected by cover. Things that can provide cover 
+include: crates, terrain, cars, or low walls. If the Attack 2
+BLASTBLAST
+LINE LINE 
+SPLASHSPLASHLINELINE
+BURSTBURST
+
+--- PAGE 87 ---
+misses, the cover might be destroyed, depending on 
+how sturdy it is and whether your crawler is strong or 
+has to have their mom do the heavy lifting.
+ENVIRONMENTAL MODIFIERS
+When attacking targets in Cover, Darkness, Severe 
+Weather, Shifting Ground, or amid other penalties, an 
+attacking crawler rolls with Disadvantage. Similarly, 
+those with help from the environment, such as 
+attacking from high ground, roll with Advantage.
+SIZE
+Crawlers roll Attack Skill Checks with Advantage if 
+the target is 4 or more size classes larger than them. 
+Inversely, crawlers roll Attack Skill Checks with 
+Disadvantage when attacking a target 4 or more 
+size classes smaller. And when a big dude hits a little 
+dude with a Disadvantaged Melee Attack due to this 
+modifier, the big dude adds their size value to the 
+damage. See Table 9 for size names and values.
+TABLE 9: CREATURE SIZE
+SIZE SIZE NAME CREATURE EXAMPLE
+1 Tiny Scatterer, Rat
+2 Small Cat, Raccoon
+3 Petite Goblin, Boar
+4 Medium Human, Wolf
+5 Large Horse, Mantaur
+6 Huge Elephant, Rhino
+7 Colossal Dinosaur, Dragon
+8 Gargantuan Kaiju
+UNSEEN ATTACKERS
+Creatures gain Advantage on Attack Skill Checks 
+against targets that can’t see them, such as a crawler 
+who is hidden, invisible, or on the other side of a 
+smoke cloud. Inversely, creatures suffer Disadvantage 
+on Attack Skill Checks against targets they can’t see.
+DAMAGE
+When a crawler hits with an Attack, they deal damage, 
+which starts with the base damage die determined by 
+the Skill (higher Ranks grant additional base damage 
+dice; see Attack Skill listings on pp. 177–184), plus 
+the appropriate Stat Mod. Some Attacks add special 
+effects alongside these extra dice.
+Unarmed Attacks deal low inherent damage but 
+allow the combatant to add 1 Damage Effect to the 
+Attack. These include well-known abilities such as 
+
+21
+Powerful Strike, Iron Punch, and others from the 
+novels. If the Attack hits, the Attack’s damage dice are 
+rolled, and then the chosen Damage Effect is applied.
+After calculating total damage, the GM applies any 
+DR and then marks off the Mob’s Health Bar.
+Cast a Spell
+A crawler can spend an Action to cast a non-Attack 
+Spell, pay its Mana cost, and follow the Spell’s 
+instructions. There’s no limit to the number of Spells 
+that can be cast in combat, provided the crawler has 
+enough Actions and Mana.
+Caster types are limited in their ready-to-go Spells by 
+their Hotlist. If a Spell ain’t in your Hotlist, you can’t cast 
+it until you Retrieve it (see Non-Skill Actions, p. 86).
+Make a Check
+Many non-Attack Skills can be useful in combat, and 
+a crawler can spend an Action to attempt the Skill 
+during battle. If the GM requires a non-Attack Skill 
+Check in the midst of battle, this generally doesn’t 
+require a crawler to spend an Action to perform, 
+unless your GM doesn’t understand the rules or 
+they’re feeling particularly spicy that day.
+Look for Clues
+The Look for Clues Action is a specialized version 
+of the Make a Check Action in combat that focuses 
+on gathering information about a Boss (not regular 
+Mobs) or the environment to give the whole party 
+a leg-up. This can be performed as an Unopposed 
+Perception, Investigation, or similar Skill Check.
+On Success, the crawler learns a piece of information 
+about the Boss or area that could aid the party. Amazing 
+Success or better grants additional clues if available.
+If multiple clues may be found, the crawler can 
+specify what aspect of the scene (such as the Boss, 
+the environment, or other features) to focus their 
+Look for Clues Action on. For Bosses, this can be as 
+specific as their weapon, their armor, or the brooch 
+the Boss is wearing.
+Clues can include vulnerabilities, Resistances, 
+Attacks to look out for, what effect killing a Mob’s 
+leader might have, how to counter Debuffs inflicted 
+by foes, environmental elements that would be useful 
+in the fight, and more.
+Ultimately, the GM decides which clue to give, so if 
+they want to be a dick, that may not go so well for the 2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 88 ---
+2
+crawlers. If we assume the GM isn’t a megalomaniac, 
+and perhaps they don’t feel a clue is going to be useful 
+to the crawlers, they are free to just give each crawler 
+Advantage on their next Attack or Evade, depending 
+on what the clue-seeker was most interested in.
+Healing
+In addition to the Use a Hotlist Item Action or the 
+Cast a Spell Action, a crawler can also use the Make 
+a Check Action to use the First Aid Skill or any other 
+means of healing in this phase. (See also the Healing 
+Interrupt Action above in Step 4.)
+Non-Skill Actions
+During a combat scene, crawlers can also take a 
+variety of Actions that don’t require a Skill Check, 
+including:
+• Call a Play: A crawler proposes an Action for an 
+ally to perform, such as attacking a specific target. 
+The crawler rolls 2d6 and keeps the higher roll: the 
+Called Play bonus. When another crawler performs 
+the proposed Action, the crawler who called the 
+play can add the Called Play bonus to their ally’s 
+Skill Check total. If the Skill Check is Successful 
+without the bonus, the Called Play bonus adds to 
+their damage roll instead.
+• Intervene: During the Crawler Action 
+Phase, a crawler can use 
+the Intervene Action as 
+well (see Step 2).
+
+• Move: A crawler can spend an Action to travel up 
+to their Move allotment and make a Step, as usual.
+• Retrieve: Pull an item from your Inventory to your 
+hand or the floor, or add it to your Hotlist. You 
+cannot use that item during your current Action.
+• Use a Hotlist Item: A crawler selects a 
+consumable item from their Hotlist, such as a 
+potion or scroll, and uses it or withdraws another 
+item. Remember that swapping weapons is free as 
+part of the Attack Action.
+STEP 5: CLEAN UP
+  You’ve punched some Mobs, 
+cast some Spells, took some 
+damage, and in doing so, you made a mess. You might 
+just be getting the hang of this, crawler!
+Reward: You get to clean up your own mess. I’m not your 
+mother or your maid. Don’t be lazy, and do it yourself.
+During this step, the players and GM do the following:
+• Apply End-of-Round Effects: Crawlers with any Buffs, 
+Debuffs, the Regeneration Skill, and other effects 
+apply them now in the order most beneficial to them.
+• Determine End of Combat: If all combatants on 
+one side or the other are defeated, the combat 
+ends. If not, combat continues at Step 1.2
+
+--- PAGE 89 ---
+CRAWLER VS. CRAWLER
+Crawlers must reach a stairwell in any way possible to 
+survive to the next floor, and that requires leveling up, 
+learning cool Spells, and acquiring great gear (among 
+other considerations). For some enterprising crawlers, 
+the easiest way to advance through the dungeon isn’t 
+to brave deadly Mobs and Bosses but rather to kill 
+other crawlers while their guard is down.
+CRAWLER VS. GMC CRAWLER
+All the players in a party in the Dungeon Crawler 
+Carl Roleplaying Game are explicitly working 
+together. When we refer to crawler vs. crawler 
+combat, it transpires between players’ crawlers and 
+other surviving crawlers in the World Dungeon who 
+are controlled by the GM (GMCs).
+If forced by a Mob to Attack a party member, the 
+target gets an Evade Check at no Action cost.
+FIGHTING OTHER CRAWLERS
+Fighting GM-controlled crawlers (GMCs) works just like 
+fighting Mobs, aside from that empty feeling that yawns 
+open inside your chest when you’ve killed another 
+Human in cold blood. But don’t worry—if you keep 
+doing it, you’ll eventually fill that chasm with enough 
+dead bodies that you’ll feel normal again. It’s science.
+KILLING A CRAWLER
+As usual, when a crawler loses the last slot of their 
+Health Bar, they die in a number of rounds equal to 
+their Con Mod (see 0% Health Bar and Dying, p. 94). 
+If a PC lets them die, they gain a white Player Killer 
+Skull above their head next to their name, which 
+identifies them to all other characters in the dungeon 
+as a Player Killer. Now everyone knows (or at least 
+strongly suspects) they can’t be trusted.
+Keep in mind that only the crawler who delivers 
+the killing blow gains the Player Killer title and the 
+corresponding skull. Deflecting damage from a third party 
+also does the trick. Use your imagination, and your GM 
+just might let you get away with murder. If you don’t get 
+the credit, the only reward you earn is the ignoble ability 
+to loot the corpse as if it were a Mob, but note that the 
+actual Player Killer gets first dibs, just like with Mobs.
+PLA YER VS. PLA YER COMBAT
+You know the old saying: Keep your enemies close, 
+and kill your friends before they kill you. In the World 
+
+21
+Dungeon, each party member works alongside 
+accomplished crawlers, each of whom probably has 
+enough magic items and special gear to make a City 
+Boss blush. And the World Dungeon is very interested 
+in helping you take what’s theirs.
+CONSIDERATE PLA Y AND PvP
+Player vs. Player (PvP) combat is an optional rule, 
+and it’s one the entire table should agree on before 
+someone gets antagonistic with another player. 
+Injury or death of one PC at the hands of another 
+can lead to hurt feelings and might break up a 
+gaming group or even a friendship. 
+No one’s really playing this game to ruin friendships, so 
+the default setting for PvP combat is off. Your group 
+still needs to decide if players can target or hurt one 
+another, whether it’s broken bones in combat or even 
+just hurt feelings in a social scene (we suggest yes, 
+but with frequent check‑ins). A common option is if 
+a crawler betrays the party or initiates combat with 
+another PC, after the dramatic moments are done, 
+they’re retired to NPC status, and the player makes a 
+new crawler with a solid reason to support the party 
+of PCs. Whatever rule you decide for your table, make 
+sure everyone agrees. You’re here to have fun, not ruin 
+friendships. The table is not the World Dungeon.
+If you’re going to engage in PvP, the books note that 
+speed and reaction time are essential in such combats. 
+At the start of each round of PvP combat, each player 
+rolls for initiative: d20 + Dex. The high roller Attacks 
+first. The low roller Attacks last. If tied, they Attack 
+simultaneously. That’s how it works in a fair fight.
+Now this may shock you: Not all fights are fair—
+especially among friends willing to kill you for your 
+enchanted watch. If a crawler makes a cowardly sneak 
+Attack, they roll the first round’s initiative with Advantage. 
+A sneak Attack is not a guarantee of landing the first blow. 
+A very fast crawler might react before the blow lands (see 
+Florin vs. Lucia Mar). There’s no honor among crawlers 
+when survival (and ratings) are on the line.
+During PvP combat, each player has 1 Action per 
+round, as their 2nd action is Evade. The attacker 
+makes an Opposed Check against the target. The 
+attacker rolls their Attack Skill Check. That value then 
+serves as the Difficulty for their victim’s Evade Check. 
+Players aren’t Mobs. Don’t treat their combat as 
+such. They are free-willed beings who happen to want 
+to murder each other. Or at least one of them might. 
+It’s a little more tragic when that happens.2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 90 ---
+2
+REWARDS FOR KILLING CRAWLERS
+The System AI realizes that killing your own kind is 
+distasteful, so it incentivizes this sort of bad behavior.
+The first time you kill another crawler, you’ll receive 
+a Silver Savage Box, or a Gold Savage Box if your 
+victim was in the top ten. These boxes often contain 
+one or more Player vs. Player Coupons naming your 
+party members, along with a promise of high-tier 
+rewards if you kill the named crawlers. They typically 
+also contain one magic item as well. The System AI is 
+magnanimous when it comes to homicide.
+Note that Savage Boxes can also be awarded for 
+permanently maiming your fellow crawlers, and not 
+just the first time. The dungeon never penalizes you 
+for dismembering a friend. Ain’t showbiz grand?
+Still not enough incentive? Killing a crawler is a 
+level-up bonanza, enough to make you forget about 
+the blood on your hands (see Experience Points, 
+pp. 169–170). Really, when you look at all the perks, 
+you had no choice. Sorry, Dungeon Crawler Bob.
+Once your friend is dead, you can scavenge their 
+carcass for clothing, armor, weapons, gold, and 
+anything else in their inventory. However, unopened 
+loot boxes are bonded to the owner and cannot be 
+removed from their inventory. The killer has 10 minutes 
+to loot the body before it’s lootable by anyone else. 
+Don’t let remorse get in the way of claiming that fancy 
+enchanted watch you always wanted Bob to give you.
+BOUNTY PA YMENT
+If leveling up and Savage Boxes weren’t enough, the 
+dungeon can sweeten the pot even further. How about 
+a huge amount of gold for killing fellow crawlers? 
+If you kill a top ten crawler, you also receive a 
+Venison Box containing a very large amount of gold. 
+Each crawler in the top ten (p. 282) has a bounty 
+(p. 283) listed next to their name when the list is 
+presented at the end of each daily recap show starting 
+on the Fourth Floor. 
+Now, your friends may not be in the top ten yet, 
+but they could be. If they are, are they really still your 
+friend? Hell no! Kill them for money.
+If a top ten crawler dies for any reason, a System 
+Message appears on all crawler HUDs: “A champion 
+has fallen.”
+• If they were killed by another crawler, it adds: “A 
+bounty has been claimed.”
+
+• If they were killed by a hunter, it adds: “A hunter has 
+claimed a bounty.”
+Other variations are encouraged, but don’t expect a 
+full obituary.
+MOB COMBAT EXAMPLE
+The crawlers have spent enough time in the Iron 
+Tangle at this point to know that many of the trains 
+carry swarms of Mobs, and they can hear a train 
+coming down the tracks toward the station.
+Jose (playing Henry): I’ve got the Ambush Skill. Is 
+everyone alright with me leading the party to take up 
+positions around the station for when the train arrives?
+Marianne (playing Michelle): Good idea!
+Mark (playing Venus): Go for it!
+Daniel (playing Chase): I’m down.
+Anisha (playing Wren): *nods in agreement*
+POSITIONING
+Before a combat scene or encounter begins, the 
+players and GM determine where everyone is in 
+the encounter. In this case, the players set their 
+miniatures in locations on a battle map. The crawlers 
+know that the Mobs will come from the tracks, but 
+not which direction the train is coming from, so they 
+place their minis accordingly. When playing without 
+a battle map, the party and GM discuss what’s in the 
+area and where everyone is before the action kicks 
+off. Good description is key!
+Theresa (the GM): Sounds like a good plan, and 
+there’s plenty of cover in the station. Everyone, go 
+ahead and put your minis at your crawlers’ locations 
+on the map. Since everyone needs to get into 
+position, we’ll need a Party Ambush Skill Check.
+Anisha: I don’t have that Skill, so that puts me at 
+Disadvantage, right? Given how dexterous Wren is, 
+I’m sure I’ve got this! Nope. Rolled a 4.
+Mark: Well, at least you’re consistent! Venus gets an 18.
+Jose: I’ve got 16.
+Daniel: Chase doesn’t have the Skill either, but I’ve 
+got an 11. 11 is good, right?2
+
+--- PAGE 91 ---
+Marianne: For the Fourth Floor? I doubt it—the 
+Difficulty’s going to be at least 14. I got a 13, which 
+isn’t much better.
+Theresa: Alright, are you happy with those numbers?
+Jose: Team, we should keep our AI Favor for when we 
+really need it during the fight.
+The rest of the party nod in agreement
+PARTY SKILL CHECKS
+The Ambush Party Skill Check here is a Failure 
+because only two players (Jose and Mark) met or 
+exceeded the Difficulty of 16 (an Opposed Skill 
+Check with a Difficulty of 10 +4 for the Floor value 
++ 2 for the Ghouls’ Int). Had a third member of the 
+party rolled 16 or higher, they all would have been 
+safe, but the random number generator hates them, 
+so the ambush goes awry.
+Theresa: As you wish. Marianne’s right, your party fails 
+to meet the Difficulty. So, the train pulls into the station, 
+and the doors open. More than a dozen emaciated 
+forms covered in festering sores shamble out. As 
+several of the grotesque individuals move onto the 
+platform, Wren slips, accidentally kicking a can 
+out into the open station. The Ghouls instantly 
+look up, alert and ready to fight!
+STEP 1: MOB ACTION 
+DECLARATION
+With the party obvious to the 
+Ghouls, Step 1 of combat is 
+for the GM to declare what 
+the Mobs are doing. Let’s see 
+what Theresa says next.
+Theresa: The Ghouls 
+flood from the train 
+car like a burst sewer pipe. Four immediately 
+converging on the noise Wren made, hissing 
+and snapping, spittle spraying from hungry 
+mouths. Four more turn toward Chase, 
+who discovers that “hidden behind a 
+pillar” and “mostly hidden behind a 
+pillar” are two very different things. A 
+dozen additional Ghouls clamber from 
+the train, sniffing the air and peering 
+into the dark corners of the station 
+in search of their next meal. Four at 
+Chase, another four after Wren!
+
+21
+STEP 2: CRAWLER REACTION PHASE
+Now the crawlers have an opportunity to “read the 
+room” so to speak, and decide if they want to use 
+an Interrupt Actions to potentially change what the 
+Mobs are doing. These actions still count against the 
+two Action limit each crawler gets in a round.
+Anisha: Well, they already know I’m here, so I might 
+as well make the most of it. I jump out of my hiding 
+spot, making as much noise as possible to draw their 
+attention. I’ll use my other action to Evade and hope I 
+don’t die!
+Theresa: I’m gonna call that a Taunt Action. Go ahead 
+and make the Skill Check, Anisha.
+Anisha: I’ve got that Skill at Rank 4! How about a 19?
+Theresa: That’s more than enough for one 
+of Chase’s Ghouls to turn your way.
+Anisha: Success! And umm help? 
+Anybody?2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 92 ---
+2
+THE EVADE ACTION
+This Interrupt Action is the most commonly used. Its 
+purpose is to avoid Attacks against them. By using an 
+Evade action, Wren gets to make an Evade Check against 
+every Attack the Ghouls send their way this round!
+Daniel: I’m not much better off than you are… three 
+on me. I’ll spend one of my actions to Evade as well.
+Theresa: Got it. Anyone else reacting? No? Then let’s 
+see how the Ghouls do.
+ENDING A STEP
+Once all crawlers decide whether to use their Actions 
+on Interrupts and make their die rolls, the Crawler 
+Reaction Step ends. It can be helpful to make a “last 
+call” for Actions to make sure nobody misses their 
+chance before ending the Crawler Reaction Phase.
+STEP 3: MOB ACTION RESOLUTION
+In this phase, the GM executes the actions that were 
+broadcast in step 1, with the exception of those four 
+additional Ghouls who have decided that Wren looks 
+like a scrumptious appetizer.
+Theresa: A total of five Festering Ghouls swipe at 
+Wren! Fortunately for you, Anisha, by the looks of the 
+battle map, only four can get to you. Please give me 
+four Evade rolls.
+Anisha: Come on dice! 19, 22, 19 again, and a 26!
+Theresa: Well done! Despite their general lack of 
+dexterity, Wren apparently becomes possessed by the 
+spirit of ninja disco and manages to avoid all four of 
+the Festering Ghouls’ Attacks! Now for Chase. You’ve 
+got three attacking you, and you chose to Evade, so 
+go ahead and make three Evade rolls.
+Daniel: I didn’t get near as lucky. 10, 18, and… a 1.
+CRITICAL FAIL WHILE EVADING
+When a player gets a Natural 1 on their Evade Check, 
+their crawler suffers twice the damage from the 
+Attack and a Major Injury after the adrenaline of the 
+fight runs out. Even with a trained medic in play like 
+Jose’s crawler, Henry, injuries require time to heal. 
+See Injuries, p. 96 for more.
+
+Theresa: You managed to barely Evade one of the 
+Attacks, but two others bite at you, tearing flesh and 
+leaving deep gashes! You take 11 from the one hit, 
+but the Critical Fail on your other Evade means that 
+one deals 20 damage to you. Apply your Damage 
+Resistance to each one, of course. And the Natural 1 
+on the Evade Check means you’ll have a Major Injury 
+after the fight.
+Daniel: Even after Damage Resistance, that’s 40% of my 
+Health Bar! Ouch! I can’t take too many hits like that.
+STEP 4: CRAWLER ACTION PHASE
+Now it’s time for the crawlers to strike back! Wren 
+doesn’t have any actions left, having spent both 
+during the Reaction Phase. Chase has one action, 
+and the rest haven’t spent any of their actions, so 
+they still have two each.
+Mark: I’m going to use one of my actions to move off 
+to the side, and then my second action to toss a Jug 
+O’ Boom right in the center of the Ghouls that are still 
+standing there.
+Theresa: Nice! Make your Explosives Handling Skill 
+Check so it doesn’t blow up in your face, and then 
+Throw for the Attack.
+Mark: 20 on Explosive Handling, and 28 for Throwing!
+Theresa: Great throw! You land the jug right in the 
+middle of the group. That’s an Amazing Success! Roll 
+your normal damage, then add four.
+AMAZING SUCCESS
+When a player rolls 10 or more over the Difficulty, 
+they gain an Amazing Success. In combat scenes, 
+an Amazing Success on an Attack Skill Check adds 
+bonus damage equal to the current Floor Number.
+Mark: That’s an 8 on the die for damage from the jug 
+and 4 for the Amazing Success, right? That’s 12 Fire 
+damage! 
+CONTEXT CLUES
+As this isn’t a Boss encounter, the crawlers can’t 
+use the Look for Clues Action. Yet throughout 
+the battle, Theresa describes the Ghouls’ tactics, 
+Attacks, and tendencies—such as avoiding fire—
+without giving away the specifics, as a storytelling 
+element amid the combat.2
+
+--- PAGE 93 ---
+Theresa: The presence of fire from the blast sends 
+Ghouls scrambling back toward the train. Only the 
+four Ghouls next to Wren, and the three close to 
+Chase remain. Marianne, you’re up. What are you 
+going to do?
+Marianne: I’m close enough, I should be able to use 
+my Sledge of Overabundant Mechanical Agitation to 
+hit at least two of the ones on Chase, right? If so, I’m 
+gonna do that.
+Theresa: Sounds good. Make your two Warhammer 
+Skill Checks.
+Marianne: Natural 20, and a 16.
+Theresa: The first one is a Critical Hit! Go ahead and 
+roll damage for that one. The second looks like it’ll be 
+a Near Miss.
+Marianne: Can anybody give me a hand on this one?
+Daniel: Can I use my second action to Intervene 
+and push the Ghoul into the 
+incoming hammer blow?
+
+21
+Theresa: Absolutely, you can! Roll 1d6, and we’ll add 
+it to Michelle’s Attack.
+Daniel: I got a 4.
+Theresa: That’s a total of 20, which makes it a Standard 
+Success! Roll damage for both Attacks, Marianne.
+THE INTERVENE ACTION
+The Intervene Action is flexible, allowing a player 
+to use their Action to help another party member 
+(hopefully) succeed. Intervene can only be used in 
+combat and adds a d6 roll to the party member’s 
+Skill Check.
+Marianne: I’ve got Rank 10 in my Warhammer Skill, 
+that’s 3d10 plus 5 for my Strength, so… 26 for the 
+standard hit. For the Critical…2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 94 ---
+2
+CRITICAL HITS
+Marianne gets a Natural 20 on Michelle’s Attack, 
+which doubles the number of dice rolled. The 
+Warhammer deals 1d10+Str damage, plus another 
+2d10 for the Skill’s Rank 10 Upgrade. With the 
+Natural 20, these dice double to 6d10+Str. Unlike 
+other Attacks, Marianne doesn’t need to ask if 
+Michelle hits, a Natural 20 always hits. Similarly, a 
+Natural 1 always misses, but no need to worry about 
+that here!
+Marianne: I got 56 damage for the Critical Hit!
+Theresa: Awesome! The first one takes the hit, the 
+force removing its arm from its body, but it’s still 
+standing at 50% Health. You swing the Warhammer 
+with all of your might towards, and then through, 
+the second Ghoul, splattering it down to 0 Health 
+instantly.
+0% HEALTH
+When a crawler reaches 0% of their Health Bar, they 
+gain the Dying Debuff and must be healed within a 
+number of rounds equal to their Con or perish. When 
+a Mob reaches 0%, they die and typically don’t come 
+back, unless there’s necromancy afoot.
+The scene continues, with Jose and Mark taking both 
+of their Actions to clear out more Festering Ghouls.
+STEP 5: CLEAN-UP
+The final phase of a combat round is when ongoing 
+effects, such as strength buffs or poison, impact 
+the crawlers. Counters get advanced, trackers get 
+tracked. It’s also an opportunity for the GM to spring 
+something on the crawlers for the next round.
+Theresa: As the two Ghouls drop into a puddle of 
+hammered goo, another group of Ghouls pries the 
+door of the car open, and five of them rush to join in!
+Daniel: Here we go again!
+Anisha: What’re you talking about! I’ve still got four 
+trying to eat my face! Just so y’all know, I’m planning to 
+drop a Fireball on the nearest one to clear them out.
+Marianne: That seems a bit extreme, doesn’t it?
+
+Anisha: Not when I have this handy dandy armlet that 
+grants me Fire Resistance. Just use your actions to get 
+out of the area and Evade. I’ll take care of the rest.
+APPL YING DAMAGE RESISTANCE 
+EFFECTS
+When determining Damage Resistance (DR) effects, 
+the player and GM always apply their DR first. 
+After that, they apply Resistance, Immunity, and 
+Vulnerability. In this case, Wren’s armlet grants 
+half damage from Fire, so they’re unlikely to suffer 
+significant damage from a nearby Fireball.
+The round continues with the Mobs declaring, 
+crawlers reacting, Mobs completing their Actions, and 
+then Anisha’s Spell results in an inferno of magical fire. 
+Chase and Michelle were able to get to safety and 
+were relatively unharmed, and Wren’s Fire Resistance 
+caused only minor self-inflicted damage. Venus, 
+however, was not so lucky.
+Mark: Oof, that was a calculated risk and boy, am I 
+bad at math.
+FRIENDL Y FIRE
+Area Attacks like the Fireball Spell and explosives 
+don’t care what team the people in the area are 
+on. Keep that in mind when aiming Area Attacks! If 
+one or more of your allies are in the area, it’s best 
+to check if the players are okay with suffering the 
+consequences of the Attack before putting their fate 
+in the hands of explosive pyrotechnics governed by a 
+random number generator.
+Theresa: Mark, since you were still in the area of 
+the Spell’s effect, but you managed to successfully 
+Evade, you only take half damage. That’s 15 points of 
+Fire damage. Along with that, you’ve got the Burned 
+Debuff because you lost an HB slot to Fire damage.
+Mark: So what does that do?
+Theresa: That means you’ll suffer 1d10 plus 4 Fire 
+damage each round until you put yourself out. You 
+might consider stop, drop, and roll.2
+
+--- PAGE 95 ---
+Health Menu
+Each character’s Health Menu is accessible whenever 
+they can access their HUD. The Health Menu is an 
+extensive pie chart that indicates any active status 
+conditions such as Buffs, Debuffs, and injuries. The 
+crawler can drill down and see which areas are 
+affected, as well as learn from the provided detailed 
+explanations of injuries and the healing process. If the 
+crawler sustains enough damage, the entire pie chart 
+may blink red.
+In the Dungeon Crawler Carl Roleplaying Game, 
+the Health Menu consists of the Health Bar, Mana, 
+Buffs & Debuffs, and Injuries.
+HEALTH BAR
+Every creature in the Dungeon Crawler Carl 
+Roleplaying Game has a Health Bar (HB), which 
+tracks their available Health and is determined by the 
+Con Mod for each slot. Each slot represents physical 
+toughness, mental fortitude, and emotional resilience.
+Crawlers’ HB is composed of 10 slots, and individu-
+al creatures can have fewer (such as common Mobs) 
+or more slots (Bosses, Elites, and some NPCs).
+DAMAGE TYPES
+Each instance of damage usually has a type, such as 
+Bludgeoning, Piercing, or Slashing for physical damage 
+and elemental types, such as Acid, Ice, or Fire. The 
+damage types themselves do not have a specific effect 
+on their own but are referenced for other effects such 
+as Resistance, Vulnerability, and Immunity.
+The damage types and their rarity in the Dungeon 
+Crawler Carl Roleplaying Game are listed in Table 10.
+DAMAGE RESISTANCE
+When a target takes damage, that damage total is 
+reduced by their Damage Resistance (DR) first. The 
+rest of the damage, if any, is applied to the victim’s 
+Health Bar.
+There are two types of Resistance: Damage 
+Resistance and Elemental Resistance. Damage 
+Resistance (DR) is resistance against all types of 
+damage. A creature that has resistance to an elemen-
+tal type, such as Fire Resistance, takes half as much 
+damage of that type whenever they take damage.
+
+21
+TABLE 10: DAMAGE TYPES AND RARITY
+DAMAGE TYPE RARITY
+Acid Uncommon
+Bludgeoning Common
+Electric Uncommon
+Fire Common
+Force Uncommon
+Holy Uncommon
+Ice Uncommon
+Necrotic Uncommon
+Piercing Common
+Poison Common
+Psychic Uncommon
+Slashing Common
+Sonic Uncommon2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+DR and Elemental Resistance are gained via 
+Armor (natural or worn), Magic, and Buffs. There 
+is no resistance against the latent sense of self-
+disappointment lurking in the depths of your soul. 
+Have you tried talking to someone?
+DAMAGE VULNERABILITY
+After Resistance is applied, use any Damage 
+Vulnerability. Creatures can have Damage 
+Vulnerability to specific types of damage, such as a 
+Fire Elemental being vulnerable to Ice damage.
+A creature takes twice as much damage when 
+they’re vulnerable to that damage type.
+DAMAGE IMMUNITY
+Finally, calculate Damage Immunity. Creatures can 
+have Damage Immunity to specific types of damage, 
+such as a Fire Elemental being immune to Fire 
+damage, so the old Earth saying “fight fire with fire” 
+won’t get you very far here.
+A creature reduces any damage to zero when it is 
+a type to which they are immune. An Immunity also 
+ignores any additional effects that come from that 
+damage, such as Debuffs.
+MULTIPLE DAMAGE TYPES
+Some attacks feature multiple damage types, such as 
+Fire and Force with a Rank 10+ Magic Missile Spell. 
+Split the damage evenly between each type, and 
+Resistance, Vulnerability, or Immunity to one of those 
+
+--- PAGE 96 ---
+2
+types applies only to that portion of the damage. So if 
+you have Immunity to Fire against a 20-damage Magic 
+Missile Spell, you still take 10 Force damage from it. 
+APPL YING DAMAGE TO THE 
+HEALTH BAR
+After applying DR, Elemental Resistance, Vulnerability, 
+and Immunity, apply that amount to the Health Bar. 
+If the remaining damage is less than the value of one 
+Health Bar (HB) slot, the victim takes no damage. If 
+the damage is higher, it is applied to the character’s 
+HB. Add up the numbers in each slot of your HB until 
+the total is equal to or greater than the damage. Any 
+damage that does not meet the value of a slot is lost.
+Make sense? Let’s play this out.
+4 4 4 4 4 4 4 4 4 4
+10% 30% 20% 40% 60% 50% 70% 80% 90% 100% 
+Damage Example
+Using the Health Bar above, the crawler needs to take 
+22 damage. That is more than 4, so they mark off an 
+HB slot and still have 18 damage incoming, which is 
+more than 4, so they repeat the process. After doing 
+this 5 times, they have 2 damage incoming which is less 
+than 4 so they stop, and that 2 extra damage is ignored. 
+This Attack has caused the crawler to lose 5 Health Bar 
+slots, and their HB now shows 50% remaining.
+To mark off a Health Bar slot, fill in or mark the 
+triangle in the upper right of the slot with a pencil. 
+Don’t X through the Con Mod, or you’ll erase it when 
+you erase the damage mark. Mark off green to red 
+(right to left), as that’s how video game health bars 
+typically work. When taking future damage, do not 
+count the slots already marked off.
+0% HEALTH BAR & DYING
+If a crawler loses their last Health Bar slot, they gain 
+the Dying Debuff and must be healed to at least 10% 
+to survive. While Dying, a crawler can’t take any 
+Actions, Move, speak, or use their HUD (see Heads-
+Up Display, p. 16).
+A crawler stays Dying for a number of rounds 
+equal to their Con, after which point they die. Each 
+time a Dying crawler would take damage, and during 
+Combat Step 5: Clean Up, subtract 1 from the 
+number of rounds they are Dying.
+Mobs die instantly at 0% HB. GM-controlled crawl-
+ers die as slowly as player crawlers do.
+
+Actions & Healing from 0%
+When a crawler’s HB is reduced to 0%, they are unable 
+to use any remaining Actions until healed. If another 
+crawler heals them during Step 4 of the same round, 
+they can immediately use any remaining Actions they 
+had left. But maybe don’t rely on your mostly dead 
+companions to bail you out in that Boss fight.
+HEALING
+After crawlers take damage, they’ll want to recover 
+their lost Health. They can heal through magic, such 
+as the Heal Spell that every crawler learns when they 
+enter the World Dungeon, through potions and other 
+items, and by resting or mending.
+Unlike damage, which requires calculations, healing 
+is always done by slots. For example, the Heal Spell 
+recovers 20% Health Bar, so a crawler heals two slots. 
+To heal a slot, erase lost bars from red to green, stop-
+ping at 100%
+Spells and items specifically say either how many 
+Health Bar slots or the percentage a crawler heals, 
+making application easy in the midst of stressful 
+situations like combat.
+RESTING
+Crawlers can also heal without using Mana or items, 
+instead relying on the most valuable resource in the 
+World Dungeon: time. By spending time resting in  
+a saferoom, crawlers regenerate their Health Bar  
+and Mana.
+Doing so is often accomplished by sleeping in a 
+saferoom’s private room but can also occur from time 
+taken doing nothing but relaxing, eating, chatting, and 
+watching the recap show, but with no manual labor 
+more strenuous than some calming crochet.
+Crawlers heal based on the amount of time they rest:
+• Short Rest (2 hours): Heal 5 Health Bar slots. 
+Crawlers also regenerate half of their total Mana 
+(rounded down), so if they have 15 Intelligence, 
+they regain 7 Mana.
+• Long Rest (8 hours): After a long rest, a crawler is as 
+good as new with a full Health Bar and Mana. A long 
+rest also removes all instances of the Fatigued Debuff.
+• Full Day’s Rest (30 hours): Required to recover from 
+long-term injuries (see Injuries, p. 96), a full day of 
+rest also recovers their full Health Bar and all Mana.2
+
+--- PAGE 97 ---
+Crawlers don’t always need to rest to recover. For 
+every full hour spent outside of combat or other 
+stressful situations, they mend their wounds and 
+recover 1 HB slot and 5 Mana.
+But don’t linger too long! Time spent lazing about 
+is time you’re not out there grinding, leveling up, and 
+making a splash for viewers at home.
+OTHER FORMS OF HEALING
+In addition to using items and Spells, Skills and 
+Buffs found on or implemented into gear can aid a 
+crawler in recovering Health and Mana, such as the 
+Regeneration Skill (see p. 196) and the Recovery Buff 
+(see Buffs, below).
+BUFFS & DEBUFFS
+Aside from the perils of damage, crawlers frequently 
+gain or suffer status effects that change how they 
+perform. These are called Buffs and Debuffs, 
+respectively.
+Buffs make crawlers stronger, faster, tougher, or 
+otherwise harder to kill. Debuffs do the opposite and 
+are typically applied as a side-effect of taking damage. 
+The dungeon applies both with equal enthusiasm and 
+leaves the mess for crawlers to sort out.
+BUFFS
+Buffs are positive effects that provide some benefit to 
+a crawler. Buffs are typically granted by potions, Spells, 
+and gear. If a Buff has a duration and/or a cooldown, it 
+must be activated to gain the effects. Buffs come in two 
+forms: Internal Buffs and External Buffs.
+Internal Buffs
+An Internal Buff is one that affects the crawler without 
+interfering with others. The most common Internal 
+Buffs increase Stats or Skills. Buffs that are granted 
+by Skill Upgrades, Races, and Classes are permanent 
+while you have access to their source. Benefits from 
+equipment, such as a bonus to Evade from the Rapier 
+Skill, only apply while wielding that equipment.
+Here are some examples of Internal Buffs:
+• Anti-Piercing: The DR of a piece of armor with this 
+quality applies against Armor-Piercing damage.
+• Good Sleep: Gains +Floor Number to all of a 
+crawler’s Stats for 30 hours.
+
+21
+• Invisible: An Invisible creature can’t be targeted by 
+anything that requires sight, and their equipment and 
+gear are also concealed. An Invisible creature also 
+benefits from Unseen Attackers benefits (see p. 85).
+• Iron Skin Potion: Doubles the crawler’s DR for 30 
+minutes.
+• Recovery Buff: Restores a crawler to full Health 
+(once per 5 hours).
+Int Mana every 10 minutes.• Replenish Buff: Gains 
+• Restore Buff: Restores a crawler to full Mana (once 
+per 5 hours).
+• Rooted in Place: Cannot be forcibly pushed, pulled, 
+slid or otherwise moved around.
+• Sticky Feet: Grants a crawler a Climb Movement for 
+Dex.a number of minutes equal to their 
+External Buffs
+While normal Buffs apply all the time, External Buffs 
+kick in when a particular trigger occurs. When the 
+trigger occurs, the player can choose whether the 
+Buff activates or not (useful when the effect has 
+a cooldown). Activating an External Buff doesn’t 
+generally require an Action, though some potent 
+effects may require a specific Action that is resolved 
+like an Interrupt.
+Here are some examples of External Buffs:
+• Damage Reflection: When a crawler loses a specific 
+number of Health Bar slots, this Buff causes the 
+attacker to lose 1 HB slot. Some versions of this Buff 
+can direct the damage elsewhere (as in the case of 
+Florin’s least favorite External Buff).
+• Resistances & Immunities: When a crawler suffers 
+a type of damage, they can activate this External 
+Buff to instantly reduce damage.
+• Safe Fall: When a crawler falls by a particular 
+distance or more, this External Buff activates to 
+prevent Bludgeoning damage from falling and has 
+the crawler land in a classic superhero pose instead.2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 98 ---
+2
+The Rule of Three
+Crawlers can have a maximum of three External Buffs 
+active at one time. If they have access to more than 
+three, the player chooses which three are active at 
+the start of the crawling day. Write them down on the 
+External Buffs section of your character sheet.
+Typically, those are the Buffs that will be most useful 
+to the crawler until the end of their next long rest. If 
+a crawler gains access to a new External Buff during 
+their adventuring day, they can change which External 
+Buffs they have active during a short rest.
+DEBUFFS
+Debuffs are negative effects that affect the creature 
+they’re inflicted upon, such as limiting their options, 
+applying Disadvantage to Checks, or dealing ongoing 
+damage until the Debuff ends. There is no limit to the 
+number of Debuffs a creature can be affected by at once.
+A creature cannot be affected by the same Debuff 
+more than once at the same time unless the Debuff 
+entry says “Stackable.” When a creature has Stackable 
+Debuffs, they all apply their effect cumulatively.
+Debuffs on Mobs or NPCs
+When Debuffs are applied to Mobs or NPCs, they have 
+the same effect they do on crawlers. However, because 
+the GM doesn’t roll d20 Checks (remember?), they 
+behave differently. The GM applies the following chang-
+es when a Debuff grants one of the listed penalties.
+• Damage: Damage from the Debuff is applied at the 
+end of each round.
+• Disadvantage: The Difficulty of the Mob’s Action, Stat 
+Mod, or similar function is reduced by 5 when a crawler 
+makes a Check against it. In the case of an Attack, the 
+crawler gains a free Evade Check vs. the Disadvantaged 
+Action. If they fail that free Check, they may still spend 
+an Action to Evade as usual and try again.
+• −X Skill Penalty: Reduce the Mob’s Difficulty by X.
+Debuff Durations
+All Debuffs have a duration, which is the amount of 
+time or the conditions that must occur before the 
+Debuff ends. Some Actions, items, or abilities may 
+end a Debuff early such as dropping and rolling or 
+leaping into water to put out a fire. The GM may also 
+rule that a Debuff ends early if circumstances change.
+If a Debuff applies damage to a crawler that would 
+drop them to 0% on their Health Bar, they can make a 
+
+Con Stat Check vs. Difficulty 10 + Floor at the end of 
+the round. This Stat Check doesn’t require an Action but 
+occurs automatically before fatal damage. On a Success, 
+the Debuff ends, and the crawler avoids the damage.
+Damage-Dealing Debuffs
+When a Debuff damages a crawler, it occurs at the end 
+of each combat round. Damage from Debuffs bypasses 
+DR, but other Resistances and Immunities still apply.
+List of Debuffs
+Table 11 lists many Debuffs you might encounter, 
+including the name, its effect, and its default duration.
+Injuries
+Injuries are a specific type of Debuff gained through 
+significant damage, such as badly failing to Evade an 
+Attack, suffering an especially powerful or vicious 
+Mob’s Attack effect, and other catastrophic efforts.
+There are two main types of injuries: normal and 
+long-term. The most common way for an injury to 
+progress from a simple injury to a long-term injury is 
+to suffer the same severity of injury multiple times. 
+For example, if a crawler sustains a Minor Injury and 
+suffers another, it becomes a long-term Minor Injury.
+All injuries are most commonly cured with rest time 
+in a saferoom.
+• Minor Injury: The crawler suffers −2 to all Checks. 
+A normal minor injury lasts until the crawler 
+completes a short rest, while a Long-Term Minor 
+Injury requires a long rest for full recovery.
+• Major Injury: The crawler suffers −5 to all Checks. A 
+normal Major Injury requires a long rest to recover 
+from, while a long-term Major Injury requires a full 
+30 hours of rest for full recovery (see Resting, p. 94).
+While some especially potent magic found on the 
+later floors or from high-tier loot boxes may help 
+crawlers recover from injuries faster, such magic is 
+rare on the early Floors.
+MANA
+In addition to Health, crawlers access their Mana —the 
+energy used to cast Spells —through the Health Menu. 
+Crawlers regain Mana by resting, consuming 
+Mana Toast (fuck you) available in some saferooms, 
+consuming Mana Potions, and other ways. For more 
+about casting Spells and Mana, see pp. 96 and 202.2
+
+--- PAGE 99 ---
+TABLE 1 1: DEBUFFS
+DEBUFF 
+NAME EFFECT DURATION
+Blinded Roll all Skill Checks that require sight with Disadvantage. Until the end of the next round.
+Blood Trail You take 1d6+F at the end of each round. Stackable. Until cured with a bandage or a First 
+Burned You take 1d10+F Fire damage at the end of each round. Until the end of combat or 5 minutes. As 
+Drowning You take 1d6+F damage at the end of each round. Until your head is above water.
+Dying You are at 0% HB. Your Con Mod is how many rounds you have 
+before you die. Subtract 1 from this countdown value at the end 
+of each round. Additionally, each time a Dying Crawler would take 
+damage from any source, they instead subtract 1 from the count‑
+down value.
+Enraged You are in a state of extreme uncontrolled fury. You may only 
+perform Attack and Move Actions.
+Fatigued You have a −1 penalty on all Checks and your Move is halved. 
+Stackable. Until the end of a long rest.
+Held You are actively being held. You can’t use Move Actions or take a 
+Step but may still twist your body to Evade. Attacks against a Held 
+foe are made with Advantage.
+Long‑Term You take a −5 penalty to all Checks. Until the end of a full day of rest.
+Major Injury
+Long‑Term You take a ‑2 penalty to all Checks. Until the end of a long rest.
+Minor Injury
+Major Injury You take a ‑5 penalty to all Checks. Gaining a Major Injury a 
+second time changes it to a Long‑Term Major Injury
+Minor Injury You take a ‑2 penalty to all Checks. Gaining a Minor Injury a second 
+time changes it to a Long‑Term Minor Injury.
+Muted You can’t speak or cast Spells. Until the end of the combat or 5 minutes.
+Poisoned You take 1d8+F Poison damage at the end of each round. Stackable.Until treated with an antidote.
+Paralyzed You can’t take any Actions. Until the end of the next round.
+Queasy If your next Action requires a roll, it’s made with Disadvantage. At the end of the next Action you take.
+Sepsis You’re Staggered (see below) and take 1d10+F Poison damage at 
+the end of each round.
+Shit‑FacedYou make all your Checks with Disadvantage. Until the end of 10 minutes.
+Shocked You lose your next Action. Once you forfeit that Action.
+Sore as Shit You suffer a ‑1 penalty to all rolls. Until the end of 1 hour.
+Staggered The next Action you take can’t be a Move, and if it is an Attack, its 
+Check is made with Disadvantage. You can’t take a 10ft Step with 
+your next Action.
+Stiff Legs You can’t take 10ft Steps. Until the end of the combat or 5 minutes.
+Stunned You gain Disadvantage on your next Check. Once you make a Check.
+Take Down You fall prone. While prone, all Attacks made against you are made 
+with Advantage.
+Terrified You can’t take Move Actions or 10ft Steps. You make all Attacks 
+with Disadvantage.
+The Taint You can’t be healed. Until the end of combat or 5 minutes.
+Woozy You can’t add your Dex Mod to Attack or Evade Checks. Until the end of the next round.
+
+21
+
+Aid Skill Check.
+an Action, a victim may perform a Dex 
+Stat Check to extinguish the flames.
+Until you die or heal at least 1 HB slot.
+Until the end of 2 rounds or 20 seconds.
+Until the end of a long rest.
+Until you are released by whatever is 
+holding you, or you escape. Make a 
+Str‑Opposed Escape Artist Skill Check.
+If not physically held, it is Unopposed.
+Until the end of a long rest.
+.
+Until the end of a short rest.
+As Staggered, and the damage contin‑
+ues until you’re healed.
+At the end of the next Action you take.
+Use your 10ft Step to stand.
+Until the end of the next round, or you 
+take at least 1 HB slot damage.
+2CHAPTER 2: PLA YING THE GAMECHAPTER 2: PLA YING THE GAME
+
+--- PAGE 100 ---
+2
+Equipment
+To survive the World Dungeon, the crawlers will find 
+and use all manner of gear.
+INVENTORY
+The crawler’s Inventory is accessed through their 
+HUD (see Heads-Up Display, p. 16), and items in the 
+Inventory are neatly categorized with key information. 
+Items in the Inventory are weightless, so crawlers 
+don’t need to worry about encumbrance.
+Outside of combat, items can be retrieved from 
+the Inventory at the speed of thought, appearing in 
+the crawler’s hand, Hotlist, or on the floor in front 
+of them. To transfer an item to another crawler or a 
+marketplace, crawlers typically remove the item from 
+inventory to hand it over, while marketplaces handle 
+transfers direct to the crawler’s inventory.
+There are a few limits on what crawlers can put into 
+their Inventory:
+• Living Creatures: If a crawler attempts to put a 
+living creature into their Inventory, it dies. However, 
+magical pet carriers make it possible for pets to take 
+a time-out there.
+• Too Heavy: A crawler must physically pick up an 
+item for 4 seconds, unaided, in order to place it in 
+their Inventory (see below).
+• Loose Liquids: If you want to store liquids, put the 
+liquid in a container first.
+• Active Volatile Items: An active, burning, ticking, or 
+fusing explosive that is within 3 seconds of deto-
+nating cannot normally be stored in a crawler’s 
+Inventory. Three seconds is enough time to give it a 
+toss, so buck up.
+• Items in Zero Zones or Outside the Dungeon: 
+Crawlers cannot typically pick up and store items in 
+their Inventory while in the production facilities of the 
+various interview shows or at CrawlCon. Anything that 
+they can carry in their hands or wear (and get past the 
+guards) can be brought back to the dungeon.
+LIFTING WEIGHT
+The biggest limitation for adding items a crawler’s 
+Inventory is whether they can lift it. A crawler can lift up 
+to their Strength score × 15 in pounds. Animal crawlers 
+don’t even have to touch items to put them into their 
+Inventory, but they have the same lifting maximum.
+
+THE HOTLIST
+Spells and items a crawler needs to have at the ready 
+can be stored in their Hotlist, which is a special part of 
+their Inventory designed for quick access. By default, 
+each crawler’s Hotlist contains 10 slots for items, 
+Spells, and anything else the crawler wants to access 
+quickly. Crawlers can spend an Action to activate 
+something from their Hotlist (see Actions, p. 64).
+If a crawler’s Hotlist is full, they must remove or 
+swap an entry from their Hotlist to replace it. A 
+crawler can swap an item in their hands for the item 
+in the Hotlist as part of the Use a Hotlist Item Action. 
+If a crawler swaps their currently equipped weapon to 
+another weapon on their Hotlist, they swap for free as 
+part of the Attack Action.
+GEAR SLOTS
+Crawlers are limited to the amount of gear they can 
+wear or benefit from at any given time. This is enforced 
+by the division of gear into Gear Slots. Each Gear Slot 
+can contain at most one clothing item, except for the 
+Accessories slot, which can contain up to 10 items.
+Only the items in these slots give crawlers bonuses 
+of any kind, and items in a crawler’s Inventory do not 
+grant any bonuses. Each item that can be equipped 
+specifies which Gear Slot it occupies.
+Example: A crawler has collected four helmets, each 
+with a different bonus. The crawler can wear only one 
+of them, and only its bonuses apply while the others 
+rest in the crawler’s Inventory. And no, Dave, you 
+can’t wear four helmets.
+The Gear Slot locations and examples of items that 
+usually reside there include:
+• Head: Items worn on the head or neck, such as 
+helmets, bandanas, and cunning hats.
+• Torso: Shirts, blouses, jerkins, and breastplates 
+usually occupy this slot.
+• Arms: Bracers and elbow pads make your puny 
+arms look bigger than they really are.
+• Legs: Pants, jeans, skirts, kilts, and boxers.
+• Feet: Shoes, sandals, boots, and socks go here.
+• Hands/Holding: This one’s a little different as you 
+may both wear gloves (or similar) and hold things 
+in your hands. One item per hand, and one pair of 
+gloves. If you carry a Shield, that uses up a Holding 
+slot. If a weapon has “Limitation: Two-Handed,” you 
+cannot hold anything else.2

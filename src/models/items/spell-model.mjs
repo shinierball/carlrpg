@@ -7,6 +7,7 @@ export class SpellDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      ...super.defineSchema(),
       rank: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       stat: new fields.StringField({ initial: 'int' }),
       manaCost: new fields.NumberField({ integer: true, min: 0, initial: 0 }),

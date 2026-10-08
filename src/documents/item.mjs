@@ -1,5 +1,6 @@
 import { getHpPerBar } from '../apps/combat-metrics.mjs';
 import { syncCompendiumItemToWorld, isCompendiumDocument } from '../data/compendium-sync.mjs';
+import { getItemAllTags } from '../data/tags.mjs';
 
 /**
  * Target detection helper for item outcomes: closest mob, self, or targeted token.
@@ -514,6 +515,14 @@ const BaseItem = globalThis.foundry?.documents?.Item
  * Dungeon Crawler Carl RPG Item Document
  */
 export class DCCItem extends BaseItem {
+  /**
+   * Get the complete set of tags for this item (explicit + derived + identity).
+   * @type {Set<string>}
+   */
+  get allTags() {
+    return getItemAllTags(this);
+  }
+
   /** @override */
   prepareBaseData() {
     if (super.prepareBaseData) super.prepareBaseData();

@@ -7,6 +7,7 @@ export class BuffDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      ...super.defineSchema(),
       buffType: new fields.StringField({ initial: 'stat' }),
       stat: new fields.StringField({ initial: 'str' }),
       value: new fields.NumberField({ initial: 2 }),

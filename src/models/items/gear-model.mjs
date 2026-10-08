@@ -12,6 +12,7 @@ export class GearDataModel extends BaseItemDataModel {
     });
 
     return {
+      ...super.defineSchema(),
       slot: new fields.StringField({ initial: 'torso' }),
       quantity: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       value: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
@@ -25,6 +26,8 @@ export class GearDataModel extends BaseItemDataModel {
       weaponCategory: new fields.StringField({ initial: '' }),
       weaponType: new fields.StringField({ initial: '' }),
       associatedSkills: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      appliesTo: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      requires: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       proficiencyMode: new fields.StringField({
         initial: 'highest',
         choices: ['highest', 'synergy', 'manual']

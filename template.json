@@ -307,7 +307,9 @@
           "notes": ""
         }
       },
-      "tags": []
+      "tags": [],
+      "identifier": "",
+      "requires": []
     },
     "attack": {
       "equipped": true,
@@ -361,7 +363,10 @@
           "notes": ""
         }
       },
-      "tags": []
+      "tags": [],
+      "identifier": "",
+      "requires": [],
+      "appliesTo": []
     },
     "spell": {
       "rank": 1,
@@ -421,7 +426,8 @@
           "notes": ""
         }
       },
-      "tags": []
+      "tags": [],
+      "identifier": ""
     },
     "gear": {
       "slot": "torso",
@@ -507,7 +513,10 @@
           "notes": ""
         }
       },
-      "tags": []
+      "tags": [],
+      "identifier": "",
+      "requires": [],
+      "appliesTo": []
     },
     "race": {
       "heritage": "Earth",
@@ -544,7 +553,10 @@
       "description": "",
       "tags": [],
       "grantedItems": [],
-      "choices": []
+      "choices": [],
+      "identifier": "",
+      "grants": [],
+      "archetypes": []
     },
     "class": {
       "classType": "Fighter",
@@ -581,15 +593,22 @@
       "description": "",
       "tags": [],
       "grantedItems": [],
-      "choices": []
+      "choices": [],
+      "identifier": "",
+      "grants": [],
+      "archetypes": []
     },
     "deity": {
       "boons": "",
-      "description": ""
+      "description": "",
+      "identifier": "",
+      "tags": []
     },
     "sponsor": {
       "gifts": "",
-      "notes": ""
+      "notes": "",
+      "identifier": "",
+      "tags": []
     },
     "loot": {
       "quantity": 1,
@@ -608,7 +627,8 @@
       "outcomes": [],
       "notes": "",
       "description": "",
-      "tags": []
+      "tags": [],
+      "identifier": ""
     },
     "buff": {
       "buffType": "stat",
@@ -628,7 +648,8 @@
       "damageModifiers": [],
       "duration": "1 Hour",
       "description": "",
-      "tags": []
+      "tags": [],
+      "identifier": ""
     },
     "debuff": {
       "severity": "Minor",
@@ -647,7 +668,8 @@
       "damageModifiers": [],
       "duration": "Combat",
       "description": "",
-      "tags": []
+      "tags": [],
+      "identifier": ""
     },
     "achievement": {
       "quote": "",
@@ -660,7 +682,9 @@
       "favor": 0,
       "xp": 0,
       "unlocked": true,
-      "description": ""
+      "description": "",
+      "identifier": "",
+      "tags": []
     }
   }
 }

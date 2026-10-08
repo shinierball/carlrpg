@@ -4,6 +4,18 @@
  */
 export class BaseItemDataModel extends (globalThis.foundry?.abstract?.TypeDataModel || class {}) {
   /**
+   * Base schema for all DCC RPG items: stable identifier and tags array.
+   */
+  static defineSchema() {
+    const fields = globalThis.foundry?.data?.fields;
+    if (!fields) return {};
+    return {
+      identifier: new fields.StringField({ initial: '' }),
+      tags: new fields.ArrayField(new fields.StringField(), { initial: [] })
+    };
+  }
+
+  /**
    * Helper to retrieve the parent item document
    * @type {Item|null}
    */

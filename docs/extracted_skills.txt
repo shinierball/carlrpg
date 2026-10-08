@@ -1,0 +1,2483 @@
+--- PAGE 172 ---
+3
+Quests: When a crawler or party completes a 
+Quest, they gain at least 1 Level—more if the Quest 
+took place across multiple floors. (Your GM will use 
+discretion here.)
+Crawler Killers: Killing other crawlers is a great way 
+to earn extra Levels! Each time you kill a crawler, you 
+gain 1d6 Levels modified by your Level difference. 
+If you are a lower Level than your victim, add the 
+difference in Levels to your result, up to a maximum of 
+gaining 15 Levels from one kill! If you are equal or a 
+higher Level than your victim, subtract the difference 
+to a minimum of 1 Level gained.
+Grinding: When crawlers grind to raise their Skill 
+Ranks, they occasionally level up during the process, 
+though it is slow.
+Bosses: When a party kills a Boss, each member gains 
+Levels based on the tier of the Boss. Your GM can 
+modify the number if the assault was very easy or very 
+hard. Whoever lands the killing blow often earns a 
+higher quality loot box but not extra Levels.
+• Neighborhood Boss: Gain 1 Level
+• Borough Boss: Gain 2 Levels
+• City Boss: Gain 3 Levels
+• Province Boss: Gain 4 Levels
+• Country Boss: Gain 5 Levels
+• Floor Boss: Gain 6 Levels
+GRINDING
+The Grinding is not only the name of another fucked-
+up Matt Dinniman novel; here in the Dungeon 
+Crawler Carl Roleplaying Game, it’s also the act of 
+continually brutalizing the lowest-Level Mobs you 
+can find to increase your Skill Ranks and occasionally 
+level up.
+To grind, you must gain access to a large group of 
+Mobs in a relatively small area or along a path to a 
+destination. There is no risk to you during a typical 
+grind, but there’s also no time for looting Mob 
+corpses. Instead of making individual Skill Checks 
+during a grind session, it’s treated like a montage as 
+you spend time improving your Skills.
+Grinding is measured in hours. Choose the 
+number of hours you wish to grind. Crawlers 
+typically go for up to 5 hours at a time, but 
+seasoned crawlers can push for much longer. For 
+
+every hour of grinding past 5 hours in a single day, 
+you must make an Unopposed Endurance Skill 
+Check to see if that hour was productive or not. 
+On Fail, that hour was not productive for you (no 
+grinding time accrued), and you gain the Fatigued 
+Debuff (see Debuffs, p. 96).
+Neighborhood Maps and Borough Field Guides 
+make grinding more efficient, because crawlers can 
+avoid lulls in the action. If you grind for 5 or more 
+hours, you accrue 1 bonus hour to your grinding 
+time if you have a Neighborhood Map or 2 bonus 
+hours if you have a Borough Field Guide. This allows 
+you to grind for 5 hours (the safe limit per day) but 
+get credit for 6 hours with a Neighborhood Map and 
+7 hours with a Field Guide.
+Crawlers declare how many hours they wish to grind. 
+Then, if the GM wishes, they roll on the Grinding Tables 
+in chapters 7, 8, or 9 (see Montages and Grinding for 
+Experience, p. 259) to determine if anything affects 
+the grind. The events on Grinding Tables represent 
+events that could happen while grinding, including 
+combats and unexpected delays. Grinding is supposed 
+to represent a slice of life or montage scene, not grind 
+play to a halt with extra combats against low-Level 
+Mobs or sudden Boss Battles.
+GRINDING SKILLS
+At the end of the grind, choose any Skill (it doesn’t 
+have to be combat-related) to accrue the hours 
+earned. Attempting to Advance a Skill requires 
+accruing grinding hours equal to its current Rank, but 
+these hours need not be continuous or happen on 
+the same day. They may accumulate from one day 
+or even one floor to the next, so keep track of your 
+grinding hours on your character sheet, perhaps in the 
+“Notes” section on your “Skills” list.
+When you have accumulated grinding hours in a Skill 
+equal to your current Rank in that Skill, immediately roll 
+a Skill Advancement Check for that Skill. Any penalties 
+from Debuffs (Fatigued is common) apply to this check.
+If you roll equal to or higher than your current 
+Skill Rank, you immediately gain 1 Rank in that Skill. 
+Regardless of the result, you cannot grind the same 
+Skill more than once per day, because too much 
+grinding leaves you raw and chapped. Give it a rest!
+If you’ve been grinding for more hours than needed 
+for a particular Skill, apply any additional hours to 
+another Skill (you can’t bank hours for the same Skill). 
+You may grind and track hours for multiple Skills at 
+the same time if you wish.3
+
+--- PAGE 173 ---
+Example: If you grind for four hours, you can make 
+a Skill Advancement Check for four Skills at Rank 1, 
+two at Rank 2, or even one at Rank 3 and then apply 
+the remaining hour to a Rank 2 Skill. Note that hour of 
+progress on the Rank 2 Skill’s “Notes” section.
+LEVELING UP VIA GRINDING
+While you grind for Skills, you progress toward 
+leveling up as well. Keep a running total of all your 
+
+31
+grinding hours and erase it only when you level up. 
+No, I’m not going to do it for you.
+You gain a Level when you grind a number of hours 
+equal to your current Level (6 hours to advance from 
+Level 6 to 7, for example). The party member with the 
+lowest Level gains 1d2 Levels when they level up this 
+way. If there is a tie for lowest, no one rolls 1d2.3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 174 ---
+4
+CHAPTER 4CHAPTER 44
+Skills, Spells, & GearSkills, Spells, & Gear
+
+
+
+--- PAGE 175 ---
+To survive the World Dungeon, crawlers need to collect Skills, Spells, and Loot. 
+Skills and Spells directly impact a crawler’s ability to function in the dungeon, 
+and savvy crawlers look for ways to keep improving them. Loot takes the form 
+of money , magical and mundane equipment, miscellaneous junk and materials for 
+crafting, and sometimes you can even find a pet or a mount.
+This chapter covers all the things crawlers can gain during the Crawl.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+Skills
+Skills are the heart of the Dungeon Crawler Carl 
+Roleplaying Game. You make Skill Checks to do most 
+things and gain upgrades from ranking up Skills.
+Each Skill entry follows a consistent format:
+The header is the name that tells you exactly 
+what it’s called—hopefully something that sounds 
+impressive when shouted aloud.
+Under the header is a list of keywords identifying 
+the Stat Mod you add to the Skill Check, if any, and 
+any special traits tied to the Skill.
+The description explains what the Skill actually does, 
+which you should probably read before attempting 
+it. On average, 35.71% of deaths in past Crawls are 
+attributable to illiteracy. The description may contain 
+additional keywords like “AI Favor” and “Limitations,” 
+which vary by the Skill type.
+Finally, the entry teases you with upgrade benefits 
+if you train it to higher Ranks, as if you need more 
+incentive to avoid your leg being ripped off by a 
+giant demon crab, only to wake up two floors later to 
+discover it grew an eyeball and a mouth and is licking 
+your face off in anger at being replaced by a prosthetic.
+SKILL CHECKS
+Skill Checks are either Opposed or Unopposed, 
+depending on what you are up against (see p. 59). 
+Roll 1d20, add your Skill’s Rank, and add your 
+associated Stat Mod. If the total matches or exceeds 
+the Difficulty of the Check, the outcome is at least a 
+Standard Success but could grant even better effects if 
+you significantly exceed the Difficulty.
+Your GM determines the Difficulty for a Check, so 
+they’re the one who needs to know the exact type 
+of Skill Check you’re making. They won’t share the 
+
+41
+Difficulty with you but will only inform you of the 
+outcome. Don’t worry, System AIs don’t cheat or lie; 
+we always fully believe what we tell you.
+But if you must know every detail (good for you, 
+boring for viewers), Opposed Skills make Checks 
+against a specific antagonist, and the Difficulty factors 
+in their Stat Mod. Unopposed Skills make Checks 
+against things that don’t have a Stat block, like objects 
+or the environment.
+The Skill’s description lists the effects of a Standard 
+Success. Lots of results are possible other than a 
+Standard Success (see Degrees of Success and Failure, 
+p. 60). Know that I encourage GMs to get creative 
+when narrating both Successes and Fails; the more 
+spectacular the results (good or bad), the more the 
+viewers can’t turn away.
+PASSIVE SKILLS
+You don’t make Skill Checks to gain the effects of 
+Passive Skills. This makes them easy to use but hard 
+to Rank-up; since you don’t make a Skill Check, 
+you can’t mark it for a Skill Advancement Check (p. 
+169). Each Passive Skill entry describes how you can 
+increase its Rank, typically requiring magic gear and 
+training, though some feature other ways.
+Using a Passive Skill typically requires an Action like 
+any other Skill type. However, some trigger alongside 
+other Skills at no extra Action cost, like Hand-to-Hand 
+Damage Effects (see p. 180).
+You can’t use a Passive Skill if you have no Ranks 
+in it (untrained). The easiest way to gain them is via a 
+potion, scroll, or gear. They can also be found in some 
+Race and Class benefits starting on the Third Floor.
+SKILL UPGRADES
+As Skills increase in Rank, they grant additional 
+bonuses at Ranks 5, 10, and 15.
+
+--- PAGE 176 ---
+4
+Upgrades on Attack Skills typically add extra 
+damage dice to the base effect damage, and these 
+always apply even if other parts of the Upgrade are 
+situational.
+Where an Upgrade increases the range or duration, 
+removes a limitation, or the like, the Upgrade 
+overrides the base effect instead of being in addition 
+to it. All other sorts of Upgrades get added together. 
+Typically, these additive Upgrades use a plus sign (+) 
+to help note this.
+CUSTOM SKILL EXAMPLES
+Paolo wants his crawler, Eglantine, to use an aforementioned Crochet
+tries for something more imaginative and works with the GM to figure something out.
+One idea is for Eglantine to be a wizard with knitting needles, so he invents the Needle
+because it’s pretty clear that it’s got a pretty limited scope but will still have a couple obvious uses. And custom 
+skills don’t need to be as broad or powerful as the ones presented below. For Upgrades, Paulo and the GM decide 
+that Needle will mostly be used in combat, so they give it the standard weapon Rank 5 Upgrade. Then they add a 
+Crafting Upgrade at Rank 10 and Dagger’s Rank 15 Upgrade.
+Needle
+Dexterity
+You have knack for using needles, whether making things or using them as weapons. Needle
+of needle use and possibly peripheral applications, such as metaphorically threading a needle (getting through a 
+tight space), crafting fabric‑based items, repairing a sail, or figh
+Upgrades
+Rank 5: +1d4 base damage
+Rank 10: Pick a needlework specialty item. You roll with Advantage when creating your mundane specialty item.
+Rank 1 5: +1d4 base damage, and attacks targeting the back of a foe deal ×2 damage.
+After creating Needle , Paolo isn’t sure he wants to focus on attacks with needles. He tries again so he has 
+a second option, this time focusing on the material. Yarn Wrangler
+Ropework.
+Yarn Wrangler
+Dexterity
+You have a knack for yarn and related materials. You can use this Skill to create or salvage yarn, tie people up, or 
+even gain a cat’s attention.
+Upgrades
+Rank 5: You can also use this skill as an Attack, with a 10ft range vs. the target’s Evade. On Success, the target 
+gains the Held Debuff.
+Rank 10: Pick a yarn‑craft specialty item. You roll with Advantage when creating your mundane specialty item.
+Rank 1 5: The attack range is now your Strength value (min 15). Just make sure your yarn is long enough.
+Paulo and the GM decide that both skills might work well for the character, but since the Rank 10 overlaps, Paulo 
+might want to just pick one or redesign one of them. Another player mentioned they expected Yarn Wrangler
+deal with lassos, so Paolo has plenty of options to consider.
+
+CREATING YOUR OWN 
+SKILLS
+The list of Skills in the World Dungeon is endless. Our 
+artificial sky’s the limit, folks! Here’s the framework in 
+which you can create any Skill you want. You’ll need 
+to use it if you come across a Skill or Spell marked 
+with an gear asterisk ( ): that’s the cue that it’s a 
+Custom Skill not found in this book.
+The simplest way to customize a Skill is to reuse 
+an existing Skill but reframe its narrative. A Skill like 
+Dumpster Diving could just as easily become Search 4
+  Skill. But that’s a bit on‑the‑nose, so he 
+  skill. The GM likes it 
+  covers any sort 
+ting with knitting needles.
+  is a good option based on Fabricate and 
+  to 
+
+--- PAGE 177 ---
+COMBAT-FOCUSED EXAMPLE
+Upon reaching the Third Floor, Paolo wants Eglantine to choose a Samurai
+video games and anime, he decides he wants a Shinken Shirahadori or Samurai Blade Clap
+alistic, but cool. Talking it over with the GM, they decide it’s very narrowly useful, and probably hard to train up.
+Samurai Blade Clap
+Dexterity
+You can catch blades with your bare hands. Or you’d better hope you can. Make a Samurai Blade Clap
+Check when you’re being attacked by an Edged melee weapon.
+On Success, you avoid the damage and effects from the attack.
+Upgrades
+Rank 5: You can also use this Skill against Ranged weapons if the missile features an edge (such as arrows or 
+shuriken). You can put the projectile in your Inventory after catching it as part of the same Action.
+Rank 10: On an Amazing Success or better, you disarm the melee attacker.
+Rank 1 5: You have +5 DR Edged weapons you attempt to catch.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+or Scrounging, just by changing the name and 
+thematic focus while still operating within the same 
+mechanical structure.
+Mixing and matching Skill effects and Upgrades is 
+a great way to create weird Skills to really customize 
+your crawler. A Crochet Skill, for instance, might 
+have a custom Upgrade that works like a Utility Skill 
+Upgrade, or it could borrow a Rank 5 Upgrade found 
+on the Dagger Skill. You can invent a new effect or 
+Upgrade following the guideline that the more niche 
+it is, the stronger it can be. If something ends up too 
+strong or too weak, the GM can always patch it later. 
+The system adjusts; so should you.
+In play, you’ll often find more than one Skill that 
+applies to a situation. Because Skills improve through 
+use, you might choose to attempt a task with a 
+weaker or less-optimal Skill just to gain experience 
+with it. This is perfectly normal behavior and occa-
+sionally even works out.
+Made-up Skills should typically be narrowly focused 
+and should not completely replace or outgun existing 
+Skills… or Actions like Evade. If you want to create 
+an Evade-like Skill, it should perhaps only be useful 
+against a certain attack type (such as Edged Weapons 
+and Ranged Weapons) or come with a significant 
+downside that makes its usage situational.
+Evade Checks don’t use Ranks, so anything that 
+adds Ranks to a Skill Check that lets you avoid any 
+type of attack will instantly be much better than 
+Evading, and that’s a no-no. If you don’t spill blood, I 
+won’t be happy. That’s the whole point!
+
+41
+‑like Class. Taking some inspiration from 
+  Skill. It’s totally unre‑
+  Skill 
+ATTACK SKILLS 
+(WEAPONS)
+Attack Skills represent your ability to harm, disable,  
+or otherwise make something stop trying to kill  
+you, whether through weapons, fists, or pure 
+destructive intent.
+Name: The name of the Attack appears as a headline 
+to the entry.
+Attack Type: Melee or Ranged. Most Attacks are 
+Melee, which have a range of 5 feet (i.e., adjacent). 
+If an Attack has a range farther than that, it will be 
+noted in the Range entry below this line. The default 
+Stat Mod used for Melee rolls to hit is Str, while the 
+default Stat Mod for ranged weapon Attacks is Dex. If 
+another Stat Mod is used to hit, it will be listed here.
+Range: If the Attack can hit a target farther than 5 feet 
+away, the maximum distance it can hit will be listed 
+here. If the Attack has no range listed, its range is 
+Melee range (adjacent or within 5 feet).
+AI Favor: Low-damage weapons grant AI Favor to 
+you if you use such a wimpy Attack for a majority of 
+your attacks during a combat that lasts for at least 
+three rounds.
+Limitations: Any conditions, requirements, or 
+penalties are listed here. “Requires two hands to 
+wield” is a common limitation, which means both 
+hands must be used to wield the weapon (I’m sure 
+you never would’ve figured that out without this 
+explanation). You can’t hold other things at the same 
+time when attacking.
+
+--- PAGE 178 ---
+4
+Cooldown: If the weapon or effect has a cooldown, it 
+will be listed here. Hit or miss, the timer starts. While 
+on cooldown, the weapon or effect cannot be used.
+Description: Any notes or descriptions of the Skill are 
+listed here. Make an Attack Skill Check vs. the target’s 
+Evade value, which is: 10 + Dex + the Floor number.
+Base Damage: This is the damage dice the weapon deals 
+with 0–4 Ranks in the Skill. Zero Ranks means using it 
+untrained. The appropriate Stat Mod value is added to 
+the damage. This Mod does not always match the one 
+listed in the Attack Type line, and not every weapon adds 
+a Stat Mod. Finally, the damage type is listed. The damage 
+type is important if the target has Resistance, Immunity, or 
+Vulnerability to that damage type.
+Effects: If there are effects other than damage, they 
+will be listed there.
+Upgrades: When you reach Rank 5, 10, and 15, these 
+bonuses kick in.
+Write your Attack Skills in the “Attacks” section on 
+the front of your character sheet. Fill out the “To Hit” 
+box for your weapons, writing in your “Rank + Stat 
+Mod” values.
+Then fill in the “Damage” box. Write in the dice as 
+“1dX,” replacing the “X” with the die type noted in the 
+description. The weapon’s base damage entry will also 
+tell you which Stat Mod (if any) you add to the damage. 
+Use the Effects area to write in short reminders of base 
+effects, Upgrade effects, and AI Favor (if any).
+Lastly, write in the Attack Skill name on your “Skills” 
+list. There, you can write in additional notes and mark 
+the advancement box on the far right when you use the 
+Skill. This keeps all your Skills in one place when rolling 
+for Skill Advancement (p. 169). Just remember to 
+update your Rank in the “Attacks” section as well when 
+you advance an Attack Skill, or you’ll be weak forever, 
+just like your middle school gym teacher prophesied.
+“One doesn’t have to resort 
+to gore-themed violence in 
+order to be stylish.”
+- Princess Donut4
+
+Rank Damage Dice
+One common damage bonus is adding a “Rank 
+damage die” to your damage roll. That die is based 
+on your current Rank in the Attack Skill, though 
+sometimes other Skills use this as well, and not 
+always for damage purposes. It is not part of the 
+base damage of the Attack, so it is not doubled on 
+a Critical Hit. Table 37 shows the Rank damage dice 
+for each Skill Rank.
+Roll the die that is closest to your Skill Rank without 
+going over (Rank 1 simply grants +1 damage). For 
+example, if you have 7 Ranks, your Rank damage die is 
+1d6, as that is the closest die without going above 7.
+TABLE 37: RANK DAMAGE DICE SCALING
+SKILL RANK DAMAGE DICE
+1 +1
+2–3 +1d2
+4–5 +1d4
+6–7 +1d6
+8–9 +1d8
+10–1 1 +1d10
+12–13 +1d12
+14–15 +1d8 & +1d6
+16–17 +2d8
+18–19 +1d10 & +1d8
+20 +2d10
+
+--- PAGE 179 ---
+Attack Skills
+Attacks are grouped by type, but each weapon entry 
+is a unique Skill. You don’t gain experience for using 
+all edged weapons just because you gave someone a 
+paper cut. The name of the weapon is also the name 
+of the Skill used to wield that weapon.
+All Attack Skill Checks are made vs. the target’s 
+Evade value, which sets the Difficulty of the attack.
+ANIMAL CRAWLER & PET 
+STRIKE SKILLS
+BACK CLAW
+Melee Attack, Str
+Base Damage: 1d6 + Str Slashing
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage
+Rank 1 5: +1d6 base damage, 
+and the target gains the Blood 
+Trail Debuff.
+
+41
+BITE
+Melee Attack, Str
+Limitations: The target must have an appendage you 
+can clamp down onto. You taste your victim’s blood. 
+Better hope they’re not poisonous.
+Base Damage: 1d8 + Str Piercing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage. You may latch on to 
+move when the foe moves during their next Action 
+(then you let go).
+Rank 1 5: +1d8 base damage, and the target gains the 
+Woozy Debuff.
+SLICE ATTACK
+Melee Attack, Dex
+AI Favor: 1
+Base Damage: 1d4 + Str Slashing
+UPGRADES
+Rank 5: +1d4 base damage
+Rank 10: +1d4 base damage
+Rank 1 5: +2d4 base damage4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 180 ---
+4
+BASHING WEAPON SKILLS
+CLUB
+Melee Attack, Str
+Base Damage: 1d6 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage, and the target gains the 
+Woozy Debuff.
+Rank 1 5: +1d6 base damage, and if the target loses 
+at least 3 Health Bar slots, they gain the Take Down 
+Debuff.
+IMPROVISED WEAPONS
+Melee Attack, Str
+AI Favor: 1
+Pick up something and smack someone else with it. 
+That object must weigh at least one pound and can’t 
+weigh more than your Str in pounds.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage, and you can throw the 
+item (using this Skill) up to a range of Rank ×5 feet.
+Rank 10: +1d4 base damage, and you roll your first 
+Attack each combat with Advantage due to the unex‑
+pected nature of your Attacks.
+Rank 1 5: +1d4 base damage
+WARHAMMER
+Melee Attack, Str
+Limitations: Requires two hands to wield.
+Base Damage: 1d10 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d10 base damage
+Rank 10: +1d10 base damage
+Rank 1 5: +1d10 base damage, and the target (of your 
+size or smaller) is pushed 15 feet.
+
+EDGED WEAPON SKILLS
+AXE
+Melee Attack, Str
+Base Damage: 1d6 + Str Slashing
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage, and you may make an 
+extra free Attack with Disadvantage against another 
+foe adjacent to both you and the original target.
+Rank 1 5: +1d6 base damage, and on an Amazing 
+Success or better, sever an arm (or similar) of your foe 
+(which disarms anyone with a two‑handed weapon).
+DAGGER
+Melee Attack, Dex
+AI Favor: 1
+Base Damage: 1d4 + Str Piercing
+UPGRADES
+Rank 5: +1d4 base damage, and this Attack deals 
+Armor‑Piercing damage (ignores DR).
+Rank 10: +1d4 base damage, and you can throw this 
+weapon (using this Skill) up to a range of Rank × 5 feet.
+Rank 1 5: +1d4 base damage, and Attacks targeting 
+the back of a foe deal ×2 damage.
+LONGSWORD
+Melee Attack, Str
+Base Damage: 1d8 + Str Slashing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage
+Rank 1 5: +1d8 base damage, and you gain a +1 
+Evade Buff.
+RAPIER
+Melee Attack, Dex
+Base Damage: 1d6 + Dex Piercing
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage, and you gain a +1 
+Evade Buff.
+Rank 1 5: +1d6 base damage, and you gain a +1 
+Evade Buff.4
+
+--- PAGE 181 ---
+HAND-TO-HAND 
+COMBAT SKILLS
+When attacking with a hand-to-hand Attack Skill that 
+has a description stating you can choose a Damage 
+Effect, choose one available Damage Effect before 
+you make the Attack Skill Check. If the Attack hits, 
+first roll the base damage dice and then apply the 
+chosen Damage Effect.
+If you choose not to use a Damage Effect for 
+a majority of your hand-to-hand attacks during a 
+combat that lasts for at least three rounds, you gain 
+the amount of AI Favor listed in the Skill’s entry.
+FOOT SOLDIER
+Melee Attack, Str
+AI Favor: 1 (only if no Damage Effect is used)
+Choose the Powerful Strike or Smush Damage Effect 
+(if you wish) before rolling to hit.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage
+Rank 10: +1d4 base damage
+Rank 1 5: +1d4 base damage, and the target gains the 
+Sore as Shit Debuff.
+NOGGIN NOCKER
+It’s like a headbutt, only cooler.
+Melee Attack, Str
+AI Favor: 1 (only if no Damage Effect is used)
+Limitations: On Success, you lose 1 Health Bar slot.
+Choose the Skullcracker or Powerful Strike Damage 
+Effect (if you wish) before rolling to hit.
+Base Damage: 1d4 + Con Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage, and you don’t take any 
+damage from your own Attack.
+Rank 10: +1d4 base damage, and add 1 Rank damage die.
+Rank 1 5: +1d4 base damage, and the target gains the 
+Woozy Debuff.
+PUGILISM
+Philistines call it punching.
+Melee Attack, Dex
+
+41
+AI Favor: 2 (only if no Damage Effect is used)
+Choose the Dirty Fighting, Iron Punch, or Powerful 
+Strike Damage Effect (if you wish) before rolling to hit.
+Base Damage: 1d2 + Str Bludgeoning
+UPGRADES
+Rank 5: +2d2 base damage
+Rank 10: +1d2 base damage
+Rank 1 5: +1d2 base damage, and you may make an 
+extra free Attack with Disadvantage.
+UNARMED COMBAT
+Melee Attack, Str
+AI Favor: 1
+Limitations: Cannot choose a Damage Effect.
+Every crawler starts out with this Skill. This is a mixture 
+of all strikes, so call it what you will when you Attack.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage
+Rank 10: +1d4 base damage
+Rank 1 5: +2d4 base damage
+WRASSLIN’
+Melee Attack, Str
+AI Favor: 1 (only if no Damage Effect is used)
+Limitations: Requires two hands to wield.
+Choose the Choke Out, Dirty Fighting, or Toss Damage 
+Effect (if you wish) before rolling to hit.
+On Success, the target gains the Held Debuff. Held 
+foes continue to be Held until they spend an Action to 
+attempt escape (Mobs may use their Move Action). To 
+prevent such an escape, you must use an Action as an 
+Interrupt and succeed in a Wrasslin’ Str‑Opposed Skill 
+Check.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: You may maintain the Held Debuff at no 
+Action cost if you wish, but your Skill Check to prevent 
+escape is made with Disadvantage.
+Rank 10: +1d4 base damage
+Rank 1 5: +1d4 base damage4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 182 ---
+4
+HAND-TO-HAND 
+DAMAGE EFFECT SKILLS
+Hand-to-hand Damage Effects are a special kind of 
+Passive Skill that can be added to certain hand-to-hand 
+Skills to enhance or modify the attack. If the attack 
+succeeds, the chosen Damage Effect applies as well.
+If the attack Fails, the Damage Effect does nothing 
+but still goes on cooldown (if there is one).
+When you make an Attack that adds a Damage Effect, 
+place a mark for later Skill Advancement (p. 169) in 
+either the Attack Skill or the Damage Effect, not both.
+CHOKE OUT
+Wrasslin’ Damage Effect, Passive
+If the target is at 10% Health Bar or less, you deal ×2 
+the total damage.
+UPGRADES
+Rank 5: Choke Out activates at 20% Health Bar or less.
+Rank 10: Choke Out activates at 40% Health Bar or 
+less, and deals ×4 the total damage.
+Rank 1 5: Choke Out activates at 80% Health Bar or 
+less, and deals ×8 the total damage.
+DIRTY FIGHTING
+Pugilism or Wrasslin’ Damage Effect, Passive
+You use underhanded tactics to win fights and cause a 
+different kind of harm to your opponents. If the Attack 
+Skill Check is a Critical Fail, lose 1 Popularity.
+Apply the Woozy Debuff to the 
+target.
+
+UPGRADES
+Rank 5: Also apply The Taint Debuff to the target.
+Rank 10: Also apply the Blinded Debuff to the target. 
+You no longer lose Popularity on Critical Fails.
+Rank 1 5: Also apply an immediate Minor Injury Debuff 
+to the target.
+IRON PUNCH
+Pugilism Damage Effect, Passive
+You deal +1d2 base damage.
+UPGRADES
+Rank 5: Add 1 Rank damage die.
+Rank 10: You may choose to have the target gain the 
+Stunned Debuff instead of rolling damage.
+Rank 1 5: Add 1 Rank damage die, and the target gains 
+the Stunned Debuff.
+POWERFUL STRIKE
+Foot Soldier, Noggin Nocker, or Pugilism Damage Effect, 
+Passive
+Cooldown: 30 hours
+Multiply your base damage dice result by your Rank in 
+this Skill, then add your modifiers and buffs.
+UPGRADES
+Rank 5: The cooldown is 10 hours.
+Rank 10: The cooldown is 5 hours.
+Rank 1 5: The cooldown is 2 hours.
+SKULLCRACKER
+Noggin Nocker Damage Effect, Passive
+If the target is the same size as you, gain +1d4 base 
+damage.
+UPGRADES
+Rank 5: +1d4 base damage if target is the same size 
+as you.
+Rank 10: If the target is the same size as you, add 
+1 Rank damage die, and the target gains the 
+Stunned Debuff.
+Rank 1 5: If the target is the same size as you, add 1 
+Rank damage die, and the target gains the Blood Trail 
+Debuff.4
+
+--- PAGE 183 ---
+SMUSH
+Foot Soldier Damage Effect, Passive
+Limitations: You can only apply this Damage Effect to 
+targets with 20% Health Bar or less.
+Cooldown: Once per round.
+You deal ×2 the total damage.
+UPGRADES
+Rank 5: Smush activates at 30% Health Bar or less 
+and deals ×3 the total damage.
+Rank 10: This skill has no cooldown.
+Rank 1 5: Smush activates at 40% Health Bar or less 
+and deals ×4 the total damage.
+TOSS
+Wrasslin’ Damage Effect, Passive
+You deal +1d8 base damage + Str Bludgeoning, end 
+the Held Debuff, and throw the target 5 feet for every 
+five Ranks (minimum 5 feet) you have in this Skill. You 
+can only Toss foes of a smaller size than you.
+UPGRADES
+Rank 5: You can Toss foes up to your own size or smaller.
+Rank 10: You can Toss foes one size larger than you or 
+smaller.
+Rank 1 5: +1d8 base damage, and you can throw foes 
+two sizes larger than you or smaller.
+RANGED WEAPON 
+SKILLS
+Ranged Skills allow you to strike targets from a distance, 
+hopefully before they can get into range to attack you—
+you filthy camper. All ranged weapons use your Dex to 
+hit, and some add your Str to the damage.
+BOW
+Ranged Attack, Dex
+Range: 100 feet
+Limitations: Requires two hands to wield. Each Attack 
+requires proper ammunition.
+Base Damage: 1d6 + Str Piercing
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage, and add 1 Rank damage die.
+Rank 1 5: +1d6 base damage, and the target gains the 
+Blood Trail Debuff.
+
+41
+“Ranged weapons. I didn’t 
+like ranged weapons.”
+—Carl4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+CROSSBOW
+Ranged Attack, Dex
+Range: 50 feet
+Limitations: Requires two hands to wield. Each Attack 
+requires proper ammunition.
+Cooldown: Once per round.
+Base Damage: 1d8 Piercing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage, and the target gains the 
+Blood Trail Debuff.
+Rank 1 5: +1d8 base damage, and the range is 100 
+feet.
+HANDGUN
+Ranged Attack, Dex
+Range: 150 feet
+Limitations: Each Attack requires proper ammunition. 
+Spend one Action to reload after a Major Fail or worse.
+Base Damage: 1d8 Piercing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage
+Rank 1 5: +1d8 base damage, and the target gains the 
+Staggered Debuff.
+
+--- PAGE 184 ---
+4
+JAVELIN
+Ranged Attack, Dex
+Range: 40 feet
+Base Damage: 1d8 + Str Piercing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage, and this attack deals 
+Armor‑Piercing damage (ignores DR).
+Rank 1 5: +1d8 base damage, and its range increases 
+by your Strength score in feet.
+SHOTGUN
+Ranged Attack, Dex
+Range: 30 feet
+Limitations: Requires two hands to wield. Each Attack 
+requires proper ammunition. Spend one Action to 
+reload after a Major Fail or worse.
+Base Damage: 1d10 Piercing
+UPGRADES
+Rank 5: +1d10 base damage
+Rank 10: +1d10 base damage
+Rank 1 5: +1d10 base damage, +5ft Splash
+SHURIKEN
+Ranged Attack, Dex
+Range: 30 feet
+AI Favor: 1
+Base Damage: 1d4 + Str Piercing
+UPGRADES
+Rank 5: +1d4 base damage, and the range is 40 feet.
+Rank 10: +1d4 base damage, and you may make an 
+extra free attack with Disadvantage.
+Rank 1 5: +1d4 base damage, and you may make an 
+extra free attack with Disadvantage.
+SLINGSHOT
+Ranged Attack, Dex
+Range: 30 feet
+AI Favor: 2
+Limitations: Requires two hands to wield.
+Base Damage: 1d2 + Str Bludgeoning
+
+UPGRADES
+Rank 5: +1d2 base damage, and its range increases 
+by your Strength score in feet.
+Rank 10: +1d2 base damage, and add 1 Rank damage die.
+Rank 1 5: +1d2 base damage, and add 1 Rank damage die.
+REACH WEAPON SKILLS
+Reach weapons allow you to make melee attacks 
+against foes up to 10 feet away but not through occu-
+pied spaces. You may attack diagonally through the 
+junction of two spaces as long as at least one of those 
+spaces is unoccupied.
+HERDING WEAPONS
+Melee Attack, Str
+You start with a shepherd’s crook but soon have more 
+tricks up your dirty sleeves.
+Range: 10 feet
+AI Favor: 1
+Limitations: Requires two hands to wield.
+Base Damage: 1d4 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d4 base damage and you may slide the 
+target 5 feet
+Rank 10: +1d4 base damage, and you may use this 
+skill to make a Sling attack with a range of 50 feet, but 
+using Dex to hit.
+Rank 1 5: +1d4 base damage, and the target gains the 
+Take Down Debuff.
+LANCE
+Melee Attack, Str
+Range: 10 feet
+Limitations: Must be mounted to use. Cannot be used 
+in conjunction with Attack of Opportunity or Zone of 
+Control Skills.
+Base Damage: 1d12 + Str Piercing
+UPGRADES
+Rank 5: +1d12 base damage
+Rank 10: +1d12 base damage, and +1 damage for 
+every 10 feet your mount Moved this turn.
+Rank 1 5: +1d12 base damage, and +X damage, where 
+X is the size of your mount.4
+
+--- PAGE 185 ---
+POLEARM
+Melee Attack, Str
+Range: 10 feet
+Limitations: Requires two hands to wield.
+Base Damage: 1d8 + Str Piercing
+UPGRADES
+Rank 5: +1d8 base damage
+Rank 10: +1d8 base damage, and +1 Rank in the 
+Zone of Control Skill.
+Rank 1 5: +1d8 base damage, and +1 Rank in the 
+Zone of Control Skill.
+QUARTERSTAFF
+Melee Attack, Str
+Range: 10 feet
+Limitations: Requires two hands to wield.
+Base Damage: 1d6 + Str Bludgeoning
+UPGRADES
+Rank 5: +1d6 base damage
+Rank 10: +1d6 base damage, and you gain a +1 
+Evade Buff.
+Rank 1 5: +1d6 base damage, and you gain a +1 
+Evade Buff.
+EXPLOSIVES SKILLS
+For handling explosives, see Explosives Handling, 
+Goblin Explosives, and Incendiary Device Handling in 
+Utility Skills (below). These Skills will also be useful for 
+crafting your own explosives once you have access to 
+a Sapper’s Table on the Fourth Floor.
+As crawlers descend to lower floors, explosives 
+become more complex than the Tutorial Floors’ 
+“light and throw” variety. See the Area of Effect 
+Attacks  (p. 83) for targeting, Difficulties, and what 
+happens when you miss your target with tossed 
+explosives. Your explosives Skill is not used when 
+attacking with a thrown explosive, but the GM 
+should have you make an Unopposed handling Skill 
+Check before throwing.
+Here are the explosives typically found on the first 
+five floors. Lesser explosives can be found on lower 
+floors, but the more powerful explosives are rarely 
+seen on the upper floors.
+
+41
+“I must admit, I like it when you 
+blow stuff up. I like it a lot.”
+—Princess Donut4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+Floor 1: Standard Explosive—Dynamite: 1d6 
+Bludgeoning, 0ft Blast radius +5ft Splash.
+Floor 2: Goblin Explosive—Dynamite: 2d6 
+Bludgeoning damage, 5ft Blast radius + 5ft Splash.
+Floor 2: Incendiary Device—Carl’s Jug O’ Boom: 1d8 
+Fire damage, 5ft Blast radius + 15ft Splash. Anyone who 
+loses at least 1 Health Bar slot gains the Burned Debuff.
+Floor 3: Goblin Explosive—Hob-Lobbers: 3d6 
+Piercing, +10ft Splash
+Floor 4: Standard Explosive—Demon Det Cord: 5d6 
+Bludgeoning, deals double damage to objects. Can 
+only be applied to non-moving targets.
+Floor 5: Incendiary Device—Gnomish Knock-Knock: 
+4d6 Fire, 10ft Blast radius +10ft Splash, and anyone 
+who fails to Evade gains the Burned Debuff. As this is 
+a notoriously unstable fuel-air explosive, a Critical Fail 
+is achieved on a Natural 1–4.
+Most explosives are custom made and not available 
+on store shelves. Carl had his custom Jelly Bombs, 
+Banger Spheres, Chum Bombs, and more.
+
+--- PAGE 186 ---
+4
+SMOKE
+Smoke is used for concealment, distraction, and 
+confusion. Attacking into or out of smoke is done 
+with Disadvantage (see Mob Advantage and 
+Disadvantage p. 60).
+Thrown smoke bombs are popular on most 
+dungeon floors as a way to get out of trouble quick-
+ly. See the Throwing Skill (p. 200) for targeting, 
+Difficulties, and what happens when you miss your 
+target. You don’t need to make a Skill Check to drop it 
+in your own space.
+Floor 1: Goblin Smoke Bomb: Creates a multicolor 
+smoke cloud that reaches 30 feet in each direction 
+from the point of impact, with a maximum duration of 
+3 minutes. However, even a slight breeze will dissipate 
+it in 1 minute.
+Floor 3: Hobgoblin Smoke Curtain: Creates a dense 
+white fog over a 60ft radius that holds even in a breeze.
+Floor 5: Hobgoblin Disco Ball: Created by infusing 
+(see Infusion Skill, p. 194) an Invisibility potion onto 
+a Hobgoblin Smoke Curtain. It produces thick multi-
+hued smoke plumes, along with some sick beats. It 
+blinds everyone in the area, friend and foe alike.
+Utility Skills
+Utility Skills help crawlers survive, adapt, and solve 
+problems that can’t be fixed by hitting them until they 
+stop moving.
+Checks that are labeled as Unopposed can, at the 
+GM’s discretion, become Opposed if something is 
+actively working against you. For example, you’re 
+trying to swim the rapids, and some dipshit is throwing 
+fishing nets at you. Cut it out, Cletus! Or I’m gonna tell 
+Mom on you!
+ACUTE EARS
+Intelligence
+Passive
+Improves a crawler’s hearing and allows the crawler 
+to see more Mobs on the minimap in their HUD. The 
+information is “somewhat reliable.”
+Rank 5: Information on the Mob’s size and whether 
+you have encountered them before are added to the 
+red dot indicator.
+
+Rank 10: Mobs of a lower level than you cannot Am‑
+bush your party.
+Rank 1 5: Mobs cannot Ambush your party.
+AIMING
+Passive
+Limitations: This Skill is used only in conjunction with 
+Ranged Attacks. Mark this Skill for Advancement only 
+when applying its Ranks to such an Attack.
+You are skilled at targeting vital body parts to deal 
+additional damage.
+When making a Ranged Attack, you can add your 
+Ranks in this Skill to your Attack Skill Check if you 
+choose to make the Check with Disadvantage.
+On Success, add 1d4 to the damage.
+UPGRADES
+Rank 5: +1d4 damage
+Rank 10: +1d4 base damage
+Rank 1 5: +1d4 base damage
+ALCHEMY
+Intelligence
+Used for crafting potions and poisons. See Crafting p. 
+2 21.
+You may craft potions up to a +5 bonus level.
+UPGRADES
+Rank 5: You may craft potions up to a +10 bonus level.
+Rank 10: You may create additional potions of the 
+same kind without spending extra time.
+Rank 1 5: You can write the recipe for any potion you find.
+AMBUSH
+Intelligence
+You are skilled at popping up out of nowhere. When a 
+Mob is moving toward you, even if they are aware of your 
+general presence, make an Int‑Opposed Skill Check.
+On Success, you gain a surprise Action against the 
+Mob before combat starts. As an unseen attacker, you 
+Attack with Advantage.
+UPGRADES
+Rank 5: If you Attack with your Surprise Action, add 
+an Ambush Rank damage die to your Surprise Attack 
+damage.
+Rank 10: When other crawlers in your party roll this skill 
+untrained, they roll as normal (not with Disadvantage).4
+
+--- PAGE 187 ---
+“That is the equivalent of 
+dropping a grenade down your 
+pants and shouting, ‘Yolo!’”
+—The System AI4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+Rank 1 5: You gain a second bonus Action as a sur‑
+prise Action. This bonus Action can’t be an Attack.
+ANIMAL HANDLING
+Charisma
+You are skilled in calming, befriending, and guiding 
+animals. Make an Int‑Opposed Skill Check.
+On Success, the animal is friendly enough to avoid 
+attacking you.
+UPGRADES
+Rank 5: Choose an animal type to specialize in. You 
+have Advantage on your Animal Handling Skill Checks 
+against that animal type. You gain a second bonus 
+Action as a surprise Action. This bonus Action can’t be 
+an attack.
+Rank 10: Forming each level of bonding with a poten‑
+tial pet takes half the normal time.
+Rank 1 5: You can have up to two pets.
+ARCANE
+Intelligence
+You have general knowledge of magic and can de‑
+termine whether items are magical or not. Make an 
+Unopposed Skill Check.
+On Success, you can identify the item as magical or not.
+
+41
+UPGRADES
+Rank 5: You are able to determine details such as the 
+specific Rank and bonus levels of magical items.
+Rank 10: You can imbue items with inherent spells 
+using an Arcanist Table. See Crafting on p. 22 1.
+Rank 1 5: The default cooldown of your imbued spells 
+is 3 hours.
+ATTACK OF OPPORTUNITY
+Passive, Interrupt
+Limitations: Requires a single‑handed melee weapon 
+with a range no greater than 5 feet.
+When a foe moves out of a space adjacent to you (ex‑
+cept via a Step), you may spend an Action to make an 
+Attack Action as an Interrupt against that foe.
+On Success, roll damage and apply any other effects 
+from the Attack!
+UPGRADES
+Rank 5: If the foe moves into another space adjacent 
+to you, they must stop.
+Rank 10: A foe using their Step no longer prevents 
+this ability.
+Rank 1 5: Roll the Attack Skill Check with Advantage.
+BACKFIRE
+Intelligence
+Limitations: Compensated Anarchist Class Only
+You are skilled at neutralizing and deconstructing traps 
+without the use of a Sapper’s Table. Triggering mecha‑
+nisms are quite valuable. Time required to neutralize a 
+trap is 10 minutes. Time required to deconstruct it is 1 
+hour. Make an Unopposed Skill Check.
+On Success, you successfully take apart the trap and 
+can repurpose it.
+UPGRADES
+Rank 5: You can identify when the trap was placed. 
+Time required to neutralize a trap is 5 minutes.
+Rank 10: You can identify when the trap was created. 
+Time required to deconstruct a trap is 30 minutes.
+Rank 1 5: You can identify the designer of the trap. 
+Time required to deconstruct a trap is 15 minutes.
+
+--- PAGE 188 ---
+4
+BALANCE
+Dexterity
+You can traverse tricky surfaces with general ease. 
+Make an Unopposed Skill Check. The GM may add 
+Difficulty for especially crazy surfaces.
+On Success, you keep your balance on tricky or shift‑
+ing surfaces.
+UPGRADES
+Rank 5: You may perform Move Actions in difficult 
+terrain without penalty.
+Rank 10: When subject to a Take Down or involuntary 
+Move effects, you may use this skill as a free Interrupt 
+Action to avoid the effect.
+Rank 1 5: You may perform your Step on vertical 
+surfaces (yes, like in The Matrix), but must end it on a 
+flat(ish) surface.
+BASIC SCIENCE
+Intelligence
+You understand basic scientific principles and natural 
+laws, which you hope are still in effect in the dungeon. If 
+you want to conduct experiments involving dead Goblins 
+and various acids, this is the Skill for you. Experiments 
+take 2 hours to perform. Make an Unopposed Skill Check.
+On Success, you learn or confirm something.
+UPGRADES
+Rank 5: Experiments take 1 hour to perform.
+Rank 10: Choose a specialty (physics, biology, chemis‑
+try, Earth science, etc.), and roll with Advantage when 
+dealing with that.
+Rank 1 5: Experiments take 30 minutes to perform.
+BOMB SURGEON
+Intelligence
+Use this Skill to deconstruct explosive bombs and smoke 
+bombs. You can then use the half‑sized bomb, or use the 
+component parts to craft new bombs using other Skills.
+If you are using a Sapper’s Table, you do not have to 
+make an Unopposed Explosives Handling Skill Check 
+to avoid a mishap. Time required is 1 hour. Make an 
+Unopposed Skill Check.
+On Success, you have deconstructed it.
+UPGRADES
+Rank 5: Time required is 30 minutes.
+Rank 10: You never have to make an Explosives Han‑
+dling Skill Check when using this skill.
+
+Rank 1 5: When cutting dynamite in half to make small‑
+er bombs, round dice up. Time required is 15 minutes.
+CALLIGRAPHY
+Dexterity
+Used for making documents look super elegant. Make 
+an Unopposed Skill Check.
+On Success, what you have written is a joy to read and 
+feels important, even if it’s bad news.
+UPGRADES
+Rank 5: Roll with Advantage on your next Charisma 
+Skill Check vs. the recipient of your beautiful paper.
+Rank 10: You are able to craft scrolls as if this were a 
+crafting skill. See Crafting, p. 22 1.
+Rank 1 5: Once per floor, you may craft a scroll for a 
+spell you have only seen cast within the last 2 hours.
+CARTOGRAPHY
+Intelligence
+You probably played some old‑school TTRPGs and 
+think that mapping the dungeon will help you in some 
+way. Wrong! It will help you in many ways. Make an 
+Unopposed Skill Check.
+On Success, you figure out where you are in relation to 
+other things.
+UPGRADES
+Rank 5: You can always return from whence you came 
+quickly, assuming the dungeon walls haven’t shifted in 
+the meantime.
+Rank 10: You provide an Advantage die to crawlers 
+in your party (could be you) who are making Tracking 
+Skill Checks or Checks that rely on spatial relations.
+Rank 1 5: Even with merely a finger point or a “that‑
+taway,” you can get from point A to point B via the 
+most direct path.
+CAT-LIKE REFLEXES
+Dexterity
+Limitation: This limited Skill is only available to cat‑
+based Races, such as Cat, Cat Girl/Cat Boy, and Tigran
+You gain a +10ft Move. Use this Skill Check when you 
+would make a Dexterity Stat Check (vs. the typically 
+lesser Stat Check Difficulty).
+UPGRADES
+Rank 5: Reduce the damage you take from foes’ Sur‑
+prise Attacks against you by your Rank in this skill.4
+
+--- PAGE 189 ---
+Rank 10: Reduce all Area damage you take by 50% 
+(rounded down).
+Rank 1 5: +10ft Move. You gain a +1 Evade Buff. Roll 
+with Advantage to Evade Attacks and effects that 
+would apply the Held Debuff (or similar) to you.
+CATCHER
+Passive, Interrupt
+When a Successful direct (non‑Area) Attack is about 
+to damage an ally, you leap in and take the damage 
+instead. You must be adjacent to that ally but can take 
+a 10ft Step before using this Skill to get into position.
+You take the damage. You can’t use Evade, Shield 
+Block, and other Skills or Spells to negate damage 
+dealt to you this way.
+UPGRADES
+Rank 5: You’ve learned how to take hits. You gain +5 
+DR when using this Skill.
+Rank 10: You gain +5 DR a when using this Skill.
+Rank 1 5: You gain +5 DR when using this Skill and 
+ignore any Debuffs attached to this damage.
+
+41
+CESTA PUNTA
+Dexterity
+Limitations: Only acquired via an Earth 
+Hobby Potion
+Use this Skill Check when playing jai alai or 
+when throwing things that fit in the xistera. See 
+Throwing p. 200 for rules on throwing things, but 
+use the ranges below. Roll with Disadvantage at rang‑
+es over 500 feet.
+UPGRADES
+Rank 5: Throw range Strength ×20 feet.
+Rank 10: Add 1 Cesta Punta Rank damage die to 
+thrown damaging Attacks.
+Rank 1 5: Throw range Strength ×30 feet, and roll with 
+Disadvantage at ranges over 2,000 feet.
+CHARACTER ACTOR
+Passive, Charisma
+Limitations: Former Child Actor Class Only. Rank 
+increases by 1 when descending to a new floor only.
+At the start of each floor, choose a new Class from 
+a random list of three provided by the GM. You gain 
+a random assortment of the new Class’s abilities for 
+the remainder of the current floor, while keeping your 
+current ones.
+For each bullet point line item in the new Class descrip‑
+tion, roll 1d2. On a 2, you gain the listed abilities.
+UPGRADES
+Rank 5: The random Classes increase in rarity and 
+power based on the crawler’s Stats and Level.
+Rank 10: Skill Ranks gained in any newly‑granted 
+Skills persist from floor to floor, but the starting Ranks 
+of those Skills are lost.
+Rank 1 5: You choose the Class from any available.
+CHOPPER PILOT
+Dexterity
+Known as a motorcycle in most parts of the world—
+and in the World Dungeon.
+Limitations: You suffer Disadvantage on Attack Skill 
+Checks made while Piloting and cannot Attack with a 
+weapon that requires two hands.
+You don’t need to use this Skill if you’re cruising 
+through a town, but if you’re racing, chasing, show‑
+ing off, or trying to pop a wheelie, this is the Skill you 
+want.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 190 ---
+4
+If you’re doing something wild or trying to avoid 
+becoming a skid mark on the highway, make an Un‑
+opposed Skill Check. Depending on how extreme the 
+circumstances are, the GM may apply Advantage or 
+Disadvantage to the Check.
+On Success, you stay upright while performing your 
+crazy maneuvers.
+UPGRADES
+Rank 5: Your chopper has +5ft Move.
+Rank 10: Attacking while piloting no longer suffers 
+Disadvantage.
+Rank 1 5: Your chopper has +5ft Move. When per‑
+forming crazy stunts (like riding up a canyon wall), roll 
+with Advantage.
+CLIMBING
+Strength
+Limitations: If you Attack while Climbing, you suffer 
+Disadvantage on those Checks.
+
+You don’t need to use this Skill if you’re climbing up a 
+narrow flight of stairs. Probably not even when you’re 
+fully roped in and tethered to other climbers. But if 
+you’re racing, chasing, rappelling from a burning build‑
+ing, or doing something dangerous while climbing, this 
+is the Skill you want.
+Make an Unopposed Skill Check every minute (not 
+round). Depending on how extreme the circumstances 
+are, the GM may apply Advantage (such as if you’ve 
+previously already climbed it) or Disadvantage (you got 
+no ropes) to the Check.
+On Success, you are safe in your climb and make 
+progress. See Special Forms of Movement p. 70, if the 
+distance moved is important.
+UPGRADES
+Rank 5: Make a Check every 5 minutes.
+Rank 10: Make a Check every 10 minutes. You no 
+longer Attack with Disadvantage while climbing.
+Rank 1 5: Make a Check every 15 minutes. When other 
+crawlers in your party roll this skill untrained, they roll 
+as normal (not with Disadvantage).
+COCKROACH
+Constitution
+Limitation: This Limited Skill can only be learned via 
+a Race, Class, or item. Mark the skill for advancement 
+until you reach Rank 5. After that, Ranks in this Skill 
+only increase by magical means and training.
+Cooldown: Once per scene
+When an Attack would drop you to 0% Health Bar, roll 
+an Unopposed Skill Check.
+On Success, drop to 10% instead.
+UPGRADES
+Rank 5: No Skill Check required anymore.
+Rank 10: The crawler’s Health Bar is unaffected by 
+damage that would drop them to 0%.
+Rank 1 5: Cooldown is twice per scene. When it trig‑
+gers, the crawler heals to 100% and has +Rank DR 
+until the end of the next round of combat.
+COOKING
+Intelligence
+You are skilled in the culinary arts. Once you have 
+your ingredients and 1 hour to prepare it, make an 
+Unopposed Skill Check.4
+
+--- PAGE 191 ---
+On Success, you make edible food for you and your 
+party.
+UPGRADES
+Rank 5: It takes you 30 minutes to prepare a meal with 
+makeshift ingredients.
+Rank 10: The diners gain the day‑long “You are full!” Buff: 
+Heal 2 Health Bar slots per hour when not resting.
+Rank 1 5: The “You are full!” Buff also causes Debuffs 
+to end if you drop to 10% Health Bar.
+DECEPTION
+Charisma
+If you know the truth but want to obscure it, this is the 
+Skill for you. When you lie and try to get away with it, 
+make an Int‑Opposed Skill Check. If the creature you’re 
+lying to has the Detect Lies Skill, you make this Check 
+with Disadvantage.
+On Success, they believe you!
+UPGRADES
+Rank 5: You can use this Skill while gambling.
+Rank 10: You can use this Skill to forge documents.
+Rank 1 5: You’re good enough to know when you’ve 
+been caught. If you fail this Check, you may perform 
+one Action before your foes can react.
+DETECT LIES
+Intelligence
+You have an incredible bullshit detector. If you believe 
+someone is trying to lie to you, make a Cha‑Opposed 
+Skill Check. If they possess the Deception Skill, you 
+make this Check with Disadvantage.
+On Success, you sense if they’re lying, but if they believe 
+they’re telling the truth, you sense they’re telling the truth.
+UPGRADES
+Rank 5: When you Fail, you still can’t detect the lie, but you 
+can ignore the additional effects of a Major Fail or worse.
+Rank 10: When you Fail, you can’t detect the lie, but 
+you can ignore the effects of a Critical Fail.
+Rank 1 5: You do not need to see the speaker, which 
+allows you to detect lies in text and audio form.
+DETECT TRAP
+Intelligence
+When you suspect a room, door, chest, or other object 
+has an active trap, this is the Skill you want. Make an 
+
+41
+Unopposed Skill Check. Roll with Disadvantage when 
+using this Skill to scan an entire room or while moving.
+On Success, you are alerted to the presence of a 
+non‑magic trap, which typically allows you to avoid 
+triggering it.
+On Fail, you sense nothing, and a trap may or may not 
+be present.
+UPGRADES
+Rank 5: You can detect magical traps.
+Rank 10: You no longer roll with Disadvantage when 
+searching a broad area or while moving.
+Rank 1 5: When you are aware of nearby traps, your 
+party has Advantage on their first Check to avoid or 
+escape the effects.
+DETERMINE VALUE
+Passive
+Limitations: Ranks in this Skill only increase by 
+magical means.
+You can sort your HUD’s Inventory by item value. The 
+actual gold value is not displayed.
+UPGRADES
+Rank 5: Your Inventory is tabbed to sort your items by 
+type, and it includes a history tab that tracks your item 
+usage and any former owners of an item.
+Rank 10: You can determine what type of loot box the 
+item would have come from.
+Rank 1 5: Whenever you add a new item to your Inven‑
+tory, the gold value of that item is displayed.
+DIPLOMACY
+Charisma
+Used in mediation between opposing organizations 
+and parties. Make an Int‑Opposed Skill Check of the 
+side with the higher Int Mod.
+On Success, the two parties are willing to discuss options.
+UPGRADES
+Rank 5: Roll with Advantage if you are not a member 
+of either party.
+Rank 10: Each side accepts consequences if they 
+break the deal.
+Rank 1 5: Hostilities cease at least for the remainder of 
+the day.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 192 ---
+4
+DODGE
+Passive
+Limitations: Mark the Skill for Advancement when 
+Evading until you reach Rank 5. After that, Ranks in 
+this Skill only increase by magical means and training.
+You gain a +1 Evade Buff.
+UPGRADES
+Rank 5: Gain a +1 Evade Buff, and you may Step an 
+additional 5 feet when you perform the Evade Action.
+Rank 10: Gain a +2 Evade Buff, and roll Evade with 
+Advantage vs. Spells and Ranged Attacks.
+Rank 1 5: Gain a +2 Evade Buff, and you may per‑
+form the Evade Action without spending an Action in 
+combat.
+DOUBLE TAP
+Passive
+Limitations: To engage this Skill, you must declare a 
+Double Tap at the start of the combat round, before 
+Mob Actions have been determined. You must then 
+use all of your Actions this round to Attack a single 
+target with the same weapon or Spell. Mark this Skill 
+for advancement anytime you roll an Amazing Success 
+or better while using it.
+If your first Attack is an Amazing Success or better, your 
+second Attack (if it hits) is upgraded to a Critical Hit.
+UPGRADES
+Rank 5: Roll your first Attack with Advantage.
+Rank 10: If your first Attack is a Standard Success or 
+better, the second Attack (if it hits) is upgraded to a 
+Critical Hit.
+Rank 1 5: Roll your second Attack with Advantage. If 
+your second Attack is a Critical Hit or upgraded to one, 
+deal ×3 damage (instead of ×2).
+DRIVING
+Dexterity
+Limitations: If you Attack while Driving, you suffer 
+Disadvantage on those Checks.
+You don’t need this Skill if you’re casually driving down 
+the road to pick up a quart of milk, but if you’re racing, 
+chasing, showing off, or doing something dangerous in 
+a vehicle, this is the Skill you want.
+If you’re doing something wild or trying to avoid 
+becoming a skid mark on the highway, make an Un‑
+opposed Skill Check. Depending on how extreme the 
+
+circumstances are, the GM may apply Advantage or 
+Disadvantage to the Check.
+On Success, you achieve your daredevil maneuver or 
+avoid wrecking your vehicle.
+UPGRADES
+Rank 5: You no longer suffer Disadvantage when 
+attacking while Driving.
+Rank 10: Your vehicle has +5ft Move. Roll with Ad‑
+vantage to Evade Attacks against your vehicle.
+Rank 1 5: Your vehicle has +5ft Move. When perform‑
+ing crazy stunts (like driving on only your left‑side 
+wheels), roll with Advantage.
+DUMPSTER DIVING
+Intelligence
+Known as “scrounging” in some parts of the world.
+This Skill bolsters your ability to search the clutter with‑
+in the dungeon to find interesting bits of rubbish and 
+maybe something useful. Using this Skill takes 1 hour 
+and can only be performed once per 50‑foot‑square 
+area. Make an Unopposed Skill Check.
+On Success, you find what you were looking for or 
+another interesting item, determined by the GM.
+UPGRADES
+Rank 5: You also find 1 Rank damage die’s‑worth of 
+Misc. Junk.
+Rank 10: A Dumpster Dive takes 30 minutes. On a 
+Critical Hit, you gain an additional interesting item.
+Rank 1 5: A Dumpster Dive takes 10 minutes. On an 
+Amazing Success, you gain an interesting item.
+ENDURANCE
+Constitution
+Use this Skill to prevent fatigue while grinding, walking 
+long distances (measured in miles), or other extended 
+strenuous activities. Make an Unopposed Skill Check.
+On Success, you may continue the activity and do not 
+gain the Fatigued Debuff.
+UPGRADES
+Rank 5: You can ignore the effects of a Major Fail 
+when making these Checks.
+Rank 10: If you are not Fatigued or in extreme condi‑
+tions, you make this Check with Advantage.
+Rank 1 5: If your Check is a Critical Fail, you can take 
+the effects of a Standard Fail.4
+
+--- PAGE 193 ---
+ENGINEERING
+Intelligence
+Limitations: Cannot create vehicles or high‑powered 
+engines (see Gear Head for that p. 192).
+This Skill is used to design and build things with 
+moving parts, fluids, or chemicals wholly out of Misc. 
+Junk with no inherent bonuses, though they may have 
+situational bonuses. Examples include a watch, a water 
+pump, or bullets. See Crafting p. 22 1.
+Starting on the Fourth Floor, you may make use of an 
+Engineering Table to make your mundane items easier 
+to craft. Make an Unopposed Skill Check.
+On Success, you create the item.
+UPGRADES
+Rank 5: Choose a mundane item type to specialize 
+in. You have Advantage when creating an item of that 
+type.
+Rank 10: You may craft your specialty item with a +1 
+bonus level enchantment.
+Rank 1 5: You may craft your specialty item with up to 
++2 bonus level enchantment, and it takes half the time.
+ESCAPE ARTIST
+Dexterity
+Holy Houdini! While anyone can use Dexterity to wig‑
+gle out of restraints or a hold, you’re especially skilled 
+at the art of escape. When you try to escape from 
+bonds or being Held, you can use this Skill.
+When trying to escape bonds, make an Unopposed 
+Skill Check.
+To escape being Held, make a Str‑Opposed Skill 
+Check. Based on the complexity or simplicity of what 
+binds you, the GM may have you make the Check with 
+Advantage or Disadvantage.
+On Success, you escape your bonds or the creature 
+holding you.
+UPGRADES
+Rank 5: You can escape your bonds, and no one sees 
+you do it. If you escape being Held, you can then take 
+a Step (also unseen).
+Rank 10: When other crawlers in your party roll 
+this skill untrained, they roll as normal (not with 
+Disadvantage).
+Rank 1 5: When you slip out, you may immediately take 
+an Action with Advantage.
+
+41
+ESCAPE PLAN
+Passive
+Limitations: Ranks in this Skill only advance by magi‑
+cal means.
+Your HUD reveals hidden doors and passages, unless 
+those passages were crafted by someone with more 
+Ranks in Fabricate or Engineering than you have in this 
+Skill or the passage is entirely natural.
+UPGRADES
+Rank 5: You have access to system‑concealed dis‑
+plays and the Dungeon Locator. Holographic signs 
+pop up in your HUD, displaying insider information 
+like signs at a zoo. Includes arrows toward City and 
+stronger Bosses.
+Rank 10: You are able to read hidden sigils (glowing 
+blue circles) used by the showrunners to direct the 
+movement of Mobs.
+Rank 1 5: You are able to read hidden messages and 
+redactions in dungeon documents.
+EXPLOSIVES HANDLING
+Intelligence
+For making Attack Skill Checks with explosives (see 
+Throwing, p. 200).
+Make an Unopposed Skill Check.
+On Success, you safely handle standard explosive de‑
+vices. On Fail, I’m sure the GM will think of something.
+UPGRADES
+Rank 5: You are able to determine the type, status, 
+and raw materials of explosives you handle.
+Rank 10: You are able to craft explosives such as dy‑
+namite as if this were a crafting Skill, though you must 
+have explosive raw materials and a Sapper’s Table (see 
+Crafting, p. 22 1).
+Rank 1 5: You may create explosive raw materials out of 
+non‑volatile materials. Your crafting takes half the time.
+FABRICATE
+Intelligence
+Limitations: Cannot create things with moving parts, 
+fluids, or chemicals.
+Use this Skill to make generic, mundane items with no 
+inherent bonuses wholly out of Misc. Junk, but your 
+GM can give them situational bonuses.
+Examples include a ladder, a 50ft rope, or a ceramic 
+pot to store napalm. For items with moving parts, see 4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 194 ---
+4
+the Engineering Skill above instead. See Crafting, p. 
+22 1. Make an Unopposed Skill Check.
+On Success, you create the item.
+UPGRADES
+Rank 5: Choose a mundane item to specialize in. You 
+have Advantage when creating that item.
+Rank 10: You may craft your specialty item with a +1 
+bonus level enchantment.
+Rank 1 5: You may craft your specialty item with up to 
++2 bonus level enchantment, and it takes half the time.
+FIND CRAWLER
+Passive
+Limitations: Ranks in this Skill only increase by 
+magical means.
+Your HUD displays other crawlers within 1,000 feet of 
+you. They are designated with a blue dot.
+UPGRADES
+Rank 5: The area in which you can detect other crawl‑
+ers increases to 5 miles.
+Rank 10: The area in which you can detect other 
+crawlers increases to 10 miles.
+Rank 1 5: You can input a specific crawler’s name and 
+learn their exact location anywhere in the dungeon.
+FIND TRAP
+Passive
+Limitations: Ranks in this Skill only increase by 
+magical means and training.
+Traps within 5 feet of you appear on your HUD one 
+second prior to triggering the trap, which is often too 
+late to react.
+UPGRADES
+Rank 5: Traps appear on your HUD up to 5 seconds 
+before they are triggered.
+Rank 10: Traps within 10 feet of you appear on your 
+HUD as you approach them.
+Rank 1 5: Traps within 15 feet of you appear on your 
+HUD as you approach them.
+FIRST AID
+Intelligence
+Limitations: After you treat someone, you can’t treat 
+them again until they complete a Short or Long Rest.
+
+Give minor medical aid to yourself or someone else. 
+Make an Unopposed Skill Check.
+On Success, the patient regains 1 Health Bar slot. Each 
+higher degree of Success heals 1 additional slot.
+UPGRADES
+Rank 5: If you spend 5 minutes, the patient also heals 
+a Minor Injury Debuff.
+Rank 10: If you spend 10 minutes, the patient also 
+heals a Long‑Term Minor Injury Debuff.
+Rank 1 5: The patient regains 1 additional Health Bar 
+slot. If you spend 15 minutes, the patient also heals a 
+Major Injury Debuff.
+GEAR HEAD
+Intelligence
+Limitations: This Limited Skill can only be learned 
+via a Race, Class, or item. Requires an Engine Stand 
+attachment to an Engineering Table (2,000 gold).
+You are proficient at building high‑performance engines, 
+using the rules of Crafting (see p. 22 1). Each +5ft Move 
+is a +1 Bonus Level at the default “10 + Bonus Level 
+×4” Difficulty. The time it takes and Misc. Junk required 
+uses the rules of crafting mundane items.
+On Success, you have successfully built a custom engine.
+UPGRADES
+Rank 5: You are able to add accessories to vehicles or 
+even build your own custom vehicles. Use the rules of Engi‑
+neering for crafting such things, but use this Skill and there 
+are no bonus level limits to your custom‑crafted items.
+Rank 10: Each +10ft Move is a +1 Bonus Level. You 
+may use this Skill as a Repair Skill (see p. 197) when 
+fixing engines.
+Rank 1 5: Cut the time required to craft engines and 
+vehicles you build around your engines in half.
+GOBLIN EXPLOSIVES
+Intelligence
+For making Attack Skill Checks with explosives, see 
+Throwing, p. 200.
+Make an Unopposed Skill Check. Goblin Explosives are 
+so unstable that Critical Fails occur on a Natural 1–4.
+On Success, you safely use Goblin Explosive devices.
+UPGRADES
+Rank 5: Critical Fail occurs on a Natural 3 or less. You 
+are able to determine the type, status, and raw materi‑
+als of Goblin Explosives you handle.4
+
+--- PAGE 195 ---
+Rank 10: Critical Fail occurs on a Natural 2 or less. You 
+are able to craft explosives such as dynamite as if this 
+were a crafting Skill, though you must have explosive raw 
+materials and a Sapper’s Table. See Crafting on p. 22 1.
+Rank 1 5: Critical Fail occurs on a Natural 1 as usual. 
+You may create explosive raw materials out of non‑vol‑
+atile materials with the use of a Sapper’s Table. Your 
+crafting takes half the time.
+GOOD FIRST IMPRESSION
+Charisma
+Limitations: This Skill doesn’t work on crawlers, 
+Bosses, or Elites. You can only make a Skill Check 
+against individuals, not groups.
+When you encounter an NPC or Mob that is not 
+immediately hostile or attacking, make an Int‑Opposed 
+Skill Check.
+On Success, the Mob approaches with wary curiosity.
+UPGRADES
+Rank 5: A Mob that is lower level than you won’t at‑
+tack your party unless they are attacked by a member 
+of your party.
+Rank 10: A Mob that is up to double your level won’t 
+attack your party unless they are attacked by you or an 
+ally or your party is preventing them from completing 
+their objective.
+Rank 1 5: A group of Mobs of the same type up to 
+double your level won’t attack your party unless they 
+are attacked by a member of your party, or your party 
+is preventing them from completing their objective.
+HIDE IN SHADOWS
+Dexterity
+Limitations: To move while avoiding detection, see 
+Stealth, p. 199.
+While in a heavily shadowed area or out of sight, 
+you can stay still and attempt to foil foes’ chances to 
+spot you. Make an Int‑Opposed Skill Check. If you’re 
+hiding behind an object that is larger than you, roll 
+with Advantage.
+On Success, you become invisible to Mobs and the 
+HUDs of other crawlers but can still be affected by 
+environmental and Area Attacks. You become visible 
+if you take an Action that affects another creature or if 
+you’re no longer behind cover.
+
+41
+UPGRADES
+Rank 5: You can use this Skill in a dim light without 
+having an object to hide behind.
+Rank 10: When other crawlers in your party roll 
+this Skill untrained, they roll as normal (not with 
+Disadvantage).
+Rank 1 5: You can use this Skill in a lightly shaded area 
+and may make a Step without giving away your position.
+IMPROVISED EXPLOSIVE DEVICE
+Intelligence
+Use this Skill to manipulate explosive material into 
+bombs and traps without a Sapper’s Table. You literally 
+can’t use one, so you’ll have to make an Explosives 
+Handling Skill Check to avoid issues when crafting your 
+device. Use the rules of Crafting on p. 22 1.
+On Success, you create the device. Bombs and 
+traps can have timers and triggering devices more 
+sophisticated than a burning fuse.
+UPGRADES
+Rank 5: Your crafting takes half the time.
+Rank 10: Your devices deal d10s of damage instead of 
+d6s (the default).
+Rank 1 5: Your devices can be set to trigger only 
+against a specific Mob, Boss, NPC, or crawler.
+INCENDIARY DEVICE HANDLING
+Intelligence
+For making Attack Skill Checks with incendiary devic‑
+es, see Throwing, p. 200.
+Make an Unopposed Skill Check.
+On Success, you are able to safely handle incendiary 
+devices.
+UPGRADES
+Rank 5: You are able to determine the type, status, 
+and raw materials of incendiary devices you handle.
+Rank 10: You are able to craft incendiary devices 
+as if this were a crafting Skill, though you must have 
+incendiary raw materials and a Sapper’s Table. See 
+Crafting, p. 22 1.
+Rank 1 5: Add a +5 Splash to your crafted device at 
+no additional Difficulty, and your crafting takes half 
+the time.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 196 ---
+4
+INFUSION
+Intelligence
+Limitations: Requires an Infusion Station attachment 
+on an Alchemy Table or Tier 3 Sapper’s Table.
+Use this Skill to infuse potion bonuses onto consum‑
+able items. One potion can infuse one item. You’ll ei‑
+ther need to learn Alchemy so you can craft your own 
+potions, or find potions to transfer to consumables. 
+Example: Infuse a Hobgoblin Smoke Curtain with an 
+Invisibility potion to create a Hobgoblin Disco Ball. See 
+Crafting, p. 22 1.
+On Success, your consumable item now does more!
+UPGRADES
+Rank 5: One potion can infuse 2 items at once.
+Rank 10: One potion can infuse 5 items at once.
+Rank 1 5: One potion can infuse 10 items at once.
+INTIMIDATE
+Strength
+You can use this Skill to scare the wits out of a foe. 
+Make a Cha‑Opposed Skill Check. If either side has 
+attacked or taken a hostile stance in this encounter, roll 
+with Disadvantage.
+On Success, the target gains the Staggered Debuff (p. 97).
+UPGRADES
+Rank 5: On Success or greater, until the end of the 
+next round, the target can only use its remaining Ac‑
+tions to move away from you (though it does not need 
+to use its Step when doing so).
+Rank 10: The target also gains the Woozy Debuff.
+Rank 1 5: The target drops everything they were hold‑
+ing and also gains the Paralyzed Debuff.
+INVESTIGATION
+Intelligence
+You spend 10 minutes looking at an area or puzzle in 
+front of you and might make heads or tails of it. Make 
+an Unopposed Skill Check.
+When you take the Look for Clues Action (p. 85), 
+spend only one Action to use this Skill.
+On Success, you learn something useful.
+UPGRADES
+Rank 5: If you’re familiar with the area you are investi‑
+gating, you can make the Skill Check with Advantage.
+Rank 10: Each attempt takes 5 minutes.
+
+Rank 1 5: Roll with Advantage if you know the parties 
+involved. Example: You know the puzzle’s maker, or 
+you know the murder victim and the main suspect.
+IRON STOMACH
+Constitution
+Eat magic items for fun and profit! But beware of 
+cursed items, as they could have negative effects. 
+Make an Unopposed Skill Check.
+On Success, you eat the item. It is destroyed, as the 
+shitter will be tomorrow morning.
+On an Amazing Success or better, gain 1 permanent 
+Intelligence.
+UPGRADES
+Rank 5: On a Critical Hit, gain 1 additional permanent 
+Intelligence.
+Rank 10: On a Standard Success or better, gain 1 
+permanent Intelligence. You may eat cursed items with 
+no ill effects.
+Rank 1 5: You choose which Stat is permanently 
+increased.
+JUMPING
+Strength
+With a running start of at least 10 feet (made as a 10‑
+foot Step with this Action), you leap through the air in 
+an arcing trajectory. Make an Unopposed Skill Check.
+On Success, you leap a distance in feet up to your 
+Rank + Str with a height of 1ft.
+UPGRADES
+Rank 5: Add your Dex to the height of your Jump.
+Rank 10: You gain a +1 Evade Buff.
+Rank 1 5: Your leap distance in feet is Rank + [Str ×2].
+LEADERSHIP
+Charisma
+You are skilled at coordinating two or more separate 
+parties during fights against Bosses. Make an Int‑Op‑
+posed Skill Check.
+On Success, the parties have Advantage on their first 
+Attack against the Boss.
+UPGRADES
+Rank 5: You may instead use this Skill during Skill 
+challenges while on a group Quest. Perform a free Call 
+a Play Action, and it extends to each member of the 
+parties during their next non‑combat Skill Check.4
+
+--- PAGE 197 ---
+Rank 10: Instead of Advantage, anyone in the parties 
+may perform a free Move Action.
+Rank 1 5: Instead of Advantage, anyone in the parties 
+may perform a free Evade Action.
+LIGHT ON YOUR FEET
+Dexterity
+Limitations: Usable only by animals
+With a running start of at least 10 feet (made as a 10ft 
+Step with this Skill), you leap through the air in an arc‑
+ing trajectory. Make an Unopposed Skill Check.
+On Success, you leap a distance in feet up to your 
+Rank ×2 with a height equal to your Dex ×2 in feet.
+UPGRADES
+Rank 5: Your distance is Rank ×3 and your height is 
+Dex ×3.
+Rank 10: You may leap without an arcing trajectory, 
+which allows for “straight up.”
+Rank 1 5: Your leap may last up to your Rank in sec‑
+onds, which resembles gliding.
+LOCKPICKING
+Dexterity
+Limitations: Roll with Disadvantage if you do not 
+have the proper tools, unless it’s a crude lock.
+You spend the Floor number in minutes trying to pick 
+the lock. Make an Unopposed Skill Check (more com‑
+plex locks may have a higher Difficulty, as determined 
+by the GM). If the lock was created by a named antago‑
+nist, this could be an Int‑Opposed Skill Check instead.
+On Success, you pick the lock!
+UPGRADES
+Rank 5: You make no noise and leave no trace.
+Rank 10: Each attempt takes half the time. You may 
+alter the lock so that the key no longer works.
+Rank 1 5: You don’t roll with Disadvantage if you lack 
+the proper tools.
+LORE
+Intelligence
+You have studied the goings‑on in the Dungeon and 
+have figured out a thing or two. Make an Unopposed 
+Skill Check.
+On Success, you know a little something about a 
+neighborhood, some of the Mobs, or how to avoid 
+pissing off the locals.
+
+41
+UPGRADES
+Rank 5: You can identify the major factions in the area.
+Rank 10: You are aware of the important local NPCs. 
+Just give your GM a break and don’t demand this all 
+up front or the first one you come across will likely 
+attack you.
+Rank 1 5: You roll with Advantage on your first Charis‑
+ma‑based Skill Check when encountering an organized 
+group in a neighborhood.
+NEGOTIATION
+Charisma
+Limitations: Does not work on members of your own 
+party. Some items have a minimum price.
+You spend 5 minutes haggling over the price of items 
+or negotiating to get what you want through compro‑
+mise. Typically, haggling is done with an NPC merchant 
+when you’re buying or selling items. If you haggle with 
+other entities, you do so with Disadvantage. Make an 
+Int‑Opposed Skill Check.
+On Success, you increase or decrease the price 10% in 
+your favor. If you’re not haggling, the opponent tenta‑
+tively agrees to your terms.
+UPGRADES
+Rank 5: Your party members can also buy or sell at 
+your newly‑negotiated price.
+Rank 10: Increase or decrease the price by an addi‑
+tional 10% in your favor.
+Rank 1 5: Increase or decrease the price by an addi‑
+tional 15% in your favor.
+PATHFINDER
+Passive
+Limitations: Ranks in this Skill only increase by magi‑
+cal means and training.
+Your HUD map zooms out with a thought, the breadth 
+of which is determined by a multiplier equal to your 
+Rank. Example: Rank 4 means your map covers ×4 the 
+standard area (1/4 of a square mile), which makes it 
+extend to 1 mile around you.
+UPGRADES
+Rank 5: You are notified when you are near a safe‑
+room or stairwell.
+Rank 10: You can see through your map while it is 
+open in your HUD.
+Rank 1 5: Mobs appear as red dots on your HUD map.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 198 ---
+4
+PERCEPTION
+Intelligence
+You concentrate your senses to pick out details about 
+your environment that others might miss. Make an Un‑
+opposed Skill Check, though the GM will likely adjust 
+the Difficulty based on the lighting, how cluttered the 
+area is, how quickly an event occurs, and other such 
+circumstances.
+Also use Perception when you take a Look for Clues 
+Action (p. 85).
+On Success, you notice something. It could be import‑
+ant; it might not be.
+UPGRADES
+Rank 5: Halve the penalty for cluttered areas.
+Rank 10: Halve the penalty for how short of a window 
+you have to notice the thing.
+Rank 1 5: Halve the penalty for the range to the thing.
+PERFORMANCE
+Charisma
+Whether you’re acting, dancing, playing an instrument, 
+singing, or delivering slam poetry, use this Skill when 
+you want to electrify an audience. Choose a type of 
+performance to specialize in as your starting type, be 
+it comedy, guitar, screamo, or reciting the collected 
+works of Alan Ginsberg.
+Make an Unopposed Skill Check to determine the 
+audience reaction. If you are competing against other 
+performers, add the top rival’s Cha to the Difficulty.
+On Success, you command the stage. The audience is 
+entertained.
+UPGRADES
+Rank 5: Choose an additional type of performance to 
+specialize in.
+Rank 10: Choose an additional type of performance. 
+You can coach and coordinate others in one of your 
+specialties. After coaching them for at least 1 hour in 
+one of your specialties, they can attempt an unskilled 
+Performance Skill Check without Disadvantage.
+Rank 1 5: Choose an additional type of performance. 
+You can mimic someone else’s performance after 
+experiencing it once.
+
+PERSUASION
+Charisma
+You have a knack for getting others to see things your 
+way. You typically need about 10 minutes of schmooz‑
+ing in a safe environment to make a Check with this 
+Skill, and you may suffer Disadvantage if the request is 
+risky, inconvenient, or untoward. Make an Int‑Opposed 
+Skill Check.
+On Success, you convince the target to follow your 
+suggestion if it isn’t too costly for them, too danger‑
+ous, or against their nature.
+UPGRADES
+Rank 5: They’ll follow your suggestion even if it is 
+costly for them.
+Rank 10: They’ll follow your suggestion even if it is 
+dangerous.
+Rank 1 5: They’ll follow your suggestion even if it’s 
+against their nature.
+REGENERATION
+Passive
+If your Rank in this Skill is equal to or greater than your 
+Con, you heal 1 Health Bar slot at the start of each 
+round (or every 10 seconds outside of combat). If not, 
+you heal 1 Health Bar slot every other round (or every 
+20 seconds outside of combat).4
+
+--- PAGE 199 ---
+UPGRADES
+Rank 5: After 5 minutes, any Minor Injury Debuff you 
+suffer from ends. After 10 minutes, any Major Injury 
+Debuff you suffer from ends.
+Rank 10: After 20 minutes, any Long‑Term Minor 
+Injury Debuff you suffer from ends. After 1 hour, any 
+Long‑Term Major Injury Debuff you suffer from ends.
+Rank 1 5: The time required to end injury Debuffs is 
+halved.
+RELIGION
+Intelligence
+You have a knack for understanding gods, their follow‑
+ers, and what makes them tick. Make an Unopposed 
+Skill Check.
+On Success, you know the basic information about a 
+god and the practices of their followers.
+UPGRADES
+Rank 5: You can identify the followers on sight, even if 
+they’re trying to hide their affiliation.
+Rank 10: You know how to sow discord among the 
+followers of that religion.
+Rank 1 5: You know strengths and weakness of the 
+gods.
+REPAIR
+Intelligence
+Limitations: For basic repairs to items with no moving 
+parts, magical or not.
+After spending 2 hours, you can repair most simple 
+items that are broken or damaged but not destroyed. 
+Make an Unopposed Skill Check.
+On Success, you repair the item.
+UPGRADES
+Rank 5: You can make repairs to things with moving 
+parts.
+Rank 10: You can make repairs in 1 hour.
+Rank 1 5: You can rebuild a destroyed item.
+RIDING
+Dexterity
+Limitations: The rider in control of the mount rolls 
+Attack Skill Checks with Disadvantage.
+While mounted on a living beast, you can ride to the 
+local watering hole without needing to make a Check. 
+
+41
+But during an action scene or when exploring Giant 
+Gopher Hole Flats, your mount might panic, and you 
+might get tossed for 1d6 bludgeoning for every 10ft 
+Move your mount has, plus its size value. Don’t land in 
+a cactus patch! Make an Unopposed Skill Check.
+On Success, your mount doesn’t stumble, and you 
+stay upright.
+UPGRADES
+Rank 5: Your mount has +5ft Move. You no longer 
+suffer Disadvantage when attacking while Riding.
+Rank 10: Your mount has an additional +10ft Move. 
+When other crawlers in your party roll this Skill un‑
+trained, they roll as normal (not with Disadvantage).
+Rank 1 5: Your mount has an additional +15ft Move. 
+When performing crazy stunts (like jumping through 
+flames), roll with Advantage.
+ROPEWORK
+Dexterity
+You know a half hitch from a clove hitch, and the quali‑
+ties of hemp vs. nylon (we had to look it up). Sadly, this 
+knowledge is mostly used to tie people up so you can 
+tor—interrogate them, but you’re going to buck that 
+trend, right? Just climbing and cattle‑rustling for you!
+Make an Unopposed Skill Check.
+On Success, you rope the thing with a good knot.
+UPGRADES
+Rank 5: You can now use this Skill as an Attack, at a 
+Range of 10ft vs. the target’s Evade. On Success, the 
+target gains the Held Debuff.
+Rank 10: You can whip your line in that special way to 
+untie a knot you made and recover your rope.
+Rank 1 5: Your Attack now has a Range of your 
+Strength (min 15). Just make sure your rope is long 
+enough.
+RUNNING
+Dexterity
+Limitations: For short bursts of running. For extended 
+runs, use Endurance instead (p. 190).
+You don’t need to use this Skill if you’re running down a 
+hallway to attack some Mobs. But if you’re racing, chas‑
+ing, or need to get away from a ticking time bomb, this 
+is the Skill you want. See Racing & Chasing, p. 73.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 200 ---
+4
+Make an Unopposed Skill Check every minute, not every 
+round. Add 1 to your result for every 10ft of Move you have.
+On Success, you succeed in the run.
+UPGRADES
+Rank 5: You have a permanent +5ft Move Buff. Make 
+a Check every 2 minutes.
+Rank 10: You have an additional permanent +10ft 
+Move Buff. Make a Check every 4 minutes.
+Rank 1 5: You have an additional permanent +15ft 
+Move Buff. Make a Check every 6 minutes.
+SAL VAGE
+Intelligence
+Limitations: Salvage cannot be used with explosive 
+devices.
+Salvage is the art of collecting useful items from things 
+you have deconstructed or failed to properly craft. See 
+Crafting, p. 22 1.
+Salvaging usually takes 1 hour to accomplish. At the 
+end of that time, make an Unopposed Skill Check.
+On Success, you recover half of the important raw materials.
+UPGRADES
+Rank 5: Your Salvage Checks take 30 minutes.
+Rank 10: On Success, you recover all of the important 
+raw materials.
+Rank 1 5: On a crafting Standard Fail or Near Miss, 
+roll your crafting Check again with Advantage, with an 
+additional 15‑minute time expenditure.
+SCUTELLIPHIL Y
+Intelligence
+Limitations: This Limited Skill can only be learned via 
+a Race, Class, or item.
+You know your way around patches and love collecting 
+them. Make an Unopposed Skill Check.
+On Success, you are able to identify a patch and its 
+bonus level, if any.
+UPGRADES
+Rank 5: You can sew and iron patches onto clothing 
+using this Skill.
+Rank 10: You may use this as a crafting Skill, but 
+crafting tables provide no bonuses. Enchanted patches 
+are limited to one per Gear slot and do not take up 
+Accessory slots. See Crafting, p. 22 1.
+
+Rank 1 5: Your crafting Checks take half the time. In‑
+crease the bonus value of your enchantments with this 
+Skill by 1, at no additional Difficulty or time to craft. 
+Example: If you craft a +2 Strength patch, it becomes 
+a +3 Strength patch.
+SHIELD BLOCK
+Strength, Interrupt
+Limitations: Requires you to be wielding a shield. 
+Cannot be used against Area of Effect damage. A suc‑
+cessful Shield Block still counts as “a hit crawler” or “a 
+crawler who failed to Evade.”
+You’re one of those types. You like a big slab of wood 
+or metal between you and the beasties. When you 
+are attacked by a physical Attack, spend one Action 
+to make a separate Shield Block Skill Check vs. the 
+Mob’s “to hit” for each of the Attacks targeting you. 
+If 3 physical Attacks are directed at you, roll this Skill 
+Check 3 times. Where an Evade Check is called for, ask 
+your GM if you can use this Skill.
+On Success, take half the damage before applying 
+your DR. Your Shield takes a ‑1 DR penalty on a Major 
+Fail; ‑2 on a Critical Fail. It breaks at 0 DR. However, a 
+broken shield and lost DR can be Repaired.
+UPGRADES
+Rank 5: You may also use this Skill against Spells and 
+magical damage.
+Rank 10: On a Critical Hit, you may make a Shield 
+Bash Attack as a free melee‑range Interrupt Attack 
+(instead of Advantage on your next Attack) if you wish, 
+dealing 3d6 base damage + Str Bludgeoning.
+Rank 1 5: +1d6 Shield Bash damage. Further reduce 
+the damage you would take by your Str Mod. Example: 
+After halving 30 damage down to 15, your Str Mod of 
+5 reduces it to 10 damage.
+SLEIGHT OF HAND
+Dexterity
+Limitations: Items you manipulate must be smaller 
+than the size of your hand. You cannot access others’ 
+Inventories or Hotlists.
+You’ve learned to manipulate small objects without being 
+spotted. Great for shoplifting. Make an Int‑Opposed Skill 
+Check. If someone’s Perception is a higher Rank than 
+your Sleight of Hand, you have Disadvantage.
+On Success, you maneuver the item without being noticed.4
+
+--- PAGE 201 ---
+UPGRADES
+Rank 5: You may attempt to pick the pockets of NPCs 
+and Mobs.
+Rank 10: You may attempt to plant items on someone 
+with pockets or the equivalent.
+Rank 1 5: You may manipulate items up to half your 
+own size (rounded down).
+SMITHING
+Strength
+You may craft mundane items such as horseshoes, 
+railroad spikes, nails, or the fun stuff: armor and 
+weapons, but without DR or any bonuses. See Crafting, 
+p. 22 1.
+UPGRADES
+Rank 5: You may craft items up to a +5 bonus.
+Rank 10: You may craft items up to a +10 bonus.
+Rank 1 5: Your crafting with this Skill takes half the time.
+STEALTH
+Dexterity
+Limitations: You must be out of sight of all foes to 
+begin this Check.
+Use this Skill if you want to move undetected or sur‑
+prise a Mob. Make an Int‑Opposed Skill Check.
+On Success before combat starts, you are unnoticed 
+and gain 1 non‑Attack Action. Don’t forget to take 
+your 10ft Step!
+On Success in a non‑combat situation, you remain 
+unnoticed and can perform a Move Action with a 10ft 
+Step as part of this Check.
+UPGRADES
+Rank 5: Your surprise Action can be an Attack with 
+Advantage.
+Rank 10: When other crawlers in your party roll this Skill 
+untrained, they roll as normal (not with Disadvantage).
+Rank 1 5: On a successful Surprise Check, you may 
+also take a full Move and Step. If you Attack with your 
+Surprise Action, deal ×2 the base damage dice.
+STREETWISE
+Charisma
+Use this Skill in populated areas to learn or spread ru‑
+mors, avoid attracting too much attention, gain access 
+to less‑than‑legal items, and the like. Make an Unop‑
+posed Skill Check.
+
+41
+On Success, you navigate a town without attracting 
+attention, deal with a criminal network, identify an informal 
+power structure, or gain the information you’re seeking.
+UPGRADES
+Rank 5: You also hear an additional rumor, as deter‑
+mined by the GM. Or spread one!
+Rank 10: You also quickly find a hiding place deter‑
+mined by the GM.
+Rank 1 5: You also uncover information that might give 
+you some leverage on an important person in town 
+determined by the GM.
+SURVIVAL
+Constitution
+You know how to survive in dangerous, often remote 
+places for long periods of time with only the meager 
+food and water you can rustle up. When traveling 
+through such areas, make an Unopposed Skill Check.
+On Success, you survive the perils of the conditions 
+unscathed. On a standard Fail, you suffer the effects of 
+hunger and/or thirst (see p. 76).
+UPGRADES
+Rank 5: You do not suffer additional damage from a 
+Critical Fail.
+Rank 10: When other crawlers in your party roll 
+this Skill untrained, they roll as normal (not with 
+Disadvantage).
+Rank 1 5: You do not suffer additional damage from a 
+Major Fail.
+SWIMMING
+Strength
+Limitations: After 1 minute of Swimming (Success or 
+Fail) or immediately on a Major Fail or worse, gain the 
+Fatigued Debuff.
+Use this Skill when there are consequences for not 
+swimming strongly or well rather than when you’re 
+taking a casual swim. For instance, if you’re racing for 
+your life, swimming against a strong current, or trying 
+to get to shore to avoid a waterfall. In these cases, 
+make an Unopposed Skill Check every 30 seconds.
+On Success, you swim well despite the danger. For 
+swimming during combat, see Special Forms of Move-
+ment, p. 70.
+UPGRADES
+Rank 5: After 2 minutes of Swimming (Success or 
+Fail), gain the Fatigued Debuff.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 202 ---
+4
+Rank 10: You can swim at your full Move rate as an 
+Action, but you still can’t take a 10ft Step.
+Rank 1 5: Make this Check every 5 minutes, and only 
+gain the Fatigue Debuff on a Critical Fail.
+TACTICS
+Intelligence
+Limitations: A crawler may attempt this Skill Check 
+only once per combat.
+Your tactical mind and directions can spur your allies 
+to victory. Choose one of the following combat disci‑
+plines: Attack, Damage, or Evade, and then make an 
+Unopposed Skill Check.
+On Success, you and each member of your party 
+gain a +1 bonus to Checks for the chosen discipline. 
+Increase the bonus by +1 for each higher degree of 
+Success.
+UPGRADES
+Rank 5: If you observe the foes and battlefield for at 
+least 5 minutes prior to combat, roll this Skill Check 
+with Advantage.
+Rank 10: After using this Skill during a combat, you 
+roll 2d10 when you Call a Play (still choose one die).
+Rank 1 5: The bonus applies to all three combat disci‑
+plines instead of just one.
+TATTOO ARTISTRY
+Dexterity
+Used to stick and poke ink under someone’s skin to 
+create a mundane tattoo. See Crafting, p. 22 1 for mag‑
+ical tattoos.
+UPGRADES
+Rank 5: You may craft tattoos with up to a +5 bonus.
+Rank 10: You may craft tattoos with up to a +10 bonus.
+Rank 1 5: Your crafting with this Skill takes half the time.
+TAUNT
+Charisma, Interrupt
+With a shout, some choice words, and maybe an 
+obscene hand gesture, you attempt to draw the ire of 
+enemies within 30 feet of you. After seeing where the 
+Mob Attacks are headed, make an Int‑Opposed Skill 
+Check.
+
+On Success, Taunt one Attack of your choosing away 
+from any target of your choosing and onto you. Higher 
+degrees of Success allow you to Taunt additional 
+Attacks onto you.
+UPGRADES
+Rank 5: You may make a free Evade Check against 
+each Taunted Attack (roll separately vs. each Attack 
+as usual). Then you may still spend an Action to Evade 
+other Attacks and reroll any Fails from your free 
+Evades.
+Rank 10: You can affect Mobs within 60 feet.
+Rank 1 5: Your free Evade Checks against Taunted 
+Attacks are made with Advantage.
+THROWING
+Strength
+This Skill is used for passing the pigskin with your pops 
+or throwing dynamite (potentially also at your pops).
+You can Throw an object that weighs up to your Str in 
+pounds at a distance of up to your Str ×10 feet. If you 
+want to Throw a heavier or bulkier item (up to the GM’s 
+discretion), you do so with Disadvantage.
+To hit a target area, make an Unopposed Skill Check.
+To hit a foe with an object, make an Attack Skill Check 
+vs. the target’s Evade.
+On Success, you hit the target.
+1
+82
+73
+64
+Figure 34
+5
+
+--- PAGE 203 ---
+On Fail, roll 1d8 for direction (see Figure 3). The 
+amount the Skill Check missed by is the distance away 
+in feet it lands.
+UPGRADES
+Rank 5: You have Advantage when Throwing to a 
+target who wants to catch what you are selling.
+Rank 10: Choose the direction on a miss, rather than roll.
+Rank 1 5: Your Throw range is your Str ×20 feet.
+TRACKING
+Intelligence
+Use this Skill to find and follow tracks. When searching 
+for or attempting to follow tracks, make an Unopposed 
+Skill Check. Factors such as how long ago the tracks 
+were made, the ground conditions, and whether other 
+tracks or marks obscure them may influence the Dif‑
+ficulty. Once you find tracks, you must make another 
+Tracking Check every 15 minutes to continue following 
+them.
+On Success, you either find the tracks or continue 
+following them.
+UPGRADES
+Rank 5: You can follow found tracks for 30 minutes 
+before making a new Check, and gain 1 piece of infor‑
+mation about the target(s).
+Rank 10: You can follow found tracks for 1 hour before 
+making a new Check, and gain 2 pieces of information 
+about the target(s).
+Rank 1 5: You can follow found tracks for 2 hours 
+before making a new Check, and gain 4 pieces of infor‑
+mation about the target(s).
+TRAP ENGINEER
+Intelligence
+Used to craft traps via a Sapper’s Table with a Trap 
+Module (3,000 gold). See Crafting, p. 22 1.
+UPGRADES
+Rank 5: Roll with Advantage when making non‑explo‑
+sive traps.
+Rank 10: Your traps can be set to trigger only against 
+a specific Mob, Boss, NPC, or crawler.
+Rank 1 5: Add a +5 Splash to your trap at no addition‑
+al Difficulty, and your crafting takes half the time.
+
+41
+ZONE OF CONTROL
+Passive
+Limitations: You must be wielding a Reach weapon.
+Once per round, when an enemy enters a space 
+adjacent to you for the first time, you may perform an 
+Interrupt Attack against them at a cost of one Action. 
+Make the Attack with Disadvantage.
+UPGRADES
+Rank 5: Your Attack is no longer made with 
+Disadvantage.
+Rank 10: The target is pushed 5 feet.
+Rank 1 5: Make your Attack Skill Check with Advantage.4CHAPTER 4: SKILLS, SPELLS, & GEARCHAPTER 4: SKILLS, SPELLS, & GEAR
+
+--- PAGE 204 ---
+4
+Spells
+Spells are the strange, dangerous, and occasionally 
+irresponsible way crawlers bend reality. Some Spells 
+heal wounds or reshape the battlefield, and others 
+exist primarily to make something stop moving—
+permanently. Spells cannot be attempted untrained 
+except via a scroll.
+Every Spell listed in this section follows the same 
+core rules for things like casting, targeting, and spend-
+ing Mana. Spell listings include a variety of terms or 
+fields associated with them, including:
+Name: The name of the Spell appears as a headline to 
+the entry.
+Type: Whether the Spell is an Attack or Passive is noted 
+under the flavor text. The type of damage delivered 
+from Attack Spells is also listed here for quick reference. 
+Spells default to your Int Mod for to-hit and damage 
+rolls. If a different Stat is listed here, that Stat is used to 
+hit and damage, but Spells all still use Intelligence for 
+Mana. If the spell is Favored by any particular Classes, 
+other Classes pay 1 additional Mana to cast it.
+Mana Cost: The Mana cost to cast the Spell.
+Range: The range of the Spell. Melee means 5ft 
+(adjacent).
+Duration: Some Spells are not instantaneous. When 
+the duration is reached, the Spell effect wears off at 
+the end of that round.
+AI Favor: Low-damage Spells grant AI Favor to you if you 
+use such a wimpy attack for a majority of your attacks 
+during a combat that lasts for at least three rounds.
+Limitations: If there are conditions, requirements, or 
+exclusions, they go here.
+Cooldown: If the Spell has a cooldown, it is listed 
+here. You can’t cast the Spell during its cooldown.
+Description: Any notes or descriptions of the general 
+effect seen when you cast the Spell are listed here. If the 
+Spell requires a Spell Check, that is also provided here.
+Base Damage: This is the damage the Spell deals with 
+1–4 Ranks in the Spell. You add your Int to the base 
+damage, unless it says otherwise. The damage type is 
+listed here as well.
+Upgrades: These are bonuses you gain when you 
+reach the listed Rank in the Spell. The first entry of 
+
+each benefit adds a damage die of the same type to 
+the base damage of the Spell. Additional damage dice 
+and effects are also listed here.
+SPELLS IN YOUR HOTLIST
+Don’t forget that Spells need to be in your Hotlist 
+to cast them in combat or other stressful situations. 
+Write down the specific combat text for your Spell in 
+the “Attacks” section on the front of your character 
+sheet. When you write a Spell on your Hotlist, you 
+need only list additional notes like the Mana cost and 
+Range of the Spell.
+Attack Spells require you to make an Attack Skill 
+Check vs. the target’s Evade. Spells that don’t require 
+a Check to be made when cast (non-Attack Spells) 
+are tagged as Passive and simply happen, but those 
+are not marked for Skill Advancement (p. 169) when 
+used. Instead, their Ranks must be raised via magical 
+means or trained at a guild.
+CREATING YOUR OWN 
+SPELLS
+In the ways that count, Spells are just a special type 
+of Skill. Create them in the same way as you’re 
+create a Skill (p. 174–175).
+LIST OF SPELLS
+AIR BUDDY
+“There’s no dungeon rule that a dog can’t fly.”
+Passive, Favored: Mage
+Mana Cost: 12
+Range: Self
+You launch yourself with enough force to fly, hurtling for‑
+ward from your current position up to 10 × your Int Mod 
+away. You land safely if you land on solid ground; other‑
+wise, you fall (see p. 76). You can cast this twice in a row 
+to “double jump” just like in platforming video games.
+UPGRADES
+Rank 5: You may choose one additional willing target 
+up to your size at touch range, who you bring with you.
+Rank 10: You can fly up to 20 × your Int Mod away 
+with this spell.
+Rank 1 5: You may choose up to five additional willing 
+targets up to your size at touch range to bring with you.4

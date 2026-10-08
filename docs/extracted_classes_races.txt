@@ -1,0 +1,3512 @@
+--- PAGE 128 ---
+3
+TABLE 35: THIRD FLOOR EVENTS 
+D1 2 ROLL 
+OR CHOOSE SKILLS GAINED/LEARNED NARRATIVE 
+Drain Life Spell, Performance, The Third Floor started with a bang as you found yourself 
+Lore, Play by Earhaving to perform for your life for an Elite NPC necromancer. 
+1 
+You managed to do well enough to be allowed to live and 
+learned a little more about the storylines of the Third Floor.
+Infusion, First Aid, Alchemy, Mixing a bunch of chemicals together and seeing what 
+Melted Off Fingerprintshappened wasn’t the best way to learn, as evidenced by 
+2 
+your melted fingernails, but you sure discovered how to 
+make an effective acid. 
+Hide in Shadows, Intimidate, You decided to enter the Third Floor carefully, sticking to the 
+3 Perception, Batman‑Wannabeshadows and waiting for the perfect moment to appear and 
+strike fear into the hearts of those nearby. Dramatic much? 
+Calligraphy, Religion, Holy On the Third Floor you discovered a quiet church that 
+Aura, God‑Curiousoffered you a resting place and time to get your bearings. 
+4 
+You probably won’t be converting any time soon, but it 
+taught you some useful Skills. 
+Engineering, Survival, Climbing, You were caught outside at night, leaving you with no 
+Just ’til Sunrisechoice but to find a way to survive. You managed to build 
+5 
+a shitty shelter up high to avoid the Mobs and live to see 
+another day. 
+Incendiary Device Handling, Mobs sometimes throw explosives, and you, an absolute 
+Regeneration, Catcher, Meat idiot, caught one and managed to save a fellow crawler’s 
+6 
+Shieldlife. It nearly cost you your arm, but it eventually healed 
+up. Mostly. 
+Jumping, Dodge, Investigation, You figured you’d be safer if you got up high and observed 
+7 Mile High Clubwhat was going on for this new floor, and hey, it kind of 
+worked out. Too bad some Mobs can fly and hurl projectiles. 
+Lockpicking, Improvised A locked room seemed like it would be a treasure room for 
+Explosive Device, Ropework, sure. Instead, you found a Borough Boss. Thanks to some 
+8 
+Short Fusequick thinking and an insane amount of explosive items tied 
+together, you got a shiny new star by your name. 
+Explosives Handling, Basic Sometimes it’s worth taking your time to learn new Skills. 
+Science, Tactics, Science is But who has that luxury in the dungeon? You grabbed a 
+9 Messyhandful of smoking bombs and hurled them into the center 
+of several Mobs. It made a huge mess, but you can’t make a 
+cake without exploding a few hundred eggs, right? 
+Pathfinder, Regeneration, Discovering a filthy castle filled with useless shit wasn’t the 
+Dumpster Diving, Got My best way to start the Third Floor, but you managed to turn 
+10 
+Tetanus Shottrash into treasure by finding some valuable stuff in the pile 
+of garbage, and you only got Super Tetanus twice! 
+Riding, Animal Handling, Acute Giant, deadly beasts tried to chase you down, but you 
+11  Ears, Yeehaw Buckaroomanaged to get the drop on one of them and rode it like a 
+bucking bronco. 
+Shield Block, Aiming, Weapon A Borough Boss of epic size nearly killed you, but a well
+12 Skill of your choice, It’s Luck attack saved your ass. T
+not Skilldeath, your shield saved your head. You’re one lucky SOB.3
+
+‑aimed 
+hen when the Boss blew up after 
+
+--- PAGE 129 ---
+TABLE 36: FOURTH FLOOR EVENTS 
+D 12  
+ROLL OR SKILLS GAINED/
+CHOOSE LEARNED NARRATIVE 
+Smithing, You attempted the impossible: making a map of the Iron Tangle. Sure, it’s a 
+1 Cartography, 3D monstrosity that takes up way too much space and isn’t actually right at 
+Arcane, Visualizerall, but damn, does it look impressive. 
+Balance, Endurance, When you jumped on the Nattier Line, you didn’t anticipate all the train cars 
+2 Swimming, Blood in would be filled with water and Concierge Sharks. Surviving the ride turned all 
+the Waterthe water bright‑red, but h
+Attack of The Neighborhood Boss didn’t seem that bad at first—just a fuzzy little guy, 
+Opportunity, but you know better than to trust that. You pissed off the Pooka into showing 
+3 
+Catcher, Taunt, its real form (a giant goat) and managed to use its rage against it. 
+Seeing Red
+Cooking, Iron Another group of crawlers threatened you over a Quest item. You didn’t back 
+Stomach, down and instead talked the group into joining you for a meal. Your sweet 
+4 
+Diplomacy, Through words and the delicious food made these enemies into allies. 
+Their Stomach
+Grand Illusion Spell, A marketplace stall, Treasures for Me, tried to rip you off, but you’re smarter 
+Determine Value, than that. You managed to spot the lie and get above value for everything 
+5 
+Investigation, Good you needed to sell, including that ugly conductor souvenir hat. 
+Business
+Find Trap, Gas from a trap causes you to hallucinate vividly. In an environment as 
+Perception, dangerous as the World Dungeon, it’s hard to tell if the feline royalty in the 
+6 
+Streetwise, corner shouting orders at you is real or just another denizen of the world. 
+Derealization
+Deception, Religion, Causing a train derailment to steal an Engineer Key from the Mantaur engi‑
+Sleight of Hand, neer wasn’t your brightest idea, and listening to him rant about Grull and 
+7 
+Sticky Fingersglorious battles definitely wasn’t the best use of your time. But you did 
+manage to nick the key from the engineer without having to fight him. 
+Basic Science, You reached station 436, the Abyss Station, and discovered a wreckage of 
+Fabricate, Salvage, train cars and a fuck
+8 
+Stare into the of valuable items, you crafted yourself something nice before escaping.
+Abyss
+Balance, Climbing, All those movies lied: Running across the tops of moving trains is not as easy 
+9 Ropework, as it looks! Thanks to some careful footwork and rope bridges, you managed 
+Ferroequinologistto survive crossing train car roofs without plummeting to your death. 
+Intimidate, A shopkeeper NPC tried to make a deal with a clueless group of crawlers, and 
+Leadership, you stepped in to make sure they got a fair deal. Sure, you might have made 
+10 
+Negotiation, Fair the shop keeper cry from fear, but that’s what tough negotiators do. 
+Deals or Bust
+Dodge, First Aid, You heard another crawler yelling for help in a nearby train car. As a hero 
+11  Wisp Armor Spell, (idiot), obviously, you ran towards the danger. Avoiding the Fleshers, and 
+Tender Hearteddefeating the War Mage, you saved the low
+Endurance, Running, Trying to outrun a train was a really stupid decision, especially with those 
+12 Foot Soldier, Train Cornets chasing you, but you are nothing if not stupidly tenacious. Not only 
+Spotterdid you not get run over, but you actually made it to the station in one piece.3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+31
+ey, it was only partially because of your blood.
+‑ton of Jikininki Janitor Ghouls. Thanks to the abundance 
+‑Level crawler. 
+
+--- PAGE 130 ---
+3
+Race & Class 
+Selection
+When you reach the Third Floor, the System AI will 
+recommend three specific Race and Class options 
+based on your Skills and background. Technically its 
+Race first, then Class; but for this game it’s more fun 
+to choose them in tandem so the order doesn’t matter 
+as long as your Race and Class are compatible.
+Your Game Guide walks you through the process 
+of selecting a Race and Class, as well as distributing 
+your Stat points. Although you can choose to remain 
+whatever Race you were upon entering the World 
+Dungeon (your choosing your original Race such as 
+Human or Cat—gaining those racial benefits), many 
+crawlers transform into a different Race to acquire 
+new aptitudes or capabilities. 
+Animal crawlers who choose a non-animal race 
+keep their animal Skills but cannot use them (unless 
+they somehow become an animal again).
+Each Race and Class features a variety of benefits, 
+including new Skills, Stats, Spells, the ability to raise Skills 
+to Rank 20, and more. If a Race or Class grants “+X Skill” 
+and you don’t have that Skill, you do now, at the Rank 
+listed. If you have that Skill, add the bonus amount, up 
+to 10 (see Skill Rank Limits sidebar). Some Races and 
+Classes have drawbacks as well.
+Some Races and Classes have prerequisites that 
+a crawler must meet to select them. If it requires an 
+SKILL RANK LIMITS
+During the Race and Class selection process, there is a Skill Rank limit of 10. If you already have Rank 8 in a Skill and 
+you would add +3 to your Rank, you stop at 10, and the remaining bonus is wasted. Once this process is over, your 
+limit is typically 15, but your Race or Class might allow some Skills to be raised to 20.
+If you manage to reach Rank 16 or higher, the benefits that come with it do not come online until the Sixth Floor.
+SEX, GENDER, AND SPECIES
+Limits from a character’s gender, sex, and species are optional, though they add spice to the game by letting you tell 
+stories relating to these elements of a character. If you don’t want to deal with these issues in a fantasy escape game, 
+you’ve already probably discussed it with your group (see Before Starting Play, p. 12, and Session Zero, p. 246). 
+Depending on how you might want to interact with these elements. Here are a few ways to deal with these limits:
+• The crawler experiences a glitch that allows an illicit choice to be made. Lawyers may be involved later as an 
+adversary sues about it.
+• Create a custom variant that does the same thing, but under a better name. The story may or may not relate to 
+the original limits.
+• Use a preferred definition: Decide that the System AI works off gender rather than sex. Patch things as needed.3
+
+achievement that you don’t have, ask your GM if you 
+might have earned it on the Tutorial Floors but never 
+received it. Even the AI can make mistakes, but it won’t 
+offer you a Race or Class you can’t select. It’s probably 
+in your inbox and you didn’t check the achievement. 
+Discuss the Races and Classes you’re interested in with 
+the GM, but they’re free to throw in some curveballs.
+In addition to prerequisite achievements, some have 
+Stat requirements. Conveniently, you gained a bunch of 
+Levels on the Tutorial Floors. Now that you’re on the Third 
+Floor, you get to apply all those Stat points before you 
+choose your Race and Class. To apply your Stat points, 
+subtract 1 from your current Level, then multiply that 
+value by 3. That is how many Stat points you get to add to 
+your five Stats, however you wish. Example: A 10th-Level 
+crawler has 27 Stat points to distribute (9 × 3). You may 
+also distribute your Stat points after choosing your Race 
+and Class.
+RACES
+Over the next dozen pages, you’ll find Race options 
+that appear in the books and are available to most 
+crawlers. Discuss your desires with the GM, and it 
+often helps to peruse likely Race and Class combos 
+before selecting your Race.
+After Classes, you’ll find the Build System, which 
+allows you to create your own Races and Classes for 
+your crawler based on a menu of available options. 
+Several of the Races presented here have unique bene-
+fits you won’t find on the point cost charts because the 
+option is just unique.
+
+--- PAGE 131 ---
+EARTH-BASED RACES
+The following Race options come from Earth, either as 
+naturally occurring (like Human and Cat), or inspired 
+by Earth culture (such as the Amazonian, Dwarf, Elf 
+[side note: you guys are really fascinated by pointy 
+ears; have you talked to your therapists about that?], 
+and Sasquatch). The mudskipper showrunners want to 
+see more of these Races battling for survival because 
+viewers across the galaxy love to root for the home 
+team. And yes, Primals are considered an Earth-based 
+Race since they’re based everywhere (or were…). It’s 
+more about the viewer’s point of view than Earthlings’.
+Earth-based Races can choose from among the 
+widest variety of Classes on Dungeon Crawler World: 
+Earth, including classic or Earth-based 
+Classes. They’re conveniently noted with 
+an Earth symbol (  ).
+Amazonian 
+Amazonians are a Race of tall, 
+well-built humanoid women from 
+Earth mythology who are known 
+for their athleticism. Upon choos-
+ing this Race, crawlers gain an 
+additional foot in height and bulk 
+up to bodybuilder levels of swole. 
+Amazonians excel at contests of 
+physical strength and endurance 
+but have little innate magical ability. 
+This Race is an ideal choice for Fighter 
+and Monk-based Classes.
+Prerequisites: This 
+limited Race is 
+only available to 
+crawlers who have 
+at least one Strength 
+or Dexterity-based Skill 
+at Rank 5+
+• Size: Medium (4)
+• +6 Strength
+• +3 Dexterity
+• +2 Bow, Endurance, and Pugilism 
+Skills
+• +2 DR
+• Each floor, you receive a 
+coupon good for one free 
+training at a Weapon 
+Training Guild
+
+31
+Arachnid 
+The way a creepy smile spreads across a face with 
+too many eyes makes the Arachnids one of the most 
+mistrusted Races in the World Dungeon. They’re 
+a popular choice among crawlers, especially with 
+cultures that revered spiders (like the Akan peoples 
+and Marvel fans who only like Spider-Man). Their 
+humanoid torsos on a spider’s frame give them a 
+terrifying appearance, but they are well known for 
+playing beautiful harp music (using silk chords), 
+weaving silken tapestries honoring their conquests, 
+and obsessing over death.
+Arachnids feel at home on the ceiling and hiding 
+in the shadows, content to watch events play out 
+while planning the moment to strike. Still, as 
+much as they are obsessed with 
+death and plotting, they are a 
+jovial Race who express their 
+creative side at every opportunity. 
+Arachnids make excellent Bards 
+and Rogues.
+• Size: Medium (4)
+• +5 Dexterity
+• +3 Web Spell, which  
+costs half the normal 
+Mana to cast
+• +2 Climbing, 
+Perception, and 
+Performance (with 
+a stringed instrument 
+specialty) Skills
+• You have an innate Climb 
+Move equal to your 
+normal Move value, 
+without needing Checks 
+(unless under duress)3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 132 ---
+3
+Cat 
+Cats are ordinary felines of unimpressive size 
+common in Earth households across the world. You 
+might not expect a Cat’s sleek grace and supernatural 
+luck to go to their head, but Cats have considered 
+themselves the true and rightful rulers of Earth since 
+before the days of ancient Egypt.
+Note that a recent update to Syndicate Race 
+standards has benefited the Cat, among other Races.
+Prerequisites: This limited Race is only 
+available to crawlers who are 
+already a Cat
+• Size: Small (2); Animal
+• +4 Dexterity
+• +2 Constitution
+• +1 Charisma
+• −3 Strength
+• +3 Cat-like Reflexes
+• +2 Slice Attack Skill
+• Can see in total darkness
+• Advantage on Cat-like 
+Reflexes Skill Checks
+• Nine Lives: Take half damage from the first 9 attacks 
+each day
+• Vulnerability: Take double damage from Dogs and Beasts
+Cat Girl/Cat Boy 
+Cat Girls/Boys are special offshoots of humanity that 
+possess the best qualities of a Cat (though many 
+pretend to be humble and demure to hide their 
+ferocity and cunning). Possessing feline traits on 
+top of a Human form, Cat Girls/Boys might appear 
+mostly Human, save for furry ears atop the head or 
+a tail, or they might appear like a humanoid lioness/
+lion in a maid’s dress. Most other species get along 
+with Cat Girls/Boys, though natural felines often view 
+their existence as an abomination. This Race is a great 
+choice for Bard and Mage Classes.
+• Size: Medium (4)
+• +3 Dexterity and Charisma
+• −2 Constitution
+• +2 Cat-like Reflexes, Good First Impression, Light on 
+your Feet, and Slice Attack Skills
+• Your Slice Attacks may add your Cha Mod to the 
+damage instead of Str
+
+• Toxoplasma G.: Once per day, your allies have Rank 
+5 Catcher Skill (and the +5 DR Upgrade!) for one 
+round to protect only you from attacks about to hit 
+you. Those who do gain 1 AI Favor
+• When dealing with felines other than Cat Girls/
+Boys, you make Charisma-based Skill Checks with 
+Disadvantage
+Changbi Demon 
+The sound of chains clinking against the floor 
+heralds a Changbi Demon, an undead 
+demonic crawler Race from Earth folklore. 
+Changbi Demons are tall and slender with 
+a pale gray-green tinge to their skin. Some 
+Changbi Demons also sport horns, claws, 
+and sharp teeth. Changbi Demons are 
+innately tuned to sense divinity and those 
+who worship gods and deities. This Race 
+is an ideal choice for Fighters, Rogues, 
+Assassins, and other martial Classes.
+• Size: Medium (4)
+• +5 Dexterity
+• +3 Strength and Constitution
+• −2 Charisma
+• +3 Ambush and Creepy Chains (Club) Skills
+• Creepy Chains: Can use any chain as a weapon (use 
+the Club Weapon Skill, but with a 10ft range). A 
+Changbi Demon can lengthen or shorten any chain 
+by 50% once per scene
+• Each time a foe touches a Changbi Demon with 
+their bare skin (such as with Hand-to-Hand attacks), 
+that foe takes 1d4+F Acid
+• No need to breathe
+• Vulnerable to Holy damage
+• Cannot worship a deity
+Changeling 
+A Changeling wears many faces—as many as they’ve 
+had the pleasure (or displeasure) of meeting. Many 
+examples of shape-stealing nightmares come from 
+across the galaxy, making Changelings right at home 
+among the stories Earthlings warned their children 
+about. Like Doppelgängers, Changelings can change 
+their form, but while Doppelgängers maintain their 
+base stats, Changelings apply the stats of whatever 
+form they assume.3
+
+--- PAGE 133 ---
+Able to slip unseen into any crowd as an 
+anonymous stranger or to infiltrate close-knit groups 
+by wearing the face of a friend, Changelings make 
+powerful friends and dangerous enemies. This Race is 
+an ideal choice for Rogue and magic-using Classes.
+• Size: Large (5)
+• +3 Charisma
+• +2 Intelligence
+• +2 Ambush and Deception Skills
+• +1 Escape Artist Skill
+• Advantage on Deception Skill Checks when no 
+talking is needed
+• Changelings gain free access to organizations and 
+producers by impersonating other crawlers and 
+Syndicate celebrities, but can only use those 
+relevant to the currently shifted individual
+• Changeling Shapeshifting: A 
+Changeling who touches a member 
+of another Race can shapeshift 
+themselves into that Race, building 
+a “library” of Races they 
+can transform into. 
+A Changeling can 
+shapeshift into 
+another Race as 
+an Action to make an 
+Unopposed Deception Skill 
+Check. While shapeshifted into 
+that other Race, they gain that 
+Race’s bonuses other than statistics 
+and Skills. For example, a Changeling 
+shapeshifted into a Crocodilian 
+would gain the Race’s Advantage 
+on Intimidation Skill Checks, DR 
+Buff, bonus after a full meal, and 
+additional fatigue penalty on 
+Charisma-based Checks
+• While shapeshifted into another 
+Race, these changes are conveyed 
+to World Dungeon systems, 
+including information on viewers’ 
+HUDs, mini-maps, and other 
+systems
+• Changelings can’t 
+touch mimics-
+type creatures. 
+Don’t ask 
+why or what 
+happens—it’s bad
+
+31
+Crocodilian 
+With a snout full of bone-chomping teeth and hands 
+that will wring necks so hard that the head just falls off 
+afterward, the bipedal wrecking machines known as 
+Crocodilians are, pound for pound, among the most 
+ferocious reptiles walking the Crawl. When it comes 
+to fighting, their thick scales and predatory instincts 
+serve Crocodilians very well. As an anthropomorphic 
+version of one of Earth’s most vicious predators, these 
+cold-blooded killers are here to prove they’re among 
+the galaxy’s most dangerous denizens.
+Crocodilians need to consume a large amount 
+of food each day just to stay active. That hunger 
+is a constant companion, but aside from that, 
+a Crocodilian is a resilient, positively terrifying 
+killing machine that thrives in swamps, aquatic 
+environments, and petting zoos (all of which 
+are rich in food). Crocodilians make excellent 
+Barbarians, Fighters, and Monks.
+• Size: Large (5)
+• +4 Strength
+• +3 Constitution
+• +2 Pugilism and Powerful 
+Strike Skills
+• When physically menacing 
+someone in person, roll 
+Intimidate Skill Checks with 
+Advantage
+• +3 DR Buff
+• +1 Buff for all of your Skill 
+Checks for 1 hour after eating a 
+full meal
+• While you have the Fatigued 
+Debuff, roll all Charisma-based 
+Checks with Disadvantage
+Doppelgänger 
+Doppelgängers are shapeshifters, 
+but they aren’t just about 
+changing their appearance to 
+match someone else. Earth must 
+have had some really fucked 
+up history for two kinds of 
+shape-stealing boogey monsters 
+to feature so prevalently—no 
+wonder you’re so freaked out 
+about your uncanny valley. In 
+fact, Doppelgängers require a 3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 134 ---
+3
+lot of practice before they can change into someone 
+specific, and even general changes are painful and 
+require a basic level of artistry and a good mirror.  
+A Doppelgänger can mold its malleable body like 
+tough clay.
+For all the flexibility of their form, Doppelgängers 
+can’t change their mass, and that includes the mass 
+of any equipment they are wearing or carrying, 
+which must become a part of whatever form they 
+take. This makes Doppelgängers a very adaptable 
+Race, as they’re able to pick up something of unusual 
+composition and integrate it into their own form, but 
+they’re not capable of assuming identities as quickly 
+or effectively as a Changeling. Doppelgängers are 
+sturdy and make great front-line Fighters and Paladins.
+• Size: Unchanged, but size changes  
+when shifting
+• +4 Constitution
+• +3 Strength
+• +1 Deception and Endurance Skills
+• +2 DR
+• Due to shifting mass, can 
+determine their maximum 
+weight to lift based on 
+Constitution instead of 
+Strength
+• Advantage on Escape Artist Skill 
+Checks and can make such Checks 
+while being Held or watched
+• Once per scene, as an Action, you can 
+incorporate a held weapon into their 
+mass to deal additional damage equal 
+to their Con Mod. Items incorporated 
+this way can’t be disarmed
+• Doppelgänger Shape-Changing: 
+As an Action, you can transform 
+into any shape of comparable mass, 
+incorporating carried and worn 
+items into the new shape in the same 
+percentage (that is, a Doppelgänger 
+holding metal equal to half their weight 
+must assume a shape that is one-third 
+metal). This transformation is painful, 
+causing you to mark off 1 Health Bar 
+slot per change. If you attempt to 
+change your shape to resemble a 
+specific person or object, do so 
+with an Unopposed Deception 
+Skill Check
+
+Dwarf, Classic 
+Is there any RPG Race more classic than the gruff, 
+bearded Dwarf? From Snow White to The Lord 
+of the Rings, Dwarves have fascinated Earthlings’ 
+imaginations for far too long. Shorter than a person 
+and as wide as they are tall, Dwarves tend to dig and 
+work underground, crafting items of unsurpassed 
+beauty and durability. Dwarves are a natural fit in 
+the tightest corridors of the World Dungeon, where 
+their doughty endurance and keen crafting traditions 
+serve them well.
+Dwarves are quick to grouse about their troubles, 
+even when things are otherwise going their way, and 
+they rarely put up with frippery or foolishness. They 
+might not all drink heavily and speak in a grumble 
+through their beards, but you’d be hard-pressed to 
+find one that doesn’t. Dwarves make great front-line 
+Fighters and are excellent crafters, no matter what 
+Class they pursue.
+• Size: Medium (4)
+• +4 Constitution
+• +2 Intelligence
+• −2 Charisma
+• +3 in two different crafting Skills of your 
+choice
+• +2 Endurance Skill
+• Can see in total darkness
+• All crafting Skills can be raised to Rank 20
+• When dealing with elves or fairies, make all 
+Charisma-based Checks with Disadvantage
+Dwarf, Fathom 
+Fathom Dwarves, more so even than other 
+Dwarves, have evolved and adapted to 
+spelunk deep into mineshafts. They strap 
+specially trained glowing lizards to their 
+heads as light sources deep where the 
+sun has never penetrated. No idea 
+where this lizard symbiosis is from, but 
+these guys are already delving so deep 
+that Gandalf wrote their asses off as 
+Balrog chow back on page 483 of The 
+Silmarillion. Go ahead, look it up.
+Fathom Dwarves are skilled 
+diggers and crafters with stout, 
+hardy bodies and rough skin. They 
+have an edge in Constitution and 3
+
+--- PAGE 135 ---
+Strength, making them an ideal choice for Fighters, 
+Barbarians, and crafting Classes where durability is as 
+important as Skill.
+• Size: Medium (4)
+• +3 Constitution
+• +2 Strength
+• +3 Engineering Skill
+• +2 Dumpster Diving and Salvage Skills
+• Roll d20 Checks with Advantage when earth, rocks, 
+and dirt are involved
+• Can produce a 15ft Cone of light from a harmless 
+lizard nesting atop their heads, and can 
+easily acquire a new lizard if the existing 
+one is lost or killed
+Elf, High 
+Graceful, tall, and immortal, 
+Elves are a species of 
+long-limbed, pointy-eared 
+humanoids with a natural 
+affinity for magic. They 
+often reside in forest groves, 
+carefully tended over many 
+Human generations to form 
+natural residences, workshops, 
+and libraries. If all this effortless 
+aptitude seems likely to make Elves 
+arrogant or snooty, well buckle up, 
+brother, because they’re even worse 
+than in the countless Earth stories 
+that thinly veiled countless authors’ 
+ear-point fetish.
+Elves consider themselves the better 
+of nearly all other Races, particularly 
+those Races that grub in the ground like 
+Dwarves and Rat-Kin. Some Elves are 
+maybe just better at not being jerks 
+about it. Choosing this Race ensures 
+a clear mind, easy charm, and a 
+complexion that Hollywood starlets 
+would kill for. This Race makes an 
+ideal magic-user, Bard, or anyone else 
+who wouldn’t like to get their hands 
+dirty or stink of… ugh, effort.
+• Size: Medium (4)
+• +4 Intelligence, Dexterity, 
+and Charisma
+
+31
+• +2 Intimidation Skill, and you can use your Cha 
+Mod
+• +1 Lore Skill
+• You recover Mana at twice the normal rate in a 
+natural environment
+• Add 1d4 to your Evade Checks
+• When dealing with Dwarves, Rat-Kin, or anyone 
+smelly or dirty, make all Charisma-based Checks 
+with Disadvantage
+• Two different Charisma-based Skills can be raised to 
+Rank 20
+Elf, City 
+City Elves are a subspecies of Elf that make their 
+home in glass skyscrapers and bustling city streets 
+rather than in groves of trees or remote castles. 
+Not convinced these bastards came from 
+Earth? I’d dare you to check out the depths 
+of Urban Fantasy, or Romantasy if you’re 
+nasty—if those still existed. Instead, your 
+ass is stuck in the dungeon and is going 
+to have to trust me on this one.
+Lithe and tall, with pale skin and 
+neon-colored hair, City Elves sometimes 
+favor using modern technological 
+interpretations of Spells and equipment 
+compared to their more rustic kin. 
+City Elves do not necessarily consider 
+themselves superior to all other Races 
+by virtue of being Elves; it’s just that all 
+others simply fall short by comparison, 
+and usually because of their beliefs more 
+than their appearance.
+For what it’s worth, City Elves in the 
+dungeon are fucking morons. They are 
+most often hypocritical sycophants 
+and cult members who are too dumb 
+to realize they’ve been tricked into 
+living in a cult. But none of that 
+has to apply to you as a crawler; 
+it might earn you some funny 
+looks from anyone else who 
+has come across another 
+City Elf in the dungeon, 
+though. This Race makes 
+ideal Arcanists, Bards,  
+or Mages.3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 136 ---
+3
+• Size: Medium (4)
+• +6 to split as you please between Intelligence, 
+Dexterity, and Charisma
+• +3 Good First Impression Skill
+• +2 Negotiation and Streetwise Skills
+• Once per floor during a Long Rest, a City Elf can 
+adjust the +4 spent between Charisma, Intelligence, 
+and Dexterity, reassigning those points between 
+those Stats
+• When entering a settlement for the first time, make 
+your first Charisma-based Check with Advantage. 
+On an Amazing Success or better, you have made a 
+permanent contact
+
+Elf, Night 
+Accustomed to the darkness and navigating via 
+the stars, Night Elves share the lithe androgynous 
+appearance of their fellow elven kin, but their skin 
+tones cover the spectrum of cool colors from teal to 
+deep purple. Thank Drizzt and Blizzard for making 
+these an Earth staple. Night Elves have longer, wider 
+ears than other elves and an even more acute sense 
+of hearing. Their eyes are accustomed to low light, 
+but they have difficulty seeing in bright light, whether 
+natural or artificial. The high Intelligence and Dexterity 
+of Night Elves make them an ideal choice for 
+Arcanists, Rogues, and Mages.
+• Size: Medium (4)
+• +3 Intelligence and Dexterity
+• +3 Acute Ears and Hide in Shadows Skills
+• Can see total darkness
+• Gain Advantage when you use the Hide in Shadows 
+Skill at night
+• Once per day, can instruct the shadow of a living 
+thing to use the Taunt Skill at Rank equal to Floor 
+Number (and no Stat Mod) to pull attacks away 
+from you
+• Hide in Shadows and one crafting Skill of your 
+choice can be raised to Rank 20
+Frost Maiden 
+Chilled to the core, Frost Maidens are a Fey Race of 
+short humanoids with ice-cold skin, pale hair, and 
+indomitable mental fortitude that originated during 
+European dark ages. The icy walls around their psyche 
+give Frost Maidens an Immunity to mental infirmity. 
+Frost Maidens are highly charismatic and have access 
+to elemental ice powers, and can gain the service of 
+their Game Guide as a Manager. This Race is a strong 
+choice for magic-users, Bards, and Tricksters.
+• Size: Petite (3)
+• +2 Charisma, Intelligence, and Dexterity
+• +2 Persuasion Skill
+• Melee attacks deal +1d4 Ice damage
+• Roll with Advantage on Int and Con Stat Checks
+• The crawler’s Game Guide becomes their Manager
+• Capable of flight for up to 1 minute per scene3
+
+--- PAGE 137 ---
+Human 
+You’re already a Human. I’m gonna go out on a limb 
+here and guess you don’t need a description. If you 
+choose this, nothing will change, except for the scant 
+benefits below. Choosing to remain Human offers 
+little by way of additional advantages, but the galaxy 
+loves to watch Humans face the perils of the dungeon 
+with only their wits and tenacity to rely on!
+• Size: Typically Medium (4)
+• +2 to all Stats
+• At the end of each floor, roll one Skill Advancement 
+Check with Advantage if that Skill is Rank 9 or less
+• Gain 1 AI Favor each time you level up
+• When you take damage, you may spend 1 AI Favor 
+to gain DR equal to your Con (as many times as you 
+have AI Favor to spend)
+• Once per day, when you would make an untrained 
+Skill Check on a non-Passive Utility Skill, you can roll 
+as if you had 2 Ranks in the Skill
+• Once per floor, you can spend an Action to remove 
+any single Debuff you’re suffering from, even Injuries
+Igneous 
+The Earthling idea for the Igneous goes much farther 
+back than the first stunt performer who threw on a 
+rock costume to battle the Power Rangers. Molten 
+rock flows through their veins, visible through the 
+cracks in their stony flesh. This flow visibly slows when 
+an Igneous is cold or injured. Igneous are unsurpassed 
+in terms of endurance and stamina. While they are 
+not typically the fastest creatures in the universe, they 
+can occasionally move with a burst of explosive speed 
+to match any erupting peak.
+An Igneous’s rocky skin makes them ideally suited 
+for stalking prey on their homeworld but leaves them 
+incredibly conspicuous anywhere else. Of course, 
+being conspicuous isn’t typically as big an issue after 
+you’ve poured a fresh batch of lava all over anyone 
+who might object to your presence. This Race is an 
+ideal choice for any tank Class.
+• Size: Large (5)
+• +6 Constitution
+• +4 Strength
+• −2 Intelligence and Charisma
+• +1 Endurance Skill
+• +3 DR Buff
+
+31
+• Once per day, double your Move for 20 seconds
+• As an Action, make a Con Stat Check. On Success, 
+deal 1d8+F Fire damage, 5ft Burst radius
+• No Survival Checks needed in harsh heat 
+conditions and can breathe underwater
+• Immunity to Fire damage, and vulnerable to Ice 
+damage
+• Ability to burrow
+• Lose 1 Health Bar slot each time you access your 
+Inventory (not Hotlist)
+• Disadvantage on Checks to conceal your presence 
+or nature (such as Stealth)3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 138 ---
+3
+Lajabless 
+Lajabless, creatures from Caribbean folklore, 
+live two lives: by day, they walk the dungeon as 
+beautiful people, casting Spells with ease, but are 
+weak in strength. At night, their face turns hideous 
+and cavernous as their magic wanes, giving way to 
+powerful strength. Lajabless must walk the balance 
+between magic and martial Skill, beauty and horror, 
+demon and Human.
+To show they constantly straddle these worlds, 
+Lajabless usually have, no matter their current aspect, 
+one humanoid leg and one animal leg (often that of 
+a cow or goat). The versatile shifting nature of the 
+Lajabless makes this Race an ideal choice for crawlers 
+who want a diverse half-caster build.
+• Size: Medium (4)
+• +5 Intelligence during the day, +5 Strength during 
+the night3
+
+• +2 in two Spells of your choice
+• +3 in one Weapon Skill of your choice
+• Advantage when using the Ambush and 
+Intimidation Skill
+• During the day, Strength is halved, but Spells cost 
+half the Mana to cast
+• During the night, Strength is doubled, but Spells 
+cost double the Mana to cast
+Obsidian Butterfly 
+Obsidian Butterflies are much like the Aztec deity that 
+inspired them. They are deadly, graceful, and absolutely 
+terrifying. These skeleton-faced figures move about the 
+battlefield with frightening speed, blessing their allies 
+and bringing devastation to their foes.
+Their wings contain hues of orange, 
+red, black, and white, blending together 
+in a colorful pattern. The vibrancy and 
+speed of their wings can make them appear 
+borne aloft by naked flame. More than one 
+foe has chosen to flee the sight of an Obsidian 
+Butterfly bearing down upon them.
+Prerequisites: This limited Race is only available to crawlers 
+who earn Rank 5+ with any Edged Weapon
+• Size: Medium (4), mostly due to wings
+• +3 Dexterity
+• +2 Intelligence
+• −4 Constitution
+• +2 Intimidate and Slice Attack Skills
+• +2 in a Spell of your choice
+• Has four translucent butterfly wings that can reach 
+up to 15 feet and deliver touch- or melee-range 
+Spells
+• May use Cha Mod instead of Con Mod in their 
+Health Bar
+• Upon entering the Sixth Floor, choose to either gain 
+Stronger Wings (wings are now capable of flight for 
+up to 2 minutes per scene, with +20ft Move when 
+flying) or Ferocious Visage (Advantage when using 
+any Skill to inspire fear or respect)
+• Add 1d4 to your Evade Checks
+
+--- PAGE 139 ---
+Primal 
+For the first several seasons of Dungeon Crawler World, 
+all contestants started off as Primals. Primals are blank 
+slates, and your appearance does not change. The 
+Primal Race offers little by way of specialization, but 
+the Earth Classes you’ll have access to make up for it. 
+Find your current Race in this section of the book and 
+apply those racial benefits. However, list your Race as 
+Primal, and then apply these modifiers:
+• Size: Unchanged
+• −1 to all Stats
+• All Skills can be raised to Rank 20
+THE WORLD DUNGEON ON HARD 
+MODE: PRIMALS
+Primals were the first known species to conquer the 
+universe. After, they seemingly disappeared and 
+have since become “the boogeymen of the cosmos.” 
+In the first Dungeon Crawler World seasons, every 
+crawler was a Primal, but since then, they’ve been 
+relegated to the back catalog, behind all of the 
+shiny and popular Race choices.
+Choosing a Primal is taking the World Dungeon 
+on hard mode—you’re declining the many 
+significant bonuses of choosing another Race 
+(even plain old humans have more benefits) 
+and accepting a penalty to all of your stats in 
+exchange for the opportunity to raise any Skill 
+above the World Dungeon’s soft cap of 15 Ranks. 
+Raising a Skill to 15 is already difficult, requiring 
+concentration to reach that degree of mastery. 
+Primals get that challenge and say “Hold my beer” 
+as they careen into maximizing as many of their 
+Skills as possible. If you make this choice, we salute 
+you—but don’t say we didn’t warn you.
+Rat Hooligan 
+Rat-Kin have a reputation for being survivors, from the 
+tales of rat-people whispered around candlelight in 
+ancient times to Master Splinter serving as a beloved 
+sewer-bound mentor. One of the more common 
+Mobs in the early floors of the World Dungeon, 
+Rat-Kin have surged forth from their warrens to resist 
+the wholesale slaughter of their species. A crawler 
+that chooses this Race becomes one of hundreds of 
+siblings across all dungeon floors. Rat-Kins’ propensity 
+to hide in places considered gross or unnatural allows 
+them to traverse the floors surreptitiously, gathering 
+secrets and carrying messages. Rat Hooligans make 
+ideal Rogues and capable magic-users.
+
+31
+• Size: Petite (3)
+• +2 Dexterity
+• +1 Constitution
+• +2 Escape Plan and Stealth Skills
+• +1 Bite and Survival Skills
+• Advantage on Checks to resist hunger and thirst
+• Can converse with common house rats to gather 
+minimal information while in buildings
+• May add Dex Mod to Bite damage instead of Str
+Sasquatch 
+Bigfoot. Yeti (if you choose an ice-based Class). Skunk 
+Ape. The list of nicknames for these privacy-minded 
+Earth creatures is almost endless, but in the end, the 
+result is the same. First, you take a Human, you cross 
+it with a gorilla, you make them a foot-and-a-half taller, 3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 140 ---
+3
+cover them with hair, and then give them size 24 feet. 
+The resulting behemoth is a monstrous melee warrior 
+and tank that smells like shit but hits (and smushes) 
+like a sledgehammer.
+Prerequisites: This limited Race is only available to 
+crawlers who have attained Rank 5+ in the Smush Skill
+• Size: Large (5)
+• +6 Strength and Constitution
+• +2 Dexterity
+• −3 Intelligence
+• −1 Charisma
+• +3 Foot Soldier and Smush Skills
+• Smush Skill can be raised to Rank 20
+Tetrakai 
+What you notice first says a lot 
+about you. Was it the blue skin 
+or the four arms? This Race is 
+traditionally offered to female 
+crawlers, but some male 
+Tetrakai have been spotted—
+literally. Male Tetrakai have 
+white polka-dot spots the 
+size of poker chips. Now 
+you know why you don’t 
+see many.
+As you can imagine, having four 
+arms is pretty nice, though I don’t know 
+what the males do with the other three. 
+Holding four items at a time offers all 
+sorts of juicy benefits. Too bad you don’t 
+have four actions, amirite?
+• Size: Medium (4)
+• +6 Dexterity
+• −2 Charisma
+• +2 Pugilism and Wrasslin’ Skills
+• +1 in all Edged Weapon Skills
+• Four Arms: Your Hands/Holding Gear slot allows for 
+four items (or two weapons requiring two hands)
+
+Tigran 
+These tiger-headed humanoids stand more than six 
+feet tall and are covered from head to toe in a layer 
+of incredibly vibrant orange-and-black fur. They have 
+the head of a tiger, a long muscular tail, and humanlike 
+hands that end in wicked claws. These claws are 
+excellent for attack and defense, but they can cause 
+difficulties in performing small, delicate tasks such as 
+picking locks. You don’t need to have fond memories 
+of your Lisa Frank trapper keeper to know these tiger 
+people are uniquely Earth creations.
+Tigrans are cunning predators. If given their choice, 
+they attack from cover, using overwhelming speed 
+and ferocity rather than engaging in a drawn-out 
+encounter. Although they’re incredibly stealthy, often 
+choosing to walk barefoot, their coloring makes 
+stealth difficult in most of the World Dungeon.
+Tigrans are social creatures, especially among 
+others of their own kind, but they harbor an inherent 
+streak of pride. It can be difficult to change their 
+minds, which makes them seem antisocial. 
+Tigrans make great Barbarians, Monks, 
+and Paladins.
+• Size: Medium (4)
+• +3 Dexterity
+• +2 Strength
+• −4 Charisma
+• +2 Ambush, Cat-like Reflexes, 
+and Slice Attack Skills
+• Can see in total darkness
+• +1 DR Buff
+• +10ft Move
+• When attacking during a 
+Surprise Action, deal ×2 
+total damage with melee 
+attacks
+• Disadvantage on 
+Dexterity-based 
+Skills that require 
+fine manipulation or 
+motor coordination3
+
+--- PAGE 141 ---
+ALIEN RACES
+In addition to Earth Races, showrunners love allowing 
+Humans to choose other Syndicate Races to compete. 
+Unfortunately, those Races don’t get access to 
+the Earth-based Classes. Instead, they gain a small 
+benefit—usually popularity among their audience.
+Bune
+Bunes are a slight, dragon-like people with a calm sense 
+of superiority; if Crocodilians are the Barbarians of the 
+lizard world, Bunes are the elves. They are naturally 
+peaceful, but they can be clever Fighters. As part of the 
+Syndicate, the Bune home world once hosted Dungeon 
+Crawler World. Although Bunes can’t use their leathery 
+wings to fly right away, their wings gain strength at higher 
+Levels and allow for short-distance flight. This Race is an 
+ideal choice for Rogue and magic-using Classes.
+Prerequisites: This limited Race is only available to 
+crawlers with 3 or more Popularity
+• Size: Medium (4)
+• +3 Intelligence
+• +2 Dexterity
+• −2 Constitution
+• +3 Determine Value, Fabricate, and Negotiation 
+Skills
+• At Level 50, +2 Dexterity and gain wings capable of 
+flying up to 500ft per scene
+• +1 Popularity each time you roll a Critical Hit in 
+combat
+Caprid
+Caprids are a Syndicate Race of bipedal, goat-headed 
+humanoids—their hands are usually Human while 
+their feet can be hooved or toed. Caprids come in 
+a variety of color morphs and can possess horns in 
+many shapes and patterns; some known Caprid colors 
+include pitch-black, dappled white, and caramel, gray, 
+or deep brown.
+Rich in both power and resources, Caprids hold 
+a strong standing in the Syndicate, and multiple 
+sponsor entities have Caprid board members. The 
+high intelligence and charisma of Caprids make them 
+an ideal choice for magic users, con artists, and cult-
+leader hopefuls.
+• Size: Large (5)
+• +3 Intelligence and Charisma
+
+31
+• −2 Strength
+• +3 Find Crawler, Investigation, and Leadership Skills
+• Find Crawler and Persuasion Skills can be raised to 
+Rank 20
+• +1 Popularity each time you roll a Critical Hit on 
+a Charisma Skill Check or on a Spell Skill Check 
+outside of combat
+Grulke
+You are a toad. A five-foot-tall toad person who once 
+conquered planets, not that anyone remembers. If 
+anyone calls you a frog, make them regret it. The 
+Grulke are a militaristic Race of toad warriors, though 
+they have lost much of their organization as a Race 
+and are now more often seen solo in mercenary 
+halls. If only a Grulke were able to unite the disparate 
+battalions and restore honor to their people, an 
+up-and-comer who hasn’t been poisoned by infighting 
+and politics. Oh, if only there were someone worthy…
+Prerequisites: This limited Race is only available to 
+crawlers who have Rank 5+ in the Jumping or Light on 
+Your Feet Skill
+• Size: Medium (4)
+• +3 Dexterity
+• +2 Strength
+• −2 Charisma
+• +3 in either Jumping or Light on Your Feet Skills
+• +2 Zone of Control and a Reach Weapon Skill of 
+your choice
+• Tongue Lashing: Ranged attack; [Rank = Floor 
+Dex to hit. 1d8 + Str, Bludgeoning, Number] + 
+30ft range. Add 1d8 at Rank 5, 10, and 15. Rank is 
+always equal to the Floor Number and cannot be 
+raised by other means
+• Gain a +2 DR breastplate (Torso) with your Grulke 
+Battalion crest, not that it means much anymore
+• Troll-type enemies have Advantage on Wrasslin’ 
+Checks against you, and when successful, they  
+lick you
+• +1 Popularity when a troll-type enemy licks you or 
+when you achieve an Amazing Success or better on 
+an Attack against a troll-type enemy
+• +1 Popularity when you score a Critical Hit on a 
+larger foe in combat3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 142 ---
+3
+Hobgoblin
+A Hobgoblin is what happens when a lady Troll 
+manages to get a Goblin drunk enough to talk 
+herself into his pants. While that description makes 
+them sound like they come from bawdy Earth 
+Bards, this alien Race of explosive hooligans is 
+a plague among the stars. Large, muscular, and 
+smart, Hobgoblins excel at trapmaking, explosives 
+management, and all-out mayhem. Unfortunately, 
+these guys are so ugly that even Gorgons lose their 
+lunch looking upon them, and they’ve suffered a few 
+nerfs in the most recent balancing patch. This Race is 
+best suited for Rogue and Fighter-based Classes.
+Prerequisites: This limited Race is only available to 
+crawlers who have Rank 5+ in the Explosives Handling 
+Skill and any Trap-based Skill
+• Size: Medium (4)
+• +1 Dexterity
+• −5 Charisma. Charisma is capped at 10
+• +3 in all Trap-based and Explosive-based Skills
+• +1 Regeneration Skill
+• Free access to all Hobgoblin Sapper 
+Workshops
+• At the end of each floor, roll 
+one Explosive or Trap-based 
+Skill Advancement Check with 
+Advantage
+• All explosives and trap-making Skills 
+can be raised to Rank 20
+• +1 Popularity when you kill an enemy 
+with a trap or explosive once per scene
+Pocket Kuma
+A Pocket Kuma is an adorable and 
+diminutive hybrid of a bear, a capybara, 
+and a sugar glider that comes from 
+beyond the stars. Their small bodies 
+and oversized eyes made them 
+absolutely adorable, and they were 
+quickly put into service as pets by the 
+High Elves who bred them specifically 
+for that purpose.
+However, these cute little 
+abominations learned how to think, 
+which inspired mass genocide of their 
+
+species. Fortunately, a few clever specimens managed 
+to escape, thus perpetuating their existence and 
+eventual spread throughout the galaxy.
+A Pocket Kuma’s oversized eyes give them the ability 
+to see incredibly well in day or night. Despite ranking 
+among the weakest and most fragile of Races, they 
+are some of the most agile and nimble creatures in the 
+galaxy. It’s not uncommon for them to leap up to ten 
+times their own body length with a running start, or 
+half that from standing.
+Although their dexterous paws have opposable 
+thumbs, they’re simply too small to wield or use any 
+weapons or items that aren’t specifically designed for 
+them, making them poor warriors. Members of this 
+Race are ideal as Bards, Rogues, or magic-users.
+• Size: Small (2); Animal
+• +5 Dexterity and Charisma
+• −4 Strength. Strength is capped at 10
+• −4 Constitution
+• +2 Bite, Dodge, and Slice Attack Skills
+• +1 Ambush Skill
+• You roll with Advantage on all 
+Charisma-based Checks
+• Can see in total darkness
+• Take no damage from falling
+• Light on Your Feet Skill can 
+be raised to Rank 20
+• You deal half damage 
+with Strength-based 
+melee weapons
+• Vulnerable to 
+Bludgeoning damage
+• +1 Popularit y when you act 
+in the Surprise Round of a 
+combat or roll a Critical Fail 
+on an Evade Check
+Pterolykos
+Powerful and beautiful, the 
+Pterolykos is the very picture 
+of dangerous grace on land or 
+air. Resembling a humanoid 
+wolf with resplendent multi-
+hued feathery wings, 
+Pterolykos inspire 3
+
+--- PAGE 143 ---
+veneration as icons of strength, versatility, and beauty. 
+Their mournful howl is known to haunt the dreams of 
+those who hear it.
+While Pterolykoses don’t have keen eyes, their noses 
+rank among the most well-developed in the galaxy. 
+They’re known to chase prey for miles, tracking them 
+through the air by scent before swooping down to tear 
+their victims apart with their powerful jaws.
+A Pterolykos can’t help but be incredibly expressive 
+in face and body, which is perfect for grand displays 
+of emotion and theatrical gestures, but it makes lying 
+and deception incredibly difficult. It’s a wonderfully 
+dramatic gesture to underline a point by snapping 
+their wings open, but it’s a challenge to pretend 
+they’re angry or upset when their wolf tail won’t stop 
+wagging. This Race is ideal for any Bard-based or 
+magic-using Class.
+• Size: Medium (4)
+• +4 Charisma
+• +2 Dexterity
+• +3 Bite, Performance, and Tracking Skills
+• +1 Diplomacy Skill
+• Has wings capable of flight for up to 50 seconds 
+per scene
+• Disadvantage on all Checks to conceal emotion or 
+presence (such as Deception and Stealth)
+• +1 Popularity when you roll a Critical Hit on a 
+Charisma Skill Check
+Skyfowl
+Regal. Devout. Loyal. Kind of opinionated. All 
+of these describe the majestic Skyfowl people 
+found throughout the World Dungeon and 
+the rest of the galaxy. Skyfowl are known for two 
+things: they’re devout warriors willing to protect their 
+honor and social standing, and they’re kind of jerks to 
+everyone about it.
+There are dozens of flights of Skyfowl, and their 
+physical characteristics depend on their origin. Those 
+hailing from the wilds of the World Dungeon may 
+have bestial hawk-like characteristics or the dense 
+muscles of a rooster protecting his flock; those from 
+cities might have dull-colored feathers and small wings 
+suitable for survival in crowded settlements.
+No matter where they originate or what their role 
+is in a Crawl, all Skyfowl believe in the superiority 
+
+31
+of those who don’t just dream of flying high in the 
+clouds but can do it. That, and feathers beat boring fur 
+and itchy scales, no contest. This Race makes a good 
+choice for any non-frontline Fighter Class.
+• Size: Medium (4)
+• +3 Dexterity and Charisma
+• −1 Strength and Constitution
+• +2 Slice Attack Skill
+• +2 in all Charisma-based Skills
+• Advantage on the Perception Skill for observing 
+things 10+ feet away
+• Capable of flight for up to 3 minutes per scene. 
+However, Skyfowl who choose a Cleric-based Class 
+have their wings clipped and can only make short 
+hops of up to 10 seconds per scene when flying
+• +1 Popularity when you roll a Critical Hit on a 
+Leadership, Perception, Persuasion, or Taunt Skill 
+Check3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 144 ---
+3
+CLASSES
+Over the next 17 pages, you’ll find Class options 
+that appear in the books and are available to most 
+crawlers. Your choice of Race should influence the 
+three Class options the System AI gives you. Discuss 
+your desires with the GM beforehand.
+Classes are divided into a bunch of categories, but 
+one big category is the base Class. Barbarians, Bards, 
+Clerics, and Mages are categories of similar Classes 
+familiar to fans of tabletop roleplaying games and 
+Dungeon Crawler Carl alike.
+Any crafting tables you gain through your Class 
+appear as soon as you acquire a personal space 
+(Fourth Floor or later).
+At the end of this section, you’ll find a Class Point 
+Buy system to help you design your own unique Class! 
+Several of these Classes have unique benefits you 
+won’t find on the point cost charts, because you’re a 
+unique snowflake.
+EARTH CLASSES
+In addition to the hundreds of possible Classes 
+(some assembly required) from previous editions of 
+the Crawl, the Borant corporation is proud to offer 
+a variety of Classes inspired by Earth! These Classes 
+are only available to crawlers who select an Earth-
+based Race (see p. 128). As an incentive for crawlers 
+to select these special Classes, they also gain a Silver 
+Earth Box (GMs can find these on p. 321). The box 
+contains an Earth Hobby Potion that guarantees 
+3 Skill Ranks in one of the many past times that 
+fascinated the hosts of this cycle’s Crawl, plus at 
+least one bonus item!
+You can tell Earth Classes, like Earth Races, by the 
+beautiful marble (  ) next to the name of the Class. 
+ARCANIST
+Arcanists are magical artisans with secret knowledge 
+of the processes required to manufacture arcane 
+items. These crafters can create a broad range of 
+traditional and not-so-traditional magical items. 
+Making arcane items often takes considerable 
+time and requires specific, sometimes hard-to-
+get ingredients. Arcanists maintain secrecy over 
+their crafting recipes and are often willing to pay 
+handsomely for new recipes in their particular fields 
+of expertise.
+
+Boring Ol’ Arcanist
+Class Type: Arcanist
+You decided long ago that you wanted to craft powerful 
+magical items, but really never settled on a specialty. 
+You’re pretty good in some areas and just average in 
+others. At higher Levels, you may gain some additional 
+expertise, but for the most part, you are a generalist. Still, 
+when someone needs that special arcane item to defeat 
+that big Boss, you might just be the Arcanist for the job. 
+And if not, well, you’re probably the only Arcanist they 
+can find, so you’ll make do.
+• +3 Intelligence
+• +2 Dexterity
+• +5 Arcane Skill
+• +3 Salvage Skill
+• +2 in a crafting Skill of your choice
+• +1 in a crafting Skill of your choice
+• Tier 1 Arcanist table
+• Arcane and one crafting Skill can be raised to Rank 20
+Alchemist
+Class Type: Arcanist
+Crafting arcane liquids, now that’s a fun thing! You 
+can make all kinds of potions for all sorts of occasions. 
+Plus, you’ve messed up enough potions to know 
+how to make some pretty cool poisons, ranging from 
+merely annoying to extremely deadly. Luckily, you’ve 
+also learned, often the hard way, how to negate these 
+poisons. Well, mostly. Don’t drink that gray one, just 
+in case.
+• +3 Constitution and Intelligence
+• +5 Alchemy Skill
+• +3 Infusion Skill
+• Immunity to Poison
+• Tier 1 Alchemy table
+• At the end of each floor, add 1 to your Skill 
+Advancement Checks for Alchemy and Infusion
+• Alchemy Skill can be raised to Rank 20
+Douchy Wizard School Wand-Maker 
+Class Type: Arcanist
+Everyone wants that special wand. Rare materials, 
+finely sculpted form, access to powerful magics. Well, 
+someone has to fill all these custom orders! Not only 3
+
+--- PAGE 145 ---
+can you make wands, but you can also make fancy 
+staves and… toys? Well, maybe wand-shaped toys… 
+not asking why you want those. All of these can be 
+used by their wielder to focus their arcane energies 
+and do wondrous things. Or maybe just make light 
+and shoot Magic Missiles—to each their own.
+• +5 Intelligence
+• +1 Strength and Dexterity
+• −2 Charisma
+• +5 Arcane Skill
+• +2 Lore, Negotiation, and Salvage Skills
+• Tier-1 crafting table of your choice
+• Arcanist Skill can be raised to Rank 20
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Infernocrafter
+Class Type: Arcanist
+Lighting stuff on fire is fun. You make a lot of things 
+that inherently burn with magical fire, including 
+flaming weapons and fiery magical items. Flaming 
+arrows? Check. Flaming swords? Check.
+• +3 Strength and Constitution
+• +1 Dexterity
+• +5 Arcane Skill
+• +3 Smithing Skill
+• Resistance to Fire damage
+• Tier 1 Arcanist table
+• Tier 1 Smithing table
+• Arcane Skill can be raised to Rank 20
+Prison Tattoo Artist 
+Class Type: Arcanist
+Sometimes you just gotta make do with the tools you 
+have on hand and hope for the best. They might not 
+be pretty, but they do the job.
+Who are we kidding? You can’t tell what these 
+motherfucking tattoos are supposed to be! Just don’t 
+say that to the lifer who’s been working on them all 
+month for you.
+You can create functional, but not aesthetically 
+pleasing, magical tattoos that grant a wide range of 
+arcane abilities for a limited amount of time.
+
+31
+• +3 Constitution and Dexterity
+• +2 Intelligence
+• +5 Tattoo Artistry Skill
+• +3 Calligraphy Skill
+• +2 Dagger Skill
+• Tier 1 Tattoo chair (table)
+• Tattoo Artistry Skill can be raised to Rank 20
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+BARBARIAN
+Barbarians are lightly-armored, rage-filled warriors. 
+Many can harness that rage to gain special abilities. 
+Others are just pretty good at smashing things. Many 
+have thick, incomprehensible accents and are just 
+better off shouting at you instead of trying to hold a 
+civil conversation. Talking generally isn’t their strong 
+suit anyway—just give them something to smash.3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 146 ---
+3
+Boring Ol’ Barbarian
+Class Type: Barbarian
+Like parading around in a loincloth and bashing 
+heads? This is the Class for you! Just remember the 
+Barbarian’s motto: what doesn’t kill you makes you 
+stronger—as well as probably bleed a whole lot in the 
+process.
+• +6 Strength
+• +5 Constitution
+• +3 in a Weapon Skill of your choice
+• +2 Endurance Skill
+• +1 Intimidate Skill
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• +2 DR Buff
+Gladiator
+Class Type: Barbarian, Bard
+You were once a slave, but now you fight for glory! 
+Well, you’re probably still a slave (you are trapped 
+in a world-spanning dungeon where you’re fighting 
+hordes of enemies for the entertainment of countless 
+strangers, after all), but you do get some additional 
+perks—as long as you manage to stay alive. You’ve 
+been used and abused, but that has only toughened 
+you and made you stronger. So strong, in fact, that 
+your masters might be fearful of you and want to 
+knock you down a peg. Or ten.
+• +3 Strength, Constitution, and Charisma
+• +2 in a Weapon Skill of your choice
+• +2 Performance and Intimidation Skills
+• +1 Attack of Opportunity Skill
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• +1 DR Buff
+• Once per combat, after you kill an enemy, you can 
+make an Unopposed Performance Skill Check. On 
+an Amazing Success or better, gain +1 Popularity
+• One Weapon Skill can be raised to Rank 20
+Harii 
+Class Type: Barbarian, Rogue
+You’re a lean, mean killing machine. And you look 
+good in black. Like, all-black, head to toe. Some think 
+
+you’re a ghostly myth, but others know better, as you 
+use your stealth to terrorize your enemies at night, 
+making them think you’re some sort of demonic spirit.
+• +1 Strength, Dexterity, and Intelligence
+• +4 Ambush and Stealth Skills
+• +2 in one Weapon Skill of your choice
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• +1 DR Buff
+• Can see in total darkness
+• Access to the Desperado Club
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Feral Cat Berserker 
+Class Type: Barbarian
+Cats couldn’t care less about you and your needs. Feral 
+cats somehow manage to care even less as they barely 
+eke out their own survival, living off cockroaches and 
+rodents of unusual size. And sometimes things just get 
+a little out of hand—out of paw?
+Prerequisites: This limited Class is only available to 
+cat-based Races, such as Cat, Cat Girl, and Tigran
+• +2 Dexterity, Strength, and Charisma
+• +3 Slice Attack and Unarmed Combat Skills
+• +2 Dodge Skill
+• +1 Ambush Skill
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• +1 DR Buff
+• Can see in total darkness
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Shieldmaiden 
+Class Type: Barbarian, Fighter
+You are a fierce and skilled warrior who strikes fear 
+in the hearts of your enemies—especially all those 
+boys who used to bully you as a child. When you’re 
+not busy kicking ass and taking names, you might be 
+found working out in the gym, helping your family, 
+or volunteering in your community. You can bring 
+home the bacon and fry it up in a pan—after you hunt 
+down the boar and butcher it, just like you did to that 
+wretched boy Dustin who used to tease you and pull 
+your pigtails.3
+
+--- PAGE 147 ---
+Prerequisite: This limited Class is only available to 
+female crawlers
+• +3 Strength, Dexterity, and Charisma
+• −2 Intelligence
+• +5 Shield Block Skill
+• +2 in one Weapon Skill of your choice
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• +1 DR Buff
+• One Weapon Skill can be raised to Rank 20
+• Add your Str Mod a second time to your melee 
+attack damage against males
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+BARD
+Bards are storytellers, musicians, and poets. They 
+are the custodians of the oral tradition, keeping 
+track of historic people and events and sharing that 
+information in a creative and entertaining way. Some 
+just happen to be more entertaining than others 
+(lookin’ at you, Jeff Hays).
+Some Bard-type Classes are eligible for Patrons, but 
+you’ll have to find someone willing and able to serve as 
+your Patron. It’s fun, like a Quest to find one. The GM 
+has information on the process and some characters 
+who might fill this role (see Bard Patronage, p. 315).
+Boring Ol’ Bard
+Class Type: Bard
+Every town and village has that one Bard who parties 
+hard all night yet still manages to look refreshed in the 
+morning. They drink, sing or play an instrument, then 
+drink some more, pass out, then wake up to do it all 
+over again the next day. If mead and beer weren’t so 
+rich in carbs and sugars, they’d probably already be 
+dead by now.
+• +3 Charisma
+• +3 Performance Skill
+• +1 in a Weapon Skill of your choice
+• +2 in a Spell of your choice
+• +2 Diplomacy Skill
+• +1 Good First Impression and Lore Skills
+• Access to all membership-based clubs, regardless of 
+current memberships
+
+31
+• Membership in the Dungeon Book of the Floor 
+Club (all Spells)
+• Free room at all saferooms
+• You may gain access to a Patron
+• You pay +1 Mana to cast Spells that are not 
+“Favored: Bard”
+Artist Alley Mogul 
+Class Type: Bard, Merchant
+This Charisma and Intelligence-based Class is a 
+modern-day merchant, using the siren song of 
+merchandise to cast a spell on the wallets and purses 
+of their prey. Using their superior artistic talent to 
+entertain and entice fellow nerds, the Artist Alley 
+Mogul travels the world to sell their copyright-infringing 
+wares. While not particularly menacing physically, this 
+plucky merchant is extremely difficult to hurt.
+A recent balance patch hit the Class, increasing 
+gold-generating potency while reducing survivability. 
+Members of this Class receive the following benefits:
+• +5 Dexterity
+• +5 Charisma
+• +2 Dodge, Negotiation, and Pathfinder Skills
+• +2 Shield Spell
+• A 25% discount at all stores plus a 15% bonus to 
+money earned from sales
+• 10% interest earned on all coins upon descent to 
+the next floor
+• Dodge Skill can be raised to Rank 20
+• Silver Earth Box, with guaranteed Earth Hobby 
+Potion
+Former Child Actor 
+Class Type: Bard
+This rare subclass is an offshoot of the Bard Class. It can 
+only be obtained by crawlers who have both earned 
+the “Cut!” achievement and reached at least one trillion 
+views. Once a spoiled brat superstar, then addicted to 
+drugs, you have crawled back from the brink stronger 
+than ever. You’re ready for your comeback. This 
+Charisma and Chance-based Class could go either way. 
+You’ll either rise to the top, or you’ll be dead in a ditch 
+in a week. After a balance patch, it’s slightly more likely 
+you’ll end up dead in that ditch, but this is your chance 
+to prove them wrong!3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 148 ---
+3
+This unique Earth Class is based on the Bard/Rogue 
+Jack-Of-All-Trades subclass, but with a few distinctive 
+differences. In addition to the following benefits, the 
+most distinct aspect of this multi-faceted Class is the 
+Rank 3 Character Actor Skill. This Skill increases in 
+Rank only upon descent to the next floor.
+Prerequisites: Must have Popularity 3+, receiving the 
+Cut! achievement, to take this Class
+• +10 Charisma
+• +3 Character Actor Skill
+• +2 Cockroach Skill
+• Add 1 to your Skill Advancement Checks for 
+Charisma-based Skills
+• Immunity to Poison and all diseases
+• The Manager Benefit
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+NecroBard
+Class Type: Bard, Necromancer
+This unusual Class combines one of the most-
+loved occupations with one of the most reviled. 
+Necromancers specialize in magic related to raising 
+the dead. Bards must choose an entertainment-based 
+Skill. Depending on this choice, whether it be singing, 
+the kazoo, or storytelling, the resulting crawler will use 
+this Skill to either entertain, protect, or glamour both 
+the living and the dead. The NecroBard receives the 
+following benefits:
+• +3 to Intelligence, Constitution, and Charisma
+• −2 Strength
+• +4 Performance Skill
+• +3 Turn Undead and Panty Dropper Spells
+• Access to all membership-based clubs, regardless of 
+current memberships
+• Free room at all saferooms
+• You pay +1 Mana to cast Spells that are not 
+“Favored: Bard” or that don’t deal Necrotic damage
+Poet Laureate 
+Class Type: Bard
+The spoken word is your jam. Rather than singing 
+or playing an instrument, you craft entertaining and 
+usually scandalous verses about the rich and famous. 
+This not only endears you to the common folk, but it 
+
+also enables you to use your words to convince others 
+to do your will.
+• +3 Intelligence
+• +2 Charisma
+• +5 Performance Skill with the written word specialty
+• +2 Earworm (as spoken word poetry), Heal Others, 
+and Shield Spells
+• Access to all membership-based clubs, regardless of 
+current memberships
+• You pay +1 Mana to cast Spells that are not 
+“Favored: Bard”
+• Performance Skill can be raised to 20
+• You must choose a Patron. The GM will give you  
+a choice of at least two options when you select  
+this class.
+• Silver Earth Box, with guaranteed Earth Hobby 
+Potion
+Professional Roadie 
+Class Type: Bard, Rogue
+Considered by some to be the backup singer to a 
+Bard, the Professional Roadie possesses powers that 
+can boost their comrades and maximize sonic effects. 
+Whether working on a team or taking your act solo, 
+the Professional Roadie has a wealth of experience to 
+draw on and has dealt with the most difficult patrons. 
+The ability to sort out broken equipment and manage 
+healing elixirs makes you invaluable to a group trying 
+to survive the Floor.
+The Professional Roadie spends a long time 
+exploring the World Dungeon, utilizing their Skills 
+to bargain for food and lodging from others. Highly 
+versatile, a Professional Roadie often has a wealth of 
+contacts on call should they need favors, information, 
+or money that is owed to them. You also tell the best 
+stories and can hypnotize a crowd with tales of days 
+gone by and gigs you’ve played.
+• +8 split between Strength, Constitution, and 
+Charisma
+• +4 Performance Skill, with a guitar specialty
+• +3 Negotiation Skill
+• +1 Iron Stomach and Repair Skills
+• Advantage on Checks against Poison or effects that 
+give the Shit-Faced Debuff3
+
+--- PAGE 149 ---
+• At the start of each combat, you may declare that 
+all the damage you deal is Sonic damage
+• Roll with Advantage when making a Repair Skill 
+Check
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Spellbinder
+Class Type: Bard
+Everyone loves a good story, and most Bards are 
+pretty good at telling them. You, on the other hand, 
+are the master weaver of fantastical tales. Glorious 
+adventures are your forte, and you effortlessly bring 
+even the most dry and voluminous tomes to life with 
+your passionate narration (with the exception 
+perhaps of those from authors who seem to 
+write several 1,000-page books a year, with 
+a never-ending narrative). Your storytelling 
+demands the rapt attention of all who hear, 
+even when they’d rather ignore you. Like in 
+the midst of battle. Or during sex. Your 
+oration is so immersive that your listeners 
+can’t help but feel a sense of loss when the 
+
+31
+story eventually ends, making them yearn for the next, 
+even though it might be years before it reaches their 
+ears. (Yeah, thanks for that, Jeff Hays).
+• +2 Charisma and Intelligence
+• +2 Good First Impression, Lore, and Performance 
+Skills
+• +2 in Hot Stuff Aura and Panty Dropper Spells
+• Add your Cha Mod a second time when making a 
+Cha Skill Check during a potentially hostile situation
+• Access to the Spellbook of the Floor club (“Favored: 
+Bard” Spells only)
+• Once per day, you can draw the attention of 
+everyone on the battlefield for a round, 
+preventing them from attacking (this 
+includes party members, Mobs, and 
+minions, but not Bosses)3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 150 ---
+3
+CLERIC
+Clerics cozy up to a deity and hope for a measure 
+of its power. They’re not necessarily true believers, 
+but they do need to keep their god’s rules and 
+regulations. And the gods are fickle bastards.
+Boring Ol’ Cleric
+Class Type: Cleric
+Whether do-gooders or downright evil, Clerics exist 
+ostensibly to serve their god and lead their god’s 
+followers. Some do this with loyalty and reverence. 
+Others do so out of fear or in hopes of rewards. Either 
+way, being a Cleric has its ups and downs, sometimes 
+leaving you dirt-poor and other times providing you 
+with that private jet you “need” to serve your god.
+• +4 Charisma
+• +3 Intelligence
+• +2 in a Weapon Skill of your choice
+• +3 Religion Skill
+• +2 Heal Others, Shield, and Turn Undead Spells
+• Access to the Spell Book of the Level club 
+(“Favored: Cleric” Spells only)
+• Access to Club Vanquisher
+• Must worship a deity (see Deities & Worship, p. 163)
+• You cannot choose a Cleric-type Class if you have 
+access to the Desperado Club
+Black Inquisitor General
+Class Types: Cleric, Mage, Paladin
+You are a true believer who seeks out and kills those 
+who have betrayed the faith… and you might enjoy 
+this sacred duty a little too much. Yeah, who are we 
+kidding? You’re a psychopath who’s out to inflict pain 
+on others, and you’re using your deity as a convenient 
+excuse.
+• +3 Strength and Intelligence
+• +1 Charisma
+• −2 Constitution
+• +3 Find Trap Skill
+• +3 in a Weapon Skill of your choice
+• +2 Trap Engineer Skill
+• +2 in a Spell of your choice
+• +1 Religion Skill
+
+• Can see in total darkness
+• Must worship a deity (see Deities & Worship, p. 163)
+• Access to all membership-based clubs, regardless of 
+current memberships
+Santero 
+Class Type: Cleric
+You can call upon powerful spirits for aid as you provide 
+guidance and protection to others, and you do it with 
+color and flair! This Class is a hybrid Necromancer Cleric 
+with tanking and support tendencies.
+• +3 Strength and Charisma
+• +2 Constitution
+• −2 Intelligence
+• +2 Heal Others, Shield, and Soul Collector Spells
+• +2 in a Weapon Skill of your choice
+• +2 Religion Skill
+• +1 Endurance Skill
+• Access to the Dungeon Book of the Floor club 
+(“Favored: Cleric” Spells only)
+• Access to Club Vanquisher
+• Must worship a deity (see Deities & Worship, p. 163)
+• You cannot choose this Class if you have access to 
+the Desperado Club
+DRUID
+Druids practice magic focused on the natural world, 
+typically as defenders of the wild. Their magic grants 
+them Spells that harm, heal, and manipulate the 
+environment.
+Boring Ol’ Druid
+Class Type: Druid
+Typical tree-hugging nature lovers, Druids are 
+protectors of flora and fauna alike. Sometimes they 
+can get a bit overprotective. Don’t get caught littering, 
+as they’re more than willing to exploit ecological 
+forces to punish their enemies. So pick up your trash, 
+or else your pulverized bones will serve as bricks for a 
+retaining wall around some Druid’s garden.
+• +2 Intelligence, Constitution, and Dexterity
+• +3 Nature’s Breath Spell
+• +3 in a Spell of your choice
+• +2 in a Spell of your choice3
+
+--- PAGE 151 ---
+• +2 Survival Skill
+• Your Mana recovers at twice the normal rate in a 
+natural environment
+• Access to the Dungeon Book of the Floor club 
+(“Favored: Druid” Spells only)
+Herbalist 
+Class Type: Arcanist, Druid
+You’ve spent years mastering the arcane properties of 
+herbs—not the boring culinary kind, but the kind that 
+make people question their life choices and maybe 
+make a few more bad ones along the way. Every herb 
+is a piece of the puzzle, every blend a calculated risk. 
+The dungeon is your garden, and you harvest it with 
+the enthusiasm of someone who genuinely does not 
+understand the concept of “too much.”
+• +2 Constitution and Intelligence
+• +2 Alchemy, Cooking, First Aid, and Survival Skills
+• +2 Nature’s Breath and Dirt Clod Spells
+• Your Mana recovers at twice the normal rate 
+in a natural environment
+Lifebringer
+Class Type: Druid
+You’ve traveled the wasteland, past former 
+refineries, down furious roads, and around 
+thunderous strongholds. You’re a survivor, and 
+you’ve learned how to restore the dead lands 
+and help flora to grow and thrive. While others 
+fought the limited resources, often wearing nothing 
+but chaps and some poorly applied sunscreen, you 
+sought to bring life back to the desert. When you 
+encountered lost souls, you took them in and helped 
+them find their way, both figuratively and spiritually. 
+You only wish you could get rid of all that sand that 
+keeps getting stuck in the most uncomfortable places. 
+There’s gotta be a spell for that!
+• +2 Constitution
+• +1 Intelligence
+• +2 First Aid, Pathfinder, Regeneration, and Survival Skills
+• +2 Nature’s Breath Spell
+• +1 Rank in all Spells with the Heal keyword
+• Once per day, you can grant Regeneration at your 
+Skill Rank to all party members within 30 feet for 10 
+minutes
+
+31
+PHysicker
+Class Type: Druid
+Your calling is to heal and protect others, and Mother 
+Nature gives you the tools to do so. The natural 
+environment comes to your aid in curing the physical 
+ailments of the sick and protecting the weak. While 
+some might think your “home remedies” are crude 
+and archaic, they are every bit as effective as other 
+magic and modern medicine (though they can get a 
+bit smelly and gross by comparison!). I mean, leeches 
+aren’t everyone’s cup of tea, and sometimes your 
+remedies are slow to effect, but they can’t deny how 
+much better they feel after a good bloodletting…3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 152 ---
+3
+• +3 Constitution and Intelligence
+• +3 Nature’s Breath and Oakhide Spells
+• +2 Rootfoot and Solsplash Spells
+• Double Mana regeneration when outdoors
+• Able to grant +1 DR to your party for 1 scene, once 
+per day
+Shepherd 
+Class Type: Druid
+Considered by some to be pacifists, Shepherds do 
+their best to maintain an appearance of docility 
+before unleashing their most potent weapons: their 
+herds. Trained in the arts of healing, animal care, and 
+protection, you have dedicated yourself to protecting 
+your flock, no matter what form that may take. It may 
+be a herd of goats, several cast-off Robogolems, or 
+even the people you’re traveling with, but once you 
+decide they’re part of your family? May the higher 
+powers protect those transgressors who attempt to 
+harm them.
+• +2 Intelligence, Charisma, and Constitution
+• +3 Animal Handling Skill
+• +2 Pathfinder Skill
+• +2 Nature’s Breath and Drain Life Spells
+• You can see twice as far as most creatures
+• Your Mana recovers at twice the normal rate in a 
+natural environment
+• The Shepherd may not use melee weapons other 
+than Herding Weapons (see p. 182)
+• Gain a friendly Pet
+• Pets in your Herd gain +2 DR
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+FIGHTER
+Fighters are versatile combatants trained in all 
+manner of martial weapons. They are durable 
+damage-dealing frontliners, generally with good 
+armor and lots of Hit Points.
+Boring Ol’ Fighter
+Class Type: Fighter
+You’re not sure which Class to pick, so why not stick 
+with the classic Boring Ol’ Fighter? No big decisions 
+to make here—just run up and hit stuff. You’ve got 
+
+decent fighting ability but really suck at magic and 
+Spells. Oh, well. Those things run out anyway, and 
+why bother counting and calculating when you can 
+just throw hands or get stabby with the bad guys? 
+Nothing is as sure and consistent as punching, kick -
+ing, bludgeoning, hacking, and slashing your way 
+through Mobs.
+• +2 Strength and Constitution
+• +5 in a Weapon Skill of your choice
+• +3 Dodge Skill
+• +2 to your choice of two of the following Skills: 
+Aiming, Attack of Opportunity, Catcher, Shield 
+Block, or Zone of Control Skills
+• Can access any Weapon Training Guild. Upon arriv-
+al on each floor, you receive a coupon good for one 
+free training at a Weapon Training Guild
+Pit Fighter 
+Class Type: Fighter
+Although you might not wear furs and carry a spiked 
+stick, you’re often mistaken for a Barbarian. Unlike 
+those rage-filled Barbarians, though, Pit Fighters are 
+much more cunning and adept at survival, especially 
+in close-quarters combat. You’ll use anything at your 
+disposal to defeat your opponent, including the pit itself.
+• +3 Dexterity
+• +2 Intelligence
+• +1 Strength
+• +3 Attack of Opportunity and Dirty Fighting Skills
+• +2 Dodge and Improvised Weapons Skills
+• +2 DR Buff
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Shotgun Messenger 
+Class Type: Fighter
+Sometimes you gotta make sure someone gets the 
+message, especially when it’s time for your pregnant 
+daughter’s ex-boyfriend to show up at the courthouse 
+and do the right thing. In those cases, the Shotgun 
+Messenger guarantees that message lands the way it’s 
+supposed to—one way or another.
+• +2 Strength, Constitution, and Dexterity
+• −2 Charisma3
+
+--- PAGE 153 ---
+• +5 in a Ranged Weapon Skill
+• +2 Aiming and Intimidate Skills
+• +1 in all muscle-powered movement-related Skills
+• Can access any Weapon Training Guild. Each floor, 
+you receive a coupon good for one free training at 
+a Weapon Training Guild
+• Access to the Desperado Club
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Straight-to-DVD Action Hero 
+Class Type: Fighter
+While A-Listers get to star in big-budget blockbust-
+er movies, the Straight-to-DVD Action Hero barely 
+makes enough to cover his rent and groceries. Forced 
+to do his own stunts, the Straight-to-DVD Action 
+Hero knows the basics of stunt work and weapons 
+handling, though they’re also worse for wear due to 
+the perpetually hazardous learning process. This is a 
+Fighter subclass.
+Straight-to-DVD Action Heroes receive the follow-
+ing benefits:
+• +3 Strength, Constitution, Dexterity, and Charisma
+• −2 Intelligence
+• +2 Unarmed Combat Skill
+• +1 Driving, Running, and Performance Skills
+• Take no damage from falling
+• +1 DR
+• The Manager Benefit
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Sword and Boarder
+Class Type: Fighter
+Some people excel at fighting, but you specialize in 
+taking ships and buildings. Often the first one through 
+the breach, you’re not afraid to charge ahead and  
+clear the room while your allies filter in behind you. It’s 
+not like you prefer to charge in mindlessly, but if you 
+have to, you become a rampaging juggernaut who 
+gets in, inflicts damage, and holds the line while others 
+catch up.
+Using your massive shield to keep yourself safe, 
+you prefer to use the terrain around you to pin your 
+foes down. They may have the numbers, but even a 
+war party of ravenous Crocodilians would struggle 
+
+31
+to break past you! Your only weakness is that you 
+cannot do things in half-measures: once you’re sent 
+in, you’re gonna need a plan to get out if you can’t 
+hold your ground.
+• +2 Strength, Constitution, and Dexterity
+• −2 Intelligence
+• +5 Shield Block Skill
+• +3 in an Edged Weapon Skill of your choice
+• +2 Attack of Opportunity and Catcher Skills
+• Access to the Desperado Club3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 154 ---
+3
+Monster Truck Driver 
+Class Type: Fighter
+You’re the type who walks down a nursing home 
+hallway and doesn’t veer from your path, no matter how 
+many shoulder-checks you have to deliver to grannies 
+recovering from carpal tunnel surgery. You specialize 
+in loud entrances, poor decisions, and turning perfectly 
+good terrain into a highlight reel. This Class uses speed 
+and size as both offense and defense, whether on wheel 
+or heel, to make the crawler into an excellent tank.
+Prerequisite: This limited Class is only available to 
+crawlers who have Rank 5+ in the Driving Skill
+• +4 Constitution
+• +2 Dexterity
+• −2 Strength
+• −2 Intelligence
+• +3 Gear Head, Driving, and Pathfinder Skills
+• While moving in combat, you have a Con Mod 
+bonus in your Health Bar slots (only) equal to 
+1/10th of the Move value of your means of 
+conveyance. If on foot, you must have spent a Move 
+Action during the previous round to gain this bonus
+• You bolt across the room and slam through each 
+entity in the way. [Rank = Floor Number] + Dex to 
+hit, 1d12 Bludgeoning, 2d10+3ft Line, then you 
+gain the Fatigued Debuff. Critical Fail on a Natural 4 
+or less. Cooldown: 30 hours. Add 1d at Rank 5, 10, 
+and 15. Rank only increases by Floor
+• Once per combat, roll 1d2 when you lose 2+ Health 
+Bar slots. On a 1, the attacker loses 1 Health Bar slot
+• Resistance to Force damage
+• Silver Earth Box, with guaranteed Earth Hobby 
+Potion
+Zulu Warrior 
+Class Type: Fighter
+You’ve trained from an early age under the tutelage of 
+your elders, learning discipline and endurance. While 
+others might prefer the relative safety of firearms and 
+other ranged weapons, you prefer getting up close 
+and personal to give your enemies an old-fashioned 
+beatdown. Using your swift mobility, you can quickly 
+flank foes and catch them off guard. 
+• +3 Strength, Constitution, and Dexterity
+• +3 in one Melee Weapon Skill of your choice
+
+• +2 Attack of Opportunity, Endurance, and Running 
+Skills
+• +1 DR
+• One Weapon Skill can be raised to Rank 20
+• Silver Earth Box, with guaranteed Earth Hobby 
+Potion
+MAGE
+In the World Dungeon, magic is common, but 
+mastery of magic is rare. Most who practice magic 
+maintain some form of martial or spiritual traditions, 
+so they can access a wider range of tools. There is an 
+order, however, which based much of its training on 
+mastering only the metaphysical, for they believe that 
+by perfecting their craft, they can transcend reality 
+and escape into the source of all magic.
+Yeah, it’s weird and cult-y at times, but whatever 
+gets you through to the next Floor, amiright?
+Boring Ol’ Mage
+Class Type: Mage
+Ever faithful to the old traditions, you, as an adherent 
+of the Boring Ol’ Mage School (as their foes would 
+describe them), strive to learn how to channel sheer 
+arcane power at the cost of other Skills. Though some 
+believe this equips the Boring Ol’ Mage Class with 
+glass jaws, your rigorous focus on magic channels 
+portions of your intellect into impressive effects.
+Several crawlers have attempted to waylay 
+one of these Mages only to find they’re capable 
+of channeling sudden destructive powers and 
+manifesting Spells straight out of legend, often with 
+the same showmanship and magical-sounding words 
+found in movies, TV shows, and fantasy books.
+• +5 Intelligence and Charisma
+• −2 Strength and Dexterity
+• +3 in a Fire Spell
+• +2 in one Force Spell and one Sonic Spell
+• +2 in two different Passive Spells
+• +2 Lore Skill
+• +1 Arcane Skill
+• −3 Ranks in all Dexterity Skills (to a minimum of 1 
+Rank if you have any Ranks)
+• −3 Ranks in all Strength Skills (to a minimum of 1 
+Rank if you have any Ranks)3
+
+--- PAGE 155 ---
+Blizzardmancer
+Class Type: Mage
+The Blizzardmancer represents the first 
+step on a journey most Mages are too 
+sensible—or too cold-averse—to attempt. 
+While your peers are out there hurling 
+fireballs and lightning bolts, you’ve 
+chosen the deeply inconvenient 
+powers of water and ice.
+You don’t explode things. You preserve 
+them. In a block of ice. Yeah, that’ll teach 
+’em! And while you’re on your way back 
+to your dorm to cry frigid tears into your 
+pillow at night, don’t forget to drop 
+some ice cubes in my drink.
+• +4 Intelligence
+• +3 Dexterity
+• −2 Strength
+• +4 Ice Blast and Frost Scar Spells
+• +2 Aiming Skill
+• Resistance to Ice damage
+• You can use the Aiming Skill for single-target Ice 
+Spells
+Crisper
+Class Type: Mage
+To say you’re hot is putting it mildly: You’re literally 
+on fire! You can generate flames out of nothing to 
+protect yourself and absolutely roast others. Unlike 
+other fire users, you can modulate how much heat 
+you’re putting out, meaning you can do anything 
+from cooking a quick meal to pelting your opponent 
+with fiery pine cones.
+The Crisper can also add additional effects to their 
+fire abilities. You can burn your opponents, sear them, 
+scorch their armor, and even extend healing magic 
+through your flames to heal others… as long as they 
+don’t mind a few blisters in the process. By laying on 
+your hands, you can also use your abilities to burn out 
+harmful magics and effects hurting your allies.
+Crispers don’t excel in humid or wet environments, 
+and despite their abilities, water tends to reduce their 
+effectiveness. But if you need a fire user who knows 
+the sheer versatility of one of the primal elements, the 
+Crisper makes for a great support Class who can keep 
+things warm and friendly among friends and fiery and 
+destructive toward foes.
+
+31
+• +3 Intelligence
+• +2 Dexterity
+• −2 Constitution
+• +3 Wall of Fire and Fire Fingers 
+Spells
+• +2 Fireball and Wilbur’s Slow-Build 
+Fireblast Spells
+• +2 Lore Skill
+• Resistance to Fire damage
+• No DR against Ice or water-based 
+damage
+Fire Spiritualist
+Class Type: Bard, Mage
+Every party wants that healer who will wade 
+into battle and pluck them from the brink of 
+death. Well, that’s you! You have the burning 
+desire to help others. I mean literally—your body 
+glows, practically smoldering with powerful 
+healing energies that can help your allies and 
+harm your enemies. Just be careful not to get too 
+close to any out-of-control water sources as they are 
+bound to douse your healing flames!
+• +2 Intelligence and Charisma
+• +2 Holy Aura and Hot Stuff Aura Spells
+• +2 Heal Others and Intimate Touches Spells
+• Heal Others Spell can be raised to 20
+• Ethereal Hug: Once per day for one scene, you can 
+grant your party +1 DR, Rank 4 Regeneration (as per 
+the Skill), +1 to hit on Weapon and Spell Skill Checks, 
+and add 1d4 bonus when they deal damage
+• Vulnerable to Ice damage
+Forsaken Aerialist
+Class Type: Mage
+Some Mages use powerful magic to blast and destroy 
+with all the subtlety of a runaway locomotive or a 
+scorching fireball. But not you. You eschew the spotlight 
+and instead seek out more elegant and discreet ways 
+to take on your foes. You have learned how to bypass 
+certain magical limitations to make even the simplest 
+and weakest of spells into something capable of slowly 
+and steadily taking down the most powerful of creatures, 
+all while they are completely unaware of their plight. 
+That frog in the boiling pot never knew what hit him!3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 156 ---
+3
+• +5 Intelligence
+• −2 Charisma
+• +3 Drain Life and Soul Collector Spells
+• +1 Alchemy, Infusion, and Tactics Skills
+• Double the duration of your Rank 5 and lower 
+Spells that have a duration
+• Your Spells can be applied to a creature without it 
+realizing it is under a Spell effect
+Necromancer
+Class Type: Mage, Necromancer
+You’re a Mage that specializes in manipulating life 
+forces, sucking the life out of the living to raise the 
+dead to do your bidding. Ever wonder why there are 
+so many zombie apocalypse scenarios out there? It’s 
+just Necromancers practicing their craft. Sure, the 
+undead might be unruly and difficult to control at 
+times, but they’re cheap labor, and there’s no threat 
+of them unionizing—not intentionally, anyway.
+• +2 Intelligence and Dexterity
+• −2 Constitution and Charisma
+• +4 Soul Collector and Rise, Dead Minion! Spells
+• +2 Drain Life and Second Chance Spells
+• Once per rest, you can ask the corpse of a dead 
+creature a number of questions equal to your Int. 
+The creature answers as truthfully as it can based on 
+what it knew in life
+• Whenever you kill an undead Mob, you heal 1 
+Health Bar, up to 5 Health Bar per combat
+MONK
+While Fighters focus on their weaponry and Mages 
+focus on spells, Monks seek harmony and natural 
+balance within themselves and the world around 
+them. And they kick a lot of ass doing it—turns out it’s 
+pretty meditative to slam your fists, elbows, knees, 
+and feet into your enemies!
+Boring Ol’ Monk
+Class Type: Monk
+Often pugilists and unarmed combatants, Monks 
+aren’t really all that devout or faithful: they’re just a 
+boring ol’ Class from some dated kung fu movie or an 
+archaic video game. You’re not like those Earth-based 
+Monks who hang out in their monasteries chanting 
+
+all the time, though you might want to be like those 
+Shaolin Monks—they’re pretty fast and badass.
+• +3 Constitution and Dexterity
+• +1 Strength
+• +3 Unarmed Combat Skill
+• +1 Foot Soldier, Iron Punch, Powerful Strike, 
+Pugilism, and Smush Skills
+• +1 in Dexterity-based Weapon Skills
+• Unarmed Combat Skill can be raised to Rank 20
+Elemental Monk
+Class Type: Mage, Monk
+You have focused your monastic training on mastering 
+the elements. It’s not that you wanted to, but your 
+monastery was too cheap to provide proper weapons 
+or training facilities. So instead, you learned to work 
+with what you had, and harnessed earth, wind, 
+water, and fire in subtle and not-so-subtle ways. Your 
+understanding of the elements enables you to see how 
+they both complement and work against each other, 
+revealing the weaknesses of elemental beings and 
+giving you knowledge of how best to defeat them.
+• +2 Intelligence and Dexterity
+• +3 Unarmed Combat Skill
+• +1 Dirt Clod, Fire Fingers, and Frost Scar Spells
+• +1 in all Spells with the Electric, Fire, and Ice 
+damage types
+• Advantage when attacking elemental creatures
+• The ability to breathe underwater
+• The ability to burrow
+• The ability to fly
+Prizefighter 
+Class Type: Bard, Monk
+Just like the galaxy loves a big, multi-floor battle royale 
+death dungeon, they love watching two creatures beat 
+the snot out of each other. Some do it for money, 
+some do it for glory, but they all turn their faces into 
+raw pulp for the crowd. The creatures in this audience 
+don’t care who is fighting who, as long as one of them 
+ends up a crumpled, bloody heap on the mat before 
+the night is done.
+Prerequisite: This limited Class is only available to 
+crawlers who have Rank 5+ in the Pugilism Skill3
+
+--- PAGE 157 ---
+• +5 Constitution
+• +2 Strength
+• −2 Intelligence and Charisma
+• +5 Pugilism and Iron Punch Skills
+• 1 × Floor Number gold for every Mob you kill with 
+a Pugilism or Unarmed Combat Skill attack
+• When you kill a foe with a Pugilism or Unarmed 
+Combat Skill attack, +1 Popularity
+• Pugilism Skill can be raised to Rank 20
+• Silver Earth Box, with guaranteed Earth Hobby 
+Potion
+Spirit Healer 
+Class Type: Druid, Monk
+Rather than focusing your knowledge of the body 
+to harm, you use it to heal yourself and others 
+through manipulating pressure points, lymph 
+nodes, crystals, and any other health craze that 
+was active when the World Dungeon 
+opened. When pressured, you can 
+also unleash your knowledge in 
+practically painful ways on those who 
+threaten you or your patients.
+• +3 Strength and Constitution
+• +1 Dexterity
+• +3 Drain Life Spell
+• +3 Smush Skill
+• +2 Heal Others and Heal Self Spells
+• Your healing Skills and Spells heal 
+1 additional Health Bar slot when 
+targeting a single individual
+• Heal Others Spell can be raised to 
+Rank 20
+• Access to Club Vanquisher
+• Silver Earth Box, with guaranteed 
+Earth Hobby Potion
+Street Monk 
+Class Type: Fighter, Monk
+You grew up on the streets, 
+scraping by every day to 
+survive. It was there that 
+your gritty, unorthodox 
+fighting style germinated, 
+
+31
+then took root and blossomed into a beautiful flower 
+with petals shaped like kicking ass. You thrive in 
+close-quarters fighting and can readily use the terrain 
+around you for both offense and defense.
+• +2 Dexterity
+• +1 Strength and Charisma
+• +2 Dirty Fighting Skill
+• +2 Streetwise and Unarmed Combat Skills
+• +1 Pugilism Skill
+• +1 in Dexterity-based Weapon Skills
+• +3 DR Buff
+• Silver Earth Box, with guaranteed Earth Hobby  
+Skill Potion
+PALADIN
+Paladins are holy warriors—a mix of Cleric 
+and Fighter—who often do battle in the 
+name of their god. While this does 
+spice up Fighters by granting access to 
+magic, Paladins draw much of their 
+power from their god, which means 
+they’re subject to the same divine 
+rules and regulations as Clerics. 
+Boring Ol’ Paladin
+Class Type: Paladin
+You can call upon powerful spirits (the 
+ethereal kind, not the drinking kind) for aid 
+as you provide guidance and protection 
+for others, and you manage to do it 
+with color and flair!
+• +2 Charisma
+• +1 Charisma
+• +3 Protective Shell, Heal 
+Others, and Holy Aura Spells
+• +3 in a Weapon Skill of your 
+choice
+• +2 Catcher or Shield Block 
+Skills
+• Access to Club Vanquisher
+• Must worship a deity
+• You cannot choose this 
+Class if you have access 
+to the Desperado 
+Club3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 158 ---
+3
+Cavalier
+Class Type: Fighter, Paladin
+This classic mounted knight type is bound by a code 
+the dungeon doesn’t fully understand. They’re a 
+frontline duelist optimized for momentum, spectacle, 
+and catastrophic commitment. Many mounts are 
+fragile, but yours is a trained warhorse (or similar), and 
+its armor (called “barding” if it’s not natural armor) 
+should help keep it alive for a while.
+The code you follow is up to you. You might be 
+the protector of the downtrodden, of the frail, of 
+lower-Level crawlers, of an opposite (or the same?) 
+sex, of pets, or the badly injured. Or you might sell 
+your sword to the highest bidder so you can make 
+some sweet coin and live the good life—what little of it 
+you have left down here. Who am I to judge?
+• +2 Strength and Constitution
+• +2 Catcher, Riding, and Lance Skills
+• +2 Shield and Smite Spells
+• When protecting someone under your code by 
+using Catcher, gain the benefit of Playing to the 
+Cameras (no Disadvantage, as this is a Passive Skill). 
+This counts as your “once per session” usage
+• Gain a bonded Mount one size bigger than you 
+with Move 40, barding with DR 10, a Trample 
+attack, and a pet carrier for it
+• When you or your Mount is the target of an Attack, 
+your fancy riding allows you to redirect an attack at 
+your Mount to yourself or vice versa
+• Access to Club Vanquisher
+• Must worship a deity
+Sacred Paladin
+Class Type: Paladin
+Piety is not a choice: it’s a calling. You are pure and 
+noble, a valiant protector of the innocent and avenger 
+of the wronged. You can fight the good fight, heal the 
+sick, and provide solace to the dying. Yeah, you’re 
+that guy in the party—the one who won’t let anyone 
+have any fun in this godforsaken dungeon.
+• +3 Strength
+• +2 Charisma
+• +2 Catcher Skill
+• +2 in a Weapon Skill of your choice
+• +2 Heal Others, Smite, and Turn Undead Spells
+
+• Access to the Dungeon Book of the Floor club 
+(Favored: Cleric or Paladin Spells only)
+• +2 DR Buff
+• Access to Club Vanquisher
+• Must worship a deity
+• You cannot choose this Class if you have access to 
+the Desperado Club
+ROGUE
+The cloaked figure moving through the shadows, the 
+knife in the dark, and the nimble hands disarming 
+a trap before it blows your head into a fine red 
+paste. These are all the hallmarks of a Rogue, one 
+of the most useful teammates to have in the World 
+Dungeon—as long as they don’t get too greedy and 
+decide you’re worth more dead than alive.
+Boring Ol’ Rogue
+Class Type: Rogue
+Thieves. Assassins. Black market merchants. Rogues 
+come in all sizes and flavors, but the one thing they 
+have in common is their love of money. Maybe 
+money can’t buy you love, but it sure makes for a 
+good time in the Desperado Club.
+Lookin’ at you, Author Steve Rowland.
+• +1 Intelligence, Dexterity, and Charisma
+• +3 Stealth Skill
+• +2 Dagger, Detect Trap, Dodge, and Lockpicking Skills
+• +1 Ambush Skill
+• Can see in total darkness
+• 1 x Floor Number gold for every Mob killed with a 
+melee weapon
+• Access to the Desperado Club
+• Cannot choose this Class if you have access to Club 
+Vanquisher
+Bomb Squad Tech 
+Class Type: Rogue
+People who actually choose to work with explosives 
+are the craziest bastards around. You excel at making 
+things blow up. And while you’re good at keeping 
+the bombs from going off in your own hands, Bomb 
+Squad Techs still tend to lose both friends and limbs at 
+alarming rates.3
+
+--- PAGE 159 ---
+Luckily, this Class comes with a benefit that can fix 
+50% of that problem.
+Prerequisite: This limited Class is only available to 
+crawlers who’ve earned the Boom! Achievement
+• +2 Dexterity
+• +1 Constitution
+• −2 Intelligence (After all, only dumbasses would 
+choose to do this for a living.)
+• +3 Bomb Surgeon and Find Trap Skills
+• +2 in all Explosive-based Skills
+• +1 DR Buff
+• Limb Regeneration Benefit: In 12 days minus your 
+Con Mod, one limb fully regrows
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Compensated Anarchist 
+Class Type: Monk, Rogue
+When the oligarchs want to manufacture a social 
+movement, or better yet, stop one in its tracks, they 
+must first bring in the big guns. The paid protestors. The 
+Agent Provocateur. This Monk/Rogue hybrid Class is a 
+trapmaking, bomb-making, social-media dynamo.
+The Compensated Anarchist will happily throw a 
+Molotov through a window one moment and step in 
+front of a camera to plead for the violence to stop the 
+next. Experts in hand-to-hand and dirty tactics, the 
+Compensated Anarchist only suffers in more tradition-
+al fighting techniques.
+A recent balance patch has adjusted this Class’s 
+values, but those who want to follow in Carl’s bare, 
+delightful footsteps can still benefit from this Class’s 
+wide array of bonuses.
+Prerequisites: This limited Class is only available to 
+crawlers who have Popularity 3 or higher and have 
+Rank 5+ in the Explosives Handling Skill
+• + 5 Charisma
+• +1 Intelligence
+• +2 Backfire, Escape Plan, and Find Trap Skills
+• +1 Bomb Surgeon, Hide in Shadows, Trap Engineer, 
+and Unarmed Combat Skills
+• +1 Fear Spell
+• Add no Stat Mod bonus damage when using Edged 
+Weapons
+
+31
+• You pay +3 Mana to cast damage-dealing Spells
+• At the end of each floor, add 1 to one of your 
+trap-related Skill Advancement Checks
+• At the end of each floor, add 1 to one of your 
+bomb-related Skill Advancement Checks
+• Access to the Desperado Club
+• Access to the Naughty Boys Employment Agency
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+High Rise Grifter 
+Class Type: Rogue
+Pickpocketing marks in the park is nothing compared 
+to making a big score, like ripping off a techbro high 
+up in his tower, but with higher rewards come higher 
+stakes. Only through meticulous planning and cunning 
+execution can you hope to come out of your nefarious 
+plots unscathed. Even then, you still need to assemble 
+the right crew and acquire the right equipment. And 
+after that job is complete, it’s on to the next one!
+• +1 Intelligence and Charisma
+• +4 Deception and Stealth Skills
+• +2 Dagger and Escape Plan Skills
+• +1 Determine Value and Negotiation Skills
+• Access to the Desperado Club
+• Cannot choose this Class if you have access to Club 
+Vanquisher
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Identity Thief 
+Class Type: Rogue
+Direct confrontation isn’t your style. Instead, you 
+make your living through guile and deception, adopt-
+ing the role of a rich noble, a trusted merchant, or a 
+long-estranged relative to work your way into wealthy 
+families and organizations where you can pilfer trea-
+sures and escape unawares. When it works, it’s great. 
+When it doesn’t… well, as long as your legs still work, 
+you can always run away, right?
+• +4 Charisma
+• +3 Dexterity
+• +5 Deception Skill
+• +3 Dagger Skill
+• +2 Investigation Skill3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 160 ---
+3
+• Tier 3 Makeup Table
+• Access to the Desperado Club
+• Cannot choose this Class if you have access to Club 
+Vanquisher
+• Silver Earth Box, with guaranteed Earth Hobby Potion
+Swashbuckler
+Class Type: Bard, Fighter, Rogue
+You are daring and flamboyant, combining your 
+exceptional swordsmanship and acrobatic agility with 
+irresistible charm to win the hearts and purses of 
+others. Your motivation may vary—perhaps someone 
+killed your father when you were young, or your true 
+love was lost to you while you were indentured at sea. 
+Regardless, your tenacity and tenor have made you 
+a foe to be reckoned with, while your charming wit 
+and dashing style have generated a cult-like following. 
+Even in the most inconceivable of circumstances, 
+you can virtually do as you wish, with few dread 
+repercussions.
+• +3 Dexterity and Charisma
+• +3 Rapier or Longsword Skill
+• +2 Balance and Dodge Skills
+• +1 Performance Skill
+• +1 Light on Your Feet Skill
+• Rapier or Longsword Skill can be raised to Rank 20
+• You have Advantage when using a melee attack 
+from a higher position than your opponent
+• Once per combat, after you kill an enemy, you can 
+make an Unopposed Performance Skill Check. On 
+an Amazing Success or better, gain +1 Popularity
+THE RACE & CLASS POINT BUILD 
+SYSTEM
+Didn’t see an option you liked? We’ve got good 
+news for you picky and persnickety types: Players 
+can simulate the thousands of options offered to 
+their crawler by creating an entirely new Race or 
+Class. Using the Build system, you can choose from 
+the menu below to create your custom crawler. You 
+have 25 Race Build Points and 30 Class Build Points  
+to purchase specific abilities, and you can optionally 
+select drawbacks to gain more Build Points to spend. 
+Any leftover Build Points are lost, so get out there 
+and spend, spend, spend!
+
+Note: Race and Class Build Points are different pools. 
+You can’t save some Race Build Points to spend on 
+Class options or vice versa.
+Step One: Imagining the Race or Class
+The first step is to imagine the unique creation you’re 
+bringing into the World Dungeon. Once you’ve got 
+a clear idea, take deep breaths and push, just like in 
+Lamaze class.
+A New Race
+Is this new Race a fantasy-style Race, a Race based on 
+Earth myths or lore, or something truly unusual to fit the 
+off-the-wall nature of the World Dungeon?
+After you’ve got a clear picture, determine if they’re 
+from Earth—including Earth folklore, mythology, and 
+legend—or if they’re an alien entity entirely! Alien 
+Races receive unique ways to gain popularity because 
+they’ve got planets of fans who want to see the 
+crawler represent them in the most popular program 
+in the galaxy, but don’t get access to Earth Classes. 
+Earth Races, on the other hand, get a sweet, sweet 
+Silver Earth Box, which is guaranteed to contain a 
+mostly-useless Earth Hobby Potion, which grants 3 
+Ranks in a Skill, and access to Earth Classes.
+A New Class
+Based on the Race you’ve selected and your 
+experiences on the Tutorial Floors, you should 
+consider the theme for the Class you want to design. 
+In the Dungeon Crawler Carl books, the Classes are 
+a crazy mash-up of modern pop-culture memes and 
+traditional fantasy tropes. Feel free to come up with 
+themes for Classes from out in left field—it’s bound to 
+be available in the dungeon!
+Step Two: Benefits
+Peruse the menu below and spend Build Points to 
+give mechanical benefits to the Race or Class you’ve 
+imagined. These benefits are ranked by general useful-
+ness and power. They’re just examples, and players 
+are encouraged to come up with original benefits 
+and discuss them with the GM. Characteristics that 
+don’t provide any mechanical benefits are free, such 
+as a strange skin color, emitting an unusual smell, or 
+having an odd voice.
+Some Skill bonuses apply to thematically linked 
+groups of Skills. The cost of such bonuses depends 
+on the size of the group of Skills (4 or 6 points). 3
+
+--- PAGE 161 ---
+Thematically linked Skills include those that all use 
+the same Stat, movement-related Skills, all Skills of 
+a particular weapon type, or another definition that 
+makes sense. Passive Skills, Spells in general, and 
+Racial Skills are not thematically linked.
+You can take the same benefit multiple times, if that 
+affects anything. For example, Stat and Skill bonuses 
+obviously work, but two instances of Resistance to 
+Slashing damage do nothing more than one instance 
+of it (Resistances are fixed at “half damage”).
+The following menu provides Build Point costs for 
+most examples in the Races and Classes above, plus 
+many common effects. Keep in mind that this menu is 
+an example of what’s possible with Races and guid-
+ance for balancing what a Build Point is worth when 
+assembling your custom creations.
+Minor Benefits (1 Build Point each)
+• +1 to a Stat
+• Membership in Club Desperado or Club Vanquisher
+• At the end of each floor, add 1 to your Skill 
+Advancement Checks for a particular Skill
+• Allow a specific Skill to be raised to Rank 20
+• Add your Stat Mod a second time when using 
+a specific non-combat Skill in a common 
+circumstance
+• A benefit that has a condition, such as gaining 
+Advantage when attacking stone creatures
+• Can see in total darkness or has a natural ability to 
+produce light
+• Double Mana regeneration from mending and rest-
+ing in a specific environment
+• You can see twice as far as most creatures
+• A tier-1 crafting table (as soon as you acquire a 
+personal space, it shows up there)
+• A free room in saferooms
+• Discount at stores, bonus earned from sales or inter-
+est earned (+1 for each category)
+• Gain a non-combat benefit once per session under 
+very specific conditions
+Moderate Benefits (2 Build Points each)
+• +1 in a Skill or Spell, including Passive ones (you 
+cannot have more than 5 points of Passive Skills in 
+any Class build)
+
+31
+• Ability to heal 1 Health Bar slot when you damage 
+or kill a creature with a specific Weapon Skill or 
+Spell, up to 5 Health Bar per combat scene
+• Add your Stat Mod a second time when making an 
+attack in a common circumstance
+• Roll with Advantage when making Skill 
+Advancement Checks for a particular Skill
+• At the end of each floor, add 1 to your Skill 
+Advancement Checks for a particular group of 
+thematically linked Skills
+• At the start of combat, you can change your 
+damage to a different type for that combat
+• +1 DR Buff (to a limit of +3)
+• Can access any guild of a particular type (for 
+example, any Weapon Training Guild)
+• Double Mana regeneration from mending and 
+resting without a limit
+• Membership in all professional and social clubs
+• Membership in the Dungeon Book of the Floor Club
+• Can raise a thematically linked group of Skills to 
+Rank 20
+• Mobs drop 1 × Floor Number gold when you kill 
+them with a specific attack
+• Ability to gain Popularity with specific actions  
+and attacks
+• Patron Benefit
+• Resistance to an uncommon damage type (Force, 
+Psychic, Necrotic, etc.)
+• Resistance to damage dealt by the environment 
+(Falling, Drowning, dungeon traps, etc.)
+• Replace a Stat used in an ability with another Stat 
+(normally, one that receives a Stat bonus), such as 
+the ability to apply Charisma to Intimidate instead 
+of Strength
+• A Stat Mod from another ability be used in addition 
+to the normal Mod for specific Skills
+• Can use skills designed for one type of weapon on 
+another type of weapon
+• When you use a Healing-type Spell, the target heals 
+1 additional Health Bar
+• The ability to traverse certain terrain types without 
+Skill Checks
+• The ability to burrow
+• The ability to breathe underwater3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 162 ---
+3
+• +1 in all Skills for a t emporary duration that’s an 
+hour or less
+• A natural attack at [Rank = Floor Number] that deals 
+1d6 + Stat Mod damage. Choose the Stat Mod to 
+hit and damage (and damage type). Add another d6 
+at Rank 5, 10, and 15. Rank only increases by Floor
+• The ability to reassign a Race or Class’s Stat point 
+benefits once per floor during a Long Rest
+Major Benefits (3 Build Points each)
+• Access to significant assistance, akin to the Manager 
+benefit
+• Gain a friendly Pet or a Mount
+• Ability to provide a significant Buff or Benefit up to 
+4 Points to all of your Pets or Mounts
+• An ability to dramatically alter an encounter once a 
+day, such as by making enemies attack each other
+• A defensive ability usable once per day, such as 
+negating all damage you take from a single attack
+• The ability to Buff the entire party once per day, 
+such as granting them regeneration or extra DR
+• The ability to fly, with some limitations
+• The ability to survive without breathing, which also 
+gives Immunity to inhaled toxins
+• Rage (Benefit): Your melee attacks deal +1 damage 
+for each Health Bar slot you have lost
+• Size 2 (Small) or less
+• +5ft Move (this increases the crawler’s Move value)
+• +5 Step (this increases the crawler’s Step value)
+• Add 1d4 to your Evade or Stat Checks for a specific Stat
+• A natural attack at [Rank = Floor Number] that deals 
+1d8 + Stat Mod damage. Choose the Stat Mod to 
+hit and damage (and damage type). Add another d8 
+at Rank 5, 10, and 15. Rank only increases by Floor
+• Advantage when using a specific non-combat Skill 
+or Spell
+• Situational bonus of up to ×2 damage for one round
+Con for determining Health Bar values with • Swap 
+another Stat
+• Gain a Climb Movement, which allows you to auto-
+matically climb most surfaces, even ceilings
+
+Extreme Benefits (4 Build Points each)
+• +1 in a Skill that you wouldn’t normally be able to 
+learn, such as Cockroach and Light on Your Feet
+• +1 to all Skills in a thematically linked group of 
+3–5 Skills (Hand-to-Hand Skills, Constitution-based 
+Skills, etc.)
+• Advantage on all Stat Checks for a specific Stat
+• All Skills in a thematically linked group of up to 6 
+Skills can be raised to Rank 20
+• Immunity to Poison
+• Resistance to a common damage type 
+(Bludgeoning, Fire)
+• Double the duration of your Rank 5 and lower 
+Spells that have a duration
+• Advantage on all Skills in a limited non-combat 
+situation
+• Additional functional arm
+• Doppelgänger shape-changing
+Epic Benefits (6 Build Points each)
+• +1 to all Skills in a thematically linked group of Skills 
+(Ranged Weapons, Intelligence-based Skills, etc.)
+• All Skills can be raised to Rank 20
+• A significant defensive ability, such as Immunity to 
+a common damage type (like Bludgeoning, Fire or 
+Piercing) or halving the damage of the first nine 
+attacks against you each day
+• The Limb Regeneration Benefit
+• Roll with Advantage on all Skills in a wide-ranging 
+set of circumstances
+• Immunity to Poison and all diseases
+• +1 in all Skills in a thematically linked group of 6+ Skills 
+(Ranged Weapons, Intelligence-based Skills, etc.)
+• A significant defensive ability, such as Advantage on 
+Evade Checks, or Immunity to a common type of 
+damage (Fire, Bludgeoning, etc.)
+• A powerful and flexible ability that can signifi-
+cantly change your Stats or Skills, such as a 
+Changeling’s ability to assume another Race’s 
+Stat or Skill bonuses
+• Changeling shapeshifting
+• Roll with Advantage on all Skill Checks for a  
+specific Stat
+• The ability to fly with no limitations3
+
+--- PAGE 163 ---
+Step Three (Optional): Detriments
+You can take mechanical disadvantages to your 
+Class—called detriments—giving you more Build Points 
+to spend on benefits. You don’t have to take any 
+drawbacks to your Class if you don’t want to, since 
+the system AI is likely to put you into positions where 
+your drawbacks make your life difficult. You cannot 
+gain more than 5 extra Build Points via detriments 
+for your Race or Class, for a total of 10 by taking the 
+maximum 5 detriments for both Race and Class.
+Stat Detriments
+You earn Build Points by assigning penalties to your 
+stats. You gain 1 extra Build Point for every 2 points 
+of penalties to one or more stats. For example, a Class 
+with −1 to Intelligence and −3 to Dexterity earns 2 
+extra Build Points to spend.
+Skill Detriments
+You can also earn Build Points by assigning penalties 
+to your current Skills. You cannot create penalties 
+for Skills you don’t have, nor can you take a penalty 
+larger than your current Rank in that Skill. You gain 
+1 extra Build Point for every 2 points of penalties 
+you take to one or more Skills. You can also take a 
+penalty to all Skills under a single Stat, such as “all 
+Charisma Skills,” gaining 1 extra Build Point for every 
+−1 penalty you take.
+Minor Detriments (1 Extra Build Point)
+• Cannot choose Class due to membership in a 
+specific club
+• For every −2 worth of Stat detriments
+• For every −2 worth of Skill detriments
+• For every −1 to all Skills under a specific Stat
+• +1 Mana cost to cast spells not favored by your Class
+• Disadvantage when using a thematically linked 
+group of Skills, when there is a condition (such 
+as Disadvantage in all social Skills used against a 
+certain category of creatures)
+• Must worship a deity
+• Cannot worship a deity
+• You suffer a −1 penalty when making Skill 
+Advancement Checks for a specific Skill provided 
+by your Race or Class at Rank 5+
+
+31
+• Vulnerability: An uncommon damage type (such as 
+Force or Necrotic) deals double damage to you
+• You halve the effects of a broad type of damage, 
+such as all Weapon damage or all Spell damage, 
+that isn’t the focus of your Class (such as halving 
+Spell damage if you are a Barbarian)
+• A weakness that has two conditions, such as 
+Disadvantage in social situations when dealing  
+with Fairies
+• Delay a bonus to after Level 50 or activating on the 
+6th Floor
+Moderate Detriments (2 Extra Build Points)
+• A weakness with a single broad condition, such as 
+Disadvantage in all social situations
+• Skill only increases in Rank upon descent to the 
+next floor
+• Limited choice of weapons available to choose from
+• No Stat Mod added to Weapon Skill provided by 
+your Race or Class
+• +3 Mana cost to a Class of spells provided by your 
+Race or Class
+• Disadvantage when using a thematically linked 
+group of Skills, such as all movement-related Skills
+• Prohibited from using a wide category of useful 
+items, such as an inability to use certain types of 
+Weapons or to cast Passive Spells
+Major Detriments (3 Extra Build Points)
+• A specific Stat is capped at 10. Even magic gear and 
+potions cannot exceed this limit
+• Vulnerability: A common damage type (such as 
+Bludgeoning or Piercing) deals double damage to you
+CREATING A CLASS EXAMPLE
+Bob and all the other players in his game have 
+reached the Third Floor, but none of the Classes fit 
+what Bob wants to play: the Dungeon Dad , who 
+looks after the rest of the party.
+Now that Bob’s got a concept in mind, he starts 
+talking to his Game Master about it. After a short 
+discussion, they agree this should be an Earth Class 
+that includes an Earth Hobby Potion. Bob looks 
+through the menu and picks the qualities most 
+important to his vision of the Class:3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 164 ---
+3
+• Grill Dad: There isn’t a grilling Skill, but Crocodilian 
+gets a bonus after eating that fits what he wants 
+to do pretty well. Since it’s a party buff, Bob and 
+his GM decide that, since it’s a Buff for the entire 
+party that’ll happen 3–4 times a day, it should be an 
+Extreme Benefit worth 4 Build Points
+• Protective Dad: There are a few ways to do this 
+based on Skills and Spells, so Bob checks out the 
+Catcher, Taunt, and Shield Block Skills, plus the 
+Hot Stuff Aura and Shield Spells. The Shield Spell 
+only protects his crawler, so that’s out, and so is 
+the Shield Block Skill. Bob decides to put 3 Ranks  
+into Catcher for 6 Build Points. He also decides 
+that means he’s going to need a weapon, so he 
+puts 4 Build Points into 2 Ranks of a Weapon of 
+his choice
+• Helpful Advice Dad: Bob takes 2 Ranks in the 
+Tactics Skill (since his crawler tends to keep the 
+group together) for 4 Build Points. Bob also talks 
+to his GM about a way to make his crawler better 
+at helping others, such as adding a +1d4 bonus to 
+others when taking the Help or Intervene Action. 
+They look at the menu and see “Add 1d4 to your 
+Evade or Stat Checks for a specific Stat” as a Major 
+Benefit. Since this bonus die requires Bob’s crawler 
+to take an Action and it’s limited compared to the 
+always-on +1d4 bonus on the menu, they decide it’s 
+worth 2 Build Points
+• Awful Jokes Dad: Bob loves making terrible, 
+groan-inducing puns and worse jokes during play, 
+so this comes naturally. First, he considers putting 
+points into the Good First Impression Skill, but 
+the rest of the players tell him that his awful jokes 
+definitely don’t fit there. Rather than a Skill,  
+Bob decides to put his points into his Charisma 
+Stat bonus
+• Fix-It Dad: Bob decides on this one easily and  
+adds 2 Ranks to the Repair Skill, spending another  
+4 Build Points
+• DILF: Bob’s got some points left over and a good 
+Charisma score, so he decides to put 4 Build Points 
+into the Hot Stuff Aura Spell, gaining 2 Ranks and 
+hitting the cap of 5 Ranks of Passive Skills for his 
+Class Build
+Bob reviews his choices and sees that he’s spent 
+24 of his 30 Class Build Points. He decides to put 2 
+Build Points into +1 DR, and the remaining 4 Build 
+Points in Stat Points: +2 Charisma, +1 Strength, and 
+
++1 Constitution. With 30 Build Points spent, he 
+considers Drawbacks and decides that the Dungeon 
+Dad  is pretty clumsy, suffering −2 Dex, and that 
+Dads may be experienced, but they feel their age—
+and Necrotic damage makes the most sense for 
+age-related injury, so he takes Vulnerability: Necrotic 
+damage. These net him 2 extra Build Points, which 
+he decides to put into an extra point of DR.
+At the end, Bob and his GM decide that the 
+Dungeon Dad’s  types are Fighter because of the 
+Catcher and Weapon Skills, and Bard because of the 
+advice and food buffs. Bob’s final Class looks like this:
+Dungeon Dad 
+Class Type: Bard, Fighter
+Once a little league coach, you’ve watched much 
+of life pass you by, but you’re determined to protect 
+and guide the youth—even if they’re a group of 20- 
+to 30-somethings who should have learned basics 
+like reading warnings, how to share, and talk about 
+their feelings without being an asshole before now. 
+Well, you’re here to make sure they learn by teaching 
+them the lessons the world never did and doing your 
+damnedest to keep them alive.
+• +2 Charisma
+• +1 Strength and Constitution
+• −2 Dexterity
+• +3 Catcher Skill
+• +2 Repair and Tactics Skills
+• +2 to a Weapon Skill of your choice
+• +2 Hot Stuff Aura Spell
+• +2 DR
+• When you and up to 6 allies consume a meal you 
+cooked (taking at least 30 minutes to cook), each 
+eater gains +1 Buff for all of their Skill Checks  
+for 1 hour
+• You roll a bonus 1d4 when you make the Help or 
+Intervene Actions and add it to the benefit provided 
+to your target
+• Vulnerability: Necrotic damage
+• Silver Earth Box, with guaranteed Earth Hobby  
+Skill Potion3
+
+--- PAGE 165 ---
+Deities & Worship
+Worshiping a god in the World Dungeon doesn’t 
+necessarily mean a crawler is devoted to them in any 
+meaningful or religious way. Like most elements of the 
+dungeon and the “real” world, worship is pragmatic 
+and highly sensationalized to spur viewership.
+For most crawlers, to “worship” a god merely means 
+carrying out required acts of daily devotion and paying 
+tithes or tributes. The historical record of the gods in the 
+dungeon would lead one to believe they are all-powerful 
+and all-knowing, but in reality, most of them are limited, 
+with humanlike intelligence, emotions, and motives. Just 
+take a look at their family tree—everyone seems related 
+to everyone, if you know what I mean.
+What’s more, gods can be sponsored by entities 
+outside the dungeon and forced to do their bidding, 
+including interacting and communicating with crawl-
+ers. While some of this is heavily restricted to avoid 
+undue disruption to the crawl, this interference can 
+still make crawlers’ lives a living hell.
+CONSEQUENCES OF 
+WORSHIP
+For crawlers, worshiping a god is initially more 
+relevant for Cleric- and Paladin-type Classes, 
+but it becomes more important as the 
+Crawl progresses. If a crawler sees a god, 
+locates one of their temples, or finds a 
+scroll of prayer, they receive the option to 
+worship the god, though the duration might be 
+extremely limited if they happen to come face-to-
+face with a rampaging deity.
+While worshiping a god 
+may grant a variety of 
+benefits, it also 
+comes with distinct 
+drawbacks. Many 
+Game Guides warn 
+their charges that most 
+gods are assholes and are 
+best avoided, though most Clerics 
+and Paladins are required to choose a 
+god to worship upon Class selection. In 
+addition, generally only these types of 
+Classes can achieve ranks higher than 
+Devotee in the church, though some 
+rare items may allow crawlers to bypass 
+
+31
+The bad stuff (and occasionally good stuff) a deity 
+does for you is hidden in Chapter 6. That’s for the 
+GM, so peek at your own risk.
+RANKINGS IN THE CHURCH
+Those who choose to worship a god begin as 
+Acolytes (Tier 1). Significant acts of devotion may 
+increase their title to Devotee (Tier 2), and for select 
+followers, even the title of Zealot (Tier 3). A ranking’s 
+Tier occasionally has rules benefits.
+ACOL YTE (TIER 1)
+Worshiping a deity earns you this title, bringing both 
+expectations and benefits:
+• Respect other Worshipers: You mustn’t cause harm 
+to fellow worshipers of your god—even if they’re 
+sycophants or jerks
+• Offering: You must make the specified offering at 
+a temple of your god at least once a day. If you are 
+unable to locate a temple within a 30-hour period, 
+you must make the offering at the god’s shrine that 
+has now appeared in your personal space. You 
+don’t have to act happy about it, though. (Note: 
+GMs might agree to a number of offerings per 
+Floor equal to the number of days before the floor 
+collapses to make it easier to track.)
+If you miss a day, you lose all the 
+benefits that worship grants until you 
+make the offering the next day. If you 
+miss two days in a row, you gain a 
+Divine Debuff. If you miss three days 
+in a row, you gain the Fallen from Grace 
+Debuff: You can’t worship any deities, 
+and there’s a 50% chance of being 
+smote. If you voluntarily leave the 
+faith, you are smote.
+• Tithe: Five percent of all looted 
+gold must also be tossed into 
+your god’s shrine
+• Enemy God’s Prohibition: 
+You may not own or wield any 
+magical gear that is blessed by 
+any rival(s) of your god
+• Obedience: You must successfully 
+complete all issued church 
+quests3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+--- PAGE 166 ---
+3
+• Temple Access: You gain access to all temples of 
+your deity
+• Temple Locations: All temples of your deity now 
+appear on your map. All temples of your deity’s 
+rival(s) also appear on your map
+• Identification: All worshipers of your deity are 
+indicated with a symbol. All worshipers of your deity’s 
+rival(s) are also indicated with a different symbol
+• Death to the Infidels: Once per Floor when you kill 
+an NPC, crawler, or Mob that worships your deity’s 
+rival(s), you gain an additional Level. Once per 
+Floor, if you grind for experience in a neighborhood 
+where the Mobs worship your deity’s rival(s), you 
+also gain a Level
+• Vanquisher: You gain free access to Club 
+Vanquisher, regardless of previous and current 
+affiliations
+• Rewards for Devotion: Every five consecutive days 
+of worship (making tithes and daily offerings), you 
+will receive a Boon from the god
+DEVOTEE (TIER 2)
+Especially devoted worshipers can achieve the title of 
+Devotee. This is the highest ranking that a non-Cleric 
+or non-Paladin can achieve.
+• Upgraded Benefits: You receive several upgraded 
+benefits from your god. These benefits vary 
+depending on the deity you worship
+• Increased Tithe: Your required tithe amount 
+increases from 5% to 10%, effective immediately
+ZEALOT (TIER 3)
+For those who have chosen more religious Classes, 
+such as Clerics or Paladins, exceptional devotion to 
+your god grants even higher benefits.
+• Skill Maximum: You can choose one of your god’s 
+signature Skills and advance it to Rank 16
+• Signature Stat: You gain 5 points in your god’s 
+signature Stat
+• Increased Tithe: Your required tithe increases from 
+10% to 20%, effective immediately
+DEITIES
+There are many deities in the Crawl, including some 
+based on Earth gods. The following are examples of 
+deities a crawler could worship.
+
+APITO, THE BLESSED OAK MOTHER, 
+THE MOTHER OF ALL GODS
+Daughter of Nekhebit, mother of Emberus, Eris, Grull, 
+APITOGRULL OGUN (Version A) OGUN (Version B)
+Hellik, and Taranis, wife of Taranis, and sibling of 
+Scolopendra. In order to maintain the path to heaven, 
+Apito’s angels must remain free and alive, and she will 
+destroy worlds if violence against them is not stopped.
+Temple: Sacred Grove of the Divine
+High Supreme Cleric: Arkangel Debadora
+Daily Offering: A single tear shed in sadness
+Rival: Nekhebit
+Likely Sponsor: The Dream
+Signature Skills: Catcher, Shield Spell
+Signature Stat: Intelligence
+Symbol: Wooden face of a beautiful woman, with 
+green hair shaped like leaves and tree branches 
+cascading down her neck
+Additional Acolyte Benefits:
+• When using the Catcher Skill, gain additional DR 
+equal to your Tier of Devotion
+• Double Int Mod for one Skill Check, once per day
+Additional Devotee Benefits:
+YSALTE ERIS (Version A) ERIS (Version B)
+• Immunity to the Blood Trail Debuff
+• Double Int Mod to all Skill Checks for 10 minutes, 
+once per day
+Additional Zealot Benefits:
+• Rank 10 Catcher Skill. If already at Rank 10 or 
+higher, +2 Catcher Skill
+• Double Int Mod to all Skill Checks during a 4-hour 
+period, once per day
+• Gain Rank 20 Catcher Skill for one use per day
+
+--- PAGE 167 ---
+HELLIK EILEITHYA NEKHEBITTARANIS3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATIONEILEITHYIA, GODDESS OF 
+CHILDBIRTH AND FEMALE PAIN
+Eileithyia is unlike most deities; she is benevolent 
+and known for her kind heart. All mothers pray to 
+her, both when they’re sowing seeds and when the 
+harvest comes. She represents both the physical pain 
+of childbirth and the inevitable darkness that comes 
+to those who are unable to complete this most sacred 
+task. She’s not known to seek the Ascendant Throne.
+Temple: The Temple of Spring Dawn
+High Supreme Cleric: Dhalia Ophal
+Daily Offering: A petal from a blooming flower
+Opposed To: Grull
+Likely Sponsor: Huanxin Jinx
+Signature Skills: Wisp Armor Spell, Heal Other Spell
+Signature Stat: Constitution
+Symbol: A blooming flower
+Additional Acolyte Benefits:
+• Advantage on Stat Checks against Spiritual 
+Possession
+Con Mod to Health Bars for one attack, • Double 
+once per day
+Additional Devotee Benefits:
+• Immunity to the Poisoned Debuff
+Con Mod to Health Bars for one combat, • Double 
+once per day
+Additional Zealot Benefits:
+• Rank 10 Heal Other Spell. If already at Rank 10 or 
+higher, +2 Heal Other Spell
+• Double Con Mod to Health Bars for a 4-hour 
+period, once per day
+• Gain Rank 20 Wisp Armor Spell once per day
+
+31
+EMBERUS, GOD OF SUN AND ASH
+The sun god and brother to Taranis and Hellik, 
+Emberus was once known to pursue justice with 
+indifference to suffering, but now he seems to 
+simply punish those he dislikes on a whim. A strong 
+contender for the throne in the Celestial Ascendancy, 
+he suspects his brother, Hellik, is responsible for the 
+death of his beloved son Geyrun.
+Temple: High Temple of the Ending Sun
+High Supreme Cleric: Pater Coal
+Daily Offering: A single drop of blood
+Rival: Hellik
+Likely Sponsor: Lemig Sortion
+Signature Skills: Morning Star (Club) Skill, Fire 
+Fingers Spell
+Signature Stat: Constitution
+Symbol: A circular sun disk with triangular rays
+Additional Acolyte Benefits:
+• Resistance to Fire damage
+Con Mod to Health Bars for one attack, • Double 
+once per day
+Additional Devotee Benefits:
+• Immunity to the Burned Debuff
+Str Mod to all attacks made in a single • Double 
+combat, once per day
+Additional Zealot Benefits:
+• Immunity to Fire damage
+• Resistance to Sheol Fire damage (which is not 
+standard Fire damage)
+• Gain Rank 20 Fireball Spell once per day
+
+--- PAGE 168 ---
+3
+ERIS, GODDESS OF CHAOS
+APITOGoddess of Chaos. Half-sister of Taranis, mother to 
+nobody, lover of parties, drinking, chaos—of course—
+and generally known as the Ascendancy’s worst, 
+most unapologetic gossip. If she were mortal and 
+Human, she’d be called a wine aunt. She’d also have 
+a rich, dead husband who died under mysterious 
+circumstances.
+Temple: Sanctum of Disharmonious Mayhem
+High Supreme Cleric: Sybil Devereaux
+Daily Offering: A secret never previously shared with 
+anyone else
+Rival: Oshun
+Likely Sponsor: Helene Jbarska
+Signature Skills: Deception Skill, Grand Illusion Spell
+Signature Stat: Charisma
+Symbol: A spinning five-sided coin
+Additional Acolyte Benefits:
+YSALTE ERIS (Version A) ERIS (Version B)
+• Advantage on Deception Skill Checks
+Cha Mod to one Skill, once per day• Double 
+Additional Devotee Benefits:
+• Immunity to Deception attempts
+• Double Cha Mod to all Skill Checks for 10 minutes, 
+once per day
+Additional Zealot Benefits:
+• Rank 10 Deception Skill. If already at Rank 10 or 
+higher, +2 Deception Skill
+• Double Cha Mod to all Skill Checks during a 4-hour 
+period, once per day
+• Gain Rank 20 Deception Skill for one Check each day
+
+GRULL, GOD OF WAR
+GRULL OGUN (Version A) OGUN (Version B)Grull is the child of Taranis and Apito and is one of the 
+few trueborn heirs to the Celestial Ascendancy. He 
+has an angry streak as long as a horse’s cock, making 
+Taranis worry that his son may not be the best choice 
+to rule the heavens. Plus, Grull’s worshipers tend to be 
+donkeys and other equine-themed creatures.
+Temple: Grand Cathedral of Slaughter
+High Supreme Cleric: Ferrus Shank
+Daily Offering: A drop of blood (or blood equivalent) 
+from a slain enemy
+Rival: Eileithyia
+Likely Sponsor: Skull Empire (in general) or Prince 
+Maestro (specifically)
+Signature Skills: Iron Punch Skill, Pugilism Skill
+Signature Stat: Strength
+Symbol: A double-headed axe with an oak tree for a 
+handle
+Additional Acolyte Benefits:
+• Advantage on Checks versus Fear effects
+Str Mod to damage for one attack, once • Double 
+per day
+Additional Devotee Benefits:
+• Immunity to Fear effects
+• Double Str Mod to all attacks made in a single 
+combat, once per day
+Additional Zealot Benefits:
+• Rank 10 Intimidate Skill. If already at Rank 10 or 
+higher, +2 Intimidate Skill
+• Double Str Mod to all attacks made during a 4-hour 
+period
+• Gain Rank 20 Pugilism for one Attack per day
+
+--- PAGE 169 ---
+HELLIK EILEITHYA NEKHEBIT
+HELLIK EILEITHYA NEKHEBITTARANIS3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATIONHELLIK, GOD OF SUN AND LIFE
+The twin brother of Emberus, the younger brother of 
+Taranis, and the son of Apito. Hellik is allegedly “quite 
+obsessed” with killing his brothers and is the most 
+likely culprit in Geyrun’s death, even though he was 
+in council with Emberus when the murder happened 
+and denies it. Instead, he seeks to work with Emberus 
+to discover what happened to his son.
+Temple: The Citadel of Light
+High Supreme Cleric: Vas Vasterdame
+Daily Offering: None required
+Rival: Emberus
+Likely Sponsor: Viceroys (The Madness) or Ripper 
+Wonton
+Signature Skills: Taunt Skill, Second Chance Spell
+Signature Stat: Charisma
+Symbol: A sun shining on a field of crops
+Additional Acolyte Benefits:
+• Advantage on Persuasion Skill Checks
+Cha Mod to one Skill, once per 30 hours• Double 
+Additional Devotee Benefits:
+• Immunity to the Enraged Debuff
+• Double Cha Mod to all Skill Checks for 10 minutes, 
+once per day
+Additional Zealot Benefits:
+• Rank 10 Taunt Skill. If already at Rank 10 or higher, 
++2 Taunt Skill
+• Double Cha Mod to all Skill Checks during a 4-hour 
+period, once per day
+• Gain Rank 20 Second Chance Spell once per day
+
+31
+TARANIS
+NEKHEBIT , SCA VENGER MOTHER 
+GODDESS
+Called the Scavenger Mother of Mothers, Nekhebit 
+was a life and protector deity. Depicted as a vulture 
+or scavenger, she cleaned up after the others. She 
+supposedly wasn’t allowed to have children, but had 
+three kids anyway, including Apito. Nekhebit was the 
+last of the old gods to fall, and she was defeated by 
+her daughter Apito.
+Temple: Temple of the Desert
+High Supreme Cleric: The Desert Spector
+Daily Offering: A cup of cold water
+Rival: Apito
+Likely Sponsor: Odette
+Signature Skills: First Aid Skill, Salvage Skill
+Signature Stat: Intelligence
+Symbol: The bare head of a large vulture
+Additional Acolyte Benefits:
+• Advantage on First Aid Skill Checks
+Int Mod to one Skill, once per day• Double 
+Additional Devotee Benefits:
+• Immunity to the Queasy Debuff
+• Double Int Mod to all Skill Checks for 10 minutes, 
+once per day
+Additional Zealot Benefits:
+• Rank 10 First Aid Skill. If already at Rank 10 or 
+higher, +2 First Aid Skill
+• Double Int Mod to all Skill Checks during a 4-hour 
+period, once per day
+• Gain Rank 20 Salvage Skill for one Check per day
+
+--- PAGE 170 ---
+3
+OGUN, GOD OF BLACKSMITHERY HELLIK EILEITHYA NEKHEBIT
+AND ARMORAPITOGRULL OGUN (Version A) OGUN (Version B)
+Ogun is an outsider. He is one of the old gods, origi-
+nally a member of an obscure pantheon that has since 
+dissipated into time. He spends his days at his celestial 
+anvil, angrily creating armor, piece after piece, but no 
+one knows why he toils or what becomes of his armor 
+when it’s completed. It’s said his creations have a 
+strange shape, all designed for four-legged beasts.
+Temple: The Eternal Forge
+High Supreme Cleric: The Armorer
+Daily Offering: A piece of steel
+Rival: Legba
+Likely Sponsor: The Dreadnoughts
+Signature Skills: Warhammer Skill, Smithing Skill
+Signature Stat: Strength
+Symbol: A large blacksmith’s hammer
+Additional Acolyte Benefits:
+YSALTE ERIS (Version A) ERIS (Version B)• Advantage on Intimidation Skill Checks
+• Double Str Mod to damage for one attack, once 
+per day
+Additional Devotee Benefits:
+• Immunity to the Take Down Debuff
+• Double Str Mod to all attacks made in a single 
+combat, once per day
+Additional Zealot Benefits:
+• Rank 10 Smithing Skill. If already at Rank 10 or 
+higher, +2 Smithing Skill
+• Double Str Mod to all attacks made during a 4-hour 
+period
+• Gain Rank 20 Warhammer Skill for one Attack per day
+
+TARANIS, GOD OF THUNDERTARANIS3
+Brother to Hellik and Emberus, half-brother to Eris, 
+husband to Apito, father to Grull, Yarilo, and many 
+more. Together, Apito and Taranis held the first 
+Butcher’s Masquerade in the Halls of Ascendancy. 
+Taranis is known to be hotheaded and fast to anger. 
+He often falls short of his wife Apito’s ever-rising star 
+in the Ascendancy.
+Temple: Holy Tower of the Gathering Rod
+High Supreme Cleric: Emitt Lathrop
+Daily Offering: A jolt of electricity
+Rival: Emberus
+Likely Sponsor: Monty Winter Jr
+Signature Skills: Dodge Skill, Lightning Bolt Spell
+Signature Stat: Dexterity
+Symbol: A jagged, silver lightning bolt
+Additional Acolyte Benefits:
+• All Electric damage attacks deal +Floor damage
+• Double Dex Mod to Evade Checks for one combat, 
+once per day
+Additional Devotee Benefits:
+• Immunity to the Shocked Debuff
+• Double Dex Mod to all Skill Checks for 10 minutes, 
+once per day
+Additional Zealot Benefits:
+• Rank 5 Dodge Skill. If already at Rank 5 or higher, 
++2 Dodge Skill
+• Double Dex Mod to all Skill Checks during a 4-hour 
+period, once per day
+• Gain Rank 20 Lightning Bolt Spell once per day
+
+--- PAGE 171 ---
+Crawler 
+Advancement
+You’re gonna need to continuously get better in every 
+aspect to survive. Stats increase constantly. Skills are easy 
+to increase early on, but then they slow to a… crawl.
+STAT INCREASES
+When a crawler on the Third Floor or lower gains 
+a Level, they also get 3 Stat points to assign as they 
+choose among their five Stats. This increases both 
+your Unenhanced and Enhanced Stats. The current 
+Level limit is 250. Send letters to Mr. D if you think 
+that cap should be removed.
+If you arrived here from the Tutorial Floors, you can 
+finally apply Stat increases based on the Levels you’ve 
+gained. If you’re Level 9, you gained 8 Levels. I bet 
+you were hoping for 27 points to work with. Oh no, 
+you only gained 8 Levels, smart guy. Do this before 
+choosing your Race and Class, in case there are Stat 
+value requirements.
+After reaching the Third Floor, you’ll need to find 
+a saferoom to distribute your Stat points. You might 
+level up several times before you find one, so just use 
+a token, or write down how many Stat points you get 
+to add when you finally get to a saferoom.
+SKILL INCREASES
+Leveling up doesn’t increase your Skills. Instead, they 
+are only raised via using, grinding, training them, or 
+via potions, Races and Classes. You’ll increase your 
+Skill Ranks rapidly until they reach Rank 5, then things 
+slow way down.
+Note: Keep in mind the Skill Rank Limits (p. 129)
+SKILL ADV ANCEMENT
+Most Skills improve through use. Each Skill on your 
+character sheet has a box in the column on the far right 
+that’s labeled with a green checkmark. Whenever you 
+attempt a Skill Check, whether you Succeed or Fail, 
+mark the box if it isn’t already marked.3CHAPTER 3: CHARACTER CREATIONCHAPTER 3: CHARACTER CREATION
+
+31
+Marked Skills are eligible for a Skill Advancement 
+Check. To make the check, roll 1d20 against your 
+current Skill Rank as the Difficulty. If the result is equal 
+to or higher than your Skill’s current Rank, you gain 1 
+Rank in the Skill, up to a maximum of 15.
+As you gain more Ranks in a Skill, it takes longer 
+to improve. At the intervals below, make a Skill 
+Advancement Check for each Skill with a mark.
+• If at Rank 4 or lower, roll a Skill Advancement 
+Check at the end of every 2 hours of play
+• If at Rank 5 or higher, roll a Skill Advancement 
+Check at the end of each floor
+• After resolving these rolls, erase all marks and start fresh
+• Passive Skills don’t require a Skill Check to use, and 
+most of them don’t receive Advancement marks 
+when used. With a few exceptions, you can only 
+increase Passive Skills via magical means or through 
+Race or Class benefits
+• Hand-to-hand Damage Effects advance separately 
+from their associated Attack Skills. When you use 
+a hand-to-hand attack and a Damage Effect, mark 
+only one or the other, not both
+• Whenever you gain Levels, simply record your new 
+Level on your character sheet. Once you reach a 
+saferoom, you’ll get to increase your Stats and more!
+EXPERIENCE POINTS
+Many roleplaying games handle character 
+advancement using experience points to represent a 
+character’s learning and path toward mastery. In the 
+Dungeon Crawler Carl novels, the system does assign 
+experience points, but their use is poorly understood 
+even by veteran or retired crawlers. This algorithm is 
+incredibly opaque by design, partly due to crawlers’ 
+repeated attempts to game the system and partly due 
+to centuries of spaghetti code baked into the process.
+The Dungeon Crawler Carl Roleplaying Game 
+doesn’t use experience points at all because its 
+designers are flesh-monkeys like you who quickly gave 
+up trying to figure out Syndicate math. For simplicity’s 
+sake, crawlers gain Levels simply by playing the game. 
+Life (or death) in the dungeon is tough enough as it is. 
+Don’t overcomplicate it.
+Here are some basics:
+Two-Hours: At the end of every 2 hours of play, each 
+party member gains 1 Level.

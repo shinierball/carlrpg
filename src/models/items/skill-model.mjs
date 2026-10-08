@@ -7,6 +7,7 @@ export class SkillDataModel extends BaseItemDataModel {
   static defineSchema() {
     const fields = globalThis.foundry.data.fields;
     return {
+      ...super.defineSchema(),
       rank: new fields.NumberField({ integer: true, min: 0, initial: 1 }),
       boonBonus: new fields.NumberField({ integer: true, initial: 0 }),
       itemBonus: new fields.NumberField({ integer: true, initial: 0 }),
@@ -30,6 +31,7 @@ export class SkillDataModel extends BaseItemDataModel {
       investedHours: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       isTechnique: new fields.BooleanField({ initial: false }),
       appliesTo: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      requires: new fields.ArrayField(new fields.StringField(), { initial: [] }),
       techniqueConfig: new fields.SchemaField({
         isDamageEffect: new fields.BooleanField({ initial: false }),
         appliesToTags: new fields.ArrayField(new fields.StringField(), { initial: [] }),

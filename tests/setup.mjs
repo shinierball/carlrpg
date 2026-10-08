@@ -7,6 +7,7 @@ import { DCC_MOBS } from '../src/data/mobs.mjs';
 import { DCC_ITEMS } from '../src/data/items.mjs';
 import { DCC_RACES } from '../src/data/races.mjs';
 import { DCC_CLASSES } from '../src/data/classes.mjs';
+import { getItemAllTags, ARCHETYPE_TO_TAG } from '../src/data/tags.mjs';
 
 /**
  * Test harness setup for DCC RPG (CarlRPG).
@@ -56,6 +57,37 @@ export class MockActor {
       exceededHands: false,
       handsWarning: ''
     };
+  }
+  getArchetypeTags() {
+    const archetypes = new Set();
+    const itemsList = this.items ? (Array.isArray(this.items) ? this.items : Array.from(this.items.values?.() || [])) : [];
+    for (const item of itemsList) {
+      if (item.type === 'class' || item.type === 'race') {
+        const itemTags = item.allTags || getItemAllTags(item);
+        for (const t of itemTags) {
+          if (t.startsWith('archetype.')) archetypes.add(t);
+        }
+      }
+    }
+    const className = (this.system?.details?.class || '').trim();
+    if (className) {
+      const parts = className.toLowerCase().split(/[\s,]+/);
+      for (const p of parts) {
+        if (ARCHETYPE_TO_TAG[p]) archetypes.add(ARCHETYPE_TO_TAG[p]);
+      }
+    }
+    return archetypes;
+  }
+  getIdentityTags() {
+    const tags = new Set(this.getArchetypeTags());
+    const itemsList = this.items ? (Array.isArray(this.items) ? this.items : Array.from(this.items.values?.() || [])) : [];
+    for (const item of itemsList) {
+      if (['class', 'race', 'deity', 'sponsor'].includes(item.type)) {
+        const itemTags = item.allTags || getItemAllTags(item);
+        for (const t of itemTags) tags.add(t);
+      }
+    }
+    return tags;
   }
   static async create(data = {}) {
     const ActorClass = (this && this !== MockActor) ? this : (CONFIG.Actor?.documentClass || MockActor);
@@ -246,6 +278,9 @@ export class MockItem {
   prepareData() {
     this.prepareBaseData();
     this.prepareDerivedData();
+  }
+  get allTags() {
+    return getItemAllTags(this);
   }
   get isEmbedded() {
     return this.actor !== null;

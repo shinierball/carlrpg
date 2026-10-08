@@ -1,3 +1,8 @@
+/**
+ * Dungeon Crawler Carl RPG - Official Races Dataset
+ * Extracted from Chapter 3: Character Creation (pp. 128-144).
+ */
+
 export const DCC_RACES = [
   {
     "_id": "dccrce0000000001",
@@ -46,7 +51,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "amazonian",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -87,6 +97,11 @@ export const DCC_RACES = [
           "name": "Web",
           "rank": 3
         }
+      ],
+      "identifier": "arachnid",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
       ]
     }
   },
@@ -134,7 +149,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "cat",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -189,7 +209,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "cat-girl-cat-boy",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -230,7 +255,12 @@ export const DCC_RACES = [
         "burrow": 0
       },
       "skills": [],
-      "spells": []
+      "spells": [],
+      "identifier": "changbi-demon",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -284,7 +314,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "changeling",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -332,7 +367,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "crocodilian",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -381,7 +421,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "doppelg-nger",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -394,15 +439,15 @@ export const DCC_RACES = [
       "size": "Medium (4)",
       "prerequisites": "",
       "description": "<p>Is there any RPG Race more classic than the gruff, bearded Dwarf? From Snow White to The Lord of the Rings, Dwarves have fascinated Earthlings’ imaginations for far too long. Shorter than a person and as wide as they are tall, Dwarves tend to dig and work underground, crafting items of unsurpassed beauty and durability. Dwarves are a natural fit in the tightest corridors of the World Dungeon, where their doughty Endurance and keen crafting traditions serve them well. Dwarves are quick to grouse about their troubles, even when things are otherwise going their way, and they rarely put up with frippery or foolishness. They might not all drink heavily and speak in a grumble through their beards, but you’d be hard-pressed to find one that doesn’t. Dwarves make great front-line Fighters and are excellent crafters, no matter what Class they pursue.</p>",
-      "abilities": "<ul><li>-4 Constitution</li><li>-2 Intelligence</li><li>-2 Charisma</li><li>+3 in two differ ent crafting Skills of your choice</li><li>+2 Endurance Skill</li><li>Can see in total darkness</li><li>All craft ing Skills can be raised to Rank 20</li><li>When dealing with elves or fairies, make all Charisma-based Checks with Disadvantage</li></ul>",
+      "abilities": "<ul><li>-4 Constitution</li><li>-2 Intelligence</li><li>-2 Charisma</li><li>+3 in two different crafting Skills of your choice</li><li>+2 Endurance Skill</li><li>Can see in total darkness</li><li>All crafting Skills can be raised to Rank 20</li><li>When dealing with elves or fairies, make all Charisma-based Checks with Disadvantage</li></ul>",
       "perks": [
         "-4 Constitution",
         "-2 Intelligence",
         "-2 Charisma",
-        "+3 in two differ ent crafting Skills of your choice",
+        "+3 in two different crafting Skills of your choice",
         "+2 Endurance Skill",
         "Can see in total darkness",
-        "All craft ing Skills can be raised to Rank 20",
+        "All crafting Skills can be raised to Rank 20",
         "When dealing with elves or fairies, make all Charisma-based Checks with Disadvantage"
       ],
       "stats": {
@@ -426,7 +471,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "dwarf-classic",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -477,7 +527,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "dwarf-fathom",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -490,15 +545,15 @@ export const DCC_RACES = [
       "size": "Medium (4)",
       "prerequisites": "",
       "description": "<p>Graceful, tall, and immortal, Elves are a species of long-limbed, pointy-eared humanoids with a natural affinity for magic. They often reside in forest groves, carefully tended over many Human generations to form natural residences, workshops, and libraries. If all this effortless aptitude seems likely to make Elves arrogant or snooty, well buckle up, brother, because they’re even worse than in the countless Earth stories that thinly veiled countless authors’ ear-point fetish. Elves consider themselves the better of nearly all other Races, particularly those Races that grub in the ground like Dwarves and Rat-Kin. Some Elves are maybe just better at not being jerks about it. Choosing this Race ensures a clear mind, easy charm, and a complexion that Hollywood starlets would kill for. This Race makes an ideal magic-user, Bard, or anyone else who wouldn’t like to get their hands dirty or stink of… ugh, effort.</p>",
-      "abilities": "<ul><li>+4 Intelligence, Dexterity, and Charisma</li><li>+2 Intimida tion Skill, and you can use your Cha Mod</li><li>+1 Lore Skill</li><li>You recover Mana at twice the normal rate in a natural environment</li><li>Add 1d4 to your Evade Checks</li><li>When dealing with Dwarves, Rat-Kin, or anyone smelly or dirty, make all Charisma-based Checks with Disadvantage</li><li>Two differ ent Charisma-based Skills can be raised to Rank 20</li></ul>",
+      "abilities": "<ul><li>+4 Intelligence, Dexterity, and Charisma</li><li>+2 Intimidation Skill, and you can use your Cha Mod</li><li>+1 Lore Skill</li><li>You recover Mana at twice the normal rate in a natural environment</li><li>Add 1d4 to your Evade Checks</li><li>When dealing with Dwarves, Rat-Kin, or anyone smelly or dirty, make all Charisma-based Checks with Disadvantage</li><li>Two different Charisma-based Skills can be raised to Rank 20</li></ul>",
       "perks": [
         "+4 Intelligence, Dexterity, and Charisma",
-        "+2 Intimida tion Skill, and you can use your Cha Mod",
+        "+2 Intimidation Skill, and you can use your Cha Mod",
         "+1 Lore Skill",
         "You recover Mana at twice the normal rate in a natural environment",
         "Add 1d4 to your Evade Checks",
         "When dealing with Dwarves, Rat-Kin, or anyone smelly or dirty, make all Charisma-based Checks with Disadvantage",
-        "Two differ ent Charisma-based Skills can be raised to Rank 20"
+        "Two different Charisma-based Skills can be raised to Rank 20"
       ],
       "stats": {
         "str": 0,
@@ -525,7 +580,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "elf-high",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -575,7 +635,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "elf-city",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -622,7 +687,12 @@ export const DCC_RACES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "elf-night",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -665,7 +735,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "frost-maiden",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -703,7 +778,12 @@ export const DCC_RACES = [
         "burrow": 0
       },
       "skills": [],
-      "spells": []
+      "spells": [],
+      "identifier": "human",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -816,7 +896,12 @@ export const DCC_RACES = [
           "description": "Disadvantage on Checks to conceal your presence or nature (such as Stealth)."
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "igneous",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -866,7 +951,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "obsidian-butterfly",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -899,7 +989,12 @@ export const DCC_RACES = [
         "burrow": 0
       },
       "skills": [],
-      "spells": []
+      "spells": [],
+      "identifier": "lajabless",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -933,7 +1028,12 @@ export const DCC_RACES = [
         "burrow": 0
       },
       "skills": [],
-      "spells": []
+      "spells": [],
+      "identifier": "primal",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -989,7 +1089,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "rat-hooligan",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1036,7 +1141,12 @@ export const DCC_RACES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "sasquatch",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1082,7 +1192,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "tetrakai",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1136,7 +1251,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "tigran",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1187,7 +1307,12 @@ export const DCC_RACES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "bune",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1237,7 +1362,12 @@ export const DCC_RACES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "caprid",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1284,7 +1414,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "grulke",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1333,7 +1468,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "hobgoblin",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1394,7 +1534,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "pocket-kuma",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1450,7 +1595,12 @@ export const DCC_RACES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "pterolykos",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   },
   {
@@ -1494,7 +1644,12 @@ export const DCC_RACES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "skyfowl",
+      "archetypes": [],
+      "tags": [
+        "kind.race"
+      ]
     }
   }
 ];

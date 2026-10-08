@@ -1,3 +1,8 @@
+/**
+ * Dungeon Crawler Carl RPG - Official Classes Dataset
+ * Extracted from Chapter 3: Character Creation (pp. 144-165).
+ */
+
 export const DCC_CLASSES = [
   {
     "_id": "dcccls0000000001",
@@ -8,14 +13,14 @@ export const DCC_CLASSES = [
       "classType": "Arcanist",
       "prerequisites": "",
       "description": "<p>You decided long ago that you wanted to craft powerful magical items, but really never settled on a specialty. You’re pretty good in some areas and just average in others. At higher Levels, you may gain some additional expertise, but for the most part, you are a generalist. Still, when someone needs that special arcane item to defeat that big Boss, you might just be the Arcanist for the job. And if not, well, you’re probably the only Arcanist they can find, so you’ll make do.</p>",
-      "abilities": "<ul><li>+3 Intelligence</li><li>-2 Dexterity</li><li>+5 Arcane Skill</li><li>+3 Salv age Skill</li><li>+2 in a craft ing Skill of your choice</li><li>+1 in a craft ing Skill of your choice</li><li>Tier 1 Arc anist table</li><li>Arcane and one cr afting Skill can be raised to Rank 20</li></ul>",
+      "abilities": "<ul><li>+3 Intelligence</li><li>-2 Dexterity</li><li>+5 Arcane Skill</li><li>+3 Salv age Skill</li><li>+2 in a crafting Skill of your choice</li><li>+1 in a crafting Skill of your choice</li><li>Tier 1 Arc anist table</li><li>Arcane and one cr afting Skill can be raised to Rank 20</li></ul>",
       "perks": [
         "+3 Intelligence",
         "+2 Dexterity",
         "+5 Arcane Skill",
         "+3 Salv age Skill",
-        "+2 in a craft ing Skill of your choice",
-        "+1 in a craft ing Skill of your choice",
+        "+2 in a crafting Skill of your choice",
+        "+1 in a crafting Skill of your choice",
         "Tier 1 Arc anist table",
         "Arcane and one cr afting Skill can be raised to Rank 20"
       ],
@@ -44,7 +49,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-arcanist",
+      "archetypes": [
+        "archetype.arcanist"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "kind.class"
+      ]
     }
   },
   {
@@ -91,7 +104,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "alchemist",
+      "archetypes": [
+        "archetype.arcanist"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "kind.class"
+      ]
     }
   },
   {
@@ -147,7 +168,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "douchy-wizard-school-wand-maker",
+      "archetypes": [
+        "archetype.arcanist"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "kind.class"
+      ]
     }
   },
   {
@@ -195,7 +224,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "infernocrafter",
+      "archetypes": [
+        "archetype.arcanist"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "kind.class"
+      ]
     }
   },
   {
@@ -247,7 +284,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "prison-tattoo-artist",
+      "archetypes": [
+        "archetype.arcanist"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "kind.class"
+      ]
     }
   },
   {
@@ -294,7 +339,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-barbarian",
+      "archetypes": [
+        "archetype.barbarian"
+      ],
+      "tags": [
+        "archetype.barbarian",
+        "kind.class"
+      ]
     }
   },
   {
@@ -346,7 +399,17 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "gladiator",
+      "archetypes": [
+        "archetype.barbarian",
+        "archetype.bard"
+      ],
+      "tags": [
+        "archetype.barbarian",
+        "archetype.bard",
+        "kind.class"
+      ]
     }
   },
   {
@@ -394,7 +457,17 @@ export const DCC_CLASSES = [
           "rank": 4
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "harii",
+      "archetypes": [
+        "archetype.barbarian",
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.barbarian",
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -450,7 +523,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "feral-cat-berserker",
+      "archetypes": [
+        "archetype.barbarian"
+      ],
+      "tags": [
+        "archetype.barbarian",
+        "kind.class"
+      ]
     }
   },
   {
@@ -495,7 +576,17 @@ export const DCC_CLASSES = [
           "rank": 5
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "shieldmaiden",
+      "archetypes": [
+        "archetype.barbarian",
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.barbarian",
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -554,7 +645,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-bard",
+      "archetypes": [
+        "archetype.bard"
+      ],
+      "tags": [
+        "archetype.bard",
+        "kind.class"
+      ]
     }
   },
   {
@@ -611,6 +710,16 @@ export const DCC_CLASSES = [
           "name": "Shield",
           "rank": 2
         }
+      ],
+      "identifier": "artist-alley-mogul",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.merchant"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.merchant",
+        "kind.class"
       ]
     }
   },
@@ -658,7 +767,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "former-child-actor",
+      "archetypes": [
+        "archetype.bard"
+      ],
+      "tags": [
+        "archetype.bard",
+        "kind.class"
+      ]
     }
   },
   {
@@ -710,6 +827,16 @@ export const DCC_CLASSES = [
           "name": "Panty Dropper",
           "rank": 3
         }
+      ],
+      "identifier": "necrobard",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.necromancer"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.necromancer",
+        "kind.class"
       ]
     }
   },
@@ -755,7 +882,15 @@ export const DCC_CLASSES = [
           "rank": 5
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "poet-laureate",
+      "archetypes": [
+        "archetype.bard"
+      ],
+      "tags": [
+        "archetype.bard",
+        "kind.class"
+      ]
     }
   },
   {
@@ -811,7 +946,17 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "professional-roadie",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -870,6 +1015,14 @@ export const DCC_CLASSES = [
           "name": "Panty Dropper",
           "rank": 2
         }
+      ],
+      "identifier": "spellbinder",
+      "archetypes": [
+        "archetype.bard"
+      ],
+      "tags": [
+        "archetype.bard",
+        "kind.class"
       ]
     }
   },
@@ -928,6 +1081,14 @@ export const DCC_CLASSES = [
           "name": "Turn Undead",
           "rank": 2
         }
+      ],
+      "identifier": "boring-ol-cleric",
+      "archetypes": [
+        "archetype.cleric"
+      ],
+      "tags": [
+        "archetype.cleric",
+        "kind.class"
       ]
     }
   },
@@ -992,6 +1153,14 @@ export const DCC_CLASSES = [
           "name": "Soul Collector",
           "rank": 2
         }
+      ],
+      "identifier": "santero",
+      "archetypes": [
+        "archetype.cleric"
+      ],
+      "tags": [
+        "archetype.cleric",
+        "kind.class"
       ]
     }
   },
@@ -1040,6 +1209,14 @@ export const DCC_CLASSES = [
           "name": "Nature's Breath",
           "rank": 3
         }
+      ],
+      "identifier": "boring-ol-druid",
+      "archetypes": [
+        "archetype.druid"
+      ],
+      "tags": [
+        "archetype.druid",
+        "kind.class"
       ]
     }
   },
@@ -1101,6 +1278,16 @@ export const DCC_CLASSES = [
           "name": "Dirt Clod",
           "rank": 2
         }
+      ],
+      "identifier": "herbalist",
+      "archetypes": [
+        "archetype.arcanist",
+        "archetype.druid"
+      ],
+      "tags": [
+        "archetype.arcanist",
+        "archetype.druid",
+        "kind.class"
       ]
     }
   },
@@ -1164,6 +1351,14 @@ export const DCC_CLASSES = [
           "name": "Rank in all",
           "rank": 1
         }
+      ],
+      "identifier": "lifebringer",
+      "archetypes": [
+        "archetype.druid"
+      ],
+      "tags": [
+        "archetype.druid",
+        "kind.class"
       ]
     }
   },
@@ -1217,6 +1412,14 @@ export const DCC_CLASSES = [
           "name": "Solsplash",
           "rank": 2
         }
+      ],
+      "identifier": "physicker",
+      "archetypes": [
+        "archetype.druid"
+      ],
+      "tags": [
+        "archetype.druid",
+        "kind.class"
       ]
     }
   },
@@ -1276,6 +1479,14 @@ export const DCC_CLASSES = [
           "name": "Drain Life",
           "rank": 2
         }
+      ],
+      "identifier": "shepherd",
+      "archetypes": [
+        "archetype.druid"
+      ],
+      "tags": [
+        "archetype.druid",
+        "kind.class"
       ]
     }
   },
@@ -1317,7 +1528,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-fighter",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1368,7 +1587,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "pit-fighter",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1416,7 +1643,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "shotgun-messenger",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1472,7 +1707,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "straight-to-dvd-action-hero",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1522,7 +1765,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "sword-and-boarder",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1576,7 +1827,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "monster-truck-driver",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1626,7 +1885,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "zulu-warrior",
+      "archetypes": [
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "kind.class"
+      ]
     }
   },
   {
@@ -1638,13 +1905,13 @@ export const DCC_CLASSES = [
       "classType": "Mage",
       "prerequisites": "",
       "description": "<p>Ever faithful to the old traditions, you, as an adherent of the Boring Ol’ Mage School (as their foes would describe them), strive to learn how to channel sheer arcane power at the cost of other Skills. Though some believe this equips the Boring Ol’ Mage Class with glass jaws, your rigorous focus on magic channels portions of your intellect into impressive effects. Several crawlers have attempted to waylay one of these Mages only to find they’re capable of channeling sudden destructive powers and manifesting Spells straight out of legend, often with the same showmanship and magical-sounding words found in movies, TV shows, and fantasy books.</p>",
-      "abilities": "<ul><li>+5 Intelligence and Charisma</li><li>−2 Strength and Dexterity</li><li>+3 in a Fire Spell</li><li>+2 in one Forc e Spell and one Sonic Spell</li><li>+2 in two differ ent Passive Spells</li><li>+2 Lore Skill</li><li>+1 Arcane Skill</li><li>−3 Ranks in all Dexterity Skills (to a minimum of 1 Rank if you have any Ranks)</li><li>−3 Ranks in all Strength Skills (to a minimum of 1 Rank if you have any Ranks)</li></ul>",
+      "abilities": "<ul><li>+5 Intelligence and Charisma</li><li>−2 Strength and Dexterity</li><li>+3 in a Fire Spell</li><li>+2 in one Force Spell and one Sonic Spell</li><li>+2 in two different Passive Spells</li><li>+2 Lore Skill</li><li>+1 Arcane Skill</li><li>−3 Ranks in all Dexterity Skills (to a minimum of 1 Rank if you have any Ranks)</li><li>−3 Ranks in all Strength Skills (to a minimum of 1 Rank if you have any Ranks)</li></ul>",
       "perks": [
         "+5 Intelligence and Charisma",
         "−2 Strength and Dexterity",
         "+3 in a Fire Spell",
-        "+2 in one Forc e Spell and one Sonic Spell",
-        "+2 in two differ ent Passive Spells",
+        "+2 in one Force Spell and one Sonic Spell",
+        "+2 in two different Passive Spells",
         "+2 Lore Skill",
         "+1 Arcane Skill",
         "−3 Ranks in all Dexterity Skills (to a minimum of 1 Rank if you have any Ranks)",
@@ -1688,6 +1955,14 @@ export const DCC_CLASSES = [
           "name": "two different Passive",
           "rank": 2
         }
+      ],
+      "identifier": "boring-ol-mage",
+      "archetypes": [
+        "archetype.mage"
+      ],
+      "tags": [
+        "archetype.mage",
+        "kind.class"
       ]
     }
   },
@@ -1740,6 +2015,14 @@ export const DCC_CLASSES = [
           "name": "Frost Scar",
           "rank": 4
         }
+      ],
+      "identifier": "blizzardmancer",
+      "archetypes": [
+        "archetype.mage"
+      ],
+      "tags": [
+        "archetype.mage",
+        "kind.class"
       ]
     }
   },
@@ -1801,6 +2084,14 @@ export const DCC_CLASSES = [
           "name": "Wilbur's Slow-Build Fireblast",
           "rank": 2
         }
+      ],
+      "identifier": "crisper",
+      "archetypes": [
+        "archetype.mage"
+      ],
+      "tags": [
+        "archetype.mage",
+        "kind.class"
       ]
     }
   },
@@ -1855,6 +2146,16 @@ export const DCC_CLASSES = [
           "name": "Intimate Touches",
           "rank": 2
         }
+      ],
+      "identifier": "fire-spiritualist",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.mage"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.mage",
+        "kind.class"
       ]
     }
   },
@@ -1914,6 +2215,14 @@ export const DCC_CLASSES = [
           "name": "Soul Collector",
           "rank": 3
         }
+      ],
+      "identifier": "forsaken-aerialist",
+      "archetypes": [
+        "archetype.mage"
+      ],
+      "tags": [
+        "archetype.mage",
+        "kind.class"
       ]
     }
   },
@@ -1968,6 +2277,16 @@ export const DCC_CLASSES = [
           "name": "Second Chance",
           "rank": 2
         }
+      ],
+      "identifier": "necromancer",
+      "archetypes": [
+        "archetype.mage",
+        "archetype.necromancer"
+      ],
+      "tags": [
+        "archetype.mage",
+        "archetype.necromancer",
+        "kind.class"
       ]
     }
   },
@@ -2030,7 +2349,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-monk",
+      "archetypes": [
+        "archetype.monk"
+      ],
+      "tags": [
+        "archetype.monk",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2091,6 +2418,16 @@ export const DCC_CLASSES = [
           "name": "all",
           "rank": 1
         }
+      ],
+      "identifier": "elemental-monk",
+      "archetypes": [
+        "archetype.mage",
+        "archetype.monk"
+      ],
+      "tags": [
+        "archetype.mage",
+        "archetype.monk",
+        "kind.class"
       ]
     }
   },
@@ -2139,7 +2476,17 @@ export const DCC_CLASSES = [
           "rank": 5
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "prizefighter",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.monk"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.monk",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2197,6 +2544,16 @@ export const DCC_CLASSES = [
           "name": "Heal Self",
           "rank": 2
         }
+      ],
+      "identifier": "spirit-healer",
+      "archetypes": [
+        "archetype.druid",
+        "archetype.monk"
+      ],
+      "tags": [
+        "archetype.druid",
+        "archetype.monk",
+        "kind.class"
       ]
     }
   },
@@ -2253,7 +2610,17 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "street-monk",
+      "archetypes": [
+        "archetype.fighter",
+        "archetype.monk"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "archetype.monk",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2305,6 +2672,14 @@ export const DCC_CLASSES = [
           "name": "Holy Aura",
           "rank": 3
         }
+      ],
+      "identifier": "boring-ol-paladin",
+      "archetypes": [
+        "archetype.paladin"
+      ],
+      "tags": [
+        "archetype.paladin",
+        "kind.class"
       ]
     }
   },
@@ -2366,6 +2741,16 @@ export const DCC_CLASSES = [
           "name": "Smite",
           "rank": 2
         }
+      ],
+      "identifier": "cavalier",
+      "archetypes": [
+        "archetype.fighter",
+        "archetype.paladin"
+      ],
+      "tags": [
+        "archetype.fighter",
+        "archetype.paladin",
+        "kind.class"
       ]
     }
   },
@@ -2425,6 +2810,14 @@ export const DCC_CLASSES = [
           "name": "Turn Undead",
           "rank": 2
         }
+      ],
+      "identifier": "sacred-paladin",
+      "archetypes": [
+        "archetype.paladin"
+      ],
+      "tags": [
+        "archetype.paladin",
+        "kind.class"
       ]
     }
   },
@@ -2489,7 +2882,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "boring-ol-rogue",
+      "archetypes": [
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2537,7 +2938,15 @@ export const DCC_CLASSES = [
           "rank": 3
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "bomb-squad-tech",
+      "archetypes": [
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2614,6 +3023,16 @@ export const DCC_CLASSES = [
           "name": "Fear",
           "rank": 1
         }
+      ],
+      "identifier": "compensated-anarchist",
+      "archetypes": [
+        "archetype.monk",
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.monk",
+        "archetype.rogue",
+        "kind.class"
       ]
     }
   },
@@ -2677,7 +3096,15 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "high-rise-grifter",
+      "archetypes": [
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2730,7 +3157,15 @@ export const DCC_CLASSES = [
           "rank": 2
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "identity-thief",
+      "archetypes": [
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2786,7 +3221,19 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "swashbuckler",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.fighter",
+        "archetype.rogue"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.fighter",
+        "archetype.rogue",
+        "kind.class"
+      ]
     }
   },
   {
@@ -2847,6 +3294,16 @@ export const DCC_CLASSES = [
           "name": "Hot Stuff Aura",
           "rank": 2
         }
+      ],
+      "identifier": "dungeon-dad",
+      "archetypes": [
+        "archetype.bard",
+        "archetype.fighter"
+      ],
+      "tags": [
+        "archetype.bard",
+        "archetype.fighter",
+        "kind.class"
       ]
     }
   },
@@ -2902,7 +3359,19 @@ export const DCC_CLASSES = [
           "rank": 1
         }
       ],
-      "spells": []
+      "spells": [],
+      "identifier": "black-inquisitor-general",
+      "archetypes": [
+        "archetype.cleric",
+        "archetype.mage",
+        "archetype.paladin"
+      ],
+      "tags": [
+        "archetype.cleric",
+        "archetype.mage",
+        "archetype.paladin",
+        "kind.class"
+      ]
     }
   }
 ];

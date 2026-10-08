@@ -18,7 +18,7 @@ The rulebook (`docs/crpgrules.pdf`) has been extracted into clean intermediary r
 
 ### Implementation Phases
 - [x] **Phase 0: Foundations & Data Models** (`tags.mjs`, `tag-query.mjs`, schema updates in `template.json` & models, test suites)
-- [ ] **Phase 1: Canonical Dataset Tagging** (Spells, Skills, Classes, Races tagged with exact rulebook values)
+- [x] **Phase 1: Canonical Dataset Tagging** (Spells, Skills, Classes, Races tagged with exact rulebook values)
 - [ ] **Phase 2: Tag Index Service** (`TagIndex` for reactive compendium/world item queries)
 - [ ] **Phase 3: Structured Grants & Class/Race Applier Rewrite** (`grants` array replacing all perk regex)
 - [ ] **Phase 4: Combat Technique & Skill Associations** (Data-driven techniques via `TagQuery`)

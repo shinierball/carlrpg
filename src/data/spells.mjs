@@ -62,7 +62,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "air-buddy",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int",
+        "favored.mage"
+      ]
     }
   },
   {
@@ -123,7 +130,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "astral-paw",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -184,7 +197,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "bad-faith",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.necrotic",
+        "stat.cha",
+        "favored.cleric"
+      ]
     }
   },
   {
@@ -245,7 +266,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "bang-bro",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -306,7 +333,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "clockwork-triplicate",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -367,7 +400,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "confusing-fog",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -428,7 +467,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "dirt-clod",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.bludgeoning",
+        "stat.int"
+      ]
     }
   },
   {
@@ -489,7 +535,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "drain-life",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.necrotic",
+        "stat.int"
+      ]
     }
   },
   {
@@ -550,7 +603,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "earworm",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.sonic",
+        "stat.cha",
+        "favored.bard"
+      ]
     }
   },
   {
@@ -611,7 +672,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "fear",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "rule.mind-control",
+        "stat.int"
+      ]
     }
   },
   {
@@ -672,7 +740,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "fire-fingers",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.fire",
+        "stat.int"
+      ]
     }
   },
   {
@@ -733,7 +808,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "fireball",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.fire",
+        "shape.aoe",
+        "stat.int"
+      ]
     }
   },
   {
@@ -794,7 +877,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "frost-scar",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.ice",
+        "stat.int"
+      ]
     }
   },
   {
@@ -855,7 +945,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "grand-illusion",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -916,7 +1012,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "heal",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "action.heal",
+        "stat.int"
+      ]
     }
   },
   {
@@ -977,7 +1081,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "heal-critter",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "action.heal",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1038,7 +1150,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "heal-others",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "action.heal",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1099,7 +1219,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "heal-self",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "action.heal",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1160,7 +1288,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "hole",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1221,7 +1355,17 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "holy-aura",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.holy",
+        "shape.aoe",
+        "stat.cha",
+        "favored.cleric",
+        "favored.paladin"
+      ]
     }
   },
   {
@@ -1282,7 +1426,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "hot-stuff-aura",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "shape.aoe",
+        "stat.int",
+        "favored.bard"
+      ]
     }
   },
   {
@@ -1343,7 +1495,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "ice-blast",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.ice",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1404,7 +1563,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "icicles",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.ice",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1465,7 +1631,16 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "intimate-touches",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.heal",
+        "stat.int",
+        "favored.cleric",
+        "favored.paladin"
+      ]
     }
   },
   {
@@ -1526,7 +1701,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "lightning-bolt",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.electric",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1587,7 +1769,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "magic-missile",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.force",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1648,7 +1837,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "mind-tickle",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.psychic",
+        "stat.cha",
+        "favored.cleric"
+      ]
     }
   },
   {
@@ -1709,7 +1906,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "minion-army",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "shape.aoe",
+        "rule.mind-control",
+        "stat.int"
+      ]
     }
   },
   {
@@ -1770,7 +1975,16 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "natures-breath",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "action.heal",
+        "stat.int",
+        "favored.druid"
+      ]
     }
   },
   {
@@ -1831,7 +2045,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "oakhide",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int",
+        "favored.druid"
+      ]
     }
   },
   {
@@ -1892,7 +2113,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "paladins-smite",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.holy",
+        "stat.cha",
+        "favored.paladin"
+      ]
     }
   },
   {
@@ -1953,7 +2182,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "panty-dropper",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "rule.mind-control",
+        "stat.cha",
+        "favored.bard"
+      ]
     }
   },
   {
@@ -2014,7 +2251,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "ping",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "shape.aoe",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2075,7 +2319,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "protective-shell",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "shape.aoe",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2136,7 +2388,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "puddle-jumper",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2197,7 +2455,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "rise-dead-minion",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "stat.int",
+        "favored.necromancer"
+      ]
     }
   },
   {
@@ -2258,7 +2523,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "rootfoot",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "stat.int",
+        "favored.druid"
+      ]
     }
   },
   {
@@ -2319,7 +2591,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "second-chance",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2380,7 +2658,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "shield",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "action.interrupt",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2441,7 +2726,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "shock-treatment",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.electric",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2502,7 +2794,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "solsplash",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.fire",
+        "stat.con",
+        "favored.druid"
+      ]
     }
   },
   {
@@ -2563,7 +2863,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "soul-collector",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.necrotic",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2624,7 +2931,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "thunderlash",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.sonic",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2685,7 +2999,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "torch",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2746,7 +3066,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "tripper",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "shape.aoe",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2807,7 +3134,17 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "turn-undead",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "shape.aoe",
+        "stat.int",
+        "favored.bard",
+        "favored.cleric",
+        "favored.paladin"
+      ]
     }
   },
   {
@@ -2868,7 +3205,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "twinkle-toes",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2929,7 +3272,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "unnecessary-force",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.force",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2990,7 +3340,15 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "vine-porn",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.piercing",
+        "stat.con",
+        "favored.druid"
+      ]
     }
   },
   {
@@ -3051,7 +3409,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "wall-of-fire",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "element.fire",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3112,7 +3477,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "water-breathing",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3173,7 +3544,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "web",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3234,7 +3611,14 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "wilburs-slow-build-fireblast",
+      "tags": [
+        "kind.spell",
+        "action.attack",
+        "element.fire",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3295,7 +3679,13 @@ export const DCC_SPELLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "wisp-armor",
+      "tags": [
+        "kind.spell",
+        "action.passive",
+        "stat.int"
+      ]
     }
   }
 ];

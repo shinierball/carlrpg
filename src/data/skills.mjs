@@ -59,7 +59,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "bite",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.natural"
+      ]
     }
   },
   {
@@ -117,7 +126,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "back-claw",
+      "tags": [
+        "action.attack",
+        "element.slashing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.natural"
+      ]
     }
   },
   {
@@ -175,7 +193,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "slice-attack",
+      "tags": [
+        "action.attack",
+        "element.slashing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weaponClass.natural"
+      ]
     }
   },
   {
@@ -233,7 +260,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "club",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.club",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -291,7 +328,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "improvised-weapons",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.improvised",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -349,7 +396,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "warhammer",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.warhammer",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -407,7 +464,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "axe",
+      "tags": [
+        "action.attack",
+        "element.slashing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.axe",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -465,7 +532,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "dagger",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.dagger",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -523,7 +600,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "longsword",
+      "tags": [
+        "action.attack",
+        "element.slashing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.longsword",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -581,7 +668,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "rapier",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.rapier",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -643,7 +740,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "foot-soldier",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.unarmed"
+      ]
     }
   },
   {
@@ -705,7 +811,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "noggin-nocker",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.unarmed"
+      ]
     }
   },
   {
@@ -768,7 +883,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "pugilism",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weaponClass.unarmed"
+      ]
     }
   },
   {
@@ -827,7 +951,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "unarmed-combat",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "rule.no-damage-effects",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.unarmed"
+      ]
     }
   },
   {
@@ -890,7 +1024,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "wrasslin",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weaponClass.unarmed"
+      ]
     }
   },
   {
@@ -962,7 +1105,15 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "choke-out",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.wrasslin"
+      ]
     }
   },
   {
@@ -1036,7 +1187,16 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "dirty-fighting",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.pugilism",
+        "technique.wrasslin"
+      ]
     }
   },
   {
@@ -1107,7 +1267,15 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "iron-punch",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.pugilism"
+      ]
     }
   },
   {
@@ -1183,7 +1351,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "powerful-strike",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.foot_soldier",
+        "technique.noggin_nocker",
+        "technique.pugilism"
+      ]
     }
   },
   {
@@ -1255,7 +1433,15 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "skullcracker",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.noggin_nocker"
+      ]
     }
   },
   {
@@ -1326,7 +1512,15 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "smush",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.foot_soldier"
+      ]
     }
   },
   {
@@ -1398,7 +1592,15 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "toss",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str",
+        "technique.wrasslin"
+      ]
     }
   },
   {
@@ -1456,7 +1658,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "bow",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.bow",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1514,7 +1726,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "crossbow",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.crossbow",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1572,7 +1794,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "handgun",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.handgun",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1630,7 +1862,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "javelin",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.javelin",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1688,7 +1930,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "shotgun",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.shotgun",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1746,7 +1998,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "shuriken",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.shuriken",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1804,7 +2066,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "slingshot",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex",
+        "weapon.slingshot",
+        "weaponClass.ranged"
+      ]
     }
   },
   {
@@ -1862,7 +2134,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "herding-weapons",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.herding_weapon",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -1920,7 +2202,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "lance",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.lance",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -1978,7 +2270,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "polearm",
+      "tags": [
+        "action.attack",
+        "element.piercing",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.polearm",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -2036,7 +2338,17 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "quarterstaff",
+      "tags": [
+        "action.attack",
+        "element.bludgeoning",
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str",
+        "weapon.quarterstaff",
+        "weaponClass.melee"
+      ]
     }
   },
   {
@@ -2091,7 +2403,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "edged-weapons",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str"
+      ]
     }
   },
   {
@@ -2146,7 +2464,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "blunt-weapons",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str"
+      ]
     }
   },
   {
@@ -2201,7 +2525,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "reach-weapons",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str"
+      ]
     }
   },
   {
@@ -2256,7 +2586,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "ranged-weapons",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -2311,7 +2647,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "strike-weapons",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.str"
+      ]
     }
   },
   {
@@ -2363,7 +2705,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "acute-ears",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2415,7 +2763,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "aiming",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -2467,7 +2822,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "alchemy",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2519,7 +2880,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "ambush",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2571,7 +2938,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "animal-handling",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -2623,7 +2996,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "arcane",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2675,7 +3054,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "attack-of-opportunity",
+      "tags": [
+        "action.interrupt",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -2727,7 +3113,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "backfire",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2779,7 +3171,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "balance",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -2831,7 +3229,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "basic-science",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2883,7 +3287,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "bomb-surgeon",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -2935,7 +3345,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "calligraphy",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -2987,7 +3403,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "cartography",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3039,7 +3461,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "cat-like-reflexes",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3094,7 +3522,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "catcher",
+      "tags": [
+        "action.interrupt",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -3146,7 +3581,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "cesta-punta",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3198,7 +3639,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "character-actor",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -3250,7 +3698,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "chopper-pilot",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3302,7 +3756,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "climbing",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -3354,7 +3814,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "cockroach",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.con"
+      ]
     }
   },
   {
@@ -3406,7 +3872,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "cooking",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3458,7 +3930,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "deception",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -3510,7 +3988,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "detect-lies",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3562,7 +4046,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "detect-trap",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3614,7 +4104,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "determine-value",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3666,7 +4163,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "diplomacy",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -3718,7 +4221,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "dodge",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3770,7 +4280,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "double-tap",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3822,7 +4339,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "driving",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -3874,7 +4397,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "dumpster-diving",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -3926,7 +4455,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "endurance",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.con"
+      ]
     }
   },
   {
@@ -3978,7 +4513,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "engineering",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4030,7 +4571,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "escape-plan",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4082,7 +4630,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "escape-artist",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -4134,7 +4688,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "explosives-handling",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4186,7 +4746,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "fabricate",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4238,7 +4804,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "find-crawler",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4290,7 +4863,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "find-trap",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4342,7 +4922,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "first-aid",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4394,7 +4980,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "gear-head",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4446,7 +5038,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "goblin-explosives",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4498,7 +5096,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "good-first-impression",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -4550,7 +5154,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "improvised-explosive-device",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4602,7 +5212,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "hide-in-shadows",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -4654,7 +5270,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "incendiary-device-handling",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4706,7 +5328,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "infusion",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4758,7 +5386,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "intimidate",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -4810,7 +5444,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "investigation",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -4862,7 +5502,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "iron-stomach",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.con"
+      ]
     }
   },
   {
@@ -4914,7 +5560,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "jumping",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -4966,7 +5618,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "leadership",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -5018,7 +5676,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "light-on-your-feet",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5070,7 +5734,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "lockpicking",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5122,7 +5792,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "lore",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5174,7 +5850,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "negotiation",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -5226,7 +5908,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "pathfinder",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5278,7 +5967,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "perception",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5330,7 +6025,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "performance",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -5382,7 +6083,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "persuasion",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -5434,7 +6141,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "regeneration",
+      "tags": [
+        "action.passive",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.con"
+      ]
     }
   },
   {
@@ -5486,7 +6200,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "religion",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5538,7 +6258,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "repair",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5590,7 +6316,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "ropework",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5642,7 +6374,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "riding",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5694,7 +6432,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "running",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5746,7 +6490,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "salvage",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5798,7 +6548,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "scutelliphily",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -5850,7 +6606,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "shield-block",
+      "tags": [
+        "action.interrupt",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -5902,7 +6665,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "sleight-of-hand",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -5954,7 +6723,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "smithing",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -6006,7 +6781,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "stealth",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -6058,7 +6839,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "streetwise",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -6110,7 +6897,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "survival",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.con"
+      ]
     }
   },
   {
@@ -6162,7 +6955,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "swimming",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -6214,7 +7013,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "tactics",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -6266,7 +7071,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "tattoo-artistry",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -6321,7 +7132,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "taunt",
+      "tags": [
+        "action.interrupt",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -6373,7 +7191,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "throwing",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.str"
+      ]
     }
   },
   {
@@ -6425,7 +7249,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "tracking",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -6477,7 +7307,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "trap-engineer",
+      "tags": [
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.int"
+      ]
     }
   },
   {
@@ -6529,7 +7365,14 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "zone-of-control",
+      "tags": [
+        "action.interrupt",
+        "kind.skill",
+        "skillGroup.utility",
+        "stat.dex"
+      ]
     }
   },
   {
@@ -6585,7 +7428,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "call-a-play",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.cha"
+      ]
     }
   },
   {
@@ -6641,7 +7490,13 @@ export const DCC_SKILLS = [
           "debuff": "",
           "notes": ""
         }
-      }
+      },
+      "identifier": "intervene",
+      "tags": [
+        "kind.skill",
+        "skillGroup.combat",
+        "stat.dex"
+      ]
     }
   }
 ];

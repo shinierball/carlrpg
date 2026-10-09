@@ -1013,7 +1013,7 @@ export class DCCItemSheet extends BaseItemSheet {
     // Open Tag Manager
     html.find('.dcc-open-tag-manager').click(ev => {
       ev.preventDefault();
-      new DCCTagManager().render(true);
+      new DCCTagManager({ item: this.item }).render(true);
     });
 
     // Remove Tag pill

@@ -2707,6 +2707,93 @@ export class DCCActor extends BaseActor {
   }
 
   /**
+   * Resolves associated skills for a weapon or attack item.
+   * Classifies skills into the primary combat weapon skill and auxiliary/passive skills.
+   * @param {Item|object} attackItem
+   * @param {Array<Item>} [availableSkills=null]
+   * @returns {{ matchingSkill: Item|null, auxiliarySkills: Array<Item>, skillRank: number, matchedSkills: Array<Item> }}
+   */
+  _resolveWeaponSkills(attackItem, availableSkills = null) {
+    if (!attackItem) return { matchingSkill: null, auxiliarySkills: [], skillRank: 0, matchedSkills: [] };
+    const sys = attackItem.system || {};
+    const normName = (attackItem.name || '').toLowerCase().trim();
+    const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+    const skillList = availableSkills || (this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : []);
+
+    const attackTags = attackItem.allTags instanceof Set
+      ? attackItem.allTags
+      : (typeof getItemAllTags === 'function' ? getItemAllTags(attackItem) : new Set(sys.tags || []));
+
+    // Match skills by name, associatedSkills, weaponType, or weapon.* tags
+    const matchedSkills = skillList.filter(s => {
+      const sName = s.name?.toLowerCase().trim();
+      const sId = (s.system?.identifier || '').toLowerCase().trim();
+      if (sName === normName) return true;
+      if (associated.some(as => {
+        const asClean = String(as).toLowerCase().trim();
+        return asClean === sName || asClean === sId || asClean === `id.skill.${sId}`;
+      })) return true;
+      if (sys.weaponType && (sName === sys.weaponType.toLowerCase().trim() || sName.includes(sys.weaponType.toLowerCase().trim()))) return true;
+      if (normName.includes(sName)) return true;
+      const sTags = s.allTags instanceof Set ? s.allTags : (typeof getItemAllTags === 'function' ? getItemAllTags(s) : new Set(s.system?.tags || []));
+      for (const t of attackTags) {
+        if (t.startsWith('weapon.') && sTags.has(t)) return true;
+      }
+      return false;
+    });
+
+    if (matchedSkills.length === 0) {
+      return { matchingSkill: null, auxiliarySkills: [], skillRank: Number(sys.toHitRank ?? sys.rank) || 0, matchedSkills: [] };
+    }
+
+    const isPrimaryCombatSkill = (s) => {
+      const sTags = s.allTags instanceof Set ? s.allTags : (typeof getItemAllTags === 'function' ? getItemAllTags(s) : new Set(s.system?.tags || []));
+      if (sTags.has('action.passive') || (s.system?.category || '').toLowerCase() === 'passive') return false;
+      if (s.system?.isAttack || s.system?.hasDamage || s.system?.baseDamage || sTags.has('action.attack') || (s.system?.category || '').toLowerCase() === 'combat') return true;
+      if (sTags.has('rule.requires-weapon')) return true;
+      return false;
+    };
+
+    // Sort matching skills: selectedSkill -> primary combat -> highest rank
+    matchedSkills.sort((a, b) => {
+      if (sys.selectedSkill) {
+        const sel = sys.selectedSkill.toLowerCase().trim();
+        const aSel = a.name.toLowerCase().trim() === sel;
+        const bSel = b.name.toLowerCase().trim() === sel;
+        if (aSel && !bSel) return -1;
+        if (!aSel && bSel) return 1;
+      }
+      const aCombat = isPrimaryCombatSkill(a);
+      const bCombat = isPrimaryCombatSkill(b);
+      if (aCombat && !bCombat) return -1;
+      if (!aCombat && bCombat) return 1;
+
+      const rA = Math.max(Number(a.system?.modifiedRank) || 0, Number(a.system?.rank) || 0);
+      const rB = Math.max(Number(b.system?.modifiedRank) || 0, Number(b.system?.rank) || 0);
+      return rB - rA;
+    });
+
+    const matchingSkill = matchedSkills.find(isPrimaryCombatSkill) || matchedSkills[0];
+    const auxiliarySkills = matchedSkills.filter(s => s.id !== matchingSkill.id);
+
+    let skillRank = 0;
+    const mode = sys.proficiencyMode || 'highest';
+    const ranks = matchedSkills.map(s => Math.max(Number(s.system?.modifiedRank) || 0, Number(s.system?.rank) || 0));
+    if (mode === 'additive') {
+      skillRank = ranks.reduce((sum, r) => sum + r, 0);
+    } else if (mode === 'primary_plus_half') {
+      const sorted = [...ranks].sort((a, b) => b - a);
+      const primary = sorted[0] || 0;
+      const halfSum = sorted.slice(1).reduce((sum, r) => sum + Math.floor(r / 2), 0);
+      skillRank = primary + halfSum;
+    } else { // 'highest'
+      skillRank = Math.max(Number(matchingSkill.system?.modifiedRank) || 0, Number(matchingSkill.system?.rank) || 0, ...ranks);
+    }
+
+    return { matchingSkill, auxiliarySkills, skillRank, matchedSkills };
+  }
+
+  /**
    * Resolve all damage parts for an attack from the weapon/attack item itself,
    * equipped gear bonuses, active skill modifiers (with rank gating),
    * and official DCC Rank damage dice.
@@ -2839,40 +2926,15 @@ export class DCCActor extends BaseActor {
     const sys = attackItem?.system || {};
     let primaryType = sys.damageType || 'Physical';
 
-    // Identify skill rank for weapon attack
     const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
-    const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
-    const matchedSkills = skills.filter(s => {
-      const sName = s.name?.toLowerCase().trim();
-      return sName === attackItem.name?.toLowerCase().trim() ||
-             associated.some(as => as.toLowerCase().trim() === sName);
-    });
-    const matchingSkill = matchedSkills[0] || null;
-
-    let skillRank = 0;
-    if (matchedSkills.length > 0) {
-      const mode = sys.proficiencyMode || 'highest';
-      const ranks = matchedSkills.map(s => Math.max(Number(s.system?.modifiedRank) || 0, Number(s.system?.rank) || 0));
-      if (mode === 'additive') {
-        skillRank = ranks.reduce((sum, r) => sum + r, 0);
-      } else if (mode === 'primary_plus_half') {
-        const sorted = [...ranks].sort((a, b) => b - a);
-        const primary = sorted[0] || 0;
-        const halfSum = sorted.slice(1).reduce((sum, r) => sum + Math.floor(r / 2), 0);
-        skillRank = primary + halfSum;
-      } else { // 'highest'
-        skillRank = Math.max(...ranks);
-      }
-    } else {
-      skillRank = (sys.toHitRank !== undefined ? Number(sys.toHitRank) || 0 : (sys.rank !== undefined ? Number(sys.rank) || 0 : 0));
-    }
+    const { matchingSkill, auxiliarySkills, skillRank, matchedSkills } = this._resolveWeaponSkills(attackItem, skills);
 
     // Base damage scaling from matching skill rank upgrades & rank breaks
     let upgradedDice = '';
     let extraWeaponRankDiceCount = 0;
+    const baseDiceCandidate = matchingSkill?.system?.baseDamage || sys.damageDice || sys.damageParts?.[0]?.dice || '';
     if ((matchingSkill || sys.rankBreaks) && skillRank >= 5) {
-      const baseDiceStr = sys.damageDice || sys.damageParts?.[0]?.dice || '';
-      const dm = baseDiceStr.match(/(\d+)d(\d+)/i);
+      const dm = baseDiceCandidate.match(/(\d+)d(\d+)/i);
       if (dm) {
         let count = parseInt(dm[1], 10);
         const sides = parseInt(dm[2], 10);
@@ -2908,7 +2970,7 @@ export class DCCActor extends BaseActor {
         }
 
         // 2. Secondary fallback for legacy upgrades
-        const upgrades = parseUpgrades(matchingSkill.system?.upgrades);
+        const upgrades = parseUpgrades(matchingSkill?.system?.upgrades);
         if (skillRank >= 5 && upgrades.rank5 && !processedWeaponTiers.has('rank5')) {
           const u5 = upgrades.rank5.match(/\+(\d+)d(\d+)\s+base damage/i);
           if (u5 && parseInt(u5[2], 10) === sides) count += parseInt(u5[1], 10);
@@ -2926,19 +2988,40 @@ export class DCCActor extends BaseActor {
       }
     }
 
-    // 1. Primary parts on attackItem
+    // 1. If matching skill provides base damage, push it as the primary base damage part
+    let hasBaseSkillPart = false;
+    if (matchingSkill && (matchingSkill.system?.baseDamage || (!sys.damageParts?.length && !sys.damageDice))) {
+      const bDice = upgradedDice || matchingSkill.system?.baseDamage || '';
+      if (bDice) {
+        const statKey = (matchingSkill.system?.damageStat || matchingSkill.system?.stat || sys.damageStat || 'dex').toLowerCase();
+        const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
+        primaryType = matchingSkill.system?.damageType || primaryType;
+        parts.push({
+          id: `skill-base-${matchingSkill.id}`,
+          type: primaryType,
+          dice: bDice,
+          stat: statKey,
+          statMod,
+          value: 0,
+          source: `${matchingSkill.name} (Rank ${skillRank})`
+        });
+        hasBaseSkillPart = true;
+      }
+    }
+
+    // 2. Weapon item damageParts (additive parts when matching skill provides base damage, or primary parts if not)
     const rawParts = sys.damageParts || [];
     const itemParts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts);
 
     if (itemParts.length > 0) {
-      let isFirst = true;
+      let isFirst = !hasBaseSkillPart;
       for (const p of itemParts) {
         if (!p) continue;
         const statKey = (p.stat || '').toLowerCase();
         const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
-        const type = p.type || sys.damageType || 'Physical';
+        const type = p.type || sys.damageType || primaryType;
         if (isFirst) primaryType = type;
-        const dice = (isFirst && upgradedDice ? upgradedDice : (p.dice || '')).trim();
+        const dice = (isFirst && upgradedDice && !hasBaseSkillPart ? upgradedDice : (p.dice || '')).trim();
         const value = Number(p.value) || 0;
         parts.push({
           id: p.id || `item-part-${parts.length}`,
@@ -2951,7 +3034,7 @@ export class DCCActor extends BaseActor {
         });
         isFirst = false;
       }
-    } else if (sys.damageDice) {
+    } else if (!hasBaseSkillPart && sys.damageDice) {
       // Legacy fallback: damageDice + damageStat + effects/damageType
       const statKey = (sys.damageStat || 'str').toLowerCase();
       const statMod = statKey && this.system?.abilities?.[statKey] ? (this.system.abilities[statKey].mod ?? 0) : 0;
@@ -2967,7 +3050,7 @@ export class DCCActor extends BaseActor {
         value: 0,
         source: attackItem.name || 'Weapon'
       });
-    } else if (skills.length === 0 || !skills.some(s => (s.system?.damageModifiers?.length > 0 || s.system?.damageParts?.length > 0))) {
+    } else if (!hasBaseSkillPart && (skills.length === 0 || !skills.some(s => (s.system?.damageModifiers?.length > 0 || s.system?.damageParts?.length > 0)))) {
       // Default fallback if no weapon parts, no damage dice, and no skills provide damage
       parts.push({
         id: 'legacy-base',
@@ -2977,6 +3060,25 @@ export class DCCActor extends BaseActor {
         statMod: this.system?.abilities?.str?.mod ?? 0,
         value: 0,
         source: attackItem.name || 'Weapon'
+      });
+    }
+
+    // 3. Auxiliary Associated Skill Bonuses (e.g. Aiming)
+    const aimingSkill = auxiliarySkills?.find(s => s.name?.toLowerCase().trim() === 'aiming');
+    if (aimingSkill) {
+      const aRank = Math.max(Number(aimingSkill.system?.modifiedRank) || 0, Number(aimingSkill.system?.rank) || 0);
+      let aCount = 1;
+      if (aRank >= 15) aCount = 4;
+      else if (aRank >= 10) aCount = 3;
+      else if (aRank >= 5) aCount = 2;
+      parts.push({
+        id: `aiming-bonus-${aimingSkill.id}`,
+        type: primaryType,
+        dice: `${aCount}d4`,
+        stat: '',
+        statMod: 0,
+        value: 0,
+        source: `Aiming (Rank ${aRank})`
       });
     }
 
@@ -3148,6 +3250,8 @@ export class DCCActor extends BaseActor {
 
     // 3. Skills: Rank-gated damage bonuses
     for (const skill of skills) {
+      if (matchingSkill && skill.id === matchingSkill.id && hasBaseSkillPart) continue;
+      if (aimingSkill && skill.id === aimingSkill.id) continue;
       const rank = Math.max(Number(skill.system?.modifiedRank) || 0, Number(skill.system?.rank) || 0);
       const rawMods = (skill.system?.damageModifiers && skill.system.damageModifiers.length > 0)
         ? skill.system.damageModifiers
@@ -3480,6 +3584,13 @@ export class DCCActor extends BaseActor {
         : (typeof getItemAllTags === 'function' ? getItemAllTags(s) : new Set(sys.tags || []));
       if (sTags.has('action.passive')) return false;
 
+      // A skill requiring an equipped weapon cannot function as an unarmed attack
+      const requiresWeapon = sys.requiresWeapon === true ||
+        sTags.has('rule.requires-weapon') ||
+        (Array.from(sTags).some(t => t.startsWith('weapon.')) && !sTags.has('weaponClass.unarmed') && !sTags.has('weaponClass.natural')) ||
+        (['ranged', 'edge', 'reach'].includes((sys.skillType || sys.type || '').toLowerCase()) && !sTags.has('weaponClass.unarmed') && !sTags.has('weaponClass.natural'));
+      if (requiresWeapon) return false;
+
       const normName = s.name.toLowerCase().trim();
       const KNOWN_MANEUVERS = new Set(['powerful strike', 'dirty fighting', 'iron punch', 'choke out', 'skullcracker', 'toss', 'low blow', 'sneak attack', 'disarm', 'cleave', 'smush']);
       if (KNOWN_MANEUVERS.has(normName) || sTags.has('kind.technique') || Boolean(sys.tags?.includes('maneuver')) || Boolean(sys.tags?.includes('technique')) || Boolean(DEFAULT_TECHNIQUE_CONFIGS[normName])) return false;
@@ -3511,37 +3622,13 @@ export class DCCActor extends BaseActor {
   _buildWeaponAttackProfile(item, skills = (this.items?.filter(i => i.type === 'skill') || []), primedTechs = []) {
     const sys = item.system || {};
     const normName = (item.name || '').toLowerCase().trim();
-    const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+    const isGear = item.type === 'gear';
     const skillList = Array.isArray(skills) ? skills : (this.items?.filter(i => i.type === 'skill') || []);
-    
-    // 4-layer matching for primary skill
-    const matchedSkills = skillList.filter(s => {
-      const sName = s.name.toLowerCase().trim();
-      if (sName === normName) return true;
-      if (associated.some(as => as.toLowerCase().trim() === sName)) return true;
-      if (sys.weaponType && sName.includes(sys.weaponType.toLowerCase().trim())) return true;
-      if (normName.includes(sName)) return true;
-      return false;
-    });
-
-    let matchingSkill = null;
-    let skillRank = 0;
-    if (matchedSkills.length > 0) {
-      matchedSkills.sort((a, b) => {
-        const rA = Math.max(Number(a.system?.modifiedRank) || 0, Number(a.system?.rank) || 0);
-        const rB = Math.max(Number(b.system?.modifiedRank) || 0, Number(b.system?.rank) || 0);
-        return rB - rA;
-      });
-      matchingSkill = matchedSkills[0];
-      skillRank = Math.max(Number(matchingSkill.system?.modifiedRank) || 0, Number(matchingSkill.system?.rank) || 0);
-    } else {
-      skillRank = Number(sys.toHitRank ?? sys.rank) || 0;
-    }
+    const { matchingSkill, auxiliarySkills, skillRank } = this._resolveWeaponSkills(item, skillList);
 
     const rawParts = sys.damageParts;
     const parts = Array.isArray(rawParts) ? rawParts : Object.values(rawParts || {});
     const primaryPart = parts[0] || null;
-    const isGear = item.type === 'gear';
 
     let toHitStat = sys.toHitStat;
     if (!toHitStat) {
@@ -3562,7 +3649,10 @@ export class DCCActor extends BaseActor {
     // Base damage and rank damage die
     let baseDice = '';
     let dmgType = 'Physical';
-    if (primaryPart) {
+    if (matchingSkill?.system?.baseDamage) {
+      baseDice = matchingSkill.system.baseDamage;
+      dmgType = matchingSkill.system.damageType || primaryPart?.type || sys.damageType || 'Physical';
+    } else if (primaryPart) {
       baseDice = primaryPart.dice || '1d6';
       dmgType = primaryPart.type || 'Physical';
     } else {
@@ -3583,6 +3673,14 @@ export class DCCActor extends BaseActor {
       if (skillRank >= 10 && activeRankBreaks.rank10?.damageDice) combinedDice += ` + ${activeRankBreaks.rank10.damageDice.replace(/^\+/, '')}`;
       if (skillRank >= 15 && activeRankBreaks.rank15?.damageDice) combinedDice += ` + ${activeRankBreaks.rank15.damageDice.replace(/^\+/, '')}`;
       if (skillRank >= 20 && activeRankBreaks.rank20?.damageDice) combinedDice += ` + ${activeRankBreaks.rank20.damageDice.replace(/^\+/, '')}`;
+    }
+
+    // Include extra weapon damage parts additively
+    const extraParts = (matchingSkill?.system?.baseDamage && parts.length > 0) ? parts : parts.slice(1);
+    for (const ep of extraParts) {
+      if (ep?.dice) {
+        combinedDice += ` + ${ep.dice}${ep.type ? ` ${ep.type}` : ''}`;
+      }
     }
 
     const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, item));
@@ -3606,11 +3704,12 @@ export class DCCActor extends BaseActor {
       techniqueBonusDice = techniqueBonusDice.trim();
     }
 
-    const dmgStatKey = (primaryPart?.stat || sys.damageStat || toHitStat).toLowerCase();
+    const dmgStatKey = (primaryPart?.stat || matchingSkill?.system?.damageStat || matchingSkill?.system?.stat || sys.damageStat || toHitStat).toLowerCase();
     const dmgStatMod = this.system?.abilities?.[dmgStatKey]?.mod ?? 0;
     const displayDmgMod = dmgStatMod >= 0 ? `+${dmgStatMod}` : `${dmgStatMod}`;
     const typeStr = dmgType ? ` (${dmgType})` : '';
-    const extra = parts.length > 1 ? ` (+${parts.length - 1} parts)` : '';
+    const extraPartsCount = (matchingSkill?.system?.baseDamage && parts.length > 0) ? parts.length : (parts.length > 1 ? parts.length - 1 : 0);
+    const extra = extraPartsCount > 0 ? ` (+${extraPartsCount} part${extraPartsCount > 1 ? 's' : ''})` : '';
 
     const formulaTokens = [baseDice];
     if (rankDie) {
@@ -3654,7 +3753,7 @@ export class DCCActor extends BaseActor {
       displayToHit,
       baseDice,
       rankDamageDie: rankDie,
-      combinedDice: rankDie ? `${baseDice} + ${rankDie.replace(/^\+/, '').trim()}` : baseDice,
+      combinedDice,
       dmgStat: dmgStatKey,
       dmgStatMod,
       displayDmgMod,
@@ -4034,31 +4133,8 @@ export class DCCActor extends BaseActor {
           attackItem.update({ 'system.checked': true }).catch(() => {});
         }
       } else {
-        const skills = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : [];
-        const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
-        const matchedSkills = skills.filter(s => {
-          const sName = s.name?.toLowerCase().trim();
-          return sName === attackItem.name?.toLowerCase().trim() ||
-                 associated.some(as => as.toLowerCase().trim() === sName);
-        });
-        const matchingSkill = matchedSkills[0] || null;
-
-        if (matchedSkills.length > 0) {
-          const mode = sys.proficiencyMode || 'highest';
-          const ranks = matchedSkills.map(s => Math.max(Number(s.system?.modifiedRank) || 0, Number(s.system?.rank) || 0));
-          if (mode === 'additive') {
-            rank = ranks.reduce((sum, r) => sum + r, 0);
-          } else if (mode === 'primary_plus_half') {
-            const sorted = [...ranks].sort((a, b) => b - a);
-            const primary = sorted[0] || 0;
-            const halfSum = sorted.slice(1).reduce((sum, r) => sum + Math.floor(r / 2), 0);
-            rank = primary + halfSum;
-          } else { // 'highest'
-            rank = Math.max(...ranks);
-          }
-        } else {
-          rank = Number(sys.toHitRank ?? sys.rank) || 0;
-        }
+        const { matchingSkill, auxiliarySkills, skillRank, matchedSkills } = this._resolveWeaponSkills(attackItem);
+        rank = skillRank;
 
         const primaryPart = Array.isArray(sys.damageParts) ? sys.damageParts[0] : Object.values(sys.damageParts || {})[0];
         toHitStat = (sys.toHitStat || matchingSkill?.system?.stat || primaryPart?.stat || (attackItem.type === 'gear' ? 'str' : 'dex')).toLowerCase();
@@ -4097,14 +4173,23 @@ export class DCCActor extends BaseActor {
         tags: [sys.weaponCategory, sys.weaponType, sys.slot].filter(Boolean)
       });
 
-      const total = isUntrained ? statMod : (rank + statMod);
+      // Aiming skill bonus when making a ranged attack with disadvantage
+      const { auxiliarySkills } = this._resolveWeaponSkills(attackItem);
+      const aimingAux = auxiliarySkills?.find(s => s.name?.toLowerCase().trim() === 'aiming');
+      let aimingBonus = 0;
+      if (advState.mode === 'disadvantage' && aimingAux) {
+        aimingBonus = Math.max(Number(aimingAux.system?.modifiedRank) || 0, Number(aimingAux.system?.rank) || 0);
+      }
+
+      const total = isUntrained ? statMod : (rank + statMod + aimingBonus);
       const formula = `${advState.formula} + ${total}`;
       const roll = await new Roll(formula, { rank: isUntrained ? 0 : rank, mod: statMod }).evaluate();
 
       let flavorText = '';
       if (advState.mode === 'disadvantage') {
         const reason = isOneHandedPenalty ? 'One-Handed Disadvantage' : (isUntrained ? 'Untrained Attack Check with Disadvantage' : (advState.label || 'Disadvantage'));
-        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${reason}</strong>: 2d20kl + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
+        const aimStr = aimingBonus > 0 ? ` + Aiming R${aimingBonus}` : '';
+        flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${reason}</strong>: 2d20kl + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod}${aimStr} vs Target Evade)${effectTag}`;
       } else if (advState.mode === 'advantage') {
         flavorText = `<strong>${this.name}</strong>: ${attackItem.name} (<strong>${advState.label}</strong>: 2d20kh + ${isUntrained ? '' : (rank > 0 ? `Rank ${rank} + ` : '')}${toHitStat.toUpperCase()} Mod ${statMod >= 0 ? `+${statMod}` : statMod} vs Target Evade)${effectTag}`;
       } else if (advState.mode === 'cancelled') {
@@ -4116,11 +4201,7 @@ export class DCCActor extends BaseActor {
 
       // Check for Fumble on Natural 1
       const isFumble = roll.dice?.[0]?.results ? roll.dice[0].results.some(r => r.result === 1 && (r.active ?? true)) : (roll.terms?.[0]?.results ? roll.terms[0].results.some(r => r.result === 1 && (r.active ?? true)) : roll.total === 1);
-      const matchedSkill = this.items.find(i =>
-        i.type === 'skill' &&
-        (i.name.toLowerCase() === attackItem.name.toLowerCase() ||
-         sys.associatedSkills?.some(s => s.toLowerCase() === i.name.toLowerCase()))
-      );
+      const { matchingSkill: matchedSkill } = this._resolveWeaponSkills(attackItem);
       const fumbleDebuff = matchedSkill?.system?.fumbleDebuff || attackItem.system?.fumbleDebuff || '';
       let fumbleTag = '';
       if (isFumble && fumbleDebuff) {
@@ -4299,11 +4380,7 @@ export class DCCActor extends BaseActor {
         }
       }
 
-      const matchedSkill = this.items.find(i =>
-        i.type === 'skill' &&
-        (i.name.toLowerCase() === attackItem.name.toLowerCase() ||
-         sys.associatedSkills?.some(s => s.toLowerCase() === i.name.toLowerCase()))
-      );
+      const { matchingSkill: matchedSkill } = this._resolveWeaponSkills(attackItem);
       if (matchedSkill) {
         const skillRank = Math.max(Number(matchedSkill.modifiedRank) || 0, Number(matchedSkill.system?.modifiedRank) || 0, Number(matchedSkill.system?.rank) || 0);
         if (matchedSkill.system?.critMultiplierR15 && skillRank >= 15) {

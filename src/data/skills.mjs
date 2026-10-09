@@ -264,6 +264,7 @@ export const DCC_SKILLS = [
       "identifier": "club",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",
@@ -332,6 +333,7 @@ export const DCC_SKILLS = [
       "identifier": "improvised-weapons",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",
@@ -400,6 +402,7 @@ export const DCC_SKILLS = [
       "identifier": "warhammer",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",
@@ -468,6 +471,7 @@ export const DCC_SKILLS = [
       "identifier": "axe",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.slashing",
         "kind.skill",
         "skillGroup.combat",
@@ -536,6 +540,7 @@ export const DCC_SKILLS = [
       "identifier": "dagger",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -604,6 +609,7 @@ export const DCC_SKILLS = [
       "identifier": "longsword",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.slashing",
         "kind.skill",
         "skillGroup.combat",
@@ -672,6 +678,7 @@ export const DCC_SKILLS = [
       "identifier": "rapier",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -1662,6 +1669,7 @@ export const DCC_SKILLS = [
       "identifier": "bow",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -1730,6 +1738,7 @@ export const DCC_SKILLS = [
       "identifier": "crossbow",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -1798,6 +1807,7 @@ export const DCC_SKILLS = [
       "identifier": "handgun",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -1866,6 +1876,7 @@ export const DCC_SKILLS = [
       "identifier": "javelin",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -1934,6 +1945,7 @@ export const DCC_SKILLS = [
       "identifier": "shotgun",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -2002,6 +2014,7 @@ export const DCC_SKILLS = [
       "identifier": "shuriken",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -2070,6 +2083,7 @@ export const DCC_SKILLS = [
       "identifier": "slingshot",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",
@@ -2138,6 +2152,7 @@ export const DCC_SKILLS = [
       "identifier": "herding-weapons",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",
@@ -2206,6 +2221,7 @@ export const DCC_SKILLS = [
       "identifier": "lance",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -2274,6 +2290,7 @@ export const DCC_SKILLS = [
       "identifier": "polearm",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.piercing",
         "kind.skill",
         "skillGroup.combat",
@@ -2342,6 +2359,7 @@ export const DCC_SKILLS = [
       "identifier": "quarterstaff",
       "tags": [
         "action.attack",
+        "rule.requires-weapon",
         "element.bludgeoning",
         "kind.skill",
         "skillGroup.combat",

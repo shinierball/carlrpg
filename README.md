@@ -10,13 +10,14 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 
 - Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
 
-- **CarlRPG 3.0.0 Unified Tagging System & Tag Taxonomy Engine**:
+- **CarlRPG 3.0.1 Unified Tagging System & Tag Taxonomy Engine**:
   - **Namespaced Tag IDs**: Fully data-driven keyword architecture covering 10 namespaces (`kind.*`, `action.*`, `element.*`, `archetype.*`, `favored.*`, `weapon.*`, `weaponClass.*`, `weaponProp.*`, `skillGroup.*`, `technique.*`, `rule.*`, `id.*`, and `custom.*`). Zero regex matching or string heuristics across the game engine.
   - **TagQuery Engine**: Structured queries (`matchesTagQuery(tags, query)`) evaluating string, array, or `{ all, any, none }` Boolean queries with automatic reference expansion (`expandTagReferences`).
   - **High-Performance Tag Index Service**: In-memory `TagIndex` singleton (`game.dcc.tags`) indexing world items and compendiums with live mutation hooks (`createItem`, `updateItem`, `deleteItem`).
   - **Structured Class & Race Grants**: Complete `system.grants` specification across all 53 classes and 30 races cleanly applying stat boosts, skills, spells, choices, and archetype skill modifiers (e.g., Boring Ol' Mage -3 to Dex/Str skills floored at 1).
   - **Favored Spell Mechanics**: Automatic caster archetype evaluation via `favored.*` tags, imposing +1 MP penalty for non-favored class casters while exempting classless crawlers and pets per official DCC rules.
-  - **Interactive Tag Manager App & Sheet Editor**: Full visual browser (`DCCTagManager`) with namespace filtering, usage counts, custom tag creation, and item sheet tag badges with autocomplete and 1-click removal.
+  - **Interactive Tag Manager App & Sheet Editor**: Full visual browser (`DCCTagManager`) with namespace filtering, usage counts, custom tag creation, and item sheet tag badges with autocomplete and 1-click removal. Directly binds to item sheets when launched from items, with live tag checkboxes and auto-apply on creation.
+  - **Additive Weapon Damage & Unequipped Filtering**: Weapons with associated skills cleanly resolve primary combat weapon skills (e.g. *Shotgun*) vs auxiliary passive skills (*Aiming*), combining weapon item damage parts (e.g. *Boom Stick* 1d6 Fire) additively with skill damage (3d10 Piercing), passive bonuses (3d4), and rank dice. Weapon attacks require an equipped weapon (`rule.requires-weapon`), preventing unequipped weapons from cluttering attack sheets.
 
 - **Item Idempotence, Crawler Cross-Scene Persistence & Compendium Synchronization**:
   - **Discrete Non-Consumable Items**: Gear, weapons, and armor exist as discrete, unique entries per acquisition so each can be equipped, modified, and tracked independently. Consumable loot (e.g. potions) stacks quantity.

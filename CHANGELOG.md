@@ -1,3 +1,22 @@
+## 3.0.1
+
+### CarlRPG 3.0.1 — Tag-Centric Item Binding, Additive Weapon Damage & Unequipped Attack Filtering
+
+- **Tag Manager Item Sheet Binding (`src/apps/tag-manager.mjs`, `templates/apps/tag-manager.hbs`, `src/sheets/item-sheet.mjs`)**:
+  - Bound `DCCTagManager` directly to item sheets when opened from item headers (`new DCCTagManager({ item: this.item })`).
+  - Added target item banner and interactive assignment checkboxes (`isAssigned`) allowing 1-click toggling of tags directly on items.
+  - Added option when creating custom tags to immediately apply the new tag to the active item (`applyToItem`).
+- **Associated Skills & Additive Weapon Damage (`src/documents/actor.mjs`)**:
+  - Implemented `actor._resolveWeaponSkills()`: distinguishes primary combat weapon skills (e.g. *Shotgun*) from auxiliary passive skills (e.g. *Aiming*) using tags (`rule.requires-weapon`, `action.attack`, `action.passive`) and proficiency modes.
+  - Implemented strictly additive damage parts in `actor.getAttackDamageParts()`: weapon item damage parts (e.g. *Boom Stick* 1d6 Fire) are added to skill base damage (e.g. *Shotgun* 3d10 Piercing), auxiliary passive skill damage (e.g. *Aiming* 3d4 Piercing), and official DCC rank damage dice without overriding.
+  - Integrated Aiming disadvantage offset and weapon fumble debuffs based on resolved skills.
+- **Unequipped Weapons & Attack Synthesis Filtering (`src/documents/actor.mjs`)**:
+  - Updated `actor.getSynthesizedAttacks()`: weapon skills requiring an equipped weapon (`rule.requires-weapon` / `weapon.*`) are no longer synthesized as standalone attacks when no corresponding weapon is equipped.
+  - Stowed/unequipped weapon items (`equipped: false`) are filtered out of attack rosters. Only equipped weapons and natural/unarmed attacks (*Pugilism*, *Bite*, etc.) appear.
+- **Weapon Skill Tag Taxonomy & Compendium Rebuild (`src/data/skills.mjs`, `packs/skills/`, `src/migrations/migration-3.0.0.mjs`)**:
+  - Standardized all 18 canonical weapon skills with `'rule.requires-weapon'`.
+  - Rebuilt all 8 compendium packs with updated metadata and tags.
+
 ## 3.0.0
 
 ### CarlRPG 3.0.0 — Unified Tagging System, Structured Grants & Tag Taxonomy Engine

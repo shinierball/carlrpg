@@ -107,3 +107,21 @@ Features:
 - Search tags by keyword or description.
 - View live usage counts across world and compendium items.
 - Register and delete custom world tags persisted in world settings (`carl-rpg.customTags`).
+
+---
+
+## 8. Item Sheet Binding & Weapon Attack Synthesis
+
+### Item Sheet Tag Manager Binding
+When opening `DCCTagManager` from an item sheet (via the Tag Manager button in the Item Header or Tag Editor tab):
+- The manager binds to `options.item`, displaying a Target Item banner.
+- An interactive `Apply` checkbox column indicates tags currently assigned to `item.system.tags`.
+- Checking or unchecking immediately updates the item document's tags via `item.update({'system.tags': [...]})`.
+- The custom tag creation form includes an "Apply to item" option to immediately assign newly registered custom tags to the item.
+
+### Weapon Attack Synthesis & Associated Skills
+- All canonical weapon skills (`Bow`, `Shotgun`, `Axe`, `Rapier`, etc.) carry the `rule.requires-weapon` tag.
+- `actor.getSynthesizedAttacks()` checks for `rule.requires-weapon` or `weapon.*` tags on skills: weapon skills requiring an equipped weapon are **never** synthesized as standalone attacks if no corresponding weapon is equipped. Standalone synthesized attacks are reserved strictly for unarmed/natural attacks (`weaponClass.unarmed`, `weaponClass.natural`, `Pugilism`, `Bite`, etc.).
+- When attacking with a weapon with multiple associated skills (e.g. `['Aiming', 'Shotgun']`), `actor._resolveWeaponSkills()` uses tags to distinguish the primary combat weapon skill (`Shotgun`) from auxiliary passive skills (`Aiming`).
+- In `actor.getAttackDamageParts()`, weapon item damage parts (e.g., 1d6 Fire) are **additive** to skill-based base damage (e.g., 3d10 Piercing), auxiliary passive bonuses (e.g., 3d4 Aiming bonus), and official DCC rank damage dice.
+

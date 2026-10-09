@@ -14,6 +14,7 @@ export class DCCTagManager extends DCCBaseApplication {
     super(options);
     this.activeNamespace = options.activeNamespace || 'all';
     this.searchQuery = '';
+    this.item = options.item || options.document || null;
   }
 
   /** @override */
@@ -58,12 +59,22 @@ export class DCCTagManager extends DCCBaseApplication {
     // 2. Compute usage counts via tagIndex
     const tagCounts = tagIndex.getTagCounts ? tagIndex.getTagCounts() : {};
 
+    // Identify tags assigned to the target item (if opened in item context)
+    const targetItem = this.item ? {
+      id: this.item.id,
+      name: this.item.name,
+      type: this.item.type,
+      tags: Array.isArray(this.item.system?.tags) ? [...this.item.system.tags] : []
+    } : null;
+    const itemTagsSet = new Set(targetItem?.tags || []);
+
     const enrichedTags = allTags.map(t => {
       const count = tagCounts[t.id] ?? (tagIndex.find ? tagIndex.find(t.id).length : 0);
       return {
         ...t,
         count,
-        isCustom: Boolean(t.isCustom || t.namespace === 'custom')
+        isCustom: Boolean(t.isCustom || t.namespace === 'custom'),
+        isAssigned: itemTagsSet.has(t.id)
       };
     });
 
@@ -112,6 +123,7 @@ export class DCCTagManager extends DCCBaseApplication {
 
     filteredTags.sort((a, b) => a.id.localeCompare(b.id));
 
+    context.targetItem = targetItem;
     context.totalTagsCount = enrichedTags.length;
     context.searchQuery = this.searchQuery;
     context.namespaceTabs = namespaceTabs;
@@ -147,12 +159,34 @@ export class DCCTagManager extends DCCBaseApplication {
       this.render(false);
     });
 
+    // Toggle Tag Assignment on Target Item
+    html.find('.dcc-tag-assign-toggle').on('change', async ev => {
+      ev.preventDefault();
+      if (!this.item) return;
+      const tagId = ev.currentTarget.dataset.tagId;
+      if (!tagId) return;
+      const checked = Boolean(ev.currentTarget.checked);
+      const curTags = Array.isArray(this.item.system?.tags) ? [...this.item.system.tags] : [];
+      let updated = curTags;
+      if (checked && !curTags.includes(tagId)) {
+        updated = [...curTags, tagId];
+      } else if (!checked && curTags.includes(tagId)) {
+        updated = curTags.filter(t => t !== tagId);
+      }
+      await this.item.update({ 'system.tags': updated });
+      if (this.item.sheet?.rendered) {
+        this.item.sheet.render(false);
+      }
+      this.render(false);
+    });
+
     // Register Custom Tag
     html.find('.dcc-register-custom-tag-btn').click(async ev => {
       ev.preventDefault();
       const idInput = html.find('.dcc-custom-tag-id').val()?.trim() || '';
       const labelInput = html.find('.dcc-custom-tag-label').val()?.trim() || '';
       const nsSelect = html.find('.dcc-custom-tag-namespace').val()?.trim() || 'custom';
+      const applyToItem = html.find('.dcc-custom-tag-apply-item').is(':checked');
 
       if (!idInput) {
         ui.notifications?.warn('DCC RPG | Please enter a Tag ID.');
@@ -184,6 +218,17 @@ export class DCCTagManager extends DCCBaseApplication {
           }
         } catch (err) {
           console.warn('DCC RPG | Could not save custom tag to settings', err);
+        }
+      }
+
+      // Auto-apply newly created tag to target item if requested
+      if (applyToItem && this.item) {
+        const curTags = Array.isArray(this.item.system?.tags) ? [...this.item.system.tags] : [];
+        if (!curTags.includes(cleanId)) {
+          await this.item.update({ 'system.tags': [...curTags, cleanId] });
+          if (this.item.sheet?.rendered) {
+            this.item.sheet.render(false);
+          }
         }
       }
 

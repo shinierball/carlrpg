@@ -105,10 +105,20 @@ export function migrateItemData300(item) {
       tags = [];
     }
     updateData['system.tags'] = tags;
-  } else {
     // If existing tags are empty, check if canonical dataset supplies tags
     if (tags.length === 0 && canonical?.system?.tags?.length) {
       updateData['system.tags'] = [...canonical.system.tags];
+    }
+  }
+
+  // Ensure rule.requires-weapon on weapon skills
+  if (itemType === 'skill') {
+    const activeTags = updateData['system.tags'] ? [...updateData['system.tags']] : (Array.isArray(sys.tags) ? [...sys.tags] : []);
+    const hasWeaponTag = activeTags.some(t => t.startsWith('weapon.') || t === 'weaponClass.ranged' || t === 'weaponClass.melee');
+    const isUnarmed = activeTags.includes('weaponClass.unarmed') || activeTags.includes('weaponClass.natural');
+    if (hasWeaponTag && !isUnarmed && !activeTags.includes('rule.requires-weapon')) {
+      activeTags.push('rule.requires-weapon');
+      updateData['system.tags'] = activeTags;
     }
   }
 

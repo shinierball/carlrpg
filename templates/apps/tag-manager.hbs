@@ -27,6 +27,18 @@
     {{/if}}
   </div>
 
+  {{!-- Target Item Context Banner --}}
+  {{#if targetItem}}
+    <div class="dcc-tm-target-banner" style="display: flex; justify-content: space-between; align-items: center; background: #eaf2f8; border: 1px solid #aed6f1; border-radius: 3px; padding: 6px 10px; margin-bottom: 10px;">
+      <div>
+        <i class="fa-solid fa-crosshairs" style="color: #2980b9;"></i> Managing Tags for: <strong style="color: #1b4f72;">{{targetItem.name}}</strong>
+      </div>
+      <div style="font-size: 11px; color: #555;">
+        Check or uncheck tags below to assign or remove them.
+      </div>
+    </div>
+  {{/if}}
+
   {{!-- Namespace Filter Tabs --}}
   <div class="dcc-tm-tabs" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #d4cbb3; padding-bottom: 6px;">
     {{#each namespaceTabs as |tab|}}
@@ -42,6 +54,9 @@
       <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
         <thead>
           <tr style="background: #f2f3f4; border-bottom: 2px solid #ccc; text-align: left; font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; color: #333;">
+            {{#if targetItem}}
+              <th style="padding: 6px 4px; text-align: center; width: 45px;">Apply</th>
+            {{/if}}
             <th style="padding: 6px 8px;">Tag ID</th>
             <th style="padding: 6px 8px;">Label</th>
             <th style="padding: 6px 8px;">Namespace</th>
@@ -51,7 +66,12 @@
         </thead>
         <tbody>
           {{#each tagsList as |tag|}}
-            <tr style="border-bottom: 1px solid #eee;">
+            <tr style="border-bottom: 1px solid #eee; {{#if tag.isAssigned}}background: #f4fbf7;{{/if}}">
+              {{#if ../targetItem}}
+                <td style="padding: 6px 4px; text-align: center;">
+                  <input type="checkbox" class="dcc-tag-assign-toggle" data-tag-id="{{tag.id}}" {{#if tag.isAssigned}}checked{{/if}} title="Assign {{tag.id}} to {{../targetItem.name}}" style="cursor: pointer; width: 14px; height: 14px;" />
+                </td>
+              {{/if}}
               <td style="padding: 6px 8px; font-family: monospace; font-weight: bold; color: #1b4f72;">
                 {{tag.id}}
               </td>
@@ -110,6 +130,11 @@
         <option value="technique">technique</option>
         <option value="rule">rule</option>
       </select>
+      {{#if targetItem}}
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: #2c3e50;">
+          <input type="checkbox" class="dcc-custom-tag-apply-item" checked style="cursor: pointer;" /> Apply to {{targetItem.name}}
+        </label>
+      {{/if}}
       <button type="button" class="dcc-btn dcc-register-custom-tag-btn" style="background: #27ae60; color: #fff; border: 1px solid #1e8449; padding: 4px 12px; font-family: 'Oswald', sans-serif; font-size: 11px; text-transform: uppercase; cursor: pointer; border-radius: 2px;">
         Register Tag
       </button>

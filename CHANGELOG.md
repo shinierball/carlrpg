@@ -1,3 +1,27 @@
+## 3.2.0
+
+### CarlRPG 3.2.0 — Tag-Driven Effects Engine, Structured Item Grants & 3.2.0 Migration Subsystem
+
+- **Tag-Driven Consumables & Resource Effects (`src/documents/item.mjs`, `src/data/tags.mjs`, `src/dcc.mjs`, `template.json`)**:
+  - Replaced hardcoded item name checks (`itemName.includes('mana potion')`) with structured outcomes tagged with exact tags (`action.restore`, `resource.mana`, `action.heal`, `resource.hp-bars`).
+  - Added new `resource` namespace (`resource.mana`, `resource.hp-bars`, `resource.temp-bars`) and `action.restore` to tag registry and taxonomy.
+  - Added data-driven outcome resolution in `resolveSingleOutcome()` supporting `restore_resource` / `mana` alongside damage and heal types.
+  - Updated `useLoot()` and added `useItem(options)` alias with interactive `.dcc-apply-mana-btn` chat message listener for 1-click crawler mana restoration.
+- **Tag-Driven Damage Reductions (`src/documents/actor.mjs`, `src/data/tags.mjs`)**:
+  - Eliminated brittle description regex parsing (`desc.match(/(\d+)%/)`) in `actor.getDamageReduction(damageType)`.
+  - Replaced with exact element tag resolution via `damageTypeToElement()` and debuff/buff matching against `element.*` tags, evaluating structured `reductionPercent` and `reductionFlat` properties directly.
+- **Structured Item Grants (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `template.json`)**:
+  - Added `system.grants` schema to `gear`, `loot`, `buff`, and `debuff` items.
+  - Structured grant kinds supported: `stat` (STR, DEX, CON, INT, WIS, CHA), `dr`, `evade`, `skill` (granting custom or core skills), `spell` (granting spells with rank and cooldown rules), and `tag_bonus` (tag query bonuses, e.g. query `element.fire`, bonus `+2` to matching spells/skills).
+  - Actor `prepareDerivedData()` dynamically applies stat/DR/evade bonuses from equipped gear and active buffs, and aggregates `activeTagGrants` for tag query bonuses.
+  - Crawler sheet displays granted spells and skills seamlessly, respecting `modifiedRank` and cooldown rules.
+- **Comprehensive 3.2.0 Migration & Pack Rebuild (`src/migrations/migration-3.2.0.mjs`, `src/migration.mjs`, `scripts/build-packs.mjs`)**:
+  - Automated migration for all existing items and actor items: converts legacy potion outcomes to structured `restore_resource` / `mana` and `heal` outcomes, converts legacy gear stat bonuses / granted skills / granted spells into structured `system.grants`, and assigns canonical tags.
+  - Integrated `migrateWorld320()` into world migration pipeline (`src/migration.mjs`).
+  - Rebuilt all LevelDB compendium packs (`packs/items`, `packs/skills`, `packs/spells`, `packs/buffs`, `packs/classes`, `packs/races`, `packs/mobs`, `packs/journals`, `packs/macros`) to version `3.2.0`.
+- **Automated Verification (`tests/tag-effects-grants.test.mjs`)**:
+  - 8 comprehensive test suites covering structured mana/healing outcomes, damage reduction without regex, gear stat grants, tag query spell/skill bonuses, granted spells in spellbook, and 3.2.0 item migrations.
+
 ## 3.1.0
 
 ### CarlRPG 3.1.0 — Auras, Temporary Health Bars, Areas of Effect & Combat Round Durations

@@ -242,6 +242,54 @@ export async function resolveSingleOutcome(outcome, actor, originItem, isMultiMo
         </div>
       </div>
     `;
+  } else if (outType === 'restore_resource' || outType === 'restore_mana' || outType === 'mana' || outcome.resource === 'mana') {
+    const resourceTarget = targetActor || actor;
+    const resKey = (outcome.resource || 'mana').toLowerCase();
+    let restoredAmount = 0;
+    let oldVal = 0;
+    let maxVal = 10;
+    let newVal = 10;
+
+    if (resKey === 'mana' && resourceTarget?.system?.attributes?.mana) {
+      oldVal = Number(resourceTarget.system.attributes.mana.value) || 0;
+      maxVal = Number(resourceTarget.system.attributes.mana.max) || 10;
+      const isFull = outcome.mode === 'full' || outcome.amount === undefined || outcome.amount === 'full';
+      if (isFull) {
+        newVal = maxVal;
+        restoredAmount = Math.max(0, maxVal - oldVal);
+      } else {
+        const amt = Number(outcome.amount ?? outcome.value) || 10;
+        newVal = Math.min(maxVal, oldVal + amt);
+        restoredAmount = newVal - oldVal;
+      }
+
+      if (isMultiMode && typeof resourceTarget.update === 'function') {
+        await resourceTarget.update({ 'system.attributes.mana.value': newVal });
+      }
+    }
+
+    outcomeHtml = `
+      <div class="dcc-scratch-outcome dcc-outcome-mana" style="background: rgba(41, 128, 185, 0.12); border-left: 4px solid #2980b9; padding: 8px 10px; margin: 8px 0; border-radius: 3px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="margin: 0; color: #2980b9; font-size: 15px; font-weight: bold; text-transform: uppercase;">
+            <i class="fa-solid fa-bolt"></i> ${outcome.name || 'Mana Restoration'}
+          </h4>
+          <span class="dcc-badge" style="background: #2980b9; color: #fff; font-size: 10px;">MANA</span>
+        </div>
+        <p style="margin: 4px 0; font-size: 12px;">
+          <strong>Recipient:</strong> <span style="color: #111;">${targetName}${distLabel}</span>
+        </p>
+        <div style="font-size: 14px; font-weight: bold; color: #2980b9; margin: 4px 0;">
+          Mana Restored: ${restoredAmount > 0 ? `+${restoredAmount} MP` : 'Refilled'} <span style="font-size: 11px; font-weight: normal; color: #555;">(Now ${newVal}/${maxVal} MP)</span>
+        </div>
+        ${outcome.description ? `<p style="margin: 4px 0; font-size: 12px; color: #444;">${outcome.description}</p>` : ''}
+        <div style="margin-top: 8px;">
+          <button type="button" class="dcc-apply-mana-btn" data-mana="${restoredAmount}" data-new-mana="${newVal}" data-target-id="${resourceTarget?.id || ''}" style="background: #2980b9; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">
+            <i class="fa-solid fa-bolt"></i> Restore Mana (+${restoredAmount} MP)
+          </button>
+        </div>
+      </div>
+    `;
   } else if (outType === 'mend_injury') {
     const severity = outcome.injurySeverity || outcome.severity || 'minor';
     const mendTarget = targetActor || actor;
@@ -855,9 +903,10 @@ export class DCCItem extends BaseItem {
    * Use a loot / consumable item (e.g. Normal Mana Potion, healing items, scratch-off lottery tickets, wands, scrolls)
    * or activate gear with on-use effects.
    * Refills resources, decrements uses/charges, checks scene limits, resolves outcome tables, and outputs rich chat cards.
+   * @param {object} options
    * @returns {Promise<ChatMessage|object>}
    */
-  async useLoot() {
+  async useLoot(options = {}) {
     const actor = this.actor;
     const sys = this.system || {};
     const itemName = this.name || 'Item';
@@ -1114,18 +1163,27 @@ export class DCCItem extends BaseItem {
       }
     }
 
-    // 5. Standard Consumable / Mana Potion Path
-    const isManaPotion = itemName.toLowerCase().includes('mana potion') ||
+    // 5. Data-Driven Consumable Resource Restoration & Fallback Path
+    const allTags = this.allTags instanceof Set ? this.allTags : new Set(this.system?.tags || []);
+    const hasManaOutcome = Array.isArray(sys.outcomes) && sys.outcomes.some(o => o.type === 'restore_resource' || o.type === 'mana' || o.resource === 'mana');
+    const isManaRestorer = hasManaOutcome ||
+      (allTags.has('resource.mana') && (allTags.has('action.restore') || allTags.has('action.heal'))) ||
+      itemName.toLowerCase().includes('mana potion') ||
       (sys.notes && sys.notes.toLowerCase().includes('mana') && sys.notes.toLowerCase().includes('refill'));
 
     let extraEffectHtml = '';
-    if (isManaPotion && actor && actor.system?.attributes?.mana) {
+    if (isManaRestorer && actor && actor.system?.attributes?.mana) {
       const currentMana = actor.system.attributes.mana.value ?? 0;
       const maxMana = actor.system.attributes.mana.max ?? 10;
-      await actor.update({ 'system.attributes.mana.value': maxMana });
+      const flatAmount = Number(sys.manaRestoreAmount ?? sys.restoreAmount);
+      const isFull = !flatAmount || flatAmount >= (maxMana - currentMana);
+      const targetMana = isFull ? maxMana : Math.min(maxMana, currentMana + flatAmount);
+      const restored = targetMana - currentMana;
+
+      await actor.update({ 'system.attributes.mana.value': targetMana });
       extraEffectHtml = `
         <div style="margin-top: 6px; padding: 6px 8px; background: rgba(41, 128, 185, 0.15); border-left: 3px solid #2980b9; color: #2980b9; font-weight: bold; font-size: 12px; border-radius: 2px;">
-          <i class="fa-solid fa-bolt"></i> Mana refilled completely to <strong>${maxMana} MP</strong>! (Was ${currentMana} MP)
+          <i class="fa-solid fa-bolt"></i> Mana ${isFull ? 'refilled completely to' : `restored (+${restored} MP) to`} <strong>${targetMana} MP</strong>! (Was ${currentMana} MP)
         </div>
       `;
     }
@@ -1154,6 +1212,15 @@ export class DCCItem extends BaseItem {
         </div>
       `
     });
+  }
+
+  /**
+   * Alias for useLoot to support standard item usage.
+   * @param {object} options
+   * @returns {Promise<ChatMessage|object>}
+   */
+  async useItem(options = {}) {
+    return this.useLoot(options);
   }
 
   static async rollSpellCard(spellItem, options = {}) {

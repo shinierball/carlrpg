@@ -1450,6 +1450,59 @@ export function onRenderChatMessage(message, html, data) {
     }
   }
 
+  // 5b. Handle click on "Apply Mana" from chat card
+  const applyManaButtons = query('.dcc-apply-mana-btn');
+  for (const btn of applyManaButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const manaClickHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const targetId = btn.dataset?.targetId || $btn?.data('target-id');
+      const manaAmount = Number(btn.dataset?.mana ?? $btn?.data('mana')) || 0;
+      const targetManaVal = Number(btn.dataset?.newMana ?? $btn?.data('new-mana')) || 0;
+
+      let targetTokens = Array.from(game.user?.targets || []);
+      if (!targetTokens.length && targetId && canvas?.tokens?.placeables) {
+        const found = canvas.tokens.placeables.find(t => t.actor?.id === targetId || t.id === targetId);
+        if (found) targetTokens = [found];
+      }
+      if (!targetTokens.length && canvas?.tokens?.controlled) {
+        targetTokens = canvas.tokens.controlled.filter(t => t.actor);
+      }
+
+      let targetActors = targetTokens.map(t => t.actor).filter(Boolean);
+      if (!targetActors.length && targetId && game.actors?.get) {
+        const directActor = game.actors.get(targetId);
+        if (directActor) targetActors = [directActor];
+      }
+
+      if (!targetActors.length) {
+        ui.notifications?.warn('DCC RPG | No target found! Please select or target a token on the canvas.');
+        return;
+      }
+
+      for (const targetActor of targetActors) {
+        if (targetActor.system?.attributes?.mana) {
+          const cur = Number(targetActor.system.attributes.mana.value) || 0;
+          const max = Number(targetActor.system.attributes.mana.max) || 10;
+          const updated = targetManaVal ? Math.min(max, targetManaVal) : Math.min(max, cur + manaAmount);
+          await targetActor.update({ 'system.attributes.mana.value': updated });
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Restored mana for ${targetActors.map(a => a.name).join(', ')}.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', manaClickHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(manaClickHandler);
+    }
+  }
+
   // 6. Handle click on "Apply Buff" from chat card (e.g. Scratch-off buff outcome, consumables)
   const applyBuffButtons = query('.dcc-apply-buff-btn');
   for (const btn of applyBuffButtons) {

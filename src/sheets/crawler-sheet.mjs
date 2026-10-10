@@ -876,6 +876,23 @@ export class DCCCrawlerSheet extends BaseActorSheet {
           entry.sources.push(`${item.name}`);
         }
       }
+
+      // D. structured grants on gear (grants: [{ kind: 'spell', name: '...', rank: ... }])
+      if (Array.isArray(item.system?.grants)) {
+        for (const g of item.system.grants) {
+          if (!g || g.kind !== 'spell') continue;
+          const sName = g.name || g.spellName;
+          if (!sName) continue;
+          const norm = sName.toLowerCase().trim();
+          const rank = Number(g.rank ?? g.bonus) || 1;
+          if (!gearGrantedSpells.has(norm)) {
+            gearGrantedSpells.set(norm, { rank, sources: [], originalName: sName, cooldownHours: Number(g.cooldownHours) || 0 });
+          }
+          const entry = gearGrantedSpells.get(norm);
+          entry.rank = Math.max(entry.rank, rank);
+          entry.sources.push(`${item.name}`);
+        }
+      }
     }
 
     // 3. Instantiate granted spells that the actor doesn't own
@@ -893,6 +910,8 @@ export class DCCCrawlerSheet extends BaseActorSheet {
           type: 'spell',
           img: official?.img || 'icons/svg/wand.svg',
           isGranted: true,
+          rank: data.rank,
+          modifiedRank: data.rank,
           itemSources: data.sources.join(', '),
           statMod: mod,
           statModStr: mod >= 0 ? `+${mod}` : `${mod}`,

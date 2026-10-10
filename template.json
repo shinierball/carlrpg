@@ -518,6 +518,7 @@
         "max": 0
       },
       "outcomes": [],
+      "grants": [],
       "notes": "",
       "rankBreaks": {
         "rank5": {
@@ -665,6 +666,7 @@
       "tableUuid": "",
       "tableName": "",
       "outcomes": [],
+      "grants": [],
       "notes": "",
       "description": "",
       "tags": [],
@@ -720,6 +722,7 @@
         "animation": ""
       },
       "active": false,
+      "grants": [],
       "tags": [],
       "identifier": ""
     },
@@ -740,6 +743,7 @@
       "damageModifiers": [],
       "duration": "Combat",
       "description": "",
+      "grants": [],
       "tags": [],
       "identifier": ""
     },

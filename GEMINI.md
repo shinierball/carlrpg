@@ -138,6 +138,7 @@ Do not create new systems if the tag system can be leveraged to create the same 
 
 ## 📋 Standard Workflow for Every Task
 
+0. **I like to read your thoughts** Keep a running log of your thoughts for the current conversation in thoughts.md. It just makes it easier for me to understand your intent.
 1. **Understand & Inspect**: Review the active code, schemas in `template.json`, and existing tests before making assumptions.
 2. **Formulate the Test Case**: Identify the exact conditions and assertions needed in a corresponding `tests/<feature>.test.mjs` file.
 3. **Implement**: Make clean, focused changes across source files, templates, and styles.

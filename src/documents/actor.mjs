@@ -13,7 +13,7 @@ import {
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
 import { CANONICAL_WEAPON_TECHNIQUE_MAP, getRecommendedAssociatedSkills } from '../data/weapon-associations.mjs';
-import { ARCHETYPE_TO_TAG, getItemAllTags, getTagDefinition } from '../data/tags.mjs';
+import { ARCHETYPE_TO_TAG, getItemAllTags, getTagDefinition, damageTypeToElement, elementToDamageType } from '../data/tags.mjs';
 import { matchesTagQuery, expandTagReferences } from '../utils/tag-query.mjs';
 
 /**
@@ -773,6 +773,32 @@ export class DCCActor extends BaseActor {
           }
         }
       }
+
+      // Structured grants on gear (grants: [{ kind: 'stat', stat: 'str', value: 2, type: 'flat' }])
+      if (Array.isArray(sys.grants)) {
+        for (const g of sys.grants) {
+          if (!g) continue;
+          if (g.kind === 'stat') {
+            const statKey = (g.stat || '').toLowerCase().trim();
+            if (gearStatBonuses[statKey]) {
+              const val = Number(g.value);
+              const type = (g.type || 'flat').toLowerCase();
+              if (Number.isFinite(val) && val !== 0) {
+                if (type === 'pct' || type === '%') {
+                  gearStatBonuses[statKey].pct += val;
+                } else {
+                  gearStatBonuses[statKey].flat += val;
+                }
+              }
+            }
+          } else if (g.kind === 'dr') {
+            gearDR += Number(g.value) || 0;
+          } else if (g.kind === 'evade') {
+            gearEvade += Number(g.value) || 0;
+          }
+        }
+      }
+
       gearDR += Number(sys.drBonus ?? sys.armorBonus) || 0;
       gearEvade += Number(sys.evadeBonus) || 0;
     }
@@ -936,12 +962,11 @@ export class DCCActor extends BaseActor {
       system.attributes.activeBuffs = activeBuffs;
 
       const dexMod = system.abilities?.dex?.mod ?? 0;
-      const evadeBuffs = Number(system.attributes.evade?.buffs) || 0;
-      if (system.attributes.evade) {
-        system.attributes.evade.items = gearEvade;
-        system.attributes.evade.gear = gearEvade;
-        system.attributes.evade.total = dexMod + evadeBuffs + gearEvade;
-      }
+      system.attributes.evade = system.attributes.evade || { base: dexMod, gear: 0, items: 0, buffs: 0, total: 0 };
+      const evadeBuffs = Number(system.attributes.evade.buffs) || 0;
+      system.attributes.evade.items = gearEvade;
+      system.attributes.evade.gear = gearEvade;
+      system.attributes.evade.total = dexMod + evadeBuffs + gearEvade;
 
       // Derive Evade Difficulty and effective Evade DC
       const currentFloor = DCCActor.getCurrentFloor ? DCCActor.getCurrentFloor() : 1;
@@ -961,13 +986,12 @@ export class DCCActor extends BaseActor {
         system.attributes.effectiveEvadeDC = 10 + dexMod + currentFloor;
       }
 
-      const drArmor = Number(system.attributes.dr?.armor) || 0;
-      const drBuffs = Number(system.attributes.dr?.buffs) || 0;
-      if (system.attributes.dr) {
-        system.attributes.dr.items = gearDR;
-        system.attributes.dr.gear = gearDR;
-        system.attributes.dr.total = drArmor + drBuffs + gearDR;
-      }
+      system.attributes.dr = system.attributes.dr || { armor: 0, gear: 0, items: 0, buffs: 0, total: 0 };
+      const drArmor = Number(system.attributes.dr.armor) || 0;
+      const drBuffs = Number(system.attributes.dr.buffs) || 0;
+      system.attributes.dr.items = gearDR;
+      system.attributes.dr.gear = gearDR;
+      system.attributes.dr.total = drArmor + drBuffs + gearDR;
 
       if (system.attributes.hp) {
         const conMod = system.abilities?.con?.mod ?? 1;
@@ -1084,6 +1108,48 @@ export class DCCActor extends BaseActor {
         entry.bonus += bonus;
         entry.sources.push(`${item.name} (+${bonus})`);
       }
+
+      // Structured grants on gear (grants: [{ kind: 'skill', name: 'Pugilism', bonus: 1 }])
+      if (Array.isArray(item.system?.grants)) {
+        for (const g of item.system.grants) {
+          if (!g) continue;
+          if (g.kind === 'skill' && g.name) {
+            const norm = g.name.toLowerCase().trim();
+            const bonus = Number(g.bonus ?? g.rank) || 0;
+            if (!gearSkillBonuses.has(norm)) {
+              gearSkillBonuses.set(norm, { bonus: 0, sources: [], originalName: g.name });
+            }
+            const entry = gearSkillBonuses.get(norm);
+            entry.bonus += bonus;
+            entry.sources.push(`${item.name} (+${bonus})`);
+          }
+        }
+      }
+    }
+
+    // Collect active tag_bonus grants across gear, active buffs, classes, and races
+    const activeTagGrants = [];
+    for (const item of equippedGear) {
+      if (Array.isArray(item.system?.grants)) {
+        for (const g of item.system.grants) {
+          if (g && (g.kind === 'tag_bonus' || g.kind === 'tagBonus')) activeTagGrants.push(g);
+        }
+      }
+    }
+    for (const buff of activeBuffs) {
+      if (Array.isArray(buff?.system?.grants)) {
+        for (const g of buff.system.grants) {
+          if (g && (g.kind === 'tag_bonus' || g.kind === 'tagBonus')) activeTagGrants.push(g);
+        }
+      }
+    }
+    const classRaceItems = this.items ? (this.items.filter ? this.items.filter(i => i.type === 'class' || i.type === 'race') : Array.from(this.items.values?.() ?? this.items).filter(i => i.type === 'class' || i.type === 'race')) : [];
+    for (const cr of classRaceItems) {
+      if (Array.isArray(cr.system?.grants)) {
+        for (const g of cr.system.grants) {
+          if (g && (g.kind === 'tag_bonus' || g.kind === 'tagBonus')) activeTagGrants.push(g);
+        }
+      }
     }
 
     if (this.items) {
@@ -1097,7 +1163,18 @@ export class DCCActor extends BaseActor {
         const norm = item.name.toLowerCase().trim();
         const baseRank = Number(item.system?.rank) || 0;
         const gearData = gearSkillBonuses.get(norm);
-        const itemBonus = gearData ? gearData.bonus : 0;
+        let itemBonus = gearData ? gearData.bonus : 0;
+
+        // Apply active tag_bonus grants matching this skill
+        if (activeTagGrants.length > 0) {
+          const skillTags = item.allTags || getItemAllTags(item);
+          for (const tg of activeTagGrants) {
+            if (tg.query && matchesTagQuery(skillTags, tg.query)) {
+              itemBonus += Number(tg.bonus) || 0;
+            }
+          }
+        }
+
         const boonBonus = Number(item.system?.boonBonus) || 0;
         const selfRank = Math.max(0, baseRank + itemBonus + boonBonus);
 
@@ -1175,13 +1252,24 @@ export class DCCActor extends BaseActor {
         item.typeSources = typeSources;
       }
 
-      // Prepare Spells: item bonuses from equipped gear and modifiedRank
+      // Prepare Spells: item bonuses from equipped gear, tag queries, and modifiedRank
       const spells = this.items.filter ? this.items.filter(i => i.type === 'spell') : Array.from(this.items.values?.() ?? this.items).filter(i => i.type === 'spell');
       for (const spell of spells) {
         const norm = spell.name.toLowerCase().trim();
         const baseRank = Number(spell.system?.rank) || 1;
         const gearData = gearSkillBonuses.get(norm);
-        const itemBonus = gearData ? gearData.bonus : 0;
+        let itemBonus = gearData ? gearData.bonus : 0;
+
+        // Apply active tag_bonus grants matching this spell
+        if (activeTagGrants.length > 0) {
+          const spellTags = spell.allTags || getItemAllTags(spell);
+          for (const tg of activeTagGrants) {
+            if (tg.query && matchesTagQuery(spellTags, tg.query)) {
+              itemBonus += Number(tg.bonus) || 0;
+            }
+          }
+        }
+
         const modifiedRank = Math.max(1, baseRank + itemBonus);
 
         const stat = spell.system?.stat || 'int';
@@ -5044,15 +5132,17 @@ export class DCCActor extends BaseActor {
   getDamageReduction(damageType) {
     if (!damageType) return { percent: 0, flat: 0, rounding: 'up', isResistant: false, isImmune: false };
     const targetType = damageType.toLowerCase().trim();
+    const elementTag = damageTypeToElement(targetType) || (targetType.startsWith('element.') ? targetType : null);
+    const canonicalName = (elementToDamageType(elementTag) || targetType).toLowerCase();
 
-    if (this.hasImmunity(damageType)) {
+    if (this.hasImmunity(damageType) || (elementTag && this.hasImmunity(elementTag))) {
       return { percent: 1, flat: 0, rounding: 'up', isResistant: false, isImmune: true };
     }
 
     let percent = 0;
     let flat = 0;
     let rounding = 'up';
-    let isResistant = this.hasResistance(damageType);
+    let isResistant = this.hasResistance(damageType) || (elementTag && this.hasResistance(elementTag));
     if (isResistant) {
       percent += 0.5;
     }
@@ -5065,6 +5155,7 @@ export class DCCActor extends BaseActor {
     for (const item of debuffItems) {
       const sys = item.system || {};
       const desc = (sys.description || item.name || '').toLowerCase();
+      const itemTags = item.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(item) : new Set(sys.tags || []));
 
       // Check multi damageModifiers if present
       if (Array.isArray(sys.damageModifiers) && sys.damageModifiers.length > 0) {
@@ -5072,7 +5163,8 @@ export class DCCActor extends BaseActor {
           if (!dm) continue;
           const kind = (dm.kind || dm.type || '').toLowerCase();
           const dt = (dm.damageType || '').toLowerCase().trim();
-          const applies = !dt || dt === 'all' || dt === targetType;
+          const dTag = (dm.elementTag || dm.tag || '').toLowerCase().trim();
+          const applies = !dt || dt === 'all' || dt === targetType || dt === canonicalName || (elementTag && (dt === elementTag || dTag === elementTag));
 
           if (applies) {
             if (kind === 'immunity') {
@@ -5091,15 +5183,16 @@ export class DCCActor extends BaseActor {
           }
         }
       } else {
-        // Legacy single modifier fallback
+        // Tag-driven single modifier check
         const itemDmg = (sys.damageType || '').toLowerCase().trim();
-        const appliesToType = !itemDmg || itemDmg === targetType || itemDmg === 'all' || desc.includes(targetType) || desc.includes('all damage') || desc.includes('all attacks');
+        const hasTagMatch = elementTag && itemTags.has(elementTag);
+        const appliesToType = !itemDmg || itemDmg === targetType || itemDmg === canonicalName || itemDmg === 'all' || hasTagMatch || desc.includes(targetType) || desc.includes('all damage') || desc.includes('all attacks');
         if (appliesToType) {
           if (sys.reductionPercent) {
             const rawPct = Number(sys.reductionPercent) || 0;
             percent += rawPct > 1 ? rawPct / 100 : rawPct;
           } else {
-            // Parse e.g. "reduces all fire damage by 50% rounded up"
+            // Legacy description fallback for unmigrated items
             const pctMatch = desc.match(/(\d+)%\s*(?:reduction|damage)?/i);
             if (pctMatch) {
               percent += Number(pctMatch[1]) / 100;
@@ -7817,6 +7910,13 @@ export class DCCActor extends BaseActor {
           gearBonus += Number(sm.bonus) || 0;
         }
       }
+      if (Array.isArray(item.system?.grants)) {
+        for (const g of item.system.grants) {
+          if (g?.kind === 'skill' && g.name && g.name.toLowerCase().trim() === norm) {
+            gearBonus += Number(g.bonus ?? g.rank) || 0;
+          }
+        }
+      }
     }
     return gearBonus;
   }
@@ -7860,6 +7960,13 @@ export class DCCActor extends BaseActor {
       for (const out of outcomes) {
         if (out?.type === 'spell' && (out.spellName || out.name)?.toLowerCase().trim() === norm) {
           return Number(out.rank ?? out.bonus) || 1;
+        }
+      }
+      if (Array.isArray(item.system?.grants)) {
+        for (const g of item.system.grants) {
+          if (g?.kind === 'spell' && (g.name || g.spellName) && (g.name || g.spellName).toLowerCase().trim() === norm) {
+            return Number(g.rank ?? g.bonus) || 1;
+          }
         }
       }
     }

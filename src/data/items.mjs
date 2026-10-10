@@ -23,6 +23,9 @@ export const DCC_ITEMS = [
         { formula: "1d4", type: "Piercing" }
       ],
       skillModifiers: [{ name: "Bashing", bonus: 1 }],
+      grants: [
+        { kind: "skill", name: "Bashing", ref: "id.skill.bashing", bonus: 1 }
+      ],
       notes: "Heavy wooden bat driven through with rusty nails. Bashing skill bonus +1.",
       description: "A crude but undeniably effective dungeon classic. Delivers crushing bludgeoning damage alongside piercing puncture wounds from rusty steel nails."
     }
@@ -44,6 +47,9 @@ export const DCC_ITEMS = [
         { formula: "1d8", type: "Piercing" }
       ],
       skillModifiers: [{ name: "Ranged", bonus: 1 }],
+      grants: [
+        { kind: "skill", name: "Ranged", ref: "id.skill.ranged", bonus: 1 }
+      ],
       notes: "Compound hunting bow with balanced draw string. Range: 60ft.",
       description: "A precision hunting bow scavenged from sporting goods displays. Silent, reliable, and lethal at a distance."
     }
@@ -126,8 +132,12 @@ export const DCC_ITEMS = [
         { formula: "1d4", type: "Bludgeoning" }
       ],
       skillModifiers: [{ name: "Unarmed Combat", bonus: 1 }],
+      grants: [
+        { kind: "skill", name: "Unarmed Combat", ref: "id.skill.unarmed-combat", bonus: 1 }
+      ],
       notes: "Close-quarters punch reinforcer. Grants +1 bonus to Unarmed Combat checks.",
-      description: "Cast metal knuckles designed to turn ordinary punches into bone-cracking strikes."
+      description: "Cast metal knuckles designed to turn ordinary punches into bone-cracking strikes.",
+      tags: ["kind.gear", "kind.weapon", "weaponClass.unarmed"]
     }
   },
   {
@@ -142,8 +152,13 @@ export const DCC_ITEMS = [
       equipped: false,
       drBonus: 1,
       evadeBonus: 1,
+      grants: [
+        { kind: "dr", value: 1 },
+        { kind: "evade", value: 1 }
+      ],
       notes: "+1 Damage Resistance and +1 Evade when held.",
-      description: "A reinforced polycarbonate protective shield that deflects incoming physical projectiles and blunt strikes."
+      description: "A reinforced polycarbonate protective shield that deflects incoming physical projectiles and blunt strikes.",
+      tags: ["kind.gear", "kind.armor"]
     }
   },
 
@@ -238,8 +253,13 @@ export const DCC_ITEMS = [
         int: { value: 1, type: "flat" },
         cha: { value: 1, type: "flat" }
       },
+      grants: [
+        { kind: "stat", stat: "int", value: 1, type: "flat" },
+        { kind: "stat", stat: "cha", value: 1, type: "flat" }
+      ],
       notes: "+1 INT and +1 CHA while worn.",
-      description: "An ornate gilded circlet humming with ancient dungeon authority. Makes the wearer look both commanding and slightly intimidating."
+      description: "An ornate gilded circlet humming with ancient dungeon authority. Makes the wearer look both commanding and slightly intimidating.",
+      tags: ["kind.gear", "stat.int", "stat.cha"]
     }
   },
   {
@@ -266,8 +286,12 @@ export const DCC_ITEMS = [
           description: "Unleashes an explosive burst of fire at the closest mob. Costs 0 mana."
         }
       ],
+      grants: [
+        { kind: "spell", name: "Fireball", ref: "id.spell.fireball", rank: 1, cooldownHours: 0 }
+      ],
       notes: "Activated Ability: Casts Fireball (0 Mana) once per scene.",
-      description: "A bronze ring set with a warm ember stone. Flickers with eager flame whenever combat erupts."
+      description: "A bronze ring set with a warm ember stone. Flickers with eager flame whenever combat erupts.",
+      tags: ["kind.gear", "element.fire"]
     }
   },
   {
@@ -281,8 +305,12 @@ export const DCC_ITEMS = [
       value: 50,
       equipped: false,
       drBonus: 1,
+      grants: [
+        { kind: "dr", value: 1 }
+      ],
       notes: "+1 Damage Resistance.",
-      description: "Carved from polished reptile carapace, this ring wraps the wearer in subtle earthen warding."
+      description: "Carved from polished reptile carapace, this ring wraps the wearer in subtle earthen warding.",
+      tags: ["kind.gear"]
     }
   },
   {
@@ -298,8 +326,12 @@ export const DCC_ITEMS = [
       abilityModifiers: {
         cha: { value: 1, type: "flat" }
       },
+      grants: [
+        { kind: "stat", stat: "cha", value: 1, type: "flat" }
+      ],
       notes: "+1 Charisma. Suitable for Princess Donut or any companion.",
-      description: "A glamorous red velvet collar studded with sparkling imitation rubies. Guaranteed to impress the Syndicate broadcast audience."
+      description: "A glamorous red velvet collar studded with sparkling imitation rubies. Guaranteed to impress the Syndicate broadcast audience.",
+      tags: ["kind.gear", "stat.cha"]
     }
   },
 
@@ -314,9 +346,20 @@ export const DCC_ITEMS = [
       value: 10,
       cooldown: "None",
       lootType: "consumable",
+      executionMode: "all",
       notes: "Refills mana completely to maximum.",
       description: "A crystalline blue flask filled with shimmering liquid mana. Consuming this item mid-battle immediately restores your mana reserves to full.",
-      outcomes: []
+      outcomes: [
+        {
+          name: "Refill Mana",
+          type: "restore_resource",
+          resource: "mana",
+          mode: "full",
+          targetType: "self",
+          description: "Refills mana completely to maximum reserves."
+        }
+      ],
+      tags: ["kind.loot", "action.restore", "resource.mana"]
     }
   },
   {
@@ -340,7 +383,8 @@ export const DCC_ITEMS = [
           targetType: "self",
           description: "Restores up to 2 Health Bars to the user."
         }
-      ]
+      ],
+      tags: ["kind.loot", "action.heal", "resource.hp-bars"]
     }
   },
   {
@@ -364,7 +408,8 @@ export const DCC_ITEMS = [
           targetType: "self",
           description: "Restores up to 5 full Health Bars to the user."
         }
-      ]
+      ],
+      tags: ["kind.loot", "action.heal", "resource.hp-bars"]
     }
   },
   {

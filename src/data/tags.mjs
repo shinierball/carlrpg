@@ -23,6 +23,7 @@ export const TAG_NAMESPACES = {
   skillGroup:   { label: 'Skill Discipline', description: 'Discipline grouping for skills' },
   technique:    { label: 'Combat Technique Target', description: 'Skill targeted by combat techniques' },
   rule:         { label: 'Special Rule Flag', description: 'Engine mechanics and overrides' },
+  resource:     { label: 'Resource Type', description: 'Character resource pools (mana, health bars, temporary bars)' },
   id:           { label: 'Identity Tag', description: 'Stable unique item identity: id.<type>.<slug>' },
   custom:       { label: 'Custom User Tag', description: 'User-created tags' }
 };
@@ -45,13 +46,21 @@ export const DCC_TAGS = [
   // --- Actions ---
   { id: 'action.attack', label: 'Attack', namespace: 'action' },
   { id: 'action.heal', label: 'Heal', namespace: 'action' },
+  { id: 'action.restore', label: 'Restore / Refill', namespace: 'action' },
   { id: 'action.passive', label: 'Passive', namespace: 'action' },
   { id: 'action.interrupt', label: 'Interrupt', namespace: 'action' },
+
+  // --- Resources ---
+  { id: 'resource.mana', label: 'Mana Points', namespace: 'resource' },
+  { id: 'resource.hp-bars', label: 'Health Bars', namespace: 'resource' },
+  { id: 'resource.temp-bars', label: 'Temporary Health Bars', namespace: 'resource' },
 
   // --- Damage / Elements ---
   { id: 'element.fire', label: 'Fire', namespace: 'element' },
   { id: 'element.ice', label: 'Ice', namespace: 'element' },
   { id: 'element.electric', label: 'Electric', namespace: 'element' },
+  { id: 'element.acid', label: 'Acid', namespace: 'element' },
+  { id: 'element.poison', label: 'Poison', namespace: 'element' },
   { id: 'element.force', label: 'Force', namespace: 'element' },
   { id: 'element.sonic', label: 'Sonic', namespace: 'element' },
   { id: 'element.holy', label: 'Holy', namespace: 'element' },
@@ -171,7 +180,8 @@ export const DCC_TAGS = [
   { id: 'rule.temp-health-bars', label: 'Temporary Health Bars', namespace: 'rule' },
   { id: 'rule.emits-light', label: 'Emits Light', namespace: 'rule' },
   { id: 'rule.causes-darkness', label: 'Causes Darkness', namespace: 'rule' },
-  { id: 'rule.depletes-on-empty', label: 'Depletes When Empty', namespace: 'rule' }
+  { id: 'rule.depletes-on-empty', label: 'Depletes When Empty', namespace: 'rule' },
+  { id: 'rule.cooldown-hours', label: 'Cooldown (2h per Rank)', namespace: 'rule' }
 ];
 
 /** Fast lookup map of registered tags */
@@ -181,11 +191,17 @@ export const TAG_MAP = new Map(DCC_TAGS.map(t => [t.id, t]));
 export const DAMAGE_TYPE_TO_ELEMENT = {
   fire: 'element.fire',
   ice: 'element.ice',
+  cold: 'element.ice',
   electric: 'element.electric',
   electricity: 'element.electric',
+  lightning: 'element.electric',
+  acid: 'element.acid',
+  poison: 'element.poison',
+  toxic: 'element.poison',
   force: 'element.force',
   sonic: 'element.sonic',
   holy: 'element.holy',
+  radiant: 'element.holy',
   necrotic: 'element.necrotic',
   psychic: 'element.psychic',
   bludgeoning: 'element.bludgeoning',
@@ -198,6 +214,8 @@ export const ELEMENT_TO_DAMAGE_TYPE = {
   'element.fire': 'Fire',
   'element.ice': 'Ice',
   'element.electric': 'Electric',
+  'element.acid': 'Acid',
+  'element.poison': 'Poison',
   'element.force': 'Force',
   'element.sonic': 'Sonic',
   'element.holy': 'Holy',
@@ -468,6 +486,43 @@ export function computeDerivedTags(item) {
   // Light emission rule
   if (sys.light && (sys.light.emits || sys.light.dim > 0 || sys.light.bright > 0)) {
     derived.add('rule.emits-light');
+  }
+
+  // Consumable outcomes / effects derived tags
+  const outcomes = Array.isArray(sys.outcomes) ? sys.outcomes : [];
+  for (const outcome of outcomes) {
+    if (!outcome) continue;
+    const outType = (outcome.type || '').toLowerCase().trim();
+    const res = (outcome.resource || '').toLowerCase().trim();
+    if (outType === 'restore_resource' || outType === 'mana' || res === 'mana') {
+      derived.add('action.restore');
+      derived.add('resource.mana');
+    }
+    if (outType === 'heal' || outType === 'heal_bars' || outcome.healBars) {
+      derived.add('action.heal');
+      derived.add('resource.hp-bars');
+    }
+    if (outType === 'heal_over_time' || outType === 'hot') {
+      derived.add('action.heal');
+      derived.add('resource.hp-bars');
+      derived.add('duration.rounds');
+    }
+  }
+
+  // Structured grants derived tags
+  const grants = Array.isArray(sys.grants) ? sys.grants : [];
+  for (const g of grants) {
+    if (!g) continue;
+    if (g.kind === 'stat' && g.stat && STAT_TO_TAG[g.stat.toLowerCase()]) {
+      derived.add(STAT_TO_TAG[g.stat.toLowerCase()]);
+    }
+    if (g.kind === 'spell') {
+      derived.add('kind.spell');
+      if (Number(g.cooldownHours) > 0) derived.add('rule.cooldown-hours');
+    }
+    if (g.kind === 'skill') {
+      derived.add('kind.skill');
+    }
   }
 
   return derived;

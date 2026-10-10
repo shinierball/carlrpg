@@ -595,6 +595,7 @@ if (!globalThis.game) {
     macros: [],
     folders: [],
     tables: [],
+    journal: [],
     packs: new Map(),
     settings: {
       register: (module, key, options) => {
@@ -1880,6 +1881,46 @@ if (!globalThis.RollTable) {
   };
 }
 
+if (!globalThis.JournalEntry) {
+  globalThis.JournalEntry = class MockJournalEntry {
+    constructor(data = {}) {
+      Object.assign(this, structuredClone(data));
+      this.id = data.id || data._id || ('mock-journal-' + Math.random().toString(36).substring(2, 9));
+      this._id = this.id;
+      this.pages = Array.isArray(data.pages) ? [...data.pages] : [];
+      this.sheet = {
+        rendered: false,
+        render: (force = true) => {
+          this.sheet.rendered = true;
+          return this.sheet;
+        }
+      };
+    }
+    static async create(data, options = {}) {
+      if (!data.name || typeof data.name !== 'string') {
+        throw new Error('JournalEntry#name: must be a non-empty string');
+      }
+      const entry = new MockJournalEntry(data);
+      if (globalThis.game?.journal) {
+        if (Array.isArray(globalThis.game.journal)) globalThis.game.journal.push(entry);
+        else if (typeof globalThis.game.journal.set === 'function') globalThis.game.journal.set(entry.id, entry);
+      }
+      return entry;
+    }
+    async createEmbeddedDocuments(embeddedType, dataArray) {
+      if (embeddedType === 'JournalEntryPage') {
+        const created = dataArray.map((p, idx) => ({
+          _id: ('page' + Math.random().toString(36).substring(2, 10) + '00000000').slice(0, 16),
+          ...p
+        }));
+        this.pages.push(...created);
+        return created;
+      }
+      return [];
+    }
+  };
+}
+
 if (!globalThis.foundry) {
   globalThis.foundry = {
     utils: {
@@ -1932,7 +1973,9 @@ globalThis.foundry.documents.Actor = globalThis.foundry.documents.Actor || MockA
 globalThis.foundry.documents.Item = globalThis.foundry.documents.Item || MockItem;
 globalThis.foundry.documents.Macro = globalThis.foundry.documents.Macro || MockMacro;
 globalThis.foundry.documents.RollTable = globalThis.foundry.documents.RollTable || globalThis.RollTable;
+globalThis.foundry.documents.JournalEntry = globalThis.foundry.documents.JournalEntry || globalThis.JournalEntry;
 globalThis.foundry.documents.ChatMessage = globalThis.foundry.documents.ChatMessage || globalThis.ChatMessage;
+CONFIG.JournalEntry = CONFIG.JournalEntry || { documentClass: globalThis.JournalEntry };
 globalThis.foundry.documents.collections = globalThis.foundry.documents.collections || {
   Actors: globalThis.Actors,
   Items: globalThis.Items

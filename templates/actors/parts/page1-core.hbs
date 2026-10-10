@@ -595,8 +595,8 @@
               </div>
             </td>
             <td>
-              <button type="button" class="dcc-attack-roll-btn roll-attack-hit">
-                {{#if attack.displayToHit}}{{attack.displayToHit}}{{else}}{{upper attack.system.toHitStat}} ({{attack.system.toHitRank}}){{/if}}
+              <button type="button" class="dcc-attack-roll-btn roll-attack-hit" data-tooltip="Roll To Hit: {{#if attack.toHitFormula}}{{attack.toHitFormula}}{{else if attack.displayToHit}}{{attack.displayToHit}}{{/if}}{{#if attack.displayToHit}} ({{attack.displayToHit}}){{/if}}">
+                {{#if attack.toHitFormula}}{{attack.toHitFormula}}{{else if attack.displayToHit}}{{attack.displayToHit}}{{else}}{{upper attack.system.toHitStat}} ({{attack.system.toHitRank}}){{/if}}
               </button>
             </td>
             <td>

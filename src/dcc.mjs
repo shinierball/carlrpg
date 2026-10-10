@@ -49,6 +49,11 @@ import {
   ensureBackgroundTables
 } from './data/background-tables.mjs';
 import {
+  TAG_SYSTEM_JOURNAL_DATA,
+  ensureTagSystemJournal,
+  openTagSystemJournal
+} from './data/journal-tag-system.mjs';
+import {
   SkillDataModel,
   AttackDataModel,
   SpellDataModel,
@@ -122,6 +127,9 @@ Hooks.once('init', async function() {
     TagIndex,
     tags: tagIndex,
     DCCTagManager,
+    ensureTagSystemJournal,
+    openTagSystemJournal,
+    tagSystemJournalData: TAG_SYSTEM_JOURNAL_DATA,
     applications: {
       DCCCrawlerSheet,
       DCCItemSheet,
@@ -520,6 +528,9 @@ Hooks.once('init', async function() {
     },
     openTagManager(options = {}) {
       return new DCCTagManager(options).render(true);
+    },
+    openTagGuide() {
+      return openTagSystemJournal();
     },
     tokenHUD: getCrawlerTokenHUD(),
     openHotbarHUD(actor, token) {
@@ -2249,8 +2260,9 @@ Hooks.on('preCreateToken', (tokenDoc, createData, options, userId) => {
 
 Hooks.once('ready', async function() {
   if (game.user.isGM) {
-    // 0. Ensure official background RollTables (Tables 11, 12, 13) exist in the world
+    // 0. Ensure official background RollTables (Tables 11, 12, 13) and Tag System Journal exist in the world
     await ensureBackgroundTables();
+    await ensureTagSystemJournal();
 
     // 1. Ensure existing world crawlers and pets have prototypeToken.actorLink = true
     if (game.actors) {

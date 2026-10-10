@@ -10,6 +10,10 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 
 - Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
 
+- **CarlRPG 3.0.2 Tag System Guide, Accurate To-Hit Formulas & Journals Pack**:
+  - **In-Game Tag System & Content Creation Guide (`packs/journals`, `carl.openTagGuide()`)**: Official 7-chapter in-game reference manual covering tag taxonomy across 12 namespaces, item creation, secondary skills (*Aiming* disadvantage offset and damage tiers), favored spell +1 MP calculations, structured grants (`system.grants`), and DCC rule-breaking principles. Auto-populates in world journals via `ensureTagSystemJournal()` and includes a 1-click **📖 Tag Guide** button in the Tag Manager.
+  - **Accurate To-Hit Formula Character Sheet Display**: Attack roll buttons on the character sheet evaluate and display the exact to-hit formula (`1d20 + 14` when trained, `2d20kl + 4` when untrained or at disadvantage, incorporating Aiming rank offsets) with comprehensive breakdown tooltips. Custom-named weapons (e.g. *Boom Stick*) cleanly resolve associated skill ranks without reverting to 0.
+
 - **CarlRPG 3.0.1 Unified Tagging System & Tag Taxonomy Engine**:
   - **Namespaced Tag IDs**: Fully data-driven keyword architecture covering 10 namespaces (`kind.*`, `action.*`, `element.*`, `archetype.*`, `favored.*`, `weapon.*`, `weaponClass.*`, `weaponProp.*`, `skillGroup.*`, `technique.*`, `rule.*`, `id.*`, and `custom.*`). Zero regex matching or string heuristics across the game engine.
   - **TagQuery Engine**: Structured queries (`matchesTagQuery(tags, query)`) evaluating string, array, or `{ all, any, none }` Boolean queries with automatic reference expansion (`expandTagReferences`).

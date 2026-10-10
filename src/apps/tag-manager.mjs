@@ -8,6 +8,7 @@
 import { DCCBaseApplication } from './base-application.mjs';
 import { DCC_TAGS, TAG_NAMESPACES, registerCustomTag, getTagDefinition } from '../data/tags.mjs';
 import { tagIndex } from './tag-index.mjs';
+import { openTagSystemJournal } from '../data/journal-tag-system.mjs';
 
 export class DCCTagManager extends DCCBaseApplication {
   constructor(options = {}) {
@@ -253,6 +254,12 @@ export class DCCTagManager extends DCCBaseApplication {
       }
 
       this.render(false);
+    });
+
+    // Open Tag Guide Journal Entry
+    html.find('.dcc-open-tag-guide-btn').click(async ev => {
+      ev.preventDefault();
+      await openTagSystemJournal();
     });
   }
 }

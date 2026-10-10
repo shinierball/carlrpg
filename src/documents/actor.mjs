@@ -12,7 +12,7 @@ import {
 } from '../data/grinding.mjs';
 import { DCCRaceClassApplier } from '../data/race-class-applier.mjs';
 import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
-import { CANONICAL_WEAPON_TECHNIQUE_MAP } from '../data/weapon-associations.mjs';
+import { CANONICAL_WEAPON_TECHNIQUE_MAP, getRecommendedAssociatedSkills } from '../data/weapon-associations.mjs';
 import { ARCHETYPE_TO_TAG, getItemAllTags, getTagDefinition } from '../data/tags.mjs';
 import { matchesTagQuery, expandTagReferences } from '../utils/tag-query.mjs';
 
@@ -2717,8 +2717,10 @@ export class DCCActor extends BaseActor {
     if (!attackItem) return { matchingSkill: null, auxiliarySkills: [], skillRank: 0, matchedSkills: [] };
     const sys = attackItem.system || {};
     const normName = (attackItem.name || '').toLowerCase().trim();
-    const associated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
     const skillList = availableSkills || (this.items ? (this.items.filter ? this.items.filter(i => i.type === 'skill') : Array.from(this.items.values?.() || this.items).filter(i => i.type === 'skill')) : []);
+    const explicitAssociated = Array.isArray(sys.associatedSkills) ? sys.associatedSkills : [];
+    const recommended = typeof getRecommendedAssociatedSkills === 'function' ? getRecommendedAssociatedSkills(attackItem, skillList) : [];
+    const associated = [...new Set([...explicitAssociated, ...recommended])];
 
     const attackTags = attackItem.allTags instanceof Set
       ? attackItem.allTags
@@ -3646,6 +3648,42 @@ export class DCCActor extends BaseActor {
     const displayToHitRank = skillRank;
     const displayToHit = `${displayToHitStat} (${skillRank})`;
 
+    const isUntrained = this.type === 'mob' ? false : (skillRank <= 0);
+    const isOneHandedPenalty = (sys.wieldMode === 'two_handed_disadv_1h' && (sys.hands === 1 || sys.wieldMode === 'one_handed' || sys.oneHanded));
+    let baseDieStr = '1d20';
+    let advMode = 'normal';
+    if (typeof this.getRollAdvantageState === 'function') {
+      const advState = this.getRollAdvantageState({
+        rollType: 'attack',
+        stat: toHitStat,
+        item,
+        isUntrained,
+        isOneHandedPenalty,
+        tags: [sys.weaponCategory, sys.weaponType, sys.slot].filter(Boolean)
+      });
+      baseDieStr = advState?.formula || (isUntrained ? '2d20kl' : '1d20');
+      advMode = advState?.mode || 'normal';
+    } else if (isUntrained || isOneHandedPenalty) {
+      baseDieStr = '2d20kl';
+      advMode = 'disadvantage';
+    }
+
+    const aimingAux = auxiliarySkills?.find(s => s.name?.toLowerCase().trim() === 'aiming');
+    let aimingBonus = 0;
+    if (advMode === 'disadvantage' && aimingAux) {
+      aimingBonus = Math.max(Number(aimingAux.system?.modifiedRank) || 0, Number(aimingAux.system?.rank) || 0);
+    }
+
+    const totalToHit = isUntrained ? statMod : (toHitMod + aimingBonus);
+    let toHitFormula = '';
+    if (totalToHit > 0) {
+      toHitFormula = `${baseDieStr} + ${totalToHit}`;
+    } else if (totalToHit < 0) {
+      toHitFormula = `${baseDieStr} - ${Math.abs(totalToHit)}`;
+    } else {
+      toHitFormula = baseDieStr;
+    }
+
     // Base damage and rank damage die
     let baseDice = '';
     let dmgType = 'Physical';
@@ -3747,7 +3785,10 @@ export class DCCActor extends BaseActor {
       isEquipped: true,
       skillRank,
       toHitStat,
+      statMod,
       toHitMod,
+      toHitFormula,
+      displayToHitFormula: toHitFormula,
       displayToHitStat,
       displayToHitRank,
       displayToHit,
@@ -3786,6 +3827,30 @@ export class DCCActor extends BaseActor {
     const displayToHitStat = toHitStat.toUpperCase();
     const displayToHitRank = rank;
     const displayToHit = `${displayToHitStat} (${rank})`;
+
+    const isUntrained = this.type === 'mob' ? false : (rank <= 0);
+    let baseDieStr = '1d20';
+    if (typeof this.getRollAdvantageState === 'function') {
+      const advState = this.getRollAdvantageState({
+        rollType: 'attack',
+        stat: toHitStat,
+        item: skill,
+        isUntrained
+      });
+      baseDieStr = advState?.formula || (isUntrained ? '2d20kl' : '1d20');
+    } else if (isUntrained) {
+      baseDieStr = '2d20kl';
+    }
+
+    const totalToHit = isUntrained ? statMod : toHitMod;
+    let toHitFormula = '';
+    if (totalToHit > 0) {
+      toHitFormula = `${baseDieStr} + ${totalToHit}`;
+    } else if (totalToHit < 0) {
+      toHitFormula = `${baseDieStr} - ${Math.abs(totalToHit)}`;
+    } else {
+      toHitFormula = baseDieStr;
+    }
 
     const applicableTechs = primedTechs.filter(t => this.isTechniqueApplicable(t, skill));
     let activeEffect = (sys.selectedEffect && sys.selectedEffect !== 'none') ? sys.selectedEffect : null;
@@ -3867,7 +3932,10 @@ export class DCCActor extends BaseActor {
       isEquipped: true,
       skillRank: rank,
       toHitStat,
+      statMod,
       toHitMod,
+      toHitFormula,
+      displayToHitFormula: toHitFormula,
       displayToHitStat,
       displayToHitRank,
       displayToHit,

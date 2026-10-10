@@ -94,8 +94,21 @@ export function isWeaponGear(item) {
 export function prepareAttackDisplay(item, actor) {
   const sys = item.system || {};
   const isGear = item.type === 'gear';
-  const skills = actor?.items ? (actor.items.filter ? actor.items.filter(i => i.type === 'skill') : Array.from(actor.items.values?.() || actor.items).filter(i => i.type === 'skill')) : [];
-  const matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === item.name?.toLowerCase().trim());
+  let matchingSkill = null;
+  let toHitRank = 0;
+  let auxiliarySkills = [];
+  if (actor && typeof actor._resolveWeaponSkills === 'function') {
+    const resolved = actor._resolveWeaponSkills(item);
+    matchingSkill = resolved.matchingSkill;
+    toHitRank = resolved.skillRank;
+    auxiliarySkills = resolved.auxiliarySkills || [];
+  } else {
+    const skills = actor?.items ? (actor.items.filter ? actor.items.filter(i => i.type === 'skill') : Array.from(actor.items.values?.() || actor.items).filter(i => i.type === 'skill')) : [];
+    matchingSkill = skills.find(s => s.name?.toLowerCase().trim() === item.name?.toLowerCase().trim());
+    toHitRank = matchingSkill
+      ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0)
+      : (Number(sys.toHitRank ?? sys.rank) || 0);
+  }
 
   // To-Hit resolution
   let toHitStat = sys.toHitStat;
@@ -108,13 +121,56 @@ export function prepareAttackDisplay(item, actor) {
       toHitStat = isGear ? 'str' : 'dex';
     }
   }
-  const toHitRank = matchingSkill
-    ? (Number(matchingSkill.system?.modifiedRank ?? matchingSkill.system?.rank) || 0)
-    : (Number(sys.toHitRank ?? sys.rank) || 0);
 
+  const statMod = actor?.system?.abilities?.[toHitStat.toLowerCase()]?.mod ?? 0;
+  const toHitMod = toHitRank + statMod;
+
+  item.toHitStat = toHitStat;
+  item.statMod = statMod;
+  item.toHitRank = toHitRank;
+  item.toHitMod = toHitMod;
   item.displayToHitStat = toHitStat.toUpperCase();
   item.displayToHitRank = toHitRank;
   item.displayToHit = `${item.displayToHitStat} (${toHitRank})`;
+
+  const isUntrained = actor?.type === 'mob' ? false : (toHitRank <= 0);
+  const isOneHandedPenalty = (sys.wieldMode === 'two_handed_disadv_1h' && (sys.hands === 1 || sys.wieldMode === 'one_handed' || sys.oneHanded));
+  let baseDieStr = '1d20';
+  let advMode = 'normal';
+  if (actor && typeof actor.getRollAdvantageState === 'function') {
+    const advState = actor.getRollAdvantageState({
+      rollType: 'attack',
+      stat: toHitStat,
+      item,
+      isUntrained,
+      isOneHandedPenalty,
+      tags: [sys.weaponCategory, sys.weaponType, sys.slot].filter(Boolean)
+    });
+    baseDieStr = advState?.formula || (isUntrained ? '2d20kl' : '1d20');
+    advMode = advState?.mode || 'normal';
+  } else if (isUntrained || isOneHandedPenalty) {
+    baseDieStr = '2d20kl';
+    advMode = 'disadvantage';
+  }
+
+  const aimingAux = auxiliarySkills?.find(s => s.name?.toLowerCase().trim() === 'aiming');
+  let aimingBonus = 0;
+  if (advMode === 'disadvantage' && aimingAux) {
+    aimingBonus = Math.max(Number(aimingAux.system?.modifiedRank) || 0, Number(aimingAux.system?.rank) || 0);
+  }
+
+  const totalToHit = isUntrained ? statMod : (toHitMod + aimingBonus);
+  let toHitFormula = '';
+  if (totalToHit > 0) {
+    toHitFormula = `${baseDieStr} + ${totalToHit}`;
+  } else if (totalToHit < 0) {
+    toHitFormula = `${baseDieStr} - ${Math.abs(totalToHit)}`;
+  } else {
+    toHitFormula = baseDieStr;
+  }
+
+  item.toHitFormula = toHitFormula;
+  item.displayToHitFormula = toHitFormula;
 
   // Damage formula display
   const rawParts = sys.damageParts;

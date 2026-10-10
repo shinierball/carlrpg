@@ -9,6 +9,7 @@ import { DCC_MOBS } from '../src/data/mobs.mjs';
 import { DCC_ITEMS } from '../src/data/items.mjs';
 import { DCC_RACES } from '../src/data/races.mjs';
 import { DCC_CLASSES } from '../src/data/classes.mjs';
+import { TAG_SYSTEM_JOURNAL_DATA } from '../src/data/journal-tag-system.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -586,6 +587,57 @@ async function buildClasses() {
   console.log(`Successfully built classes compendium at ${packDir}`);
 }
 
+// 9. Build Journals Pack
+async function buildJournals() {
+  const packDir = path.resolve(__dirname, '../packs/journals');
+  if (fs.existsSync(packDir)) {
+    fs.rmSync(packDir, { recursive: true, force: true });
+  }
+  fs.mkdirSync(packDir, { recursive: true });
+
+  const db = new ClassicLevel(packDir, { keyEncoding: 'utf8', valueEncoding: 'json' });
+  await db.open();
+
+  console.log(`Building journals compendium...`);
+  const batch = db.batch();
+
+  const journalId = 'dccjnl0000000001';
+  const pages = TAG_SYSTEM_JOURNAL_DATA.pages.map((p, idx) => ({
+    _id: `dccjpg000000000${idx + 1}`,
+    name: p.name,
+    type: p.type || 'text',
+    title: p.title || { show: true, level: 1 },
+    text: p.text || { format: 1, content: '' },
+    sort: (idx + 1) * 100000,
+    flags: {},
+    system: {}
+  }));
+
+  const doc = {
+    _id: journalId,
+    name: TAG_SYSTEM_JOURNAL_DATA.name,
+    pages,
+    folder: null,
+    sort: 0,
+    ownership: { default: 0 },
+    flags: TAG_SYSTEM_JOURNAL_DATA.flags || {},
+    _stats: {
+      systemId: "carl-rpg",
+      systemVersion,
+      coreVersion: "12.331",
+      createdTime: Date.now(),
+      modifiedTime: Date.now(),
+      lastModifiedBy: "dccRPG0000000001"
+    }
+  };
+
+  batch.put(`!journal!${journalId}`, doc);
+  await batch.write();
+  await db.compactRange('', '\uffff');
+  await db.close();
+  console.log(`Successfully built journals compendium at ${packDir}`);
+}
+
 await buildSkills();
 await buildSpells();
 await buildBuffs();
@@ -594,4 +646,6 @@ await buildMobs();
 await buildItems();
 await buildRaces();
 await buildClasses();
+await buildJournals();
+
 

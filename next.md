@@ -1,14 +1,5 @@
-# Next Items & Backlog
+# Next Tasks
 
-## Completed in 3.0.1
-- **Unequipped weapon skill showing as attack when stowed**: [COMPLETED]
-  - Fixed in `actor.getSynthesizedAttacks()`: weapon skills requiring an equipped weapon (`rule.requires-weapon` / `weapon.*`) are excluded from attack synthesis unless an appropriate weapon is equipped.
-  - Stowed/unequipped weapon items (`equipped: false`) are filtered out of attack rosters. Only equipped weapons and natural/unarmed attacks (`weaponClass.unarmed`, `weaponClass.natural`, `Pugilism`, `Bite`, etc.) appear.
-  - Verified in `tests/unequipped-weapon-skill-attack.test.mjs`.
-
-- **Weapon damage parts overriding skill-based damage**: [COMPLETED]
-  - Fixed in `actor.getAttackDamageParts()`: weapon item damage parts (e.g. 1d6 Fire) are added additively to skill base damage (e.g. 3d10 Piercing), auxiliary passive skill damage (Aiming 3d4), and DCC rank damage dice.
-  - Verified in `tests/custom-weapon-associated-skills.test.mjs`.
-
-## Upcoming Tasks
-- (Add upcoming priorities or new feature requests here)
+All previous tasks completed:
+- [x] **Accurate Attack To-Hit Formula Display**: The evaluated to-hit formula (e.g. `1d20 + 14` or `2d20kl + 4`) is now accurately displayed on character sheets with full context tooltips and custom weapon skill resolution.
+- [x] **Tag System & Content Creation Journal Guide**: Created the official 7-page in-game Journal Entry (`CarlRPG — Tag System & Content Creation Guide`), automated world creation hook via `ensureTagSystemJournal()`, `carl.openTagGuide()` macro, Tag Manager `📖 Tag Guide` UI button, and compendium pack.

@@ -1,3 +1,26 @@
+## 3.0.2
+
+### CarlRPG 3.0.2 — In-Game Tag System Guide, Character Sheet To-Hit Formula Display & Journals Pack
+
+- **Accurate To-Hit Formula Character Sheet Display (`src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`)**:
+  - Replaced the placeholder `${displayToHitStat} (${skillRank})` button display on character sheets with the real evaluated attack roll formula (e.g. `1d20 + 14` when trained, `2d20kl + 4` when untrained or at disadvantage).
+  - Enhanced tooltips on attack roll buttons to present the complete context breakdown (e.g. `Roll To Hit (DEX Mod +4 + Rank 10)`).
+  - Resolved weapon skill lookups for custom-named weapons (e.g. *Boom Stick* with `associatedSkills: ['Shotgun']`) in `prepareAttackDisplay`, eliminating the bug where custom weapon ranks were displayed as `DEX (0)`.
+  - Integrated Aiming passive skill bonus (+Aiming rank) onto disadvantage attack formulas (`2d20kl + total`) and `_resolveWeaponSkills()` canonical suggestions.
+- **In-Game Tag System & Content Creation Journal Guide (`src/data/journal-tag-system.mjs`, `packs/journals/`, `system.json`)**:
+  - Created official 7-page in-game Journal Entry (`CarlRPG — Tag System & Content Creation Guide`) covering:
+    1. *Overview & Tag Taxonomy*: 12 official namespaces, `<namespace>.<identifier>` syntax, data-driven design (Rule 0).
+    2. *Tag Manager & Item Tag Editor*: `DCCTagManager`, real-time search, 1-click apply checkboxes, custom tag creation.
+    3. *Creating Custom Weapons & Gear*: Item configuration walkthrough (*Goblin Boom Stick*), additive damage calculation.
+    4. *Secondary Skills & Disadvantage Offsets*: *Aiming* disadvantage offset and damage bonus tiers, `rule.requires-weapon`, items with cooldown grants (2 hours per rank).
+    5. *Custom Spells & Favored Spell Costs*: `favored.<archetype>` reference expansion, +1 MP non-favored penalty, classless crawler exemption.
+    6. *Custom Classes, Races & Structured Grants*: `system.grants` array schema (`stat`, `skill`, `spell`, `choice`, `archetype`), TagQuery boolean filters.
+    7. *Rule Breaking & Engine Principles*: "All rules will be broken; when players break the rules, they should be rewarded."
+  - Added `ensureTagSystemJournal()` to world lifecycle hooks (`ready`), auto-creating/updating the guide in `game.journal`.
+  - Added `carl.openTagGuide()` macro command and exposed on `CONFIG.DCC.openTagSystemJournal`.
+  - Added `📖 Tag Guide` header button in `DCCTagManager` (`templates/apps/tag-manager.hbs`, `src/apps/tag-manager.mjs`).
+  - Added `journals` compendium pack in `system.json` and updated `scripts/build-packs.mjs`.
+
 ## 3.0.1
 
 ### CarlRPG 3.0.1 — Tag-Centric Item Binding, Additive Weapon Damage & Unequipped Attack Filtering

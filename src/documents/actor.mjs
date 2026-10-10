@@ -15,6 +15,7 @@ import { CANONICAL_CONDITION_ROLL_MODIFIERS } from '../data/buffs.mjs';
 import { CANONICAL_WEAPON_TECHNIQUE_MAP, getRecommendedAssociatedSkills } from '../data/weapon-associations.mjs';
 import { ARCHETYPE_TO_TAG, getItemAllTags, getTagDefinition, damageTypeToElement, elementToDamageType } from '../data/tags.mjs';
 import { matchesTagQuery, expandTagReferences } from '../utils/tag-query.mjs';
+import { DCC_SPELLS } from '../data/spells.mjs';
 
 /**
  * Calculate DCC RPG stat modifier based on enhanced stat value:
@@ -460,6 +461,88 @@ export class DCCActor extends BaseActor {
       await super._preUpdate(changes, options, user);
     }
     this._preventDuplicateExternalBuffs(changes);
+    this._absorbDamageIntoTempBars(changes, options);
+  }
+
+  /**
+   * Absorbs incoming damage into temporary health bars before permanent health bars
+   * if damage was applied via direct actor update rather than applyDamageToTarget.
+   * @param {object} changes
+   * @param {object} options
+   */
+  _absorbDamageIntoTempBars(changes, options) {
+    if (!changes || typeof changes !== 'object') return;
+    if (options?.dccDamageHandled) return;
+
+    let newHpVal = undefined;
+    if ('system.attributes.hp.value' in changes) {
+      newHpVal = Number(changes['system.attributes.hp.value']);
+    } else if (changes.system?.attributes?.hp?.value !== undefined) {
+      newHpVal = Number(changes.system.attributes.hp.value);
+    }
+    if (newHpVal === undefined || !Number.isFinite(newHpVal)) return;
+
+    const currentHp = Number(this.system?.attributes?.hp?.value) || 0;
+    if (newHpVal >= currentHp) return; // Healing or unchanged
+
+    const dmg = currentHp - newHpVal;
+    const tb = this.system?.attributes?.hp?.tempBars;
+    let tbCount = Number(tb?.count) || 0;
+    const tbHpPerSlot = Number(tb?.hpPerSlot) || 0;
+    let tbCurrentSlotHp = Number(tb?.currentSlotHp) || (tbCount > 0 ? tbHpPerSlot : 0);
+
+    if (tbCount <= 0 || tbHpPerSlot <= 0) return; // No active temp bars
+
+    let tempBarsRemainingHp = (tbCount - 1) * tbHpPerSlot + tbCurrentSlotHp;
+    let penetratingDmg = dmg;
+    if (penetratingDmg <= tempBarsRemainingHp) {
+      tempBarsRemainingHp -= penetratingDmg;
+      penetratingDmg = 0;
+    } else {
+      penetratingDmg -= tempBarsRemainingHp;
+      tempBarsRemainingHp = 0;
+    }
+
+    let newTbCount = 0;
+    let newCurrentSlotHp = 0;
+    if (tempBarsRemainingHp > 0) {
+      newTbCount = Math.ceil(tempBarsRemainingHp / tbHpPerSlot);
+      const rem = tempBarsRemainingHp % tbHpPerSlot;
+      newCurrentSlotHp = rem === 0 ? tbHpPerSlot : rem;
+    }
+
+    changes['system.attributes.hp.tempBars.count'] = newTbCount;
+    changes['system.attributes.hp.tempBars.currentSlotHp'] = newCurrentSlotHp;
+    if (newTbCount === 0) {
+      changes['system.attributes.hp.tempBars.source'] = '';
+    }
+    changes['system.attributes.hp.temp'] = tempBarsRemainingHp;
+
+    const hpPerBar = (Number(this.system?.abilities?.con?.mod) > 0 ? Number(this.system.abilities.con.mod) : 1);
+    const barsRemoved = Math.floor(penetratingDmg / hpPerBar);
+    const dmgToHp = barsRemoved * hpPerBar;
+    const adjustedNewHp = Math.max(0, currentHp - dmgToHp);
+
+    if ('system.attributes.hp.value' in changes) {
+      changes['system.attributes.hp.value'] = adjustedNewHp;
+    } else if (changes.system?.attributes?.hp) {
+      changes.system.attributes.hp.value = adjustedNewHp;
+    }
+  }
+
+  /**
+   * Override modifyTokenAttribute to route negative HP adjustments through applyDamage
+   * so temporary health bars, full damage bars, and DR are respected.
+   * @override
+   */
+  async modifyTokenAttribute(attribute, value, isDelta = false, isBar = true) {
+    if ((attribute === 'attributes.hp' || attribute === 'hp' || attribute === 'attributes.hp.value') && isDelta && value < 0) {
+      return this.applyDamage(-value);
+    }
+    if (typeof super.modifyTokenAttribute === 'function') {
+      return super.modifyTokenAttribute(attribute, value, isDelta, isBar);
+    }
+    return this;
   }
 
   /**
@@ -4693,20 +4776,52 @@ export class DCCActor extends BaseActor {
 
   /**
    * Activate an aura spell/item on this actor and grant linked aura effects (e.g. temporary health bars).
+   * Also protects and grants temporary health bars to all allies within the aura radius.
    * @param {DCCItem} spellItem
+   * @param {object} [options={}]
    * @returns {Promise<object>}
    */
-  async activateAura(spellItem) {
+  async activateAura(spellItem, options = {}) {
     if (!spellItem) return { active: false, error: 'No item provided' };
     const sys = spellItem.system || {};
-    const rank = Number(sys.rank) || 1;
+    const rank = Number(this.getSpellRank ? this.getSpellRank(spellItem.name) : (sys.modifiedRank ?? sys.rank)) || Number(sys.rank) || 1;
 
-    // 1. Calculate aura radius with rank upgrades
-    let radius = Number(sys.area?.radius) || 5;
-    if (rank >= 15 && sys.rankBreaks?.rank15?.area?.radiusBonus) {
-      radius += Number(sys.rankBreaks.rank15.area.radiusBonus);
-    } else if (rank >= 10 && sys.rankBreaks?.rank10?.area?.radiusBonus) {
-      radius += Number(sys.rankBreaks.rank10.area.radiusBonus);
+    // Resolve canonical definition if spell properties are incomplete
+    let tempBarsConfig = sys.tempBars;
+    let rankBreaksConfig = sys.rankBreaks;
+    let areaConfig = sys.area;
+    if ((!tempBarsConfig?.hasTempBars || !areaConfig?.hasArea || !areaConfig?.radius) && spellItem.name) {
+      const canonical = typeof DCC_SPELLS !== 'undefined'
+        ? DCC_SPELLS.find(s => s.name?.toLowerCase().trim() === spellItem.name.toLowerCase().trim())
+        : null;
+      if (canonical?.system) {
+        if (!tempBarsConfig?.hasTempBars && canonical.system.tempBars?.hasTempBars) {
+          tempBarsConfig = canonical.system.tempBars;
+        }
+        if ((!areaConfig?.radius || Number(areaConfig.radius) === 0) && canonical.system.area?.radius) {
+          areaConfig = canonical.system.area;
+        }
+        if (!rankBreaksConfig && canonical.system.rankBreaks) {
+          rankBreaksConfig = canonical.system.rankBreaks;
+        }
+      }
+    }
+
+    // 1. Calculate aura radius with cumulative rank upgrades
+    // Hot Stuff Aura / Burst base radius is 5ft
+    let radius = Number(areaConfig?.radius ?? sys.area?.radius);
+    if (!Number.isFinite(radius) || radius <= 0) {
+      radius = 5;
+    }
+
+    // Add cumulative bonuses at Rank 10 and Rank 15
+    if (rank >= 10) {
+      const r10Bonus = Number(rankBreaksConfig?.rank10?.area?.radiusBonus ?? sys.rankBreaks?.rank10?.area?.radiusBonus) || 0;
+      radius += r10Bonus;
+    }
+    if (rank >= 15) {
+      const r15Bonus = Number(rankBreaksConfig?.rank15?.area?.radiusBonus ?? sys.rankBreaks?.rank15?.area?.radiusBonus) || 0;
+      radius += r15Bonus;
     }
 
     // 2. Calculate temporary health bars if configured
@@ -4714,8 +4829,9 @@ export class DCCActor extends BaseActor {
     let hpPerSlot = 0;
     let totalTempHp = 0;
 
-    if (sys.tempBars?.hasTempBars) {
-      const formula = (sys.tempBars.slotsFormula || '').trim();
+    const hasTemp = Boolean(tempBarsConfig?.hasTempBars || sys.tempBars?.hasTempBars);
+    if (hasTemp) {
+      const formula = String(tempBarsConfig?.slotsFormula ?? sys.tempBars?.slotsFormula ?? '').trim().toLowerCase();
       if (formula.includes('cha')) {
         slots = Number(this.system?.abilities?.cha?.mod) || 0;
       } else if (formula.includes('con')) {
@@ -4731,14 +4847,14 @@ export class DCCActor extends BaseActor {
       }
       slots = Math.max(1, slots);
 
-      if (rank >= 15 && sys.rankBreaks?.rank15?.tempBars?.hpPerSlot) {
-        hpPerSlot = Number(sys.rankBreaks.rank15.tempBars.hpPerSlot);
-      } else if (rank >= 10 && sys.rankBreaks?.rank10?.tempBars?.hpPerSlot) {
-        hpPerSlot = Number(sys.rankBreaks.rank10.tempBars.hpPerSlot);
-      } else if (rank >= 5 && sys.rankBreaks?.rank5?.tempBars?.hpPerSlot) {
-        hpPerSlot = Number(sys.rankBreaks.rank5.tempBars.hpPerSlot);
+      if (rank >= 15 && (rankBreaksConfig?.rank15?.tempBars?.hpPerSlot || sys.rankBreaks?.rank15?.tempBars?.hpPerSlot)) {
+        hpPerSlot = Number(rankBreaksConfig?.rank15?.tempBars?.hpPerSlot ?? sys.rankBreaks?.rank15?.tempBars?.hpPerSlot);
+      } else if (rank >= 10 && (rankBreaksConfig?.rank10?.tempBars?.hpPerSlot || sys.rankBreaks?.rank10?.tempBars?.hpPerSlot)) {
+        hpPerSlot = Number(rankBreaksConfig?.rank10?.tempBars?.hpPerSlot ?? sys.rankBreaks?.rank10?.tempBars?.hpPerSlot);
+      } else if (rank >= 5 && (rankBreaksConfig?.rank5?.tempBars?.hpPerSlot || sys.rankBreaks?.rank5?.tempBars?.hpPerSlot)) {
+        hpPerSlot = Number(rankBreaksConfig?.rank5?.tempBars?.hpPerSlot ?? sys.rankBreaks?.rank5?.tempBars?.hpPerSlot);
       } else {
-        hpPerSlot = Number(sys.tempBars.hpPerSlot) || 2;
+        hpPerSlot = Number(tempBarsConfig?.hpPerSlot ?? sys.tempBars?.hpPerSlot) || 2;
       }
 
       totalTempHp = slots * hpPerSlot;
@@ -4794,6 +4910,66 @@ export class DCCActor extends BaseActor {
       }
     }
 
+    // 5. Apply temporary health bars to all allies within the burst radius
+    const affectedAllies = [];
+    if (slots > 0 && hpPerSlot > 0) {
+      const filter = (areaConfig?.targetFilter || sys.area?.targetFilter || 'allies').toLowerCase();
+      const isAllyProtect = filter === 'allies' || spellItem.name.toLowerCase().includes('hot stuff');
+
+      if (isAllyProtect) {
+        // Direct allies passed via options
+        if (Array.isArray(options?.allies)) {
+          for (const ally of options.allies) {
+            if (ally && ally.id !== this.id && typeof ally.grantTempBars === 'function') {
+              await ally.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
+              affectedAllies.push(ally);
+            }
+          }
+        }
+
+        // Canvas tokens within radius
+        if (typeof canvas !== 'undefined' && canvas?.tokens?.placeables) {
+          const casterToken = token || canvas.tokens.placeables.find(t => t.actor?.id === this.id);
+          const candidateTokens = canvas.tokens.placeables.filter(t =>
+            t.actor &&
+            t.actor.id !== this.id &&
+            Number(t.actor.system?.attributes?.hp?.value ?? 1) > 0
+          );
+
+          for (const cand of candidateTokens) {
+            const candActor = cand.actor;
+            const isAlly = candActor.type === 'crawler' || candActor.type === 'pet' ||
+              (cand.document?.disposition === (globalThis.CONST?.TOKEN_DISPOSITIONS?.FRIENDLY ?? 1));
+            if (!isAlly) continue;
+
+            let dist = 0;
+            if (casterToken) {
+              if (canvas.grid && typeof canvas.grid.measureDistance === 'function') {
+                dist = canvas.grid.measureDistance(casterToken, cand);
+              } else {
+                const gridSize = canvas.grid?.size || 50;
+                const gridDist = canvas.scene?.grid?.distance || 5;
+                const pxDist = Math.hypot(
+                  (cand.center?.x ?? cand.x) - (casterToken.center?.x ?? casterToken.x),
+                  (cand.center?.y ?? cand.y) - (casterToken.center?.y ?? casterToken.y)
+                );
+                dist = (pxDist / gridSize) * gridDist;
+              }
+            }
+
+            if (dist <= radius) {
+              if (typeof candActor.grantTempBars === 'function') {
+                await candActor.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
+                if (!affectedAllies.some(a => a.id === candActor.id)) {
+                  affectedAllies.push(candActor);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     return {
       active: true,
       radius,
@@ -4802,18 +4978,21 @@ export class DCCActor extends BaseActor {
       totalTempHp,
       remainingRounds: rounds,
       target: sys.target || 'Self',
-      targetFilter: sys.area?.targetFilter || 'allies',
+      targetFilter: areaConfig?.targetFilter || sys.area?.targetFilter || 'allies',
       tokenCenter: token ? { x: token.center?.x, y: token.center?.y } : null,
-      templateId: template?.id || null
+      templateId: template?.id || null,
+      affectedAllies
     };
   }
 
   /**
    * Deactivate an aura spell/item and clear any granted temporary health bars.
+   * Also clears temporary health bars on all allies who received them from this aura.
    * @param {DCCItem} spellItem
+   * @param {object} [options={}]
    * @returns {Promise<object>}
    */
-  async deactivateAura(spellItem) {
+  async deactivateAura(spellItem, options = {}) {
     if (!spellItem) return { active: false };
 
     await spellItem.update({
@@ -4821,9 +5000,34 @@ export class DCCActor extends BaseActor {
       'system.durationConfig.remainingRounds': 0
     });
 
+    const auraName = spellItem.name;
     const currentSource = this.system?.attributes?.hp?.tempBars?.source;
-    if (currentSource && (currentSource === spellItem.name || currentSource.toLowerCase() === spellItem.name.toLowerCase())) {
+    if (currentSource && (currentSource === auraName || currentSource.toLowerCase() === auraName.toLowerCase())) {
       await this.grantTempBars({ count: 0, hpPerSlot: 0 });
+    }
+
+    // Clear temporary health bars from allies who received them from this aura
+    if (typeof canvas !== 'undefined' && canvas?.tokens?.placeables) {
+      for (const t of canvas.tokens.placeables) {
+        if (t.actor && t.actor.id !== this.id) {
+          const src = t.actor.system?.attributes?.hp?.tempBars?.source;
+          if (src && (src === auraName || src.toLowerCase() === auraName.toLowerCase())) {
+            if (typeof t.actor.grantTempBars === 'function') {
+              await t.actor.grantTempBars({ count: 0, hpPerSlot: 0 });
+            }
+          }
+        }
+      }
+    }
+    if (Array.isArray(options?.allies)) {
+      for (const ally of options.allies) {
+        const src = ally?.system?.attributes?.hp?.tempBars?.source;
+        if (src && (src === auraName || src.toLowerCase() === auraName.toLowerCase())) {
+          if (typeof ally.grantTempBars === 'function') {
+            await ally.grantTempBars({ count: 0, hpPerSlot: 0 });
+          }
+        }
+      }
     }
 
     if (typeof canvas !== 'undefined' && canvas?.scene?.templates && canvas.scene.deleteEmbeddedDocuments) {
@@ -5843,7 +6047,7 @@ export class DCCActor extends BaseActor {
 
     const sys = spellItem.system || {};
     const spellTags = spellItem.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(spellItem) : new Set(sys.tags || []));
-    const isAura = sys.delivery === 'aura' || sys.area?.isAura || (spellTags && (spellTags.has('delivery.aura') || spellTags.has('shape.aura')));
+    const isAura = sys.delivery === 'aura' || sys.area?.isAura || (spellTags && (spellTags.has('delivery.aura') || spellTags.has('shape.aura'))) || (typeof spellItem.name === 'string' && spellItem.name.toLowerCase().includes('aura'));
 
     // If an aura is currently active, casting it toggles/dismisses it
     if (isAura && sys.active) {
@@ -6125,6 +6329,7 @@ export class DCCActor extends BaseActor {
             </button>
           </div>
           ${auraData.totalTempHp > 0 ? `<div><i class="fa-solid fa-shield-heart" style="color: #d4af37;"></i> Granted <strong>${auraData.slots}</strong> Temporary Health Bars (${auraData.hpPerSlot} HP/slot, <strong>${auraData.totalTempHp} Temp HP</strong> total)</div>` : ''}
+          ${auraData.affectedAllies?.length ? `<div><i class="fa-solid fa-user-shield" style="color: #27ae60;"></i> Applied bonus health bars to <strong>${auraData.affectedAllies.length}</strong> allies in radius: ${auraData.affectedAllies.map(a => a.name).join(', ')}</div>` : ''}
           <div><i class="fa-solid fa-users"></i> Target: <strong>${auraData.target || 'Self'}</strong> (${auraData.targetFilter} within <strong>${auraData.radius}ft</strong>) • Duration: <strong>${auraData.remainingRounds} combat rounds</strong></div>
         </div>
       `;
@@ -6132,7 +6337,7 @@ export class DCCActor extends BaseActor {
 
     if (sys.delivery === 'placed' || (sys.area?.hasArea && !isAura)) {
       const areaShape = sys.area?.shape || 'circle';
-      const areaRadius = Number(sys.area?.radius) || 20;
+      const areaRadius = Number(sys.area?.radius) || 5;
       content += `
         <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #e74c3c;">
           <button type="button" class="dcc-btn place-aoe-template-btn" data-spell-id="${spellItem.id || spellItem._id || ''}" data-actor-id="${this.id}" data-radius="${areaRadius}" data-shape="${areaShape}" style="width: 100%; background: #e67e22; color: #fff; border: 1px solid #d35400; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-primary, sans-serif); font-size: 12px;">

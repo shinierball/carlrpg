@@ -1243,7 +1243,11 @@ export function onRenderChatMessage(message, html, data) {
       }
 
       const summary = results.map(r => {
-        let text = `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg (${r.barsRemoved ?? 0} bar${r.barsRemoved === 1 ? '' : 's'}, ${r.newHp} HP left`;
+        let text = `<strong>${r.targetName}</strong>: ${r.actualDamage} net dmg`;
+        if (r.tempBarsDamage > 0) {
+          text += ` (${r.tempBarsDamage} absorbed by bonus bars, ${r.tempBarsRemaining ?? 0} bonus bars left)`;
+        }
+        text += ` (${r.barsRemoved ?? 0} regular bar${r.barsRemoved === 1 ? '' : 's'}, ${r.newHp} HP left`;
         if (r.excessDamage > 0) {
           text += `, ${r.excessDamage} excess ignored`;
         }
@@ -2027,7 +2031,7 @@ export function onRenderChatMessage(message, html, data) {
       ev.preventDefault();
       const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
       const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
-      const radius = Number(btn.dataset?.radius ?? $btn?.data('radius')) || 20;
+      const radius = Number(btn.dataset?.radius ?? $btn?.data('radius')) || 5;
       const shape = btn.dataset?.shape || $btn?.data('shape') || 'circle';
 
       if (typeof canvas !== 'undefined' && canvas?.scene) {

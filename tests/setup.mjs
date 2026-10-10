@@ -113,16 +113,17 @@ export class MockActor {
       'system.attributes.hp.temp': totalHp
     });
   }
-  async activateAura(spellItem) {
+  async activateAura(spellItem, options = {}) {
     if (!spellItem) return { active: false, error: 'No item provided' };
     const sys = spellItem.system || {};
     const rank = Number(sys.rank) || 1;
 
     let radius = Number(sys.area?.radius) || 5;
+    if (rank >= 10 && sys.rankBreaks?.rank10?.area?.radiusBonus) {
+      radius += Number(sys.rankBreaks.rank10.area.radiusBonus);
+    }
     if (rank >= 15 && sys.rankBreaks?.rank15?.area?.radiusBonus) {
       radius += Number(sys.rankBreaks.rank15.area.radiusBonus);
-    } else if (rank >= 10 && sys.rankBreaks?.rank10?.area?.radiusBonus) {
-      radius += Number(sys.rankBreaks.rank10.area.radiusBonus);
     }
 
     let slots = 0;
@@ -160,10 +161,47 @@ export class MockActor {
       await this.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
     }
 
+    const affectedAllies = [];
+    const candidateAllies = Array.isArray(options.allies) ? [...options.allies] : [];
+    if (globalThis.canvas?.tokens?.placeables) {
+      const myToken = globalThis.canvas.tokens.placeables.find(t => t.actor?.id === this.id || t.id === this.id);
+      const myX = myToken?.center?.x ?? myToken?.x ?? 0;
+      const myY = myToken?.center?.y ?? myToken?.y ?? 0;
+      const gridSize = globalThis.canvas.grid?.size || 50;
+      const gridDistance = globalThis.canvas.scene?.grid?.distance || 5;
+
+      for (const tok of globalThis.canvas.tokens.placeables) {
+        if (!tok || !tok.actor || tok.actor.id === this.id) continue;
+        const tokX = tok.center?.x ?? tok.x ?? 0;
+        const tokY = tok.center?.y ?? tok.y ?? 0;
+        const distPixels = Math.hypot(tokX - myX, tokY - myY);
+        const distFeet = (distPixels / gridSize) * gridDistance;
+        if (distFeet <= radius + 0.01) {
+          const isFriendly = tok.document?.disposition === 1 ||
+                             tok.disposition === 1 ||
+                             tok.actor.type === 'crawler' ||
+                             tok.actor.type === 'pet';
+          if (isFriendly) {
+            candidateAllies.push(tok.actor);
+          }
+        }
+      }
+    }
+
+    if (slots > 0 && hpPerSlot > 0) {
+      for (const ally of candidateAllies) {
+        if (ally && typeof ally.grantTempBars === 'function') {
+          await ally.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
+          affectedAllies.push({ id: ally.id, name: ally.name, actor: ally });
+        }
+      }
+    }
+
     const rounds = Number(sys.durationConfig?.rounds) || 2;
     await spellItem.update({
       'system.active': true,
-      'system.durationConfig.remainingRounds': rounds
+      'system.durationConfig.remainingRounds': rounds,
+      'system.appliedAllies': affectedAllies.map(a => a.id)
     });
 
     return {
@@ -174,15 +212,45 @@ export class MockActor {
       totalTempHp,
       remainingRounds: rounds,
       target: sys.target || 'Self',
-      targetFilter: sys.area?.targetFilter || 'allies'
+      targetFilter: sys.area?.targetFilter || 'allies',
+      affectedAllies
     };
   }
-  async deactivateAura(spellItem) {
+  async deactivateAura(spellItem, options = {}) {
     if (!spellItem) return { active: false };
+    const sys = spellItem.system || {};
+
+    const appliedAllyIds = Array.isArray(sys.appliedAllies) ? sys.appliedAllies : [];
+    const candidateAllies = Array.isArray(options.allies) ? [...options.allies] : [];
+    if (globalThis.canvas?.tokens?.placeables) {
+      for (const tok of globalThis.canvas.tokens.placeables) {
+        if (tok.actor && appliedAllyIds.includes(tok.actor.id)) {
+          candidateAllies.push(tok.actor);
+        }
+      }
+    }
+    if (globalThis.game?.actors) {
+      for (const id of appliedAllyIds) {
+        const act = globalThis.game.actors.get ? globalThis.game.actors.get(id) : null;
+        if (act && !candidateAllies.some(a => a.id === act.id)) {
+          candidateAllies.push(act);
+        }
+      }
+    }
+
+    for (const ally of candidateAllies) {
+      if (ally && typeof ally.grantTempBars === 'function') {
+        const currentSource = ally.system?.attributes?.hp?.tempBars?.source;
+        if (!currentSource || currentSource === spellItem.name || currentSource.toLowerCase() === spellItem.name.toLowerCase()) {
+          await ally.grantTempBars({ count: 0, hpPerSlot: 0 });
+        }
+      }
+    }
 
     await spellItem.update({
       'system.active': false,
-      'system.durationConfig.remainingRounds': 0
+      'system.durationConfig.remainingRounds': 0,
+      'system.appliedAllies': []
     });
 
     const currentSource = this.system?.attributes?.hp?.tempBars?.source;
@@ -286,12 +354,79 @@ export class MockActor {
       }
     }
   }
-  async update(data) {
+  _absorbDamageIntoTempBars(changes, options = {}) {
+    if (!changes || typeof changes !== 'object') return;
+    if (options?.dccDamageHandled) return;
+
+    let newHpVal = undefined;
+    if ('system.attributes.hp.value' in changes) {
+      newHpVal = Number(changes['system.attributes.hp.value']);
+    } else if (changes.system?.attributes?.hp?.value !== undefined) {
+      newHpVal = Number(changes.system.attributes.hp.value);
+    }
+    if (newHpVal === undefined || !Number.isFinite(newHpVal)) return;
+
+    const currentHp = Number(this.system?.attributes?.hp?.value) || 0;
+    if (newHpVal >= currentHp) return;
+
+    const dmg = currentHp - newHpVal;
+    const tb = this.system?.attributes?.hp?.tempBars;
+    let tbCount = Number(tb?.count) || 0;
+    const tbHpPerSlot = Number(tb?.hpPerSlot) || 0;
+    let tbCurrentSlotHp = Number(tb?.currentSlotHp) || (tbCount > 0 ? tbHpPerSlot : 0);
+
+    if (tbCount <= 0 || tbHpPerSlot <= 0) return;
+
+    let tempBarsRemainingHp = (tbCount - 1) * tbHpPerSlot + tbCurrentSlotHp;
+    let penetratingDmg = dmg;
+    if (penetratingDmg <= tempBarsRemainingHp) {
+      tempBarsRemainingHp -= penetratingDmg;
+      penetratingDmg = 0;
+    } else {
+      penetratingDmg -= tempBarsRemainingHp;
+      tempBarsRemainingHp = 0;
+    }
+
+    let newTbCount = 0;
+    let newCurrentSlotHp = 0;
+    if (tempBarsRemainingHp > 0) {
+      newTbCount = Math.ceil(tempBarsRemainingHp / tbHpPerSlot);
+      const rem = tempBarsRemainingHp % tbHpPerSlot;
+      newCurrentSlotHp = rem === 0 ? tbHpPerSlot : rem;
+    }
+
+    changes['system.attributes.hp.tempBars.count'] = newTbCount;
+    changes['system.attributes.hp.tempBars.currentSlotHp'] = newCurrentSlotHp;
+    if (newTbCount === 0) {
+      changes['system.attributes.hp.tempBars.source'] = '';
+    }
+    changes['system.attributes.hp.temp'] = tempBarsRemainingHp;
+
+    const hpPerBar = (Number(this.system?.abilities?.con?.mod) > 0 ? Number(this.system.abilities.con.mod) : 1);
+    const barsRemoved = Math.floor(penetratingDmg / hpPerBar);
+    const dmgToHp = barsRemoved * hpPerBar;
+    const adjustedNewHp = Math.max(0, currentHp - dmgToHp);
+
+    if ('system.attributes.hp.value' in changes) {
+      changes['system.attributes.hp.value'] = adjustedNewHp;
+    } else if (changes.system?.attributes?.hp) {
+      changes.system.attributes.hp.value = adjustedNewHp;
+    }
+  }
+  async update(data, options = {}) {
     if (typeof this._preUpdate === 'function') {
-      await this._preUpdate(data, {}, globalThis.game?.user?.id || 'test-user');
+      await this._preUpdate(data, options, globalThis.game?.user?.id || 'test-user');
+    } else {
+      this._absorbDamageIntoTempBars(data, options);
     }
     this.updateSource(data);
     return this;
+  }
+  async applyDamage(rawDamage, options = {}) {
+    if (typeof DCCCombatMetrics !== 'undefined' && typeof DCCCombatMetrics.applyDamageToTarget === 'function') {
+      return DCCCombatMetrics.applyDamageToTarget({ targetActor: this, rawDamage, ...options });
+    }
+    return this.update({ 'system.attributes.hp.value': Math.max(0, (this.system?.attributes?.hp?.value || 0) - (Number(rawDamage) || 0)) }, options);
   }
   async createEmbeddedDocuments(embeddedType, dataArray) {
     if (embeddedType === 'Item') {

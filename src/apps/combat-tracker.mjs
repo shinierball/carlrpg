@@ -100,12 +100,27 @@ export class DCCCombatTracker extends BaseCombatTracker {
       const canSpendAIFavor = !isMob && !actions.bonusActionGranted && currentFavor >= 1;
       const trophyBadges = typeof actor?.getBadgeSummary === 'function' ? actor.getBadgeSummary() : null;
 
+      const tb = actor?.system?.attributes?.hp?.tempBars;
+      const tbCount = Number(tb?.count) || 0;
+      const tbHpPerSlot = Number(tb?.hpPerSlot) || 0;
+      const tbCurrentSlotHp = Number(tb?.currentSlotHp) || (tbCount > 0 ? tbHpPerSlot : 0);
+      const hasTempBars = tbCount > 0 && tbHpPerSlot > 0;
+      const tempBarsTotalHp = hasTempBars ? ((tbCount - 1) * tbHpPerSlot + tbCurrentSlotHp) : 0;
+      const tempHp = Number(actor?.system?.attributes?.hp?.temp) || 0;
+
       const enrichedTurn = {
         ...turn,
         combatant,
         actor,
         isMob,
         healthThreshold,
+        hasTempBars,
+        tempBarsCount: tbCount,
+        tempBarsHpPerSlot: tbHpPerSlot,
+        tempBarsCurrentSlotHp: tbCurrentSlotHp,
+        tempBarsTotalHp,
+        tempBarsSource: tb?.source || '',
+        tempHp,
         actions,
         slotList,
         remainingActions,

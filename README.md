@@ -10,6 +10,12 @@ Questions or concerns contact me @ shinierball via gmail or maybe discord or wha
 
 - Hopefully the AI keeps this in sync reasonably with reality, but code changes so fast these days! Odds that this accurately reflects the rules are probably close to zero, but I'm committed to the process of telling the AI to do better!
 
+- **CarlRPG 3.2.1 Hot Stuff Aura Burst Radius Fix, Ally Bonus Health Bars & Universal Temp Bar Absorption**:
+  - **Accurate Burst Radius Scaling**: Base burst radius for Hot Stuff Aura is strictly 5ft at Rank 1 (preventing erroneous 20ft template placement), expanding to 10ft at Rank 10 and 20ft cumulative at Rank 15.
+  - **Burst Radius Ally Bonus Bars**: Activating the aura applies bonus health bar slots (CHA Mod slots) to all allies (crawlers, pets, friendly tokens) within the burst radius, while excluding hostiles. Dismissing or expiring the aura cleanly clears temporary health bars from caster and all protected allies.
+  - **Universal Damage Absorption**: Temporary health bars absorb incoming damage slot-by-slot before permanent HP can be harmed, whether damage originates from attack chat cards (`applyDamage()`), direct token HUD bar editing, or actor updates.
+  - **Clear Sheet & Combat Tracker Display**: Interactive gold shield badges display active bonus bars (`🛡️ +X Bars (Y HP)`) in the numeric HP header row of the character sheet and beside combatant health bars in the Combat Tracker.
+
 - **CarlRPG 3.2.0 Tag-Driven Effects Engine, Structured Item Grants & Migration Subsystem**:
   - **Tag-Driven Consumables & Resource Effects**: Replaced hardcoded item name checks (`itemName.includes('mana potion')`) with data-driven structured outcomes tagged with exact tags (`action.restore`, `resource.mana`, `action.heal`, `resource.hp-bars`). Consumable mana potions and health potions now resolve outcomes dynamically through `resolveSingleOutcome()`, providing interactive `.dcc-apply-mana-btn` chat cards for 1-click crawler mana restoration.
   - **Zero-Regex Damage Reductions**: Replaced brittle description regex parsing (`desc.match(/(\d+)%/)`) with exact element tag matching via `damageTypeToElement()` and debuffs/buffs tagged with `element.*`. Evaluates structured `reductionPercent` and `reductionFlat` properties directly.

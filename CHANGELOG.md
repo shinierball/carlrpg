@@ -1,3 +1,27 @@
+## 3.2.1
+
+### CarlRPG 3.2.1 — Hot Stuff Aura Burst Radius Fix, Ally Bonus Health Bars & Universal Temp Bar Damage Absorption
+
+- **Aura Burst Radius Calculation (`src/documents/actor.mjs`, `src/dcc.mjs`, `tests/setup.mjs`)**:
+  - Fixed fallback radius bug where unconfigured `sys.area.radius` defaulted to 20ft instead of base 5ft at Rank 1.
+  - Implemented cumulative rank progression (+5ft at Rank 10, +10ft at Rank 15 -> Rank 1 = 5ft, Rank 10 = 10ft, Rank 15 = 20ft).
+  - Added fallback resolution to canonical compendium spell data (`DCC_SPELLS`) if active world item has incomplete area or temp bar definitions.
+- **Burst Radius Ally Bonus Bars Application (`src/documents/actor.mjs`, `tests/setup.mjs`)**:
+  - `activateAura()` now detects all allied tokens (crawlers, pets, friendly tokens with disposition 1) within the aura radius and automatically calls `grantTempBars()` on them.
+  - Excludes hostile and neutral targets.
+  - `deactivateAura()` cleanly clears temporary health bars from both the caster and all affected allies who received them from this aura.
+  - Spell chat card now explicitly enumerates all allies protected by the aura.
+- **Universal Temporary Health Bar Damage Absorption (`src/documents/actor.mjs`, `src/apps/combat-metrics.mjs`, `src/dcc.mjs`, `tests/setup.mjs`)**:
+  - Added `_absorbDamageIntoTempBars()` to `DCCActor._preUpdate` and `MockActor.update` to intercept any direct HP modifications (such as token HUD bar edits or direct updates) and absorb damage slot-by-slot before permanent HP is touched.
+  - Overrode `modifyTokenAttribute()` on `DCCActor` to route token HUD negative HP edits through `applyDamage()`.
+  - Added `dccDamageHandled` option in `DCCCombatMetrics.applyDamageToTarget` to prevent double absorption.
+  - Updated chat damage feedback to show absorbed bonus bars.
+- **Character Sheet & Combat Tracker Display (`templates/actors/parts/page1-core.hbs`, `src/apps/combat-tracker.mjs`, `templates/apps/combat-tracker.hbs`)**:
+  - Character sheet: Added a gold shield badge (`[🛡️ +X Bonus Bars (Y HP)]`) directly next to the `Temp:` input in the numeric HP header row, alongside the existing structured bar grid.
+  - Combat tracker: Enriched combatant turns with `hasTempBars`, `tempBarsCount`, `tempBarsTotalHp`, and `tempBarsSource`, rendering an active gold shield badge in each combatant's HP row.
+- **Automated Verification (`tests/aura-workflow.test.mjs`)**:
+  - Added unit test cases 10 through 15 verifying Rank 1 (5ft), Rank 15 (20ft cumulative), ally canvas radius detection, hostile filtering, damage absorption via `applyDamage` and `_preUpdate`, ally deactivation cleanup, and combat tracker data enrichment.
+
 ## 3.2.0
 
 ### CarlRPG 3.2.0 — Tag-Driven Effects Engine, Structured Item Grants & 3.2.0 Migration Subsystem

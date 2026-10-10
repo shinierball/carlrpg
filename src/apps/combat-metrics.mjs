@@ -399,7 +399,7 @@ export class DCCCombatMetrics {
       }
     }
 
-    await targetActor.update(actorUpdates);
+    await targetActor.update(actorUpdates, { dccDamageHandled: true });
 
     // Award boss star or crawler skull on lethal damage
     if (isLethal && attackerActor && attackerActor.type === 'crawler') {

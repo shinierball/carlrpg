@@ -165,6 +165,11 @@
       {{/if}}
       <span class="dcc-field-label" style="margin-left: 10px; margin-right: 4px;">Temp:</span>
       <input class="dcc-hp-input" name="system.attributes.hp.temp" type="number" value="{{system.attributes.hp.temp}}" placeholder="0" style="border: 1px solid #000; width: 44px;" />
+      {{#if hasTempBars}}
+      <span class="dcc-temp-bars-badge" style="margin-left: 6px; background: #fff8e7; color: #b7791f; border: 1.5px solid #d4af37; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;" title="{{tempBarsSource}} ({{system.attributes.hp.tempBars.count}} / {{system.attributes.hp.tempBars.maxCount}} slots)">
+        <i class="fa-solid fa-shield-heart" style="color: #d4af37;"></i> +{{system.attributes.hp.tempBars.count}} Bonus Bars ({{system.attributes.hp.temp}} HP)
+      </span>
+      {{/if}}
 
       {{#unless isMob}}
       <div class="dcc-rest-buttons-group">

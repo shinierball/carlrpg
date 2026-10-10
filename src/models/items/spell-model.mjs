@@ -12,6 +12,7 @@ export class SpellDataModel extends BaseItemDataModel {
       stat: new fields.StringField({ initial: 'int' }),
       manaCost: new fields.NumberField({ integer: true, min: 0, initial: 0 }),
       range: new fields.StringField({ initial: '30 feet' }),
+      target: new fields.StringField({ initial: 'Self' }),
       duration: new fields.StringField({ initial: 'Instantaneous' }),
       cooldown: new fields.StringField({ initial: 'None' }),
       spellType: new fields.StringField({ initial: 'Attack' }),

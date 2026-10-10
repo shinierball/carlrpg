@@ -173,6 +173,7 @@ export class MockActor {
       hpPerSlot,
       totalTempHp,
       remainingRounds: rounds,
+      target: sys.target || 'Self',
       targetFilter: sys.area?.targetFilter || 'allies'
     };
   }

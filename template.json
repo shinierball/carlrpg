@@ -380,6 +380,7 @@
       "stat": "int",
       "manaCost": 0,
       "range": "30 feet",
+      "target": "Self",
       "duration": "Instantaneous",
       "cooldown": "None",
       "spellType": "Attack",

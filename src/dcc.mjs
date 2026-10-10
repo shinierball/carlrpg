@@ -1973,17 +1973,39 @@ export function onRenderChatMessage(message, html, data) {
     const aoeHandler = async (ev) => {
       ev.preventDefault();
       const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
       const radius = Number(btn.dataset?.radius ?? $btn?.data('radius')) || 20;
       const shape = btn.dataset?.shape || $btn?.data('shape') || 'circle';
 
       if (typeof canvas !== 'undefined' && canvas?.scene) {
+        let x = 0;
+        let y = 0;
+        let token = null;
+        if (actorId && canvas?.tokens?.placeables) {
+          token = canvas.tokens.placeables.find(t => t.actor?.id === actorId || t.id === actorId) || canvas.tokens.controlled?.[0];
+        }
+        if (!token && canvas?.tokens?.controlled?.length) {
+          token = canvas.tokens.controlled[0];
+        }
+
+        if (token) {
+          x = token.center?.x ?? (token.x + (canvas.grid?.size || 50) / 2);
+          y = token.center?.y ?? (token.y + (canvas.grid?.size || 50) / 2);
+        } else if (canvas.mousePosition) {
+          x = canvas.mousePosition.x;
+          y = canvas.mousePosition.y;
+        } else if (canvas.dimensions?.rect?.center) {
+          x = canvas.dimensions.rect.center.x;
+          y = canvas.dimensions.rect.center.y;
+        }
+
         const templateData = {
           t: shape === 'cone' ? 'cone' : (shape === 'ray' ? 'ray' : (shape === 'rect' ? 'rect' : 'circle')),
           user: game.user?.id,
           distance: radius,
           direction: 0,
-          x: 0,
-          y: 0,
+          x,
+          y,
           fillColor: '#e67e22'
         };
         if (typeof MeasuredTemplateDocument !== 'undefined' && canvas.scene.createEmbeddedDocuments) {

@@ -4664,6 +4664,48 @@ export class DCCActor extends BaseActor {
       'system.durationConfig.remainingRounds': rounds
     });
 
+    // 4. Center aura on caster token (target: self)
+    let token = null;
+    let template = null;
+    if (typeof canvas !== 'undefined' && canvas?.scene) {
+      if (canvas?.tokens?.placeables) {
+        token = canvas.tokens.placeables.find(t => t.actor?.id === this.id) || canvas.tokens.controlled?.[0];
+      }
+      if (token) {
+        const x = token.center?.x ?? (token.x + (canvas.grid?.size || 50) / 2);
+        const y = token.center?.y ?? (token.y + (canvas.grid?.size || 50) / 2);
+
+        if (canvas.scene.templates && canvas.scene.deleteEmbeddedDocuments) {
+          const old = canvas.scene.templates.filter(t => t.flags?.['carl-rpg']?.auraItemId === (spellItem.id || spellItem._id));
+          if (old.length) {
+            await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', old.map(t => t.id));
+          }
+        }
+
+        const templateData = {
+          t: 'circle',
+          user: globalThis.game?.user?.id,
+          distance: radius,
+          direction: 0,
+          x,
+          y,
+          fillColor: '#d4af37',
+          flags: {
+            'carl-rpg': {
+              auraItemId: spellItem.id || spellItem._id,
+              actorId: this.id,
+              isAura: true,
+              target: 'self'
+            }
+          }
+        };
+        if (typeof MeasuredTemplateDocument !== 'undefined' && canvas.scene.createEmbeddedDocuments) {
+          const created = await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [templateData]);
+          template = created?.[0] || null;
+        }
+      }
+    }
+
     return {
       active: true,
       radius,
@@ -4671,7 +4713,10 @@ export class DCCActor extends BaseActor {
       hpPerSlot,
       totalTempHp,
       remainingRounds: rounds,
-      targetFilter: sys.area?.targetFilter || 'allies'
+      target: sys.target || 'Self',
+      targetFilter: sys.area?.targetFilter || 'allies',
+      tokenCenter: token ? { x: token.center?.x, y: token.center?.y } : null,
+      templateId: template?.id || null
     };
   }
 
@@ -4691,6 +4736,13 @@ export class DCCActor extends BaseActor {
     const currentSource = this.system?.attributes?.hp?.tempBars?.source;
     if (currentSource && (currentSource === spellItem.name || currentSource.toLowerCase() === spellItem.name.toLowerCase())) {
       await this.grantTempBars({ count: 0, hpPerSlot: 0 });
+    }
+
+    if (typeof canvas !== 'undefined' && canvas?.scene?.templates && canvas.scene.deleteEmbeddedDocuments) {
+      const auraTemplates = canvas.scene.templates.filter(t => t.flags?.['carl-rpg']?.auraItemId === (spellItem.id || spellItem._id));
+      if (auraTemplates.length) {
+        await canvas.scene.deleteEmbeddedDocuments('MeasuredTemplate', auraTemplates.map(t => t.id));
+      }
     }
 
     return { active: false };
@@ -5895,7 +5947,8 @@ export class DCCActor extends BaseActor {
       <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; margin-bottom: 8px; background: #fdfaf2; border: 1px solid #e2d9c2; padding: 4px 6px; border-radius: 3px;">
         <div><strong>Mana:</strong> ${manaDisplay}</div>
         ${sourceBadge}
-        <div><strong>Range:</strong> ${sys.range || 'Self'}</div>
+        <div><strong>Range:</strong> ${sys.range || (isAura ? 'Self' : '30 feet')}</div>
+        <div><strong>Target:</strong> ${sys.target || (isAura ? 'Self' : (healInfo ? 'Self only' : 'Target'))}</div>
         <div><strong>Duration:</strong> ${sys.duration || 'Instantaneous'}</div>
         ${sys.cooldown && sys.cooldown !== 'None' ? `<div><strong>Cooldown:</strong> ${sys.cooldown}</div>` : ''}
         ${sys.favored ? `<div><strong>Favored:</strong> ${sys.favored}</div>` : ''}
@@ -5979,7 +6032,7 @@ export class DCCActor extends BaseActor {
             </button>
           </div>
           ${auraData.totalTempHp > 0 ? `<div><i class="fa-solid fa-shield-heart" style="color: #d4af37;"></i> Granted <strong>${auraData.slots}</strong> Temporary Health Bars (${auraData.hpPerSlot} HP/slot, <strong>${auraData.totalTempHp} Temp HP</strong> total)</div>` : ''}
-          <div><i class="fa-solid fa-users"></i> Targets: <strong>${auraData.targetFilter}</strong> within <strong>${auraData.radius}ft</strong> • Duration: <strong>${auraData.remainingRounds} combat rounds</strong></div>
+          <div><i class="fa-solid fa-users"></i> Target: <strong>${auraData.target || 'Self'}</strong> (${auraData.targetFilter} within <strong>${auraData.radius}ft</strong>) • Duration: <strong>${auraData.remainingRounds} combat rounds</strong></div>
         </div>
       `;
     }

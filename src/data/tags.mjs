@@ -430,6 +430,17 @@ export function computeDerivedTags(item) {
     }
   }
 
+  // Explicit or implicit Target (e.g. self for auras/caster-centered effects)
+  if (sys.target) {
+    const tgt = sys.target.toLowerCase().trim();
+    if (['self', 'allies', 'enemies', 'all'].includes(tgt)) {
+      derived.add(`target.${tgt}`);
+    }
+  }
+  if (sys.delivery === 'aura' || sys.area?.origin === 'caster') {
+    derived.add('target.self');
+  }
+
   // Delivery mode
   if (sys.delivery) {
     const deliv = sys.delivery.toLowerCase().trim();

@@ -222,4 +222,118 @@ test('Aura Activation and Deactivation Workflow', async (t) => {
     assert.equal(spellItem.system.active, false, 'Spell active should become false after button click');
     assert.equal(actor.system.attributes.hp.tempBars.count, 0, 'Temp health bars should be cleared');
   });
+
+  await t.test('7. Hot Stuff Aura compendium definition targets Self and carries target.self tag', async () => {
+    const hotStuff = DCC_SPELLS.find(s => s.name === 'Hot Stuff Aura');
+    assert.ok(hotStuff, 'Hot Stuff Aura spell must exist in compendium');
+    assert.equal(hotStuff.system.target, 'Self', 'Target must be Self');
+    assert.ok(hotStuff.system.tags.includes('target.self'), 'Tags must include target.self');
+    assert.equal(hotStuff.system.delivery, 'aura', 'Delivery must be aura');
+  });
+
+  await t.test('8. activateAura targets Self and centers on caster token rather than (0,0)', async () => {
+    const actor = new DCCActor({
+      name: 'Carl Caster',
+      type: 'crawler',
+      system: {
+        abilities: { cha: { value: 10, mod: 4 }, con: { value: 10, mod: 4 } },
+        attributes: { hp: { value: 40, max: 40, temp: 0 }, mana: { value: 20, max: 20 } }
+      }
+    });
+
+    const hotStuffDef = structuredClone(DCC_SPELLS.find(s => s.name === 'Hot Stuff Aura'));
+    const spellItem = new MockItem(hotStuffDef, actor);
+    actor.items.push(spellItem);
+
+    // Mock canvas token centered at (250, 350)
+    let createdTemplate = null;
+    globalThis.canvas = {
+      scene: {
+        templates: [],
+        createEmbeddedDocuments: async (type, docs) => {
+          createdTemplate = docs[0];
+          return [createdTemplate];
+        },
+        deleteEmbeddedDocuments: async () => {}
+      },
+      tokens: {
+        placeables: [
+          {
+            actor: { id: actor.id },
+            center: { x: 250, y: 350 },
+            x: 225,
+            y: 325
+          }
+        ]
+      },
+      grid: { size: 50 }
+    };
+    globalThis.MeasuredTemplateDocument = class {};
+
+    const auraResult = await actor.activateAura(spellItem);
+    assert.equal(auraResult.target, 'Self', 'activateAura result target must be Self');
+    assert.ok(createdTemplate, 'MeasuredTemplate should have been created on canvas');
+    assert.equal(createdTemplate.x, 250, 'Template x must center on token x (250), not 0');
+    assert.equal(createdTemplate.y, 350, 'Template y must center on token y (350), not 0');
+    assert.equal(createdTemplate.flags?.['carl-rpg']?.target, 'self');
+
+    // Clean up global mock
+    delete globalThis.canvas;
+    delete globalThis.MeasuredTemplateDocument;
+  });
+
+  await t.test('9. placeAoeButtons centers template on caster token rather than (0,0)', async () => {
+    let createdTemplate = null;
+    globalThis.canvas = {
+      scene: {
+        createEmbeddedDocuments: async (type, docs) => {
+          createdTemplate = docs[0];
+          return [createdTemplate];
+        }
+      },
+      tokens: {
+        placeables: [
+          {
+            actor: { id: 'caster-123' },
+            center: { x: 400, y: 600 }
+          }
+        ]
+      },
+      grid: { size: 50 }
+    };
+    globalThis.MeasuredTemplateDocument = class {};
+
+    let clickHandler = null;
+    const mockBtn = {
+      dataset: {
+        actorId: 'caster-123',
+        radius: '15',
+        shape: 'circle'
+      },
+      addEventListener: (type, fn) => {
+        if (type === 'click') clickHandler = fn;
+      }
+    };
+
+    const mockHtml = {
+      querySelectorAll: (sel) => {
+        if (sel === '.place-aoe-template-btn') return [mockBtn];
+        return [];
+      }
+    };
+
+    onRenderChatMessage({}, mockHtml, {});
+    assert.ok(clickHandler, 'Click handler must be bound to place AoE button');
+
+    let prevented = false;
+    await clickHandler({ preventDefault: () => { prevented = true; } });
+
+    assert.equal(prevented, true);
+    assert.ok(createdTemplate, 'Template should be created');
+    assert.equal(createdTemplate.x, 400, 'Template x must be token center x (400), not 0');
+    assert.equal(createdTemplate.y, 600, 'Template y must be token center y (600), not 0');
+
+    delete globalThis.canvas;
+    delete globalThis.MeasuredTemplateDocument;
+  });
 });

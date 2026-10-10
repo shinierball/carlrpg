@@ -4,6 +4,7 @@
  * Official multi-page in-game Journal Entry and reference documentation
  * explaining the data-driven Unified Tagging System, item creation,
  * secondary skill mechanics, favored spells, and structured grants.
+ * Fully supports light mode and dark mode via semantic CSS classes.
  */
 
 export const TAG_SYSTEM_JOURNAL_DATA = {
@@ -11,7 +12,7 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
   flags: {
     "carl-rpg": {
       guideKey: "tagSystemGuide",
-      version: "3.0.1"
+      version: "3.0.2"
     }
   },
   pages: [
@@ -22,102 +23,96 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    CarlRPG 3.0.0 — Unified Tagging Architecture
-  </h2>
+<div class="dcc-journal-page">
+  <h2>CarlRPG 3.0.0 — Unified Tagging Architecture</h2>
   <p>
     Welcome to the <strong>CarlRPG Tagging System</strong>! In CarlRPG, all game mechanics, weapon associations, technique activations, spell mana costs, and character progression are powered by <em>exact, namespaced tags</em> rather than hardcoded text, magic strings, or fragile regular expressions.
   </p>
 
-  <div style="background: #eaf2f8; border-left: 4px solid #2980b9; padding: 10px 14px; margin: 12px 0; border-radius: 2px;">
-    <strong style="color: #1b4f72;">Core Principle (Rule 0):</strong>
+  <div class="dcc-journal-callout dcc-journal-callout-info">
+    <strong>Core Principle (Rule 0):</strong>
     CarlRPG assumes that players and GMs will constantly invent custom items, races, classes, and spells. Every mechanic relies on querying structured data tags (e.g. <code>element.fire</code>, <code>weapon.shotgun</code>) so that user-created content immediately interacts seamlessly with existing rules.
   </div>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Tag Syntax & Notation
-  </h3>
+  <h3>Tag Syntax & Notation</h3>
   <p>
     All tags follow the lowercase, dot-separated schema: <code>&lt;namespace&gt;.&lt;identifier&gt;</code>. Multi-word identifiers use hyphens (e.g., <code>rule.requires-weapon</code>, <code>weaponClass.two-handed</code>).
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    The 12 Official Tag Namespaces
-  </h3>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px;">
+  <h3>The 12 Official Tag Namespaces</h3>
+  <table class="dcc-journal-table">
     <thead>
-      <tr style="background: #2c3e50; color: #fff; font-family: 'Oswald', sans-serif; text-transform: uppercase; text-align: left;">
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Namespace</th>
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Purpose & Description</th>
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Examples</th>
+      <tr>
+        <th>Namespace</th>
+        <th>Purpose & Description</th>
+        <th>Examples</th>
       </tr>
     </thead>
     <tbody>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">kind</td>
-        <td style="padding: 6px 10px;">Primary entity type in Foundry VTT</td>
-        <td style="padding: 6px 10px;"><code>kind.gear</code>, <code>kind.skill</code>, <code>kind.spell</code>, <code>kind.class</code>, <code>kind.race</code></td>
+      <tr>
+        <td><strong>kind</strong></td>
+        <td>Primary entity type in Foundry VTT</td>
+        <td><code>kind.gear</code>, <code>kind.skill</code>, <code>kind.spell</code>, <code>kind.class</code>, <code>kind.race</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">action</td>
-        <td style="padding: 6px 10px;">Operational category and action economy behavior</td>
-        <td style="padding: 6px 10px;"><code>action.attack</code>, <code>action.passive</code>, <code>action.heal</code>, <code>action.interrupt</code></td>
+      <tr>
+        <td><strong>action</strong></td>
+        <td>Operational category and action economy behavior</td>
+        <td><code>action.attack</code>, <code>action.passive</code>, <code>action.heal</code>, <code>action.interrupt</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">element</td>
-        <td style="padding: 6px 10px;">Damage type, spell school, and elemental affinity</td>
-        <td style="padding: 6px 10px;"><code>element.fire</code>, <code>element.ice</code>, <code>element.acid</code>, <code>element.poison</code>, <code>element.electric</code>, <code>element.holy</code></td>
+      <tr>
+        <td><strong>element</strong></td>
+        <td>Damage type, spell school, and elemental affinity</td>
+        <td><code>element.fire</code>, <code>element.ice</code>, <code>element.acid</code>, <code>element.poison</code>, <code>element.electric</code>, <code>element.holy</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">archetype</td>
-        <td style="padding: 6px 10px;">Core character class role granted to crawlers</td>
-        <td style="padding: 6px 10px;"><code>archetype.mage</code>, <code>archetype.fighter</code>, <code>archetype.cleric</code>, <code>archetype.rogue</code></td>
+      <tr>
+        <td><strong>archetype</strong></td>
+        <td>Core character class role granted to crawlers</td>
+        <td><code>archetype.mage</code>, <code>archetype.fighter</code>, <code>archetype.cleric</code>, <code>archetype.rogue</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">favored</td>
-        <td style="padding: 6px 10px;">Favored class archetype for spells (exempt from +1 MP penalty)</td>
-        <td style="padding: 6px 10px;"><code>favored.mage</code>, <code>favored.cleric</code>, <code>favored.druid</code></td>
+      <tr>
+        <td><strong>favored</strong></td>
+        <td>Favored class archetype for spells (exempt from +1 MP penalty)</td>
+        <td><code>favored.mage</code>, <code>favored.cleric</code>, <code>favored.druid</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">weapon</td>
-        <td style="padding: 6px 10px;">Specific weapon family or weapon proficiency</td>
-        <td style="padding: 6px 10px;"><code>weapon.bow</code>, <code>weapon.shotgun</code>, <code>weapon.sword</code>, <code>weapon.dagger</code>, <code>weapon.unarmed</code></td>
+      <tr>
+        <td><strong>weapon</strong></td>
+        <td>Specific weapon family or weapon proficiency</td>
+        <td><code>weapon.bow</code>, <code>weapon.shotgun</code>, <code>weapon.sword</code>, <code>weapon.dagger</code>, <code>weapon.unarmed</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">weaponClass</td>
-        <td style="padding: 6px 10px;">Broad weapon classification category</td>
-        <td style="padding: 6px 10px;"><code>weaponClass.melee</code>, <code>weaponClass.ranged</code>, <code>weaponClass.unarmed</code>, <code>weaponClass.natural</code></td>
+      <tr>
+        <td><strong>weaponClass</strong></td>
+        <td>Broad weapon classification category</td>
+        <td><code>weaponClass.melee</code>, <code>weaponClass.ranged</code>, <code>weaponClass.unarmed</code>, <code>weaponClass.natural</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">weaponProp</td>
-        <td style="padding: 6px 10px;">Physical handling traits and wield properties</td>
-        <td style="padding: 6px 10px;"><code>weaponProp.two-handed</code>, <code>weaponProp.reach</code>, <code>weaponProp.versatile</code>, <code>weaponProp.finesse</code></td>
+      <tr>
+        <td><strong>weaponProp</strong></td>
+        <td>Physical handling traits and wield properties</td>
+        <td><code>weaponProp.two-handed</code>, <code>weaponProp.reach</code>, <code>weaponProp.versatile</code>, <code>weaponProp.finesse</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">skillGroup</td>
-        <td style="padding: 6px 10px;">Discipline category for skill checks and training</td>
-        <td style="padding: 6px 10px;"><code>skillGroup.combat</code>, <code>skillGroup.magic</code>, <code>skillGroup.survival</code>, <code>skillGroup.crafting</code></td>
+      <tr>
+        <td><strong>skillGroup</strong></td>
+        <td>Discipline category for skill checks and training</td>
+        <td><code>skillGroup.combat</code>, <code>skillGroup.magic</code>, <code>skillGroup.survival</code>, <code>skillGroup.crafting</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">technique</td>
-        <td style="padding: 6px 10px;">Target weapon or combat style for specialized techniques</td>
-        <td style="padding: 6px 10px;"><code>technique.unarmed</code>, <code>technique.pugilism</code>, <code>technique.wrasslin</code></td>
+      <tr>
+        <td><strong>technique</strong></td>
+        <td>Target weapon or combat style for specialized techniques</td>
+        <td><code>technique.unarmed</code>, <code>technique.pugilism</code>, <code>technique.wrasslin</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">rule</td>
-        <td style="padding: 6px 10px;">Engine-level mechanical constraints and triggers</td>
-        <td style="padding: 6px 10px;"><code>rule.requires-weapon</code>, <code>rule.no-damage-effects</code>, <code>rule.cooldown-hours</code></td>
+      <tr>
+        <td><strong>rule</strong></td>
+        <td>Engine-level mechanical constraints and triggers</td>
+        <td><code>rule.requires-weapon</code>, <code>rule.no-damage-effects</code>, <code>rule.cooldown-hours</code></td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">id</td>
-        <td style="padding: 6px 10px;">Canonical unique item identifier for references and grants</td>
-        <td style="padding: 6px 10px;"><code>id.skill.aiming</code>, <code>id.spell.fireball</code>, <code>id.class.boring-ol-mage</code></td>
+      <tr>
+        <td><strong>id</strong></td>
+        <td>Canonical unique item identifier for references and grants</td>
+        <td><code>id.skill.aiming</code>, <code>id.spell.fireball</code>, <code>id.class.boring-ol-mage</code></td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">custom</td>
-        <td style="padding: 6px 10px;">User-defined world tags for unique campaign mechanics</td>
-        <td style="padding: 6px 10px;"><code>custom.hellfire-charge</code>, <code>custom.cybernetic-implant</code></td>
+      <tr>
+        <td><strong>custom</strong></td>
+        <td>User-defined world tags for unique campaign mechanics</td>
+        <td><code>custom.hellfire-charge</code>, <code>custom.cybernetic-implant</code></td>
       </tr>
     </tbody>
   </table>
@@ -132,22 +127,18 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Managing Tags in Foundry VTT
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Managing Tags in Foundry VTT</h2>
   <p>
     CarlRPG provides two synchronized interfaces for managing tags: the <strong>Global Tag Manager & Taxonomy</strong> and the <strong>Item Sheet Tag Editor</strong>.
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    1. The Global Tag Manager (<code>DCCTagManager</code>)
-  </h3>
+  <h3>1. The Global Tag Manager (<code>DCCTagManager</code>)</h3>
   <p>
     To open the Tag Manager at any time:
   </p>
   <ul>
-    <li>Navigate to the <strong>Items Directory</strong> in the Foundry sidebar and click the <strong style="color: #c0392b;"><i class="fa-solid fa-tags"></i> Tag Taxonomy</strong> header button.</li>
+    <li>Navigate to the <strong>Items Directory</strong> in the Foundry sidebar and click the <strong><i class="fa-solid fa-tags"></i> Tag Taxonomy</strong> header button.</li>
     <li>Or execute in the browser console / macro: <code>carl.openTagManager()</code>.</li>
   </ul>
   <p>
@@ -160,9 +151,7 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
     <li><strong>Custom Tag Registration:</strong> Scroll to the bottom of the window to register new world tags with custom labels, auto-persisted to your world settings.</li>
   </ul>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    2. Item Sheet Tag Editor & 1-Click Assignment
-  </h3>
+  <h3>2. Item Sheet Tag Editor & 1-Click Assignment</h3>
   <p>
     Every Item sheet in CarlRPG features a dedicated <strong>Tag Editor</strong> tab and a Tag Manager header action:
   </p>
@@ -170,12 +159,12 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
     <li>Open any Item sheet (Weapon, Armor, Spell, Skill, Class, Race, Buff, Loot).</li>
     <li>Click the <strong>Tags</strong> tab on the sheet to view:
       <ul>
-        <li><strong style="color: #27ae60;">Explicit Tags:</strong> Assigned tags that you can add or remove via input.</li>
-        <li><strong style="color: #2980b9;">Derived Tags:</strong> Auto-computed tags inferred from item type, damage parts, and categories (e.g. <code>element.fire</code> from a Fire damage packet).</li>
-        <li><strong style="color: #8e44ad;">Identity Tags:</strong> Unique canonical ID tag (e.g. <code>id.gear.boom-stick</code>).</li>
+        <li><strong>Explicit Tags:</strong> Assigned tags that you can add or remove via input.</li>
+        <li><strong>Derived Tags:</strong> Auto-computed tags inferred from item type, damage parts, and categories (e.g. <code>element.fire</code> from a Fire damage packet).</li>
+        <li><strong>Identity Tags:</strong> Unique canonical ID tag (e.g. <code>id.gear.boom-stick</code>).</li>
       </ul>
     </li>
-    <li>Click the <strong style="color: #c0392b;"><i class="fa-solid fa-tags"></i> Manage Tags</strong> button in the Item sheet header:
+    <li>Click the <strong><i class="fa-solid fa-tags"></i> Manage Tags</strong> button in the Item sheet header:
       <ul>
         <li>The Tag Manager opens bound directly to your active item.</li>
         <li>An <strong>Apply</strong> checkbox column appears in the tag list.</li>
@@ -194,22 +183,18 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Creating Custom Weapons with Tags
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Creating Custom Weapons with Tags</h2>
   <p>
     When creating a custom weapon in CarlRPG, you combine <strong>weapon classification tags</strong>, <strong>damage packets</strong>, and <strong>associated skills</strong> to give the weapon full system automation.
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Walkthrough: The "Goblin Boom Stick"
-  </h3>
+  <h3>Walkthrough: The "Goblin Boom Stick"</h3>
   <p>
     Let's create a custom sawed-off incendiary weapon named <em>"Goblin Boom Stick"</em>:
   </p>
-  <div style="background: #fdfaf2; border: 1px solid #d4cbb3; padding: 12px; border-radius: 4px; margin: 12px 0;">
-    <h4 style="margin-top: 0; color: #c0392b; font-family: 'Oswald', sans-serif;">Item Configuration:</h4>
+  <div class="dcc-journal-card">
+    <h4>Item Configuration:</h4>
     <ul>
       <li><strong>Type:</strong> Gear (Slot: <code>hands</code>, Hands required: <code>2</code>)</li>
       <li><strong>Weapon Category:</strong> <code>ranged</code></li>
@@ -221,18 +206,16 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
         </ul>
       </li>
       <li><strong>Tags:</strong>
-        <code style="background: #eee; padding: 2px 4px;">kind.gear</code>,
-        <code style="background: #eee; padding: 2px 4px;">weaponClass.ranged</code>,
-        <code style="background: #eee; padding: 2px 4px;">weapon.shotgun</code>,
-        <code style="background: #eee; padding: 2px 4px;">weaponProp.two-handed</code>,
-        <code style="background: #eee; padding: 2px 4px;">element.fire</code>
+        <code>kind.gear</code>,
+        <code>weaponClass.ranged</code>,
+        <code>weapon.shotgun</code>,
+        <code>weaponProp.two-handed</code>,
+        <code>element.fire</code>
       </li>
     </ul>
   </div>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    How the Engine Resolves Weapon Attacks
-  </h3>
+  <h3>How the Engine Resolves Weapon Attacks</h3>
   <p>
     When a crawler equips the <em>Goblin Boom Stick</em>:
   </p>
@@ -245,7 +228,7 @@ export const TAG_SYSTEM_JOURNAL_DATA = {
     <li>
       <strong>Strictly Additive Damage Scaling:</strong>
       Unlike traditional systems that overwrite dice, CarlRPG uses <em>strictly additive</em> damage calculation:
-      <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+      <pre>
 Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
              + Weapon Item Damage (Boom Stick: 1d6 Fire)
              + Official Rank Damage Die (Rank 10: +1d10)
@@ -270,17 +253,13 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Secondary Skills & Complex Interactions
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Secondary Skills & Complex Interactions</h2>
   <p>
     In CarlRPG, characters often possess secondary or passive skills that modify attack rolls and damage output under specific conditions.
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    The "Aiming" Skill Mechanics
-  </h3>
+  <h3>The "Aiming" Skill Mechanics</h3>
   <p>
     The canonical <em>Aiming</em> skill (notes: <em>"Used only with Ranged Attacks. Add Ranks to Attack check if made with Disadvantage. On Success, add 1d4 to damage."</em>) illustrates how the tag engine works:
   </p>
@@ -289,10 +268,10 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       <strong>Disadvantage To-Hit Offset:</strong>
       When a ranged attack is rolled at disadvantage (e.g., target has partial cover, or attacker is blinded, or wields a two-handed weapon in one hand), the roll die becomes <code>2d20kl</code> (keep lowest).
       The engine detects <code>action.passive</code> on <em>Aiming</em> and adds the crawler's Aiming rank directly to the to-hit total:
-      <div style="background: #2c3e50; color: #ecf0f1; padding: 8px 12px; border-radius: 4px; font-family: monospace; font-size: 13px; margin: 8px 0;">
-        Normal Attack: 1d20 + 9 (DEX +4 + Bow Rank 5)<br>
-        Disadvantage Attack: 2d20kl + 12 (DEX +4 + Bow Rank 5 + Aiming Rank 3)
-      </div>
+      <pre>
+Normal Attack: 1d20 + 9 (DEX +4 + Bow Rank 5)
+Disadvantage Attack: 2d20kl + 12 (DEX +4 + Bow Rank 5 + Aiming Rank 3)
+      </pre>
     </li>
     <li>
       <strong>Success Damage Bonus:</strong>
@@ -306,9 +285,7 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
     </li>
   </ul>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Equipped Weapon Filtering (<code>rule.requires-weapon</code>)
-  </h3>
+  <h3>Equipped Weapon Filtering (<code>rule.requires-weapon</code>)</h3>
   <p>
     To prevent character sheets from cluttering with dozens of attack buttons for weapons the character is not carrying:
   </p>
@@ -318,13 +295,11 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
     <li><strong>Unarmed & Natural Attacks:</strong> Skills tagged with <code>weaponClass.unarmed</code> or <code>weaponClass.natural</code> (like <em>Pugilism</em>, <em>Bite</em>, <em>Claws</em>) do NOT require an equipped weapon and remain available at all times.</li>
   </ul>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Items with Special Cooldown Grants
-  </h3>
+  <h3>Items with Special Cooldown Grants</h3>
   <p>
     High-tier magical gear frequently grants a skill or spell that normal crawlers cannot acquire, balanced by strict cooldowns:
   </p>
-  <div style="background: #fdfaf2; border-left: 4px solid #c0392b; padding: 10px 14px; margin: 8px 0;">
+  <div class="dcc-journal-callout dcc-journal-callout-alert">
     <strong>Example: Iron Shell Bracers</strong><br>
     Grants the <em>Iron Shell</em> spell at Rank 15. In CarlRPG, items granting abilities impose a cooldown of <strong>2 hours per granted rank</strong>.
     Tagging the grant with <code>rule.cooldown-hours</code> calculates a 30-hour cooldown (15 ranks &times; 2 hours) tracked by the Session Manager.
@@ -340,18 +315,14 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Custom Spells & Favored Archetypes
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Custom Spells & Favored Archetypes</h2>
   <p>
     In CarlRPG, magic operates strictly under official DCC RPG mechanics:
     <strong>no spell slots, no cantrips, and no D&amp;D rules</strong>. All spells cost Mana Points (MP) and can be cast at will provided the crawler has sufficient MP.
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    The Favored Spell Tag System
-  </h3>
+  <h3>The Favored Spell Tag System</h3>
   <p>
     Every spell belongs to one or more favored caster archetypes via <code>favored.&lt;archetype&gt;</code> tags:
   </p>
@@ -362,9 +333,7 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
     <li><code>favored.rogue</code> &rarr; Desperado, Shadow Rogue, Trickster</li>
   </ul>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    The +1 MP Non-Favored Penalty Calculation
-  </h3>
+  <h3>The +1 MP Non-Favored Penalty Calculation</h3>
   <p>
     When a crawler casts a spell (via <code>actor.rollSpell(item)</code>):
   </p>
@@ -380,16 +349,14 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       <ul>
         <li>If the crawler has a class and its archetype matches one of the spell's favored archetypes &rarr; <strong>Normal MP cost</strong> (e.g. 5 MP for Fireball).</li>
         <li>If the crawler has a class but does NOT match any favored archetype (e.g. a Fighter casting Fireball) &rarr; <strong>+1 MP Penalty</strong> (6 MP total).</li>
-        <li><strong style="color: #27ae60;">Canonical Exemption:</strong> Classless crawlers (Levels 1–2 before class selection) and pet companions are <em>completely exempt</em> from the penalty and pay base MP cost!</li>
+        <li><strong>Canonical Exemption:</strong> Classless crawlers (Levels 1–2 before class selection) and pet companions are <em>completely exempt</em> from the penalty and pay base MP cost!</li>
       </ul>
     </li>
   </ol>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Walkthrough: Creating "Frostfire Lance"
-  </h3>
-  <div style="background: #fdfaf2; border: 1px solid #d4cbb3; padding: 12px; border-radius: 4px; margin: 12px 0;">
-    <h4 style="margin-top: 0; color: #c0392b; font-family: 'Oswald', sans-serif;">Spell Setup:</h4>
+  <h3>Walkthrough: Creating "Frostfire Lance"</h3>
+  <div class="dcc-journal-card">
+    <h4>Spell Setup:</h4>
     <ul>
       <li><strong>Name:</strong> Frostfire Lance</li>
       <li><strong>Type:</strong> <code>spell</code></li>
@@ -397,10 +364,10 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       <li><strong>Base Damage:</strong> <code>2d8</code> (Damage Type: <code>Cold</code>)</li>
       <li><strong>Extra Damage Parts:</strong> <code>1d6 Fire</code></li>
       <li><strong>Tags:</strong>
-        <code style="background: #eee; padding: 2px 4px;">kind.spell</code>,
-        <code style="background: #eee; padding: 2px 4px;">element.ice</code>,
-        <code style="background: #eee; padding: 2px 4px;">element.fire</code>,
-        <code style="background: #eee; padding: 2px 4px;">favored.mage</code>
+        <code>kind.spell</code>,
+        <code>element.ice</code>,
+        <code>element.fire</code>,
+        <code>favored.mage</code>
       </li>
     </ul>
     <p style="margin-bottom: 0; font-size: 13px;">
@@ -418,61 +385,55 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Creating Custom Classes & Races with Structured Grants
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Creating Custom Classes & Races with Structured Grants</h2>
   <p>
     In CarlRPG 3.0.0, Class and Race documents do not rely on fragile text descriptions to apply benefits. Instead, they define a <code>system.grants</code> array that automatically applies stats, skills, spells, and choices upon selection.
   </p>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    The Grant Kinds
-  </h3>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px;">
+  <h3>The Grant Kinds</h3>
+  <table class="dcc-journal-table">
     <thead>
-      <tr style="background: #2c3e50; color: #fff; font-family: 'Oswald', sans-serif; text-transform: uppercase; text-align: left;">
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Kind</th>
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Schema & Payload</th>
-        <th style="padding: 6px 10px; border: 1px solid #1a252f;">Effect</th>
+      <tr>
+        <th>Kind</th>
+        <th>Schema & Payload</th>
+        <th>Effect</th>
       </tr>
     </thead>
     <tbody>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">stat</td>
-        <td style="padding: 6px 10px;"><code>{ "kind": "stat", "stats": { "str": 4, "dex": 2, "int": -2 } }</code></td>
-        <td style="padding: 6px 10px;">Modifies base unenhanced ability scores directly.</td>
+      <tr>
+        <td><strong>stat</strong></td>
+        <td><code>{ "kind": "stat", "stats": { "str": 4, "dex": 2, "int": -2 } }</code></td>
+        <td>Modifies base unenhanced ability scores directly.</td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">skill</td>
-        <td style="padding: 6px 10px;"><code>{ "kind": "skill", "name": "Aiming", "rank": 2, "ref": "id.skill.aiming" }</code></td>
-        <td style="padding: 6px 10px;">Grants or levels up the target skill by the specified rank.</td>
+      <tr>
+        <td><strong>skill</strong></td>
+        <td><code>{ "kind": "skill", "name": "Aiming", "rank": 2, "ref": "id.skill.aiming" }</code></td>
+        <td>Grants or levels up the target skill by the specified rank.</td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">spell</td>
-        <td style="padding: 6px 10px;"><code>{ "kind": "spell", "name": "Fireball", "rank": 1, "ref": "id.spell.fireball" }</code></td>
-        <td style="padding: 6px 10px;">Grants the specified spell to the character.</td>
+      <tr>
+        <td><strong>spell</strong></td>
+        <td><code>{ "kind": "spell", "name": "Fireball", "rank": 1, "ref": "id.spell.fireball" }</code></td>
+        <td>Grants the specified spell to the character.</td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">choice</td>
-        <td style="padding: 6px 10px;"><code>{ "kind": "choice", "count": 1, "query": { "all": ["kind.spell"], "any": ["element.fire", "element.ice"] }, "rank": 2 }</code></td>
-        <td style="padding: 6px 10px;">Prompts the player with an interactive modal to pick from items matching the Tag Query!</td>
+      <tr>
+        <td><strong>choice</strong></td>
+        <td><code>{ "kind": "choice", "count": 1, "query": { "all": ["kind.spell"], "any": ["element.fire", "element.ice"] }, "rank": 2 }</code></td>
+        <td>Prompts the player with an interactive modal to pick from items matching the Tag Query!</td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">archetype</td>
-        <td style="padding: 6px 10px;"><code>{ "kind": "archetype", "tags": ["archetype.mage"] }</code></td>
-        <td style="padding: 6px 10px;">Assigns caster archetype tags to the crawler.</td>
+      <tr>
+        <td><strong>archetype</strong></td>
+        <td><code>{ "kind": "archetype", "tags": ["archetype.mage"] }</code></td>
+        <td>Assigns caster archetype tags to the crawler.</td>
       </tr>
     </tbody>
   </table>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Tag Queries in Choice Grants
-  </h3>
+  <h3>Tag Queries in Choice Grants</h3>
   <p>
     When a class allows a player to <em>"Choose any 1 Fire or Ice spell at Rank 2"</em>, you define a structured boolean query:
   </p>
-  <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+  <pre>
 {
   "kind": "choice",
   "count": 1,
@@ -498,23 +459,17 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
       text: {
         format: 1,
         content: `
-<div class="dcc-journal-page" style="font-family: var(--font-primary, sans-serif); line-height: 1.5; color: #222;">
-  <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin-top: 0;">
-    Rule Breaking & Dungeon Crawler Carl Philosophy
-  </h2>
+<div class="dcc-journal-page">
+  <h2>Rule Breaking & Dungeon Crawler Carl Philosophy</h2>
 
-  <div style="background: #f9ebea; border-left: 4px solid #c0392b; padding: 12px 16px; margin: 12px 0;">
-    <h3 style="margin-top: 0; color: #962d22; font-family: 'Oswald', sans-serif; text-transform: uppercase;">
-      "All rules will be broken. When players break the rules, they should be rewarded."
-    </h3>
+  <div class="dcc-journal-callout dcc-journal-callout-alert">
+    <h3>"All rules will be broken. When players break the rules, they should be rewarded."</h3>
     <p style="margin-bottom: 0;">
       A fundamental tenet of the Dungeon Crawler Carl universe is that crawlers exploit exploits, find loophole combinations, and disrupt the system AI's expectations.
     </p>
   </div>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    System Design Guidelines for GMs & Creators
-  </h3>
+  <h3>System Design Guidelines for GMs & Creators</h3>
   <ul>
     <li>
       <strong>No Artificial Hard Gates:</strong>
@@ -538,22 +493,20 @@ Total Damage = Skill Base Damage (Shotgun: 3d10 Piercing)
     </li>
   </ul>
 
-  <h3 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; color: #111; margin-top: 16px;">
-    Quick Reference API
-  </h3>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px;">
+  <h3>Quick Reference API</h3>
+  <table class="dcc-journal-table">
     <tbody>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">carl.openTagManager()</td>
-        <td style="padding: 6px 10px;">Opens the interactive Tag Taxonomy and Management interface.</td>
+      <tr>
+        <td><code>carl.openTagManager()</code></td>
+        <td>Opens the interactive Tag Taxonomy and Management interface.</td>
       </tr>
-      <tr style="background: #fff; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">carl.openTagGuide()</td>
-        <td style="padding: 6px 10px;">Opens this in-game Tag System &amp; Content Creation Journal Entry.</td>
+      <tr>
+        <td><code>carl.openTagGuide()</code></td>
+        <td>Opens this in-game Tag System &amp; Content Creation Journal Entry.</td>
       </tr>
-      <tr style="background: #fdfaf2; border-bottom: 1px solid #e0d8c3;">
-        <td style="padding: 6px 10px; font-weight: bold; font-family: monospace;">game.dcc.tags.find('element.fire')</td>
-        <td style="padding: 6px 10px;">Queries the in-memory TagIndex for all items matching a tag.</td>
+      <tr>
+        <td><code>game.dcc.tags.find('element.fire')</code></td>
+        <td>Queries the in-memory TagIndex for all items matching a tag.</td>
       </tr>
     </tbody>
   </table>

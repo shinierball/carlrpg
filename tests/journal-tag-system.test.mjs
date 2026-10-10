@@ -153,4 +153,42 @@ test('CarlRPG Tag System & Content Creation Journal Entry (next.md Requirement)'
     assert.strictEqual(journalPack.path, 'packs/journals');
     assert.strictEqual(journalPack.system, 'carl-rpg');
   });
+
+  await t.test('13. Journal page content avoids hardcoded dark text colors to respect dark mode', () => {
+    for (const [idx, page] of TAG_SYSTEM_JOURNAL_DATA.pages.entries()) {
+      const content = page.text.content;
+      assert.ok(
+        !content.includes('color: #222'),
+        `Page ${idx + 1} (${page.name}) must not hardcode 'color: #222'`
+      );
+      assert.ok(
+        !content.includes('color: #111'),
+        `Page ${idx + 1} (${page.name}) must not hardcode 'color: #111'`
+      );
+      assert.ok(
+        !content.includes('color: #000'),
+        `Page ${idx + 1} (${page.name}) must not hardcode 'color: #000'`
+      );
+      assert.ok(
+        !content.includes('color: black'),
+        `Page ${idx + 1} (${page.name}) must not hardcode 'color: black'`
+      );
+    }
+  });
+
+  await t.test('14. styles/dcc.css defines high-contrast dark mode styles for .dcc-journal-page and Tag Manager', () => {
+    const css = fs.readFileSync(path.resolve(__dirname, '../styles/dcc.css'), 'utf8');
+
+    // Journal dark mode rules
+    assert.ok(css.includes('.dcc-journal-page'), 'Styles contain .dcc-journal-page');
+    assert.ok(css.includes('@media (prefers-color-scheme: dark)'), 'Styles contain dark mode media query');
+    assert.ok(css.includes('--dcc-journal-text: #e5e7eb'), 'Dark mode sets light text #e5e7eb');
+    assert.ok(css.includes('--dcc-journal-heading: #ffffff'), 'Dark mode sets pure white headings #ffffff');
+    assert.ok(css.includes('body.theme-dark .dcc-journal-page'), 'Contains theme-dark class selector');
+    assert.ok(css.includes('body.dark-mode .dcc-journal-page'), 'Contains dark-mode class selector');
+
+    // Tag Manager dark mode rules
+    assert.ok(css.includes('.dcc-tag-manager-container'), 'Styles contain .dcc-tag-manager-container');
+    assert.ok(css.includes('.theme-dark .dcc-tag-manager-container'), 'Contains Tag Manager dark theme selector');
+  });
 });

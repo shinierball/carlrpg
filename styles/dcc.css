@@ -9024,3 +9024,373 @@ select.dcc-box-input.dcc-size-select,
   color: #e74c3c !important;
   font-weight: bold !important;
 }
+
+/* =======================================================
+   CARLRPG JOURNAL ENTRY & GUIDE STYLING (DARK MODE AWARE)
+   ======================================================= */
+
+.dcc-journal-page {
+  /* Default / Light Mode Color Tokens */
+  --dcc-journal-text: #1f2937;
+  --dcc-journal-text-muted: #4b5563;
+  --dcc-journal-heading: #111827;
+  --dcc-journal-accent: #c0392b;
+  --dcc-journal-border: #d4cbb3;
+  --dcc-journal-table-border: #d4cbb3;
+  --dcc-journal-table-bg-odd: #fdfaf2;
+  --dcc-journal-table-bg-even: #ffffff;
+  --dcc-journal-table-header-bg: #2c3e50;
+  --dcc-journal-table-header-text: #ffffff;
+  --dcc-journal-card-bg: #fdfaf2;
+  --dcc-journal-card-border: #d4cbb3;
+  --dcc-journal-callout-info-bg: #eaf2f8;
+  --dcc-journal-callout-info-border: #2980b9;
+  --dcc-journal-callout-info-text: #1b4f72;
+  --dcc-journal-callout-alert-bg: #f9ebea;
+  --dcc-journal-callout-alert-border: #c0392b;
+  --dcc-journal-callout-alert-text: #962d22;
+  --dcc-journal-code-bg: rgba(0, 0, 0, 0.07);
+  --dcc-journal-code-text: #a93226;
+  --dcc-journal-code-border: rgba(0, 0, 0, 0.15);
+  --dcc-journal-pre-bg: #1f2937;
+  --dcc-journal-pre-text: #f3f4f6;
+  --dcc-journal-pre-border: #111827;
+
+  font-family: var(--font-primary, 'Roboto Condensed', sans-serif);
+  line-height: 1.6;
+  color: var(--dcc-journal-text);
+  padding: 6px 4px;
+  box-sizing: border-box;
+}
+
+/* Media Query Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .dcc-journal-page {
+    --dcc-journal-text: #e5e7eb;
+    --dcc-journal-text-muted: #9ca3af;
+    --dcc-journal-heading: #ffffff;
+    --dcc-journal-accent: #ff6b6b;
+    --dcc-journal-border: #404040;
+    --dcc-journal-table-border: #404040;
+    --dcc-journal-table-bg-odd: #242424;
+    --dcc-journal-table-bg-even: #1a1a1a;
+    --dcc-journal-table-header-bg: #1e293b;
+    --dcc-journal-table-header-text: #ffffff;
+    --dcc-journal-card-bg: #222222;
+    --dcc-journal-card-border: #444444;
+    --dcc-journal-callout-info-bg: #0f2942;
+    --dcc-journal-callout-info-border: #38bdf8;
+    --dcc-journal-callout-info-text: #bae6fd;
+    --dcc-journal-callout-alert-bg: #3d1515;
+    --dcc-journal-callout-alert-border: #f87171;
+    --dcc-journal-callout-alert-text: #fecaca;
+    --dcc-journal-code-bg: rgba(255, 255, 255, 0.12);
+    --dcc-journal-code-text: #fca5a5;
+    --dcc-journal-code-border: rgba(255, 255, 255, 0.2);
+    --dcc-journal-pre-bg: #0f172a;
+    --dcc-journal-pre-text: #f1f5f9;
+    --dcc-journal-pre-border: #334155;
+  }
+}
+
+/* Foundry & UI Module Dark Theme Class Selectors */
+body.theme-dark .dcc-journal-page,
+body.dark-mode .dcc-journal-page,
+[data-theme="dark"] .dcc-journal-page,
+.theme-dark .dcc-journal-page,
+.dark-theme .dcc-journal-page,
+.app.theme-dark .dcc-journal-page,
+.window-app.theme-dark .dcc-journal-page,
+.journal-sheet.theme-dark .dcc-journal-page,
+.journal-entry-page.theme-dark .dcc-journal-page,
+.journal-entry-pages.theme-dark .dcc-journal-page,
+.journal-entry-content.theme-dark .dcc-journal-page,
+.journal-page-content.theme-dark .dcc-journal-page {
+  --dcc-journal-text: #e5e7eb;
+  --dcc-journal-text-muted: #9ca3af;
+  --dcc-journal-heading: #ffffff;
+  --dcc-journal-accent: #ff6b6b;
+  --dcc-journal-border: #404040;
+  --dcc-journal-table-border: #404040;
+  --dcc-journal-table-bg-odd: #242424;
+  --dcc-journal-table-bg-even: #1a1a1a;
+  --dcc-journal-table-header-bg: #1e293b;
+  --dcc-journal-table-header-text: #ffffff;
+  --dcc-journal-card-bg: #222222;
+  --dcc-journal-card-border: #444444;
+  --dcc-journal-callout-info-bg: #0f2942;
+  --dcc-journal-callout-info-border: #38bdf8;
+  --dcc-journal-callout-info-text: #bae6fd;
+  --dcc-journal-callout-alert-bg: #3d1515;
+  --dcc-journal-callout-alert-border: #f87171;
+  --dcc-journal-callout-alert-text: #fecaca;
+  --dcc-journal-code-bg: rgba(255, 255, 255, 0.12);
+  --dcc-journal-code-text: #fca5a5;
+  --dcc-journal-code-border: rgba(255, 255, 255, 0.2);
+  --dcc-journal-pre-bg: #0f172a;
+  --dcc-journal-pre-text: #f1f5f9;
+  --dcc-journal-pre-border: #334155;
+}
+
+/* Journal Typography */
+.dcc-journal-page h2,
+.dcc-journal-page .dcc-journal-title {
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  color: var(--dcc-journal-accent);
+  border-bottom: 2px solid var(--dcc-journal-accent);
+  padding-bottom: 4px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.dcc-journal-page h3,
+.dcc-journal-page .dcc-journal-section {
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  color: var(--dcc-journal-heading);
+  margin-top: 18px;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.dcc-journal-page h4,
+.dcc-journal-page .dcc-journal-subtitle {
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  color: var(--dcc-journal-accent);
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.dcc-journal-page p {
+  color: var(--dcc-journal-text);
+  margin: 0 0 10px 0;
+}
+
+.dcc-journal-page ul,
+.dcc-journal-page ol {
+  color: var(--dcc-journal-text);
+  margin: 0 0 12px 0;
+  padding-left: 24px;
+}
+
+.dcc-journal-page li {
+  margin-bottom: 4px;
+}
+
+.dcc-journal-page strong {
+  font-weight: 700;
+  color: var(--dcc-journal-heading);
+}
+
+/* Callouts */
+.dcc-journal-page .dcc-journal-callout {
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.dcc-journal-page .dcc-journal-callout-info {
+  background: var(--dcc-journal-callout-info-bg);
+  border-left: 4px solid var(--dcc-journal-callout-info-border);
+  color: var(--dcc-journal-callout-info-text);
+}
+
+.dcc-journal-page .dcc-journal-callout-info strong {
+  color: var(--dcc-journal-callout-info-border);
+}
+
+.dcc-journal-page .dcc-journal-callout-alert {
+  background: var(--dcc-journal-callout-alert-bg);
+  border-left: 4px solid var(--dcc-journal-callout-alert-border);
+  color: var(--dcc-journal-callout-alert-text);
+}
+
+.dcc-journal-page .dcc-journal-callout-alert h3 {
+  color: var(--dcc-journal-accent);
+  margin-top: 0;
+}
+
+/* Cards */
+.dcc-journal-page .dcc-journal-card {
+  background: var(--dcc-journal-card-bg);
+  border: 1px solid var(--dcc-journal-card-border);
+  padding: 12px 14px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+/* Tables */
+.dcc-journal-page .dcc-journal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 13px;
+  border: 1px solid var(--dcc-journal-table-border);
+}
+
+.dcc-journal-page .dcc-journal-table thead tr {
+  background: var(--dcc-journal-table-header-bg);
+  color: var(--dcc-journal-table-header-text);
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.dcc-journal-page .dcc-journal-table th {
+  padding: 8px 10px;
+  border: 1px solid var(--dcc-journal-table-border);
+  color: var(--dcc-journal-table-header-text);
+}
+
+.dcc-journal-page .dcc-journal-table td {
+  padding: 6px 10px;
+  border: 1px solid var(--dcc-journal-table-border);
+  color: var(--dcc-journal-text);
+}
+
+.dcc-journal-page .dcc-journal-table tbody tr:nth-child(odd) {
+  background: var(--dcc-journal-table-bg-odd);
+}
+
+.dcc-journal-page .dcc-journal-table tbody tr:nth-child(even) {
+  background: var(--dcc-journal-table-bg-even);
+}
+
+/* Inline Code & Pre Blocks */
+.dcc-journal-page code {
+  font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
+  background: var(--dcc-journal-code-bg);
+  color: var(--dcc-journal-code-text);
+  border: 1px solid var(--dcc-journal-code-border);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.dcc-journal-page pre,
+.dcc-journal-page .dcc-journal-pre {
+  background: var(--dcc-journal-pre-bg);
+  color: var(--dcc-journal-pre-text);
+  border: 1px solid var(--dcc-journal-pre-border);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+
+.dcc-journal-page pre code {
+  background: transparent;
+  color: inherit;
+  border: none;
+  padding: 0;
+}
+
+/* =======================================================
+   TAG MANAGER DARK MODE SUPPORT
+   ======================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .dcc-tag-manager-container {
+    background: #1e1e1e !important;
+    color: #e5e7eb !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-header h2 {
+    color: #ffffff !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-header div {
+    color: #9ca3af !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-list {
+    background: #141414 !important;
+    border-color: #374151 !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-list table thead tr {
+    background: #1e293b !important;
+    color: #ffffff !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-list table tbody tr {
+    border-color: #262626 !important;
+    color: #e5e7eb !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-list table tbody td {
+    color: #e5e7eb !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-create-box {
+    background: #1e1e1e !important;
+    border-color: #374151 !important;
+    color: #e5e7eb !important;
+  }
+  .dcc-tag-manager-container .dcc-tm-create-box h4 {
+    color: #ffffff !important;
+  }
+}
+
+body.theme-dark .dcc-tag-manager-container,
+body.dark-mode .dcc-tag-manager-container,
+[data-theme="dark"] .dcc-tag-manager-container,
+.theme-dark .dcc-tag-manager-container,
+.dark-theme .dcc-tag-manager-container {
+  background: #1e1e1e !important;
+  color: #e5e7eb !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-header h2,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-header h2,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-header h2,
+.theme-dark .dcc-tag-manager-container .dcc-tm-header h2 {
+  color: #ffffff !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-header div,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-header div,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-header div,
+.theme-dark .dcc-tag-manager-container .dcc-tm-header div {
+  color: #9ca3af !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-list,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-list,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-list,
+.theme-dark .dcc-tag-manager-container .dcc-tm-list {
+  background: #141414 !important;
+  border-color: #374151 !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-list table thead tr,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-list table thead tr,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-list table thead tr,
+.theme-dark .dcc-tag-manager-container .dcc-tm-list table thead tr {
+  background: #1e293b !important;
+  color: #ffffff !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-list table tbody tr,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-list table tbody tr,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-list table tbody tr,
+.theme-dark .dcc-tag-manager-container .dcc-tm-list table tbody tr {
+  border-color: #262626 !important;
+  color: #e5e7eb !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-list table tbody td,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-list table tbody td,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-list table tbody td,
+.theme-dark .dcc-tag-manager-container .dcc-tm-list table tbody td {
+  color: #e5e7eb !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-create-box,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-create-box,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-create-box,
+.theme-dark .dcc-tag-manager-container .dcc-tm-create-box {
+  background: #1e1e1e !important;
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+body.theme-dark .dcc-tag-manager-container .dcc-tm-create-box h4,
+body.dark-mode .dcc-tag-manager-container .dcc-tm-create-box h4,
+[data-theme="dark"] .dcc-tag-manager-container .dcc-tm-create-box h4,
+.theme-dark .dcc-tag-manager-container .dcc-tm-create-box h4 {
+  color: #ffffff !important;
+}
+

@@ -1400,6 +1400,7 @@ export const DCC_SPELLS = [
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
+          "tempBars": { "hpPerSlot": 4 },
           "notes": "Increase the Health to 4 in each slot."
         },
         "rank10": {
@@ -1408,6 +1409,8 @@ export const DCC_SPELLS = [
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
+          "area": { "radiusBonus": 5 },
+          "tempBars": { "hpPerSlot": 6 },
           "notes": "+5ft Burst radius, with a 6 in each slot."
         },
         "rank15": {
@@ -1416,6 +1419,8 @@ export const DCC_SPELLS = [
           "rankDamageDice": 0,
           "buffsResistances": "",
           "debuff": "",
+          "area": { "radiusBonus": 10 },
+          "tempBars": { "hpPerSlot": 8 },
           "notes": "+10ft Burst radius, with a 8 in each slot."
         },
         "rank20": {
@@ -1427,12 +1432,49 @@ export const DCC_SPELLS = [
           "notes": ""
         }
       },
+      "area": {
+        "hasArea": true,
+        "shape": "burst",
+        "radius": 5,
+        "coneAngle": 53.13,
+        "lineLength": 0,
+        "lineWidth": 5,
+        "origin": "caster",
+        "targetFilter": "allies",
+        "radiusBonus": 0
+      },
+      "delivery": "aura",
+      "tempBars": {
+        "hasTempBars": true,
+        "slotsFormula": "@abilities.cha.mod",
+        "hpPerSlot": 2
+      },
+      "durationConfig": {
+        "type": "rounds",
+        "rounds": 2,
+        "minutes": 0,
+        "hours": 0,
+        "remainingRounds": 2
+      },
+      "light": {
+        "emits": false,
+        "dim": 0,
+        "bright": 0,
+        "color": "",
+        "animation": ""
+      },
+      "active": false,
       "identifier": "hot-stuff-aura",
       "tags": [
         "kind.spell",
         "action.passive",
-        "shape.aoe",
-        "stat.int",
+        "shape.aura",
+        "shape.burst",
+        "delivery.aura",
+        "target.allies",
+        "duration.rounds",
+        "rule.temp-health-bars",
+        "stat.cha",
         "favored.bard"
       ]
     }

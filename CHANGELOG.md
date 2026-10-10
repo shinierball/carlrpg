@@ -1,3 +1,28 @@
+## 3.1.0
+
+### CarlRPG 3.1.0 — Auras, Temporary Health Bars, Areas of Effect & Combat Round Durations
+
+- **Aura & Area-of-Effect Delivery Subsystem (`src/documents/actor.mjs`, `src/models/items/spell-model.mjs`, `src/models/items/buff-model.mjs`, `template.json`)**:
+  - Implemented persistent token-centered Auras scaling dynamically with caster attributes and rank milestones (e.g. *Hot Stuff Aura* base 5ft radius, expanding to 10ft at Rank 10 and 15ft at Rank 15).
+  - Added structured AoE delivery definitions supporting placed templates (*Fireball*), persistent auras, ray/cone/circle/rect shapes, target filters (`allies`, `enemies`, `all`, `self`), and emission properties (light/darkness).
+  - Added 1-click toggling (`activateAura`, `deactivateAura`, `rollSpell` toggle integration) and interactive chat card action buttons (`Dismiss Aura`, `Place Area of Effect`).
+- **Temporary Health Bars Absorption & Depletion Pipeline (`src/apps/combat-metrics.mjs`, `src/documents/actor.mjs`, `src/sheets/crawler-sheet.mjs`, `templates/actors/parts/page1-core.hbs`, `styles/dcc.css`)**:
+  - Implemented first-absorption temporary health bars (`hp.tempBars`: `count`, `maxCount`, `hpPerSlot`, `currentSlotHp`, `source`).
+  - Damage is absorbed slot-by-slot before touching permanent health bars. When a temporary health bar slot is exhausted, `count` decrements and `currentSlotHp` refreshes to `hpPerSlot`.
+  - Excessive spillover damage after all temporary health bars are depleted penetrates to permanent HP under strict DCC full-bar rules.
+  - Rendered interactive gold shield indicators (`.dcc-temp-bars-container`) directly on the crawler character sheet above the core health bar.
+- **Combat Round Duration Clock & Expiration (`src/documents/combat.mjs`)**:
+  - Integrated 10-second combat round duration management (`DCCCombat.prototype.processRoundDurations`) triggered automatically on `nextRound()`.
+  - Active effects with round durations decrement each combat round; upon expiration, auras and buffs deactivate cleanly, clearing temporary health bars and posting Dungeon AI notification cards to chat.
+- **Tag Taxonomy Extensions for Auras, Durations & Delivery (`src/data/tags.mjs`, `tests/aura-aoe-tags.test.mjs`)**:
+  - Added new namespaces and tags:
+    - `delivery.*` (`delivery.placed`, `delivery.aura`, `delivery.self`, `delivery.target`)
+    - `duration.*` (`duration.instant`, `duration.rounds`, `duration.minutes`, `duration.hours`, `duration.combat`, `duration.permanent`)
+    - `target.*` (`target.allies`, `target.enemies`, `target.all`, `target.self`)
+    - `shape.*` (`shape.aura`, `shape.circle`, `shape.cone`, `shape.ray`, `shape.rect`, `shape.line`)
+    - `rule.*` (`rule.temp-health-bars`, `rule.emits-light`, `rule.causes-darkness`, `rule.depletes-on-empty`)
+  - Extended `computeDerivedTags()` to dynamically tag spells and buffs with matching delivery, shape, duration, and target tags from their structured configurations.
+
 ## 3.0.2
 
 ### CarlRPG 3.0.2 — In-Game Tag System Guide, Character Sheet To-Hit Formula Display & Journals Pack

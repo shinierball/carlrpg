@@ -4572,6 +4572,131 @@ export class DCCActor extends BaseActor {
   }
 
   /**
+   * Grant or set temporary health bars for this actor.
+   * @param {object} params
+   * @param {number} params.count - Number of temporary bar slots
+   * @param {number} params.hpPerSlot - HP capacity per slot
+   * @param {string} [params.source=''] - Source spell or item name
+   * @returns {Promise<DCCActor>}
+   */
+  async grantTempBars({ count, hpPerSlot, source = '' } = {}) {
+    const numCount = Math.max(0, Math.floor(Number(count) || 0));
+    const numPerSlot = Math.max(0, Math.floor(Number(hpPerSlot) || 0));
+    if (numCount <= 0 || numPerSlot <= 0) {
+      return this.update({
+        'system.attributes.hp.tempBars.count': 0,
+        'system.attributes.hp.tempBars.maxCount': 0,
+        'system.attributes.hp.tempBars.hpPerSlot': 0,
+        'system.attributes.hp.tempBars.currentSlotHp': 0,
+        'system.attributes.hp.tempBars.source': '',
+        'system.attributes.hp.temp': 0
+      });
+    }
+    const totalHp = numCount * numPerSlot;
+    return this.update({
+      'system.attributes.hp.tempBars.count': numCount,
+      'system.attributes.hp.tempBars.maxCount': numCount,
+      'system.attributes.hp.tempBars.hpPerSlot': numPerSlot,
+      'system.attributes.hp.tempBars.currentSlotHp': numPerSlot,
+      'system.attributes.hp.tempBars.source': String(source || ''),
+      'system.attributes.hp.temp': totalHp
+    });
+  }
+
+  /**
+   * Activate an aura spell/item on this actor and grant linked aura effects (e.g. temporary health bars).
+   * @param {DCCItem} spellItem
+   * @returns {Promise<object>}
+   */
+  async activateAura(spellItem) {
+    if (!spellItem) return { active: false, error: 'No item provided' };
+    const sys = spellItem.system || {};
+    const rank = Number(sys.rank) || 1;
+
+    // 1. Calculate aura radius with rank upgrades
+    let radius = Number(sys.area?.radius) || 5;
+    if (rank >= 15 && sys.rankBreaks?.rank15?.area?.radiusBonus) {
+      radius += Number(sys.rankBreaks.rank15.area.radiusBonus);
+    } else if (rank >= 10 && sys.rankBreaks?.rank10?.area?.radiusBonus) {
+      radius += Number(sys.rankBreaks.rank10.area.radiusBonus);
+    }
+
+    // 2. Calculate temporary health bars if configured
+    let slots = 0;
+    let hpPerSlot = 0;
+    let totalTempHp = 0;
+
+    if (sys.tempBars?.hasTempBars) {
+      const formula = (sys.tempBars.slotsFormula || '').trim();
+      if (formula.includes('cha')) {
+        slots = Number(this.system?.abilities?.cha?.mod) || 0;
+      } else if (formula.includes('con')) {
+        slots = Number(this.system?.abilities?.con?.mod) || 0;
+      } else if (formula.includes('str')) {
+        slots = Number(this.system?.abilities?.str?.mod) || 0;
+      } else if (formula.includes('int')) {
+        slots = Number(this.system?.abilities?.int?.mod) || 0;
+      } else if (formula.includes('dex')) {
+        slots = Number(this.system?.abilities?.dex?.mod) || 0;
+      } else {
+        slots = Number(formula) || Number(this.system?.abilities?.cha?.mod) || 1;
+      }
+      slots = Math.max(1, slots);
+
+      if (rank >= 15 && sys.rankBreaks?.rank15?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank15.tempBars.hpPerSlot);
+      } else if (rank >= 10 && sys.rankBreaks?.rank10?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank10.tempBars.hpPerSlot);
+      } else if (rank >= 5 && sys.rankBreaks?.rank5?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank5.tempBars.hpPerSlot);
+      } else {
+        hpPerSlot = Number(sys.tempBars.hpPerSlot) || 2;
+      }
+
+      totalTempHp = slots * hpPerSlot;
+      await this.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
+    }
+
+    // 3. Set spell active and reset round duration
+    const rounds = Number(sys.durationConfig?.rounds) || 2;
+    await spellItem.update({
+      'system.active': true,
+      'system.durationConfig.remainingRounds': rounds
+    });
+
+    return {
+      active: true,
+      radius,
+      slots,
+      hpPerSlot,
+      totalTempHp,
+      remainingRounds: rounds,
+      targetFilter: sys.area?.targetFilter || 'allies'
+    };
+  }
+
+  /**
+   * Deactivate an aura spell/item and clear any granted temporary health bars.
+   * @param {DCCItem} spellItem
+   * @returns {Promise<object>}
+   */
+  async deactivateAura(spellItem) {
+    if (!spellItem) return { active: false };
+
+    await spellItem.update({
+      'system.active': false,
+      'system.durationConfig.remainingRounds': 0
+    });
+
+    const currentSource = this.system?.attributes?.hp?.tempBars?.source;
+    if (currentSource && (currentSource === spellItem.name || currentSource.toLowerCase() === spellItem.name.toLowerCase())) {
+      await this.grantTempBars({ count: 0, hpPerSlot: 0 });
+    }
+
+    return { active: false };
+  }
+
+  /**
    * Get all archetype tags associated with this actor (e.g. Set {'archetype.mage'}).
    * Evaluates embedded class and race items, as well as details.class.
    * @returns {Set<string>}
@@ -5572,6 +5697,39 @@ export class DCCActor extends BaseActor {
     }
 
     const sys = spellItem.system || {};
+    const spellTags = spellItem.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(spellItem) : new Set(sys.tags || []));
+    const isAura = sys.delivery === 'aura' || sys.area?.isAura || (spellTags && (spellTags.has('delivery.aura') || spellTags.has('shape.aura')));
+
+    // If an aura is currently active, casting it toggles/dismisses it
+    if (isAura && sys.active) {
+      await this.deactivateAura(spellItem);
+      const dismissContent = `
+        <div class="dcc-chat-card dcc-spell-card dcc-aura-dismissed" style="font-family: var(--font-primary, sans-serif); border: 2px solid #7f8c8d;">
+          <div class="dcc-chat-card-header" style="display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #7f8c8d; padding-bottom: 4px; margin-bottom: 6px;">
+            <img src="${spellItem.img || 'icons/svg/wand.svg'}" style="width: 36px; height: 36px; border: 1px solid #000; border-radius: 4px;" />
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #333;">${spellItem.name} — DISMISSED</h3>
+              <span style="font-size: 11px; text-transform: uppercase; color: #7f8c8d; font-weight: bold;">Aura Deactivated</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #555; background: #f8f9fa; border: 1px solid #e9ecef; padding: 6px 8px; border-radius: 3px;">
+            <i class="fa-solid fa-power-off"></i> <strong>${this.name}</strong> dismissed the <strong>${spellItem.name}</strong> aura. Any temporary health bars or persistent effects have been cleared.
+          </div>
+        </div>
+      `;
+      return ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: dismissContent,
+        flags: {
+          'carl-rpg': {
+            isSpellCast: true,
+            isAuraDismiss: true,
+            auraItem: spellItem.id || spellItem._id
+          }
+        }
+      });
+    }
+
     const isFreeCast = Boolean(
       opts.freeCast ||
       opts.noMana ||
@@ -5584,7 +5742,6 @@ export class DCCActor extends BaseActor {
     const baseManaCost = Math.max(0, Number(sys.manaCost) || 0);
 
     // Check Favored spell mechanics (+1 MP for non-favored classes when caster has a class)
-    const spellTags = spellItem.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(spellItem) : new Set(sys.tags || []));
     const favoredTags = Array.from(spellTags).filter(t => typeof t === 'string' && t.startsWith('favored.'));
 
     let isFavored = true;
@@ -5689,6 +5846,11 @@ export class DCCActor extends BaseActor {
 
     if (Object.keys(updates).length > 0) {
       await this.update(updates);
+    }
+
+    let auraData = null;
+    if (isAura) {
+      auraData = await this.activateAura(spellItem);
     }
 
     if (typeof DCCSessionEngine !== 'undefined' && typeof DCCSessionEngine.recordRoll === 'function') {
@@ -5807,6 +5969,33 @@ export class DCCActor extends BaseActor {
       `;
     }
 
+    if (auraData) {
+      content += `
+        <div class="dcc-aura-effect" style="margin: 8px 0; padding: 8px 10px; background: #fff8e7; border: 1px solid #d4af37; border-radius: 4px; color: #856404; font-size: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <span style="font-weight: bold; font-size: 13px; color: #b7791f;"><i class="fa-solid fa-atom"></i> Aura Active: ${auraData.radius}ft Radius</span>
+            <button type="button" class="dcc-btn dcc-dismiss-aura-btn" data-actor-id="${this.id}" data-spell-id="${spellItem.id || spellItem._id}" style="padding: 2px 6px; font-size: 11px; background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 3px; cursor: pointer; color: #2d3748;">
+              <i class="fa-solid fa-power-off"></i> Dismiss
+            </button>
+          </div>
+          ${auraData.totalTempHp > 0 ? `<div><i class="fa-solid fa-shield-heart" style="color: #d4af37;"></i> Granted <strong>${auraData.slots}</strong> Temporary Health Bars (${auraData.hpPerSlot} HP/slot, <strong>${auraData.totalTempHp} Temp HP</strong> total)</div>` : ''}
+          <div><i class="fa-solid fa-users"></i> Targets: <strong>${auraData.targetFilter}</strong> within <strong>${auraData.radius}ft</strong> • Duration: <strong>${auraData.remainingRounds} combat rounds</strong></div>
+        </div>
+      `;
+    }
+
+    if (sys.delivery === 'placed' || (sys.area?.hasArea && !isAura)) {
+      const areaShape = sys.area?.shape || 'circle';
+      const areaRadius = Number(sys.area?.radius) || 20;
+      content += `
+        <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #e74c3c;">
+          <button type="button" class="dcc-btn place-aoe-template-btn" data-spell-id="${spellItem.id || spellItem._id || ''}" data-actor-id="${this.id}" data-radius="${areaRadius}" data-shape="${areaShape}" style="width: 100%; background: #e67e22; color: #fff; border: 1px solid #d35400; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-primary, sans-serif); font-size: 12px;">
+            <i class="fa-solid fa-bullseye"></i> Place Area of Effect (${areaRadius}ft ${areaShape})
+          </button>
+        </div>
+      `;
+    }
+
     content += `</div>`;
 
     return ChatMessage.create({
@@ -5824,6 +6013,8 @@ export class DCCActor extends BaseActor {
           remainingMana: isFreeCast ? currentMana : newMana,
           isHeal: Boolean(healInfo),
           healInfo: healInfo || null,
+          isAura: Boolean(isAura),
+          auraData: auraData || null,
           originItemName: opts.originItem?.name || null,
           isItemEffect: Boolean(opts.isItemEffect || opts.isConsumable || opts.originItem)
         }

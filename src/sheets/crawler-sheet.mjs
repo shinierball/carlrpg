@@ -363,6 +363,34 @@ export class DCCCrawlerSheet extends BaseActorSheet {
     context.hpPerBar = getHpPerBar(actor);
     context.fiveHpBars = 5 * context.hpPerBar;
 
+    // Structured Temporary Health Bars display
+    const tb = context.system.attributes?.hp?.tempBars;
+    const tbCount = Number(tb?.count) || 0;
+    const tbMaxCount = Math.max(tbCount, Number(tb?.maxCount) || tbCount);
+    const tbHpPerSlot = Number(tb?.hpPerSlot) || 0;
+    const tbCurrentSlotHp = Number(tb?.currentSlotHp) || (tbCount > 0 ? tbHpPerSlot : 0);
+
+    context.hasTempBars = tbCount > 0 && tbHpPerSlot > 0;
+    if (context.hasTempBars) {
+      context.tempBarSlots = [];
+      for (let i = 1; i <= tbMaxCount; i++) {
+        const isDepleted = i > tbCount;
+        const isCurrentActive = i === tbCount;
+        const slotHp = isDepleted ? 0 : (isCurrentActive ? tbCurrentSlotHp : tbHpPerSlot);
+        const fillPct = tbHpPerSlot > 0 ? Math.round((slotHp / tbHpPerSlot) * 100) : 0;
+        context.tempBarSlots.push({
+          index: i,
+          isDepleted,
+          isCurrentActive,
+          slotHp,
+          maxHp: tbHpPerSlot,
+          fillPct,
+          label: `${slotHp}/${tbHpPerSlot}`
+        });
+      }
+      context.tempBarsSource = tb.source || 'Shield';
+    }
+
     // Prepare creature size options
     const currentSize = context.system.attributes?.size ?? 'Medium';
     const currentSizeInfo = getSizeInfo(currentSize);

@@ -131,7 +131,8 @@ This document defines the core directives, workflow rules, architecture standard
   - Primary font: `'Oswald', sans-serif`
   - Accent / DCC Red: `#c0392b` / `#962d22`
   - Clean borders, high contrast, readable inputs, and crisp state badges (`[EQUIPPED]`, `[SPELL]`, `[ATTACK]`, `[ITEM]`, `[BUFF]`, `[DEBUFF]`).
-
+### 9. Use the tag system wherever possible
+Do not create new systems if the tag system can be leveraged to create the same effect. Do not force the tag system in as a solution if it increases complexity significantly but the cost of adding a new system far exceeds a minor complexity increase. 
 
 ---
 

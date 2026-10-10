@@ -90,6 +90,124 @@ export class MockActor {
     }
     return tags;
   }
+  async grantTempBars({ count, hpPerSlot, source = '' } = {}) {
+    const numCount = Math.max(0, Math.floor(Number(count) || 0));
+    const numPerSlot = Math.max(0, Math.floor(Number(hpPerSlot) || 0));
+    if (numCount <= 0 || numPerSlot <= 0) {
+      return this.update({
+        'system.attributes.hp.tempBars.count': 0,
+        'system.attributes.hp.tempBars.maxCount': 0,
+        'system.attributes.hp.tempBars.hpPerSlot': 0,
+        'system.attributes.hp.tempBars.currentSlotHp': 0,
+        'system.attributes.hp.tempBars.source': '',
+        'system.attributes.hp.temp': 0
+      });
+    }
+    const totalHp = numCount * numPerSlot;
+    return this.update({
+      'system.attributes.hp.tempBars.count': numCount,
+      'system.attributes.hp.tempBars.maxCount': numCount,
+      'system.attributes.hp.tempBars.hpPerSlot': numPerSlot,
+      'system.attributes.hp.tempBars.currentSlotHp': numPerSlot,
+      'system.attributes.hp.tempBars.source': String(source || ''),
+      'system.attributes.hp.temp': totalHp
+    });
+  }
+  async activateAura(spellItem) {
+    if (!spellItem) return { active: false, error: 'No item provided' };
+    const sys = spellItem.system || {};
+    const rank = Number(sys.rank) || 1;
+
+    let radius = Number(sys.area?.radius) || 5;
+    if (rank >= 15 && sys.rankBreaks?.rank15?.area?.radiusBonus) {
+      radius += Number(sys.rankBreaks.rank15.area.radiusBonus);
+    } else if (rank >= 10 && sys.rankBreaks?.rank10?.area?.radiusBonus) {
+      radius += Number(sys.rankBreaks.rank10.area.radiusBonus);
+    }
+
+    let slots = 0;
+    let hpPerSlot = 0;
+    let totalTempHp = 0;
+
+    if (sys.tempBars?.hasTempBars) {
+      const formula = (sys.tempBars.slotsFormula || '').trim();
+      if (formula.includes('cha')) {
+        slots = Number(this.system?.abilities?.cha?.mod) || 0;
+      } else if (formula.includes('con')) {
+        slots = Number(this.system?.abilities?.con?.mod) || 0;
+      } else if (formula.includes('str')) {
+        slots = Number(this.system?.abilities?.str?.mod) || 0;
+      } else if (formula.includes('int')) {
+        slots = Number(this.system?.abilities?.int?.mod) || 0;
+      } else if (formula.includes('dex')) {
+        slots = Number(this.system?.abilities?.dex?.mod) || 0;
+      } else {
+        slots = Number(formula) || Number(this.system?.abilities?.cha?.mod) || 1;
+      }
+      slots = Math.max(1, slots);
+
+      if (rank >= 15 && sys.rankBreaks?.rank15?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank15.tempBars.hpPerSlot);
+      } else if (rank >= 10 && sys.rankBreaks?.rank10?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank10.tempBars.hpPerSlot);
+      } else if (rank >= 5 && sys.rankBreaks?.rank5?.tempBars?.hpPerSlot) {
+        hpPerSlot = Number(sys.rankBreaks.rank5.tempBars.hpPerSlot);
+      } else {
+        hpPerSlot = Number(sys.tempBars.hpPerSlot) || 2;
+      }
+
+      totalTempHp = slots * hpPerSlot;
+      await this.grantTempBars({ count: slots, hpPerSlot, source: spellItem.name });
+    }
+
+    const rounds = Number(sys.durationConfig?.rounds) || 2;
+    await spellItem.update({
+      'system.active': true,
+      'system.durationConfig.remainingRounds': rounds
+    });
+
+    return {
+      active: true,
+      radius,
+      slots,
+      hpPerSlot,
+      totalTempHp,
+      remainingRounds: rounds,
+      targetFilter: sys.area?.targetFilter || 'allies'
+    };
+  }
+  async deactivateAura(spellItem) {
+    if (!spellItem) return { active: false };
+
+    await spellItem.update({
+      'system.active': false,
+      'system.durationConfig.remainingRounds': 0
+    });
+
+    const currentSource = this.system?.attributes?.hp?.tempBars?.source;
+    if (currentSource && (currentSource === spellItem.name || currentSource.toLowerCase() === spellItem.name.toLowerCase())) {
+      await this.grantTempBars({ count: 0, hpPerSlot: 0 });
+    }
+
+    return { active: false };
+  }
+  async rollSpell(spellItem, action = 'cast', opts = {}) {
+    if (typeof action === 'object' && action !== null) {
+      opts = action;
+      action = 'cast';
+    }
+    const sys = spellItem.system || {};
+    const spellTags = spellItem.allTags || (typeof getItemAllTags === 'function' ? getItemAllTags(spellItem) : new Set(sys.tags || []));
+    const isAura = sys.delivery === 'aura' || sys.area?.isAura || (spellTags && (spellTags.has('delivery.aura') || spellTags.has('shape.aura')));
+
+    if (isAura && sys.active) {
+      return this.deactivateAura(spellItem);
+    }
+    if (isAura) {
+      return this.activateAura(spellItem);
+    }
+    return { success: true };
+  }
   static async create(data = {}) {
     const ActorClass = (this && this !== MockActor) ? this : (CONFIG.Actor?.documentClass || MockActor);
     const actor = new ActorClass(data);

@@ -11,6 +11,9 @@ export const TAG_NAMESPACES = {
   action:       { label: 'Action Type', description: 'Action classification for skills and spells' },
   element:      { label: 'Damage / Element', description: 'Damage and energy types' },
   shape:        { label: 'Area / Delivery', description: 'Targeting shape or delivery mode' },
+  delivery:     { label: 'Delivery Mode', description: 'Targeting and delivery mechanism (placed, aura, self, target)' },
+  duration:     { label: 'Duration Type', description: 'Duration type (instant, rounds, minutes, hours, combat, permanent)' },
+  target:       { label: 'Target Filter', description: 'Target filtering (allies, enemies, all, self)' },
   stat:         { label: 'Governing Stat', description: 'Core crawler attribute' },
   archetype:    { label: 'Class Archetype', description: 'Base class archetype from rulebook' },
   favored:      { label: 'Favored Archetype', description: 'Favored class archetype for spells', references: 'archetype' },
@@ -65,6 +68,27 @@ export const DCC_TAGS = [
   { id: 'shape.line', label: 'Line', namespace: 'shape' },
   { id: 'shape.splash', label: 'Splash', namespace: 'shape' },
   { id: 'shape.single', label: 'Single Target', namespace: 'shape' },
+  { id: 'shape.aura', label: 'Aura', namespace: 'shape' },
+
+  // --- Delivery Modes ---
+  { id: 'delivery.placed', label: 'Placed Area', namespace: 'delivery' },
+  { id: 'delivery.aura', label: 'Aura (Token Follower)', namespace: 'delivery' },
+  { id: 'delivery.self', label: 'Self', namespace: 'delivery' },
+  { id: 'delivery.target', label: 'Target Creature', namespace: 'delivery' },
+
+  // --- Duration Types ---
+  { id: 'duration.instant', label: 'Instantaneous', namespace: 'duration' },
+  { id: 'duration.rounds', label: 'Combat Rounds', namespace: 'duration' },
+  { id: 'duration.minutes', label: 'Minutes', namespace: 'duration' },
+  { id: 'duration.hours', label: 'Hours', namespace: 'duration' },
+  { id: 'duration.combat', label: 'Until End of Combat', namespace: 'duration' },
+  { id: 'duration.permanent', label: 'Permanent / Sustained', namespace: 'duration' },
+
+  // --- Target Filters ---
+  { id: 'target.allies', label: 'Allies', namespace: 'target' },
+  { id: 'target.enemies', label: 'Enemies', namespace: 'target' },
+  { id: 'target.all', label: 'All Targets', namespace: 'target' },
+  { id: 'target.self', label: 'Self Only', namespace: 'target' },
 
   // --- Governing Stats ---
   { id: 'stat.str', label: 'Strength', namespace: 'stat' },
@@ -143,7 +167,11 @@ export const DCC_TAGS = [
   // --- Engine Rule Overrides ---
   { id: 'rule.no-damage-effects', label: 'Cannot Take Damage Effects', namespace: 'rule' },
   { id: 'rule.requires-weapon', label: 'Requires Equipped Weapon', namespace: 'rule' },
-  { id: 'rule.mind-control', label: 'Mind Control', namespace: 'rule' }
+  { id: 'rule.mind-control', label: 'Mind Control', namespace: 'rule' },
+  { id: 'rule.temp-health-bars', label: 'Temporary Health Bars', namespace: 'rule' },
+  { id: 'rule.emits-light', label: 'Emits Light', namespace: 'rule' },
+  { id: 'rule.causes-darkness', label: 'Causes Darkness', namespace: 'rule' },
+  { id: 'rule.depletes-on-empty', label: 'Depletes When Empty', namespace: 'rule' }
 ];
 
 /** Fast lookup map of registered tags */
@@ -385,6 +413,50 @@ export function computeDerivedTags(item) {
         derived.add(ARCHETYPE_TO_TAG[arch]);
       }
     }
+  }
+
+  // Area and targeting tags
+  if (sys.area && (sys.area.hasArea || sys.area.radius > 0 || sys.area.shape)) {
+    derived.add('shape.aoe');
+    const shape = (sys.area.shape || 'burst').toLowerCase().trim();
+    if (['burst', 'cone', 'line', 'splash', 'aura'].includes(shape)) {
+      derived.add(`shape.${shape}`);
+    }
+    if (sys.area.targetFilter) {
+      const tf = sys.area.targetFilter.toLowerCase().trim();
+      if (['allies', 'enemies', 'all', 'self'].includes(tf)) {
+        derived.add(`target.${tf}`);
+      }
+    }
+  }
+
+  // Delivery mode
+  if (sys.delivery) {
+    const deliv = sys.delivery.toLowerCase().trim();
+    if (['placed', 'aura', 'self', 'target'].includes(deliv)) {
+      derived.add(`delivery.${deliv}`);
+      if (deliv === 'aura') {
+        derived.add('shape.aura');
+      }
+    }
+  }
+
+  // Duration
+  if (sys.durationConfig?.type) {
+    const durType = sys.durationConfig.type.toLowerCase().trim();
+    if (['instant', 'rounds', 'minutes', 'hours', 'combat', 'permanent'].includes(durType)) {
+      derived.add(`duration.${durType}`);
+    }
+  }
+
+  // Temporary health bars rule
+  if (sys.tempBars && (sys.tempBars.hasTempBars || sys.tempBars.hpPerSlot > 0 || sys.tempBars.slotsFormula)) {
+    derived.add('rule.temp-health-bars');
+  }
+
+  // Light emission rule
+  if (sys.light && (sys.light.emits || sys.light.dim > 0 || sys.light.bright > 0)) {
+    derived.add('rule.emits-light');
   }
 
   return derived;

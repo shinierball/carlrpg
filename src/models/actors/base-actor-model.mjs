@@ -117,7 +117,14 @@ export class BaseActorDataModel extends (globalThis.foundry?.abstract?.TypeDataM
         value: new fields.NumberField({ required: true, integer: true, initial: 40 }),
         max: new fields.NumberField({ required: true, integer: true, initial: 40 }),
         temp: new fields.NumberField({ integer: true, initial: 0 }),
-        pct: new fields.NumberField({ integer: true, initial: 100 })
+        pct: new fields.NumberField({ integer: true, initial: 100 }),
+        tempBars: new fields.SchemaField({
+          count: new fields.NumberField({ integer: true, initial: 0 }),
+          maxCount: new fields.NumberField({ integer: true, initial: 0 }),
+          hpPerSlot: new fields.NumberField({ integer: true, initial: 0 }),
+          currentSlotHp: new fields.NumberField({ integer: true, initial: 0 }),
+          source: new fields.StringField({ initial: '' })
+        })
       }),
       mana: new fields.SchemaField({
         value: new fields.NumberField({ required: true, integer: true, initial: 10 }),

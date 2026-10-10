@@ -1922,6 +1922,84 @@ export function onRenderChatMessage(message, html, data) {
     }
   }
 
+  // 7h. Handle click on "Dismiss Aura" from spell chat card
+  const dismissAuraButtons = query('.dcc-dismiss-aura-btn');
+  for (const btn of dismissAuraButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const dismissHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const actorId = btn.dataset?.actorId || $btn?.data('actor-id');
+      const spellId = btn.dataset?.spellId || $btn?.data('spell-id');
+
+      let actor = (typeof game !== 'undefined' && game.actors?.get) ? game.actors.get(actorId) : null;
+      if (!actor && canvas?.tokens?.controlled?.length) {
+        actor = canvas.tokens.controlled[0]?.actor;
+      }
+      if (!actor && message?.speaker?.actor && game.actors?.get) {
+        actor = game.actors.get(message.speaker.actor);
+      }
+      if (!actor) {
+        ui.notifications?.warn('DCC RPG | Caster actor not found to dismiss aura!');
+        return;
+      }
+
+      const spellItem = actor.items?.get?.(spellId) || (Array.isArray(actor.items) ? actor.items.find(i => i.id === spellId || i._id === spellId) : null);
+      if (spellItem && typeof actor.deactivateAura === 'function') {
+        await actor.deactivateAura(spellItem);
+        ui.notifications?.info(`DCC RPG | ${actor.name} dismissed ${spellItem.name}.`);
+      }
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', dismissHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(dismissHandler);
+    }
+  }
+
+  // 7i. Handle click on "Place Area of Effect" from spell chat card
+  const placeAoeButtons = query('.place-aoe-template-btn');
+  for (const btn of placeAoeButtons) {
+    if (btn.dataset) {
+      if (btn.dataset.dccBound) continue;
+      btn.dataset.dccBound = 'true';
+    }
+
+    const aoeHandler = async (ev) => {
+      ev.preventDefault();
+      const $btn = (typeof $ !== 'undefined') ? $(btn) : null;
+      const radius = Number(btn.dataset?.radius ?? $btn?.data('radius')) || 20;
+      const shape = btn.dataset?.shape || $btn?.data('shape') || 'circle';
+
+      if (typeof canvas !== 'undefined' && canvas?.scene) {
+        const templateData = {
+          t: shape === 'cone' ? 'cone' : (shape === 'ray' ? 'ray' : (shape === 'rect' ? 'rect' : 'circle')),
+          user: game.user?.id,
+          distance: radius,
+          direction: 0,
+          x: 0,
+          y: 0,
+          fillColor: '#e67e22'
+        };
+        if (typeof MeasuredTemplateDocument !== 'undefined' && canvas.scene.createEmbeddedDocuments) {
+          await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [templateData]);
+        }
+      }
+      ui.notifications?.info(`DCC RPG | Placed ${radius}ft ${shape} template.`);
+    };
+
+    if (typeof btn.addEventListener === 'function') {
+      btn.addEventListener('click', aoeHandler);
+    } else if (typeof $ !== 'undefined') {
+      $(btn).click(aoeHandler);
+    }
+  }
+
   // 8. Enhance chat card or message sender with Crawler Trophy Badges (Boss Stars & Skulls)
   try {
     const speakerActorId = message?.speaker?.actor || message?.flags?.['carl-rpg']?.actorId;

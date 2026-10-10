@@ -321,24 +321,62 @@ export class DCCCombatMetrics {
     // HP per damage bar (determined by CON modifier: 1 bar = CON mod HP)
     const hpPerBar = this.getHpPerBar(targetActor);
 
-    // Deduct from Temp HP first point-for-point
-    const currentTemp = Number(targetActor.system?.attributes?.hp?.temp) || 0;
-    const currentHp = Number(targetActor.system?.attributes?.hp?.value) || 0;
-    let tempRemaining = currentTemp;
-    let tempDamage = 0;
+    // Deduct from Temporary Health Bars first slot-by-slot, then legacy Temp HP
+    const tb = targetActor.system?.attributes?.hp?.tempBars;
+    let tbCount = Number(tb?.count) || 0;
+    const tbHpPerSlot = Number(tb?.hpPerSlot) || 0;
+    let tbCurrentSlotHp = Number(tb?.currentSlotHp) || (tbCount > 0 ? tbHpPerSlot : 0);
+    const hasTempBars = tbCount > 0 && tbHpPerSlot > 0;
+
+    let tempBarsRemainingHp = 0;
+    if (hasTempBars) {
+      tempBarsRemainingHp = (tbCount - 1) * tbHpPerSlot + tbCurrentSlotHp;
+    }
+
+    let tempBarsDamage = 0;
     let damagePenetrating = damageAfterDR;
 
-    if (currentTemp > 0) {
-      if (damageAfterDR <= currentTemp) {
-        tempDamage = damageAfterDR;
-        tempRemaining = currentTemp - damageAfterDR;
+    if (hasTempBars && damagePenetrating > 0) {
+      if (damagePenetrating <= tempBarsRemainingHp) {
+        tempBarsDamage = damagePenetrating;
+        tempBarsRemainingHp -= damagePenetrating;
         damagePenetrating = 0;
       } else {
-        tempDamage = currentTemp;
-        tempRemaining = 0;
-        damagePenetrating = damageAfterDR - currentTemp;
+        tempBarsDamage = tempBarsRemainingHp;
+        damagePenetrating -= tempBarsRemainingHp;
+        tempBarsRemainingHp = 0;
+      }
+
+      if (tempBarsRemainingHp <= 0) {
+        tbCount = 0;
+        tbCurrentSlotHp = 0;
+      } else {
+        tbCount = Math.ceil(tempBarsRemainingHp / tbHpPerSlot);
+        const rem = tempBarsRemainingHp % tbHpPerSlot;
+        tbCurrentSlotHp = rem === 0 ? tbHpPerSlot : rem;
       }
     }
+
+    // Deduct from legacy Temp HP point-for-point if any penetrating damage remains
+    const currentTemp = Number(targetActor.system?.attributes?.hp?.temp) || 0;
+    const currentHp = Number(targetActor.system?.attributes?.hp?.value) || 0;
+    let legacyTempRemaining = Math.max(0, currentTemp - tempBarsDamage);
+    let legacyTempDamage = 0;
+
+    if (!hasTempBars && currentTemp > 0 && damagePenetrating > 0) {
+      if (damagePenetrating <= currentTemp) {
+        legacyTempDamage = damagePenetrating;
+        legacyTempRemaining = currentTemp - damagePenetrating;
+        damagePenetrating = 0;
+      } else {
+        legacyTempDamage = currentTemp;
+        legacyTempRemaining = 0;
+        damagePenetrating = damagePenetrating - currentTemp;
+      }
+    }
+
+    const tempDamage = tempBarsDamage + legacyTempDamage;
+    const tempRemaining = hasTempBars ? tempBarsRemainingHp : legacyTempRemaining;
 
     // Only remove full damage bars rounded down from regular HP. Excess damage is ignored.
     const barsRemoved = Math.floor(damagePenetrating / hpPerBar);
@@ -349,10 +387,19 @@ export class DCCCombatMetrics {
     const newHp = Math.max(0, currentHp - damageToHp);
     const isLethal = currentHp > 0 && newHp === 0;
 
-    await targetActor.update({
+    const actorUpdates = {
       'system.attributes.hp.value': newHp,
       'system.attributes.hp.temp': tempRemaining
-    });
+    };
+    if (hasTempBars || tb) {
+      actorUpdates['system.attributes.hp.tempBars.count'] = tbCount;
+      actorUpdates['system.attributes.hp.tempBars.currentSlotHp'] = tbCurrentSlotHp;
+      if (tbCount === 0) {
+        actorUpdates['system.attributes.hp.tempBars.source'] = '';
+      }
+    }
+
+    await targetActor.update(actorUpdates);
 
     // Award boss star or crawler skull on lethal damage
     if (isLethal && attackerActor && attackerActor.type === 'crawler') {
@@ -436,6 +483,9 @@ export class DCCCombatMetrics {
       excessDamage,
       damageToHp,
       tempDamage,
+      tempBarsDamage,
+      tempBarsRemaining: tbCount,
+      tempBarsRemainingHp,
       actualDamage,
       newHp,
       tempRemaining,

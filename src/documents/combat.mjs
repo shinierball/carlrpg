@@ -917,8 +917,95 @@ export class DCCCombat extends BaseCombat {
   }
 
   /**
+   * Process duration countdowns for active spells, auras, and buffs on combatants.
+   * Decrements remainingRounds by 1. When remaining reaches 0, deactivates the effect
+   * and cleans up any linked temporary health bars.
+   * @param {number} r Current combat round
+   * @returns {Promise<Array<object>>} Expired items list
+   */
+  async processRoundDurations(r) {
+    const expiredList = [];
+    for (const c of (this.combatants || [])) {
+      const actor = c.actor || (globalThis.game?.actors?.get ? globalThis.game.actors.get(c.actorId) : null);
+      if (!actor || !actor.items) continue;
+
+      const itemsList = Array.isArray(actor.items)
+        ? actor.items
+        : Array.from(actor.items.values?.() || []);
+
+      for (const item of itemsList) {
+        const sys = item.system || {};
+        if (!sys.active) continue;
+
+        const durCfg = sys.durationConfig;
+        const isRoundDuration = durCfg?.type === 'rounds' || (typeof sys.duration === 'string' && sys.duration.toLowerCase().includes('round'));
+
+        let remaining = Number(durCfg?.remainingRounds);
+        if (!Number.isFinite(remaining) || remaining <= 0) {
+          if (durCfg?.rounds > 0) remaining = Number(durCfg.rounds);
+          else if (typeof sys.duration === 'string') {
+            const m = sys.duration.match(/(\d+)\s*round/i);
+            if (m) remaining = Number(m[1]);
+          }
+        }
+
+        if (isRoundDuration && Number.isFinite(remaining) && remaining > 0) {
+          const newRemaining = remaining - 1;
+          const isExpired = newRemaining <= 0;
+
+          const updates = {
+            'system.durationConfig.remainingRounds': Math.max(0, newRemaining)
+          };
+
+          if (isExpired) {
+            updates['system.active'] = false;
+
+            // If this item was providing temporary health bars, clear them
+            const currentSource = actor.system?.attributes?.hp?.tempBars?.source;
+            if (currentSource && (currentSource === item.name || currentSource.toLowerCase() === item.name.toLowerCase())) {
+              if (typeof actor.grantTempBars === 'function') {
+                await actor.grantTempBars({ count: 0, hpPerSlot: 0 });
+              } else {
+                await actor.update({
+                  'system.attributes.hp.tempBars.count': 0,
+                  'system.attributes.hp.tempBars.currentSlotHp': 0,
+                  'system.attributes.hp.tempBars.source': '',
+                  'system.attributes.hp.temp': 0
+                });
+              }
+            }
+
+            expiredList.push({
+              combatantId: c.id,
+              actorId: actor.id,
+              actorName: actor.name,
+              itemId: item.id,
+              itemName: item.name,
+              itemType: item.type,
+              round: r
+            });
+          }
+
+          await item.update(updates);
+        }
+      }
+    }
+
+    if (expiredList.length > 0 && typeof ChatMessage !== 'undefined' && typeof ChatMessage.create === 'function') {
+      const msgs = expiredList.map(e => `<li><strong>${e.actorName}</strong>: <em>${e.itemName}</em> has faded.</li>`).join('');
+      await ChatMessage.create({
+        speaker: { alias: 'Combat Clock' },
+        content: `<div class="dcc-chat-card dcc-expiration-card"><header class="dcc-card-header"><span class="dcc-badge">[DURATION EXPIRED]</span><h3>Combat Round ${r} Expirations</h3></header><div class="dcc-card-body"><ul>${msgs}</ul></div></div>`
+      });
+    }
+
+    return expiredList;
+  }
+
+  /**
    * Advance to the next round of combat.
    * - Triggers all debuffs that cause damage and all buffs that cause healing at the end of the round.
+   * - Decrements duration on active round-based spells, auras, and buffs.
    * - Snapshots outgoing round action states into roundHistory.
    * - Resets actions for all combatants.
    * - Surprise round automatically expires after the ambush round.
@@ -928,6 +1015,7 @@ export class DCCCombat extends BaseCombat {
     const currentRound = this.round || 1;
     if (currentRound >= 1) {
       await this.triggerRoundEndEffects(currentRound);
+      await this.processRoundDurations(currentRound);
     }
     await this.snapshotRoundActions(currentRound);
     await this.resetRoundActions();

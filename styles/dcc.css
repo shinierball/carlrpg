@@ -477,6 +477,92 @@ select.dcc-field-input optgroup {
   }
 }
 
+/* ---------------- TEMPORARY HEALTH BARS (SHIELD) ---------------- */
+.dcc-temp-bars-container {
+  margin-bottom: 6px;
+  background: #1a1a1a;
+  border: 2px solid #d4af37;
+  padding: 4px 6px;
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.4);
+}
+
+.dcc-temp-bars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.dcc-temp-bars-title {
+  color: #f1c40f;
+  letter-spacing: 0.5px;
+}
+
+.dcc-temp-bars-title i {
+  margin-right: 4px;
+}
+
+.dcc-temp-bars-count {
+  color: #ffffff;
+  font-size: 10px;
+}
+
+.dcc-temp-bars-grid {
+  display: grid;
+  gap: 3px;
+  height: 18px;
+}
+
+.dcc-temp-bar-slot {
+  position: relative;
+  background: #2a2a2a;
+  border: 1px solid #d4af37;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dcc-temp-bar-slot.depleted {
+  border-color: #555555;
+  background: #111111;
+  opacity: 0.5;
+}
+
+.dcc-temp-bar-slot.active {
+  box-shadow: 0 0 4px #f39c12;
+  border-color: #f39c12;
+}
+
+.dcc-temp-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #d4af37, #f1c40f);
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+.dcc-temp-bar-label {
+  position: relative;
+  z-index: 2;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #000000;
+  text-shadow: 0 0 2px #ffffff;
+}
+
+.dcc-temp-bar-slot.depleted .dcc-temp-bar-label {
+  color: #777777;
+  text-shadow: none;
+}
+
 /* ---------------- PAGE 1: MAIN GRID ---------------- */
 .dcc-main-grid {
   display: grid;

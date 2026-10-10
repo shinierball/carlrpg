@@ -190,6 +190,23 @@
       {{/unless}}
     </div>
 
+    {{#if hasTempBars}}
+    <div class="dcc-temp-bars-container" data-tooltip="Temporary Shield: {{tempBarsSource}} ({{system.attributes.hp.tempBars.count}} active slots)">
+      <div class="dcc-temp-bars-header">
+        <span class="dcc-temp-bars-title"><i class="fa-solid fa-shield-halved"></i> Temporary Shield: {{tempBarsSource}}</span>
+        <span class="dcc-temp-bars-count">{{system.attributes.hp.tempBars.count}} / {{system.attributes.hp.tempBars.maxCount}} Slots ({{system.attributes.hp.tempBars.currentSlotHp}} / {{system.attributes.hp.tempBars.hpPerSlot}} HP in current slot)</span>
+      </div>
+      <div class="dcc-temp-bars-grid" style="grid-template-columns: repeat({{tempBarSlots.length}}, 1fr);">
+        {{#each tempBarSlots}}
+        <div class="dcc-temp-bar-slot {{#if this.isDepleted}}depleted{{else if this.isCurrentActive}}active{{else}}full{{/if}}" data-tooltip="Slot {{this.index}}: {{this.label}} HP">
+          <div class="dcc-temp-bar-fill" style="width: {{this.fillPct}}%;"></div>
+          <span class="dcc-temp-bar-label">{{this.label}}</span>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
     <div class="dcc-health-bar-wrapper" style="--hp-val: {{system.attributes.hp.value}}; --hp-max: {{system.attributes.hp.max}}; --hp-pct: {{system.attributes.hp.pct}}; --hp-segments: {{healthSegments.length}};" data-tooltip="HP: {{system.attributes.hp.value}} / {{system.attributes.hp.max}}">
       <div class="dcc-health-fill-overlay"></div>
       <div class="dcc-health-segments" style="grid-template-columns: repeat({{healthSegments.length}}, 1fr);">

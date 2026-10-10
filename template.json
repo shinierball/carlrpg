@@ -41,7 +41,14 @@
             "value": 40,
             "max": 40,
             "temp": 0,
-            "pct": 100
+            "pct": 100,
+            "tempBars": {
+              "count": 0,
+              "maxCount": 0,
+              "hpPerSlot": 0,
+              "currentSlotHp": 0,
+              "source": ""
+            }
           },
           "mana": {
             "value": 10,
@@ -426,6 +433,38 @@
           "notes": ""
         }
       },
+      "area": {
+        "hasArea": false,
+        "shape": "burst",
+        "radius": 0,
+        "coneAngle": 53.13,
+        "lineLength": 0,
+        "lineWidth": 5,
+        "origin": "caster",
+        "targetFilter": "allies",
+        "radiusBonus": 0
+      },
+      "delivery": "placed",
+      "tempBars": {
+        "hasTempBars": false,
+        "slotsFormula": "",
+        "hpPerSlot": 0
+      },
+      "durationConfig": {
+        "type": "instant",
+        "rounds": 0,
+        "minutes": 0,
+        "hours": 0,
+        "remainingRounds": 0
+      },
+      "light": {
+        "emits": false,
+        "dim": 0,
+        "bright": 0,
+        "color": "",
+        "animation": ""
+      },
+      "active": false,
       "tags": [],
       "identifier": ""
     },
@@ -648,6 +687,38 @@
       "damageModifiers": [],
       "duration": "1 Hour",
       "description": "",
+      "area": {
+        "hasArea": false,
+        "shape": "burst",
+        "radius": 0,
+        "coneAngle": 53.13,
+        "lineLength": 0,
+        "lineWidth": 5,
+        "origin": "caster",
+        "targetFilter": "allies",
+        "radiusBonus": 0
+      },
+      "delivery": "self",
+      "tempBars": {
+        "hasTempBars": false,
+        "slotsFormula": "",
+        "hpPerSlot": 0
+      },
+      "durationConfig": {
+        "type": "minutes",
+        "rounds": 0,
+        "minutes": 60,
+        "hours": 1,
+        "remainingRounds": 0
+      },
+      "light": {
+        "emits": false,
+        "dim": 0,
+        "bright": 0,
+        "color": "",
+        "animation": ""
+      },
+      "active": false,
       "tags": [],
       "identifier": ""
     },
